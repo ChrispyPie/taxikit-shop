@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaxiKit • Kvalitetsprodukter för taxichaufförer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .heading { font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif; }
+    </style>
+</head>
+<body class="bg-[#F8FAFC] text-[#1F2937]">
+    <!-- Navigation -->
+    <nav class="bg-white border-b sticky top-0 z-50">
+        <div class="max-w-screen-xl mx-auto px-6 py-5 flex items-center justify-between">
+            <div class="flex items-center gap-x-3">
+                <div class="w-9 h-9 bg-[#3B82F6] rounded-2xl flex items-center justify-center">
+                    <span class="text-white font-bold text-2xl">T</span>
+                </div>
+                <span class="font-semibold text-3xl tracking-tighter">TaxiKit</span>
+            </div>
+            
+            <div class="hidden md:flex items-center gap-x-8 text-sm font-medium">
+                <a href="#" class="hover:text-[#3B82F6]">Produkter</a>
+                <a href="#" class="hover:text-[#3B82F6]">Så fungerar det</a>
+                <a href="#" class="hover:text-[#3B82F6]">Om oss</a>
+            </div>
+
+            <div>
+                <button onclick="document.getElementById('contact').scrollIntoView({ behavior: 'smooth' })" 
+                        class="px-6 py-2.5 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-semibold rounded-3xl text-sm transition-colors">
+                    Kontakta oss
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="max-w-screen-xl mx-auto px-6 pt-20 pb-16">
+        <div class="max-w-2xl">
+            <h1 class="text-6xl md:text-7xl font-semibold tracking-tighter leading-none mb-6">
+                Kvalitetsprodukter<br>
+                <span class="text-[#3B82F6]">för taxichaufförer</span>
+            </h1>
+            
+            <p class="text-2xl text-gray-600 mb-10">"If we don't have it, you don't need it!"</p>
+
+            <div class="flex flex-col sm:flex-row gap-4">
+                <button onclick="document.getElementById('products').scrollIntoView({ behavior: 'smooth' })" 
+                        class="px-8 py-4 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-semibold rounded-3xl text-lg transition-all flex items-center justify-center gap-x-3">
+                    Utforska produkter
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        function initTailwind() {
+            document.documentElement.style.setProperty('--accent-yellow', '#FACC15');
+        }
+        window.onload = initTailwind;
+    </script>
+</body>
+</html>
