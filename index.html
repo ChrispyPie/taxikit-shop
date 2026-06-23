@@ -9,17 +9,6 @@
     <style>
         body { font-family: 'Inter', system-ui, sans-serif; }
         .heading { font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif; }
-        
-        .nav-link {
-            transition: color 0.2s ease;
-        }
-        .nav-link:hover {
-            color: #3B82F6;
-        }
-        
-        .mobile-menu {
-            transition: all 0.3s ease;
-        }
     </style>
 </head>
 <body class="bg-[#F8FAFC] text-[#1F2937]">
@@ -29,12 +18,199 @@
             <div class="flex items-center justify-between h-20">
                 <!-- Logo -->
                 <div class="flex items-center gap-x-3">
-                    <div class="w-10 h-10 bg-[#3B82F6] rounded-2xl flex items-center justify-center">
-                        <span class="text-white font-bold text-3xl">T</span>
+                    <div class="w-9 h-9 bg-[#3B82F6] rounded-2xl flex items-center justify-center">
+                        <span class="text-white font-bold text-2xl">T</span>
                     </div>
                     <span class="font-semibold text-3xl tracking-tighter">TaxiKit</span>
                 </div>
 
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center gap-x-8 text-sm font-medium">
+                    <a href="#products" class="hover:text-[#3B82F6]">Produkter</a>
+                    <a href="#how-it-works" class="hover:text-[#3B82F6]">Så fungerar det</a>
+                    <a href="#about" class="hover:text-[#3B82F6]">Om oss</a>
+                </div>
+
+                <div class="flex items-center gap-x-3">
+                    <button onclick="document.getElementById('contact').scrollIntoView({ behavior: 'smooth' })" 
+                            class="hidden md:block px-5 py-2.5 text-sm font-semibold rounded-3xl border border-gray-200 hover:bg-gray-50">
+                        Kontakta oss
+                    </button>
+                    
+                    <!-- Mobile Menu Button -->
+                    <button id="mobile-menu-btn" class="md:hidden w-10 h-10 flex items-center justify-center text-xl">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden border-t bg-white px-6 py-4">
+            <div class="flex flex-col gap-y-3 text-sm font-medium">
+                <a href="#products" class="py-1">Produkter</a>
+                <a href="#how-it-works" class="py-1">Så fungerar det</a>
+                <a href="#about" class="py-1">Om oss</a>
+                <button onclick="document.getElementById('contact').scrollIntoView({ behavior: 'smooth' })" 
+                        class="mt-2 w-full py-3 bg-[#3B82F6] text-white rounded-3xl font-semibold">
+                    Kontakta oss
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="max-w-screen-xl mx-auto px-6 pt-14 pb-12">
+        <div class="max-w-2xl">
+            <h1 class="text-5xl md:text-6xl font-semibold tracking-tighter leading-none mb-6">
+                Kvalitetsprodukter<br>
+                för taxichaufförer
+            </h1>
+            
+            <p class="text-2xl text-gray-600 mb-8">"If we don't have it, you don't need it!"</p>
+
+            <button onclick="document.getElementById('products').scrollIntoView({ behavior: 'smooth' })" 
+                    class="px-8 py-4 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-semibold rounded-3xl text-lg transition-all">
+                Utforska produkter
+            </button>
+        </div>
+    </section>
+
+    <!-- Trust Bar -->
+    <div class="border-y border-gray-100 bg-white py-5">
+        <div class="max-w-screen-xl mx-auto px-6">
+            <div class="flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm font-medium opacity-70">
+                <div class="flex items-center gap-x-2"><i class="fas fa-check text-emerald-500"></i> <span>30 dagars öppet köp</span></div>
+                <div class="flex items-center gap-x-2"><i class="fas fa-truck text-emerald-500"></i> <span>Snabb leverans</span></div>
+                <div class="flex items-center gap-x-2"><i class="fas fa-headset text-emerald-500"></i> <span>Personlig support</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured Products -->
+    <section id="products" class="max-w-screen-xl mx-auto px-6 py-14">
+        <div class="flex items-end justify-between mb-8">
+            <div>
+                <h2 class="text-3xl font-semibold tracking-tight">Utvalda produkter</h2>
+                <p class="text-gray-600 mt-1">Populära bland våra chaufförer</p>
+            </div>
+        </div>
+
+        <!-- Product Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            
+            <!-- Product 1 -->
+            <div class="bg-white border border-gray-100 rounded-3xl overflow-hidden">
+                <div class="h-40 bg-gray-100 flex items-center justify-center">
+                    <i class="fas fa-id-card text-6xl text-gray-300"></i>
+                </div>
+                <div class="p-4">
+                    <h3 class="font-semibold">Standard Visitkort</h3>
+                    <p class="text-sm text-gray-500 mb-3">Anpassningsbara mallar</p>
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold">99 kr</span>
+                        <button class="text-sm px-4 py-1.5 border rounded-2xl active:bg-gray-50">Visa</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product 2 -->
+            <div class="bg-white border border-gray-100 rounded-3xl overflow-hidden">
+                <div class="h-40 bg-gray-100 flex items-center justify-center">
+                    <i class="fas fa-mint text-6xl text-gray-300"></i>
+                </div>
+                <div class="p-4">
+                    <h3 class="font-semibold">TaxiKit Mints</h3>
+                    <p class="text-sm text-gray-500 mb-3">Branded mintburkar</p>
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold">49 kr</span>
+                        <button class="text-sm px-4 py-1.5 border rounded-2xl active:bg-gray-50">Visa</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product 3 -->
+            <div class="bg-white border border-gray-100 rounded-3xl overflow-hidden">
+                <div class="h-40 bg-gray-100 flex items-center justify-center">
+                    <i class="fas fa-car text-6xl text-gray-300"></i>
+                </div>
+                <div class="p-4">
+                    <h3 class="font-semibold">Car Seat Organizer</h3>
+                    <p class="text-sm text-gray-500 mb-3">Håll ordning i bilen</p>
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold">129 kr</span>
+                        <button class="text-sm px-4 py-1.5 border rounded-2xl active:bg-gray-50">Visa</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product 4 -->
+            <div class="bg-white border border-gray-100 rounded-3xl overflow-hidden">
+                <div class="h-40 bg-gray-100 flex items-center justify-center">
+                    <i class="fas fa-phone text-6xl text-gray-300"></i>
+                </div>
+                <div class="p-4">
+                    <h3 class="font-semibold">Phone Mount</h3>
+                    <p class="text-sm text-gray-500 mb-3">Stark hållare för taxi</p>
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold">89 kr</span>
+                        <button class="text-sm px-4 py-1.5 border rounded-2xl active:bg-gray-50">Visa</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section id="how-it-works" class="bg-white border-y">
+        <div class="max-w-screen-xl mx-auto px-6 py-14">
+            <h2 class="text-3xl font-semibold tracking-tight mb-10">Så fungerar det</h2>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div>
+                    <div class="text-[#3B82F6] text-4xl font-bold mb-3">01</div>
+                    <h3 class="font-semibold mb-2">Bläddra bland produkter</h3>
+                    <p class="text-gray-600 text-sm">Hitta det du behöver i våra kategorier</p>
+                </div>
+                <div>
+                    <div class="text-[#3B82F6] text-4xl font-bold mb-3">02</div>
+                    <h3 class="font-semibold mb-2">Kontakta oss</h3>
+                    <p class="text-gray-600 text-sm">Skicka en förfrågan så återkommer vi snabbt</p>
+                </div>
+                <div>
+                    <div class="text-[#3B82F6] text-4xl font-bold mb-3">03</div>
+                    <h3 class="font-semibold mb-2">Få din leverans</h3>
+                    <p class="text-gray-600 text-sm">Vi packar och skickar med omsorg</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About -->
+    <section id="about" class="max-w-screen-xl mx-auto px-6 py-14">
+        <div class="max-w-2xl">
+            <h2 class="text-3xl font-semibold tracking-tight mb-4">Om TaxiKit</h2>
+            <p class="text-gray-600">
+                TaxiKit startades av en taxichaufför som ville ha enkla och praktiska produkter till rimliga priser. 
+                Vi tror på kvalitet, ärliga priser och bra service.
+            </p>
+        </div>
+    </section>
+
+    <script>
+        // Mobile menu
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        if (mobileBtn && mobileMenu) {
+            mobileBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+    </script>
+</body>
+</html>
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center gap-x-8 text-sm font-medium">
                     <a href="#products" class="nav-link">Produkter</a>
