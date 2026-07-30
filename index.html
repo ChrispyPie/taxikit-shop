@@ -6,183 +6,285 @@
     <title>TaxiKit • Kvalitetsprodukter för taxichaufförer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            950: '#0B0F19',
+                            900: '#111827',
+                            800: '#1a2234',
+                            700: '#243044'
+                        },
+                        gold: {
+                            400: '#E8C47A',
+                            500: '#D4AF37',
+                            600: '#B8962E'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'Georgia', 'serif'],
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         body { font-family: 'Inter', system-ui, sans-serif; }
+        .hero-title { font-family: 'Playfair Display', Georgia, serif; }
+        .glass {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+        }
+        .glass-hover:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(232, 196, 122, 0.35);
+            box-shadow: 0 0 30px rgba(232, 196, 122, 0.12);
+        }
+        .gold-glow {
+            box-shadow: 0 0 40px rgba(212, 175, 55, 0.15);
+        }
     </style>
 </head>
-<body class="bg-[#F8FAFC] text-[#1F2937]">
-    
+<body class="bg-dark-950 text-gray-100 antialiased">
+
     <!-- Navigation -->
-    <nav class="bg-white border-b sticky top-0 z-50">
-        <div class="max-w-screen-xl mx-auto px-6">
-            <div class="flex items-center justify-between h-20">
-                <div class="flex items-center gap-x-3">
-                    <div class="w-9 h-9 bg-[#3B82F6] rounded-2xl flex items-center justify-center">
-                        <span class="text-white font-bold text-2xl">T</span>
-                    </div>
-                    <span class="font-semibold text-3xl tracking-tighter">TaxiKit</span>
+    <nav class="sticky top-0 z-50 bg-dark-950/80 backdrop-blur-xl border-b border-white/5">
+        <div class="max-w-6xl mx-auto px-5">
+            <div class="flex items-center justify-between h-16 md:h-18">
+                <!-- Logo -->
+                <a href="/" class="flex items-center gap-2 group">
+                    <span class="text-xl md:text-2xl font-semibold tracking-tight">Taxi<span class="text-gold-400">Kit</span></span>
+                    <span class="hidden sm:block w-8 h-0.5 bg-gradient-to-r from-gold-400 to-transparent rounded-full opacity-80 group-hover:opacity-100 transition"></span>
+                </a>
+
+                <!-- Desktop Nav -->
+                <div class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
+                    <a href="#" class="hover:text-white transition">Hem</a>
+                    <a href="#products" class="hover:text-white transition">Produkter</a>
+                    <a href="#about" class="hover:text-white transition">Om oss</a>
+                    <a href="#contact" class="hover:text-white transition">Kontakt</a>
                 </div>
 
-                <div class="hidden md:flex items-center gap-x-8 text-sm font-medium">
-                    <a href="#products" class="hover:text-[#3B82F6]">Produkter</a>
-                    <a href="#how-it-works" class="hover:text-[#3B82F6]">Så fungerar det</a>
-                    <a href="#about" class="hover:text-[#3B82F6]">Om oss</a>
-                </div>
-
-                <div>
-                    <button onclick="document.getElementById('contact').scrollIntoView({ behavior: 'smooth' })" 
-                            class="hidden md:block px-5 py-2.5 text-sm font-semibold rounded-3xl border border-gray-200 hover:bg-gray-50">
-                        Kontakta oss
+                <!-- Right side -->
+                <div class="flex items-center gap-3 md:gap-4">
+                    <!-- Language -->
+                    <button class="hidden sm:flex items-center gap-1.5 text-xs font-medium text-gray-400 hover:text-white transition px-2 py-1 rounded-lg hover:bg-white/5">
+                        <span class="text-base">🇸🇪</span>
+                        <span>/English</span>
                     </button>
-                    
-                    <button id="mobile-menu-btn" class="md:hidden w-10 h-10 flex items-center justify-center text-xl">
-                        <i class="fas fa-bars"></i>
+
+                    <!-- Login -->
+                    <button class="hidden md:block text-sm font-medium text-gray-300 hover:text-white transition px-3 py-1.5 rounded-lg hover:bg-white/5">
+                        Logga in
+                    </button>
+
+                    <!-- Cart -->
+                    <button class="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 transition text-gray-300 hover:text-white">
+                        <i class="fas fa-bag-shopping text-lg"></i>
+                        <span class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-gold-500 text-dark-950 text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
+                    </button>
+
+                    <!-- Mobile menu button -->
+                    <button id="mobile-menu-btn" class="md:hidden w-10 h-10 flex items-center justify-center text-gray-300">
+                        <i class="fas fa-bars text-xl"></i>
                     </button>
                 </div>
             </div>
         </div>
 
         <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden border-t bg-white px-6 py-4">
-            <div class="flex flex-col gap-y-3 text-sm font-medium">
-                <a href="#products" class="py-1">Produkter</a>
-                <a href="#how-it-works" class="py-1">Så fungerar det</a>
-                <a href="#about" class="py-1">Om oss</a>
-                <button onclick="document.getElementById('contact').scrollIntoView({ behavior: 'smooth' })" 
-                        class="mt-2 w-full py-3 bg-[#3B82F6] text-white rounded-3xl font-semibold">
-                    Kontakta oss
-                </button>
+        <div id="mobile-menu" class="hidden md:hidden border-t border-white/5 bg-dark-900">
+            <div class="px-5 py-4 flex flex-col gap-1">
+                <a href="#" class="py-2.5 text-sm font-medium text-gray-300 hover:text-white">Hem</a>
+                <a href="#products" class="py-2.5 text-sm font-medium text-gray-300 hover:text-white">Produkter</a>
+                <a href="#about" class="py-2.5 text-sm font-medium text-gray-300 hover:text-white">Om oss</a>
+                <a href="#contact" class="py-2.5 text-sm font-medium text-gray-300 hover:text-white">Kontakt</a>
+                <div class="pt-3 mt-2 border-t border-white/5 flex items-center justify-between">
+                    <button class="text-sm text-gray-400">🇸🇪 / English</button>
+                    <button class="text-sm font-medium text-gold-400">Logga in</button>
+                </div>
             </div>
         </div>
     </nav>
 
     <!-- Hero -->
-    <section class="max-w-screen-xl mx-auto px-6 pt-12 pb-10">
-        <div class="max-w-2xl">
-            <h1 class="text-5xl md:text-6xl font-semibold tracking-tighter leading-none mb-6">
-                Kvalitetsprodukter<br>
-                för taxichaufförer
-            </h1>
-            <p class="text-2xl text-gray-600">"If we don't have it, you don't need it!"</p>
+    <section class="relative overflow-hidden">
+        <!-- Soft glow -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gold-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-6xl mx-auto px-5 pt-16 pb-12 md:pt-24 md:pb-16 relative">
+            <div class="max-w-3xl mx-auto text-center">
+                <h1 class="hero-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-medium leading-[1.1] tracking-tight mb-5">
+                    Kvalitetsprodukter<br>
+                    <span class="text-gold-400">för taxichaufförer</span>
+                </h1>
+                <p class="text-lg md:text-xl text-gray-400 mb-8 max-w-xl mx-auto">
+                    Det vi inte har, det behöver du inte.
+                </p>
+                <a href="#products" class="inline-flex items-center gap-2 px-7 py-3.5 bg-gold-500 hover:bg-gold-400 text-dark-950 font-semibold rounded-full transition gold-glow">
+                    TaxiKit Produkter
+                    <i class="fas fa-arrow-right text-sm"></i>
+                </a>
+            </div>
         </div>
     </section>
 
     <!-- Bästsäljare -->
-    <section id="products" class="max-w-screen-xl mx-auto px-6 pb-12">
-        <div class="mb-6">
-            <h2 class="text-3xl font-semibold tracking-tight">Bästsäljare</h2>
-            <p class="text-gray-600">Populära produkter bland våra chaufförer</p>
+    <section id="products" class="max-w-6xl mx-auto px-5 pb-16 md:pb-24">
+        <div class="text-center mb-10">
+            <h2 class="hero-title text-3xl md:text-4xl font-medium tracking-tight mb-2">Bästsäljare</h2>
+            <p class="text-gray-500 text-sm">Populära produkter bland våra chaufförer</p>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            
-            <!-- Product 1 -->
-            <div class="bg-white border border-gray-100 rounded-3xl overflow-hidden">
-                <div class="aspect-square bg-gray-100 flex items-center justify-center">
-                    <i class="fas fa-id-card text-6xl text-gray-300"></i>
-                </div>
-                <div class="p-4">
-                    <h3 class="font-semibold">Standard Visitkort</h3>
-                    <p class="text-sm text-gray-500">Anpassningsbara mallar</p>
-                    <div class="flex justify-between items-center mt-3">
-                        <span class="font-semibold">99 kr</span>
-                        <button class="text-sm px-4 py-1 border rounded-2xl active:bg-gray-50">Visa</button>
-                    </div>
-                </div>
-            </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
 
-            <!-- Product 2 -->
-            <div class="bg-white border border-gray-100 rounded-3xl overflow-hidden">
-                <div class="aspect-square bg-gray-100 flex items-center justify-center">
-                    <i class="fas fa-mint text-6xl text-gray-300"></i>
-                </div>
-                <div class="p-4">
-                    <h3 class="font-semibold">TaxiKit Mints</h3>
-                    <p class="text-sm text-gray-500">Branded mintburkar</p>
-                    <div class="flex justify-between items-center mt-3">
-                        <span class="font-semibold">49 kr</span>
-                        <button class="text-sm px-4 py-1 border rounded-2xl active:bg-gray-50">Visa</button>
+            <!-- Product 1 - Visitkort -->
+            <a href="#" class="glass glass-hover rounded-2xl p-4 md:p-5 transition duration-300 group">
+                <div class="aspect-square rounded-xl bg-dark-800/80 flex items-center justify-center mb-4 overflow-hidden">
+                    <div class="w-16 h-20 md:w-20 md:h-24 bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-400/20 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-id-card text-3xl md:text-4xl text-blue-300/70"></i>
                     </div>
                 </div>
-            </div>
+                <h3 class="font-semibold text-sm md:text-base mb-0.5 group-hover:text-gold-400 transition">Visitkort</h3>
+                <p class="text-xs text-gray-500 mb-3">Standard & Premium</p>
+                <div class="flex items-center justify-between">
+                    <span class="font-semibold text-gold-400">från 99 kr</span>
+                    <span class="text-xs text-gray-500 group-hover:text-gold-400 transition">Visa →</span>
+                </div>
+            </a>
 
-            <!-- Product 3 -->
-            <div class="bg-white border border-gray-100 rounded-3xl overflow-hidden">
-                <div class="aspect-square bg-gray-100 flex items-center justify-center">
-                    <i class="fas fa-car text-6xl text-gray-300"></i>
-                </div>
-                <div class="p-4">
-                    <h3 class="font-semibold">Car Seat Organizer</h3>
-                    <p class="text-sm text-gray-500">Håll ordning i bilen</p>
-                    <div class="flex justify-between items-center mt-3">
-                        <span class="font-semibold">129 kr</span>
-                        <button class="text-sm px-4 py-1 border rounded-2xl active:bg-gray-50">Visa</button>
+            <!-- Product 2 - Mints -->
+            <a href="#" class="glass glass-hover rounded-2xl p-4 md:p-5 transition duration-300 group">
+                <div class="aspect-square rounded-xl bg-dark-800/80 flex items-center justify-center mb-4">
+                    <div class="w-14 h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-emerald-400/30 to-emerald-600/20 border border-emerald-400/30 flex items-center justify-center">
+                        <span class="text-emerald-300 font-bold text-xs md:text-sm">Mints</span>
                     </div>
                 </div>
-            </div>
+                <h3 class="font-semibold text-sm md:text-base mb-0.5 group-hover:text-gold-400 transition">TaxiKit Mints</h3>
+                <p class="text-xs text-gray-500 mb-3">Branded mintburkar</p>
+                <div class="flex items-center justify-between">
+                    <span class="font-semibold text-gold-400">49 kr</span>
+                    <span class="text-xs text-gray-500 group-hover:text-gold-400 transition">Visa →</span>
+                </div>
+            </a>
 
-            <!-- Product 4 -->
-            <div class="bg-white border border-gray-100 rounded-3xl overflow-hidden">
-                <div class="aspect-square bg-gray-100 flex items-center justify-center">
-                    <i class="fas fa-phone text-6xl text-gray-300"></i>
-                </div>
-                <div class="p-4">
-                    <h3 class="font-semibold">Phone Mount</h3>
-                    <p class="text-sm text-gray-500">Stark hållare för taxi</p>
-                    <div class="flex justify-between items-center mt-3">
-                        <span class="font-semibold">89 kr</span>
-                        <button class="text-sm px-4 py-1 border rounded-2xl active:bg-gray-50">Visa</button>
+            <!-- Product 3 - Phone Mount -->
+            <a href="#" class="glass glass-hover rounded-2xl p-4 md:p-5 transition duration-300 group">
+                <div class="aspect-square rounded-xl bg-dark-800/80 flex items-center justify-center mb-4">
+                    <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-gray-600/40 to-gray-800/40 border border-white/10 flex items-center justify-center">
+                        <i class="fas fa-mobile-screen text-2xl md:text-3xl text-gray-300"></i>
                     </div>
                 </div>
-            </div>
+                <h3 class="font-semibold text-sm md:text-base mb-0.5 group-hover:text-gold-400 transition">Phone Mount</h3>
+                <p class="text-xs text-gray-500 mb-3">Stark hållare för taxi</p>
+                <div class="flex items-center justify-between">
+                    <span class="font-semibold text-gold-400">89 kr</span>
+                    <span class="text-xs text-gray-500 group-hover:text-gold-400 transition">Visa →</span>
+                </div>
+            </a>
+
+            <!-- Product 4 - Organizer -->
+            <a href="#" class="glass glass-hover rounded-2xl p-4 md:p-5 transition duration-300 group">
+                <div class="aspect-square rounded-xl bg-dark-800/80 flex items-center justify-center mb-4">
+                    <div class="w-16 h-12 md:w-20 md:h-14 rounded-lg bg-gradient-to-br from-slate-500/30 to-slate-700/30 border border-white/10 flex items-center justify-center">
+                        <i class="fas fa-box text-2xl md:text-3xl text-slate-300"></i>
+                    </div>
+                </div>
+                <h3 class="font-semibold text-sm md:text-base mb-0.5 group-hover:text-gold-400 transition">Organizer</h3>
+                <p class="text-xs text-gray-500 mb-3">Håll ordning i bilen</p>
+                <div class="flex items-center justify-between">
+                    <span class="font-semibold text-gold-400">129 kr</span>
+                    <span class="text-xs text-gray-500 group-hover:text-gold-400 transition">Visa →</span>
+                </div>
+            </a>
 
         </div>
     </section>
 
-    <!-- Trust Bar -->
-    <div class="border-y border-gray-100 bg-white">
-        <div class="max-w-screen-xl mx-auto px-6 py-5">
-            <div class="flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm font-medium opacity-70">
-                <div class="flex items-center gap-x-2"><i class="fas fa-check text-emerald-500"></i> <span>30 dagars öppet köp</span></div>
-                <div class="flex items-center gap-x-2"><i class="fas fa-truck text-emerald-500"></i> <span>Snabb leverans</span></div>
-                <div class="flex items-center gap-x-2"><i class="fas fa-headset text-emerald-500"></i> <span>Personlig support</span></div>
+    <!-- Trust bar -->
+    <div class="border-y border-white/5 bg-dark-900/50">
+        <div class="max-w-6xl mx-auto px-5 py-5">
+            <div class="flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm text-gray-400">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-check text-gold-400"></i>
+                    <span>30 dagars öppet köp</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-truck text-gold-400"></i>
+                    <span>Snabb leverans</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-headset text-gold-400"></i>
+                    <span>Personlig support</span>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- How it works -->
-    <section id="how-it-works" class="max-w-screen-xl mx-auto px-6 py-14">
-        <h2 class="text-3xl font-semibold tracking-tight mb-8">Så fungerar det</h2>
-        
-        <div class="grid md:grid-cols-3 gap-8">
-            <div>
-                <div class="text-[#3B82F6] text-4xl font-bold mb-2">01</div>
-                <h3 class="font-semibold mb-1">Bläddra bland produkter</h3>
-                <p class="text-gray-600 text-sm">Hitta det du behöver i våra kategorier</p>
+    <section id="how-it-works" class="max-w-6xl mx-auto px-5 py-16 md:py-20">
+        <h2 class="hero-title text-3xl md:text-4xl font-medium tracking-tight mb-10 text-center">Så fungerar det</h2>
+
+        <div class="grid md:grid-cols-3 gap-8 md:gap-10">
+            <div class="text-center md:text-left">
+                <div class="text-gold-400 text-4xl font-bold mb-3 opacity-80">01</div>
+                <h3 class="font-semibold text-lg mb-2">Bläddra bland produkter</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Hitta det du behöver bland våra utvalda produkter för taxichaufförer.</p>
             </div>
-            <div>
-                <div class="text-[#3B82F6] text-4xl font-bold mb-2">02</div>
-                <h3 class="font-semibold mb-1">Kontakta oss</h3>
-                <p class="text-gray-600 text-sm">Skicka en förfrågan så återkommer vi snabbt</p>
+            <div class="text-center md:text-left">
+                <div class="text-gold-400 text-4xl font-bold mb-3 opacity-80">02</div>
+                <h3 class="font-semibold text-lg mb-2">Lägg beställning</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Enkelt och smidigt. Vi återkommer snabbt om något behöver bekräftas.</p>
             </div>
-            <div>
-                <div class="text-[#3B82F6] text-4xl font-bold mb-2">03</div>
-                <h3 class="font-semibold mb-1">Få din leverans</h3>
-                <p class="text-gray-600 text-sm">Vi packar och skickar med omsorg</p>
+            <div class="text-center md:text-left">
+                <div class="text-gold-400 text-4xl font-bold mb-3 opacity-80">03</div>
+                <h3 class="font-semibold text-lg mb-2">Få din leverans</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Vi packar med omsorg och skickar direkt till dig.</p>
             </div>
         </div>
     </section>
 
     <!-- About -->
-    <section id="about" class="max-w-screen-xl mx-auto px-6 py-14 border-t">
-        <div class="max-w-2xl">
-            <h2 class="text-3xl font-semibold tracking-tight mb-4">Om TaxiKit</h2>
-            <p class="text-gray-600">
-                TaxiKit startades av en taxichaufför som ville ha enkla och praktiska produkter till rimliga priser. 
-                Vi tror på kvalitet, ärliga priser och bra service.
-            </p>
+    <section id="about" class="border-t border-white/5">
+        <div class="max-w-6xl mx-auto px-5 py-16 md:py-20">
+            <div class="max-w-2xl">
+                <h2 class="hero-title text-3xl md:text-4xl font-medium tracking-tight mb-5">Om TaxiKit</h2>
+                <p class="text-gray-400 leading-relaxed mb-4">
+                    TaxiKit startades av en taxichaufför som ville ha enkla och praktiska produkter till rimliga priser.
+                </p>
+                <p class="text-gray-500 text-sm leading-relaxed">
+                    Vi tror på kvalitet, ärliga priser och bra service. Allt är utvalt för dig som kör taxi varje dag.
+                </p>
+            </div>
         </div>
     </section>
+
+    <!-- Contact / Footer -->
+    <footer id="contact" class="border-t border-white/5 bg-dark-900/40">
+        <div class="max-w-6xl mx-auto px-5 py-12">
+            <div class="flex flex-col md:flex-row justify-between gap-8">
+                <div>
+                    <div class="text-xl font-semibold mb-3">Taxi<span class="text-gold-400">Kit</span></div>
+                    <p class="text-gray-500 text-sm max-w-xs">Kvalitetsprodukter för taxichaufförer. Det vi inte har, det behöver du inte.</p>
+                </div>
+                <div class="text-sm text-gray-500">
+                    <p class="mb-1">Frågor? Hör av dig.</p>
+                    <a href="mailto:hej@taxikit.shop" class="text-gold-400 hover:text-gold-300 transition">hej@taxikit.shop</a>
+                </div>
+            </div>
+            <div class="mt-10 pt-6 border-t border-white/5 text-xs text-gray-600 flex flex-col sm:flex-row justify-between gap-2">
+                <span>© 2026 TaxiKit</span>
+                <span>Göteborg, Sverige</span>
+            </div>
+        </div>
+    </footer>
 
     <script>
         const mobileBtn = document.getElementById('mobile-menu-btn');
