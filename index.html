@@ -50,21 +50,51 @@
         .gold-glow {
             box-shadow: 0 0 40px rgba(212, 175, 55, 0.15);
         }
-        .logo-img { height: 40px; width: auto; object-fit: contain; }
-        @media (min-width: 768px) { .logo-img { height: 48px; } }
+        /* Nav logo – larger */
+        .nav-logo {
+            height: 44px;
+            width: auto;
+            object-fit: contain;
+        }
+        @media (min-width: 768px) {
+            .nav-logo { height: 52px; }
+        }
+        /* Big centered hero logo */
+        .hero-logo {
+            height: auto;
+            width: min(78vw, 320px);
+            max-width: 320px;
+            object-fit: contain;
+        }
+        @media (min-width: 768px) {
+            .hero-logo {
+                width: min(42vw, 380px);
+                max-width: 380px;
+            }
+        }
+        /* Small mascot beside logo */
         .mascot-img {
-            max-height: 420px; width: auto; object-fit: contain;
-            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.45));
+            height: auto;
+            width: min(38vw, 140px);
+            max-width: 140px;
+            object-fit: contain;
+            filter: drop-shadow(0 12px 24px rgba(0,0,0,0.4));
+        }
+        @media (min-width: 768px) {
+            .mascot-img {
+                width: min(22vw, 200px);
+                max-width: 200px;
+            }
         }
     </style>
 </head>
 <body class="bg-dark-950 text-gray-100 antialiased">
 
     <nav class="sticky top-0 z-50 bg-dark-950/85 backdrop-blur-xl border-b border-white/5">
-        <div class="max-w-6xl mx-auto px-5">
-            <div class="flex items-center justify-between h-16 md:h-[4.5rem]">
-                <a href="/" class="flex items-center gap-2.5 group">
-                    <img src="assets/logo.jpg" alt="TaxiKit" class="logo-img hidden" id="logo-img"
+        <div class="max-w-6xl mx-auto px-4 sm:px-5">
+            <div class="flex items-center justify-between h-14 md:h-16">
+                <a href="/" class="flex items-center shrink-0">
+                    <img src="assets/logo.jpg" alt="TaxiKit" class="nav-logo hidden" id="logo-img"
                          onload="this.classList.remove('hidden'); document.getElementById('logo-fallback').classList.add('hidden');"
                          onerror="this.style.display='none'">
                     <span id="logo-fallback" class="text-xl md:text-2xl font-semibold tracking-tight">
@@ -78,11 +108,7 @@
                     <a href="#contact" class="hover:text-white transition">Kontakt</a>
                     <a href="/skiftlogg/" class="hover:text-gold-400 transition">Skiftlogg</a>
                 </div>
-                <div class="flex items-center gap-3 md:gap-4">
-                    <button class="hidden sm:flex items-center gap-1.5 text-xs font-medium text-gray-400 hover:text-white transition px-2 py-1 rounded-lg hover:bg-white/5">
-                        <span class="text-base">🇸🇪</span><span>/English</span>
-                    </button>
-                    <button class="hidden md:block text-sm font-medium text-gray-300 hover:text-white transition px-3 py-1.5 rounded-lg hover:bg-white/5">Logga in</button>
+                <div class="flex items-center gap-2 md:gap-4">
                     <button class="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 transition text-gray-300 hover:text-white">
                         <i class="fas fa-bag-shopping text-lg"></i>
                         <span class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-gold-500 text-dark-950 text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
@@ -100,46 +126,42 @@
                 <a href="#about" class="py-2.5 text-sm font-medium text-gray-300 hover:text-white">Om oss</a>
                 <a href="#contact" class="py-2.5 text-sm font-medium text-gray-300 hover:text-white">Kontakt</a>
                 <a href="/skiftlogg/" class="py-2.5 text-sm font-medium text-gold-400">Skiftlogg</a>
-                <div class="pt-3 mt-2 border-t border-white/5 flex items-center justify-between">
-                    <button class="text-sm text-gray-400">🇸🇪 / English</button>
-                    <button class="text-sm font-medium text-gold-400">Logga in</button>
-                </div>
             </div>
         </div>
     </nav>
 
+    <!-- Hero: big centered logo + small mascot beside -->
     <section class="relative overflow-hidden">
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gold-500/5 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="max-w-6xl mx-auto px-5 pt-12 pb-10 md:pt-20 md:pb-16 relative">
-            <div class="grid md:grid-cols-2 gap-10 md:gap-12 items-center">
-                <div class="text-center md:text-left order-2 md:order-1">
-                    <h1 class="hero-title text-4xl sm:text-5xl md:text-5xl lg:text-6xl font-medium leading-[1.12] tracking-tight mb-5">
-                        Kvalitetsprodukter<br>
-                        <span class="text-gold-400">för taxichaufförer</span>
-                    </h1>
-                    <p class="text-base md:text-lg text-gray-400 mb-8 max-w-md mx-auto md:mx-0">
-                        Allt du behöver i bilen – utvalt av chaufförer, till ärliga priser.
-                    </p>
-                    <a href="#products" class="inline-flex items-center gap-2 px-7 py-3.5 bg-gold-500 hover:bg-gold-400 text-dark-950 font-semibold rounded-full transition gold-glow">
-                        Se produkter
-                        <i class="fas fa-arrow-right text-sm"></i>
-                    </a>
-                </div>
-                <div class="flex justify-center order-1 md:order-2">
-                    <img src="assets/MascotStart.jpg" alt="TaxiKit-maskoten välkomnar dig" class="mascot-img"
-                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                    <div class="hidden flex-col items-center justify-center w-full max-w-xs aspect-[3/4] rounded-2xl border border-dashed border-white/15 bg-dark-900/50 text-center px-6">
-                        <i class="fas fa-user-tie text-4xl text-gold-400/50 mb-3"></i>
-                        <p class="text-sm text-gray-500">Ladda upp <code class="text-gold-400">assets/MascotStart.jpg</code></p>
-                    </div>
-                </div>
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-gold-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-6xl mx-auto px-4 sm:px-5 pt-8 pb-8 md:pt-14 md:pb-14 relative">
+
+            <!-- Logo + mascot row -->
+            <div class="flex items-end justify-center gap-3 sm:gap-5 md:gap-8 mb-6 md:mb-10">
+                <img src="assets/logo.jpg" alt="TaxiKit" class="hero-logo">
+                <img src="assets/MascotStart.jpg" alt="TaxiKit-maskoten" class="mascot-img shrink-0">
+            </div>
+
+            <!-- Text -->
+            <div class="text-center max-w-2xl mx-auto">
+                <h1 class="hero-title text-3xl sm:text-4xl md:text-5xl font-medium leading-[1.15] tracking-tight mb-3 md:mb-4">
+                    Kvalitetsprodukter<br>
+                    <span class="text-gold-400">för taxichaufförer</span>
+                </h1>
+                <p class="text-sm sm:text-base md:text-lg text-gray-400 mb-6 md:mb-8 max-w-md mx-auto">
+                    Allt du behöver i bilen – utvalt av chaufförer, till ärliga priser.
+                </p>
+                <a href="#products" class="inline-flex items-center gap-2 px-6 py-3 md:px-7 md:py-3.5 bg-gold-500 hover:bg-gold-400 text-dark-950 font-semibold rounded-full transition gold-glow text-sm md:text-base">
+                    Se produkter
+                    <i class="fas fa-arrow-right text-sm"></i>
+                </a>
             </div>
         </div>
     </section>
 
-    <section id="products" class="max-w-6xl mx-auto px-5 pb-16 md:pb-24">
-        <div class="text-center mb-10">
-            <h2 class="hero-title text-3xl md:text-4xl font-medium tracking-tight mb-2">Bästsäljare</h2>
+    <section id="products" class="max-w-6xl mx-auto px-4 sm:px-5 pb-16 md:pb-24">
+        <div class="text-center mb-8 md:mb-10">
+            <h2 class="hero-title text-2xl md:text-4xl font-medium tracking-tight mb-2">Bästsäljare</h2>
             <p class="text-gray-500 text-sm">Populära produkter bland våra chaufförer</p>
         </div>
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
