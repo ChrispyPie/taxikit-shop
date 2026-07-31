@@ -50,7 +50,6 @@
         .gold-glow {
             box-shadow: 0 0 40px rgba(212, 175, 55, 0.15);
         }
-        /* Nav logo – larger */
         .nav-logo {
             height: 44px;
             width: auto;
@@ -59,7 +58,6 @@
         @media (min-width: 768px) {
             .nav-logo { height: 52px; }
         }
-        /* Big centered hero logo */
         .hero-logo {
             height: auto;
             width: min(78vw, 320px);
@@ -72,7 +70,6 @@
                 max-width: 380px;
             }
         }
-        /* Small mascot beside logo */
         .mascot-img {
             height: auto;
             width: min(38vw, 140px);
@@ -94,7 +91,7 @@
         <div class="max-w-6xl mx-auto px-4 sm:px-5">
             <div class="flex items-center justify-between h-14 md:h-16">
                 <a href="/" class="flex items-center shrink-0">
-                    <img src="assets/logo.jpg" alt="TaxiKit" class="nav-logo hidden" id="logo-img"
+                    <img src="assets/logo.png" alt="TaxiKit" class="nav-logo hidden" id="logo-img"
                          onload="this.classList.remove('hidden'); document.getElementById('logo-fallback').classList.add('hidden');"
                          onerror="this.style.display='none'">
                     <span id="logo-fallback" class="text-xl md:text-2xl font-semibold tracking-tight">
@@ -130,19 +127,16 @@
         </div>
     </nav>
 
-    <!-- Hero: big centered logo + small mascot beside -->
     <section class="relative overflow-hidden">
         <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-gold-500/5 rounded-full blur-3xl pointer-events-none"></div>
 
         <div class="max-w-6xl mx-auto px-4 sm:px-5 pt-8 pb-8 md:pt-14 md:pb-14 relative">
 
-            <!-- Logo + mascot row -->
             <div class="flex items-end justify-center gap-3 sm:gap-5 md:gap-8 mb-6 md:mb-10">
-                <img src="assets/logo.jpg" alt="TaxiKit" class="hero-logo">
+                <img src="assets/logo.png" alt="TaxiKit" class="hero-logo">
                 <img src="assets/MascotStart.jpg" alt="TaxiKit-maskoten" class="mascot-img shrink-0">
             </div>
 
-            <!-- Text -->
             <div class="text-center max-w-2xl mx-auto">
                 <h1 class="hero-title text-3xl sm:text-4xl md:text-5xl font-medium leading-[1.15] tracking-tight mb-3 md:mb-4">
                     Kvalitetsprodukter<br>
