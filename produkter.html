@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produkter • TaxiKit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            950: '#0c0e12',
+                            900: '#151922',
+                            800: '#1c2230'
+                        },
+                        gold: {
+                            400: '#E8C47A',
+                            500: '#D4AF37'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'Georgia', 'serif'],
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .hero-title { font-family: 'Playfair Display', Georgia, serif; }
+    </style>
+</head>
+<body class="bg-dark-950 text-gray-100 antialiased min-h-screen flex flex-col">
+
+    <nav class="sticky top-0 z-50 bg-dark-950/85 backdrop-blur-xl border-b border-white/5">
+        <div class="max-w-6xl mx-auto px-4 sm:px-5">
+            <div class="flex items-center justify-between h-14 md:h-16">
+                <div class="flex items-center gap-1">
+                    <button id="mobile-menu-btn" class="md:hidden w-10 h-10 flex items-center justify-center text-gray-300">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <div class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-300">
+                        <a href="/" class="hover:text-white transition">Hem</a>
+                        <a href="/produkter.html" class="text-white transition">Produkter</a>
+                        <a href="/skiftlogg/" class="hover:text-gold-400 transition">Skiftlogg</a>
+                    </div>
+                </div>
+                <button class="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 transition text-gray-300 hover:text-white">
+                    <i class="fas fa-bag-shopping text-lg"></i>
+                    <span class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-gold-500 text-dark-950 text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden border-t border-white/5 bg-dark-900">
+            <div class="px-5 py-4 flex flex-col gap-1">
+                <a href="/" class="py-2.5 text-sm font-medium text-gray-300 hover:text-white">Hem</a>
+                <a href="/produkter.html" class="py-2.5 text-sm font-medium text-white">Produkter</a>
+                <a href="/skiftlogg/" class="py-2.5 text-sm font-medium text-gold-400">Skiftlogg</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 flex flex-col items-center justify-center px-6 py-20 text-center">
+        <h1 class="hero-title text-3xl md:text-4xl font-medium tracking-tight mb-3">Produkter</h1>
+        <p class="text-gray-500 text-sm max-w-sm">
+            Här kommer hela sortimentet snart.
+        </p>
+    </main>
+
+    <footer class="pb-8 pt-4 text-center">
+        <p class="text-xs text-gray-600">TaxiKit 2026</p>
+    </footer>
+
+    <script>
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (mobileBtn && mobileMenu) {
+            mobileBtn.addEventListener('click', () => { mobileMenu.classList.toggle('hidden'); });
+        }
+    </script>
+</body>
+</html>
