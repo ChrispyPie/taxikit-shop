@@ -76,11 +76,9 @@
 </head>
 <body class="bg-dark-950 text-gray-100 antialiased">
 
-    <!-- Menu left, cart right – no logo -->
     <nav class="sticky top-0 z-50 bg-dark-950/85 backdrop-blur-xl border-b border-white/5">
         <div class="max-w-6xl mx-auto px-4 sm:px-5">
             <div class="flex items-center justify-between h-14 md:h-16">
-                <!-- Left: menu -->
                 <div class="flex items-center gap-1">
                     <button id="mobile-menu-btn" class="md:hidden w-10 h-10 flex items-center justify-center text-gray-300">
                         <i class="fas fa-bars text-xl"></i>
@@ -93,8 +91,6 @@
                         <a href="/skiftlogg/" class="hover:text-gold-400 transition">Skiftlogg</a>
                     </div>
                 </div>
-
-                <!-- Right: cart -->
                 <button class="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 transition text-gray-300 hover:text-white">
                     <i class="fas fa-bag-shopping text-lg"></i>
                     <span class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-gold-500 text-dark-950 text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
@@ -112,10 +108,17 @@
         </div>
     </nav>
 
-    <!-- Centered logo under menu -->
-    <section class="pt-10 pb-6 md:pt-14 md:pb-8">
+    <!-- Logo -->
+    <section class="pt-4 pb-2 md:pt-6 md:pb-3">
         <div class="flex justify-center px-4">
             <img src="assets/logo.png" alt="TaxiKit" class="hero-logo">
+        </div>
+    </section>
+
+    <!-- Mascot under logo -->
+    <section class="pt-2 pb-8 md:pb-10">
+        <div class="flex justify-center px-4">
+            <img src="assets/MascotStart.jpg" alt="TaxiKit-maskoten" class="mascot-img">
         </div>
     </section>
 
@@ -178,13 +181,6 @@
                     <span class="text-xs text-gray-500 group-hover:text-gold-400 transition">Visa →</span>
                 </div>
             </a>
-        </div>
-    </section>
-
-    <!-- Mascot under logo + bestsellers -->
-    <section class="pb-12 md:pb-16">
-        <div class="flex justify-center px-4">
-            <img src="assets/MascotStart.jpg" alt="TaxiKit-maskoten" class="mascot-img">
         </div>
     </section>
 
