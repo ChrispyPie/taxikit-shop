@@ -47,73 +47,58 @@
             border-color: rgba(232, 196, 122, 0.35);
             box-shadow: 0 0 30px rgba(232, 196, 122, 0.12);
         }
-        .gold-glow {
-            box-shadow: 0 0 40px rgba(212, 175, 55, 0.15);
-        }
-        .nav-logo {
-            height: 44px;
-            width: auto;
-            object-fit: contain;
-        }
-        @media (min-width: 768px) {
-            .nav-logo { height: 52px; }
-        }
         .hero-logo {
             height: auto;
-            width: min(78vw, 320px);
-            max-width: 320px;
+            width: min(82vw, 340px);
+            max-width: 340px;
             object-fit: contain;
         }
         @media (min-width: 768px) {
             .hero-logo {
-                width: min(42vw, 380px);
-                max-width: 380px;
+                width: min(50vw, 420px);
+                max-width: 420px;
             }
         }
         .mascot-img {
             height: auto;
-            width: min(38vw, 140px);
-            max-width: 140px;
+            width: min(70vw, 260px);
+            max-width: 260px;
             object-fit: contain;
             filter: drop-shadow(0 12px 24px rgba(0,0,0,0.4));
         }
         @media (min-width: 768px) {
             .mascot-img {
-                width: min(22vw, 200px);
-                max-width: 200px;
+                width: min(30vw, 280px);
+                max-width: 280px;
             }
         }
     </style>
 </head>
 <body class="bg-dark-950 text-gray-100 antialiased">
 
+    <!-- Menu left, cart right – no logo -->
     <nav class="sticky top-0 z-50 bg-dark-950/85 backdrop-blur-xl border-b border-white/5">
         <div class="max-w-6xl mx-auto px-4 sm:px-5">
             <div class="flex items-center justify-between h-14 md:h-16">
-                <a href="/" class="flex items-center shrink-0">
-                    <img src="assets/logo.png" alt="TaxiKit" class="nav-logo hidden" id="logo-img"
-                         onload="this.classList.remove('hidden'); document.getElementById('logo-fallback').classList.add('hidden');"
-                         onerror="this.style.display='none'">
-                    <span id="logo-fallback" class="text-xl md:text-2xl font-semibold tracking-tight">
-                        Taxi<span class="text-gold-400">Kit</span>
-                    </span>
-                </a>
-                <div class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
-                    <a href="/" class="text-white transition">Hem</a>
-                    <a href="#products" class="hover:text-white transition">Produkter</a>
-                    <a href="#about" class="hover:text-white transition">Om oss</a>
-                    <a href="#contact" class="hover:text-white transition">Kontakt</a>
-                    <a href="/skiftlogg/" class="hover:text-gold-400 transition">Skiftlogg</a>
-                </div>
-                <div class="flex items-center gap-2 md:gap-4">
-                    <button class="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 transition text-gray-300 hover:text-white">
-                        <i class="fas fa-bag-shopping text-lg"></i>
-                        <span class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-gold-500 text-dark-950 text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
-                    </button>
+                <!-- Left: menu -->
+                <div class="flex items-center gap-1">
                     <button id="mobile-menu-btn" class="md:hidden w-10 h-10 flex items-center justify-center text-gray-300">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
+                    <div class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-300">
+                        <a href="/" class="text-white transition">Hem</a>
+                        <a href="#products" class="hover:text-white transition">Produkter</a>
+                        <a href="#about" class="hover:text-white transition">Om oss</a>
+                        <a href="#contact" class="hover:text-white transition">Kontakt</a>
+                        <a href="/skiftlogg/" class="hover:text-gold-400 transition">Skiftlogg</a>
+                    </div>
                 </div>
+
+                <!-- Right: cart -->
+                <button class="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 transition text-gray-300 hover:text-white">
+                    <i class="fas fa-bag-shopping text-lg"></i>
+                    <span class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-gold-500 text-dark-950 text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
+                </button>
             </div>
         </div>
         <div id="mobile-menu" class="hidden md:hidden border-t border-white/5 bg-dark-900">
@@ -127,33 +112,15 @@
         </div>
     </nav>
 
-    <section class="relative overflow-hidden">
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-gold-500/5 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div class="max-w-6xl mx-auto px-4 sm:px-5 pt-8 pb-8 md:pt-14 md:pb-14 relative">
-
-            <div class="flex items-end justify-center gap-3 sm:gap-5 md:gap-8 mb-6 md:mb-10">
-                <img src="assets/logo.png" alt="TaxiKit" class="hero-logo">
-                <img src="assets/MascotStart.jpg" alt="TaxiKit-maskoten" class="mascot-img shrink-0">
-            </div>
-
-            <div class="text-center max-w-2xl mx-auto">
-                <h1 class="hero-title text-3xl sm:text-4xl md:text-5xl font-medium leading-[1.15] tracking-tight mb-3 md:mb-4">
-                    Kvalitetsprodukter<br>
-                    <span class="text-gold-400">för taxichaufförer</span>
-                </h1>
-                <p class="text-sm sm:text-base md:text-lg text-gray-400 mb-6 md:mb-8 max-w-md mx-auto">
-                    Allt du behöver i bilen – utvalt av chaufförer, till ärliga priser.
-                </p>
-                <a href="#products" class="inline-flex items-center gap-2 px-6 py-3 md:px-7 md:py-3.5 bg-gold-500 hover:bg-gold-400 text-dark-950 font-semibold rounded-full transition gold-glow text-sm md:text-base">
-                    Se produkter
-                    <i class="fas fa-arrow-right text-sm"></i>
-                </a>
-            </div>
+    <!-- Centered logo under menu -->
+    <section class="pt-10 pb-6 md:pt-14 md:pb-8">
+        <div class="flex justify-center px-4">
+            <img src="assets/logo.png" alt="TaxiKit" class="hero-logo">
         </div>
     </section>
 
-    <section id="products" class="max-w-6xl mx-auto px-4 sm:px-5 pb-16 md:pb-24">
+    <!-- Bestsellers -->
+    <section id="products" class="max-w-6xl mx-auto px-4 sm:px-5 pb-10 md:pb-14">
         <div class="text-center mb-8 md:mb-10">
             <h2 class="hero-title text-2xl md:text-4xl font-medium tracking-tight mb-2">Bästsäljare</h2>
             <p class="text-gray-500 text-sm">Populära produkter bland våra chaufförer</p>
@@ -211,6 +178,13 @@
                     <span class="text-xs text-gray-500 group-hover:text-gold-400 transition">Visa →</span>
                 </div>
             </a>
+        </div>
+    </section>
+
+    <!-- Mascot under logo + bestsellers -->
+    <section class="pb-12 md:pb-16">
+        <div class="flex justify-center px-4">
+            <img src="assets/MascotStart.jpg" alt="TaxiKit-maskoten" class="mascot-img">
         </div>
     </section>
 
