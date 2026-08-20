@@ -31,35 +31,36 @@
     .explanation { font-size: 0.85rem; color: #94a3b8; margin-top: 0.35rem; display: none; line-height: 1.4; }
     .explanation.open { display: block; }
 
-    /* 2D Compass with colored quadrants */
+    /* 2D Compass – soft gradients */
     .compass-wrapper { margin-bottom: 1.1rem; }
     .compass {
       position: relative;
       width: 100%;
       aspect-ratio: 1 / 0.78;
-      border-radius: 10px;
+      border-radius: 12px;
       border: 1px solid #334155;
       overflow: hidden;
-      background:
-        linear-gradient(to right, #7c3aed 0%, #7c3aed 50%, #f59e0b 50%, #f59e0b 100%),
-        linear-gradient(to bottom, #3b82f6 0%, #3b82f6 50%, #ef4444 50%, #ef4444 100%);
-      background-blend-mode: multiply;
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(220, 38, 38, 0.55) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 20%, rgba(37, 99, 235, 0.55) 0%, transparent 55%),
+        radial-gradient(ellipse at 20% 80%, rgba(234, 88, 12, 0.5) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 80%, rgba(30, 58, 138, 0.6) 0%, transparent 55%),
+        linear-gradient(135deg, #1e1b4b 0%, #0f172a 50%, #1e1b4b 100%);
     }
-    /* Better quadrant colors */
-    .compass {
+    .compass::before {
+      content: "";
+      position: absolute;
+      inset: 0;
       background:
-        linear-gradient(to bottom right, transparent 49.5%, #334155 49.5%, #334155 50.5%, transparent 50.5%),
-        linear-gradient(to bottom left, transparent 49.5%, #334155 49.5%, #334155 50.5%, transparent 50.5%),
-        linear-gradient(135deg, #6d28d9 0%, #6d28d9 50%, transparent 50%),
-        linear-gradient(225deg, #2563eb 0%, #2563eb 50%, transparent 50%),
-        linear-gradient(315deg, #dc2626 0%, #dc2626 50%, transparent 50%),
-        linear-gradient(45deg, #d97706 0%, #d97706 50%, transparent 50%);
+        linear-gradient(to right, transparent 49.2%, rgba(148,163,184,0.35) 49.2%, rgba(148,163,184,0.35) 50.8%, transparent 50.8%),
+        linear-gradient(to bottom, transparent 49.2%, rgba(148,163,184,0.35) 49.2%, rgba(148,163,184,0.35) 50.8%, transparent 50.8%);
+      pointer-events: none;
     }
-    .compass-label { position: absolute; font-size: 0.68rem; color: #e2e8f0; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.7); z-index: 1; }
-    .compass-label.left { left: 7px; top: 50%; transform: translateY(-50%); }
-    .compass-label.right { right: 7px; top: 50%; transform: translateY(-50%); }
-    .compass-label.top { top: 6px; left: 50%; transform: translateX(-50%); }
-    .compass-label.bottom { bottom: 6px; left: 50%; transform: translateX(-50%); }
+    .compass-label { position: absolute; font-size: 0.68rem; color: #e2e8f0; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,0.8); z-index: 1; }
+    .compass-label.left { left: 8px; top: 50%; transform: translateY(-50%); }
+    .compass-label.right { right: 8px; top: 50%; transform: translateY(-50%); }
+    .compass-label.top { top: 7px; left: 50%; transform: translateX(-50%); }
+    .compass-label.bottom { bottom: 7px; left: 50%; transform: translateX(-50%); }
 
     .compass-marker {
       position: absolute;
@@ -79,8 +80,8 @@
     .compass-marker:hover { transform: translate(-50%, -50%) scale(1.15); z-index: 10; }
     .compass-marker.selected {
       border-color: #fbbf24;
-      box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.45), 0 2px 8px rgba(0,0,0,0.5);
-      transform: translate(-50%, -50%) scale(1.2);
+      box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.5), 0 2px 8px rgba(0,0,0,0.5);
+      transform: translate(-50%, -50%) scale(1.22);
       z-index: 12;
     }
 
@@ -99,11 +100,9 @@
     <h1>Valkompass</h1>
     <p class="subtitle">Testa om du verkligen stämmer med partiet du tror</p>
 
-    <!-- Step 1: Choose party -->
     <div id="step-party" class="card">
       <p style="margin-bottom:0.85rem;font-size:0.92rem">Vilket parti stöder eller tror du dig stå närmast just nu?</p>
 
-      <!-- 2D Compass -->
       <div class="compass-wrapper">
         <div class="compass" id="compass">
           <div class="compass-label top">GAL</div>
@@ -113,7 +112,6 @@
         </div>
       </div>
 
-      <!-- Selection state (hidden until party chosen) -->
       <div id="selection-panel" class="hidden">
         <div class="selection-info">Du har valt: <strong id="selected-name"></strong></div>
         <div class="btn-row">
@@ -122,21 +120,18 @@
         </div>
       </div>
 
-      <!-- List (hidden after selection) -->
       <div id="list-section">
         <p style="font-size:0.78rem;color:#94a3b8;margin:0.7rem 0 0.55rem">Eller välj från listan (störst först enligt 2022):</p>
         <div id="party-list"></div>
       </div>
     </div>
 
-    <!-- Step 2: Questions -->
     <div id="step-questions" class="card hidden">
       <div class="progress"><div class="progress-bar" id="progress"></div></div>
       <div class="question" id="question-text"></div>
       <div class="options" id="options"></div>
     </div>
 
-    <!-- Step 3: Results -->
     <div id="step-results" class="card hidden">
       <h2 style="margin-bottom:0.9rem;font-size:1.1rem">Ditt resultat</h2>
       <p id="chosen-summary" style="margin-bottom:1rem;color:#94a3b8;font-size:0.88rem"></p>
@@ -160,7 +155,6 @@
       { id: "med",  name: "Medborgerlig Samling",   short: "MED", pct: "0,2 %",  x: 75, y: 45 }
     ];
 
-    // Temporary placeholder questions
     const questions = [
       {
         text: "Sverige bör ha mycket stramare invandringsregler än idag.",
@@ -187,7 +181,6 @@
     let userScores = {};
     const markers = {};
 
-    // Build compass markers
     const compass = document.getElementById("compass");
     parties.forEach(p => {
       const marker = document.createElement("div");
@@ -201,7 +194,6 @@
       markers[p.id] = marker;
     });
 
-    // Build size-sorted list
     const partyList = document.getElementById("party-list");
     parties.forEach(p => {
       const btn = document.createElement("button");
@@ -213,12 +205,8 @@
 
     function selectParty(party) {
       chosenParty = party;
-
-      // Highlight marker
       Object.values(markers).forEach(m => m.classList.remove("selected"));
       markers[party.id].classList.add("selected");
-
-      // Show selection panel, hide list
       document.getElementById("selected-name").textContent = party.name;
       document.getElementById("selection-panel").classList.remove("hidden");
       document.getElementById("list-section").classList.add("hidden");
@@ -244,7 +232,6 @@
       const q = questions[currentQ];
       document.getElementById("question-text").textContent = q.text;
       document.getElementById("progress").style.width = ((currentQ / questions.length) * 100) + "%";
-
       const optionsDiv = document.getElementById("options");
       optionsDiv.innerHTML = "";
       q.options.forEach(opt => {
@@ -260,17 +247,13 @@
         userScores[id] = (userScores[id] || 0) + val;
       }
       currentQ++;
-      if (currentQ < questions.length) {
-        showQuestion();
-      } else {
-        showResults();
-      }
+      if (currentQ < questions.length) showQuestion();
+      else showResults();
     }
 
     function showResults() {
       document.getElementById("step-questions").classList.add("hidden");
       document.getElementById("step-results").classList.remove("hidden");
-
       const maxPossible = questions.length * 2;
       const ranked = parties.map(p => ({
         ...p,
@@ -293,9 +276,7 @@
             Förklaring kommer här – varför du matchar eller inte matchar ${r.name}.
           </div>
         `;
-        div.onclick = () => {
-          document.getElementById(`exp-${r.id}`).classList.toggle("open");
-        };
+        div.onclick = () => document.getElementById(`exp-${r.id}`).classList.toggle("open");
         list.appendChild(div);
       });
     }
