@@ -6,27 +6,36 @@
   <title>Valkompass – Testa din riktiga alignment</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 2rem 1rem; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 1.5rem 1rem; }
     .container { max-width: 520px; width: 100%; }
-    h1 { font-size: 1.6rem; margin-bottom: 0.5rem; text-align: center; }
-    .subtitle { text-align: center; color: #94a3b8; margin-bottom: 2rem; font-size: 0.95rem; }
-    .card { background: #1e293b; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
-    button { background: #3b82f6; color: white; border: none; padding: 0.75rem 1.25rem; border-radius: 8px; font-size: 1rem; cursor: pointer; width: 100%; margin-top: 0.75rem; }
+    h1 { font-size: 1.5rem; margin-bottom: 0.4rem; text-align: center; }
+    .subtitle { text-align: center; color: #94a3b8; margin-bottom: 1.5rem; font-size: 0.9rem; }
+    .card { background: #1e293b; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+    button { background: #3b82f6; color: white; border: none; padding: 0.7rem 1.1rem; border-radius: 8px; font-size: 0.95rem; cursor: pointer; width: 100%; margin-top: 0.5rem; }
     button:hover { background: #2563eb; }
-    .party-btn { background: #334155; margin-bottom: 0.5rem; text-align: left; }
+    .party-btn { background: #334155; margin-bottom: 0.4rem; text-align: left; display: flex; justify-content: space-between; align-items: center; }
     .party-btn:hover { background: #475569; }
+    .party-btn .pct { font-size: 0.8rem; color: #94a3b8; }
     .hidden { display: none; }
-    .progress { height: 6px; background: #334155; border-radius: 3px; margin-bottom: 1.5rem; overflow: hidden; }
+    .progress { height: 6px; background: #334155; border-radius: 3px; margin-bottom: 1.25rem; overflow: hidden; }
     .progress-bar { height: 100%; background: #3b82f6; width: 0%; transition: width 0.3s; }
-    .question { font-size: 1.15rem; margin-bottom: 1.25rem; line-height: 1.4; }
+    .question { font-size: 1.1rem; margin-bottom: 1.1rem; line-height: 1.4; }
     .options button { background: #334155; text-align: left; }
     .options button:hover { background: #475569; }
-    .result-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #334155; cursor: pointer; }
+    .result-item { display: flex; justify-content: space-between; align-items: center; padding: 0.7rem 0; border-bottom: 1px solid #334155; cursor: pointer; }
     .result-item:hover { background: #1e293b; }
     .match { font-weight: 600; color: #4ade80; }
     .low { color: #f87171; }
-    .explanation { font-size: 0.9rem; color: #94a3b8; margin-top: 0.5rem; display: none; }
+    .explanation { font-size: 0.88rem; color: #94a3b8; margin-top: 0.4rem; display: none; line-height: 1.4; }
     .explanation.open { display: block; }
+
+    /* Left-right scale */
+    .scale-wrapper { margin-bottom: 1.5rem; }
+    .scale-label { display: flex; justify-content: space-between; font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.4rem; }
+    .scale { position: relative; height: 48px; background: linear-gradient(to right, #7c3aed, #3b82f6, #94a3b8, #f59e0b, #ef4444); border-radius: 8px; }
+    .scale-marker { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 28px; height: 28px; border-radius: 50%; background: #0f172a; border: 2px solid white; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; cursor: pointer; color: white; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+    .scale-marker:hover { transform: translate(-50%, -50%) scale(1.15); z-index: 5; }
+    .scale-marker span { pointer-events: none; }
   </style>
 </head>
 <body>
@@ -36,7 +45,18 @@
 
     <!-- Step 1: Choose party -->
     <div id="step-party" class="card">
-      <p style="margin-bottom:1rem">Vilket parti stöder eller tror du dig stå närmast just nu?</p>
+      <p style="margin-bottom:1rem;font-size:0.95rem">Vilket parti stöder eller tror du dig stå närmast just nu?</p>
+
+      <!-- Left-right scale -->
+      <div class="scale-wrapper">
+        <div class="scale-label">
+          <span>Vänster</span>
+          <span>Höger</span>
+        </div>
+        <div class="scale" id="scale"></div>
+      </div>
+
+      <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:0.75rem">Eller välj från listan (störst först enligt 2022):</p>
       <div id="party-list"></div>
     </div>
 
@@ -49,46 +69,47 @@
 
     <!-- Step 3: Results -->
     <div id="step-results" class="card hidden">
-      <h2 style="margin-bottom:1rem;font-size:1.2rem">Ditt resultat</h2>
-      <p id="chosen-summary" style="margin-bottom:1.25rem;color:#94a3b8;font-size:0.95rem"></p>
+      <h2 style="margin-bottom:1rem;font-size:1.15rem">Ditt resultat</h2>
+      <p id="chosen-summary" style="margin-bottom:1.1rem;color:#94a3b8;font-size:0.9rem"></p>
       <div id="results-list"></div>
-      <button onclick="location.reload()" style="margin-top:1.5rem;background:#475569">Gör om testet</button>
+      <button onclick="location.reload()" style="margin-top:1.4rem;background:#475569">Gör om testet</button>
     </div>
   </div>
 
   <script>
-    // Placeholder data – will be expanded later
+    // Parties sorted by 2022 result (largest first) + left-right position (0 = leftmost, 100 = rightmost)
     const parties = [
-      { id: "sd", name: "Sverigedemokraterna" },
-      { id: "m", name: "Moderaterna" },
-      { id: "kd", name: "Kristdemokraterna" },
-      { id: "l", name: "Liberalerna" },
-      { id: "c", name: "Centerpartiet" },
-      { id: "s", name: "Socialdemokraterna" },
-      { id: "mp", name: "Miljöpartiet" },
-      { id: "v", name: "Vänsterpartiet" },
-      { id: "afs", name: "Alternativ för Sverige" },
-      { id: "med", name: "Medborgerlig Samling" }
+      { id: "s",   name: "Socialdemokraterna",     short: "S",   pct: "30,3 %", pos: 28 },
+      { id: "sd",  name: "Sverigedemokraterna",    short: "SD",  pct: "20,5 %", pos: 82 },
+      { id: "m",   name: "Moderaterna",            short: "M",   pct: "19,1 %", pos: 68 },
+      { id: "v",   name: "Vänsterpartiet",         short: "V",   pct: "6,8 %",  pos: 8 },
+      { id: "c",   name: "Centerpartiet",          short: "C",   pct: "6,7 %",  pos: 42 },
+      { id: "kd",  name: "Kristdemokraterna",      short: "KD",  pct: "5,3 %",  pos: 72 },
+      { id: "mp",  name: "Miljöpartiet",           short: "MP",  pct: "5,1 %",  pos: 18 },
+      { id: "l",   name: "Liberalerna",            short: "L",   pct: "4,6 %",  pos: 55 },
+      { id: "nyans", name: "Partiet Nyans",         short: "NY",  pct: "0,4 %",  pos: 35 },
+      { id: "afs", name: "Alternativ för Sverige", short: "AFS", pct: "0,3 %",  pos: 92 },
+      { id: "med", name: "Medborgerlig Samling",   short: "MED", pct: "0,2 %",  pos: 78 }
     ];
 
-    // Temporary placeholder questions (will be replaced with real ones)
+    // Temporary placeholder questions
     const questions = [
       {
         text: "Sverige bör ha mycket stramare invandringsregler än idag.",
         options: [
-          { label: "Helt enig", scores: { sd: 2, afs: 2, m: 1, kd: 1, med: 1, l: 0, c: -1, s: -1, mp: -2, v: -2 } },
-          { label: "Delvis enig", scores: { sd: 1, afs: 1, m: 1, kd: 1, med: 1, l: 0, c: 0, s: 0, mp: -1, v: -1 } },
-          { label: "Delvis oenig", scores: { sd: -1, afs: -1, m: 0, kd: 0, med: 0, l: 0, c: 1, s: 1, mp: 1, v: 1 } },
-          { label: "Helt oenig", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -1, l: 0, c: 1, s: 2, mp: 2, v: 2 } }
+          { label: "Helt enig", scores: { sd: 2, afs: 2, m: 1, kd: 1, med: 1, l: 0, c: -1, s: -1, mp: -2, v: -2, nyans: -1 } },
+          { label: "Delvis enig", scores: { sd: 1, afs: 1, m: 1, kd: 1, med: 1, l: 0, c: 0, s: 0, mp: -1, v: -1, nyans: 0 } },
+          { label: "Delvis oenig", scores: { sd: -1, afs: -1, m: 0, kd: 0, med: 0, l: 0, c: 1, s: 1, mp: 1, v: 1, nyans: 1 } },
+          { label: "Helt oenig", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -1, l: 0, c: 1, s: 2, mp: 2, v: 2, nyans: 1 } }
         ]
       },
       {
         text: "Straffen för våldsbrott bör bli betydligt hårdare.",
         options: [
-          { label: "Helt enig", scores: { sd: 2, afs: 2, m: 2, kd: 1, med: 1, l: 1, c: 0, s: 0, mp: -1, v: -2 } },
-          { label: "Delvis enig", scores: { sd: 1, afs: 1, m: 1, kd: 1, med: 1, l: 1, c: 0, s: 0, mp: 0, v: -1 } },
-          { label: "Delvis oenig", scores: { sd: -1, afs: -1, m: 0, kd: 0, med: 0, l: 0, c: 0, s: 1, mp: 1, v: 1 } },
-          { label: "Helt oenig", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -1, l: 0, c: 0, s: 1, mp: 2, v: 2 } }
+          { label: "Helt enig", scores: { sd: 2, afs: 2, m: 2, kd: 1, med: 1, l: 1, c: 0, s: 0, mp: -1, v: -2, nyans: 0 } },
+          { label: "Delvis enig", scores: { sd: 1, afs: 1, m: 1, kd: 1, med: 1, l: 1, c: 0, s: 0, mp: 0, v: -1, nyans: 0 } },
+          { label: "Delvis oenig", scores: { sd: -1, afs: -1, m: 0, kd: 0, med: 0, l: 0, c: 0, s: 1, mp: 1, v: 1, nyans: 1 } },
+          { label: "Helt oenig", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -1, l: 0, c: 0, s: 1, mp: 2, v: 2, nyans: 1 } }
         ]
       }
     ];
@@ -97,12 +118,24 @@
     let currentQ = 0;
     let userScores = {};
 
-    // Init party buttons
+    // Build left-right scale
+    const scale = document.getElementById("scale");
+    parties.forEach(p => {
+      const marker = document.createElement("div");
+      marker.className = "scale-marker";
+      marker.style.left = p.pos + "%";
+      marker.innerHTML = `<span>${p.short}</span>`;
+      marker.title = p.name;
+      marker.onclick = () => startQuestions(p);
+      scale.appendChild(marker);
+    });
+
+    // Build size-sorted list
     const partyList = document.getElementById("party-list");
     parties.forEach(p => {
       const btn = document.createElement("button");
       btn.className = "party-btn";
-      btn.textContent = p.name;
+      btn.innerHTML = `<span>${p.name}</span><span class="pct">${p.pct}</span>`;
       btn.onclick = () => startQuestions(p);
       partyList.appendChild(btn);
     });
@@ -122,7 +155,7 @@
 
       const optionsDiv = document.getElementById("options");
       optionsDiv.innerHTML = "";
-      q.options.forEach((opt, i) => {
+      q.options.forEach(opt => {
         const btn = document.createElement("button");
         btn.textContent = opt.label;
         btn.onclick = () => answer(opt.scores);
@@ -146,7 +179,6 @@
       document.getElementById("step-questions").classList.add("hidden");
       document.getElementById("step-results").classList.remove("hidden");
 
-      // Normalize scores to 0-100 roughly (placeholder)
       const maxPossible = questions.length * 2;
       const ranked = parties.map(p => ({
         ...p,
@@ -170,8 +202,7 @@
           </div>
         `;
         div.onclick = () => {
-          const exp = document.getElementById(`exp-${r.id}`);
-          exp.classList.toggle("open");
+          document.getElementById(`exp-${r.id}`).classList.toggle("open");
         };
         list.appendChild(div);
       });
