@@ -11,16 +11,18 @@
     h1 { font-size: 1.45rem; margin-bottom: 0.35rem; text-align: center; }
     .subtitle { text-align: center; color: #94a3b8; margin-bottom: 1.3rem; font-size: 0.88rem; }
     .card { background: #1e293b; border-radius: 12px; padding: 1.15rem; margin-bottom: 1rem; }
-    button { background: #3b82f6; color: white; border: none; padding: 0.65rem 1rem; border-radius: 8px; font-size: 0.92rem; cursor: pointer; width: 100%; margin-top: 0.45rem; }
+    button { background: #3b82f6; color: white; border: none; padding: 0.7rem 1rem; border-radius: 8px; font-size: 0.95rem; cursor: pointer; width: 100%; }
     button:hover { background: #2563eb; }
+    button.secondary { background: #475569; }
+    button.secondary:hover { background: #64748b; }
     .party-btn { background: #334155; margin-bottom: 0.35rem; text-align: left; display: flex; justify-content: space-between; align-items: center; }
     .party-btn:hover { background: #475569; }
     .party-btn .pct { font-size: 0.78rem; color: #94a3b8; }
-    .hidden { display: none; }
+    .hidden { display: none !important; }
     .progress { height: 5px; background: #334155; border-radius: 3px; margin-bottom: 1.1rem; overflow: hidden; }
     .progress-bar { height: 100%; background: #3b82f6; width: 0%; transition: width 0.3s; }
     .question { font-size: 1.05rem; margin-bottom: 1rem; line-height: 1.4; }
-    .options button { background: #334155; text-align: left; }
+    .options button { background: #334155; text-align: left; margin-top: 0.4rem; }
     .options button:hover { background: #475569; }
     .result-item { display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0; border-bottom: 1px solid #334155; cursor: pointer; }
     .result-item:hover { background: #1e293b; }
@@ -29,35 +31,67 @@
     .explanation { font-size: 0.85rem; color: #94a3b8; margin-top: 0.35rem; display: none; line-height: 1.4; }
     .explanation.open { display: block; }
 
-    /* 2D Compass */
-    .compass-wrapper { margin-bottom: 1.3rem; }
-    .compass { position: relative; width: 100%; aspect-ratio: 1 / 0.75; background: #0f172a; border-radius: 10px; border: 1px solid #334155; overflow: hidden; }
-    .compass-grid {
-      position: absolute; inset: 0;
+    /* 2D Compass with colored quadrants */
+    .compass-wrapper { margin-bottom: 1.1rem; }
+    .compass {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 0.78;
+      border-radius: 10px;
+      border: 1px solid #334155;
+      overflow: hidden;
       background:
-        linear-gradient(to right, transparent 49.5%, #475569 49.5%, #475569 50.5%, transparent 50.5%),
-        linear-gradient(to bottom, transparent 49.5%, #475569 49.5%, #475569 50.5%, transparent 50.5%);
+        linear-gradient(to right, #7c3aed 0%, #7c3aed 50%, #f59e0b 50%, #f59e0b 100%),
+        linear-gradient(to bottom, #3b82f6 0%, #3b82f6 50%, #ef4444 50%, #ef4444 100%);
+      background-blend-mode: multiply;
     }
-    .compass-label { position: absolute; font-size: 0.68rem; color: #94a3b8; font-weight: 500; }
-    .compass-label.left { left: 6px; top: 50%; transform: translateY(-50%); }
-    .compass-label.right { right: 6px; top: 50%; transform: translateY(-50%); }
-    .compass-label.top { top: 5px; left: 50%; transform: translateX(-50%); }
-    .compass-label.bottom { bottom: 5px; left: 50%; transform: translateX(-50%); }
+    /* Better quadrant colors */
+    .compass {
+      background:
+        linear-gradient(to bottom right, transparent 49.5%, #334155 49.5%, #334155 50.5%, transparent 50.5%),
+        linear-gradient(to bottom left, transparent 49.5%, #334155 49.5%, #334155 50.5%, transparent 50.5%),
+        linear-gradient(135deg, #6d28d9 0%, #6d28d9 50%, transparent 50%),
+        linear-gradient(225deg, #2563eb 0%, #2563eb 50%, transparent 50%),
+        linear-gradient(315deg, #dc2626 0%, #dc2626 50%, transparent 50%),
+        linear-gradient(45deg, #d97706 0%, #d97706 50%, transparent 50%);
+    }
+    .compass-label { position: absolute; font-size: 0.68rem; color: #e2e8f0; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.7); z-index: 1; }
+    .compass-label.left { left: 7px; top: 50%; transform: translateY(-50%); }
+    .compass-label.right { right: 7px; top: 50%; transform: translateY(-50%); }
+    .compass-label.top { top: 6px; left: 50%; transform: translateX(-50%); }
+    .compass-label.bottom { bottom: 6px; left: 50%; transform: translateX(-50%); }
+
     .compass-marker {
       position: absolute;
       width: 30px; height: 30px;
       border-radius: 50%;
-      background: #1e293b;
+      background: #0f172a;
       border: 2px solid #e2e8f0;
       display: flex; align-items: center; justify-content: center;
       font-size: 0.62rem; font-weight: 700;
       color: white;
       cursor: pointer;
       transform: translate(-50%, -50%);
-      box-shadow: 0 2px 5px rgba(0,0,0,0.45);
-      z-index: 2;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+      z-index: 3;
+      transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
     }
-    .compass-marker:hover { transform: translate(-50%, -50%) scale(1.18); z-index: 10; border-color: #3b82f6; }
+    .compass-marker:hover { transform: translate(-50%, -50%) scale(1.15); z-index: 10; }
+    .compass-marker.selected {
+      border-color: #fbbf24;
+      box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.45), 0 2px 8px rgba(0,0,0,0.5);
+      transform: translate(-50%, -50%) scale(1.2);
+      z-index: 12;
+    }
+
+    .selection-info {
+      text-align: center;
+      margin: 0.9rem 0 0.7rem;
+      font-size: 0.95rem;
+    }
+    .selection-info strong { color: #fbbf24; }
+    .btn-row { display: flex; gap: 0.6rem; margin-top: 0.6rem; }
+    .btn-row button { flex: 1; }
   </style>
 </head>
 <body>
@@ -67,12 +101,11 @@
 
     <!-- Step 1: Choose party -->
     <div id="step-party" class="card">
-      <p style="margin-bottom:0.9rem;font-size:0.92rem">Vilket parti stöder eller tror du dig stå närmast just nu?</p>
+      <p style="margin-bottom:0.85rem;font-size:0.92rem">Vilket parti stöder eller tror du dig stå närmast just nu?</p>
 
       <!-- 2D Compass -->
       <div class="compass-wrapper">
         <div class="compass" id="compass">
-          <div class="compass-grid"></div>
           <div class="compass-label top">GAL</div>
           <div class="compass-label bottom">TAN</div>
           <div class="compass-label left">Vänster</div>
@@ -80,8 +113,20 @@
         </div>
       </div>
 
-      <p style="font-size:0.78rem;color:#94a3b8;margin-bottom:0.65rem">Eller välj från listan (störst först enligt 2022):</p>
-      <div id="party-list"></div>
+      <!-- Selection state (hidden until party chosen) -->
+      <div id="selection-panel" class="hidden">
+        <div class="selection-info">Du har valt: <strong id="selected-name"></strong></div>
+        <div class="btn-row">
+          <button class="secondary" id="btn-back">Tillbaka</button>
+          <button id="btn-start">Starta test</button>
+        </div>
+      </div>
+
+      <!-- List (hidden after selection) -->
+      <div id="list-section">
+        <p style="font-size:0.78rem;color:#94a3b8;margin:0.7rem 0 0.55rem">Eller välj från listan (störst först enligt 2022):</p>
+        <div id="party-list"></div>
+      </div>
     </div>
 
     <!-- Step 2: Questions -->
@@ -101,11 +146,6 @@
   </div>
 
   <script>
-    /* 
-      Positioner ungefärliga:
-      x = 0 (vänster) → 100 (höger)
-      y = 0 (GAL / upp) → 100 (TAN / ner)
-    */
     const parties = [
       { id: "s",    name: "Socialdemokraterna",     short: "S",   pct: "30,3 %", x: 32, y: 48 },
       { id: "sd",   name: "Sverigedemokraterna",    short: "SD",  pct: "20,5 %", x: 78, y: 78 },
@@ -145,8 +185,9 @@
     let chosenParty = null;
     let currentQ = 0;
     let userScores = {};
+    const markers = {};
 
-    // Build 2D compass markers
+    // Build compass markers
     const compass = document.getElementById("compass");
     parties.forEach(p => {
       const marker = document.createElement("div");
@@ -155,8 +196,9 @@
       marker.style.top = p.y + "%";
       marker.textContent = p.short;
       marker.title = p.name;
-      marker.onclick = () => startQuestions(p);
+      marker.onclick = () => selectParty(p);
       compass.appendChild(marker);
+      markers[p.id] = marker;
     });
 
     // Build size-sorted list
@@ -165,17 +207,38 @@
       const btn = document.createElement("button");
       btn.className = "party-btn";
       btn.innerHTML = `<span>${p.name}</span><span class="pct">${p.pct}</span>`;
-      btn.onclick = () => startQuestions(p);
+      btn.onclick = () => selectParty(p);
       partyList.appendChild(btn);
     });
 
-    function startQuestions(party) {
+    function selectParty(party) {
       chosenParty = party;
+
+      // Highlight marker
+      Object.values(markers).forEach(m => m.classList.remove("selected"));
+      markers[party.id].classList.add("selected");
+
+      // Show selection panel, hide list
+      document.getElementById("selected-name").textContent = party.name;
+      document.getElementById("selection-panel").classList.remove("hidden");
+      document.getElementById("list-section").classList.add("hidden");
+    }
+
+    document.getElementById("btn-back").onclick = () => {
+      chosenParty = null;
+      Object.values(markers).forEach(m => m.classList.remove("selected"));
+      document.getElementById("selection-panel").classList.add("hidden");
+      document.getElementById("list-section").classList.remove("hidden");
+    };
+
+    document.getElementById("btn-start").onclick = () => {
+      if (!chosenParty) return;
       parties.forEach(p => userScores[p.id] = 0);
+      currentQ = 0;
       document.getElementById("step-party").classList.add("hidden");
       document.getElementById("step-questions").classList.remove("hidden");
       showQuestion();
-    }
+    };
 
     function showQuestion() {
       const q = questions[currentQ];
