@@ -6,36 +6,58 @@
   <title>Valkompass – Testa din riktiga alignment</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 1.5rem 1rem; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 1.25rem 0.9rem; }
     .container { max-width: 520px; width: 100%; }
-    h1 { font-size: 1.5rem; margin-bottom: 0.4rem; text-align: center; }
-    .subtitle { text-align: center; color: #94a3b8; margin-bottom: 1.5rem; font-size: 0.9rem; }
-    .card { background: #1e293b; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
-    button { background: #3b82f6; color: white; border: none; padding: 0.7rem 1.1rem; border-radius: 8px; font-size: 0.95rem; cursor: pointer; width: 100%; margin-top: 0.5rem; }
+    h1 { font-size: 1.45rem; margin-bottom: 0.35rem; text-align: center; }
+    .subtitle { text-align: center; color: #94a3b8; margin-bottom: 1.3rem; font-size: 0.88rem; }
+    .card { background: #1e293b; border-radius: 12px; padding: 1.15rem; margin-bottom: 1rem; }
+    button { background: #3b82f6; color: white; border: none; padding: 0.65rem 1rem; border-radius: 8px; font-size: 0.92rem; cursor: pointer; width: 100%; margin-top: 0.45rem; }
     button:hover { background: #2563eb; }
-    .party-btn { background: #334155; margin-bottom: 0.4rem; text-align: left; display: flex; justify-content: space-between; align-items: center; }
+    .party-btn { background: #334155; margin-bottom: 0.35rem; text-align: left; display: flex; justify-content: space-between; align-items: center; }
     .party-btn:hover { background: #475569; }
-    .party-btn .pct { font-size: 0.8rem; color: #94a3b8; }
+    .party-btn .pct { font-size: 0.78rem; color: #94a3b8; }
     .hidden { display: none; }
-    .progress { height: 6px; background: #334155; border-radius: 3px; margin-bottom: 1.25rem; overflow: hidden; }
+    .progress { height: 5px; background: #334155; border-radius: 3px; margin-bottom: 1.1rem; overflow: hidden; }
     .progress-bar { height: 100%; background: #3b82f6; width: 0%; transition: width 0.3s; }
-    .question { font-size: 1.1rem; margin-bottom: 1.1rem; line-height: 1.4; }
+    .question { font-size: 1.05rem; margin-bottom: 1rem; line-height: 1.4; }
     .options button { background: #334155; text-align: left; }
     .options button:hover { background: #475569; }
-    .result-item { display: flex; justify-content: space-between; align-items: center; padding: 0.7rem 0; border-bottom: 1px solid #334155; cursor: pointer; }
+    .result-item { display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0; border-bottom: 1px solid #334155; cursor: pointer; }
     .result-item:hover { background: #1e293b; }
     .match { font-weight: 600; color: #4ade80; }
     .low { color: #f87171; }
-    .explanation { font-size: 0.88rem; color: #94a3b8; margin-top: 0.4rem; display: none; line-height: 1.4; }
+    .explanation { font-size: 0.85rem; color: #94a3b8; margin-top: 0.35rem; display: none; line-height: 1.4; }
     .explanation.open { display: block; }
 
-    /* Left-right scale */
-    .scale-wrapper { margin-bottom: 1.5rem; }
-    .scale-label { display: flex; justify-content: space-between; font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.4rem; }
-    .scale { position: relative; height: 48px; background: linear-gradient(to right, #7c3aed, #3b82f6, #94a3b8, #f59e0b, #ef4444); border-radius: 8px; }
-    .scale-marker { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 28px; height: 28px; border-radius: 50%; background: #0f172a; border: 2px solid white; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; cursor: pointer; color: white; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
-    .scale-marker:hover { transform: translate(-50%, -50%) scale(1.15); z-index: 5; }
-    .scale-marker span { pointer-events: none; }
+    /* 2D Compass */
+    .compass-wrapper { margin-bottom: 1.3rem; }
+    .compass { position: relative; width: 100%; aspect-ratio: 1 / 0.75; background: #0f172a; border-radius: 10px; border: 1px solid #334155; overflow: hidden; }
+    .compass-grid {
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(to right, transparent 49.5%, #475569 49.5%, #475569 50.5%, transparent 50.5%),
+        linear-gradient(to bottom, transparent 49.5%, #475569 49.5%, #475569 50.5%, transparent 50.5%);
+    }
+    .compass-label { position: absolute; font-size: 0.68rem; color: #94a3b8; font-weight: 500; }
+    .compass-label.left { left: 6px; top: 50%; transform: translateY(-50%); }
+    .compass-label.right { right: 6px; top: 50%; transform: translateY(-50%); }
+    .compass-label.top { top: 5px; left: 50%; transform: translateX(-50%); }
+    .compass-label.bottom { bottom: 5px; left: 50%; transform: translateX(-50%); }
+    .compass-marker {
+      position: absolute;
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: #1e293b;
+      border: 2px solid #e2e8f0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.62rem; font-weight: 700;
+      color: white;
+      cursor: pointer;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.45);
+      z-index: 2;
+    }
+    .compass-marker:hover { transform: translate(-50%, -50%) scale(1.18); z-index: 10; border-color: #3b82f6; }
   </style>
 </head>
 <body>
@@ -45,18 +67,20 @@
 
     <!-- Step 1: Choose party -->
     <div id="step-party" class="card">
-      <p style="margin-bottom:1rem;font-size:0.95rem">Vilket parti stöder eller tror du dig stå närmast just nu?</p>
+      <p style="margin-bottom:0.9rem;font-size:0.92rem">Vilket parti stöder eller tror du dig stå närmast just nu?</p>
 
-      <!-- Left-right scale -->
-      <div class="scale-wrapper">
-        <div class="scale-label">
-          <span>Vänster</span>
-          <span>Höger</span>
+      <!-- 2D Compass -->
+      <div class="compass-wrapper">
+        <div class="compass" id="compass">
+          <div class="compass-grid"></div>
+          <div class="compass-label top">GAL</div>
+          <div class="compass-label bottom">TAN</div>
+          <div class="compass-label left">Vänster</div>
+          <div class="compass-label right">Höger</div>
         </div>
-        <div class="scale" id="scale"></div>
       </div>
 
-      <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:0.75rem">Eller välj från listan (störst först enligt 2022):</p>
+      <p style="font-size:0.78rem;color:#94a3b8;margin-bottom:0.65rem">Eller välj från listan (störst först enligt 2022):</p>
       <div id="party-list"></div>
     </div>
 
@@ -69,27 +93,31 @@
 
     <!-- Step 3: Results -->
     <div id="step-results" class="card hidden">
-      <h2 style="margin-bottom:1rem;font-size:1.15rem">Ditt resultat</h2>
-      <p id="chosen-summary" style="margin-bottom:1.1rem;color:#94a3b8;font-size:0.9rem"></p>
+      <h2 style="margin-bottom:0.9rem;font-size:1.1rem">Ditt resultat</h2>
+      <p id="chosen-summary" style="margin-bottom:1rem;color:#94a3b8;font-size:0.88rem"></p>
       <div id="results-list"></div>
-      <button onclick="location.reload()" style="margin-top:1.4rem;background:#475569">Gör om testet</button>
+      <button onclick="location.reload()" style="margin-top:1.3rem;background:#475569">Gör om testet</button>
     </div>
   </div>
 
   <script>
-    // Parties sorted by 2022 result (largest first) + left-right position (0 = leftmost, 100 = rightmost)
+    /* 
+      Positioner ungefärliga:
+      x = 0 (vänster) → 100 (höger)
+      y = 0 (GAL / upp) → 100 (TAN / ner)
+    */
     const parties = [
-      { id: "s",   name: "Socialdemokraterna",     short: "S",   pct: "30,3 %", pos: 28 },
-      { id: "sd",  name: "Sverigedemokraterna",    short: "SD",  pct: "20,5 %", pos: 82 },
-      { id: "m",   name: "Moderaterna",            short: "M",   pct: "19,1 %", pos: 68 },
-      { id: "v",   name: "Vänsterpartiet",         short: "V",   pct: "6,8 %",  pos: 8 },
-      { id: "c",   name: "Centerpartiet",          short: "C",   pct: "6,7 %",  pos: 42 },
-      { id: "kd",  name: "Kristdemokraterna",      short: "KD",  pct: "5,3 %",  pos: 72 },
-      { id: "mp",  name: "Miljöpartiet",           short: "MP",  pct: "5,1 %",  pos: 18 },
-      { id: "l",   name: "Liberalerna",            short: "L",   pct: "4,6 %",  pos: 55 },
-      { id: "nyans", name: "Partiet Nyans",         short: "NY",  pct: "0,4 %",  pos: 35 },
-      { id: "afs", name: "Alternativ för Sverige", short: "AFS", pct: "0,3 %",  pos: 92 },
-      { id: "med", name: "Medborgerlig Samling",   short: "MED", pct: "0,2 %",  pos: 78 }
+      { id: "s",    name: "Socialdemokraterna",     short: "S",   pct: "30,3 %", x: 32, y: 48 },
+      { id: "sd",   name: "Sverigedemokraterna",    short: "SD",  pct: "20,5 %", x: 78, y: 78 },
+      { id: "m",    name: "Moderaterna",            short: "M",   pct: "19,1 %", x: 72, y: 55 },
+      { id: "v",    name: "Vänsterpartiet",         short: "V",   pct: "6,8 %",  x: 12, y: 28 },
+      { id: "c",    name: "Centerpartiet",          short: "C",   pct: "6,7 %",  x: 48, y: 38 },
+      { id: "kd",   name: "Kristdemokraterna",      short: "KD",  pct: "5,3 %",  x: 70, y: 68 },
+      { id: "mp",   name: "Miljöpartiet",           short: "MP",  pct: "5,1 %",  x: 22, y: 18 },
+      { id: "l",    name: "Liberalerna",            short: "L",   pct: "4,6 %",  x: 58, y: 32 },
+      { id: "nyans",name: "Partiet Nyans",          short: "NY",  pct: "0,4 %",  x: 38, y: 42 },
+      { id: "afs",  name: "Alternativ för Sverige", short: "AFS", pct: "0,3 %",  x: 88, y: 88 },
+      { id: "med",  name: "Medborgerlig Samling",   short: "MED", pct: "0,2 %",  x: 75, y: 45 }
     ];
 
     // Temporary placeholder questions
@@ -118,16 +146,17 @@
     let currentQ = 0;
     let userScores = {};
 
-    // Build left-right scale
-    const scale = document.getElementById("scale");
+    // Build 2D compass markers
+    const compass = document.getElementById("compass");
     parties.forEach(p => {
       const marker = document.createElement("div");
-      marker.className = "scale-marker";
-      marker.style.left = p.pos + "%";
-      marker.innerHTML = `<span>${p.short}</span>`;
+      marker.className = "compass-marker";
+      marker.style.left = p.x + "%";
+      marker.style.top = p.y + "%";
+      marker.textContent = p.short;
       marker.title = p.name;
       marker.onclick = () => startQuestions(p);
-      scale.appendChild(marker);
+      compass.appendChild(marker);
     });
 
     // Build size-sorted list
