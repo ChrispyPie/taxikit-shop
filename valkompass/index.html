@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Valkompass – Testa din riktiga alignment</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 2rem 1rem; }
+    .container { max-width: 520px; width: 100%; }
+    h1 { font-size: 1.6rem; margin-bottom: 0.5rem; text-align: center; }
+    .subtitle { text-align: center; color: #94a3b8; margin-bottom: 2rem; font-size: 0.95rem; }
+    .card { background: #1e293b; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+    button { background: #3b82f6; color: white; border: none; padding: 0.75rem 1.25rem; border-radius: 8px; font-size: 1rem; cursor: pointer; width: 100%; margin-top: 0.75rem; }
+    button:hover { background: #2563eb; }
+    .party-btn { background: #334155; margin-bottom: 0.5rem; text-align: left; }
+    .party-btn:hover { background: #475569; }
+    .hidden { display: none; }
+    .progress { height: 6px; background: #334155; border-radius: 3px; margin-bottom: 1.5rem; overflow: hidden; }
+    .progress-bar { height: 100%; background: #3b82f6; width: 0%; transition: width 0.3s; }
+    .question { font-size: 1.15rem; margin-bottom: 1.25rem; line-height: 1.4; }
+    .options button { background: #334155; text-align: left; }
+    .options button:hover { background: #475569; }
+    .result-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #334155; cursor: pointer; }
+    .result-item:hover { background: #1e293b; }
+    .match { font-weight: 600; color: #4ade80; }
+    .low { color: #f87171; }
+    .explanation { font-size: 0.9rem; color: #94a3b8; margin-top: 0.5rem; display: none; }
+    .explanation.open { display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Valkompass</h1>
+    <p class="subtitle">Testa om du verkligen stämmer med partiet du tror</p>
+
+    <!-- Step 1: Choose party -->
+    <div id="step-party" class="card">
+      <p style="margin-bottom:1rem">Vilket parti stöder eller tror du dig stå närmast just nu?</p>
+      <div id="party-list"></div>
+    </div>
+
+    <!-- Step 2: Questions -->
+    <div id="step-questions" class="card hidden">
+      <div class="progress"><div class="progress-bar" id="progress"></div></div>
+      <div class="question" id="question-text"></div>
+      <div class="options" id="options"></div>
+    </div>
+
+    <!-- Step 3: Results -->
+    <div id="step-results" class="card hidden">
+      <h2 style="margin-bottom:1rem;font-size:1.2rem">Ditt resultat</h2>
+      <p id="chosen-summary" style="margin-bottom:1.25rem;color:#94a3b8;font-size:0.95rem"></p>
+      <div id="results-list"></div>
+      <button onclick="location.reload()" style="margin-top:1.5rem;background:#475569">Gör om testet</button>
+    </div>
+  </div>
+
+  <script>
+    // Placeholder data – will be expanded later
+    const parties = [
+      { id: "sd", name: "Sverigedemokraterna" },
+      { id: "m", name: "Moderaterna" },
+      { id: "kd", name: "Kristdemokraterna" },
+      { id: "l", name: "Liberalerna" },
+      { id: "c", name: "Centerpartiet" },
+      { id: "s", name: "Socialdemokraterna" },
+      { id: "mp", name: "Miljöpartiet" },
+      { id: "v", name: "Vänsterpartiet" },
+      { id: "afs", name: "Alternativ för Sverige" },
+      { id: "med", name: "Medborgerlig Samling" }
+    ];
+
+    // Temporary placeholder questions (will be replaced with real ones)
+    const questions = [
+      {
+        text: "Sverige bör ha mycket stramare invandringsregler än idag.",
+        options: [
+          { label: "Helt enig", scores: { sd: 2, afs: 2, m: 1, kd: 1, med: 1, l: 0, c: -1, s: -1, mp: -2, v: -2 } },
+          { label: "Delvis enig", scores: { sd: 1, afs: 1, m: 1, kd: 1, med: 1, l: 0, c: 0, s: 0, mp: -1, v: -1 } },
+          { label: "Delvis oenig", scores: { sd: -1, afs: -1, m: 0, kd: 0, med: 0, l: 0, c: 1, s: 1, mp: 1, v: 1 } },
+          { label: "Helt oenig", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -1, l: 0, c: 1, s: 2, mp: 2, v: 2 } }
+        ]
+      },
+      {
+        text: "Straffen för våldsbrott bör bli betydligt hårdare.",
+        options: [
+          { label: "Helt enig", scores: { sd: 2, afs: 2, m: 2, kd: 1, med: 1, l: 1, c: 0, s: 0, mp: -1, v: -2 } },
+          { label: "Delvis enig", scores: { sd: 1, afs: 1, m: 1, kd: 1, med: 1, l: 1, c: 0, s: 0, mp: 0, v: -1 } },
+          { label: "Delvis oenig", scores: { sd: -1, afs: -1, m: 0, kd: 0, med: 0, l: 0, c: 0, s: 1, mp: 1, v: 1 } },
+          { label: "Helt oenig", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -1, l: 0, c: 0, s: 1, mp: 2, v: 2 } }
+        ]
+      }
+    ];
+
+    let chosenParty = null;
+    let currentQ = 0;
+    let userScores = {};
+
+    // Init party buttons
+    const partyList = document.getElementById("party-list");
+    parties.forEach(p => {
+      const btn = document.createElement("button");
+      btn.className = "party-btn";
+      btn.textContent = p.name;
+      btn.onclick = () => startQuestions(p);
+      partyList.appendChild(btn);
+    });
+
+    function startQuestions(party) {
+      chosenParty = party;
+      parties.forEach(p => userScores[p.id] = 0);
+      document.getElementById("step-party").classList.add("hidden");
+      document.getElementById("step-questions").classList.remove("hidden");
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const q = questions[currentQ];
+      document.getElementById("question-text").textContent = q.text;
+      document.getElementById("progress").style.width = ((currentQ / questions.length) * 100) + "%";
+
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.textContent = opt.label;
+        btn.onclick = () => answer(opt.scores);
+        optionsDiv.appendChild(btn);
+      });
+    }
+
+    function answer(scores) {
+      for (const [id, val] of Object.entries(scores)) {
+        userScores[id] = (userScores[id] || 0) + val;
+      }
+      currentQ++;
+      if (currentQ < questions.length) {
+        showQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      document.getElementById("step-questions").classList.add("hidden");
+      document.getElementById("step-results").classList.remove("hidden");
+
+      // Normalize scores to 0-100 roughly (placeholder)
+      const maxPossible = questions.length * 2;
+      const ranked = parties.map(p => ({
+        ...p,
+        match: Math.round(((userScores[p.id] + maxPossible) / (maxPossible * 2)) * 100)
+      })).sort((a, b) => b.match - a.match);
+
+      const chosenMatch = ranked.find(r => r.id === chosenParty.id);
+      document.getElementById("chosen-summary").textContent =
+        `Du valde ${chosenParty.name}. Din faktiska matchning: ${chosenMatch.match}%`;
+
+      const list = document.getElementById("results-list");
+      list.innerHTML = "";
+      ranked.forEach(r => {
+        const div = document.createElement("div");
+        div.className = "result-item";
+        div.innerHTML = `
+          <span>${r.name}</span>
+          <span class="match ${r.match < 40 ? 'low' : ''}">${r.match}%</span>
+          <div class="explanation" id="exp-${r.id}">
+            Förklaring kommer här – varför du matchar eller inte matchar ${r.name}.
+          </div>
+        `;
+        div.onclick = () => {
+          const exp = document.getElementById(`exp-${r.id}`);
+          exp.classList.toggle("open");
+        };
+        list.appendChild(div);
+      });
+    }
+  </script>
+</body>
+</html>
