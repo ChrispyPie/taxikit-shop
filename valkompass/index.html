@@ -15,15 +15,15 @@
     button:hover { background: #2563eb; }
     button.secondary { background: #475569; }
     button.secondary:hover { background: #64748b; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
     .party-btn { background: #334155; margin-bottom: 0.35rem; text-align: left; display: flex; justify-content: space-between; align-items: center; }
     .party-btn:hover { background: #475569; }
     .party-btn .pct { font-size: 0.78rem; color: #94a3b8; }
     .hidden { display: none !important; }
-    .progress { height: 5px; background: #334155; border-radius: 3px; margin-bottom: 1.1rem; overflow: hidden; }
-    .progress-bar { height: 100%; background: #3b82f6; width: 0%; transition: width 0.3s; }
     .question { font-size: 1.05rem; margin-bottom: 1rem; line-height: 1.4; }
     .options button { background: #334155; text-align: left; margin-top: 0.4rem; }
     .options button:hover { background: #475569; }
+    .options button.selected { background: #1d4ed8; border: 1px solid #60a5fa; }
     .result-item { display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0; border-bottom: 1px solid #334155; cursor: pointer; }
     .result-item:hover { background: #1e293b; }
     .match { font-weight: 600; color: #4ade80; }
@@ -33,12 +33,7 @@
 
     .compass-wrapper { margin-bottom: 1.1rem; position: relative; }
     .compass {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 1 / 0.78;
-      border-radius: 12px;
-      border: 1px solid #334155;
-      overflow: hidden;
+      position: relative; width: 100%; aspect-ratio: 1 / 0.78; border-radius: 12px; border: 1px solid #334155; overflow: hidden;
       background:
         radial-gradient(ellipse at 50% 0%, rgba(34, 197, 94, 0.55) 0%, transparent 55%),
         radial-gradient(ellipse at 50% 100%, rgba(120, 53, 15, 0.65) 0%, transparent 55%),
@@ -47,9 +42,7 @@
         linear-gradient(160deg, #1e1b4b 0%, #0f172a 50%, #1c1917 100%);
     }
     .compass::before {
-      content: "";
-      position: absolute;
-      inset: 0;
+      content: ""; position: absolute; inset: 0;
       background:
         linear-gradient(to right, transparent 49.3%, rgba(148,163,184,0.4) 49.3%, rgba(148,163,184,0.4) 50.7%, transparent 50.7%),
         linear-gradient(to bottom, transparent 49.3%, rgba(148,163,184,0.4) 49.3%, rgba(148,163,184,0.4) 50.7%, transparent 50.7%);
@@ -62,85 +55,57 @@
     .compass-label.bottom { bottom: 7px; left: 50%; transform: translateX(-50%); }
 
     .compass-marker {
-      position: absolute;
-      width: 30px; height: 30px;
-      border-radius: 50%;
-      background: #0f172a;
-      border: 2px solid #e2e8f0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.62rem; font-weight: 700;
-      color: white;
-      cursor: pointer;
-      transform: translate(-50%, -50%);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
-      z-index: 3;
+      position: absolute; width: 30px; height: 30px; border-radius: 50%; background: #0f172a; border: 2px solid #e2e8f0;
+      display: flex; align-items: center; justify-content: center; font-size: 0.62rem; font-weight: 700; color: white;
+      cursor: pointer; transform: translate(-50%, -50%); box-shadow: 0 2px 6px rgba(0,0,0,0.5); z-index: 3;
       transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
     }
     .compass-marker:hover { transform: translate(-50%, -50%) scale(1.15); z-index: 10; }
     .compass-marker.selected {
-      border-color: #fbbf24;
-      box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.5), 0 2px 8px rgba(0,0,0,0.5);
-      transform: translate(-50%, -50%) scale(1.22);
-      z-index: 12;
+      border-color: #fbbf24; box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.5), 0 2px 8px rgba(0,0,0,0.5);
+      transform: translate(-50%, -50%) scale(1.22); z-index: 12;
     }
 
     .info-btn {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      background: rgba(15, 23, 42, 0.75);
-      border: 1.5px solid #94a3b8;
-      color: #e2e8f0;
-      font-size: 0.85rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 5;
-      padding: 0;
-      line-height: 1;
+      position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; border-radius: 50%;
+      background: rgba(15, 23, 42, 0.75); border: 1.5px solid #94a3b8; color: #e2e8f0;
+      font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; z-index: 5; padding: 0; line-height: 1;
     }
     .info-btn:hover { background: rgba(51, 65, 85, 0.9); border-color: #e2e8f0; }
 
     .info-popup {
-      position: absolute;
-      top: 40px;
-      right: 8px;
-      left: 8px;
-      background: #1e293b;
-      border: 1px solid #475569;
-      border-radius: 10px;
-      padding: 0.9rem 1rem;
-      font-size: 0.82rem;
-      line-height: 1.45;
-      color: #cbd5e1;
-      z-index: 20;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+      position: absolute; top: 40px; right: 8px; left: 8px; background: #1e293b; border: 1px solid #475569;
+      border-radius: 10px; padding: 0.9rem 1rem; font-size: 0.82rem; line-height: 1.45; color: #cbd5e1;
+      z-index: 20; box-shadow: 0 8px 24px rgba(0,0,0,0.45);
     }
     .info-popup strong { color: #f1f5f9; }
     .info-popup .close-info {
-      position: absolute;
-      top: 6px;
-      right: 10px;
-      background: none;
-      border: none;
-      color: #94a3b8;
-      font-size: 1.1rem;
-      cursor: pointer;
-      width: auto;
-      padding: 0;
+      position: absolute; top: 6px; right: 10px; background: none; border: none; color: #94a3b8;
+      font-size: 1.1rem; cursor: pointer; width: auto; padding: 0;
     }
 
     .selection-info { text-align: center; margin: 0.9rem 0 0.7rem; font-size: 0.95rem; }
     .selection-info strong { color: #fbbf24; }
     .btn-row { display: flex; gap: 0.6rem; margin-top: 0.6rem; }
     .btn-row button { flex: 1; }
-    .stop-row { margin-top: 1.2rem; }
-    .phase-info { font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.8rem; text-align: center; }
+    .nav-row { display: flex; gap: 0.5rem; margin-top: 1rem; }
+    .nav-row button { flex: 1; }
+    .stop-row { margin-top: 0.8rem; }
+    .phase-info { font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.6rem; text-align: center; }
+
+    /* Segmented progress */
+    .segments {
+      display: flex; gap: 3px; margin-bottom: 1rem;
+    }
+    .segment {
+      flex: 1; height: 8px; border-radius: 3px; background: #1e293b; border: 1px solid #334155;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .segment.unseen { background: #0f172a; }
+    .segment.answered { background: #22c55e; border-color: #16a34a; }
+    .segment.skipped { background: #ef4444; border-color: #dc2626; }
+    .segment.current { outline: 2px solid #fbbf24; outline-offset: 1px; }
   </style>
 </head>
 <body>
@@ -185,9 +150,13 @@
 
     <div id="step-questions" class="card hidden">
       <div class="phase-info" id="phase-info"></div>
-      <div class="progress"><div class="progress-bar" id="progress"></div></div>
+      <div class="segments" id="segments"></div>
       <div class="question" id="question-text"></div>
       <div class="options" id="options"></div>
+      <div class="nav-row">
+        <button class="secondary" id="btn-prev">← Bakåt</button>
+        <button class="secondary" id="btn-next">Framåt →</button>
+      </div>
       <div class="stop-row">
         <button class="secondary" id="btn-finish-early">Avsluta och se resultat</button>
       </div>
@@ -224,185 +193,141 @@
       { id: "med",  name: "Medborgerlig Samling",   short: "MED", pct: "0,2 %",  x: 75, y: 45 }
     ];
 
-    // Party-specific question banks
     const partyQuestions = {
       sd: [
-        {
-          text: "En person kör rattfull och dödar en annan människa. Vad bör minimistraffet vara?",
+        { text: "En person kör rattfull och dödar en annan människa. Vad bör minimistraffet vara?",
           options: [
             { label: "4 år", scores: { sd: -1, afs: -1, m: 0, kd: 0, med: 0, l: 1, c: 1, s: 1, mp: 1, v: 1, nyans: 1 } },
             { label: "8 år eller mer", scores: { sd: 2, afs: 2, m: 2, kd: 1, med: 2, l: 0, c: -1, s: -1, mp: -2, v: -2, nyans: -1 } },
             { label: "2 år", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -1, l: 0, c: 0, s: 1, mp: 1, v: 2, nyans: 1 } },
             { label: "6 år", scores: { sd: 1, afs: 1, m: 1, kd: 1, med: 1, l: 0, c: 0, s: 0, mp: -1, v: -1, nyans: 0 } }
-          ]
-        },
-        {
-          text: "En asylsökande reser tillbaka till det land hen säger sig ha flytt från medan ansökan prövas. Vad bör hända?",
+          ]},
+        { text: "En asylsökande reser tillbaka till det land hen säger sig ha flytt från medan ansökan prövas. Vad bör hända?",
           options: [
             { label: "Det bör vägas in negativt", scores: { sd: 1, afs: 1, m: 1, kd: 1, med: 1, l: 1, c: 0, s: 0, mp: -1, v: -1, nyans: 0 } },
             { label: "Det ska inte påverka", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -2, l: 0, c: 1, s: 1, mp: 2, v: 2, nyans: 1 } },
             { label: "Ansökan ska avslås", scores: { sd: 2, afs: 2, m: 1, kd: 1, med: 2, l: 0, c: -1, s: -1, mp: -2, v: -2, nyans: -1 } }
-          ]
-        },
-        {
-          text: "En person som fått svenskt medborgarskap begår grova våldsbrott. Bör medborgarskapet kunna återkallas?",
+          ]},
+        { text: "En person som fått svenskt medborgarskap begår grova våldsbrott. Bör medborgarskapet kunna återkallas?",
           options: [
             { label: "Nej", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -2, l: 0, c: 1, s: 1, mp: 2, v: 2, nyans: 1 } },
             { label: "Ja, vid allvarliga våldsbrott", scores: { sd: 2, afs: 2, m: 1, kd: 1, med: 2, l: 0, c: -1, s: -1, mp: -2, v: -2, nyans: -1 } },
             { label: "Ja, men bara i extrema fall", scores: { sd: 1, afs: 1, m: 1, kd: 1, med: 1, l: 1, c: 0, s: 0, mp: -1, v: -1, nyans: 0 } }
-          ]
-        },
-        {
-          text: "När vårdköerna är långa, vem bör prioriteras först?",
+          ]},
+        { text: "När vårdköerna är långa, vem bör prioriteras först?",
           options: [
             { label: "Alla lika", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -1, l: 1, c: 1, s: 2, mp: 2, v: 2, nyans: 1 } },
             { label: "Svenska medborgare", scores: { sd: 2, afs: 2, m: 1, kd: 1, med: 1, l: 0, c: -1, s: -1, mp: -2, v: -2, nyans: -1 } },
             { label: "De som bott längst i Sverige", scores: { sd: 1, afs: 1, m: 1, kd: 1, med: 1, l: 0, c: 0, s: 0, mp: -1, v: -1, nyans: 0 } }
-          ]
-        },
-        {
-          text: "Bör det krävas godkänd svenska för att få permanent uppehållstillstånd?",
+          ]},
+        { text: "Bör det krävas godkänd svenska för att få permanent uppehållstillstånd?",
           options: [
             { label: "Ja, men lågt krav", scores: { sd: 1, afs: 1, m: 1, kd: 1, med: 1, l: 1, c: 1, s: 1, mp: 0, v: 0, nyans: 0 } },
             { label: "Nej", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -2, l: -1, c: 0, s: 1, mp: 2, v: 2, nyans: 1 } },
             { label: "Ja, relativt högt krav", scores: { sd: 2, afs: 2, m: 1, kd: 1, med: 2, l: 1, c: 0, s: -1, mp: -2, v: -2, nyans: -1 } }
-          ]
-        },
-        {
-          text: "Ekonomiska bidrag till nyanlända jämfört med en låginkomsttagare som arbetat länge i Sverige bör vara:",
+          ]},
+        { text: "Ekonomiska bidrag till nyanlända jämfört med en låginkomsttagare som arbetat länge i Sverige bör vara:",
           options: [
             { label: "Högre under en etableringsperiod", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -2, l: 0, c: 1, s: 1, mp: 2, v: 2, nyans: 1 } },
             { label: "Tydligt lägre", scores: { sd: 2, afs: 2, m: 1, kd: 1, med: 2, l: 0, c: -1, s: -1, mp: -2, v: -2, nyans: -1 } },
             { label: "Ungefär samma", scores: { sd: 0, afs: -1, m: 0, kd: 0, med: 0, l: 1, c: 1, s: 1, mp: 1, v: 1, nyans: 1 } }
-          ]
-        },
-        {
-          text: "Bör det vara tillåtet att bygga moskéer som finansieras av stater som Saudiarabien, Qatar eller Turkiet?",
+          ]},
+        { text: "Bör det vara tillåtet att bygga moskéer som finansieras av stater som Saudiarabien, Qatar eller Turkiet?",
           options: [
             { label: "Ja, fritt", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -2, l: 0, c: 1, s: 1, mp: 1, v: 1, nyans: 2 } },
             { label: "Nej", scores: { sd: 2, afs: 2, m: 1, kd: 1, med: 2, l: 0, c: -1, s: -1, mp: -1, v: -1, nyans: -2 } },
             { label: "Ja, men med stränga krav på öppenhet", scores: { sd: 0, afs: -1, m: 1, kd: 1, med: 0, l: 1, c: 1, s: 1, mp: 1, v: 1, nyans: 0 } }
-          ]
-        },
-        {
-          text: "Bör skolan aktivt främja svenska traditioner och högtider (jul, midsommar, påsk) även när det finns elever från andra kulturer?",
+          ]},
+        { text: "Bör skolan aktivt främja svenska traditioner och högtider (jul, midsommar, påsk) även när det finns elever från andra kulturer?",
           options: [
             { label: "I viss mån", scores: { sd: 1, afs: 1, m: 1, kd: 1, med: 1, l: 1, c: 1, s: 1, mp: 0, v: 0, nyans: 0 } },
             { label: "Nej, skolan ska vara neutral", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -1, l: 0, c: 0, s: 0, mp: 2, v: 1, nyans: 1 } },
             { label: "Ja, det bör vara självklart", scores: { sd: 2, afs: 2, m: 1, kd: 2, med: 1, l: 0, c: 0, s: 0, mp: -2, v: -1, nyans: -1 } }
-          ]
-        },
-        {
-          text: "En person utan svenskt medborgarskap är aktiv i ett kriminellt nätverk. Vad bör vara huvudregeln?",
+          ]},
+        { text: "En person utan svenskt medborgarskap är aktiv i ett kriminellt nätverk. Vad bör vara huvudregeln?",
           options: [
             { label: "Behandling och rehabilitering i Sverige", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -2, l: 0, c: 0, s: 1, mp: 2, v: 2, nyans: 1 } },
             { label: "Utvisning först efter avtjänat straff", scores: { sd: 0, afs: 0, m: 1, kd: 1, med: 0, l: 1, c: 1, s: 1, mp: 0, v: 0, nyans: 0 } },
             { label: "Utvisning så fort det är juridiskt möjligt", scores: { sd: 2, afs: 2, m: 2, kd: 1, med: 2, l: 1, c: 0, s: -1, mp: -2, v: -2, nyans: -1 } }
-          ]
-        },
-        {
-          text: "Hur generös bör rätten vara för den som fått uppehållstillstånd att ta hit sina anhöriga (familjeåterförening)?",
+          ]},
+        { text: "Hur generös bör rätten vara för den som fått uppehållstillstånd att ta hit sina anhöriga (familjeåterförening)?",
           options: [
             { label: "Generös", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -2, l: 0, c: 1, s: 1, mp: 2, v: 2, nyans: 1 } },
             { label: "Mycket restriktiv", scores: { sd: 2, afs: 2, m: 1, kd: 1, med: 2, l: 0, c: -1, s: -1, mp: -2, v: -2, nyans: -1 } },
             { label: "Måttlig", scores: { sd: 0, afs: 0, m: 1, kd: 1, med: 0, l: 1, c: 1, s: 1, mp: 0, v: 0, nyans: 0 } }
-          ]
-        }
+          ]}
       ],
-
       s: [
-        {
-          text: "Bör skatten på höga inkomster höjas för att finansiera mer välfärd?",
+        { text: "Bör skatten på höga inkomster höjas för att finansiera mer välfärd?",
           options: [
             { label: "Ja, tydligt", scores: { s: 2, v: 2, mp: 1, nyans: 1, c: 0, l: -1, m: -2, kd: -1, sd: -1, med: -2, afs: -2 } },
             { label: "Nej, skatten är redan hög nog", scores: { s: -2, v: -2, mp: -1, nyans: -1, c: 0, l: 1, m: 2, kd: 1, sd: 1, med: 2, afs: 1 } },
             { label: "Bara marginellt", scores: { s: 1, v: 1, mp: 1, nyans: 0, c: 1, l: 0, m: -1, kd: 0, sd: 0, med: -1, afs: 0 } }
-          ]
-        },
-        {
-          text: "Hur viktig är den svenska modellen med starka fackförbund och kollektivavtal?",
+          ]},
+        { text: "Hur viktig är den svenska modellen med starka fackförbund och kollektivavtal?",
           options: [
             { label: "Mycket viktig, den ska stärkas", scores: { s: 2, v: 2, mp: 1, nyans: 1, c: 0, l: -1, m: -1, kd: 0, sd: 0, med: -2, afs: -1 } },
             { label: "Den fungerar men behöver moderniseras", scores: { s: 1, v: 0, mp: 1, nyans: 0, c: 1, l: 1, m: 1, kd: 1, sd: 1, med: 0, afs: 0 } },
             { label: "Den är föråldrad och begränsar företagen", scores: { s: -2, v: -2, mp: -1, nyans: -1, c: 0, l: 1, m: 2, kd: 0, sd: 0, med: 2, afs: 1 } }
-          ]
-        },
-        {
-          text: "Bör vinster i välfärden (skola, vård, omsorg) begränsas kraftigt eller förbjudas?",
+          ]},
+        { text: "Bör vinster i välfärden (skola, vård, omsorg) begränsas kraftigt eller förbjudas?",
           options: [
             { label: "Ja, vinster bör förbjudas eller kraftigt begränsas", scores: { s: 2, v: 2, mp: 2, nyans: 1, c: -1, l: -1, m: -2, kd: -1, sd: 0, med: -2, afs: 0 } },
             { label: "Nej, valfrihet och konkurrens är bra", scores: { s: -2, v: -2, mp: -2, nyans: -1, c: 1, l: 2, m: 2, kd: 1, sd: 0, med: 2, afs: 0 } },
             { label: "Vinster är okej om kvaliteten är hög", scores: { s: 0, v: -1, mp: 0, nyans: 0, c: 1, l: 1, m: 1, kd: 1, sd: 1, med: 1, afs: 1 } }
-          ]
-        },
-        {
-          text: "Hur generös bör a-kassan och sjukförsäkringen vara?",
+          ]},
+        { text: "Hur generös bör a-kassan och sjukförsäkringen vara?",
           options: [
             { label: "Högre ersättningsnivåer än idag", scores: { s: 2, v: 2, mp: 1, nyans: 1, c: 0, l: -1, m: -2, kd: -1, sd: -1, med: -2, afs: -1 } },
             { label: "Nuvarande nivå är ungefär lagom", scores: { s: 1, v: 0, mp: 0, nyans: 0, c: 1, l: 1, m: 0, kd: 1, sd: 1, med: 0, afs: 0 } },
             { label: "Lägre ersättning och mer krav på aktivitet", scores: { s: -2, v: -2, mp: -1, nyans: -1, c: 0, l: 1, m: 2, kd: 1, sd: 1, med: 2, afs: 1 } }
-          ]
-        },
-        {
-          text: "Bör staten ta ett större ansvar för att skapa jobb i områden med hög arbetslöshet?",
+          ]},
+        { text: "Bör staten ta ett större ansvar för att skapa jobb i områden med hög arbetslöshet?",
           options: [
             { label: "Ja, genom offentliga investeringar och subventionerade jobb", scores: { s: 2, v: 2, mp: 1, nyans: 1, c: 0, l: 0, m: -1, kd: 0, sd: 0, med: -2, afs: -1 } },
             { label: "Nej, marknaden och sänkta skatter är bättre", scores: { s: -2, v: -2, mp: -1, nyans: -1, c: 0, l: 1, m: 2, kd: 1, sd: 1, med: 2, afs: 1 } },
             { label: "En blandning av båda", scores: { s: 1, v: 0, mp: 1, nyans: 0, c: 1, l: 1, m: 0, kd: 1, sd: 1, med: 0, afs: 0 } }
-          ]
-        },
-        {
-          text: "Hur ska Sverige hantera klimatet – hur högt ska priset på utsläpp vara?",
+          ]},
+        { text: "Hur ska Sverige hantera klimatet – hur högt ska priset på utsläpp vara?",
           options: [
             { label: "Högre än idag, även om det kostar jobb på kort sikt", scores: { s: 1, v: 1, mp: 2, nyans: 0, c: 1, l: 1, m: 0, kd: 0, sd: -1, med: -1, afs: -2 } },
             { label: "Nuvarande nivå är lagom", scores: { s: 1, v: 0, mp: 0, nyans: 0, c: 1, l: 1, m: 1, kd: 1, sd: 1, med: 0, afs: 0 } },
             { label: "Lägre – konkurrenskraft och jobb är viktigare just nu", scores: { s: -1, v: -1, mp: -2, nyans: 0, c: 0, l: 0, m: 1, kd: 1, sd: 2, med: 2, afs: 2 } }
-          ]
-        },
-        {
-          text: "Bör det vara lättare eller svårare att säga upp anställda?",
+          ]},
+        { text: "Bör det vara lättare eller svårare att säga upp anställda?",
           options: [
             { label: "Svårare – anställningstryggheten ska stärkas", scores: { s: 2, v: 2, mp: 1, nyans: 1, c: -1, l: -1, m: -2, kd: -1, sd: 0, med: -2, afs: 0 } },
             { label: "Lättare – företagen behöver mer flexibilitet", scores: { s: -2, v: -2, mp: -1, nyans: -1, c: 1, l: 1, m: 2, kd: 1, sd: 0, med: 2, afs: 1 } },
             { label: "Nuvarande balans är ungefär rätt", scores: { s: 1, v: 0, mp: 0, nyans: 0, c: 1, l: 1, m: 0, kd: 1, sd: 1, med: 0, afs: 0 } }
-          ]
-        },
-        {
-          text: "Hur mycket ska staten styra över boendet (hyresreglering, byggkrav, bostadsbidrag)?",
+          ]},
+        { text: "Hur mycket ska staten styra över boendet (hyresreglering, byggkrav, bostadsbidrag)?",
           options: [
             { label: "Mer styrning för att hålla hyror nere och bygga mer hyresrätter", scores: { s: 2, v: 2, mp: 1, nyans: 1, c: 0, l: -1, m: -2, kd: -1, sd: 0, med: -2, afs: 0 } },
             { label: "Mindre styrning – marknaden ska styra mer", scores: { s: -2, v: -2, mp: -1, nyans: -1, c: 1, l: 1, m: 2, kd: 1, sd: 1, med: 2, afs: 1 } },
             { label: "En blandning", scores: { s: 1, v: 0, mp: 1, nyans: 0, c: 1, l: 1, m: 0, kd: 1, sd: 1, med: 0, afs: 0 } }
-          ]
-        },
-        {
-          text: "Bör föräldraledigheten vara mer jämnt delad mellan mammor och pappor (mer öronmärkta månader)?",
+          ]},
+        { text: "Bör föräldraledigheten vara mer jämnt delad mellan mammor och pappor (mer öronmärkta månader)?",
           options: [
             { label: "Ja, mer ska vara öronmärkt för respektive förälder", scores: { s: 2, v: 1, mp: 2, nyans: 0, c: 1, l: 1, m: 0, kd: -1, sd: -1, med: 0, afs: -2 } },
             { label: "Nej, familjerna ska få bestämma själva", scores: { s: -1, v: -1, mp: -1, nyans: 0, c: 0, l: 0, m: 1, kd: 2, sd: 2, med: 1, afs: 2 } },
             { label: "Nuvarande nivå är lagom", scores: { s: 1, v: 0, mp: 0, nyans: 0, c: 1, l: 1, m: 1, kd: 1, sd: 1, med: 1, afs: 0 } }
-          ]
-        },
-        {
-          text: "Hur viktigt är det att behålla och utveckla den generella välfärden (samma system för alla) istället för mer behovsprövade bidrag?",
+          ]},
+        { text: "Hur viktigt är det att behålla och utveckla den generella välfärden (samma system för alla) istället för mer behovsprövade bidrag?",
           options: [
             { label: "Mycket viktigt – generella system skapar sammanhållning", scores: { s: 2, v: 2, mp: 1, nyans: 1, c: 0, l: 0, m: -1, kd: 0, sd: 0, med: -1, afs: -1 } },
             { label: "Mer behovsprövning är bättre – pengarna ska gå till dem som verkligen behöver", scores: { s: -1, v: -1, mp: 0, nyans: 0, c: 1, l: 1, m: 2, kd: 1, sd: 1, med: 2, afs: 1 } },
             { label: "En blandning av båda", scores: { s: 1, v: 0, mp: 1, nyans: 0, c: 1, l: 1, m: 0, kd: 1, sd: 1, med: 0, afs: 0 } }
-          ]
-        }
+          ]}
       ]
     };
-
-    // For parties without their own questions yet, fall back to a mix
-    // (will be expanded later)
 
     let chosenParty = null;
     let currentQ = 0;
     let userScores = {};
-    let answeredCount = 0;
-    let phase = "specific"; // "specific" | "mixed"
+    let phase = "specific";
     let currentQueue = [];
+    let answers = [];          // answers[i] = scores object or null
+    let status = [];           // "unseen" | "answered" | "skipped"
     const markers = {};
 
     function shuffle(array) {
@@ -438,15 +363,10 @@
 
     const infoBtn = document.getElementById("info-btn");
     const infoPopup = document.getElementById("info-popup");
-    infoBtn.onclick = (e) => {
-      e.stopPropagation();
-      infoPopup.classList.toggle("hidden");
-    };
+    infoBtn.onclick = (e) => { e.stopPropagation(); infoPopup.classList.toggle("hidden"); };
     document.getElementById("close-info").onclick = () => infoPopup.classList.add("hidden");
     document.addEventListener("click", (e) => {
-      if (!infoPopup.contains(e.target) && e.target !== infoBtn) {
-        infoPopup.classList.add("hidden");
-      }
+      if (!infoPopup.contains(e.target) && e.target !== infoBtn) infoPopup.classList.add("hidden");
     });
 
     function selectParty(party) {
@@ -469,82 +389,115 @@
     document.getElementById("btn-start").onclick = () => {
       if (!chosenParty) return;
       parties.forEach(p => userScores[p.id] = 0);
-      answeredCount = 0;
       phase = "specific";
-
-      // Use the chosen party's questions if available, otherwise fall back to SD for now
       const bank = partyQuestions[chosenParty.id] || partyQuestions.sd;
       currentQueue = shuffle([...bank]);
+      answers = new Array(currentQueue.length).fill(null);
+      status = new Array(currentQueue.length).fill("unseen");
       currentQ = 0;
+      status[0] = "skipped"; // mark as visited
 
       document.getElementById("step-party").classList.add("hidden");
       document.getElementById("step-questions").classList.remove("hidden");
+      buildSegments();
       showQuestion();
     };
 
+    function buildSegments() {
+      const cont = document.getElementById("segments");
+      cont.innerHTML = "";
+      currentQueue.forEach((_, i) => {
+        const seg = document.createElement("div");
+        seg.className = "segment " + status[i];
+        if (i === currentQ) seg.classList.add("current");
+        seg.onclick = () => jumpTo(i);
+        cont.appendChild(seg);
+      });
+    }
+
+    function updateSegments() {
+      const segs = document.querySelectorAll("#segments .segment");
+      segs.forEach((seg, i) => {
+        seg.className = "segment " + status[i];
+        if (i === currentQ) seg.classList.add("current");
+      });
+    }
+
+    function jumpTo(i) {
+      if (i < 0 || i >= currentQueue.length) return;
+      currentQ = i;
+      if (status[i] === "unseen") status[i] = "skipped";
+      showQuestion();
+    }
+
+    document.getElementById("btn-prev").onclick = () => {
+      if (currentQ > 0) jumpTo(currentQ - 1);
+    };
+
+    document.getElementById("btn-next").onclick = () => {
+      if (currentQ < currentQueue.length - 1) {
+        jumpTo(currentQ + 1);
+      } else {
+        // last question → check if all answered or go to continue screen
+        finishPhase();
+      }
+    };
+
     document.getElementById("btn-finish-early").onclick = () => {
-      if (answeredCount === 0) {
+      const answered = answers.filter(a => a !== null).length;
+      if (answered === 0) {
         alert("Svara på minst en fråga först.");
         return;
       }
+      calculateScores();
       showResults(true);
     };
 
-    document.getElementById("btn-see-results").onclick = () => showResults(true);
+    document.getElementById("btn-see-results").onclick = () => {
+      calculateScores();
+      showResults(true);
+    };
 
     document.getElementById("btn-continue").onclick = () => {
-      // Build mixed queue: 1 random from each available party bank (except the one already used)
       phase = "mixed";
       currentQueue = [];
-      const used = new Set();
-
-      // Add remaining questions from other parties
       Object.keys(partyQuestions).forEach(pid => {
         if (pid === chosenParty.id) return;
         const qs = partyQuestions[pid];
-        if (qs && qs.length) {
-          currentQueue.push(...shuffle(qs));
-        }
+        if (qs && qs.length) currentQueue.push(...shuffle(qs));
       });
-
-      // Also add any leftover from own party if we want, but for now just others
       currentQueue = shuffle(currentQueue);
-      currentQ = 0;
 
       if (currentQueue.length === 0) {
         alert("Inga fler frågor tillgängliga ännu.");
+        calculateScores();
         showResults(true);
         return;
       }
 
+      answers = new Array(currentQueue.length).fill(null);
+      status = new Array(currentQueue.length).fill("unseen");
+      currentQ = 0;
+      status[0] = "skipped";
+
       document.getElementById("step-continue").classList.add("hidden");
       document.getElementById("step-questions").classList.remove("hidden");
+      buildSegments();
       showQuestion();
     };
 
     function showQuestion() {
-      if (currentQ >= currentQueue.length) {
-        // Finished current phase
-        if (phase === "specific") {
-          document.getElementById("step-questions").classList.add("hidden");
-          document.getElementById("step-continue").classList.remove("hidden");
-          return;
-        } else {
-          showResults(false);
-          return;
-        }
-      }
-
       const q = currentQueue[currentQ];
-      const totalInPhase = currentQueue.length;
       document.getElementById("question-text").textContent = q.text;
-      document.getElementById("progress").style.width = ((currentQ / totalInPhase) * 100) + "%";
 
       if (phase === "specific") {
-        document.getElementById("phase-info").textContent = `Fråga ${currentQ + 1} av 10 (viktiga för ${chosenParty.name})`;
+        document.getElementById("phase-info").textContent = `Fråga ${currentQ + 1} av ${currentQueue.length} (viktiga för ${chosenParty.name})`;
       } else {
-        document.getElementById("phase-info").textContent = `Extrafråga ${currentQ + 1} av ${totalInPhase}`;
+        document.getElementById("phase-info").textContent = `Extrafråga ${currentQ + 1} av ${currentQueue.length}`;
       }
+
+      document.getElementById("btn-prev").disabled = currentQ === 0;
+      document.getElementById("btn-next").textContent = currentQ === currentQueue.length - 1 ? "Klar →" : "Framåt →";
 
       const optionsDiv = document.getElementById("options");
       optionsDiv.innerHTML = "";
@@ -552,18 +505,55 @@
       shuffled.forEach(opt => {
         const btn = document.createElement("button");
         btn.textContent = opt.label;
-        btn.onclick = () => answer(opt.scores);
+        // highlight if this was previously selected
+        if (answers[currentQ] && JSON.stringify(answers[currentQ]) === JSON.stringify(opt.scores)) {
+          btn.classList.add("selected");
+        }
+        btn.onclick = () => selectAnswer(opt.scores, btn);
         optionsDiv.appendChild(btn);
       });
+
+      updateSegments();
     }
 
-    function answer(scores) {
-      for (const [id, val] of Object.entries(scores)) {
-        userScores[id] = (userScores[id] || 0) + val;
+    function selectAnswer(scores, btnEl) {
+      answers[currentQ] = scores;
+      status[currentQ] = "answered";
+
+      // visual feedback
+      document.querySelectorAll("#options button").forEach(b => b.classList.remove("selected"));
+      btnEl.classList.add("selected");
+
+      updateSegments();
+
+      // auto-advance after short delay
+      setTimeout(() => {
+        if (currentQ < currentQueue.length - 1) {
+          jumpTo(currentQ + 1);
+        } else {
+          finishPhase();
+        }
+      }, 300);
+    }
+
+    function finishPhase() {
+      if (phase === "specific") {
+        document.getElementById("step-questions").classList.add("hidden");
+        document.getElementById("step-continue").classList.remove("hidden");
+      } else {
+        calculateScores();
+        showResults(false);
       }
-      answeredCount++;
-      currentQ++;
-      showQuestion();
+    }
+
+    function calculateScores() {
+      parties.forEach(p => userScores[p.id] = 0);
+      answers.forEach(a => {
+        if (!a) return;
+        for (const [id, val] of Object.entries(a)) {
+          userScores[id] = (userScores[id] || 0) + val;
+        }
+      });
     }
 
     function showResults(early) {
@@ -571,6 +561,7 @@
       document.getElementById("step-continue").classList.add("hidden");
       document.getElementById("step-results").classList.remove("hidden");
 
+      const answeredCount = answers.filter(a => a !== null).length;
       const maxPossible = answeredCount * 2;
       const ranked = parties.map(p => ({
         ...p,
@@ -579,9 +570,7 @@
 
       const chosenMatch = ranked.find(r => r.id === chosenParty.id);
       let summary = `Du valde ${chosenParty.name}. Din faktiska matchning: ${chosenMatch.match}%`;
-      if (early) {
-        summary += ` (baserat på ${answeredCount} frågor)`;
-      }
+      if (early) summary += ` (baserat på ${answeredCount} frågor)`;
       document.getElementById("chosen-summary").textContent = summary;
 
       const list = document.getElementById("results-list");
@@ -592,9 +581,7 @@
         div.innerHTML = `
           <span>${r.name}</span>
           <span class="match ${r.match < 40 ? 'low' : ''}">${r.match}%</span>
-          <div class="explanation" id="exp-${r.id}">
-            Förklaring kommer här – varför du matchar eller inte matchar ${r.name}.
-          </div>
+          <div class="explanation" id="exp-${r.id}">Förklaring kommer här.</div>
         `;
         div.onclick = () => document.getElementById(`exp-${r.id}`).classList.toggle("open");
         list.appendChild(div);
