@@ -357,11 +357,14 @@
     var shuffled = shuffle(q.options.slice());
     shuffled.forEach(function (opt) {
       var btn = document.createElement("button");
-      btn.textContent = opt.label;
+      btn.innerHTML = renderQuestionText(opt.label);
       if (answers[currentQ] && JSON.stringify(answers[currentQ]) === JSON.stringify(opt.scores)) {
         btn.classList.add("selected");
       }
-      btn.onclick = function () { selectAnswer(opt.scores, btn); };
+      btn.onclick = function (e) {
+        if (e.target.closest(".term")) return;
+        selectAnswer(opt.scores, btn);
+      };
       optionsDiv.appendChild(btn);
     });
     updateSegments();
