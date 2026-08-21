@@ -27,9 +27,9 @@ window.partyQuestions = {
       id: "q-bef9",
       text: "En person som fått svenskt medborgarskap begår grova våldsbrott. Bör medborgarskapet kunna återkallas?",
       options: [
-        { label: "Nej", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -2, l: 0, c: 1, s: 1, mp: 2, v: 2, nyans: 1 } },
-        { label: "Ja, vid allvarliga våldsbrott", scores: { sd: 2, afs: 2, m: 1, kd: 1, med: 2, l: 0, c: -1, s: -1, mp: -2, v: -2, nyans: -1 } },
-        { label: "Ja, men bara i extrema fall", scores: { sd: 1, afs: 1, m: 1, kd: 1, med: 1, l: 1, c: 0, s: 0, mp: -1, v: -1, nyans: 0 } }
+        { label: "Nej, medborgarskap ska inte kunna återkallas", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -2, l: 0, c: 1, s: 1, mp: 2, v: 2, nyans: 1 } },
+        { label: "Ja, vid grova våldsbrott (t.ex. mord, grov misshandel)", scores: { sd: 2, afs: 2, m: 1, kd: 1, med: 2, l: 0, c: -1, s: -1, mp: -2, v: -2, nyans: -1 } },
+        { label: "Ja, men bara vid terrorbrott eller liknande", scores: { sd: 1, afs: 1, m: 1, kd: 1, med: 1, l: 1, c: 0, s: 0, mp: -1, v: -1, nyans: 0 } }
       ]
     },
     {
