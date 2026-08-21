@@ -180,10 +180,15 @@
     </div>
   </div>
 
-  <!-- Frågor laddas från separat fil -->
   <script src="questions.js"></script>
 
   <script>
+    // Säkerställ att frågorna laddats
+    const partyQuestions = window.partyQuestions;
+    if (!partyQuestions) {
+      alert("Kunde inte ladda frågorna. Ladda om sidan.");
+    }
+
     const parties = [
       { id: "s",    name: "Socialdemokraterna",     short: "S",   pct: "30,3 %", x: 32, y: 48 },
       { id: "sd",   name: "Sverigedemokraterna",    short: "SD",  pct: "20,5 %", x: 78, y: 78 },
@@ -197,8 +202,6 @@
       { id: "afs",  name: "Alternativ för Sverige", short: "AFS", pct: "0,3 %",  x: 88, y: 88 },
       { id: "med",  name: "Medborgerlig Samling",   short: "MED", pct: "0,2 %",  x: 75, y: 45 }
     ];
-
-    // partyQuestions kommer från questions.js
 
     const STORAGE_KEY = "valkompass_results_v1";
 
@@ -302,6 +305,10 @@
 
     document.getElementById("btn-start").onclick = () => {
       if (!chosenParty) return;
+      if (!partyQuestions) {
+        alert("Frågorna har inte laddats. Ladda om sidan.");
+        return;
+      }
 
       const saved = getSaved(chosenParty.id);
       if (saved) {
@@ -315,6 +322,10 @@
       totalAnswered = 0;
       phase = "specific";
       const bank = partyQuestions[chosenParty.id] || partyQuestions.sd;
+      if (!bank || !bank.length) {
+        alert("Inga frågor finns ännu för detta parti.");
+        return;
+      }
       currentQueue = shuffle([...bank]);
       answers = new Array(currentQueue.length).fill(null);
       status = new Array(currentQueue.length).fill("unseen");
