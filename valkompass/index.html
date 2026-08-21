@@ -24,7 +24,7 @@
     .party-btn .pct { font-size: 0.78rem; color: #94a3b8; }
     .party-btn .saved { font-size: 0.72rem; color: #4ade80; margin-left: 0.4rem; }
     .hidden { display: none !important; }
-    .question { font-size: 1.05rem; margin-bottom: 1rem; line-height: 1.4; }
+    .question { font-size: 1.05rem; margin-bottom: 1rem; line-height: 1.45; }
     .options button { background: #334155; text-align: left; margin-top: 0.4rem; }
     .options button:hover { background: #475569; }
     .options button.selected { background: #1d4ed8; border: 1px solid #60a5fa; }
@@ -107,6 +107,65 @@
     .segment.answered { background: #22c55e; border-color: #16a34a; }
     .segment.skipped { background: #ef4444; border-color: #dc2626; }
     .segment.current { outline: 2px solid #fbbf24; outline-offset: 1px; }
+
+    /* Term explanations */
+    .term {
+      color: #93c5fd;
+      border-bottom: 1px dotted #60a5fa;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .term-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: #334155;
+      border: 1px solid #60a5fa;
+      color: #93c5fd;
+      font-size: 0.65rem;
+      font-weight: 700;
+      margin-left: 2px;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .term-popup {
+      position: fixed;
+      left: 50%;
+      bottom: 1.5rem;
+      transform: translateX(-50%);
+      width: calc(100% - 2rem);
+      max-width: 420px;
+      background: #1e293b;
+      border: 1px solid #475569;
+      border-radius: 12px;
+      padding: 0.95rem 1.1rem;
+      font-size: 0.88rem;
+      line-height: 1.45;
+      color: #e2e8f0;
+      z-index: 100;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .term-popup strong {
+      display: block;
+      color: #fbbf24;
+      margin-bottom: 0.35rem;
+      font-size: 0.92rem;
+    }
+    .term-popup .close-term {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.2rem;
+      cursor: pointer;
+      width: auto;
+      padding: 0;
+    }
   </style>
 </head>
 <body>
@@ -184,6 +243,12 @@
     </div>
   </div>
 
+  <div id="term-popup" class="term-popup hidden">
+    <button class="close-term" id="close-term">×</button>
+    <strong id="term-title"></strong>
+    <span id="term-body"></span>
+  </div>
+
   <script src="/valkompass/questions.js"></script>
 
   <script>
@@ -248,6 +313,41 @@
     function setSubtitle(text) {
       document.getElementById("subtitle").textContent = text;
     }
+
+    // Parse [[term|definition]] into clickable spans
+    function renderQuestionText(raw) {
+      const escaped = raw
+        .replace(/&/g, "&")
+        .replace(/</g, "<")
+        .replace(/>/g, ">");
+      return escaped.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, (_, term, def) => {
+        const safeTerm = term;
+        const safeDef = def.replace(/"/g, """);
+        return `<span class="term" data-term="${safeTerm}" data-def="${safeDef}">${safeTerm}<span class="term-icon">i</span></span>`;
+      });
+    }
+
+    function showTermPopup(term, def) {
+      document.getElementById("term-title").textContent = term;
+      document.getElementById("term-body").textContent = def;
+      document.getElementById("term-popup").classList.remove("hidden");
+    }
+
+    function hideTermPopup() {
+      document.getElementById("term-popup").classList.add("hidden");
+    }
+
+    document.getElementById("close-term").onclick = hideTermPopup;
+    document.addEventListener("click", (e) => {
+      const termEl = e.target.closest(".term");
+      if (termEl) {
+        e.stopPropagation();
+        showTermPopup(termEl.dataset.term, termEl.dataset.def);
+        return;
+      }
+      const popup = document.getElementById("term-popup");
+      if (!popup.contains(e.target)) hideTermPopup();
+    });
 
     const compass = document.getElementById("compass");
     parties.forEach(p => {
@@ -459,8 +559,9 @@
     };
 
     function showQuestion() {
+      hideTermPopup();
       const q = currentQueue[currentQ];
-      document.getElementById("question-text").textContent = q.text;
+      document.getElementById("question-text").innerHTML = renderQuestionText(q.text);
 
       if (phase === "specific") {
         document.getElementById("phase-info").textContent = `Fråga ${currentQ + 1} av ${currentQueue.length} (viktiga för ${chosenParty.name})`;
@@ -520,6 +621,7 @@
     }
 
     function showResults(fromSaved = false) {
+      hideTermPopup();
       document.getElementById("step-questions").classList.add("hidden");
       document.getElementById("step-continue").classList.add("hidden");
       document.getElementById("step-results").classList.remove("hidden");
