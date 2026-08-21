@@ -172,9 +172,9 @@ window.partyQuestions = {
     },
     {
       id: "q-1815",
-      text: "Bör föräldraledigheten vara mer jämnt delad mellan mammor och pappor (mer öronmärkta månader)?",
+      text: "Bör föräldraledigheten vara mer jämnt delad mellan mammor och pappor (mer [[öronmärkta månader]])?",
       options: [
-        { label: "Ja, mer ska vara öronmärkt för respektive förälder", scores: { s: 2, v: 1, mp: 2, nyans: 0, c: 1, l: 1, m: 0, kd: -1, sd: -1, med: 0, afs: -2 } },
+        { label: "Ja, mer ska vara [[öronmärkta månader]] för respektive förälder", scores: { s: 2, v: 1, mp: 2, nyans: 0, c: 1, l: 1, m: 0, kd: -1, sd: -1, med: 0, afs: -2 } },
         { label: "Nej, familjerna ska få bestämma själva", scores: { s: -1, v: -1, mp: -1, nyans: 0, c: 0, l: 0, m: 1, kd: 2, sd: 2, med: 1, afs: 2 } },
         { label: "Nuvarande nivå är lagom", scores: { s: 1, v: 0, mp: 0, nyans: 0, c: 1, l: 1, m: 1, kd: 1, sd: 1, med: 1, afs: 0 } }
       ]
