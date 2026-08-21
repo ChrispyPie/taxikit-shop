@@ -8,10 +8,10 @@ window.partyQuestions = {
       id: "q-41ae",
       text: "En person kör rattfull och dödar en annan människa. Vad bör minimistraffet vara?",
       options: [
-        { label: "4 år", scores: { sd: -1, afs: -1, m: 0, kd: 0, med: 0, l: 1, c: 1, s: 1, mp: 1, v: 1, nyans: 1 } },
-        { label: "8 år eller mer", scores: { sd: 2, afs: 2, m: 2, kd: 1, med: 2, l: 0, c: -1, s: -1, mp: -2, v: -2, nyans: -1 } },
-        { label: "2 år", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -1, l: 0, c: 0, s: 1, mp: 1, v: 2, nyans: 1 } },
-        { label: "6 år", scores: { sd: 1, afs: 1, m: 1, kd: 1, med: 1, l: 0, c: 0, s: 0, mp: -1, v: -1, nyans: 0 } }
+        { label: "2 år", scores: { sd: -2, afs: -2, m: -2, kd: -2, med: -2, l: -1, c: 0, s: 0, mp: 1, v: 2, nyans: 1 } },
+        { label: "4 år", scores: { sd: -1, afs: -1, m: -1, kd: 0, med: -1, l: 0, c: 1, s: 2, mp: 2, v: 1, nyans: 1 } },
+        { label: "6 år", scores: { sd: 1, afs: 1, m: 1, kd: 1, med: 1, l: 1, c: 0, s: 0, mp: -1, v: -1, nyans: 0 } },
+        { label: "8 år eller mer", scores: { sd: 2, afs: 2, m: 2, kd: 2, med: 2, l: 1, c: -1, s: -1, mp: -2, v: -2, nyans: -1 } }
       ]
     },
     {
