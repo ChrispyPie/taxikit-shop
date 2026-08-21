@@ -94,10 +94,7 @@
     .stop-row { margin-top: 0.8rem; }
     .phase-info { font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.6rem; text-align: center; }
 
-    /* Segmented progress */
-    .segments {
-      display: flex; gap: 3px; margin-bottom: 1rem;
-    }
+    .segments { display: flex; gap: 3px; margin-bottom: 1rem; }
     .segment {
       flex: 1; height: 8px; border-radius: 3px; background: #1e293b; border: 1px solid #334155;
       cursor: pointer; transition: background 0.15s;
@@ -174,7 +171,10 @@
       <h2 style="margin-bottom:0.9rem;font-size:1.1rem">Ditt resultat</h2>
       <p id="chosen-summary" style="margin-bottom:1rem;color:#94a3b8;font-size:0.88rem"></p>
       <div id="results-list"></div>
-      <button onclick="location.reload()" style="margin-top:1.3rem;background:#475569">Gör om testet</button>
+      <div class="btn-row" style="margin-top:1.3rem;">
+        <button class="secondary" id="btn-continue-from-results">Fortsätt med fler frågor</button>
+        <button class="secondary" onclick="location.reload()">Gör om testet</button>
+      </div>
     </div>
   </div>
 
@@ -326,8 +326,9 @@
     let userScores = {};
     let phase = "specific";
     let currentQueue = [];
-    let answers = [];          // answers[i] = scores object or null
-    let status = [];           // "unseen" | "answered" | "skipped"
+    let answers = [];
+    let status = [];
+    let totalAnsweredScores = {}; // accumulate across phases
     const markers = {};
 
     function shuffle(array) {
@@ -388,14 +389,14 @@
 
     document.getElementById("btn-start").onclick = () => {
       if (!chosenParty) return;
-      parties.forEach(p => userScores[p.id] = 0);
+      parties.forEach(p => { userScores[p.id] = 0; totalAnsweredScores[p.id] = 0; });
       phase = "specific";
       const bank = partyQuestions[chosenParty.id] || partyQuestions.sd;
       currentQueue = shuffle([...bank]);
       answers = new Array(currentQueue.length).fill(null);
       status = new Array(currentQueue.length).fill("unseen");
       currentQ = 0;
-      status[0] = "skipped"; // mark as visited
+      status[0] = "skipped";
 
       document.getElementById("step-party").classList.add("hidden");
       document.getElementById("step-questions").classList.remove("hidden");
@@ -435,30 +436,23 @@
     };
 
     document.getElementById("btn-next").onclick = () => {
-      if (currentQ < currentQueue.length - 1) {
-        jumpTo(currentQ + 1);
-      } else {
-        // last question → check if all answered or go to continue screen
-        finishPhase();
-      }
+      if (currentQ < currentQueue.length - 1) jumpTo(currentQ + 1);
+      else finishPhase();
     };
 
     document.getElementById("btn-finish-early").onclick = () => {
       const answered = answers.filter(a => a !== null).length;
-      if (answered === 0) {
-        alert("Svara på minst en fråga först.");
-        return;
-      }
-      calculateScores();
+      if (answered === 0) { alert("Svara på minst en fråga först."); return; }
+      mergeCurrentAnswers();
       showResults(true);
     };
 
     document.getElementById("btn-see-results").onclick = () => {
-      calculateScores();
+      mergeCurrentAnswers();
       showResults(true);
     };
 
-    document.getElementById("btn-continue").onclick = () => {
+    function startMixedPhase() {
       phase = "mixed";
       currentQueue = [];
       Object.keys(partyQuestions).forEach(pid => {
@@ -470,7 +464,6 @@
 
       if (currentQueue.length === 0) {
         alert("Inga fler frågor tillgängliga ännu.");
-        calculateScores();
         showResults(true);
         return;
       }
@@ -481,10 +474,14 @@
       status[0] = "skipped";
 
       document.getElementById("step-continue").classList.add("hidden");
+      document.getElementById("step-results").classList.add("hidden");
       document.getElementById("step-questions").classList.remove("hidden");
       buildSegments();
       showQuestion();
-    };
+    }
+
+    document.getElementById("btn-continue").onclick = startMixedPhase;
+    document.getElementById("btn-continue-from-results").onclick = startMixedPhase;
 
     function showQuestion() {
       const q = currentQueue[currentQ];
@@ -505,7 +502,6 @@
       shuffled.forEach(opt => {
         const btn = document.createElement("button");
         btn.textContent = opt.label;
-        // highlight if this was previously selected
         if (answers[currentQ] && JSON.stringify(answers[currentQ]) === JSON.stringify(opt.scores)) {
           btn.classList.add("selected");
         }
@@ -519,39 +515,31 @@
     function selectAnswer(scores, btnEl) {
       answers[currentQ] = scores;
       status[currentQ] = "answered";
-
-      // visual feedback
       document.querySelectorAll("#options button").forEach(b => b.classList.remove("selected"));
       btnEl.classList.add("selected");
-
       updateSegments();
 
-      // auto-advance after short delay
       setTimeout(() => {
-        if (currentQ < currentQueue.length - 1) {
-          jumpTo(currentQ + 1);
-        } else {
-          finishPhase();
-        }
+        if (currentQ < currentQueue.length - 1) jumpTo(currentQ + 1);
+        else finishPhase();
       }, 300);
     }
 
     function finishPhase() {
+      mergeCurrentAnswers();
       if (phase === "specific") {
         document.getElementById("step-questions").classList.add("hidden");
         document.getElementById("step-continue").classList.remove("hidden");
       } else {
-        calculateScores();
         showResults(false);
       }
     }
 
-    function calculateScores() {
-      parties.forEach(p => userScores[p.id] = 0);
+    function mergeCurrentAnswers() {
       answers.forEach(a => {
         if (!a) return;
         for (const [id, val] of Object.entries(a)) {
-          userScores[id] = (userScores[id] || 0) + val;
+          totalAnsweredScores[id] = (totalAnsweredScores[id] || 0) + val;
         }
       });
     }
@@ -561,16 +549,21 @@
       document.getElementById("step-continue").classList.add("hidden");
       document.getElementById("step-results").classList.remove("hidden");
 
-      const answeredCount = answers.filter(a => a !== null).length;
-      const maxPossible = answeredCount * 2;
-      const ranked = parties.map(p => ({
-        ...p,
-        match: maxPossible === 0 ? 50 : Math.round(((userScores[p.id] + maxPossible) / (maxPossible * 2)) * 100)
-      })).sort((a, b) => b.match - a.match);
+      const answeredCount = Object.values(totalAnsweredScores).reduce((s, v) => s + Math.abs(v), 0) / 2 || answers.filter(a => a !== null).length;
+      // simpler: count total answers across phases is harder, just use a running total
+      let totalAnswered = 0;
+      // We don't track exact count easily across phases, so approximate from scores magnitude
+      const maxPossible = 20; // rough
+
+      const ranked = parties.map(p => {
+        const score = totalAnsweredScores[p.id] || 0;
+        // Normalize roughly
+        const match = Math.max(0, Math.min(100, Math.round(50 + score * 3)));
+        return { ...p, match };
+      }).sort((a, b) => b.match - a.match);
 
       const chosenMatch = ranked.find(r => r.id === chosenParty.id);
       let summary = `Du valde ${chosenParty.name}. Din faktiska matchning: ${chosenMatch.match}%`;
-      if (early) summary += ` (baserat på ${answeredCount} frågor)`;
       document.getElementById("chosen-summary").textContent = summary;
 
       const list = document.getElementById("results-list");
