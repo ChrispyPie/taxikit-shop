@@ -215,6 +215,7 @@
     ];
 
     const questions = [
+      // === SD-focused (first 10) ===
       {
         text: "En person kör rattfull och dödar en annan människa. Vad bör minimistraffet vara?",
         options: [
@@ -295,6 +296,88 @@
           { label: "Mycket restriktiv", scores: { sd: 2, afs: 2, m: 1, kd: 1, med: 2, l: 0, c: -1, s: -1, mp: -2, v: -2, nyans: -1 } },
           { label: "Måttlig", scores: { sd: 0, afs: 0, m: 1, kd: 1, med: 0, l: 1, c: 1, s: 1, mp: 0, v: 0, nyans: 0 } }
         ]
+      },
+
+      // === Socialdemokraterna-focused (next 10) ===
+      {
+        text: "Bör skatten på höga inkomster höjas för att finansiera mer välfärd?",
+        options: [
+          { label: "Ja, tydligt", scores: { s: 2, v: 2, mp: 1, nyans: 1, c: 0, l: -1, m: -2, kd: -1, sd: -1, med: -2, afs: -2 } },
+          { label: "Nej, skatten är redan hög nog", scores: { s: -2, v: -2, mp: -1, nyans: -1, c: 0, l: 1, m: 2, kd: 1, sd: 1, med: 2, afs: 1 } },
+          { label: "Bara marginellt", scores: { s: 1, v: 1, mp: 1, nyans: 0, c: 1, l: 0, m: -1, kd: 0, sd: 0, med: -1, afs: 0 } }
+        ]
+      },
+      {
+        text: "Hur viktig är den svenska modellen med starka fackförbund och kollektivavtal?",
+        options: [
+          { label: "Mycket viktig, den ska stärkas", scores: { s: 2, v: 2, mp: 1, nyans: 1, c: 0, l: -1, m: -1, kd: 0, sd: 0, med: -2, afs: -1 } },
+          { label: "Den fungerar men behöver moderniseras", scores: { s: 1, v: 0, mp: 1, nyans: 0, c: 1, l: 1, m: 1, kd: 1, sd: 1, med: 0, afs: 0 } },
+          { label: "Den är föråldrad och begränsar företagen", scores: { s: -2, v: -2, mp: -1, nyans: -1, c: 0, l: 1, m: 2, kd: 0, sd: 0, med: 2, afs: 1 } }
+        ]
+      },
+      {
+        text: "Bör vinster i välfärden (skola, vård, omsorg) begränsas kraftigt eller förbjudas?",
+        options: [
+          { label: "Ja, vinster bör förbjudas eller kraftigt begränsas", scores: { s: 2, v: 2, mp: 2, nyans: 1, c: -1, l: -1, m: -2, kd: -1, sd: 0, med: -2, afs: 0 } },
+          { label: "Nej, valfrihet och konkurrens är bra", scores: { s: -2, v: -2, mp: -2, nyans: -1, c: 1, l: 2, m: 2, kd: 1, sd: 0, med: 2, afs: 0 } },
+          { label: "Vinster är okej om kvaliteten är hög", scores: { s: 0, v: -1, mp: 0, nyans: 0, c: 1, l: 1, m: 1, kd: 1, sd: 1, med: 1, afs: 1 } }
+        ]
+      },
+      {
+        text: "Hur generös bör a-kassan och sjukförsäkringen vara?",
+        options: [
+          { label: "Högre ersättningsnivåer än idag", scores: { s: 2, v: 2, mp: 1, nyans: 1, c: 0, l: -1, m: -2, kd: -1, sd: -1, med: -2, afs: -1 } },
+          { label: "Nuvarande nivå är ungefär lagom", scores: { s: 1, v: 0, mp: 0, nyans: 0, c: 1, l: 1, m: 0, kd: 1, sd: 1, med: 0, afs: 0 } },
+          { label: "Lägre ersättning och mer krav på aktivitet", scores: { s: -2, v: -2, mp: -1, nyans: -1, c: 0, l: 1, m: 2, kd: 1, sd: 1, med: 2, afs: 1 } }
+        ]
+      },
+      {
+        text: "Bör staten ta ett större ansvar för att skapa jobb i områden med hög arbetslöshet?",
+        options: [
+          { label: "Ja, genom offentliga investeringar och subventionerade jobb", scores: { s: 2, v: 2, mp: 1, nyans: 1, c: 0, l: 0, m: -1, kd: 0, sd: 0, med: -2, afs: -1 } },
+          { label: "Nej, marknaden och sänkta skatter är bättre", scores: { s: -2, v: -2, mp: -1, nyans: -1, c: 0, l: 1, m: 2, kd: 1, sd: 1, med: 2, afs: 1 } },
+          { label: "En blandning av båda", scores: { s: 1, v: 0, mp: 1, nyans: 0, c: 1, l: 1, m: 0, kd: 1, sd: 1, med: 0, afs: 0 } }
+        ]
+      },
+      {
+        text: "Hur ska Sverige hantera klimatet – hur högt ska priset på utsläpp vara?",
+        options: [
+          { label: "Högre än idag, även om det kostar jobb på kort sikt", scores: { s: 1, v: 1, mp: 2, nyans: 0, c: 1, l: 1, m: 0, kd: 0, sd: -1, med: -1, afs: -2 } },
+          { label: "Nuvarande nivå är lagom", scores: { s: 1, v: 0, mp: 0, nyans: 0, c: 1, l: 1, m: 1, kd: 1, sd: 1, med: 0, afs: 0 } },
+          { label: "Lägre – konkurrenskraft och jobb är viktigare just nu", scores: { s: -1, v: -1, mp: -2, nyans: 0, c: 0, l: 0, m: 1, kd: 1, sd: 2, med: 2, afs: 2 } }
+        ]
+      },
+      {
+        text: "Bör det vara lättare eller svårare att säga upp anställda?",
+        options: [
+          { label: "Svårare – anställningstryggheten ska stärkas", scores: { s: 2, v: 2, mp: 1, nyans: 1, c: -1, l: -1, m: -2, kd: -1, sd: 0, med: -2, afs: 0 } },
+          { label: "Lättare – företagen behöver mer flexibilitet", scores: { s: -2, v: -2, mp: -1, nyans: -1, c: 1, l: 1, m: 2, kd: 1, sd: 0, med: 2, afs: 1 } },
+          { label: "Nuvarande balans är ungefär rätt", scores: { s: 1, v: 0, mp: 0, nyans: 0, c: 1, l: 1, m: 0, kd: 1, sd: 1, med: 0, afs: 0 } }
+        ]
+      },
+      {
+        text: "Hur mycket ska staten styra över boendet (hyresreglering, byggkrav, bostadsbidrag)?",
+        options: [
+          { label: "Mer styrning för att hålla hyror nere och bygga mer hyresrätter", scores: { s: 2, v: 2, mp: 1, nyans: 1, c: 0, l: -1, m: -2, kd: -1, sd: 0, med: -2, afs: 0 } },
+          { label: "Mindre styrning – marknaden ska styra mer", scores: { s: -2, v: -2, mp: -1, nyans: -1, c: 1, l: 1, m: 2, kd: 1, sd: 1, med: 2, afs: 1 } },
+          { label: "En blandning", scores: { s: 1, v: 0, mp: 1, nyans: 0, c: 1, l: 1, m: 0, kd: 1, sd: 1, med: 0, afs: 0 } }
+        ]
+      },
+      {
+        text: "Bör föräldraledigheten vara mer jämnt delad mellan mammor och pappor (mer öronmärkta månader)?",
+        options: [
+          { label: "Ja, mer ska vara öronmärkt för respektive förälder", scores: { s: 2, v: 1, mp: 2, nyans: 0, c: 1, l: 1, m: 0, kd: -1, sd: -1, med: 0, afs: -2 } },
+          { label: "Nej, familjerna ska få bestämma själva", scores: { s: -1, v: -1, mp: -1, nyans: 0, c: 0, l: 0, m: 1, kd: 2, sd: 2, med: 1, afs: 2 } },
+          { label: "Nuvarande nivå är lagom", scores: { s: 1, v: 0, mp: 0, nyans: 0, c: 1, l: 1, m: 1, kd: 1, sd: 1, med: 1, afs: 0 } }
+        ]
+      },
+      {
+        text: "Hur viktigt är det att behålla och utveckla den generella välfärden (samma system för alla) istället för mer behovsprövade bidrag?",
+        options: [
+          { label: "Mycket viktigt – generella system skapar sammanhållning", scores: { s: 2, v: 2, mp: 1, nyans: 1, c: 0, l: 0, m: -1, kd: 0, sd: 0, med: -1, afs: -1 } },
+          { label: "Mer behovsprövning är bättre – pengarna ska gå till dem som verkligen behöver", scores: { s: -1, v: -1, mp: 0, nyans: 0, c: 1, l: 1, m: 2, kd: 1, sd: 1, med: 2, afs: 1 } },
+          { label: "En blandning av båda", scores: { s: 1, v: 0, mp: 1, nyans: 0, c: 1, l: 1, m: 0, kd: 1, sd: 1, med: 0, afs: 0 } }
+        ]
       }
     ];
 
@@ -303,7 +386,6 @@
     let userScores = {};
     const markers = {};
 
-    // Fisher-Yates shuffle
     function shuffle(array) {
       const arr = [...array];
       for (let i = arr.length - 1; i > 0; i--) {
@@ -382,7 +464,6 @@
       const optionsDiv = document.getElementById("options");
       optionsDiv.innerHTML = "";
 
-      // Shuffle options every time the question is shown
       const shuffled = shuffle(q.options);
       shuffled.forEach(opt => {
         const btn = document.createElement("button");
