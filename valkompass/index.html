@@ -15,6 +15,8 @@
     button:hover { background: #2563eb; }
     button.secondary { background: #475569; }
     button.secondary:hover { background: #64748b; }
+    button.danger { background: #7f1d1d; }
+    button.danger:hover { background: #991b1b; }
     .party-btn { background: #334155; margin-bottom: 0.35rem; text-align: left; display: flex; justify-content: space-between; align-items: center; }
     .party-btn:hover { background: #475569; }
     .party-btn .pct { font-size: 0.78rem; color: #94a3b8; }
@@ -143,6 +145,8 @@
     .selection-info strong { color: #fbbf24; }
     .btn-row { display: flex; gap: 0.6rem; margin-top: 0.6rem; }
     .btn-row button { flex: 1; }
+
+    .stop-row { margin-top: 1.2rem; }
   </style>
 </head>
 <body>
@@ -189,6 +193,9 @@
       <div class="progress"><div class="progress-bar" id="progress"></div></div>
       <div class="question" id="question-text"></div>
       <div class="options" id="options"></div>
+      <div class="stop-row">
+        <button class="secondary" id="btn-finish-early">Avsluta och se resultat</button>
+      </div>
     </div>
 
     <div id="step-results" class="card hidden">
@@ -215,7 +222,6 @@
     ];
 
     const questions = [
-      // === SD-focused (first 10) ===
       {
         text: "En person kör rattfull och dödar en annan människa. Vad bör minimistraffet vara?",
         options: [
@@ -297,8 +303,6 @@
           { label: "Måttlig", scores: { sd: 0, afs: 0, m: 1, kd: 1, med: 0, l: 1, c: 1, s: 1, mp: 0, v: 0, nyans: 0 } }
         ]
       },
-
-      // === Socialdemokraterna-focused (next 10) ===
       {
         text: "Bör skatten på höga inkomster höjas för att finansiera mer välfärd?",
         options: [
@@ -384,6 +388,7 @@
     let chosenParty = null;
     let currentQ = 0;
     let userScores = {};
+    let answeredCount = 0;
     const markers = {};
 
     function shuffle(array) {
@@ -451,9 +456,18 @@
       if (!chosenParty) return;
       parties.forEach(p => userScores[p.id] = 0);
       currentQ = 0;
+      answeredCount = 0;
       document.getElementById("step-party").classList.add("hidden");
       document.getElementById("step-questions").classList.remove("hidden");
       showQuestion();
+    };
+
+    document.getElementById("btn-finish-early").onclick = () => {
+      if (answeredCount === 0) {
+        alert("Svara på minst en fråga först.");
+        return;
+      }
+      showResults(true);
     };
 
     function showQuestion() {
@@ -477,23 +491,28 @@
       for (const [id, val] of Object.entries(scores)) {
         userScores[id] = (userScores[id] || 0) + val;
       }
+      answeredCount++;
       currentQ++;
       if (currentQ < questions.length) showQuestion();
-      else showResults();
+      else showResults(false);
     }
 
-    function showResults() {
+    function showResults(early) {
       document.getElementById("step-questions").classList.add("hidden");
       document.getElementById("step-results").classList.remove("hidden");
-      const maxPossible = questions.length * 2;
+
+      const maxPossible = answeredCount * 2;
       const ranked = parties.map(p => ({
         ...p,
-        match: Math.round(((userScores[p.id] + maxPossible) / (maxPossible * 2)) * 100)
+        match: maxPossible === 0 ? 50 : Math.round(((userScores[p.id] + maxPossible) / (maxPossible * 2)) * 100)
       })).sort((a, b) => b.match - a.match);
 
       const chosenMatch = ranked.find(r => r.id === chosenParty.id);
-      document.getElementById("chosen-summary").textContent =
-        `Du valde ${chosenParty.name}. Din faktiska matchning: ${chosenMatch.match}%`;
+      let summary = `Du valde ${chosenParty.name}. Din faktiska matchning: ${chosenMatch.match}%`;
+      if (early) {
+        summary += ` (baserat på ${answeredCount} av ${questions.length} frågor)`;
+      }
+      document.getElementById("chosen-summary").textContent = summary;
 
       const list = document.getElementById("results-list");
       list.innerHTML = "";
