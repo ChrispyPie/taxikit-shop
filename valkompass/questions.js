@@ -239,11 +239,12 @@ window.partyQuestions = {
     },
     {
       id: "q-7671",
-      text: "Hur mycket bör Sverige satsa på försvaret de kommande åren?",
+      text: "Om Sverige måste välja: vad prioriterar du främst de kommande åren?",
       options: [
-        { label: "Betydligt mer än idag", scores: { m: 2, kd: 2, sd: 2, med: 1, afs: 1, l: 1, c: 1, s: 1, v: -1, mp: -1, nyans: 0 } },
-        { label: "Ungefär nuvarande nivå", scores: { m: 0, kd: 0, sd: 0, med: 0, afs: 0, l: 0, c: 0, s: 1, v: 1, mp: 1, nyans: 0 } },
-        { label: "Mindre – pengarna behövs bättre annorstädes", scores: { m: -2, kd: -2, sd: -2, med: -1, afs: -1, l: -1, c: -1, s: -1, v: 2, mp: 1, nyans: 0 } }
+        { label: "Starkare försvar, även om det betyder högre skatt eller mindre till annat", scores: { m: 2, kd: 2, sd: 2, med: 1, afs: 1, l: 1, c: 1, s: 1, v: -1, mp: -1, nyans: 0 } },
+        { label: "Lägre skatt och mer fokus på ekonomi och jobb", scores: { m: 1, med: 2, l: 1, c: 1, kd: 0, sd: 0, afs: 0, s: -1, v: -2, mp: -1, nyans: 0 } },
+        { label: "Mer till vård, skola och socialt stöd", scores: { m: -1, kd: 0, sd: 0, med: -1, afs: 0, l: 0, c: 0, s: 2, v: 2, mp: 1, nyans: 1 } },
+        { label: "Ungefär som nu – ingen stor förändring", scores: { m: 0, kd: 0, sd: 0, med: 0, afs: 0, l: 0, c: 0, s: 1, v: 1, mp: 1, nyans: 0 } }
       ]
     },
     {
