@@ -283,5 +283,98 @@ window.partyQuestions = {
         { label: "Både utbyggnad av planerbar el och tillfälliga stöd", scores: { m: 1, kd: 1, sd: 1, med: 1, afs: 0, l: 1, c: 1, s: 1, v: 0, mp: 0, nyans: 0 } }
       ]
     }
+  ],
+
+  v: [
+    {
+      id: "q-v01a",
+      text: "Bör vinster i välfärden (skola, vård, omsorg) förbjudas?",
+      options: [
+        { label: "Ja, förbjudas helt", scores: { v: 2, s: 1, mp: 2, nyans: 1, c: -1, l: -2, m: -2, kd: -1, sd: 0, med: -2, afs: 0 } },
+        { label: "Nej, vinster är okej om kvaliteten är hög", scores: { v: -2, s: -1, mp: -2, nyans: -1, c: 1, l: 2, m: 2, kd: 1, sd: 0, med: 2, afs: 0 } },
+        { label: "Kraftigt begränsas, men inte förbjudas", scores: { v: 1, s: 1, mp: 1, nyans: 0, c: 0, l: -1, m: -1, kd: 0, sd: 0, med: -1, afs: 0 } }
+      ]
+    },
+    {
+      id: "q-v02b",
+      text: "Bör skatten på de högsta inkomsterna höjas tydligt?",
+      options: [
+        { label: "Ja", scores: { v: 2, s: 2, mp: 1, nyans: 1, c: 0, l: -1, m: -2, kd: -1, sd: -1, med: -2, afs: -1 } },
+        { label: "Nej", scores: { v: -2, s: -2, mp: -1, nyans: -1, c: 0, l: 1, m: 2, kd: 1, sd: 1, med: 2, afs: 1 } },
+        { label: "Bara marginellt", scores: { v: 0, s: 1, mp: 0, nyans: 0, c: 1, l: 0, m: -1, kd: 0, sd: 0, med: -1, afs: 0 } }
+      ]
+    },
+    {
+      id: "q-v03c",
+      text: "Hur starkt ska anställningsskyddet vara?",
+      options: [
+        { label: "Starkare än idag – svårare att säga upp", scores: { v: 2, s: 2, mp: 1, nyans: 1, c: -1, l: -1, m: -2, kd: -1, sd: 0, med: -2, afs: 0 } },
+        { label: "Svagare – företagen behöver mer flexibilitet", scores: { v: -2, s: -2, mp: -1, nyans: -1, c: 1, l: 1, m: 2, kd: 1, sd: 0, med: 2, afs: 1 } },
+        { label: "Ungefär som idag", scores: { v: 0, s: 1, mp: 0, nyans: 0, c: 1, l: 1, m: 0, kd: 1, sd: 1, med: 0, afs: 0 } }
+      ]
+    },
+    {
+      id: "q-v04d",
+      text: "Bör Sverige bygga ut kärnkraften?",
+      options: [
+        { label: "Ja, kraftigt", scores: { v: -2, mp: -2, s: 0, nyans: 0, c: 0, l: 1, m: 2, kd: 2, sd: 2, med: 2, afs: 1 } },
+        { label: "Nej, fokusera på vind, sol och lagring", scores: { v: 2, mp: 2, s: 1, nyans: 0, c: 1, l: 0, m: -2, kd: -1, sd: -2, med: -2, afs: -2 } },
+        { label: "Behåll befintlig men bygg inte ut kraftigt", scores: { v: 0, mp: -1, s: 1, nyans: 0, c: 1, l: 1, m: 1, kd: 1, sd: 1, med: 1, afs: 0 } }
+      ]
+    },
+    {
+      id: "q-v05e",
+      text: "Hur generös bör asyl- och invandringspolitiken vara?",
+      options: [
+        { label: "Mer generös än idag", scores: { v: 2, mp: 2, s: 1, nyans: 2, c: 1, l: 0, m: -1, kd: -1, sd: -2, med: -2, afs: -2 } },
+        { label: "Tydligt mer restriktiv", scores: { v: -2, mp: -2, s: -1, nyans: -1, c: -1, l: 0, m: 1, kd: 1, sd: 2, med: 2, afs: 2 } },
+        { label: "Ungefär som idag", scores: { v: 0, mp: 0, s: 1, nyans: 0, c: 1, l: 1, m: 0, kd: 0, sd: -1, med: -1, afs: -1 } }
+      ]
+    },
+    {
+      id: "q-v06f",
+      text: "Bör staten ta över fler företag inom viktiga samhällssektorer (t.ex. el, tåg, apotek)?",
+      options: [
+        { label: "Ja, mer offentlig ägande", scores: { v: 2, s: 1, mp: 1, nyans: 0, c: -1, l: -2, m: -2, kd: -1, sd: 0, med: -2, afs: 0 } },
+        { label: "Nej, privat ägande fungerar bättre", scores: { v: -2, s: -1, mp: -1, nyans: 0, c: 1, l: 2, m: 2, kd: 1, sd: 0, med: 2, afs: 1 } },
+        { label: "Bara i vissa fall där marknaden misslyckas", scores: { v: 0, s: 1, mp: 1, nyans: 0, c: 1, l: 0, m: 0, kd: 1, sd: 1, med: 0, afs: 0 } }
+      ]
+    },
+    {
+      id: "q-v07g",
+      text: "Hur högt ska priset på koldioxidutsläpp vara?",
+      options: [
+        { label: "Tydligt högre – klimatet går före kortsiktiga jobb", scores: { v: 2, mp: 2, s: 1, nyans: 0, c: 1, l: 1, m: 0, kd: 0, sd: -1, med: -1, afs: -2 } },
+        { label: "Lägre – jobb och konkurrenskraft är viktigare just nu", scores: { v: -2, mp: -2, s: -1, nyans: 0, c: 0, l: 0, m: 1, kd: 1, sd: 2, med: 2, afs: 2 } },
+        { label: "Ungefär som idag", scores: { v: 0, mp: 0, s: 1, nyans: 0, c: 1, l: 1, m: 1, kd: 1, sd: 1, med: 0, afs: 0 } }
+      ]
+    },
+    {
+      id: "q-v08h",
+      text: "Bör det bli svårare att hyra ut i andra hand och spekulera i bostäder?",
+      options: [
+        { label: "Ja, strängare regler mot spekulation", scores: { v: 2, s: 1, mp: 1, nyans: 0, c: 0, l: -1, m: -1, kd: 0, sd: 0, med: -1, afs: 0 } },
+        { label: "Nej, fri marknad ger fler bostäder", scores: { v: -2, s: -1, mp: -1, nyans: 0, c: 1, l: 1, m: 2, kd: 0, sd: 0, med: 2, afs: 1 } },
+        { label: "Vissa begränsningar, men inte för hårda", scores: { v: 0, s: 1, mp: 0, nyans: 0, c: 1, l: 1, m: 0, kd: 1, sd: 1, med: 0, afs: 0 } }
+      ]
+    },
+    {
+      id: "q-v09i",
+      text: "Hur ska Sverige främst minska klyftorna mellan rika och fattiga?",
+      options: [
+        { label: "Högre skatter på kapital och höga inkomster + mer bidrag", scores: { v: 2, s: 2, mp: 1, nyans: 1, c: 0, l: -1, m: -2, kd: -1, sd: -1, med: -2, afs: -1 } },
+        { label: "Främst genom mer jobb och lägre skatt på arbete", scores: { v: -2, s: -1, mp: -1, nyans: 0, c: 1, l: 1, m: 2, kd: 1, sd: 1, med: 2, afs: 1 } },
+        { label: "En blandning av båda", scores: { v: 0, s: 1, mp: 1, nyans: 0, c: 1, l: 1, m: 0, kd: 1, sd: 0, med: 0, afs: 0 } }
+      ]
+    },
+    {
+      id: "q-v10j",
+      text: "Bör militärutgifterna öka de kommande åren?",
+      options: [
+        { label: "Ja, tydligt", scores: { v: -2, mp: -1, s: 0, nyans: 0, c: 1, l: 1, m: 2, kd: 2, sd: 2, med: 1, afs: 1 } },
+        { label: "Nej, pengarna behövs mer till välfärd", scores: { v: 2, mp: 1, s: 1, nyans: 1, c: 0, l: 0, m: -1, kd: -1, sd: -1, med: -1, afs: 0 } },
+        { label: "Måttlig ökning", scores: { v: 0, mp: 0, s: 1, nyans: 0, c: 1, l: 1, m: 1, kd: 1, sd: 1, med: 1, afs: 0 } }
+      ]
+    }
   ]
 };
