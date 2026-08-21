@@ -180,13 +180,13 @@
     </div>
   </div>
 
-  <script src="questions.js"></script>
+  <!-- Absolut sökväg så det fungerar även utan trailing slash -->
+  <script src="/valkompass/questions.js"></script>
 
   <script>
-    // Säkerställ att frågorna laddats
     const partyQuestions = window.partyQuestions;
     if (!partyQuestions) {
-      alert("Kunde inte ladda frågorna. Ladda om sidan.");
+      console.error("partyQuestions saknas – questions.js laddades inte");
     }
 
     const parties = [
@@ -306,7 +306,7 @@
     document.getElementById("btn-start").onclick = () => {
       if (!chosenParty) return;
       if (!partyQuestions) {
-        alert("Frågorna har inte laddats. Ladda om sidan.");
+        alert("Frågorna har inte laddats. Ladda om sidan (gärna med rensad cache).");
         return;
       }
 
