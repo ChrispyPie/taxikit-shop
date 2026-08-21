@@ -21,6 +21,7 @@
     button:disabled { opacity: 0.4; cursor: not-allowed; }
     .party-btn { background: #334155; margin-bottom: 0.35rem; text-align: left; display: flex; justify-content: space-between; align-items: center; }
     .party-btn:hover { background: #475569; }
+    .party-btn.active { background: #1d4ed8; border: 1px solid #60a5fa; }
     .party-btn .pct { font-size: 0.78rem; color: #94a3b8; }
     .party-btn .saved { font-size: 0.72rem; color: #4ade80; margin-left: 0.4rem; }
     .hidden { display: none !important; }
@@ -108,28 +109,12 @@
     .segment.skipped { background: #ef4444; border-color: #dc2626; }
     .segment.current { outline: 2px solid #fbbf24; outline-offset: 1px; }
 
-    /* Term explanations */
+    /* Diskreta klickbara ord */
     .term {
-      color: #93c5fd;
-      border-bottom: 1px dotted #60a5fa;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .term-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 15px;
-      height: 15px;
-      border-radius: 50%;
-      background: #334155;
-      border: 1px solid #60a5fa;
-      color: #93c5fd;
-      font-size: 0.65rem;
-      font-weight: 700;
-      margin-left: 2px;
-      vertical-align: middle;
-      line-height: 1;
+      font-weight: 600;
+      color: inherit;
+      border-bottom: 1px dotted #94a3b8;
+      cursor: help;
     }
     .term-popup {
       position: fixed;
@@ -249,13 +234,12 @@
     <span id="term-body"></span>
   </div>
 
+  <script src="/valkompass/glossary.js"></script>
   <script src="/valkompass/questions.js"></script>
 
   <script>
     const partyQuestions = window.partyQuestions;
-    if (!partyQuestions) {
-      console.error("partyQuestions saknas – questions.js laddades inte");
-    }
+    const glossary = window.glossary || {};
 
     const parties = [
       { id: "s",    name: "Socialdemokraterna",     short: "S",   pct: "30,3 %", x: 32, y: 48 },
@@ -314,16 +298,20 @@
       document.getElementById("subtitle").textContent = text;
     }
 
-    // Parse [[term|definition]] into clickable spans
-    function renderQuestionText(raw) {
-      const escaped = raw
+    function escapeHtml(str) {
+      return String(str)
         .replace(/&/g, "&")
         .replace(/</g, "<")
-        .replace(/>/g, ">");
-      return escaped.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, (_, term, def) => {
-        const safeTerm = term;
-        const safeDef = def.replace(/"/g, """);
-        return `<span class="term" data-term="${safeTerm}" data-def="${safeDef}">${safeTerm}<span class="term-icon">i</span></span>`;
+        .replace(/>/g, ">")
+        .replace(/"/g, """);
+    }
+
+    // [[term]] eller [[term|egen förklaring]]
+    function renderQuestionText(raw) {
+      return escapeHtml(raw).replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, function(_, term, def) {
+        const explanation = def || glossary[term] || glossary[term.toLowerCase()] || "";
+        if (!explanation) return term;
+        return '<span class="term" data-term="' + escapeHtml(term) + '" data-def="' + escapeHtml(explanation) + '">' + escapeHtml(term) + '</span>';
       });
     }
 
@@ -337,83 +325,101 @@
       document.getElementById("term-popup").classList.add("hidden");
     }
 
-    document.getElementById("close-term").onclick = hideTermPopup;
-    document.addEventListener("click", (e) => {
-      const termEl = e.target.closest(".term");
+    document.getElementById("close-term").onclick = function(e) {
+      e.stopPropagation();
+      hideTermPopup();
+    };
+
+    document.addEventListener("click", function(e) {
+      var termEl = e.target.closest(".term");
       if (termEl) {
         e.stopPropagation();
-        showTermPopup(termEl.dataset.term, termEl.dataset.def);
+        showTermPopup(termEl.getAttribute("data-term"), termEl.getAttribute("data-def"));
         return;
       }
-      const popup = document.getElementById("term-popup");
-      if (!popup.contains(e.target)) hideTermPopup();
+      var popup = document.getElementById("term-popup");
+      if (!popup.classList.contains("hidden") && !popup.contains(e.target)) {
+        hideTermPopup();
+      }
     });
 
-    const compass = document.getElementById("compass");
-    parties.forEach(p => {
-      const marker = document.createElement("div");
+    var compass = document.getElementById("compass");
+    parties.forEach(function(p) {
+      var marker = document.createElement("div");
       marker.className = "compass-marker";
       marker.style.left = p.x + "%";
       marker.style.top = p.y + "%";
       marker.textContent = p.short;
       marker.title = p.name;
-      marker.onclick = () => selectParty(p);
+      marker.onclick = function() { selectParty(p); };
       compass.appendChild(marker);
       markers[p.id] = marker;
     });
 
     function renderPartyList() {
-      const partyList = document.getElementById("party-list");
+      var partyList = document.getElementById("party-list");
       partyList.innerHTML = "";
-      const saved = loadSaved();
-      parties.forEach(p => {
-        const btn = document.createElement("button");
-        btn.className = "party-btn";
-        const hasSaved = saved[p.id];
-        btn.innerHTML = `<span>${p.name}${hasSaved ? '<span class="saved">✓ sparad</span>' : ''}</span><span class="pct">${p.pct}</span>`;
-        btn.onclick = () => selectParty(p);
+      var saved = loadSaved();
+      parties.forEach(function(p) {
+        var btn = document.createElement("button");
+        btn.className = "party-btn" + (chosenParty && chosenParty.id === p.id ? " active" : "");
+        var hasSaved = saved[p.id];
+        btn.innerHTML = "<span>" + p.name + (hasSaved ? '<span class="saved">✓ sparad</span>' : "") + "</span><span class=\"pct\">" + p.pct + "</span>";
+        btn.onclick = function() { selectParty(p); };
         partyList.appendChild(btn);
       });
     }
     renderPartyList();
 
-    const infoBtn = document.getElementById("info-btn");
-    const infoPopup = document.getElementById("info-popup");
-    infoBtn.onclick = (e) => { e.stopPropagation(); infoPopup.classList.toggle("hidden"); };
-    document.getElementById("close-info").onclick = () => infoPopup.classList.add("hidden");
-    document.addEventListener("click", (e) => {
-      if (!infoPopup.contains(e.target) && e.target !== infoBtn) infoPopup.classList.add("hidden");
+    var infoBtn = document.getElementById("info-btn");
+    var infoPopup = document.getElementById("info-popup");
+    infoBtn.onclick = function(e) {
+      e.stopPropagation();
+      infoPopup.classList.toggle("hidden");
+    };
+    document.getElementById("close-info").onclick = function() {
+      infoPopup.classList.add("hidden");
+    };
+    document.addEventListener("click", function(e) {
+      if (!infoPopup.contains(e.target) && e.target !== infoBtn) {
+        infoPopup.classList.add("hidden");
+      }
     });
 
     function selectParty(party) {
       chosenParty = party;
-      Object.values(markers).forEach(m => m.classList.remove("selected"));
+      Object.keys(markers).forEach(function(id) {
+        markers[id].classList.remove("selected");
+      });
       markers[party.id].classList.add("selected");
       document.getElementById("selected-name").textContent = party.name;
       document.getElementById("selection-panel").classList.remove("hidden");
-      document.getElementById("list-section").classList.add("hidden");
+      // Listan syns alltid kvar
       infoPopup.classList.add("hidden");
+      renderPartyList();
 
-      const saved = getSaved(party.id);
+      var saved = getSaved(party.id);
       document.getElementById("btn-start").textContent = saved ? "Visa sparat resultat" : "Starta test";
     }
 
-    document.getElementById("btn-back").onclick = () => {
+    document.getElementById("btn-back").onclick = function() {
       chosenParty = null;
-      Object.values(markers).forEach(m => m.classList.remove("selected"));
+      Object.keys(markers).forEach(function(id) {
+        markers[id].classList.remove("selected");
+      });
       document.getElementById("selection-panel").classList.add("hidden");
-      document.getElementById("list-section").classList.remove("hidden");
       setSubtitle("Testa om du verkligen stämmer med partiet du tror");
+      renderPartyList();
     };
 
-    document.getElementById("btn-start").onclick = () => {
+    document.getElementById("btn-start").onclick = function() {
       if (!chosenParty) return;
       if (!partyQuestions) {
         alert("Frågorna har inte laddats. Ladda om sidan (gärna med rensad cache).");
         return;
       }
 
-      const saved = getSaved(chosenParty.id);
+      var saved = getSaved(chosenParty.id);
       if (saved) {
         allAnswers = saved.allAnswers || [];
         totalAnswered = saved.answered || 0;
@@ -424,18 +430,18 @@
       allAnswers = [];
       totalAnswered = 0;
       phase = "specific";
-      const bank = partyQuestions[chosenParty.id] || partyQuestions.sd;
+      var bank = partyQuestions[chosenParty.id] || partyQuestions.sd;
       if (!bank || !bank.length) {
         alert("Inga frågor finns ännu för detta parti.");
         return;
       }
-      currentQueue = shuffle([...bank]);
+      currentQueue = shuffle(bank.slice());
       answers = new Array(currentQueue.length).fill(null);
       status = new Array(currentQueue.length).fill("unseen");
       currentQ = 0;
       status[0] = "skipped";
 
-      setSubtitle(`Testar hur väl dina åsikter stämmer överens med ${chosenParty.name}`);
+      setSubtitle("Testar hur väl dina åsikter stämmer överens med " + chosenParty.name);
       document.getElementById("step-party").classList.add("hidden");
       document.getElementById("step-questions").classList.remove("hidden");
       buildSegments();
@@ -443,20 +449,20 @@
     };
 
     function buildSegments() {
-      const cont = document.getElementById("segments");
+      var cont = document.getElementById("segments");
       cont.innerHTML = "";
-      currentQueue.forEach((_, i) => {
-        const seg = document.createElement("div");
+      currentQueue.forEach(function(_, i) {
+        var seg = document.createElement("div");
         seg.className = "segment " + status[i];
         if (i === currentQ) seg.classList.add("current");
-        seg.onclick = () => jumpTo(i);
+        seg.onclick = function() { jumpTo(i); };
         cont.appendChild(seg);
       });
     }
 
     function updateSegments() {
-      const segs = document.querySelectorAll("#segments .segment");
-      segs.forEach((seg, i) => {
+      var segs = document.querySelectorAll("#segments .segment");
+      segs.forEach(function(seg, i) {
         seg.className = "segment " + status[i];
         if (i === currentQ) seg.classList.add("current");
       });
@@ -469,17 +475,17 @@
       showQuestion();
     }
 
-    document.getElementById("btn-prev").onclick = () => {
+    document.getElementById("btn-prev").onclick = function() {
       if (currentQ > 0) jumpTo(currentQ - 1);
     };
 
-    document.getElementById("btn-next").onclick = () => {
+    document.getElementById("btn-next").onclick = function() {
       if (currentQ < currentQueue.length - 1) jumpTo(currentQ + 1);
       else finishPhase();
     };
 
-    document.getElementById("btn-finish-early").onclick = () => {
-      const answered = answers.filter(a => a !== null).length;
+    document.getElementById("btn-finish-early").onclick = function() {
+      var answered = answers.filter(function(a) { return a !== null; }).length;
       if (answered === 0 && totalAnswered === 0) {
         alert("Svara på minst en fråga först.");
         return;
@@ -488,7 +494,7 @@
       showResults();
     };
 
-    document.getElementById("btn-see-results").onclick = () => {
+    document.getElementById("btn-see-results").onclick = function() {
       mergeCurrentAnswers();
       showResults();
     };
@@ -497,10 +503,10 @@
       mergeCurrentAnswers();
       phase = "mixed";
       currentQueue = [];
-      Object.keys(partyQuestions).forEach(pid => {
+      Object.keys(partyQuestions).forEach(function(pid) {
         if (pid === chosenParty.id) return;
-        const qs = partyQuestions[pid];
-        if (qs && qs.length) currentQueue.push(...shuffle(qs));
+        var qs = partyQuestions[pid];
+        if (qs && qs.length) currentQueue = currentQueue.concat(shuffle(qs.slice()));
       });
       currentQueue = shuffle(currentQueue);
 
@@ -525,33 +531,34 @@
     document.getElementById("btn-continue").onclick = startMixedPhase;
     document.getElementById("btn-continue-from-results").onclick = startMixedPhase;
 
-    document.getElementById("btn-save-exit").onclick = () => {
+    document.getElementById("btn-save-exit").onclick = function() {
       chosenParty = null;
-      Object.values(markers).forEach(m => m.classList.remove("selected"));
+      Object.keys(markers).forEach(function(id) {
+        markers[id].classList.remove("selected");
+      });
       document.getElementById("step-results").classList.add("hidden");
       document.getElementById("step-party").classList.remove("hidden");
       document.getElementById("selection-panel").classList.add("hidden");
-      document.getElementById("list-section").classList.remove("hidden");
       setSubtitle("Testa om du verkligen stämmer med partiet du tror");
       renderPartyList();
     };
 
-    document.getElementById("btn-retake").onclick = () => {
-      const all = loadSaved();
+    document.getElementById("btn-retake").onclick = function() {
+      var all = loadSaved();
       delete all[chosenParty.id];
       localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
 
       allAnswers = [];
       totalAnswered = 0;
       phase = "specific";
-      const bank = partyQuestions[chosenParty.id] || partyQuestions.sd;
-      currentQueue = shuffle([...bank]);
+      var bank = partyQuestions[chosenParty.id] || partyQuestions.sd;
+      currentQueue = shuffle(bank.slice());
       answers = new Array(currentQueue.length).fill(null);
       status = new Array(currentQueue.length).fill("unseen");
       currentQ = 0;
       status[0] = "skipped";
 
-      setSubtitle(`Testar hur väl dina åsikter stämmer överens med ${chosenParty.name}`);
+      setSubtitle("Testar hur väl dina åsikter stämmer överens med " + chosenParty.name);
       document.getElementById("step-results").classList.add("hidden");
       document.getElementById("step-questions").classList.remove("hidden");
       buildSegments();
@@ -560,28 +567,31 @@
 
     function showQuestion() {
       hideTermPopup();
-      const q = currentQueue[currentQ];
+      var q = currentQueue[currentQ];
       document.getElementById("question-text").innerHTML = renderQuestionText(q.text);
 
       if (phase === "specific") {
-        document.getElementById("phase-info").textContent = `Fråga ${currentQ + 1} av ${currentQueue.length} (viktiga för ${chosenParty.name})`;
+        document.getElementById("phase-info").textContent =
+          "Fråga " + (currentQ + 1) + " av " + currentQueue.length + " (viktiga för " + chosenParty.name + ")";
       } else {
-        document.getElementById("phase-info").textContent = `Extrafråga ${currentQ + 1} av ${currentQueue.length}`;
+        document.getElementById("phase-info").textContent =
+          "Extrafråga " + (currentQ + 1) + " av " + currentQueue.length;
       }
 
       document.getElementById("btn-prev").disabled = currentQ === 0;
-      document.getElementById("btn-next").textContent = currentQ === currentQueue.length - 1 ? "Klar →" : "Framåt →";
+      document.getElementById("btn-next").textContent =
+        currentQ === currentQueue.length - 1 ? "Klar →" : "Framåt →";
 
-      const optionsDiv = document.getElementById("options");
+      var optionsDiv = document.getElementById("options");
       optionsDiv.innerHTML = "";
-      const shuffled = shuffle(q.options);
-      shuffled.forEach(opt => {
-        const btn = document.createElement("button");
+      var shuffled = shuffle(q.options.slice());
+      shuffled.forEach(function(opt) {
+        var btn = document.createElement("button");
         btn.textContent = opt.label;
         if (answers[currentQ] && JSON.stringify(answers[currentQ]) === JSON.stringify(opt.scores)) {
           btn.classList.add("selected");
         }
-        btn.onclick = () => selectAnswer(opt.scores, btn);
+        btn.onclick = function() { selectAnswer(opt.scores, btn); };
         optionsDiv.appendChild(btn);
       });
 
@@ -591,11 +601,13 @@
     function selectAnswer(scores, btnEl) {
       answers[currentQ] = scores;
       status[currentQ] = "answered";
-      document.querySelectorAll("#options button").forEach(b => b.classList.remove("selected"));
+      document.querySelectorAll("#options button").forEach(function(b) {
+        b.classList.remove("selected");
+      });
       btnEl.classList.add("selected");
       updateSegments();
 
-      setTimeout(() => {
+      setTimeout(function() {
         if (currentQ < currentQueue.length - 1) jumpTo(currentQ + 1);
         else finishPhase();
       }, 300);
@@ -612,63 +624,72 @@
     }
 
     function mergeCurrentAnswers() {
-      answers.forEach(a => {
+      answers.forEach(function(a) {
         if (!a) return;
         allAnswers.push(a);
         totalAnswered++;
       });
-      answers = answers.map(() => null);
+      answers = answers.map(function() { return null; });
     }
 
-    function showResults(fromSaved = false) {
+    function showResults() {
       hideTermPopup();
       document.getElementById("step-questions").classList.add("hidden");
       document.getElementById("step-continue").classList.add("hidden");
       document.getElementById("step-results").classList.remove("hidden");
 
-      setSubtitle(`Resultat för ${chosenParty.name}`);
+      setSubtitle("Resultat för " + chosenParty.name);
 
-      const scores = {};
-      parties.forEach(p => scores[p.id] = 0);
-      allAnswers.forEach(a => {
-        for (const [id, val] of Object.entries(a)) {
-          scores[id] = (scores[id] || 0) + val;
-        }
+      var scores = {};
+      parties.forEach(function(p) { scores[p.id] = 0; });
+      allAnswers.forEach(function(a) {
+        Object.keys(a).forEach(function(id) {
+          scores[id] = (scores[id] || 0) + a[id];
+        });
       });
 
-      const maxPossible = totalAnswered * 2;
+      var maxPossible = totalAnswered * 2;
 
-      const ranked = parties.map(p => {
-        let match;
+      var ranked = parties.map(function(p) {
+        var match;
         if (maxPossible === 0) match = 50;
         else match = Math.round(((scores[p.id] + maxPossible) / (maxPossible * 2)) * 100);
-        return { ...p, match };
-      }).sort((a, b) => b.match - a.match);
+        return {
+          id: p.id,
+          name: p.name,
+          short: p.short,
+          pct: p.pct,
+          x: p.x,
+          y: p.y,
+          match: match
+        };
+      }).sort(function(a, b) { return b.match - a.match; });
 
-      const chosenMatch = ranked.find(r => r.id === chosenParty.id);
+      var chosenMatch = ranked.find(function(r) { return r.id === chosenParty.id; });
 
       saveResult(chosenParty.id, {
         answered: totalAnswered,
         match: chosenMatch.match,
         allAnswers: allAnswers,
-        ranked: ranked.map(r => ({ id: r.id, match: r.match })),
+        ranked: ranked.map(function(r) { return { id: r.id, match: r.match }; }),
         date: new Date().toISOString()
       });
 
       document.getElementById("chosen-summary").textContent =
-        `Du valde ${chosenParty.name}. Din faktiska matchning: ${chosenMatch.match}%\nBesvarade frågor: ${totalAnswered}`;
+        "Du valde " + chosenParty.name + ". Din faktiska matchning: " + chosenMatch.match + "%\nBesvarade frågor: " + totalAnswered;
 
-      const list = document.getElementById("results-list");
+      var list = document.getElementById("results-list");
       list.innerHTML = "";
-      ranked.forEach(r => {
-        const div = document.createElement("div");
+      ranked.forEach(function(r) {
+        var div = document.createElement("div");
         div.className = "result-item";
-        div.innerHTML = `
-          <span>${r.name}</span>
-          <span class="match ${r.match < 40 ? 'low' : ''}">${r.match}%</span>
-          <div class="explanation" id="exp-${r.id}">Förklaring kommer här.</div>
-        `;
-        div.onclick = () => document.getElementById(`exp-${r.id}`).classList.toggle("open");
+        div.innerHTML =
+          "<span>" + r.name + "</span>" +
+          '<span class="match ' + (r.match < 40 ? "low" : "") + '">' + r.match + "%</span>" +
+          '<div class="explanation" id="exp-' + r.id + '">Förklaring kommer här.</div>';
+        div.onclick = function() {
+          document.getElementById("exp-" + r.id).classList.toggle("open");
+        };
         list.appendChild(div);
       });
     }
