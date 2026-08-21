@@ -1,666 +1,140 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Valkompass</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 1.25rem 0.9rem; }
-    .container { max-width: 520px; width: 100%; }
-    h1 { font-size: 1.45rem; margin-bottom: 0.35rem; text-align: center; }
-    .subtitle { text-align: center; color: #94a3b8; margin-bottom: 0.5rem; font-size: 0.88rem; min-height: 1.4em; }
-    .about-link { text-align: center; margin-bottom: 1.1rem; }
-    .about-link a { color: #60a5fa; font-size: 0.85rem; text-decoration: none; }
-    .about-link a:hover { text-decoration: underline; }
-    .card { background: #1e293b; border-radius: 12px; padding: 1.15rem; margin-bottom: 1rem; }
-    button { background: #3b82f6; color: white; border: none; padding: 0.7rem 1rem; border-radius: 8px; font-size: 0.95rem; cursor: pointer; width: 100%; }
-    button:hover { background: #2563eb; }
-    button.secondary { background: #475569; }
-    button.secondary:hover { background: #64748b; }
-    button:disabled { opacity: 0.4; cursor: not-allowed; }
-    .party-btn { background: #334155; margin-bottom: 0.35rem; text-align: left; display: flex; justify-content: space-between; align-items: center; }
-    .party-btn:hover { background: #475569; }
-    .party-btn.active { background: #1d4ed8; border: 1px solid #60a5fa; }
-    .party-btn .pct { font-size: 0.78rem; color: #94a3b8; }
-    .party-btn .saved { font-size: 0.72rem; color: #4ade80; margin-left: 0.4rem; }
-    .hidden { display: none !important; }
-    .question { font-size: 1.05rem; margin-bottom: 1rem; line-height: 1.45; }
-    .options button { background: #334155; text-align: left; margin-top: 0.4rem; }
-    .options button:hover { background: #475569; }
-    .options button.selected { background: #1d4ed8; border: 1px solid #60a5fa; }
-    .result-item { display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0; border-bottom: 1px solid #334155; cursor: pointer; }
-    .result-item:hover { background: #1e293b; }
-    .match { font-weight: 600; color: #4ade80; }
-    .low { color: #f87171; }
-    .explanation { font-size: 0.85rem; color: #94a3b8; margin-top: 0.35rem; display: none; line-height: 1.4; }
-    .explanation.open { display: block; }
-    .compass-wrapper { margin-bottom: 1.1rem; position: relative; }
-    .compass {
-      position: relative; width: 100%; aspect-ratio: 1 / 0.78; border-radius: 12px; border: 1px solid #334155; overflow: hidden;
-      background:
-        radial-gradient(ellipse at 50% 0%, rgba(34, 197, 94, 0.55) 0%, transparent 55%),
-        radial-gradient(ellipse at 50% 100%, rgba(120, 53, 15, 0.65) 0%, transparent 55%),
-        radial-gradient(ellipse at 0% 50%, rgba(220, 38, 38, 0.6) 0%, transparent 55%),
-        radial-gradient(ellipse at 100% 50%, rgba(37, 99, 235, 0.6) 0%, transparent 55%),
-        linear-gradient(160deg, #1e1b4b 0%, #0f172a 50%, #1c1917 100%);
-    }
-    .compass::before {
-      content: ""; position: absolute; inset: 0;
-      background:
-        linear-gradient(to right, transparent 49.3%, rgba(148,163,184,0.4) 49.3%, rgba(148,163,184,0.4) 50.7%, transparent 50.7%),
-        linear-gradient(to bottom, transparent 49.3%, rgba(148,163,184,0.4) 49.3%, rgba(148,163,184,0.4) 50.7%, transparent 50.7%);
-      pointer-events: none;
-    }
-    .compass-label { position: absolute; font-size: 0.68rem; color: #f1f5f9; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,0.85); z-index: 1; }
-    .compass-label.left { left: 8px; top: 50%; transform: translateY(-50%); }
-    .compass-label.right { right: 8px; top: 50%; transform: translateY(-50%); }
-    .compass-label.top { top: 7px; left: 50%; transform: translateX(-50%); }
-    .compass-label.bottom { bottom: 7px; left: 50%; transform: translateX(-50%); }
-    .compass-marker {
-      position: absolute; width: 30px; height: 30px; border-radius: 50%; background: #0f172a; border: 2px solid #e2e8f0;
-      display: flex; align-items: center; justify-content: center; font-size: 0.62rem; font-weight: 700; color: white;
-      cursor: pointer; transform: translate(-50%, -50%); box-shadow: 0 2px 6px rgba(0,0,0,0.5); z-index: 3;
-      transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
-    }
-    .compass-marker:hover { transform: translate(-50%, -50%) scale(1.15); z-index: 10; }
-    .compass-marker.selected {
-      border-color: #fbbf24; box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.5), 0 2px 8px rgba(0,0,0,0.5);
-      transform: translate(-50%, -50%) scale(1.22); z-index: 12;
-    }
-    .info-btn {
-      position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; border-radius: 50%;
-      background: rgba(15, 23, 42, 0.75); border: 1.5px solid #94a3b8; color: #e2e8f0;
-      font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; justify-content: center;
-      cursor: pointer; z-index: 5; padding: 0; line-height: 1;
-    }
-    .info-btn:hover { background: rgba(51, 65, 85, 0.9); border-color: #e2e8f0; }
-    .info-popup {
-      position: absolute; top: 40px; right: 8px; left: 8px; background: #1e293b; border: 1px solid #475569;
-      border-radius: 10px; padding: 0.9rem 1rem; font-size: 0.82rem; line-height: 1.45; color: #cbd5e1;
-      z-index: 20; box-shadow: 0 8px 24px rgba(0,0,0,0.45);
-    }
-    .info-popup strong { color: #f1f5f9; }
-    .info-popup .close-info {
-      position: absolute; top: 6px; right: 10px; background: none; border: none; color: #94a3b8;
-      font-size: 1.1rem; cursor: pointer; width: auto; padding: 0;
-    }
-    .selection-info { text-align: center; margin: 0.9rem 0 0.7rem; font-size: 0.95rem; }
-    .selection-info strong { color: #fbbf24; }
-    .btn-row { display: flex; gap: 0.6rem; margin-top: 0.6rem; }
-    .btn-row button { flex: 1; }
-    .nav-row { display: flex; gap: 0.5rem; margin-top: 1rem; }
-    .nav-row button { flex: 1; }
-    .stop-row { margin-top: 0.8rem; }
-    .phase-info { font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.6rem; text-align: center; }
-    .segments { display: flex; gap: 3px; margin-bottom: 1rem; }
-    .segment {
-      flex: 1; height: 8px; border-radius: 3px; background: #1e293b; border: 1px solid #334155;
-      cursor: pointer; transition: background 0.15s;
-    }
-    .segment.unseen { background: #0f172a; }
-    .segment.answered { background: #22c55e; border-color: #16a34a; }
-    .segment.skipped { background: #ef4444; border-color: #dc2626; }
-    .segment.current { outline: 2px solid #fbbf24; outline-offset: 1px; }
-    .term {
-      font-weight: 600;
-      color: inherit;
-      border-bottom: 1px dotted #94a3b8;
-      cursor: help;
-    }
-    .term-popup {
-      position: fixed;
-      left: 12px;
-      right: 12px;
-      max-width: 420px;
-      margin: 0 auto;
-      background: #1e293b;
-      border: 1px solid #475569;
-      border-radius: 12px;
-      padding: 0.85rem 1rem;
-      font-size: 0.88rem;
-      line-height: 1.45;
-      color: #e2e8f0;
-      z-index: 100;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-    }
-    .term-popup strong { display: block; color: #fbbf24; margin-bottom: 0.3rem; font-size: 0.92rem; padding-right: 1.2rem; }
-    .term-popup .close-term {
-      position: absolute; top: 8px; right: 12px; background: none; border: none;
-      color: #94a3b8; font-size: 1.2rem; cursor: pointer; width: auto; padding: 0;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valkompass</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:1.25rem 0.9rem}
+.container{max-width:520px;width:100%}
+h1{font-size:1.45rem;margin-bottom:0.35rem;text-align:center}
+.subtitle{text-align:center;color:#94a3b8;margin-bottom:0.5rem;font-size:0.88rem;min-height:1.4em}
+.about-link{text-align:center;margin-bottom:1.1rem}
+.about-link a{color:#60a5fa;font-size:0.85rem;text-decoration:none}
+.card{background:#1e293b;border-radius:12px;padding:1.15rem;margin-bottom:1rem}
+button{background:#3b82f6;color:#fff;border:none;padding:0.7rem 1rem;border-radius:8px;font-size:0.95rem;cursor:pointer;width:100%}
+button:hover{background:#2563eb}
+button.secondary{background:#475569}
+button:disabled{opacity:0.4;cursor:not-allowed}
+.party-btn{background:#334155;margin-bottom:0.35rem;text-align:left;display:flex;justify-content:space-between;align-items:center}
+.party-btn:hover{background:#475569}
+.party-btn.active{background:#1d4ed8;border:1px solid #60a5fa}
+.party-btn .pct{font-size:0.78rem;color:#94a3b8}
+.party-btn .saved{font-size:0.72rem;color:#4ade80;margin-left:0.4rem}
+.hidden{display:none!important}
+.question{font-size:1.05rem;margin-bottom:1rem;line-height:1.45}
+.options button{background:#334155;text-align:left;margin-top:0.4rem}
+.options button.selected{background:#1d4ed8;border:1px solid #60a5fa}
+.result-item{display:flex;justify-content:space-between;align-items:center;padding:0.65rem 0;border-bottom:1px solid #334155}
+.match{font-weight:600;color:#4ade80}
+.low{color:#f87171}
+.compass-wrapper{margin-bottom:1.1rem;position:relative}
+.compass{position:relative;width:100%;aspect-ratio:1/0.78;border-radius:12px;border:1px solid #334155;overflow:hidden;background:radial-gradient(ellipse at 50% 0%,rgba(34,197,94,0.55) 0%,transparent 55%),radial-gradient(ellipse at 50% 100%,rgba(120,53,15,0.65) 0%,transparent 55%),radial-gradient(ellipse at 0% 50%,rgba(220,38,38,0.6) 0%,transparent 55%),radial-gradient(ellipse at 100% 50%,rgba(37,99,235,0.6) 0%,transparent 55%),linear-gradient(160deg,#1e1b4b 0%,#0f172a 50%,#1c1917 100%)}
+.compass::before{content:"";position:absolute;inset:0;background:linear-gradient(to right,transparent 49.3%,rgba(148,163,184,0.4) 49.3%,rgba(148,163,184,0.4) 50.7%,transparent 50.7%),linear-gradient(to bottom,transparent 49.3%,rgba(148,163,184,0.4) 49.3%,rgba(148,163,184,0.4) 50.7%,transparent 50.7%);pointer-events:none}
+.compass-label{position:absolute;font-size:0.68rem;color:#f1f5f9;font-weight:600;text-shadow:0 1px 4px rgba(0,0,0,0.85);z-index:1}
+.compass-label.left{left:8px;top:50%;transform:translateY(-50%)}
+.compass-label.right{right:8px;top:50%;transform:translateY(-50%)}
+.compass-label.top{top:7px;left:50%;transform:translateX(-50%)}
+.compass-label.bottom{bottom:7px;left:50%;transform:translateX(-50%)}
+.compass-marker{position:absolute;width:30px;height:30px;border-radius:50%;background:#0f172a;border:2px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-size:0.62rem;font-weight:700;color:#fff;cursor:pointer;transform:translate(-50%,-50%);box-shadow:0 2px 6px rgba(0,0,0,0.5);z-index:3}
+.compass-marker.selected{border-color:#fbbf24;box-shadow:0 0 0 3px rgba(251,191,36,0.5);transform:translate(-50%,-50%) scale(1.22);z-index:12}
+.info-btn{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(15,23,42,0.75);border:1.5px solid #94a3b8;color:#e2e8f0;font-size:0.85rem;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;padding:0}
+.info-popup{position:absolute;top:40px;right:8px;left:8px;background:#1e293b;border:1px solid #475569;border-radius:10px;padding:0.9rem 1rem;font-size:0.82rem;line-height:1.45;color:#cbd5e1;z-index:20;box-shadow:0 8px 24px rgba(0,0,0,0.45)}
+.info-popup .close-info{position:absolute;top:6px;right:10px;background:none;border:none;color:#94a3b8;font-size:1.1rem;cursor:pointer;width:auto;padding:0}
+.selection-info{text-align:center;margin:0.9rem 0 0.7rem;font-size:0.95rem}
+.selection-info strong{color:#fbbf24}
+.btn-row{display:flex;gap:0.6rem;margin-top:0.6rem}
+.btn-row button{flex:1}
+.nav-row{display:flex;gap:0.5rem;margin-top:1rem}
+.nav-row button{flex:1}
+.stop-row{margin-top:0.8rem}
+.phase-info{font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem;text-align:center;overflow:hidden}
+.segments{display:flex;gap:3px;margin-bottom:1rem}
+.segment{flex:1;height:8px;border-radius:3px;background:#1e293b;border:1px solid #334155;cursor:pointer}
+.segment.unseen{background:#0f172a}
+.segment.answered{background:#22c55e;border-color:#16a34a}
+.segment.skipped{background:#ef4444;border-color:#dc2626}
+.segment.current{outline:2px solid #fbbf24;outline-offset:1px}
+.qid{float:right;font-size:0.68rem;color:#64748b;cursor:pointer;user-select:none;padding:2px 6px;border-radius:4px}
+.qid:hover{color:#94a3b8;background:#334155}
+.qid.copied{color:#4ade80}
+.term{font-weight:600;color:inherit;border-bottom:1px dotted #94a3b8;cursor:help}
+.term-popup{position:fixed;left:12px;right:12px;max-width:420px;margin:0 auto;background:#1e293b;border:1px solid #475569;border-radius:12px;padding:0.85rem 1rem;font-size:0.88rem;line-height:1.45;color:#e2e8f0;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,0.5)}
+.term-popup strong{display:block;color:#fbbf24;margin-bottom:0.3rem;font-size:0.92rem;padding-right:1.2rem}
+.term-popup .close-term{position:absolute;top:8px;right:12px;background:none;border:none;color:#94a3b8;font-size:1.2rem;cursor:pointer;width:auto;padding:0}
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>Valkompass</h1>
-    <p class="subtitle" id="subtitle">Testa om du verkligen st&auml;mmer med partiet du tror</p>
-    <div class="about-link"><a href="/valkompass/om.html">Om testet</a></div>
-
-    <div id="step-party" class="card">
-      <p style="margin-bottom:0.85rem;font-size:0.92rem">Vilket parti st&ouml;der eller tror du dig st&aring; n&auml;rmast just nu?</p>
-
-      <div class="compass-wrapper">
-        <div class="compass" id="compass">
-          <div class="compass-label top">GAL</div>
-          <div class="compass-label bottom">TAN</div>
-          <div class="compass-label left">V&auml;nster</div>
-          <div class="compass-label right">H&ouml;ger</div>
-        </div>
-        <button class="info-btn" id="info-btn" title="Vad betyder skalorna?">i</button>
-        <div class="info-popup hidden" id="info-popup">
-          <button class="close-info" id="close-info">&times;</button>
-          <p style="margin-bottom:0.5rem"><strong>V&auml;nster &ndash; H&ouml;ger</strong><br>Handlar fr&auml;mst om ekonomi, skatter, f&ouml;rdelning och statens storlek.</p>
-          <p style="margin-bottom:0.5rem"><strong>GAL &ndash; TAN</strong><br>
-          <strong>GAL</strong> = Gr&ouml;n, Alternativ, Libert&auml;r<br>
-          <strong>TAN</strong> = Traditionell, Auktorit&auml;r, Nationalistisk</p>
-          <p style="font-size:0.78rem;color:#94a3b8">Placeringarna &auml;r ungef&auml;rliga.</p>
-        </div>
-      </div>
-
-      <div id="selection-panel" class="hidden">
-        <div class="selection-info">Du har valt: <strong id="selected-name"></strong></div>
-        <div class="btn-row">
-          <button class="secondary" id="btn-back">Tillbaka</button>
-          <button id="btn-start">Starta test</button>
-        </div>
-      </div>
-
-      <div id="list-section">
-        <p style="font-size:0.78rem;color:#94a3b8;margin:0.7rem 0 0.55rem">Eller v&auml;lj fr&aring;n listan (st&ouml;rst f&ouml;rst enligt 2022):</p>
-        <div id="party-list"></div>
-      </div>
-    </div>
-
-    <div id="step-questions" class="card hidden">
-      <div class="phase-info" id="phase-info"></div>
-      <div class="segments" id="segments"></div>
-      <div class="question" id="question-text"></div>
-      <div class="options" id="options"></div>
-      <div class="nav-row">
-        <button class="secondary" id="btn-prev">&larr; Bak&aring;t</button>
-        <button class="secondary" id="btn-next">Fram&aring;t &rarr;</button>
-      </div>
-      <div class="stop-row">
-        <button class="secondary" id="btn-finish-early">Se resultat</button>
-      </div>
-    </div>
-
-    <div id="step-continue" class="card hidden">
-      <p style="text-align:center;margin-bottom:1rem;">Du har svarat p&aring; de 10 viktigaste fr&aring;gorna f&ouml;r ditt valda parti.</p>
-      <div class="btn-row">
-        <button class="secondary" id="btn-see-results">Se resultat</button>
-        <button id="btn-continue">Forts&auml;tt med fler fr&aring;gor</button>
-      </div>
-    </div>
-
-    <div id="step-results" class="card hidden">
-      <h2 style="margin-bottom:0.9rem;font-size:1.1rem">Ditt resultat</h2>
-      <p id="chosen-summary" style="margin-bottom:1rem;color:#94a3b8;font-size:0.88rem"></p>
-      <div id="results-list"></div>
-      <div class="btn-row" style="margin-top:1.3rem;">
-        <button id="btn-continue-from-results">Forts&auml;tt med fler fr&aring;gor</button>
-        <button class="secondary" id="btn-save-exit">Avsluta & Spara</button>
-      </div>
-      <button class="secondary" id="btn-retake" style="margin-top:0.6rem;">G&ouml;r om detta partis test</button>
-    </div>
-  </div>
-
-  <div id="term-popup" class="term-popup hidden">
-    <button class="close-term" id="close-term">&times;</button>
-    <strong id="term-title"></strong>
-    <span id="term-body"></span>
-  </div>
-
-  <script src="/valkompass/glossary.js"></script>
-  <script src="/valkompass/questions.js"></script>
-
-  <script>
-  (function () {
-    var partyQuestions = window.partyQuestions;
-    var glossary = window.glossary || {};
-
-    var parties = [
-      { id: "s",    name: "Socialdemokraterna",     short: "S",   pct: "30,3 %", x: 32, y: 48 },
-      { id: "sd",   name: "Sverigedemokraterna",    short: "SD",  pct: "20,5 %", x: 78, y: 78 },
-      { id: "m",    name: "Moderaterna",            short: "M",   pct: "19,1 %", x: 72, y: 55 },
-      { id: "v",    name: "V\u00e4nsterpartiet",     short: "V",   pct: "6,8 %",  x: 12, y: 28 },
-      { id: "c",    name: "Centerpartiet",          short: "C",   pct: "6,7 %",  x: 48, y: 38 },
-      { id: "kd",   name: "Kristdemokraterna",      short: "KD",  pct: "5,3 %",  x: 70, y: 68 },
-      { id: "mp",   name: "Milj\u00f6partiet",       short: "MP",  pct: "5,1 %",  x: 22, y: 18 },
-      { id: "l",    name: "Liberalerna",            short: "L",   pct: "4,6 %",  x: 58, y: 32 },
-      { id: "nyans",name: "Partiet Nyans",          short: "NY",  pct: "0,4 %",  x: 38, y: 42 },
-      { id: "afs",  name: "Alternativ f\u00f6r Sverige", short: "AFS", pct: "0,3 %",  x: 88, y: 88 },
-      { id: "med",  name: "Medborgerlig Samling",   short: "MED", pct: "0,2 %",  x: 75, y: 45 }
-    ];
-
-    var STORAGE_KEY = "valkompass_results_v1";
-
-    function loadSaved() {
-      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
-      catch (e) { return {}; }
-    }
-    function saveResult(partyId, data) {
-      var all = loadSaved();
-      all[partyId] = data;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
-    }
-    function getSaved(partyId) { return loadSaved()[partyId] || null; }
-
-    var chosenParty = null;
-    var currentQ = 0;
-    var phase = "specific";
-    var currentQueue = [];
-    var answers = [];
-    var status = [];
-    var allAnswers = [];
-    var totalAnswered = 0;
-    var markers = {};
-
-    function shuffle(array) {
-      var arr = array.slice();
-      for (var i = arr.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
-      }
-      return arr;
-    }
-
-    function setSubtitle(text) {
-      document.getElementById("subtitle").textContent = text;
-    }
-
-    function escapeHtml(str) {
-      var d = document.createElement("div");
-      d.textContent = str;
-      return d.innerHTML;
-    }
-
-    function renderQuestionText(raw) {
-      return escapeHtml(raw).replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, function (_, term, def) {
-        var explanation = def || glossary[term] || glossary[term.toLowerCase()] || "";
-        if (!explanation) return term;
-        return '<span class="term" data-term="' + escapeHtml(term) + '" data-def="' + escapeHtml(explanation) + '">' + escapeHtml(term) + '</span>';
-      });
-    }
-
-    function showTermPopup(term, def, anchorEl) {
-      var popup = document.getElementById("term-popup");
-      document.getElementById("term-title").textContent = term;
-      document.getElementById("term-body").textContent = def;
-      popup.classList.remove("hidden");
-
-      // Place just below the clicked word; if not enough space, place above
-      var rect = anchorEl.getBoundingClientRect();
-      var gap = 8;
-      // Force layout so we know height
-      var ph = popup.offsetHeight || 80;
-      var spaceBelow = window.innerHeight - rect.bottom;
-      var top;
-      if (spaceBelow < ph + gap + 12 && rect.top > ph + gap + 12) {
-        top = rect.top - ph - gap;
-      } else {
-        top = rect.bottom + gap;
-      }
-      // Keep inside viewport horizontally via left/right CSS; vertically clamp
-      if (top < 8) top = 8;
-      if (top + ph > window.innerHeight - 8) top = Math.max(8, window.innerHeight - ph - 8);
-      popup.style.top = top + "px";
-      popup.style.bottom = "auto";
-    }
-
-    function hideTermPopup() {
-      document.getElementById("term-popup").classList.add("hidden");
-    }
-
-    document.getElementById("close-term").onclick = function (e) {
-      e.stopPropagation();
-      hideTermPopup();
-    };
-
-    document.addEventListener("click", function (e) {
-      var termEl = e.target.closest(".term");
-      if (termEl) {
-        e.stopPropagation();
-        showTermPopup(termEl.getAttribute("data-term"), termEl.getAttribute("data-def"), termEl);
-        return;
-      }
-      var popup = document.getElementById("term-popup");
-      if (!popup.classList.contains("hidden") && !popup.contains(e.target)) hideTermPopup();
-    });
-
-    var compass = document.getElementById("compass");
-    parties.forEach(function (p) {
-      var marker = document.createElement("div");
-      marker.className = "compass-marker";
-      marker.style.left = p.x + "%";
-      marker.style.top = p.y + "%";
-      marker.textContent = p.short;
-      marker.title = p.name;
-      marker.onclick = function () { selectParty(p); };
-      compass.appendChild(marker);
-      markers[p.id] = marker;
-    });
-
-    function renderPartyList() {
-      var partyList = document.getElementById("party-list");
-      partyList.innerHTML = "";
-      var saved = loadSaved();
-      parties.forEach(function (p) {
-        var btn = document.createElement("button");
-        btn.className = "party-btn" + (chosenParty && chosenParty.id === p.id ? " active" : "");
-        var left = document.createElement("span");
-        left.textContent = p.name;
-        if (saved[p.id]) {
-          var tag = document.createElement("span");
-          tag.className = "saved";
-          tag.textContent = " \u2713 sparad";
-          left.appendChild(tag);
-        }
-        var right = document.createElement("span");
-        right.className = "pct";
-        right.textContent = p.pct;
-        btn.appendChild(left);
-        btn.appendChild(right);
-        btn.onclick = function () { selectParty(p); };
-        partyList.appendChild(btn);
-      });
-    }
-    renderPartyList();
-
-    var infoBtn = document.getElementById("info-btn");
-    var infoPopup = document.getElementById("info-popup");
-    infoBtn.onclick = function (e) {
-      e.stopPropagation();
-      infoPopup.classList.toggle("hidden");
-    };
-    document.getElementById("close-info").onclick = function () {
-      infoPopup.classList.add("hidden");
-    };
-    document.addEventListener("click", function (e) {
-      if (!infoPopup.contains(e.target) && e.target !== infoBtn) infoPopup.classList.add("hidden");
-    });
-
-    function selectParty(party) {
-      chosenParty = party;
-      Object.keys(markers).forEach(function (id) { markers[id].classList.remove("selected"); });
-      markers[party.id].classList.add("selected");
-      document.getElementById("selected-name").textContent = party.name;
-      document.getElementById("selection-panel").classList.remove("hidden");
-      infoPopup.classList.add("hidden");
-      renderPartyList();
-      var saved = getSaved(party.id);
-      document.getElementById("btn-start").textContent = saved ? "Visa sparat resultat" : "Starta test";
-    }
-
-    document.getElementById("btn-back").onclick = function () {
-      chosenParty = null;
-      Object.keys(markers).forEach(function (id) { markers[id].classList.remove("selected"); });
-      document.getElementById("selection-panel").classList.add("hidden");
-      setSubtitle("Testa om du verkligen st\u00e4mmer med partiet du tror");
-      renderPartyList();
-    };
-
-    document.getElementById("btn-start").onclick = function () {
-      if (!chosenParty) return;
-      if (!partyQuestions) {
-        alert("Fr\u00e5gorna har inte laddats. Ladda om sidan.");
-        return;
-      }
-      var saved = getSaved(chosenParty.id);
-      if (saved) {
-        allAnswers = saved.allAnswers || [];
-        totalAnswered = saved.answered || 0;
-        showResults();
-        return;
-      }
-      allAnswers = [];
-      totalAnswered = 0;
-      phase = "specific";
-      var bank = partyQuestions[chosenParty.id] || partyQuestions.sd;
-      if (!bank || !bank.length) {
-        alert("Inga fr\u00e5gor finns \u00e4nnu f\u00f6r detta parti.");
-        return;
-      }
-      currentQueue = shuffle(bank.slice());
-      answers = [];
-      status = [];
-      for (var i = 0; i < currentQueue.length; i++) { answers.push(null); status.push("unseen"); }
-      currentQ = 0;
-      status[0] = "skipped";
-      setSubtitle("Testar hur v\u00e4l dina \u00e5sikter st\u00e4mmer \u00f6verens med " + chosenParty.name);
-      document.getElementById("step-party").classList.add("hidden");
-      document.getElementById("step-questions").classList.remove("hidden");
-      buildSegments();
-      showQuestion();
-    };
-
-    function buildSegments() {
-      var cont = document.getElementById("segments");
-      cont.innerHTML = "";
-      for (var i = 0; i < currentQueue.length; i++) {
-        (function (idx) {
-          var seg = document.createElement("div");
-          seg.className = "segment " + status[idx];
-          if (idx === currentQ) seg.classList.add("current");
-          seg.onclick = function () { jumpTo(idx); };
-          cont.appendChild(seg);
-        })(i);
-      }
-    }
-
-    function updateSegments() {
-      var segs = document.querySelectorAll("#segments .segment");
-      for (var i = 0; i < segs.length; i++) {
-        segs[i].className = "segment " + status[i];
-        if (i === currentQ) segs[i].classList.add("current");
-      }
-    }
-
-    function jumpTo(i) {
-      if (i < 0 || i >= currentQueue.length) return;
-      currentQ = i;
-      if (status[i] === "unseen") status[i] = "skipped";
-      showQuestion();
-    }
-
-    document.getElementById("btn-prev").onclick = function () {
-      if (currentQ > 0) jumpTo(currentQ - 1);
-    };
-    document.getElementById("btn-next").onclick = function () {
-      if (currentQ < currentQueue.length - 1) jumpTo(currentQ + 1);
-      else finishPhase();
-    };
-    document.getElementById("btn-finish-early").onclick = function () {
-      var answered = 0;
-      for (var i = 0; i < answers.length; i++) if (answers[i] !== null) answered++;
-      if (answered === 0 && totalAnswered === 0) {
-        alert("Svara p\u00e5 minst en fr\u00e5ga f\u00f6rst.");
-        return;
-      }
-      mergeCurrentAnswers();
-      showResults();
-    };
-    document.getElementById("btn-see-results").onclick = function () {
-      mergeCurrentAnswers();
-      showResults();
-    };
-
-    function startMixedPhase() {
-      mergeCurrentAnswers();
-      phase = "mixed";
-      currentQueue = [];
-      Object.keys(partyQuestions).forEach(function (pid) {
-        if (pid === chosenParty.id) return;
-        var qs = partyQuestions[pid];
-        if (qs && qs.length) currentQueue = currentQueue.concat(shuffle(qs.slice()));
-      });
-      currentQueue = shuffle(currentQueue);
-      if (currentQueue.length === 0) {
-        alert("Inga fler fr\u00e5gor tillg\u00e4ngliga \u00e4nnu.");
-        showResults();
-        return;
-      }
-      answers = [];
-      status = [];
-      for (var i = 0; i < currentQueue.length; i++) { answers.push(null); status.push("unseen"); }
-      currentQ = 0;
-      status[0] = "skipped";
-      document.getElementById("step-continue").classList.add("hidden");
-      document.getElementById("step-results").classList.add("hidden");
-      document.getElementById("step-questions").classList.remove("hidden");
-      buildSegments();
-      showQuestion();
-    }
-
-    document.getElementById("btn-continue").onclick = startMixedPhase;
-    document.getElementById("btn-continue-from-results").onclick = startMixedPhase;
-
-    document.getElementById("btn-save-exit").onclick = function () {
-      chosenParty = null;
-      Object.keys(markers).forEach(function (id) { markers[id].classList.remove("selected"); });
-      document.getElementById("step-results").classList.add("hidden");
-      document.getElementById("step-party").classList.remove("hidden");
-      document.getElementById("selection-panel").classList.add("hidden");
-      setSubtitle("Testa om du verkligen st\u00e4mmer med partiet du tror");
-      renderPartyList();
-    };
-
-    document.getElementById("btn-retake").onclick = function () {
-      var all = loadSaved();
-      delete all[chosenParty.id];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
-      allAnswers = [];
-      totalAnswered = 0;
-      phase = "specific";
-      var bank = partyQuestions[chosenParty.id] || partyQuestions.sd;
-      currentQueue = shuffle(bank.slice());
-      answers = [];
-      status = [];
-      for (var i = 0; i < currentQueue.length; i++) { answers.push(null); status.push("unseen"); }
-      currentQ = 0;
-      status[0] = "skipped";
-      setSubtitle("Testar hur v\u00e4l dina \u00e5sikter st\u00e4mmer \u00f6verens med " + chosenParty.name);
-      document.getElementById("step-results").classList.add("hidden");
-      document.getElementById("step-questions").classList.remove("hidden");
-      buildSegments();
-      showQuestion();
-    };
-
-    function showQuestion() {
-      hideTermPopup();
-      var q = currentQueue[currentQ];
-      document.getElementById("question-text").innerHTML = renderQuestionText(q.text);
-      if (phase === "specific") {
-        document.getElementById("phase-info").textContent =
-          "Fr\u00e5ga " + (currentQ + 1) + " av " + currentQueue.length + " (viktiga f\u00f6r " + chosenParty.name + ")";
-      } else {
-        document.getElementById("phase-info").textContent =
-          "Extrafr\u00e5ga " + (currentQ + 1) + " av " + currentQueue.length;
-      }
-      document.getElementById("btn-prev").disabled = currentQ === 0;
-      document.getElementById("btn-next").textContent =
-        currentQ === currentQueue.length - 1 ? "Klar \u2192" : "Fram\u00e5t \u2192";
-      var optionsDiv = document.getElementById("options");
-      optionsDiv.innerHTML = "";
-      var shuffled = shuffle(q.options.slice());
-      shuffled.forEach(function (opt) {
-        var btn = document.createElement("button");
-        btn.textContent = opt.label;
-        if (answers[currentQ] && JSON.stringify(answers[currentQ]) === JSON.stringify(opt.scores)) {
-          btn.classList.add("selected");
-        }
-        btn.onclick = function () { selectAnswer(opt.scores, btn); };
-        optionsDiv.appendChild(btn);
-      });
-      updateSegments();
-    }
-
-    function selectAnswer(scores, btnEl) {
-      answers[currentQ] = scores;
-      status[currentQ] = "answered";
-      var btns = document.querySelectorAll("#options button");
-      for (var i = 0; i < btns.length; i++) btns[i].classList.remove("selected");
-      btnEl.classList.add("selected");
-      updateSegments();
-      setTimeout(function () {
-        if (currentQ < currentQueue.length - 1) jumpTo(currentQ + 1);
-        else finishPhase();
-      }, 300);
-    }
-
-    function finishPhase() {
-      mergeCurrentAnswers();
-      if (phase === "specific") {
-        document.getElementById("step-questions").classList.add("hidden");
-        document.getElementById("step-continue").classList.remove("hidden");
-      } else {
-        showResults();
-      }
-    }
-
-    function mergeCurrentAnswers() {
-      for (var i = 0; i < answers.length; i++) {
-        if (!answers[i]) continue;
-        allAnswers.push(answers[i]);
-        totalAnswered++;
-      }
-      for (var j = 0; j < answers.length; j++) answers[j] = null;
-    }
-
-    function showResults() {
-      hideTermPopup();
-      document.getElementById("step-questions").classList.add("hidden");
-      document.getElementById("step-continue").classList.add("hidden");
-      document.getElementById("step-results").classList.remove("hidden");
-      setSubtitle("Resultat f\u00f6r " + chosenParty.name);
-
-      var scores = {};
-      parties.forEach(function (p) { scores[p.id] = 0; });
-      allAnswers.forEach(function (a) {
-        Object.keys(a).forEach(function (id) {
-          scores[id] = (scores[id] || 0) + a[id];
-        });
-      });
-
-      var maxPossible = totalAnswered * 2;
-      var ranked = parties.map(function (p) {
-        var match = maxPossible === 0 ? 50 : Math.round(((scores[p.id] + maxPossible) / (maxPossible * 2)) * 100);
-        return { id: p.id, name: p.name, match: match };
-      }).sort(function (a, b) { return b.match - a.match; });
-
-      var chosenMatch = null;
-      for (var i = 0; i < ranked.length; i++) {
-        if (ranked[i].id === chosenParty.id) { chosenMatch = ranked[i]; break; }
-      }
-
-      saveResult(chosenParty.id, {
-        answered: totalAnswered,
-        match: chosenMatch.match,
-        allAnswers: allAnswers,
-        ranked: ranked.map(function (r) { return { id: r.id, match: r.match }; }),
-        date: new Date().toISOString()
-      });
-
-      document.getElementById("chosen-summary").textContent =
-        "Du valde " + chosenParty.name + ". Din faktiska matchning: " + chosenMatch.match + "%\nBesvarade fr\u00e5gor: " + totalAnswered;
-
-      var list = document.getElementById("results-list");
-      list.innerHTML = "";
-      ranked.forEach(function (r) {
-        var div = document.createElement("div");
-        div.className = "result-item";
-        var nameSpan = document.createElement("span");
-        nameSpan.textContent = r.name;
-        var matchSpan = document.createElement("span");
-        matchSpan.className = "match" + (r.match < 40 ? " low" : "");
-        matchSpan.textContent = r.match + "%";
-        div.appendChild(nameSpan);
-        div.appendChild(matchSpan);
-        list.appendChild(div);
-      });
-    }
-  })();
-  </script>
+<div class="container">
+<h1>Valkompass</h1>
+<p class="subtitle" id="subtitle">Testa om du verkligen st&auml;mmer med partiet du tror</p>
+<div class="about-link"><a href="/valkompass/om.html">Om testet</a></div>
+<div id="step-party" class="card">
+<p style="margin-bottom:0.85rem;font-size:0.92rem">Vilket parti st&ouml;der eller tror du dig st&aring; n&auml;rmast just nu?</p>
+<div class="compass-wrapper">
+<div class="compass" id="compass">
+<div class="compass-label top">GAL</div>
+<div class="compass-label bottom">TAN</div>
+<div class="compass-label left">V&auml;nster</div>
+<div class="compass-label right">H&ouml;ger</div>
+</div>
+<button class="info-btn" id="info-btn" title="Vad betyder skalorna?">i</button>
+<div class="info-popup hidden" id="info-popup">
+<button class="close-info" id="close-info">&times;</button>
+<p style="margin-bottom:0.5rem"><strong>V&auml;nster &ndash; H&ouml;ger</strong><br>Handlar fr&auml;mst om ekonomi, skatter, f&ouml;rdelning och statens storlek.</p>
+<p style="margin-bottom:0.5rem"><strong>GAL &ndash; TAN</strong><br><strong>GAL</strong> = Gr&ouml;n, Alternativ, Libert&auml;r<br><strong>TAN</strong> = Traditionell, Auktorit&auml;r, Nationalistisk</p>
+<p style="font-size:0.78rem;color:#94a3b8">Placeringarna &auml;r ungef&auml;rliga.</p>
+</div>
+</div>
+<div id="selection-panel" class="hidden">
+<div class="selection-info">Du har valt: <strong id="selected-name"></strong></div>
+<div class="btn-row">
+<button class="secondary" id="btn-back">Tillbaka</button>
+<button id="btn-start">Starta test</button>
+</div>
+</div>
+<div id="list-section">
+<p style="font-size:0.78rem;color:#94a3b8;margin:0.7rem 0 0.55rem">Eller v&auml;lj fr&aring;n listan (st&ouml;rst f&ouml;rst enligt 2022):</p>
+<div id="party-list"></div>
+</div>
+</div>
+<div id="step-questions" class="card hidden">
+<div class="phase-info"><span id="phase-info"></span><span class="qid" id="qid-label" title="Klicka f&ouml;r att kopiera"></span></div>
+<div class="segments" id="segments"></div>
+<div class="question" id="question-text"></div>
+<div class="options" id="options"></div>
+<div class="nav-row">
+<button class="secondary" id="btn-prev">&larr; Bak&aring;t</button>
+<button class="secondary" id="btn-next">Fram&aring;t &rarr;</button>
+</div>
+<div class="stop-row"><button class="secondary" id="btn-finish-early">Se resultat</button></div>
+</div>
+<div id="step-continue" class="card hidden">
+<p style="text-align:center;margin-bottom:1rem;">Du har svarat p&aring; de 10 viktigaste fr&aring;gorna f&ouml;r ditt valda parti.</p>
+<div class="btn-row">
+<button class="secondary" id="btn-see-results">Se resultat</button>
+<button id="btn-continue">Forts&auml;tt med fler fr&aring;gor</button>
+</div>
+</div>
+<div id="step-results" class="card hidden">
+<h2 style="margin-bottom:0.9rem;font-size:1.1rem">Ditt resultat</h2>
+<p id="chosen-summary" style="margin-bottom:1rem;color:#94a3b8;font-size:0.88rem"></p>
+<div id="results-list"></div>
+<div class="btn-row" style="margin-top:1.3rem">
+<button id="btn-continue-from-results">Forts&auml;tt med fler fr&aring;gor</button>
+<button class="secondary" id="btn-save-exit">Avsluta & Spara</button>
+</div>
+<button class="secondary" id="btn-retake" style="margin-top:0.6rem">G&ouml;r om detta partis test</button>
+</div>
+</div>
+<div id="term-popup" class="term-popup hidden">
+<button class="close-term" id="close-term">&times;</button>
+<strong id="term-title"></strong>
+<span id="term-body"></span>
+</div>
+<script src="/valkompass/glossary.js"></script>
+<script src="/valkompass/questions.js"></script>
+<script src="/valkompass/app.js"></script>
 </body>
 </html>
