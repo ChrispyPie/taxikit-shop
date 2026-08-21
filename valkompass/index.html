@@ -109,13 +109,22 @@
       cursor: help;
     }
     .term-popup {
-      position: fixed; left: 50%; bottom: 1.5rem; transform: translateX(-50%);
-      width: calc(100% - 2rem); max-width: 420px;
-      background: #1e293b; border: 1px solid #475569; border-radius: 12px;
-      padding: 0.95rem 1.1rem; font-size: 0.88rem; line-height: 1.45; color: #e2e8f0;
-      z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      max-width: 420px;
+      margin: 0 auto;
+      background: #1e293b;
+      border: 1px solid #475569;
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      font-size: 0.88rem;
+      line-height: 1.45;
+      color: #e2e8f0;
+      z-index: 100;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
     }
-    .term-popup strong { display: block; color: #fbbf24; margin-bottom: 0.35rem; font-size: 0.92rem; }
+    .term-popup strong { display: block; color: #fbbf24; margin-bottom: 0.3rem; font-size: 0.92rem; padding-right: 1.2rem; }
     .term-popup .close-term {
       position: absolute; top: 8px; right: 12px; background: none; border: none;
       color: #94a3b8; font-size: 1.2rem; cursor: pointer; width: auto; padding: 0;
@@ -125,27 +134,27 @@
 <body>
   <div class="container">
     <h1>Valkompass</h1>
-    <p class="subtitle" id="subtitle">Testa om du verkligen stammer med partiet du tror</p>
+    <p class="subtitle" id="subtitle">Testa om du verkligen st&auml;mmer med partiet du tror</p>
     <div class="about-link"><a href="/valkompass/om.html">Om testet</a></div>
 
     <div id="step-party" class="card">
-      <p style="margin-bottom:0.85rem;font-size:0.92rem">Vilket parti stoder eller tror du dig sta narmast just nu?</p>
+      <p style="margin-bottom:0.85rem;font-size:0.92rem">Vilket parti st&ouml;der eller tror du dig st&aring; n&auml;rmast just nu?</p>
 
       <div class="compass-wrapper">
         <div class="compass" id="compass">
           <div class="compass-label top">GAL</div>
           <div class="compass-label bottom">TAN</div>
-          <div class="compass-label left">Vanster</div>
-          <div class="compass-label right">Hoger</div>
+          <div class="compass-label left">V&auml;nster</div>
+          <div class="compass-label right">H&ouml;ger</div>
         </div>
         <button class="info-btn" id="info-btn" title="Vad betyder skalorna?">i</button>
         <div class="info-popup hidden" id="info-popup">
-          <button class="close-info" id="close-info">x</button>
-          <p style="margin-bottom:0.5rem"><strong>Vanster - Hoger</strong><br>Handlar framst om ekonomi, skatter, fordelning och statens storlek.</p>
-          <p style="margin-bottom:0.5rem"><strong>GAL - TAN</strong><br>
-          <strong>GAL</strong> = Gron, Alternativ, Libertär<br>
-          <strong>TAN</strong> = Traditionell, Auktoritar, Nationalistisk</p>
-          <p style="font-size:0.78rem;color:#94a3b8">Placeringarna ar ungefärliga.</p>
+          <button class="close-info" id="close-info">&times;</button>
+          <p style="margin-bottom:0.5rem"><strong>V&auml;nster &ndash; H&ouml;ger</strong><br>Handlar fr&auml;mst om ekonomi, skatter, f&ouml;rdelning och statens storlek.</p>
+          <p style="margin-bottom:0.5rem"><strong>GAL &ndash; TAN</strong><br>
+          <strong>GAL</strong> = Gr&ouml;n, Alternativ, Libert&auml;r<br>
+          <strong>TAN</strong> = Traditionell, Auktorit&auml;r, Nationalistisk</p>
+          <p style="font-size:0.78rem;color:#94a3b8">Placeringarna &auml;r ungef&auml;rliga.</p>
         </div>
       </div>
 
@@ -158,7 +167,7 @@
       </div>
 
       <div id="list-section">
-        <p style="font-size:0.78rem;color:#94a3b8;margin:0.7rem 0 0.55rem">Eller valj fran listan (storst forst enligt 2022):</p>
+        <p style="font-size:0.78rem;color:#94a3b8;margin:0.7rem 0 0.55rem">Eller v&auml;lj fr&aring;n listan (st&ouml;rst f&ouml;rst enligt 2022):</p>
         <div id="party-list"></div>
       </div>
     </div>
@@ -169,8 +178,8 @@
       <div class="question" id="question-text"></div>
       <div class="options" id="options"></div>
       <div class="nav-row">
-        <button class="secondary" id="btn-prev">Bakåt</button>
-        <button class="secondary" id="btn-next">Framat</button>
+        <button class="secondary" id="btn-prev">&larr; Bak&aring;t</button>
+        <button class="secondary" id="btn-next">Fram&aring;t &rarr;</button>
       </div>
       <div class="stop-row">
         <button class="secondary" id="btn-finish-early">Se resultat</button>
@@ -178,10 +187,10 @@
     </div>
 
     <div id="step-continue" class="card hidden">
-      <p style="text-align:center;margin-bottom:1rem;">Du har svarat pa de 10 viktigaste fragorna for ditt valda parti.</p>
+      <p style="text-align:center;margin-bottom:1rem;">Du har svarat p&aring; de 10 viktigaste fr&aring;gorna f&ouml;r ditt valda parti.</p>
       <div class="btn-row">
         <button class="secondary" id="btn-see-results">Se resultat</button>
-        <button id="btn-continue">Fortsatt med fler fragor</button>
+        <button id="btn-continue">Forts&auml;tt med fler fr&aring;gor</button>
       </div>
     </div>
 
@@ -190,15 +199,15 @@
       <p id="chosen-summary" style="margin-bottom:1rem;color:#94a3b8;font-size:0.88rem"></p>
       <div id="results-list"></div>
       <div class="btn-row" style="margin-top:1.3rem;">
-        <button id="btn-continue-from-results">Fortsatt med fler fragor</button>
-        <button class="secondary" id="btn-save-exit">Avsluta och Spara</button>
+        <button id="btn-continue-from-results">Forts&auml;tt med fler fr&aring;gor</button>
+        <button class="secondary" id="btn-save-exit">Avsluta & Spara</button>
       </div>
-      <button class="secondary" id="btn-retake" style="margin-top:0.6rem;">Gor om detta partis test</button>
+      <button class="secondary" id="btn-retake" style="margin-top:0.6rem;">G&ouml;r om detta partis test</button>
     </div>
   </div>
 
   <div id="term-popup" class="term-popup hidden">
-    <button class="close-term" id="close-term">x</button>
+    <button class="close-term" id="close-term">&times;</button>
     <strong id="term-title"></strong>
     <span id="term-body"></span>
   </div>
@@ -215,20 +224,15 @@
       { id: "s",    name: "Socialdemokraterna",     short: "S",   pct: "30,3 %", x: 32, y: 48 },
       { id: "sd",   name: "Sverigedemokraterna",    short: "SD",  pct: "20,5 %", x: 78, y: 78 },
       { id: "m",    name: "Moderaterna",            short: "M",   pct: "19,1 %", x: 72, y: 55 },
-      { id: "v",    name: "Vansterpartiet",         short: "V",   pct: "6,8 %",  x: 12, y: 28 },
+      { id: "v",    name: "V\u00e4nsterpartiet",     short: "V",   pct: "6,8 %",  x: 12, y: 28 },
       { id: "c",    name: "Centerpartiet",          short: "C",   pct: "6,7 %",  x: 48, y: 38 },
       { id: "kd",   name: "Kristdemokraterna",      short: "KD",  pct: "5,3 %",  x: 70, y: 68 },
-      { id: "mp",   name: "Miljopartiet",           short: "MP",  pct: "5,1 %",  x: 22, y: 18 },
+      { id: "mp",   name: "Milj\u00f6partiet",       short: "MP",  pct: "5,1 %",  x: 22, y: 18 },
       { id: "l",    name: "Liberalerna",            short: "L",   pct: "4,6 %",  x: 58, y: 32 },
       { id: "nyans",name: "Partiet Nyans",          short: "NY",  pct: "0,4 %",  x: 38, y: 42 },
-      { id: "afs",  name: "Alternativ for Sverige", short: "AFS", pct: "0,3 %",  x: 88, y: 88 },
+      { id: "afs",  name: "Alternativ f\u00f6r Sverige", short: "AFS", pct: "0,3 %",  x: 88, y: 88 },
       { id: "med",  name: "Medborgerlig Samling",   short: "MED", pct: "0,2 %",  x: 75, y: 45 }
     ];
-
-    // Fix Swedish characters that may have been stripped
-    parties[3].name = "V\u00e4nsterpartiet";
-    parties[6].name = "Milj\u00f6partiet";
-    parties[9].name = "Alternativ f\u00f6r Sverige";
 
     var STORAGE_KEY = "valkompass_results_v1";
 
@@ -280,11 +284,31 @@
       });
     }
 
-    function showTermPopup(term, def) {
+    function showTermPopup(term, def, anchorEl) {
+      var popup = document.getElementById("term-popup");
       document.getElementById("term-title").textContent = term;
       document.getElementById("term-body").textContent = def;
-      document.getElementById("term-popup").classList.remove("hidden");
+      popup.classList.remove("hidden");
+
+      // Place just below the clicked word; if not enough space, place above
+      var rect = anchorEl.getBoundingClientRect();
+      var gap = 8;
+      // Force layout so we know height
+      var ph = popup.offsetHeight || 80;
+      var spaceBelow = window.innerHeight - rect.bottom;
+      var top;
+      if (spaceBelow < ph + gap + 12 && rect.top > ph + gap + 12) {
+        top = rect.top - ph - gap;
+      } else {
+        top = rect.bottom + gap;
+      }
+      // Keep inside viewport horizontally via left/right CSS; vertically clamp
+      if (top < 8) top = 8;
+      if (top + ph > window.innerHeight - 8) top = Math.max(8, window.innerHeight - ph - 8);
+      popup.style.top = top + "px";
+      popup.style.bottom = "auto";
     }
+
     function hideTermPopup() {
       document.getElementById("term-popup").classList.add("hidden");
     }
@@ -293,11 +317,12 @@
       e.stopPropagation();
       hideTermPopup();
     };
+
     document.addEventListener("click", function (e) {
       var termEl = e.target.closest(".term");
       if (termEl) {
         e.stopPropagation();
-        showTermPopup(termEl.getAttribute("data-term"), termEl.getAttribute("data-def"));
+        showTermPopup(termEl.getAttribute("data-term"), termEl.getAttribute("data-def"), termEl);
         return;
       }
       var popup = document.getElementById("term-popup");
@@ -329,7 +354,7 @@
         if (saved[p.id]) {
           var tag = document.createElement("span");
           tag.className = "saved";
-          tag.textContent = " sparad";
+          tag.textContent = " \u2713 sparad";
           left.appendChild(tag);
         }
         var right = document.createElement("span");
@@ -372,14 +397,14 @@
       chosenParty = null;
       Object.keys(markers).forEach(function (id) { markers[id].classList.remove("selected"); });
       document.getElementById("selection-panel").classList.add("hidden");
-      setSubtitle("Testa om du verkligen stammer med partiet du tror");
+      setSubtitle("Testa om du verkligen st\u00e4mmer med partiet du tror");
       renderPartyList();
     };
 
     document.getElementById("btn-start").onclick = function () {
       if (!chosenParty) return;
       if (!partyQuestions) {
-        alert("Fragorna har inte laddats. Ladda om sidan.");
+        alert("Fr\u00e5gorna har inte laddats. Ladda om sidan.");
         return;
       }
       var saved = getSaved(chosenParty.id);
@@ -394,7 +419,7 @@
       phase = "specific";
       var bank = partyQuestions[chosenParty.id] || partyQuestions.sd;
       if (!bank || !bank.length) {
-        alert("Inga fragor finns annu for detta parti.");
+        alert("Inga fr\u00e5gor finns \u00e4nnu f\u00f6r detta parti.");
         return;
       }
       currentQueue = shuffle(bank.slice());
@@ -403,7 +428,7 @@
       for (var i = 0; i < currentQueue.length; i++) { answers.push(null); status.push("unseen"); }
       currentQ = 0;
       status[0] = "skipped";
-      setSubtitle("Testar hur val dina asikter stammer overens med " + chosenParty.name);
+      setSubtitle("Testar hur v\u00e4l dina \u00e5sikter st\u00e4mmer \u00f6verens med " + chosenParty.name);
       document.getElementById("step-party").classList.add("hidden");
       document.getElementById("step-questions").classList.remove("hidden");
       buildSegments();
@@ -450,7 +475,7 @@
       var answered = 0;
       for (var i = 0; i < answers.length; i++) if (answers[i] !== null) answered++;
       if (answered === 0 && totalAnswered === 0) {
-        alert("Svara pa minst en fraga forst.");
+        alert("Svara p\u00e5 minst en fr\u00e5ga f\u00f6rst.");
         return;
       }
       mergeCurrentAnswers();
@@ -472,7 +497,7 @@
       });
       currentQueue = shuffle(currentQueue);
       if (currentQueue.length === 0) {
-        alert("Inga fler fragor tillgangliga annu.");
+        alert("Inga fler fr\u00e5gor tillg\u00e4ngliga \u00e4nnu.");
         showResults();
         return;
       }
@@ -497,7 +522,7 @@
       document.getElementById("step-results").classList.add("hidden");
       document.getElementById("step-party").classList.remove("hidden");
       document.getElementById("selection-panel").classList.add("hidden");
-      setSubtitle("Testa om du verkligen stammer med partiet du tror");
+      setSubtitle("Testa om du verkligen st\u00e4mmer med partiet du tror");
       renderPartyList();
     };
 
@@ -515,7 +540,7 @@
       for (var i = 0; i < currentQueue.length; i++) { answers.push(null); status.push("unseen"); }
       currentQ = 0;
       status[0] = "skipped";
-      setSubtitle("Testar hur val dina asikter stammer overens med " + chosenParty.name);
+      setSubtitle("Testar hur v\u00e4l dina \u00e5sikter st\u00e4mmer \u00f6verens med " + chosenParty.name);
       document.getElementById("step-results").classList.add("hidden");
       document.getElementById("step-questions").classList.remove("hidden");
       buildSegments();
@@ -528,14 +553,14 @@
       document.getElementById("question-text").innerHTML = renderQuestionText(q.text);
       if (phase === "specific") {
         document.getElementById("phase-info").textContent =
-          "Fraga " + (currentQ + 1) + " av " + currentQueue.length + " (viktiga for " + chosenParty.name + ")";
+          "Fr\u00e5ga " + (currentQ + 1) + " av " + currentQueue.length + " (viktiga f\u00f6r " + chosenParty.name + ")";
       } else {
         document.getElementById("phase-info").textContent =
-          "Extrafraga " + (currentQ + 1) + " av " + currentQueue.length;
+          "Extrafr\u00e5ga " + (currentQ + 1) + " av " + currentQueue.length;
       }
       document.getElementById("btn-prev").disabled = currentQ === 0;
       document.getElementById("btn-next").textContent =
-        currentQ === currentQueue.length - 1 ? "Klar" : "Framat";
+        currentQ === currentQueue.length - 1 ? "Klar \u2192" : "Fram\u00e5t \u2192";
       var optionsDiv = document.getElementById("options");
       optionsDiv.innerHTML = "";
       var shuffled = shuffle(q.options.slice());
@@ -588,7 +613,7 @@
       document.getElementById("step-questions").classList.add("hidden");
       document.getElementById("step-continue").classList.add("hidden");
       document.getElementById("step-results").classList.remove("hidden");
-      setSubtitle("Resultat for " + chosenParty.name);
+      setSubtitle("Resultat f\u00f6r " + chosenParty.name);
 
       var scores = {};
       parties.forEach(function (p) { scores[p.id] = 0; });
@@ -618,7 +643,7 @@
       });
 
       document.getElementById("chosen-summary").textContent =
-        "Du valde " + chosenParty.name + ". Din faktiska matchning: " + chosenMatch.match + "%\nBesvarade fragor: " + totalAnswered;
+        "Du valde " + chosenParty.name + ". Din faktiska matchning: " + chosenMatch.match + "%\nBesvarade fr\u00e5gor: " + totalAnswered;
 
       var list = document.getElementById("results-list");
       list.innerHTML = "";
