@@ -183,5 +183,97 @@ Object.assign(window.partyQuestions, {
         { label: "Balans mellan skyddsjakt och bevarande", scores: { c: 1, kd: 1, sd: 0, m: 1, med: 0, afs: 0, s: 1, l: 1, v: 0, mp: 0, nyans: 0 } }
       ]
     }
+  ],
+  kd: [
+    {
+      id: "q-kd01",
+      text: "Hur ska Sverige främst stärka familjerna?",
+      options: [
+        { label: "Högre barnbidrag och mer stöd till föräldrar som stannar hemma", scores: { kd: 2, sd: 1, s: 1, c: 1, m: 0, l: 0, v: 0, mp: 0, med: -1, afs: 0, nyans: 0 } },
+        { label: "Mer förskola och att båda föräldrarna jobbar", scores: { kd: -1, sd: -1, s: 1, c: 0, m: 0, l: 1, v: 1, mp: 2, med: 0, afs: -1, nyans: 0 } },
+        { label: "Lägre skatt så familjerna får mer pengar kvar", scores: { kd: 1, sd: 1, s: -1, c: 1, m: 2, l: 1, v: -2, mp: -1, med: 2, afs: 1, nyans: 0 } }
+      ]
+    },
+    {
+      id: "q-kd02",
+      text: "Bör vården prioritera kortare köer och mer valfrihet för patienten?",
+      options: [
+        { label: "Ja, tydligt", scores: { kd: 2, m: 2, l: 1, c: 1, med: 2, sd: 1, s: 0, v: -1, mp: 0, afs: 0, nyans: 0 } },
+        { label: "Nej, mer offentlig styrning och lika för alla", scores: { kd: -2, m: -2, l: -1, c: -1, med: -2, sd: 0, s: 2, v: 2, mp: 1, afs: 0, nyans: 1 } },
+        { label: "En blandning", scores: { kd: 1, m: 1, l: 1, c: 1, med: 0, sd: 1, s: 1, v: 0, mp: 1, afs: 0, nyans: 0 } }
+      ]
+    },
+    {
+      id: "q-kd03",
+      text: "Hur viktigt är det att skolan förmedlar kristna och traditionella värderingar?",
+      options: [
+        { label: "Mycket viktigt", scores: { kd: 2, sd: 1, afs: 1, m: 0, c: 0, s: -1, l: -1, v: -2, mp: -2, med: 0, nyans: -1 } },
+        { label: "Skolan ska vara neutral i trosfrågor", scores: { kd: -2, sd: -1, afs: -1, m: 0, c: 1, s: 1, l: 1, v: 1, mp: 2, med: 1, nyans: 1 } },
+        { label: "Viss plats för traditioner, men utan att styra trosfrågor", scores: { kd: 1, sd: 1, afs: 0, m: 1, c: 1, s: 1, l: 1, v: 0, mp: 0, med: 1, nyans: 0 } }
+      ]
+    },
+    {
+      id: "q-kd04",
+      text: "Bör straffen för vålds- och sexualbrott skärpas?",
+      options: [
+        { label: "Ja, tydligt", scores: { kd: 2, sd: 2, m: 2, med: 2, afs: 2, l: 1, c: 0, s: 0, v: -2, mp: -1, nyans: -1 } },
+        { label: "Nej, mer fokus på rehabilitering", scores: { kd: -2, sd: -2, m: -1, med: -2, afs: -2, l: 0, c: 0, s: 1, v: 2, mp: 1, nyans: 1 } },
+        { label: "Viss skärpning, men inte extremt", scores: { kd: 1, sd: 0, m: 1, med: 0, afs: 0, l: 1, c: 1, s: 1, v: 0, mp: 0, nyans: 0 } }
+      ]
+    },
+    {
+      id: "q-kd05",
+      text: "Hur generös bör invandringspolitiken vara?",
+      options: [
+        { label: "Tydligt mer restriktiv", scores: { kd: 2, sd: 2, m: 1, med: 2, afs: 2, l: 0, c: -1, s: -1, v: -2, mp: -2, nyans: -1 } },
+        { label: "Mer generös än idag", scores: { kd: -2, sd: -2, m: -1, med: -2, afs: -2, l: 0, c: 1, s: 1, v: 2, mp: 2, nyans: 2 } },
+        { label: "Ungefär som idag, men med tydligare krav på integration", scores: { kd: 1, sd: 0, m: 1, med: 0, afs: -1, l: 1, c: 1, s: 1, v: 0, mp: 0, nyans: 0 } }
+      ]
+    },
+    {
+      id: "q-kd06",
+      text: "Bör äldreomsorgen få mer resurser även om det betyder högre skatt eller mindre till annat?",
+      options: [
+        { label: "Ja", scores: { kd: 2, s: 1, c: 1, v: 1, mp: 1, m: 0, l: 0, sd: 0, med: -1, afs: 0, nyans: 0 } },
+        { label: "Nej, andra områden är viktigare just nu", scores: { kd: -1, s: -1, c: 0, v: -1, mp: -1, m: 1, l: 1, sd: 1, med: 1, afs: 1, nyans: 0 } },
+        { label: "Mer till äldreomsorg, men främst genom effektivisering", scores: { kd: 1, s: 1, c: 1, v: 0, mp: 0, m: 1, l: 1, sd: 1, med: 1, afs: 0, nyans: 0 } }
+      ]
+    },
+    {
+      id: "q-kd07",
+      text: "Hur ska Sverige se på kön och identitet i lag och skola?",
+      options: [
+        { label: "Biologiskt kön ska vara grunden – könsbyte för minderåriga bör stoppas", scores: { kd: 2, sd: 2, afs: 2, med: 1, m: 1, c: 0, l: 0, s: -1, v: -2, mp: -2, nyans: -1 } },
+        { label: "Barn och unga ska få stöd att byta kön om de vill", scores: { kd: -2, sd: -2, afs: -2, med: -1, m: -1, c: 0, l: 1, s: 1, v: 2, mp: 2, nyans: 1 } },
+        { label: "Försiktig linje – utredning och åldersgränser, inte förbud", scores: { kd: 0, sd: 0, afs: -1, med: 0, m: 1, c: 1, l: 1, s: 1, v: 0, mp: 0, nyans: 0 } }
+      ]
+    },
+    {
+      id: "q-kd08",
+      text: "Bör det bli lättare för friskolor med konfessionell inriktning (t.ex. kristna skolor)?",
+      options: [
+        { label: "Ja", scores: { kd: 2, sd: 0, m: 0, c: 0, l: 0, med: 0, s: -1, v: -2, mp: -1, afs: 0, nyans: 1 } },
+        { label: "Nej, skolan ska vara helt icke-konfessionell", scores: { kd: -2, sd: 0, m: 0, c: 0, l: 1, med: 1, s: 1, v: 2, mp: 2, afs: 0, nyans: -1 } },
+        { label: "Okej om de följer läroplanen och inte diskriminerar", scores: { kd: 1, sd: 1, m: 1, c: 1, l: 1, med: 1, s: 1, v: 0, mp: 0, afs: 0, nyans: 0 } }
+      ]
+    },
+    {
+      id: "q-kd09",
+      text: "Hur viktigt är det att Sverige bygger ut kärnkraften?",
+      options: [
+        { label: "Mycket viktigt", scores: { kd: 2, m: 2, sd: 2, med: 2, l: 1, afs: 1, c: 1, s: 0, v: -2, mp: -2, nyans: 0 } },
+        { label: "Nej, fokusera på förnybart", scores: { kd: -2, m: -2, sd: -2, med: -2, l: 0, afs: -2, c: -1, s: 1, v: 1, mp: 2, nyans: 0 } },
+        { label: "Behåll och komplettera, men inte bara kärnkraft", scores: { kd: 1, m: 1, sd: 1, med: 1, l: 1, afs: 0, c: 2, s: 1, v: 0, mp: -1, nyans: 0 } }
+      ]
+    },
+    {
+      id: "q-kd10",
+      text: "Bör civilsamhället (kyrkor, ideella organisationer) få mer ansvar och stöd i välfärden?",
+      options: [
+        { label: "Ja, tydligt", scores: { kd: 2, c: 1, m: 1, sd: 0, l: 0, s: 0, v: -1, mp: 0, med: 0, afs: 0, nyans: 0 } },
+        { label: "Nej, välfärden ska skötas av det offentliga", scores: { kd: -2, c: -1, m: -1, sd: 0, l: 0, s: 1, v: 2, mp: 1, med: 0, afs: 0, nyans: 0 } },
+        { label: "Viss roll, men det offentliga ska ha huvudansvaret", scores: { kd: 1, c: 1, m: 1, sd: 1, l: 1, s: 1, v: 0, mp: 1, med: 1, afs: 0, nyans: 0 } }
+      ]
+    }
   ]
 });
