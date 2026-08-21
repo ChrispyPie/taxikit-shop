@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Valkompass – Testa din riktiga alignment</title>
+  <title>Valkompass</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 1.25rem 0.9rem; }
@@ -35,7 +35,6 @@
     .low { color: #f87171; }
     .explanation { font-size: 0.85rem; color: #94a3b8; margin-top: 0.35rem; display: none; line-height: 1.4; }
     .explanation.open { display: block; }
-
     .compass-wrapper { margin-bottom: 1.1rem; position: relative; }
     .compass {
       position: relative; width: 100%; aspect-ratio: 1 / 0.78; border-radius: 12px; border: 1px solid #334155; overflow: hidden;
@@ -58,7 +57,6 @@
     .compass-label.right { right: 8px; top: 50%; transform: translateY(-50%); }
     .compass-label.top { top: 7px; left: 50%; transform: translateX(-50%); }
     .compass-label.bottom { bottom: 7px; left: 50%; transform: translateX(-50%); }
-
     .compass-marker {
       position: absolute; width: 30px; height: 30px; border-radius: 50%; background: #0f172a; border: 2px solid #e2e8f0;
       display: flex; align-items: center; justify-content: center; font-size: 0.62rem; font-weight: 700; color: white;
@@ -70,7 +68,6 @@
       border-color: #fbbf24; box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.5), 0 2px 8px rgba(0,0,0,0.5);
       transform: translate(-50%, -50%) scale(1.22); z-index: 12;
     }
-
     .info-btn {
       position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; border-radius: 50%;
       background: rgba(15, 23, 42, 0.75); border: 1.5px solid #94a3b8; color: #e2e8f0;
@@ -78,7 +75,6 @@
       cursor: pointer; z-index: 5; padding: 0; line-height: 1;
     }
     .info-btn:hover { background: rgba(51, 65, 85, 0.9); border-color: #e2e8f0; }
-
     .info-popup {
       position: absolute; top: 40px; right: 8px; left: 8px; background: #1e293b; border: 1px solid #475569;
       border-radius: 10px; padding: 0.9rem 1rem; font-size: 0.82rem; line-height: 1.45; color: #cbd5e1;
@@ -89,7 +85,6 @@
       position: absolute; top: 6px; right: 10px; background: none; border: none; color: #94a3b8;
       font-size: 1.1rem; cursor: pointer; width: auto; padding: 0;
     }
-
     .selection-info { text-align: center; margin: 0.9rem 0 0.7rem; font-size: 0.95rem; }
     .selection-info strong { color: #fbbf24; }
     .btn-row { display: flex; gap: 0.6rem; margin-top: 0.6rem; }
@@ -98,7 +93,6 @@
     .nav-row button { flex: 1; }
     .stop-row { margin-top: 0.8rem; }
     .phase-info { font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.6rem; text-align: center; }
-
     .segments { display: flex; gap: 3px; margin-bottom: 1rem; }
     .segment {
       flex: 1; height: 8px; border-radius: 3px; background: #1e293b; border: 1px solid #334155;
@@ -108,8 +102,6 @@
     .segment.answered { background: #22c55e; border-color: #16a34a; }
     .segment.skipped { background: #ef4444; border-color: #dc2626; }
     .segment.current { outline: 2px solid #fbbf24; outline-offset: 1px; }
-
-    /* Diskreta klickbara ord */
     .term {
       font-weight: 600;
       color: inherit;
@@ -117,66 +109,43 @@
       cursor: help;
     }
     .term-popup {
-      position: fixed;
-      left: 50%;
-      bottom: 1.5rem;
-      transform: translateX(-50%);
-      width: calc(100% - 2rem);
-      max-width: 420px;
-      background: #1e293b;
-      border: 1px solid #475569;
-      border-radius: 12px;
-      padding: 0.95rem 1.1rem;
-      font-size: 0.88rem;
-      line-height: 1.45;
-      color: #e2e8f0;
-      z-index: 100;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      position: fixed; left: 50%; bottom: 1.5rem; transform: translateX(-50%);
+      width: calc(100% - 2rem); max-width: 420px;
+      background: #1e293b; border: 1px solid #475569; border-radius: 12px;
+      padding: 0.95rem 1.1rem; font-size: 0.88rem; line-height: 1.45; color: #e2e8f0;
+      z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    .term-popup strong {
-      display: block;
-      color: #fbbf24;
-      margin-bottom: 0.35rem;
-      font-size: 0.92rem;
-    }
+    .term-popup strong { display: block; color: #fbbf24; margin-bottom: 0.35rem; font-size: 0.92rem; }
     .term-popup .close-term {
-      position: absolute;
-      top: 8px;
-      right: 12px;
-      background: none;
-      border: none;
-      color: #94a3b8;
-      font-size: 1.2rem;
-      cursor: pointer;
-      width: auto;
-      padding: 0;
+      position: absolute; top: 8px; right: 12px; background: none; border: none;
+      color: #94a3b8; font-size: 1.2rem; cursor: pointer; width: auto; padding: 0;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Valkompass</h1>
-    <p class="subtitle" id="subtitle">Testa om du verkligen stämmer med partiet du tror</p>
+    <p class="subtitle" id="subtitle">Testa om du verkligen stammer med partiet du tror</p>
     <div class="about-link"><a href="/valkompass/om.html">Om testet</a></div>
 
     <div id="step-party" class="card">
-      <p style="margin-bottom:0.85rem;font-size:0.92rem">Vilket parti stöder eller tror du dig stå närmast just nu?</p>
+      <p style="margin-bottom:0.85rem;font-size:0.92rem">Vilket parti stoder eller tror du dig sta narmast just nu?</p>
 
       <div class="compass-wrapper">
         <div class="compass" id="compass">
           <div class="compass-label top">GAL</div>
           <div class="compass-label bottom">TAN</div>
-          <div class="compass-label left">Vänster</div>
-          <div class="compass-label right">Höger</div>
+          <div class="compass-label left">Vanster</div>
+          <div class="compass-label right">Hoger</div>
         </div>
         <button class="info-btn" id="info-btn" title="Vad betyder skalorna?">i</button>
         <div class="info-popup hidden" id="info-popup">
-          <button class="close-info" id="close-info">×</button>
-          <p style="margin-bottom:0.5rem"><strong>Vänster – Höger</strong><br>Handlar främst om ekonomi, skatter, fördelning och statens storlek.</p>
-          <p style="margin-bottom:0.5rem"><strong>GAL – TAN</strong><br>
-          <strong>GAL</strong> = Grön, Alternativ, Libertär<br>
-          <strong>TAN</strong> = Traditionell, Auktoritär, Nationalistisk</p>
-          <p style="font-size:0.78rem;color:#94a3b8">Placeringarna är ungefärliga.</p>
+          <button class="close-info" id="close-info">x</button>
+          <p style="margin-bottom:0.5rem"><strong>Vanster - Hoger</strong><br>Handlar framst om ekonomi, skatter, fordelning och statens storlek.</p>
+          <p style="margin-bottom:0.5rem"><strong>GAL - TAN</strong><br>
+          <strong>GAL</strong> = Gron, Alternativ, Libertär<br>
+          <strong>TAN</strong> = Traditionell, Auktoritar, Nationalistisk</p>
+          <p style="font-size:0.78rem;color:#94a3b8">Placeringarna ar ungefärliga.</p>
         </div>
       </div>
 
@@ -189,7 +158,7 @@
       </div>
 
       <div id="list-section">
-        <p style="font-size:0.78rem;color:#94a3b8;margin:0.7rem 0 0.55rem">Eller välj från listan (störst först enligt 2022):</p>
+        <p style="font-size:0.78rem;color:#94a3b8;margin:0.7rem 0 0.55rem">Eller valj fran listan (storst forst enligt 2022):</p>
         <div id="party-list"></div>
       </div>
     </div>
@@ -200,8 +169,8 @@
       <div class="question" id="question-text"></div>
       <div class="options" id="options"></div>
       <div class="nav-row">
-        <button class="secondary" id="btn-prev">← Bakåt</button>
-        <button class="secondary" id="btn-next">Framåt →</button>
+        <button class="secondary" id="btn-prev">Bakåt</button>
+        <button class="secondary" id="btn-next">Framat</button>
       </div>
       <div class="stop-row">
         <button class="secondary" id="btn-finish-early">Se resultat</button>
@@ -209,10 +178,10 @@
     </div>
 
     <div id="step-continue" class="card hidden">
-      <p style="text-align:center;margin-bottom:1rem;">Du har svarat på de 10 viktigaste frågorna för ditt valda parti.</p>
+      <p style="text-align:center;margin-bottom:1rem;">Du har svarat pa de 10 viktigaste fragorna for ditt valda parti.</p>
       <div class="btn-row">
         <button class="secondary" id="btn-see-results">Se resultat</button>
-        <button id="btn-continue">Fortsätt med fler frågor</button>
+        <button id="btn-continue">Fortsatt med fler fragor</button>
       </div>
     </div>
 
@@ -221,15 +190,15 @@
       <p id="chosen-summary" style="margin-bottom:1rem;color:#94a3b8;font-size:0.88rem"></p>
       <div id="results-list"></div>
       <div class="btn-row" style="margin-top:1.3rem;">
-        <button id="btn-continue-from-results">Fortsätt med fler frågor</button>
-        <button class="secondary" id="btn-save-exit">Avsluta & Spara</button>
+        <button id="btn-continue-from-results">Fortsatt med fler fragor</button>
+        <button class="secondary" id="btn-save-exit">Avsluta och Spara</button>
       </div>
-      <button class="secondary" id="btn-retake" style="margin-top:0.6rem;">Gör om detta partis test</button>
+      <button class="secondary" id="btn-retake" style="margin-top:0.6rem;">Gor om detta partis test</button>
     </div>
   </div>
 
   <div id="term-popup" class="term-popup hidden">
-    <button class="close-term" id="close-term">×</button>
+    <button class="close-term" id="close-term">x</button>
     <strong id="term-title"></strong>
     <span id="term-body"></span>
   </div>
@@ -238,58 +207,57 @@
   <script src="/valkompass/questions.js"></script>
 
   <script>
-    const partyQuestions = window.partyQuestions;
-    const glossary = window.glossary || {};
+  (function () {
+    var partyQuestions = window.partyQuestions;
+    var glossary = window.glossary || {};
 
-    const parties = [
+    var parties = [
       { id: "s",    name: "Socialdemokraterna",     short: "S",   pct: "30,3 %", x: 32, y: 48 },
       { id: "sd",   name: "Sverigedemokraterna",    short: "SD",  pct: "20,5 %", x: 78, y: 78 },
       { id: "m",    name: "Moderaterna",            short: "M",   pct: "19,1 %", x: 72, y: 55 },
-      { id: "v",    name: "Vänsterpartiet",         short: "V",   pct: "6,8 %",  x: 12, y: 28 },
+      { id: "v",    name: "Vansterpartiet",         short: "V",   pct: "6,8 %",  x: 12, y: 28 },
       { id: "c",    name: "Centerpartiet",          short: "C",   pct: "6,7 %",  x: 48, y: 38 },
       { id: "kd",   name: "Kristdemokraterna",      short: "KD",  pct: "5,3 %",  x: 70, y: 68 },
-      { id: "mp",   name: "Miljöpartiet",           short: "MP",  pct: "5,1 %",  x: 22, y: 18 },
+      { id: "mp",   name: "Miljopartiet",           short: "MP",  pct: "5,1 %",  x: 22, y: 18 },
       { id: "l",    name: "Liberalerna",            short: "L",   pct: "4,6 %",  x: 58, y: 32 },
       { id: "nyans",name: "Partiet Nyans",          short: "NY",  pct: "0,4 %",  x: 38, y: 42 },
-      { id: "afs",  name: "Alternativ för Sverige", short: "AFS", pct: "0,3 %",  x: 88, y: 88 },
+      { id: "afs",  name: "Alternativ for Sverige", short: "AFS", pct: "0,3 %",  x: 88, y: 88 },
       { id: "med",  name: "Medborgerlig Samling",   short: "MED", pct: "0,2 %",  x: 75, y: 45 }
     ];
 
-    const STORAGE_KEY = "valkompass_results_v1";
+    // Fix Swedish characters that may have been stripped
+    parties[3].name = "V\u00e4nsterpartiet";
+    parties[6].name = "Milj\u00f6partiet";
+    parties[9].name = "Alternativ f\u00f6r Sverige";
+
+    var STORAGE_KEY = "valkompass_results_v1";
 
     function loadSaved() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-      } catch {
-        return {};
-      }
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
+      catch (e) { return {}; }
     }
-
     function saveResult(partyId, data) {
-      const all = loadSaved();
+      var all = loadSaved();
       all[partyId] = data;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
     }
+    function getSaved(partyId) { return loadSaved()[partyId] || null; }
 
-    function getSaved(partyId) {
-      return loadSaved()[partyId] || null;
-    }
-
-    let chosenParty = null;
-    let currentQ = 0;
-    let phase = "specific";
-    let currentQueue = [];
-    let answers = [];
-    let status = [];
-    let allAnswers = [];
-    let totalAnswered = 0;
-    const markers = {};
+    var chosenParty = null;
+    var currentQ = 0;
+    var phase = "specific";
+    var currentQueue = [];
+    var answers = [];
+    var status = [];
+    var allAnswers = [];
+    var totalAnswered = 0;
+    var markers = {};
 
     function shuffle(array) {
-      const arr = [...array];
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
+      var arr = array.slice();
+      for (var i = arr.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
       }
       return arr;
     }
@@ -299,17 +267,14 @@
     }
 
     function escapeHtml(str) {
-      return String(str)
-        .replace(/&/g, "&")
-        .replace(/</g, "<")
-        .replace(/>/g, ">")
-        .replace(/"/g, """);
+      var d = document.createElement("div");
+      d.textContent = str;
+      return d.innerHTML;
     }
 
-    // [[term]] eller [[term|egen förklaring]]
     function renderQuestionText(raw) {
-      return escapeHtml(raw).replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, function(_, term, def) {
-        const explanation = def || glossary[term] || glossary[term.toLowerCase()] || "";
+      return escapeHtml(raw).replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, function (_, term, def) {
+        var explanation = def || glossary[term] || glossary[term.toLowerCase()] || "";
         if (!explanation) return term;
         return '<span class="term" data-term="' + escapeHtml(term) + '" data-def="' + escapeHtml(explanation) + '">' + escapeHtml(term) + '</span>';
       });
@@ -320,17 +285,15 @@
       document.getElementById("term-body").textContent = def;
       document.getElementById("term-popup").classList.remove("hidden");
     }
-
     function hideTermPopup() {
       document.getElementById("term-popup").classList.add("hidden");
     }
 
-    document.getElementById("close-term").onclick = function(e) {
+    document.getElementById("close-term").onclick = function (e) {
       e.stopPropagation();
       hideTermPopup();
     };
-
-    document.addEventListener("click", function(e) {
+    document.addEventListener("click", function (e) {
       var termEl = e.target.closest(".term");
       if (termEl) {
         e.stopPropagation();
@@ -338,20 +301,18 @@
         return;
       }
       var popup = document.getElementById("term-popup");
-      if (!popup.classList.contains("hidden") && !popup.contains(e.target)) {
-        hideTermPopup();
-      }
+      if (!popup.classList.contains("hidden") && !popup.contains(e.target)) hideTermPopup();
     });
 
     var compass = document.getElementById("compass");
-    parties.forEach(function(p) {
+    parties.forEach(function (p) {
       var marker = document.createElement("div");
       marker.className = "compass-marker";
       marker.style.left = p.x + "%";
       marker.style.top = p.y + "%";
       marker.textContent = p.short;
       marker.title = p.name;
-      marker.onclick = function() { selectParty(p); };
+      marker.onclick = function () { selectParty(p); };
       compass.appendChild(marker);
       markers[p.id] = marker;
     });
@@ -360,12 +321,23 @@
       var partyList = document.getElementById("party-list");
       partyList.innerHTML = "";
       var saved = loadSaved();
-      parties.forEach(function(p) {
+      parties.forEach(function (p) {
         var btn = document.createElement("button");
         btn.className = "party-btn" + (chosenParty && chosenParty.id === p.id ? " active" : "");
-        var hasSaved = saved[p.id];
-        btn.innerHTML = "<span>" + p.name + (hasSaved ? '<span class="saved">✓ sparad</span>' : "") + "</span><span class=\"pct\">" + p.pct + "</span>";
-        btn.onclick = function() { selectParty(p); };
+        var left = document.createElement("span");
+        left.textContent = p.name;
+        if (saved[p.id]) {
+          var tag = document.createElement("span");
+          tag.className = "saved";
+          tag.textContent = " sparad";
+          left.appendChild(tag);
+        }
+        var right = document.createElement("span");
+        right.className = "pct";
+        right.textContent = p.pct;
+        btn.appendChild(left);
+        btn.appendChild(right);
+        btn.onclick = function () { selectParty(p); };
         partyList.appendChild(btn);
       });
     }
@@ -373,75 +345,65 @@
 
     var infoBtn = document.getElementById("info-btn");
     var infoPopup = document.getElementById("info-popup");
-    infoBtn.onclick = function(e) {
+    infoBtn.onclick = function (e) {
       e.stopPropagation();
       infoPopup.classList.toggle("hidden");
     };
-    document.getElementById("close-info").onclick = function() {
+    document.getElementById("close-info").onclick = function () {
       infoPopup.classList.add("hidden");
     };
-    document.addEventListener("click", function(e) {
-      if (!infoPopup.contains(e.target) && e.target !== infoBtn) {
-        infoPopup.classList.add("hidden");
-      }
+    document.addEventListener("click", function (e) {
+      if (!infoPopup.contains(e.target) && e.target !== infoBtn) infoPopup.classList.add("hidden");
     });
 
     function selectParty(party) {
       chosenParty = party;
-      Object.keys(markers).forEach(function(id) {
-        markers[id].classList.remove("selected");
-      });
+      Object.keys(markers).forEach(function (id) { markers[id].classList.remove("selected"); });
       markers[party.id].classList.add("selected");
       document.getElementById("selected-name").textContent = party.name;
       document.getElementById("selection-panel").classList.remove("hidden");
-      // Listan syns alltid kvar
       infoPopup.classList.add("hidden");
       renderPartyList();
-
       var saved = getSaved(party.id);
       document.getElementById("btn-start").textContent = saved ? "Visa sparat resultat" : "Starta test";
     }
 
-    document.getElementById("btn-back").onclick = function() {
+    document.getElementById("btn-back").onclick = function () {
       chosenParty = null;
-      Object.keys(markers).forEach(function(id) {
-        markers[id].classList.remove("selected");
-      });
+      Object.keys(markers).forEach(function (id) { markers[id].classList.remove("selected"); });
       document.getElementById("selection-panel").classList.add("hidden");
-      setSubtitle("Testa om du verkligen stämmer med partiet du tror");
+      setSubtitle("Testa om du verkligen stammer med partiet du tror");
       renderPartyList();
     };
 
-    document.getElementById("btn-start").onclick = function() {
+    document.getElementById("btn-start").onclick = function () {
       if (!chosenParty) return;
       if (!partyQuestions) {
-        alert("Frågorna har inte laddats. Ladda om sidan (gärna med rensad cache).");
+        alert("Fragorna har inte laddats. Ladda om sidan.");
         return;
       }
-
       var saved = getSaved(chosenParty.id);
       if (saved) {
         allAnswers = saved.allAnswers || [];
         totalAnswered = saved.answered || 0;
-        showResults(true);
+        showResults();
         return;
       }
-
       allAnswers = [];
       totalAnswered = 0;
       phase = "specific";
       var bank = partyQuestions[chosenParty.id] || partyQuestions.sd;
       if (!bank || !bank.length) {
-        alert("Inga frågor finns ännu för detta parti.");
+        alert("Inga fragor finns annu for detta parti.");
         return;
       }
       currentQueue = shuffle(bank.slice());
-      answers = new Array(currentQueue.length).fill(null);
-      status = new Array(currentQueue.length).fill("unseen");
+      answers = [];
+      status = [];
+      for (var i = 0; i < currentQueue.length; i++) { answers.push(null); status.push("unseen"); }
       currentQ = 0;
       status[0] = "skipped";
-
-      setSubtitle("Testar hur väl dina åsikter stämmer överens med " + chosenParty.name);
+      setSubtitle("Testar hur val dina asikter stammer overens med " + chosenParty.name);
       document.getElementById("step-party").classList.add("hidden");
       document.getElementById("step-questions").classList.remove("hidden");
       buildSegments();
@@ -451,21 +413,23 @@
     function buildSegments() {
       var cont = document.getElementById("segments");
       cont.innerHTML = "";
-      currentQueue.forEach(function(_, i) {
-        var seg = document.createElement("div");
-        seg.className = "segment " + status[i];
-        if (i === currentQ) seg.classList.add("current");
-        seg.onclick = function() { jumpTo(i); };
-        cont.appendChild(seg);
-      });
+      for (var i = 0; i < currentQueue.length; i++) {
+        (function (idx) {
+          var seg = document.createElement("div");
+          seg.className = "segment " + status[idx];
+          if (idx === currentQ) seg.classList.add("current");
+          seg.onclick = function () { jumpTo(idx); };
+          cont.appendChild(seg);
+        })(i);
+      }
     }
 
     function updateSegments() {
       var segs = document.querySelectorAll("#segments .segment");
-      segs.forEach(function(seg, i) {
-        seg.className = "segment " + status[i];
-        if (i === currentQ) seg.classList.add("current");
-      });
+      for (var i = 0; i < segs.length; i++) {
+        segs[i].className = "segment " + status[i];
+        if (i === currentQ) segs[i].classList.add("current");
+      }
     }
 
     function jumpTo(i) {
@@ -475,26 +439,24 @@
       showQuestion();
     }
 
-    document.getElementById("btn-prev").onclick = function() {
+    document.getElementById("btn-prev").onclick = function () {
       if (currentQ > 0) jumpTo(currentQ - 1);
     };
-
-    document.getElementById("btn-next").onclick = function() {
+    document.getElementById("btn-next").onclick = function () {
       if (currentQ < currentQueue.length - 1) jumpTo(currentQ + 1);
       else finishPhase();
     };
-
-    document.getElementById("btn-finish-early").onclick = function() {
-      var answered = answers.filter(function(a) { return a !== null; }).length;
+    document.getElementById("btn-finish-early").onclick = function () {
+      var answered = 0;
+      for (var i = 0; i < answers.length; i++) if (answers[i] !== null) answered++;
       if (answered === 0 && totalAnswered === 0) {
-        alert("Svara på minst en fråga först.");
+        alert("Svara pa minst en fraga forst.");
         return;
       }
       mergeCurrentAnswers();
       showResults();
     };
-
-    document.getElementById("btn-see-results").onclick = function() {
+    document.getElementById("btn-see-results").onclick = function () {
       mergeCurrentAnswers();
       showResults();
     };
@@ -503,24 +465,22 @@
       mergeCurrentAnswers();
       phase = "mixed";
       currentQueue = [];
-      Object.keys(partyQuestions).forEach(function(pid) {
+      Object.keys(partyQuestions).forEach(function (pid) {
         if (pid === chosenParty.id) return;
         var qs = partyQuestions[pid];
         if (qs && qs.length) currentQueue = currentQueue.concat(shuffle(qs.slice()));
       });
       currentQueue = shuffle(currentQueue);
-
       if (currentQueue.length === 0) {
-        alert("Inga fler frågor tillgängliga ännu.");
+        alert("Inga fler fragor tillgangliga annu.");
         showResults();
         return;
       }
-
-      answers = new Array(currentQueue.length).fill(null);
-      status = new Array(currentQueue.length).fill("unseen");
+      answers = [];
+      status = [];
+      for (var i = 0; i < currentQueue.length; i++) { answers.push(null); status.push("unseen"); }
       currentQ = 0;
       status[0] = "skipped";
-
       document.getElementById("step-continue").classList.add("hidden");
       document.getElementById("step-results").classList.add("hidden");
       document.getElementById("step-questions").classList.remove("hidden");
@@ -531,34 +491,31 @@
     document.getElementById("btn-continue").onclick = startMixedPhase;
     document.getElementById("btn-continue-from-results").onclick = startMixedPhase;
 
-    document.getElementById("btn-save-exit").onclick = function() {
+    document.getElementById("btn-save-exit").onclick = function () {
       chosenParty = null;
-      Object.keys(markers).forEach(function(id) {
-        markers[id].classList.remove("selected");
-      });
+      Object.keys(markers).forEach(function (id) { markers[id].classList.remove("selected"); });
       document.getElementById("step-results").classList.add("hidden");
       document.getElementById("step-party").classList.remove("hidden");
       document.getElementById("selection-panel").classList.add("hidden");
-      setSubtitle("Testa om du verkligen stämmer med partiet du tror");
+      setSubtitle("Testa om du verkligen stammer med partiet du tror");
       renderPartyList();
     };
 
-    document.getElementById("btn-retake").onclick = function() {
+    document.getElementById("btn-retake").onclick = function () {
       var all = loadSaved();
       delete all[chosenParty.id];
       localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
-
       allAnswers = [];
       totalAnswered = 0;
       phase = "specific";
       var bank = partyQuestions[chosenParty.id] || partyQuestions.sd;
       currentQueue = shuffle(bank.slice());
-      answers = new Array(currentQueue.length).fill(null);
-      status = new Array(currentQueue.length).fill("unseen");
+      answers = [];
+      status = [];
+      for (var i = 0; i < currentQueue.length; i++) { answers.push(null); status.push("unseen"); }
       currentQ = 0;
       status[0] = "skipped";
-
-      setSubtitle("Testar hur väl dina åsikter stämmer överens med " + chosenParty.name);
+      setSubtitle("Testar hur val dina asikter stammer overens med " + chosenParty.name);
       document.getElementById("step-results").classList.add("hidden");
       document.getElementById("step-questions").classList.remove("hidden");
       buildSegments();
@@ -569,45 +526,39 @@
       hideTermPopup();
       var q = currentQueue[currentQ];
       document.getElementById("question-text").innerHTML = renderQuestionText(q.text);
-
       if (phase === "specific") {
         document.getElementById("phase-info").textContent =
-          "Fråga " + (currentQ + 1) + " av " + currentQueue.length + " (viktiga för " + chosenParty.name + ")";
+          "Fraga " + (currentQ + 1) + " av " + currentQueue.length + " (viktiga for " + chosenParty.name + ")";
       } else {
         document.getElementById("phase-info").textContent =
-          "Extrafråga " + (currentQ + 1) + " av " + currentQueue.length;
+          "Extrafraga " + (currentQ + 1) + " av " + currentQueue.length;
       }
-
       document.getElementById("btn-prev").disabled = currentQ === 0;
       document.getElementById("btn-next").textContent =
-        currentQ === currentQueue.length - 1 ? "Klar →" : "Framåt →";
-
+        currentQ === currentQueue.length - 1 ? "Klar" : "Framat";
       var optionsDiv = document.getElementById("options");
       optionsDiv.innerHTML = "";
       var shuffled = shuffle(q.options.slice());
-      shuffled.forEach(function(opt) {
+      shuffled.forEach(function (opt) {
         var btn = document.createElement("button");
         btn.textContent = opt.label;
         if (answers[currentQ] && JSON.stringify(answers[currentQ]) === JSON.stringify(opt.scores)) {
           btn.classList.add("selected");
         }
-        btn.onclick = function() { selectAnswer(opt.scores, btn); };
+        btn.onclick = function () { selectAnswer(opt.scores, btn); };
         optionsDiv.appendChild(btn);
       });
-
       updateSegments();
     }
 
     function selectAnswer(scores, btnEl) {
       answers[currentQ] = scores;
       status[currentQ] = "answered";
-      document.querySelectorAll("#options button").forEach(function(b) {
-        b.classList.remove("selected");
-      });
+      var btns = document.querySelectorAll("#options button");
+      for (var i = 0; i < btns.length; i++) btns[i].classList.remove("selected");
       btnEl.classList.add("selected");
       updateSegments();
-
-      setTimeout(function() {
+      setTimeout(function () {
         if (currentQ < currentQueue.length - 1) jumpTo(currentQ + 1);
         else finishPhase();
       }, 300);
@@ -624,12 +575,12 @@
     }
 
     function mergeCurrentAnswers() {
-      answers.forEach(function(a) {
-        if (!a) return;
-        allAnswers.push(a);
+      for (var i = 0; i < answers.length; i++) {
+        if (!answers[i]) continue;
+        allAnswers.push(answers[i]);
         totalAnswered++;
-      });
-      answers = answers.map(function() { return null; });
+      }
+      for (var j = 0; j < answers.length; j++) answers[j] = null;
     }
 
     function showResults() {
@@ -637,62 +588,54 @@
       document.getElementById("step-questions").classList.add("hidden");
       document.getElementById("step-continue").classList.add("hidden");
       document.getElementById("step-results").classList.remove("hidden");
-
-      setSubtitle("Resultat för " + chosenParty.name);
+      setSubtitle("Resultat for " + chosenParty.name);
 
       var scores = {};
-      parties.forEach(function(p) { scores[p.id] = 0; });
-      allAnswers.forEach(function(a) {
-        Object.keys(a).forEach(function(id) {
+      parties.forEach(function (p) { scores[p.id] = 0; });
+      allAnswers.forEach(function (a) {
+        Object.keys(a).forEach(function (id) {
           scores[id] = (scores[id] || 0) + a[id];
         });
       });
 
       var maxPossible = totalAnswered * 2;
+      var ranked = parties.map(function (p) {
+        var match = maxPossible === 0 ? 50 : Math.round(((scores[p.id] + maxPossible) / (maxPossible * 2)) * 100);
+        return { id: p.id, name: p.name, match: match };
+      }).sort(function (a, b) { return b.match - a.match; });
 
-      var ranked = parties.map(function(p) {
-        var match;
-        if (maxPossible === 0) match = 50;
-        else match = Math.round(((scores[p.id] + maxPossible) / (maxPossible * 2)) * 100);
-        return {
-          id: p.id,
-          name: p.name,
-          short: p.short,
-          pct: p.pct,
-          x: p.x,
-          y: p.y,
-          match: match
-        };
-      }).sort(function(a, b) { return b.match - a.match; });
-
-      var chosenMatch = ranked.find(function(r) { return r.id === chosenParty.id; });
+      var chosenMatch = null;
+      for (var i = 0; i < ranked.length; i++) {
+        if (ranked[i].id === chosenParty.id) { chosenMatch = ranked[i]; break; }
+      }
 
       saveResult(chosenParty.id, {
         answered: totalAnswered,
         match: chosenMatch.match,
         allAnswers: allAnswers,
-        ranked: ranked.map(function(r) { return { id: r.id, match: r.match }; }),
+        ranked: ranked.map(function (r) { return { id: r.id, match: r.match }; }),
         date: new Date().toISOString()
       });
 
       document.getElementById("chosen-summary").textContent =
-        "Du valde " + chosenParty.name + ". Din faktiska matchning: " + chosenMatch.match + "%\nBesvarade frågor: " + totalAnswered;
+        "Du valde " + chosenParty.name + ". Din faktiska matchning: " + chosenMatch.match + "%\nBesvarade fragor: " + totalAnswered;
 
       var list = document.getElementById("results-list");
       list.innerHTML = "";
-      ranked.forEach(function(r) {
+      ranked.forEach(function (r) {
         var div = document.createElement("div");
         div.className = "result-item";
-        div.innerHTML =
-          "<span>" + r.name + "</span>" +
-          '<span class="match ' + (r.match < 40 ? "low" : "") + '">' + r.match + "%</span>" +
-          '<div class="explanation" id="exp-' + r.id + '">Förklaring kommer här.</div>';
-        div.onclick = function() {
-          document.getElementById("exp-" + r.id).classList.toggle("open");
-        };
+        var nameSpan = document.createElement("span");
+        nameSpan.textContent = r.name;
+        var matchSpan = document.createElement("span");
+        matchSpan.className = "match" + (r.match < 40 ? " low" : "");
+        matchSpan.textContent = r.match + "%";
+        div.appendChild(nameSpan);
+        div.appendChild(matchSpan);
         list.appendChild(div);
       });
     }
+  })();
   </script>
 </body>
 </html>
