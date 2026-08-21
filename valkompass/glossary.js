@@ -16,5 +16,7 @@ window.glossary = {
   "kollektivavtal": "Avtal mellan fackförbund och arbetsgivare om löner och villkor som gäller på arbetsplatsen.",
   "planerbar el": "Elproduktion som kan styras efter behov, t.ex. kärnkraft och vattenkraft – till skillnad från vind och sol som beror på vädret.",
   "A2": "Grundläggande nivå enligt EU:s språksteg. Man klarar enkla vardagssamtal, kan handla, fråga om vägen och förstå korta, tydliga texter.",
+  "konfessionell": "Kopplad till en viss religion eller trosinriktning (t.ex. kristen, muslimsk eller judisk skola).",
+  "konfessionell inriktning": "Att en skola eller verksamhet har en tydlig koppling till en viss religion.",
   "B1": "Självständig nivå. Man klarar det mesta i vardagen, kan berätta om erfarenheter, förstå nyheter i stora drag och skriva enklare texter."
 };
