@@ -11,6 +11,7 @@ window.glossary = {
   "behovsprövade bidrag": "Bidrag som bara ges till dem som uppfyller vissa inkomst- eller behovskrav.",
   "permanent uppehållstillstånd": "Rätt att stanna i Sverige på obestämd tid (men inte samma sak som medborgarskap).",
   "subventionerade jobb": "Jobb där staten betalar en del av lönen (t.ex. nystartsjobb eller lönebidrag) för att göra det billigare för arbetsgivaren att anställa.",
+  "öronmärkta månader": "Månader i föräldraledigheten som bara den ena föräldern får ta ut. Den andra föräldern kan inte använda dem.",
   "etableringsperiod": "De första åren efter att en person fått uppehållstillstånd, då särskilda regler och stöd ofta gäller.",
   "kollektivavtal": "Avtal mellan fackförbund och arbetsgivare om löner och villkor som gäller på arbetsplatsen.",
   "planerbar el": "Elproduktion som kan styras efter behov, t.ex. kärnkraft och vattenkraft – till skillnad från vind och sol som beror på vädret.",
