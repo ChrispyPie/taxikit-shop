@@ -52,11 +52,11 @@ window.partyQuestions = {
     },
     {
       id: "q-83d3",
-      text: "Ekonomiska bidrag till nyanlända jämfört med en låginkomsttagare som arbetat länge i Sverige bör vara:",
+      text: "Ekonomiskt bistånd till nyanlända jämfört med riksnormen för övriga bör vara:",
       options: [
-        { label: "Högre under en etableringsperiod", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -2, l: 0, c: 1, s: 1, mp: 2, v: 2, nyans: 1 } },
-        { label: "Tydligt lägre", scores: { sd: 2, afs: 2, m: 1, kd: 1, med: 2, l: 0, c: -1, s: -1, mp: -2, v: -2, nyans: -1 } },
-        { label: "Ungefär samma", scores: { sd: 0, afs: -1, m: 0, kd: 0, med: 0, l: 1, c: 1, s: 1, mp: 1, v: 1, nyans: 1 } }
+        { label: "Högre under en [[etableringsperiod]]", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -2, l: 0, c: 1, s: 1, mp: 2, v: 2, nyans: 1 } },
+        { label: "Ungefär samma", scores: { sd: 0, afs: -1, m: 0, kd: 0, med: 0, l: 1, c: 1, s: 1, mp: 1, v: 1, nyans: 1 } },
+        { label: "Tydligt lägre", scores: { sd: 2, afs: 2, m: 1, kd: 1, med: 2, l: 0, c: -1, s: -1, mp: -2, v: -2, nyans: -1 } }
       ]
     },
     {
