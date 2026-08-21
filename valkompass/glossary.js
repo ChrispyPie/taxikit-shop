@@ -12,5 +12,7 @@ window.glossary = {
   "permanent uppehållstillstånd": "Rätt att stanna i Sverige på obestämd tid (men inte samma sak som medborgarskap).",
   "etableringsperiod": "De första åren efter att en person fått uppehållstillstånd, då särskilda regler och stöd ofta gäller.",
   "kollektivavtal": "Avtal mellan fackförbund och arbetsgivare om löner och villkor som gäller på arbetsplatsen.",
-  "planerbar el": "Elproduktion som kan styras efter behov, t.ex. kärnkraft och vattenkraft – till skillnad från vind och sol som beror på vädret."
+  "planerbar el": "Elproduktion som kan styras efter behov, t.ex. kärnkraft och vattenkraft – till skillnad från vind och sol som beror på vädret.",
+  "A2": "Grundläggande nivå enligt EU:s språksteg. Man klarar enkla vardagssamtal, kan handla, fråga om vägen och förstå korta, tydliga texter.",
+  "B1": "Självständig nivå. Man klarar det mesta i vardagen, kan berätta om erfarenheter, förstå nyheter i stora drag och skriva enklare texter."
 };
