@@ -1,7 +1,7 @@
 // Frågebanker per parti
 // Lägg till fler partier här när vi bygger ut testet
 
-const partyQuestions = {
+window.partyQuestions = {
   sd: [
     {
       text: "En person kör rattfull och dödar en annan människa. Vad bör minimistraffet vara?",
