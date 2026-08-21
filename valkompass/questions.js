@@ -167,5 +167,88 @@ window.partyQuestions = {
         { label: "En blandning av båda", scores: { s: 1, v: 0, mp: 1, nyans: 0, c: 1, l: 1, m: 0, kd: 1, sd: 1, med: 0, afs: 0 } }
       ]
     }
+  ],
+
+  m: [
+    {
+      text: "Bör skatten på arbete sänkas även om det innebär att vissa välfärdstjänster får mindre pengar på kort sikt?",
+      options: [
+        { label: "Ja, tydligt", scores: { m: 2, med: 2, l: 1, kd: 1, c: 1, sd: 1, afs: 0, s: -2, v: -2, mp: -1, nyans: -1 } },
+        { label: "Nej, välfärden måste gå före", scores: { m: -2, med: -2, l: -1, kd: -1, c: 0, sd: -1, afs: 0, s: 2, v: 2, mp: 1, nyans: 1 } },
+        { label: "Bara marginellt", scores: { m: 1, med: 1, l: 1, kd: 1, c: 1, sd: 0, afs: 0, s: 0, v: -1, mp: 0, nyans: 0 } }
+      ]
+    },
+    {
+      text: "Hur ska Sverige främst säkra elproduktionen de kommande 20 åren?",
+      options: [
+        { label: "Bygga ut kärnkraft kraftigt", scores: { m: 2, kd: 2, sd: 2, med: 2, afs: 1, l: 1, c: 0, s: 0, v: -2, mp: -2, nyans: 0 } },
+        { label: "Främst vind, sol och lagring", scores: { m: -2, kd: -1, sd: -2, med: -2, afs: -2, l: 0, c: 1, s: 1, v: 1, mp: 2, nyans: 0 } },
+        { label: "En blandning där kärnkraft behålls och kompletteras", scores: { m: 1, kd: 1, sd: 1, med: 1, afs: 0, l: 1, c: 1, s: 1, v: 0, mp: -1, nyans: 0 } }
+      ]
+    },
+    {
+      text: "Bör det vara tillåtet att göra vinst i friskolor så länge kvaliteten är hög?",
+      options: [
+        { label: "Ja", scores: { m: 2, l: 2, c: 1, med: 2, kd: 1, sd: 0, afs: 0, s: -2, v: -2, mp: -2, nyans: -1 } },
+        { label: "Nej, vinster bör förbjudas", scores: { m: -2, l: -2, c: -1, med: -2, kd: -1, sd: 0, afs: 0, s: 2, v: 2, mp: 2, nyans: 1 } },
+        { label: "Ja, men med tydliga kvalitetskrav och begränsningar", scores: { m: 1, l: 1, c: 1, med: 0, kd: 1, sd: 1, afs: 0, s: 0, v: -1, mp: 0, nyans: 0 } }
+      ]
+    },
+    {
+      text: "En person döms för grovt våldsbrott för tredje gången. Vad bör hända med straffet?",
+      options: [
+        { label: "Betydligt längre straff än idag", scores: { m: 2, sd: 2, kd: 2, med: 2, afs: 2, l: 1, c: 0, s: -1, v: -2, mp: -1, nyans: -1 } },
+        { label: "Ungefär samma nivå som idag", scores: { m: 0, sd: -1, kd: 0, med: 0, afs: -1, l: 0, c: 1, s: 1, v: 1, mp: 1, nyans: 1 } },
+        { label: "Fokus på rehabilitering snarare än längre straff", scores: { m: -2, sd: -2, kd: -1, med: -2, afs: -2, l: -1, c: 0, s: 1, v: 2, mp: 1, nyans: 1 } }
+      ]
+    },
+    {
+      text: "Bör det krävas att den som får uppehållstillstånd snabbare kommer i arbete, annars riskerar tillståndet att påverkas?",
+      options: [
+        { label: "Ja, tydliga krav och konsekvenser", scores: { m: 2, sd: 2, kd: 1, med: 2, afs: 2, l: 1, c: 0, s: -1, v: -2, mp: -1, nyans: -1 } },
+        { label: "Nej, det bör inte kopplas till uppehållstillståndet", scores: { m: -2, sd: -2, kd: -1, med: -2, afs: -2, l: 0, c: 0, s: 1, v: 2, mp: 1, nyans: 1 } },
+        { label: "Krav på aktivitet, men utan att dra in tillståndet lättvindigt", scores: { m: 1, sd: 0, kd: 1, med: 1, afs: 0, l: 1, c: 1, s: 1, v: 0, mp: 0, nyans: 0 } }
+      ]
+    },
+    {
+      text: "Hur mycket bör Sverige satsa på försvaret de kommande åren?",
+      options: [
+        { label: "Betydligt mer än idag", scores: { m: 2, kd: 2, sd: 2, med: 1, afs: 1, l: 1, c: 1, s: 1, v: -1, mp: -1, nyans: 0 } },
+        { label: "Ungefär nuvarande nivå", scores: { m: 0, kd: 0, sd: 0, med: 0, afs: 0, l: 0, c: 0, s: 1, v: 1, mp: 1, nyans: 0 } },
+        { label: "Mindre – pengarna behövs bättre annorstädes", scores: { m: -2, kd: -2, sd: -2, med: -1, afs: -1, l: -1, c: -1, s: -1, v: 2, mp: 1, nyans: 0 } }
+      ]
+    },
+    {
+      text: "Bör det bli enklare att starta och driva företag genom att minska regler och tillståndskrav?",
+      options: [
+        { label: "Ja, kraftigt", scores: { m: 2, med: 2, l: 1, c: 1, kd: 1, sd: 1, afs: 1, s: -1, v: -2, mp: -1, nyans: 0 } },
+        { label: "Nej, reglerna behövs för miljö, arbetsmiljö och rättvisa", scores: { m: -2, med: -2, l: -1, c: 0, kd: -1, sd: -1, afs: -1, s: 1, v: 2, mp: 2, nyans: 1 } },
+        { label: "Ja, men med behållna skydd för miljö och anställda", scores: { m: 1, med: 1, l: 1, c: 1, kd: 1, sd: 1, afs: 0, s: 1, v: 0, mp: 0, nyans: 0 } }
+      ]
+    },
+    {
+      text: "Hyresregleringen (bruksvärdessystemet) bör:",
+      options: [
+        { label: "Avskaffas eller kraftigt luckras upp", scores: { m: 2, med: 2, l: 1, c: 1, kd: 0, sd: 0, afs: 0, s: -2, v: -2, mp: -1, nyans: -1 } },
+        { label: "Behållas ungefär som idag", scores: { m: -1, med: -1, l: 0, c: 0, kd: 0, sd: 0, afs: 0, s: 1, v: 1, mp: 1, nyans: 1 } },
+        { label: "Behållas men moderniseras", scores: { m: 1, med: 0, l: 1, c: 1, kd: 1, sd: 1, afs: 0, s: 1, v: 0, mp: 0, nyans: 0 } }
+      ]
+    },
+    {
+      text: "Bör det bli lättare för arbetsgivare att anställa på prov och säga upp vid arbetsbrist?",
+      options: [
+        { label: "Ja", scores: { m: 2, med: 2, l: 1, c: 1, kd: 1, sd: 0, afs: 0, s: -2, v: -2, mp: -1, nyans: -1 } },
+        { label: "Nej, anställningsskyddet ska vara starkt", scores: { m: -2, med: -2, l: -1, c: -1, kd: -1, sd: 0, afs: 0, s: 2, v: 2, mp: 1, nyans: 1 } },
+        { label: "Något enklare än idag, men med skydd kvar", scores: { m: 1, med: 1, l: 1, c: 1, kd: 1, sd: 1, afs: 0, s: 0, v: -1, mp: 0, nyans: 0 } }
+      ]
+    },
+    {
+      text: "När elpriserna är höga, vad bör staten prioritiera?",
+      options: [
+        { label: "Långsiktig utbyggnad av planerbar el (t.ex. kärnkraft)", scores: { m: 2, kd: 2, sd: 2, med: 2, afs: 1, l: 1, c: 0, s: 0, v: -1, mp: -2, nyans: 0 } },
+        { label: "Stöd till hushåll och mer förnybart", scores: { m: -1, kd: 0, sd: -1, med: -1, afs: -1, l: 0, c: 1, s: 2, v: 1, mp: 2, nyans: 1 } },
+        { label: "Både utbyggnad av planerbar el och tillfälliga stöd", scores: { m: 1, kd: 1, sd: 1, med: 1, afs: 0, l: 1, c: 1, s: 1, v: 0, mp: 0, nyans: 0 } }
+      ]
+    }
   ]
 };
