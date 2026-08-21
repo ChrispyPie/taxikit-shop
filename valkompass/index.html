@@ -9,7 +9,7 @@
     body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 1.25rem 0.9rem; }
     .container { max-width: 520px; width: 100%; }
     h1 { font-size: 1.45rem; margin-bottom: 0.35rem; text-align: center; }
-    .subtitle { text-align: center; color: #94a3b8; margin-bottom: 1.3rem; font-size: 0.88rem; }
+    .subtitle { text-align: center; color: #94a3b8; margin-bottom: 1.3rem; font-size: 0.88rem; min-height: 2.4em; }
     .card { background: #1e293b; border-radius: 12px; padding: 1.15rem; margin-bottom: 1rem; }
     button { background: #3b82f6; color: white; border: none; padding: 0.7rem 1rem; border-radius: 8px; font-size: 0.95rem; cursor: pointer; width: 100%; }
     button:hover { background: #2563eb; }
@@ -19,6 +19,7 @@
     .party-btn { background: #334155; margin-bottom: 0.35rem; text-align: left; display: flex; justify-content: space-between; align-items: center; }
     .party-btn:hover { background: #475569; }
     .party-btn .pct { font-size: 0.78rem; color: #94a3b8; }
+    .party-btn .saved { font-size: 0.72rem; color: #4ade80; margin-left: 0.4rem; }
     .hidden { display: none !important; }
     .question { font-size: 1.05rem; margin-bottom: 1rem; line-height: 1.4; }
     .options button { background: #334155; text-align: left; margin-top: 0.4rem; }
@@ -108,7 +109,7 @@
 <body>
   <div class="container">
     <h1>Valkompass</h1>
-    <p class="subtitle">Testa om du verkligen stämmer med partiet du tror</p>
+    <p class="subtitle" id="subtitle">Testa om du verkligen stämmer med partiet du tror</p>
 
     <div id="step-party" class="card">
       <p style="margin-bottom:0.85rem;font-size:0.92rem">Vilket parti stöder eller tror du dig stå närmast just nu?</p>
@@ -173,8 +174,9 @@
       <div id="results-list"></div>
       <div class="btn-row" style="margin-top:1.3rem;">
         <button id="btn-continue-from-results">Fortsätt med fler frågor</button>
-        <button class="secondary" onclick="location.reload()">Gör om testet</button>
+        <button class="secondary" id="btn-save-exit">Avsluta & Spara</button>
       </div>
+      <button class="secondary" id="btn-retake" style="margin-top:0.6rem;">Gör om detta partis test</button>
     </div>
   </div>
 
@@ -321,14 +323,36 @@
       ]
     };
 
+    // ---------- Persistence ----------
+    const STORAGE_KEY = "valkompass_results_v1";
+
+    function loadSaved() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      } catch {
+        return {};
+      }
+    }
+
+    function saveResult(partyId, data) {
+      const all = loadSaved();
+      all[partyId] = data;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+    }
+
+    function getSaved(partyId) {
+      return loadSaved()[partyId] || null;
+    }
+
+    // ---------- State ----------
     let chosenParty = null;
     let currentQ = 0;
     let phase = "specific";
     let currentQueue = [];
-    let answers = [];          // current phase answers
+    let answers = [];
     let status = [];
-    let allAnswers = [];       // accumulated scores from all phases
-    let totalAnswered = 0;     // total number of answered questions across phases
+    let allAnswers = [];
+    let totalAnswered = 0;
     const markers = {};
 
     function shuffle(array) {
@@ -340,6 +364,11 @@
       return arr;
     }
 
+    function setSubtitle(text) {
+      document.getElementById("subtitle").textContent = text;
+    }
+
+    // ---------- UI setup ----------
     const compass = document.getElementById("compass");
     parties.forEach(p => {
       const marker = document.createElement("div");
@@ -353,14 +382,20 @@
       markers[p.id] = marker;
     });
 
-    const partyList = document.getElementById("party-list");
-    parties.forEach(p => {
-      const btn = document.createElement("button");
-      btn.className = "party-btn";
-      btn.innerHTML = `<span>${p.name}</span><span class="pct">${p.pct}</span>`;
-      btn.onclick = () => selectParty(p);
-      partyList.appendChild(btn);
-    });
+    function renderPartyList() {
+      const partyList = document.getElementById("party-list");
+      partyList.innerHTML = "";
+      const saved = loadSaved();
+      parties.forEach(p => {
+        const btn = document.createElement("button");
+        btn.className = "party-btn";
+        const hasSaved = saved[p.id];
+        btn.innerHTML = `<span>${p.name}${hasSaved ? '<span class="saved">✓ sparad</span>' : ''}</span><span class="pct">${p.pct}</span>`;
+        btn.onclick = () => selectParty(p);
+        partyList.appendChild(btn);
+      });
+    }
+    renderPartyList();
 
     const infoBtn = document.getElementById("info-btn");
     const infoPopup = document.getElementById("info-popup");
@@ -378,6 +413,14 @@
       document.getElementById("selection-panel").classList.remove("hidden");
       document.getElementById("list-section").classList.add("hidden");
       infoPopup.classList.add("hidden");
+
+      // If already has a saved result → go directly to results
+      const saved = getSaved(party.id);
+      if (saved) {
+        document.getElementById("btn-start").textContent = "Visa sparat resultat";
+      } else {
+        document.getElementById("btn-start").textContent = "Starta test";
+      }
     }
 
     document.getElementById("btn-back").onclick = () => {
@@ -385,10 +428,22 @@
       Object.values(markers).forEach(m => m.classList.remove("selected"));
       document.getElementById("selection-panel").classList.add("hidden");
       document.getElementById("list-section").classList.remove("hidden");
+      setSubtitle("Testa om du verkligen stämmer med partiet du tror");
     };
 
     document.getElementById("btn-start").onclick = () => {
       if (!chosenParty) return;
+
+      const saved = getSaved(chosenParty.id);
+      if (saved) {
+        // Show saved result directly
+        allAnswers = saved.allAnswers || [];
+        totalAnswered = saved.answered || 0;
+        showResults(true); // true = from saved
+        return;
+      }
+
+      // Start new test
       allAnswers = [];
       totalAnswered = 0;
       phase = "specific";
@@ -399,6 +454,7 @@
       currentQ = 0;
       status[0] = "skipped";
 
+      setSubtitle(`Testar hur väl dina åsikter stämmer överens med ${chosenParty.name}`);
       document.getElementById("step-party").classList.add("hidden");
       document.getElementById("step-questions").classList.remove("hidden");
       buildSegments();
@@ -457,7 +513,7 @@
     };
 
     function startMixedPhase() {
-      mergeCurrentAnswers(); // save any remaining answers from previous phase
+      mergeCurrentAnswers();
       phase = "mixed";
       currentQueue = [];
       Object.keys(partyQuestions).forEach(pid => {
@@ -487,6 +543,41 @@
 
     document.getElementById("btn-continue").onclick = startMixedPhase;
     document.getElementById("btn-continue-from-results").onclick = startMixedPhase;
+
+    document.getElementById("btn-save-exit").onclick = () => {
+      // Already saved in showResults, just go back to start
+      chosenParty = null;
+      Object.values(markers).forEach(m => m.classList.remove("selected"));
+      document.getElementById("step-results").classList.add("hidden");
+      document.getElementById("step-party").classList.remove("hidden");
+      document.getElementById("selection-panel").classList.add("hidden");
+      document.getElementById("list-section").classList.remove("hidden");
+      setSubtitle("Testa om du verkligen stämmer med partiet du tror");
+      renderPartyList();
+    };
+
+    document.getElementById("btn-retake").onclick = () => {
+      // Clear saved for this party and restart
+      const all = loadSaved();
+      delete all[chosenParty.id];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+
+      allAnswers = [];
+      totalAnswered = 0;
+      phase = "specific";
+      const bank = partyQuestions[chosenParty.id] || partyQuestions.sd;
+      currentQueue = shuffle([...bank]);
+      answers = new Array(currentQueue.length).fill(null);
+      status = new Array(currentQueue.length).fill("unseen");
+      currentQ = 0;
+      status[0] = "skipped";
+
+      setSubtitle(`Testar hur väl dina åsikter stämmer överens med ${chosenParty.name}`);
+      document.getElementById("step-results").classList.add("hidden");
+      document.getElementById("step-questions").classList.remove("hidden");
+      buildSegments();
+      showQuestion();
+    };
 
     function showQuestion() {
       const q = currentQueue[currentQ];
@@ -546,16 +637,17 @@
         allAnswers.push(a);
         totalAnswered++;
       });
-      // clear so we don't double-count if called again
       answers = answers.map(() => null);
     }
 
-    function showResults() {
+    function showResults(fromSaved = false) {
       document.getElementById("step-questions").classList.add("hidden");
       document.getElementById("step-continue").classList.add("hidden");
       document.getElementById("step-results").classList.remove("hidden");
 
-      // Sum scores per party
+      setSubtitle(`Resultat för ${chosenParty.name}`);
+
+      // Calculate scores
       const scores = {};
       parties.forEach(p => scores[p.id] = 0);
       allAnswers.forEach(a => {
@@ -564,23 +656,28 @@
         }
       });
 
-      const maxPossible = totalAnswered * 2; // each question can contribute ±2
+      const maxPossible = totalAnswered * 2;
 
       const ranked = parties.map(p => {
         let match;
-        if (maxPossible === 0) {
-          match = 50;
-        } else {
-          // score ranges from -maxPossible to +maxPossible
-          // map to 0–100%
-          match = Math.round(((scores[p.id] + maxPossible) / (maxPossible * 2)) * 100);
-        }
+        if (maxPossible === 0) match = 50;
+        else match = Math.round(((scores[p.id] + maxPossible) / (maxPossible * 2)) * 100);
         return { ...p, match };
       }).sort((a, b) => b.match - a.match);
 
       const chosenMatch = ranked.find(r => r.id === chosenParty.id);
+
+      // Save result
+      saveResult(chosenParty.id, {
+        answered: totalAnswered,
+        match: chosenMatch.match,
+        allAnswers: allAnswers,
+        ranked: ranked.map(r => ({ id: r.id, match: r.match })),
+        date: new Date().toISOString()
+      });
+
       document.getElementById("chosen-summary").textContent =
-        `Du valde ${chosenParty.name}. Din faktiska matchning: ${chosenMatch.match}% (baserat på ${totalAnswered} frågor)`;
+        `Du valde ${chosenParty.name}. Din faktiska matchning: ${chosenMatch.match}%\nBesvarade frågor: ${totalAnswered}`;
 
       const list = document.getElementById("results-list");
       list.innerHTML = "";
