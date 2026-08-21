@@ -31,8 +31,7 @@
     .explanation { font-size: 0.85rem; color: #94a3b8; margin-top: 0.35rem; display: none; line-height: 1.4; }
     .explanation.open { display: block; }
 
-    /* 2D Compass – Left=red, Right=blue, GAL=green, TAN=brown */
-    .compass-wrapper { margin-bottom: 1.1rem; }
+    .compass-wrapper { margin-bottom: 1.1rem; position: relative; }
     .compass {
       position: relative;
       width: 100%;
@@ -41,15 +40,10 @@
       border: 1px solid #334155;
       overflow: hidden;
       background:
-        /* GAL green from top */
         radial-gradient(ellipse at 50% 0%, rgba(34, 197, 94, 0.55) 0%, transparent 55%),
-        /* TAN brown from bottom */
         radial-gradient(ellipse at 50% 100%, rgba(120, 53, 15, 0.65) 0%, transparent 55%),
-        /* Left red */
         radial-gradient(ellipse at 0% 50%, rgba(220, 38, 38, 0.6) 0%, transparent 55%),
-        /* Right blue */
         radial-gradient(ellipse at 100% 50%, rgba(37, 99, 235, 0.6) 0%, transparent 55%),
-        /* Soft base */
         linear-gradient(160deg, #1e1b4b 0%, #0f172a 50%, #1c1917 100%);
     }
     .compass::before {
@@ -90,6 +84,58 @@
       z-index: 12;
     }
 
+    /* Info button */
+    .info-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1.5px solid #94a3b8;
+      color: #e2e8f0;
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 5;
+      padding: 0;
+      line-height: 1;
+    }
+    .info-btn:hover { background: rgba(51, 65, 85, 0.9); border-color: #e2e8f0; }
+
+    .info-popup {
+      position: absolute;
+      top: 40px;
+      right: 8px;
+      left: 8px;
+      background: #1e293b;
+      border: 1px solid #475569;
+      border-radius: 10px;
+      padding: 0.9rem 1rem;
+      font-size: 0.82rem;
+      line-height: 1.45;
+      color: #cbd5e1;
+      z-index: 20;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    }
+    .info-popup strong { color: #f1f5f9; }
+    .info-popup .close-info {
+      position: absolute;
+      top: 6px;
+      right: 10px;
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.1rem;
+      cursor: pointer;
+      width: auto;
+      padding: 0;
+    }
+
     .selection-info {
       text-align: center;
       margin: 0.9rem 0 0.7rem;
@@ -114,6 +160,15 @@
           <div class="compass-label bottom">TAN</div>
           <div class="compass-label left">Vänster</div>
           <div class="compass-label right">Höger</div>
+        </div>
+        <button class="info-btn" id="info-btn" title="Vad betyder skalorna?">i</button>
+        <div class="info-popup hidden" id="info-popup">
+          <button class="close-info" id="close-info">×</button>
+          <p style="margin-bottom:0.5rem"><strong>Vänster – Höger</strong><br>Handlar främst om ekonomi, skatter, fördelning och statens storlek.</p>
+          <p style="margin-bottom:0.5rem"><strong>GAL – TAN</strong><br>
+          <strong>GAL</strong> = Grön, Alternativ, Libertär (frihetlig, grön, progressiv)<br>
+          <strong>TAN</strong> = Traditionell, Auktoritär, Nationalistisk (ordning, tradition, nation)</p>
+          <p style="font-size:0.78rem;color:#94a3b8">Placeringarna är ungefärliga.</p>
         </div>
       </div>
 
@@ -208,6 +263,20 @@
       partyList.appendChild(btn);
     });
 
+    // Info popup
+    const infoBtn = document.getElementById("info-btn");
+    const infoPopup = document.getElementById("info-popup");
+    infoBtn.onclick = (e) => {
+      e.stopPropagation();
+      infoPopup.classList.toggle("hidden");
+    };
+    document.getElementById("close-info").onclick = () => infoPopup.classList.add("hidden");
+    document.addEventListener("click", (e) => {
+      if (!infoPopup.contains(e.target) && e.target !== infoBtn) {
+        infoPopup.classList.add("hidden");
+      }
+    });
+
     function selectParty(party) {
       chosenParty = party;
       Object.values(markers).forEach(m => m.classList.remove("selected"));
@@ -215,6 +284,7 @@
       document.getElementById("selected-name").textContent = party.name;
       document.getElementById("selection-panel").classList.remove("hidden");
       document.getElementById("list-section").classList.add("hidden");
+      infoPopup.classList.add("hidden");
     }
 
     document.getElementById("btn-back").onclick = () => {
