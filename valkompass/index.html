@@ -214,7 +214,6 @@
       { id: "med",  name: "Medborgerlig Samling",   short: "MED", pct: "0,2 %",  x: 75, y: 45 }
     ];
 
-    // Options order is shuffled so the "party-correct" answer is not always first
     const questions = [
       {
         text: "En person kör rattfull och dödar en annan människa. Vad bör minimistraffet vara?",
@@ -304,6 +303,16 @@
     let userScores = {};
     const markers = {};
 
+    // Fisher-Yates shuffle
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
     const compass = document.getElementById("compass");
     parties.forEach(p => {
       const marker = document.createElement("div");
@@ -369,9 +378,13 @@
       const q = questions[currentQ];
       document.getElementById("question-text").textContent = q.text;
       document.getElementById("progress").style.width = ((currentQ / questions.length) * 100) + "%";
+
       const optionsDiv = document.getElementById("options");
       optionsDiv.innerHTML = "";
-      q.options.forEach(opt => {
+
+      // Shuffle options every time the question is shown
+      const shuffled = shuffle(q.options);
+      shuffled.forEach(opt => {
         const btn = document.createElement("button");
         btn.textContent = opt.label;
         btn.onclick = () => answer(opt.scores);
