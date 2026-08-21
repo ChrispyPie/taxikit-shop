@@ -16,11 +16,11 @@ window.partyQuestions = {
     },
     {
       id: "q-26ee",
-      text: "En asylsökande reser tillbaka till det land hen säger sig ha flytt från medan ansökan prövas. Vad bör hända?",
+      text: "En asylsökande reser tillbaka till det land denne säger sig ha flytt från medan ansökan prövas. Vad bör hända?",
       options: [
-        { label: "Det bör vägas in negativt", scores: { sd: 1, afs: 1, m: 1, kd: 1, med: 1, l: 1, c: 0, s: 0, mp: -1, v: -1, nyans: 0 } },
-        { label: "Det ska inte påverka", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -2, l: 0, c: 1, s: 1, mp: 2, v: 2, nyans: 1 } },
-        { label: "Ansökan ska avslås", scores: { sd: 2, afs: 2, m: 1, kd: 1, med: 2, l: 0, c: -1, s: -1, mp: -2, v: -2, nyans: -1 } }
+        { label: "Ansökan ska avslås", scores: { sd: 2, afs: 2, m: 1, kd: 1, med: 2, l: 0, c: -1, s: -1, mp: -2, v: -2, nyans: -1 } },
+        { label: "Det ska vägas in, men inte automatiskt leda till avslag", scores: { sd: 1, afs: 1, m: 1, kd: 1, med: 1, l: 1, c: 0, s: 0, mp: -1, v: -1, nyans: 0 } },
+        { label: "Det ska inte påverka alls", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -2, l: 0, c: 1, s: 1, mp: 2, v: 2, nyans: 1 } }
       ]
     },
     {
