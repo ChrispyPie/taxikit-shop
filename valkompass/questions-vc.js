@@ -250,7 +250,7 @@ Object.assign(window.partyQuestions, {
     },
     {
       id: "q-kd08",
-      text: "Bör det bli lättare för friskolor med konfessionell inriktning (t.ex. kristna skolor)?",
+      text: "Bör det bli lättare för friskolor med [[konfessionell inriktning]] (t.ex. kristna skolor)?",
       options: [
         { label: "Ja", scores: { kd: 2, sd: 0, m: 0, c: 0, l: 0, med: 0, s: -1, v: -2, mp: -1, afs: 0, nyans: 1 } },
         { label: "Nej, skolan ska vara helt icke-konfessionell", scores: { kd: -2, sd: 0, m: 0, c: 0, l: 1, med: 1, s: 1, v: 2, mp: 2, afs: 0, nyans: -1 } },
@@ -273,6 +273,98 @@ Object.assign(window.partyQuestions, {
         { label: "Ja, tydligt", scores: { kd: 2, c: 1, m: 1, sd: 0, l: 0, s: 0, v: -1, mp: 0, med: 0, afs: 0, nyans: 0 } },
         { label: "Nej, välfärden ska skötas av det offentliga", scores: { kd: -2, c: -1, m: -1, sd: 0, l: 0, s: 1, v: 2, mp: 1, med: 0, afs: 0, nyans: 0 } },
         { label: "Viss roll, men det offentliga ska ha huvudansvaret", scores: { kd: 1, c: 1, m: 1, sd: 1, l: 1, s: 1, v: 0, mp: 1, med: 1, afs: 0, nyans: 0 } }
+      ]
+    }
+  ],
+  mp: [
+    {
+      id: "q-mp01",
+      text: "Hur högt ska priset på koldioxidutsläpp vara?",
+      options: [
+        { label: "Tydligt högre – klimatet går före kortsiktiga jobb", scores: { mp: 2, v: 2, s: 1, c: 1, l: 1, m: 0, kd: 0, sd: -1, med: -1, afs: -2, nyans: 0 } },
+        { label: "Lägre – jobb och konkurrenskraft är viktigare just nu", scores: { mp: -2, v: -2, s: -1, c: 0, l: 0, m: 1, kd: 1, sd: 2, med: 2, afs: 2, nyans: 0 } },
+        { label: "Ungefär som idag", scores: { mp: 0, v: 0, s: 1, c: 1, l: 1, m: 1, kd: 1, sd: 1, med: 0, afs: 0, nyans: 0 } }
+      ]
+    },
+    {
+      id: "q-mp02",
+      text: "Bör Sverige bygga ut kärnkraften?",
+      options: [
+        { label: "Nej, fokusera på vind, sol och lagring", scores: { mp: 2, v: 2, s: 1, c: 1, l: 0, m: -2, kd: -1, sd: -2, med: -2, afs: -2, nyans: 0 } },
+        { label: "Ja, kraftigt", scores: { mp: -2, v: -2, s: 0, c: 0, l: 1, m: 2, kd: 2, sd: 2, med: 2, afs: 1, nyans: 0 } },
+        { label: "Behåll befintlig men bygg inte ut kraftigt", scores: { mp: -1, v: 0, s: 1, c: 1, l: 1, m: 1, kd: 1, sd: 1, med: 1, afs: 0, nyans: 0 } }
+      ]
+    },
+    {
+      id: "q-mp03",
+      text: "Hur generös bör asyl- och invandringspolitiken vara?",
+      options: [
+        { label: "Mer generös än idag", scores: { mp: 2, v: 2, s: 1, c: 1, l: 0, nyans: 2, m: -1, kd: -1, sd: -2, med: -2, afs: -2 } },
+        { label: "Tydligt mer restriktiv", scores: { mp: -2, v: -2, s: -1, c: -1, l: 0, nyans: -1, m: 1, kd: 1, sd: 2, med: 2, afs: 2 } },
+        { label: "Ungefär som idag", scores: { mp: 0, v: 0, s: 1, c: 1, l: 1, nyans: 0, m: 0, kd: 0, sd: -1, med: -1, afs: -1 } }
+      ]
+    },
+    {
+      id: "q-mp04",
+      text: "Bör vinster i välfärden (skola, vård, omsorg) förbjudas eller kraftigt begränsas?",
+      options: [
+        { label: "Ja", scores: { mp: 2, v: 2, s: 2, nyans: 1, c: -1, l: -1, m: -2, kd: -1, sd: 0, med: -2, afs: 0 } },
+        { label: "Nej, valfrihet och konkurrens är bra", scores: { mp: -2, v: -2, s: -2, nyans: -1, c: 1, l: 2, m: 2, kd: 1, sd: 0, med: 2, afs: 0 } },
+        { label: "Vinster okej om kvaliteten är hög", scores: { mp: 0, v: -1, s: 0, nyans: 0, c: 1, l: 1, m: 1, kd: 1, sd: 1, med: 1, afs: 1 } }
+      ]
+    },
+    {
+      id: "q-mp05",
+      text: "Hur ska Sverige främst minska biltrafiken i städerna?",
+      options: [
+        { label: "Mer kollektivtrafik, cykel och restriktioner för bil", scores: { mp: 2, v: 1, s: 1, c: 1, l: 1, m: -1, kd: 0, sd: -1, med: -1, afs: -1, nyans: 0 } },
+        { label: "Låt bilen vara enkel – bygg mer väg om det behövs", scores: { mp: -2, v: -1, s: -1, c: 0, l: 0, m: 1, kd: 1, sd: 2, med: 1, afs: 2, nyans: 0 } },
+        { label: "Bättre kollektivtrafik, men utan hårda restriktioner mot bil", scores: { mp: 0, v: 0, s: 1, c: 1, l: 1, m: 1, kd: 1, sd: 1, med: 1, afs: 0, nyans: 0 } }
+      ]
+    },
+    {
+      id: "q-mp06",
+      text: "Bör det bli förbjudet eller kraftigt begränsat att hålla djur för pälsproduktion?",
+      options: [
+        { label: "Ja", scores: { mp: 2, v: 1, s: 1, c: 1, l: 0, m: 0, kd: 0, sd: 0, med: 0, afs: 0, nyans: 0 } },
+        { label: "Nej", scores: { mp: -2, v: -1, s: 0, c: 0, l: 0, m: 1, kd: 1, sd: 1, med: 1, afs: 1, nyans: 0 } },
+        { label: "Strängare regler, men inte totalförbud", scores: { mp: 1, v: 1, s: 1, c: 1, l: 1, m: 1, kd: 1, sd: 1, med: 0, afs: 0, nyans: 0 } }
+      ]
+    },
+    {
+      id: "q-mp07",
+      text: "Hur viktigt är det att skydda skog och natur även om det begränsar skogsbruk och jobb lokalt?",
+      options: [
+        { label: "Mycket viktigt – naturen går före", scores: { mp: 2, v: 1, s: 0, c: 0, l: 0, m: -1, kd: 0, sd: -1, med: -1, afs: -1, nyans: 0 } },
+        { label: "Jobb och skogsbruk är viktigare", scores: { mp: -2, v: -1, s: 0, c: 1, l: 0, m: 1, kd: 1, sd: 2, med: 1, afs: 2, nyans: 0 } },
+        { label: "Balans mellan skydd och brukande", scores: { mp: 0, v: 0, s: 1, c: 2, l: 1, m: 1, kd: 1, sd: 1, med: 1, afs: 0, nyans: 0 } }
+      ]
+    },
+    {
+      id: "q-mp08",
+      text: "Bör föräldraledigheten vara mer jämnt delad med fler [[öronmärkta månader]]?",
+      options: [
+        { label: "Ja", scores: { mp: 2, s: 2, v: 1, c: 1, l: 1, m: 0, kd: -1, sd: -1, med: 0, afs: -2, nyans: 0 } },
+        { label: "Nej, familjerna ska bestämma själva", scores: { mp: -1, s: -1, v: -1, c: 0, l: 0, m: 1, kd: 2, sd: 2, med: 1, afs: 2, nyans: 0 } },
+        { label: "Nuvarande nivå är lagom", scores: { mp: 0, s: 1, v: 0, c: 1, l: 1, m: 1, kd: 1, sd: 1, med: 1, afs: 0, nyans: 0 } }
+      ]
+    },
+    {
+      id: "q-mp09",
+      text: "Bör militärutgifterna öka de kommande åren?",
+      options: [
+        { label: "Nej, pengarna behövs mer till klimat och välfärd", scores: { mp: 2, v: 2, s: 1, nyans: 1, c: 0, l: 0, m: -1, kd: -1, sd: -1, med: -1, afs: 0 } },
+        { label: "Ja, tydligt", scores: { mp: -2, v: -2, s: 0, nyans: 0, c: 1, l: 1, m: 2, kd: 2, sd: 2, med: 1, afs: 1 } },
+        { label: "Måttlig ökning", scores: { mp: 0, v: 0, s: 1, nyans: 0, c: 1, l: 1, m: 1, kd: 1, sd: 1, med: 1, afs: 0 } }
+      ]
+    },
+    {
+      id: "q-mp10",
+      text: "Hur ska Sverige hantera varg och andra rovdjur?",
+      options: [
+        { label: "Starkare skydd för vargen – naturen går före", scores: { mp: 2, v: 1, s: 0, c: -2, l: 0, m: -1, kd: -1, sd: -1, med: -1, afs: -1, nyans: 0 } },
+        { label: "Mer skyddsjakt och lägre vargstam", scores: { mp: -2, v: -1, s: 0, c: 2, l: 0, m: 1, kd: 1, sd: 1, med: 1, afs: 1, nyans: 0 } },
+        { label: "Balans mellan skyddsjakt och bevarande", scores: { mp: 0, v: 0, s: 1, c: 1, l: 1, m: 1, kd: 1, sd: 0, med: 0, afs: 0, nyans: 0 } }
       ]
     }
   ]
