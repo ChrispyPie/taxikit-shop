@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Om – Valkompass</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 1.25rem 0.9rem 3rem;
+      line-height: 1.55;
+    }
+    .container { max-width: 560px; margin: 0 auto; }
+    h1 { font-size: 1.5rem; margin-bottom: 0.4rem; }
+    h2 { font-size: 1.1rem; margin: 1.6rem 0 0.6rem; color: #f1f5f9; }
+    p { margin-bottom: 0.75rem; color: #cbd5e1; font-size: 0.95rem; }
+    a { color: #60a5fa; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .back {
+      display: inline-block;
+      margin-bottom: 1.2rem;
+      font-size: 0.9rem;
+      color: #94a3b8;
+    }
+    .back:hover { color: #e2e8f0; }
+    .card {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 1.15rem 1.2rem;
+      margin-bottom: 1rem;
+    }
+    .card p:last-child { margin-bottom: 0; }
+    ul { margin: 0.5rem 0 0.75rem 1.2rem; color: #cbd5e1; font-size: 0.95rem; }
+    li { margin-bottom: 0.35rem; }
+    .placeholder {
+      background: #0f172a;
+      border: 1px dashed #475569;
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      color: #94a3b8;
+      font-size: 0.88rem;
+      margin-top: 0.5rem;
+    }
+    .version {
+      display: inline-block;
+      background: #334155;
+      color: #94a3b8;
+      font-size: 0.75rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      margin-left: 0.4rem;
+      vertical-align: middle;
+    }
+    .changelog-item {
+      border-left: 3px solid #334155;
+      padding-left: 0.9rem;
+      margin-bottom: 1.1rem;
+    }
+    .changelog-item strong {
+      display: block;
+      color: #f1f5f9;
+      font-size: 0.92rem;
+      margin-bottom: 0.25rem;
+    }
+    .changelog-item .date {
+      font-size: 0.78rem;
+      color: #64748b;
+      margin-bottom: 0.3rem;
+    }
+    .changelog-item ul {
+      margin: 0.3rem 0 0 1rem;
+      font-size: 0.88rem;
+    }
+    .goal {
+      background: #172554;
+      border: 1px solid #1e40af;
+      border-radius: 10px;
+      padding: 0.9rem 1rem;
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: #bfdbfe;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a class="back" href="/valkompass/">← Tillbaka till testet</a>
+
+    <h1>Om Valkompassen <span class="version">pre-1.0</span></h1>
+    <p style="color:#94a3b8;font-size:0.9rem;margin-bottom:1.3rem;">Ett annat sätt att testa hur väl dina åsikter stämmer med partierna.</p>
+
+    <div class="card">
+      <h2 style="margin-top:0;">Vad är det här?</h2>
+      <p>
+        De flesta valkompasser ställer generella frågor och matchar dig mot partier.
+        Här gör vi tvärtom: <strong>du väljer först vilket parti du tror dig stå närmast</strong>,
+        sedan får du frågor som är särskilt viktiga just för det partiet.
+      </p>
+      <p>
+        Syftet är att utmana den bild man har av sig själv – inte att tala om hur man ska rösta.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0;">Hur fungerar testet?</h2>
+      <ul>
+        <li>Du väljer det parti du tror dig stå närmast.</li>
+        <li>Du får 10 frågor som är särskilt relevanta för just det partiet.</li>
+        <li>Svarsalternativen blandas varje gång så att det inte går att “gissa rätt”.</li>
+        <li>Efter de 10 frågorna kan du se ett resultat – eller fortsätta med fler frågor från andra partier.</li>
+        <li>Resultatet sparas lokalt i din webbläsare per parti.</li>
+      </ul>
+      <p>
+        Ju fler frågor du svarar på, desto mer stabil blir matchningen mot alla partier.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0;">Partineutralitet</h2>
+      <p>
+        Målet är att verktyget ska vara så opartiskt som möjligt.
+        Frågorna är formulerade konkret och hypotetiskt istället för med ledande formuleringar.
+        Alla partier (även mindre) får egna frågebanker över tid.
+      </p>
+      <p>
+        Feedback på frågor och svarsalternativ är välkommen – det hjälper till att göra testet bättre.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0;">Donera</h2>
+      <p>Appen är gratis. Om du vill stötta utvecklingen går det bra att donera.</p>
+      <div class="placeholder">
+        [Doneringslänk kommer här – t.ex. Swish, Buy Me a Coffee eller Stripe]
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0;">Kontakt</h2>
+      <p>Har du synpunkter, hittat fel eller vill föreslå förbättringar?</p>
+      <div class="placeholder">
+        [Kontaktinfo kommer här – e-post, X-konto eller liknande]
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0;">Changelog</h2>
+
+      <div class="changelog-item">
+        <strong>pre-1.0 – Pågående utveckling</strong>
+        <div class="date">augusti 2026</div>
+        <ul>
+          <li>2D politisk kompass (vänster–höger + GAL–TAN)</li>
+          <li>Partispecifika frågebanker (SD + Socialdemokraterna)</li>
+          <li>Slumpad ordning på svarsalternativ</li>
+          <li>Segmenterad progress-indikator med bakåt/framåt-navigering</li>
+          <li>Möjlighet att se resultat när som helst och fortsätta senare</li>
+          <li>Resultat sparas lokalt per parti</li>
+          <li>Frågor utbrutna till separat fil (questions.js)</li>
+          <li>Denna Om-sida med changelog</li>
+        </ul>
+      </div>
+
+      <div class="changelog-item">
+        <strong>Planerat inför version 1.0.0</strong>
+        <div class="date">mål</div>
+        <ul>
+          <li>Frågor till övriga partier (M, V, C, KD, MP, L, AFS, MED, Nyans m.fl.)</li>
+          <li>Dela resultat på sociala medier</li>
+          <li>Feedback-knapp under varje fråga</li>
+          <li>Färdig donerings- och kontaktfunktion</li>
+          <li>Nytt namn + egen domän</li>
+        </ul>
+      </div>
+
+      <div class="goal">
+        <strong>Mål:</strong> Version <strong>1.0.0</strong> när ovanstående är på plats och testet känns stabilt nog att dela öppet.
+      </div>
+    </div>
+
+    <p style="text-align:center;margin-top:1.5rem;font-size:0.85rem;color:#64748b;">
+      <a href="/valkompass/">← Tillbaka till testet</a>
+    </p>
+  </div>
+</body>
+</html>
