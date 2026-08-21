@@ -43,11 +43,11 @@ window.partyQuestions = {
     },
     {
       id: "q-d13f",
-      text: "Bör det krävas godkänd svenska för att få permanent uppehållstillstånd?",
+      text: "Bör det krävas godkänd svenska för att få [[permanent uppehållstillstånd]]?",
       options: [
-        { label: "Ja, men lågt krav", scores: { sd: 1, afs: 1, m: 1, kd: 1, med: 1, l: 1, c: 1, s: 1, mp: 0, v: 0, nyans: 0 } },
-        { label: "Nej", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -2, l: -1, c: 0, s: 1, mp: 2, v: 2, nyans: 1 } },
-        { label: "Ja, relativt högt krav", scores: { sd: 2, afs: 2, m: 1, kd: 1, med: 2, l: 1, c: 0, s: -1, mp: -2, v: -2, nyans: -1 } }
+        { label: "Nej, språkkunskap ska inte krävas", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -2, l: -1, c: 0, s: 1, mp: 2, v: 2, nyans: 1 } },
+        { label: "Ja, grundläggande svenska ([[A2]])", scores: { sd: 1, afs: 1, m: 1, kd: 1, med: 1, l: 1, c: 1, s: 1, mp: 0, v: 0, nyans: 0 } },
+        { label: "Ja, god svenska ([[B1]] eller högre)", scores: { sd: 2, afs: 2, m: 1, kd: 1, med: 2, l: 1, c: 0, s: -1, mp: -2, v: -2, nyans: -1 } }
       ]
     },
     {
