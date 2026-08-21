@@ -61,11 +61,11 @@ window.partyQuestions = {
     },
     {
       id: "q-ce13",
-      text: "Bör det vara tillåtet att bygga moskéer som finansieras av stater som Saudiarabien, Qatar eller Turkiet?",
+      text: "Bör det vara tillåtet att bygga moskéer som finansieras av utländska stater (t.ex. Saudiarabien, Qatar eller Turkiet)?",
       options: [
-        { label: "Ja, fritt", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -2, l: 0, c: 1, s: 1, mp: 1, v: 1, nyans: 2 } },
-        { label: "Nej", scores: { sd: 2, afs: 2, m: 1, kd: 1, med: 2, l: 0, c: -1, s: -1, mp: -1, v: -1, nyans: -2 } },
-        { label: "Ja, men med stränga krav på öppenhet", scores: { sd: 0, afs: -1, m: 1, kd: 1, med: 0, l: 1, c: 1, s: 1, mp: 1, v: 1, nyans: 0 } }
+        { label: "Ja, även med utländsk statsfinansiering", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -2, l: 0, c: 1, s: 1, mp: 1, v: 1, nyans: 2 } },
+        { label: "Ja, men bara med privat eller svensk finansiering – ingen utländsk statsfinansiering", scores: { sd: 1, afs: 0, m: 2, kd: 2, med: 1, l: 1, c: 1, s: 0, mp: 0, v: 0, nyans: -1 } },
+        { label: "Nej, nya moskéer bör inte tillåtas alls", scores: { sd: 2, afs: 2, m: 0, kd: 0, med: 2, l: -1, c: -1, s: -2, mp: -1, v: -1, nyans: -2 } }
       ]
     },
     {
