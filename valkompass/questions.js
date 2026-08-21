@@ -1,5 +1,5 @@
 // Frågebanker per parti
-// Lägg till fler partier här när vi bygger ut testet
+// Syntax för förklaringar: [[ord|förklaringstext]]
 
 window.partyQuestions = {
   sd: [
@@ -77,7 +77,7 @@ window.partyQuestions = {
       ]
     },
     {
-      text: "Hur generös bör rätten vara för den som fått uppehållstillstånd att ta hit sina anhöriga (familjeåterförening)?",
+      text: "Hur generös bör rätten vara för den som fått uppehållstillstånd att ta hit sina anhöriga ([[familjeåterförening|Möjlighet för den som fått uppehållstillstånd att ta hit make/maka, barn eller ibland andra nära anhöriga]])?",
       options: [
         { label: "Generös", scores: { sd: -2, afs: -2, m: -1, kd: -1, med: -2, l: 0, c: 1, s: 1, mp: 2, v: 2, nyans: 1 } },
         { label: "Mycket restriktiv", scores: { sd: 2, afs: 2, m: 1, kd: 1, med: 2, l: 0, c: -1, s: -1, mp: -2, v: -2, nyans: -1 } },
@@ -112,7 +112,7 @@ window.partyQuestions = {
       ]
     },
     {
-      text: "Hur generös bör a-kassan och sjukförsäkringen vara?",
+      text: "Hur generös bör [[a-kassan|Arbetslöshetsförsäkring – ersättning när man är arbetslös]] och sjukförsäkringen vara?",
       options: [
         { label: "Högre ersättningsnivåer än idag", scores: { s: 2, v: 2, mp: 1, nyans: 1, c: 0, l: -1, m: -2, kd: -1, sd: -1, med: -2, afs: -1 } },
         { label: "Nuvarande nivå är ungefär lagom", scores: { s: 1, v: 0, mp: 0, nyans: 0, c: 1, l: 1, m: 0, kd: 1, sd: 1, med: 0, afs: 0 } },
@@ -144,7 +144,7 @@ window.partyQuestions = {
       ]
     },
     {
-      text: "Hur mycket ska staten styra över boendet (hyresreglering, byggkrav, bostadsbidrag)?",
+      text: "Hur mycket ska staten styra över boendet ([[hyresreglering|Regler som begränsar hur mycket hyran får höjas och hur den sätts]], byggkrav, bostadsbidrag)?",
       options: [
         { label: "Mer styrning för att hålla hyror nere och bygga mer hyresrätter", scores: { s: 2, v: 2, mp: 1, nyans: 1, c: 0, l: -1, m: -2, kd: -1, sd: 0, med: -2, afs: 0 } },
         { label: "Mindre styrning – marknaden ska styra mer", scores: { s: -2, v: -2, mp: -1, nyans: -1, c: 1, l: 1, m: 2, kd: 1, sd: 1, med: 2, afs: 1 } },
@@ -160,7 +160,7 @@ window.partyQuestions = {
       ]
     },
     {
-      text: "Hur viktigt är det att behålla och utveckla den generella välfärden (samma system för alla) istället för mer behovsprövade bidrag?",
+      text: "Hur viktigt är det att behålla och utveckla den generella välfärden (samma system för alla) istället för mer [[behovsprövade bidrag|Bidrag som bara ges till dem som uppfyller vissa inkomst- eller behovskrav]]?",
       options: [
         { label: "Mycket viktigt – generella system skapar sammanhållning", scores: { s: 2, v: 2, mp: 1, nyans: 1, c: 0, l: 0, m: -1, kd: 0, sd: 0, med: -1, afs: -1 } },
         { label: "Mer behovsprövning är bättre – pengarna ska gå till dem som verkligen behöver", scores: { s: -1, v: -1, mp: 0, nyans: 0, c: 1, l: 1, m: 2, kd: 1, sd: 1, med: 2, afs: 1 } },
@@ -227,7 +227,7 @@ window.partyQuestions = {
       ]
     },
     {
-      text: "Hyresregleringen (bruksvärdessystemet) bör:",
+      text: "[[Hyresregleringen|Regler som begränsar hur hyran sätts och får höjas]] ([[bruksvärdessystemet|System där hyran bestäms utifrån lägenhetens standard och läge – inte fri marknadshyra]]) bör:",
       options: [
         { label: "Avskaffas eller kraftigt luckras upp", scores: { m: 2, med: 2, l: 1, c: 1, kd: 0, sd: 0, afs: 0, s: -2, v: -2, mp: -1, nyans: -1 } },
         { label: "Behållas ungefär som idag", scores: { m: -1, med: -1, l: 0, c: 0, kd: 0, sd: 0, afs: 0, s: 1, v: 1, mp: 1, nyans: 1 } },
@@ -243,7 +243,7 @@ window.partyQuestions = {
       ]
     },
     {
-      text: "När elpriserna är höga, vad bör staten prioritiera?",
+      text: "När elpriserna är höga, vad bör staten prioritera?",
       options: [
         { label: "Långsiktig utbyggnad av planerbar el (t.ex. kärnkraft)", scores: { m: 2, kd: 2, sd: 2, med: 2, afs: 1, l: 1, c: 0, s: 0, v: -1, mp: -2, nyans: 0 } },
         { label: "Stöd till hushåll och mer förnybart", scores: { m: -1, kd: 0, sd: -1, med: -1, afs: -1, l: 0, c: 1, s: 2, v: 1, mp: 2, nyans: 1 } },
