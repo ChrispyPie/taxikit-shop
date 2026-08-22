@@ -120,9 +120,10 @@
     var saved = loadSaved();
     parties.forEach(function (p) {
       var isSelected = chosenParty && chosenParty.id === p.id;
-      var row = document.createElement("button");
+      var row = document.createElement("div");
       row.className = "party-btn" + (isSelected ? " active" : "");
-      row.type = "button";
+      row.setAttribute("role", "button");
+      row.tabIndex = 0;
 
       var left = document.createElement("span");
       left.className = "name-wrap";
