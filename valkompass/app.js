@@ -144,7 +144,6 @@
       prog.textContent = answered + "/" + total;
 
       row.appendChild(left);
-      row.appendChild(prog);
 
       if (isSelected) {
         var action = document.createElement("button");
@@ -156,6 +155,8 @@
           startOrShow(p);
         };
         row.appendChild(action);
+      } else {
+        row.appendChild(prog);
       }
 
       row.onclick = function () {
