@@ -111,7 +111,7 @@ button:disabled{opacity:0.4;cursor:not-allowed}
 <div class="stop-row"><button class="secondary" id="btn-finish-early">Se resultat</button></div>
 </div>
 <div id="step-continue" class="card hidden">
-<p style="text-align:center;margin-bottom:1rem;">Du har svarat p&aring; de 10 viktigaste fr&aring;gorna f&ouml;r ditt valda parti.</p>
+<p id="continue-text" style="text-align:center;margin-bottom:1rem;">Du har svarat p&aring; en omg&aring;ng fr&aring;gor.</p>
 <div class="btn-row">
 <button class="secondary" id="btn-see-results">Se resultat</button>
 <button id="btn-continue">Forts&auml;tt med fler fr&aring;gor</button>
@@ -119,9 +119,13 @@ button:disabled{opacity:0.4;cursor:not-allowed}
 </div>
 <div id="step-results" class="card hidden">
 <h2 style="margin-bottom:0.9rem;font-size:1.1rem">Ditt resultat</h2>
-<p id="chosen-summary" style="margin-bottom:1rem;color:#94a3b8;font-size:0.88rem"></p>
+<p id="chosen-summary" style="margin-bottom:0.7rem;color:#94a3b8;font-size:0.88rem;white-space:pre-line"></p>
+<p id="result-explanation" style="margin-bottom:1rem;font-size:0.92rem;line-height:1.45;color:#e2e8f0;background:#0f172a;border-radius:8px;padding:0.75rem 0.9rem"></p>
 <div id="results-list"></div>
-<div class="btn-row" style="margin-top:1.3rem">
+<div class="btn-row" style="margin-top:1.1rem">
+<button id="btn-share">Dela resultat</button>
+</div>
+<div class="btn-row" style="margin-top:0.6rem">
 <button id="btn-continue-from-results">Forts&auml;tt med fler fr&aring;gor</button>
 <button class="secondary" id="btn-save-exit">Avsluta & Spara</button>
 </div>
