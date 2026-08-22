@@ -114,6 +114,71 @@
     return bank.length;
   }
 
+  function persistProgress() {
+    if (!chosenParty) return;
+    var prev = getSaved(chosenParty.id) || {};
+    saveResult(chosenParty.id, {
+      answered: totalAnswered,
+      allAnswers: allAnswers,
+      ranked: lastRanked && lastRanked.length ? lastRanked : prev.ranked || null,
+      date: new Date().toISOString()
+    });
+  }
+
+  function loadPartyState(party) {
+    chosenParty = party;
+    var saved = getSaved(party.id);
+    allAnswers = (saved && saved.allAnswers) ? saved.allAnswers.slice() : [];
+    totalAnswered = (saved && saved.answered) || allAnswers.length || 0;
+    answeredIds = {};
+    allAnswers.forEach(function (a) {
+      if (a && a.id) answeredIds[a.id] = true;
+    });
+    lastRanked = (saved && saved.ranked) || [];
+  }
+
+  function startFresh(party) {
+    if (!partyQuestions) {
+      alert("Fr\u00e5gorna har inte laddats. Ladda om sidan.");
+      return;
+    }
+    chosenParty = party;
+    allAnswers = [];
+    totalAnswered = 0;
+    answeredIds = {};
+    lastRanked = [];
+    persistProgress();
+    var bank = (partyQuestions && partyQuestions[party.id]) || [];
+    if (!bank.length) {
+      alert("Inga fr\u00e5gor finns \u00e4nnu f\u00f6r detta parti.");
+      return;
+    }
+    startBatch();
+  }
+
+  function resumeParty(party) {
+    if (!partyQuestions) {
+      alert("Fr\u00e5gorna har inte laddats. Ladda om sidan.");
+      return;
+    }
+    loadPartyState(party);
+    var bank = (partyQuestions && partyQuestions[party.id]) || [];
+    if (!bank.length) {
+      alert("Inga fr\u00e5gor finns \u00e4nnu f\u00f6r detta parti.");
+      return;
+    }
+    if (!remainingQuestions().length) {
+      showResults();
+      return;
+    }
+    startBatch();
+  }
+
+  function openSavedResults(party) {
+    loadPartyState(party);
+    showResults();
+  }
+
   function renderPartyList() {
     var partyList = document.getElementById("party-list");
     partyList.innerHTML = "";
@@ -147,15 +212,35 @@
       row.appendChild(left);
 
       if (isSelected) {
-        var action = document.createElement("button");
-        action.className = "row-action";
-        action.type = "button";
-        action.textContent = saved[p.id] ? "Resultat" : "Starta";
-        action.onclick = function (e) {
-          e.stopPropagation();
-          startOrShow(p);
-        };
-        row.appendChild(action);
+        var wrap = document.createElement("span");
+        wrap.className = "row-actions";
+        var ans = answered;
+        if (ans === 0) {
+          var b = document.createElement("button");
+          b.className = "row-action";
+          b.type = "button";
+          b.textContent = "Starta";
+          b.onclick = function (e) { e.stopPropagation(); startFresh(p); };
+          wrap.appendChild(b);
+        } else {
+          if (ans < total) {
+            var b2 = document.createElement("button");
+            b2.className = "row-action";
+            b2.type = "button";
+            b2.textContent = "Forts\u00e4tt";
+            b2.onclick = function (e) { e.stopPropagation(); resumeParty(p); };
+            wrap.appendChild(b2);
+          }
+          if (ans >= 5) {
+            var b3 = document.createElement("button");
+            b3.className = "row-action secondary";
+            b3.type = "button";
+            b3.textContent = "Resultat";
+            b3.onclick = function (e) { e.stopPropagation(); openSavedResults(p); };
+            wrap.appendChild(b3);
+          }
+        }
+        row.appendChild(wrap);
       } else {
         row.appendChild(prog);
       }
@@ -193,35 +278,6 @@
     if (markers[party.id]) markers[party.id].classList.add("selected");
     infoPopup.classList.add("hidden");
     renderPartyList();
-  }
-
-  function startOrShow(party) {
-    chosenParty = party;
-    if (!partyQuestions) {
-      alert("Fr\u00e5gorna har inte laddats. Ladda om sidan.");
-      return;
-    }
-    var saved = getSaved(party.id);
-    if (saved) {
-      allAnswers = saved.allAnswers || [];
-      totalAnswered = saved.answered || 0;
-      answeredIds = {};
-      allAnswers.forEach(function (a) {
-        if (a && a.id) answeredIds[a.id] = true;
-      });
-      lastRanked = saved.ranked || [];
-      showResults();
-      return;
-    }
-    allAnswers = [];
-    totalAnswered = 0;
-    answeredIds = {};
-    var bank = (partyQuestions && partyQuestions[party.id]) || [];
-    if (!bank.length) {
-      alert("Inga fr\u00e5gor finns \u00e4nnu f\u00f6r detta parti.");
-      return;
-    }
-    startBatch();
   }
 
   function getPartyBank() {
@@ -300,13 +356,13 @@
 
   function finishBatch() {
     if (!allBatchAnswered()) {
-      alert("Svara p\u00e5 alla " + currentQueue.length + " fr\u00e5gor innan du g\u00e5r vidare.");
+      alert("Svara p\u00e5 alla " + currentQueue.length + " fr\u00e5gor i den h\u00e4r omg\u00e5ngen, eller tryck Till start f\u00f6r att spara och l\u00e4mna.");
       for (var i = 0; i < answers.length; i++) {
         if (answers[i] === null) { jumpTo(i); break; }
       }
       return;
     }
-    mergeCurrentAnswers();
+    persistProgress();
     var left = remainingQuestions().length;
     document.getElementById("step-questions").classList.add("hidden");
     if (left > 0) {
@@ -320,23 +376,14 @@
     }
   }
 
-  function mergeCurrentAnswers() {
-    for (var i = 0; i < answers.length; i++) {
-      if (!answers[i]) continue;
-      var qid = currentQueue[i] && currentQueue[i].id ? currentQueue[i].id : ("x-" + i);
-      if (answeredIds[qid]) continue;
-      answeredIds[qid] = true;
-      allAnswers.push({ id: qid, scores: answers[i] });
-      totalAnswered++;
-    }
-    for (var j = 0; j < answers.length; j++) answers[j] = null;
-  }
-
   document.getElementById("btn-continue").onclick = function () {
     startBatch();
   };
   document.getElementById("btn-see-results").onclick = function () {
-    mergeCurrentAnswers();
+    if (totalAnswered < 5) {
+      alert("Svara p\u00e5 minst 5 fr\u00e5gor innan du kan se resultat.");
+      return;
+    }
     showResults();
   };
   document.getElementById("btn-continue-from-results").onclick = function () {
@@ -349,6 +396,7 @@
   };
 
   document.getElementById("btn-save-exit").onclick = function () {
+    persistProgress();
     chosenParty = null;
     Object.keys(markers).forEach(function (id) { markers[id].classList.remove("selected"); });
     document.getElementById("step-results").classList.add("hidden");
@@ -367,6 +415,40 @@
     lastRanked = [];
     startBatch();
   };
+
+  function updateEarlyResultsBtn() {
+    var btn = document.getElementById("btn-early-results");
+    if (!btn) return;
+    var seen = 0;
+    for (var i = 0; i < status.length; i++) {
+      if (status[i] === "answered" || status[i] === "skipped") seen++;
+    }
+    var ok = totalAnswered >= 5 && (totalAnswered >= 10 || seen >= 10);
+    btn.disabled = !ok;
+  }
+
+  var btnToStart = document.getElementById("btn-to-start");
+  if (btnToStart) {
+    btnToStart.onclick = function () {
+      persistProgress();
+      chosenParty = null;
+      Object.keys(markers).forEach(function (id) { markers[id].classList.remove("selected"); });
+      document.getElementById("step-questions").classList.add("hidden");
+      document.getElementById("step-continue").classList.add("hidden");
+      document.getElementById("step-results").classList.add("hidden");
+      document.getElementById("step-party").classList.remove("hidden");
+      setSubtitle("Testa om du verkligen st\u00e4mmer med partiet du tror");
+      renderPartyList();
+    };
+  }
+  var btnEarly = document.getElementById("btn-early-results");
+  if (btnEarly) {
+    btnEarly.onclick = function () {
+      if (btnEarly.disabled || totalAnswered < 5) return;
+      persistProgress();
+      showResults();
+    };
+  }
 
   function showQuestion() {
     hideTermPopup();
@@ -414,15 +496,29 @@
       optionsDiv.appendChild(btn);
     });
     updateSegments();
+    updateEarlyResultsBtn();
   }
 
   function selectAnswer(scores, btnEl) {
     answers[currentQ] = scores;
     status[currentQ] = "answered";
+    var q = currentQueue[currentQ];
+    var qid = q && q.id ? q.id : ("x-" + currentQ);
+    if (!answeredIds[qid]) {
+      answeredIds[qid] = true;
+      allAnswers.push({ id: qid, scores: scores });
+      totalAnswered++;
+    } else {
+      for (var ai = 0; ai < allAnswers.length; ai++) {
+        if (allAnswers[ai].id === qid) { allAnswers[ai].scores = scores; break; }
+      }
+    }
+    persistProgress();
     var btns = document.querySelectorAll("#options button");
     for (var i = 0; i < btns.length; i++) btns[i].classList.remove("selected");
     btnEl.classList.add("selected");
     updateSegments();
+    updateEarlyResultsBtn();
     setTimeout(function () {
       if (currentQ < currentQueue.length - 1) jumpTo(currentQ + 1);
       else finishBatch();
@@ -504,27 +600,47 @@
     });
   }
 
-  document.getElementById("btn-share").onclick = function () {
-    if (!chosenParty || !lastRanked.length) return;
+  function shareText() {
+    if (!chosenParty || !lastRanked.length) return "";
     var chosenMatch = null;
     for (var i = 0; i < lastRanked.length; i++) {
       if (lastRanked[i].id === chosenParty.id) { chosenMatch = lastRanked[i]; break; }
     }
     var top = lastRanked[0];
-    var text = buildExplanation(chosenMatch, top) +
+    return buildExplanation(chosenMatch, top) +
       "\n\nBesvarade fr\u00e5gor: " + totalAnswered +
       "\nTesta sj\u00e4lv: https://taxikit.shop/valkompass";
-    if (navigator.share) {
-      navigator.share({ title: "Valkompass", text: text }).catch(function () {});
-    } else if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(function () {
-        var btn = document.getElementById("btn-share");
-        var old = btn.textContent;
-        btn.textContent = "Kopierat!";
-        setTimeout(function () { btn.textContent = old; }, 1500);
+  }
+  function openShare(url) {
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+  var btnX = document.getElementById("btn-share-x");
+  if (btnX) btnX.onclick = function () {
+    var t = shareText();
+    if (!t) return;
+    openShare("https://twitter.com/intent/tweet?text=" + encodeURIComponent(t));
+  };
+  var btnWa = document.getElementById("btn-share-wa");
+  if (btnWa) btnWa.onclick = function () {
+    var t = shareText();
+    if (!t) return;
+    openShare("https://wa.me/?text=" + encodeURIComponent(t));
+  };
+  var btnFb = document.getElementById("btn-share-fb");
+  if (btnFb) btnFb.onclick = function () {
+    openShare("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent("https://taxikit.shop/valkompass"));
+  };
+  var btnCopy = document.getElementById("btn-share-copy");
+  if (btnCopy) btnCopy.onclick = function () {
+    var t = shareText();
+    if (!t) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t).then(function () {
+        btnCopy.textContent = "Kopierat!";
+        setTimeout(function () { btnCopy.textContent = "Kopiera"; }, 1500);
       });
     } else {
-      prompt("Kopiera texten:", text);
+      prompt("Kopiera texten:", t);
     }
   };
 })();
