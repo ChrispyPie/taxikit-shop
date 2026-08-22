@@ -215,6 +215,7 @@
         var wrap = document.createElement("span");
         wrap.className = "row-actions";
         var ans = answered;
+        var hasResults = !!(saved[p.id] && saved[p.id].ranked && saved[p.id].ranked.length);
         if (ans === 0) {
           var b = document.createElement("button");
           b.className = "row-action";
@@ -222,23 +223,20 @@
           b.textContent = "Starta";
           b.onclick = function (e) { e.stopPropagation(); startFresh(p); };
           wrap.appendChild(b);
+        } else if (hasResults || ans >= 10) {
+          var b3 = document.createElement("button");
+          b3.className = "row-action";
+          b3.type = "button";
+          b3.textContent = "Resultat";
+          b3.onclick = function (e) { e.stopPropagation(); openSavedResults(p); };
+          wrap.appendChild(b3);
         } else {
-          if (ans < total) {
-            var b2 = document.createElement("button");
-            b2.className = "row-action";
-            b2.type = "button";
-            b2.textContent = "Forts\u00e4tt";
-            b2.onclick = function (e) { e.stopPropagation(); resumeParty(p); };
-            wrap.appendChild(b2);
-          }
-          if (ans >= 5) {
-            var b3 = document.createElement("button");
-            b3.className = "row-action secondary";
-            b3.type = "button";
-            b3.textContent = "Resultat";
-            b3.onclick = function (e) { e.stopPropagation(); openSavedResults(p); };
-            wrap.appendChild(b3);
-          }
+          var b2 = document.createElement("button");
+          b2.className = "row-action";
+          b2.type = "button";
+          b2.textContent = "Forts\u00e4tt";
+          b2.onclick = function (e) { e.stopPropagation(); resumeParty(p); };
+          wrap.appendChild(b2);
         }
         row.appendChild(wrap);
       } else {
