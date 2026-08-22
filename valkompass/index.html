@@ -55,12 +55,18 @@ button:disabled{opacity:0.4;cursor:not-allowed}
 .nav-row button{flex:1}
 .nav-extra{display:flex;gap:0.5rem;margin-top:0.75rem}
 .nav-extra button{flex:1;font-size:0.85rem;padding:0.55rem 0.6rem}
-.share-row{display:flex;gap:0.5rem;margin-top:0.85rem;flex-wrap:wrap;justify-content:center}
-.share-btn{width:auto;flex:1;min-width:5.5rem;padding:0.55rem 0.5rem;font-size:0.82rem;display:flex;align-items:center;justify-content:center;gap:0.35rem;background:#334155}
+.share-row{display:flex;gap:0.65rem;margin-top:0.9rem;flex-wrap:wrap;justify-content:center;align-items:center}
+.share-btn{width:44px;height:44px;min-width:44px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#334155;border:none;cursor:pointer;flex:0 0 auto}
+.share-btn svg{width:22px;height:22px;display:block}
 .share-btn.x{background:#000}
-.share-btn.wa{background:#128C7E}
+.share-btn.x:hover{background:#222}
+.share-btn.wa{background:#25D366}
+.share-btn.wa:hover{background:#1ebe57}
 .share-btn.fb{background:#1877F2}
+.share-btn.fb:hover{background:#166fe5}
 .share-btn.copy{background:#475569}
+.share-btn.copy:hover{background:#64748b}
+.share-btn:active{transform:scale(0.94)}
 .phase-info{font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem;text-align:center;overflow:hidden}
 .segments{display:flex;gap:3px;margin-bottom:1rem}
 .segment{flex:1;height:8px;border-radius:3px;background:#1e293b;border:1px solid #334155;cursor:pointer}
@@ -131,10 +137,18 @@ button:disabled{opacity:0.4;cursor:not-allowed}
 <p id="result-explanation" style="margin-bottom:1rem;font-size:0.92rem;line-height:1.45;color:#e2e8f0;background:#0f172a;border-radius:8px;padding:0.75rem 0.9rem"></p>
 <div id="results-list"></div>
 <div class="share-row">
-<button class="share-btn x" id="btn-share-x" type="button" title="Dela p&aring; X">𝕏 X</button>
-<button class="share-btn wa" id="btn-share-wa" type="button" title="Dela via WhatsApp">WhatsApp</button>
-<button class="share-btn fb" id="btn-share-fb" type="button" title="Dela p&aring; Facebook">Facebook</button>
-<button class="share-btn copy" id="btn-share-copy" type="button" title="Kopiera text">Kopiera</button>
+<button class="share-btn x" id="btn-share-x" type="button" title="Dela p&aring; X" aria-label="Dela p&aring; X">
+<svg viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+</button>
+<button class="share-btn wa" id="btn-share-wa" type="button" title="Dela via WhatsApp" aria-label="Dela via WhatsApp">
+<svg viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</button>
+<button class="share-btn fb" id="btn-share-fb" type="button" title="Dela p&aring; Facebook" aria-label="Dela p&aring; Facebook">
+<svg viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg>
+</button>
+<button class="share-btn copy" id="btn-share-copy" type="button" title="Kopiera text" aria-label="Kopiera text">
+<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+</button>
 </div>
 <div class="btn-row" style="margin-top:0.85rem">
 <button id="btn-continue-from-results">Forts&auml;tt med fler fr&aring;gor</button>
