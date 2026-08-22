@@ -441,6 +441,7 @@
 
   function showResults() {
     hideTermPopup();
+    document.getElementById("step-party").classList.add("hidden");
     document.getElementById("step-questions").classList.add("hidden");
     document.getElementById("step-continue").classList.add("hidden");
     document.getElementById("step-results").classList.remove("hidden");
