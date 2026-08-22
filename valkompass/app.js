@@ -109,28 +109,65 @@
     markers[p.id] = marker;
   });
 
+  function partyBankCount(pid) {
+    var bank = (partyQuestions && partyQuestions[pid]) || [];
+    return bank.length;
+  }
+
   function renderPartyList() {
     var partyList = document.getElementById("party-list");
     partyList.innerHTML = "";
     var saved = loadSaved();
     parties.forEach(function (p) {
-      var btn = document.createElement("button");
-      btn.className = "party-btn" + (chosenParty && chosenParty.id === p.id ? " active" : "");
+      var isSelected = chosenParty && chosenParty.id === p.id;
+      var row = document.createElement("button");
+      row.className = "party-btn" + (isSelected ? " active" : "");
+      row.type = "button";
+
       var left = document.createElement("span");
-      left.textContent = p.name;
-      if (saved[p.id]) {
-        var tag = document.createElement("span");
-        tag.className = "saved";
-        tag.textContent = " \u2713 sparad";
-        left.appendChild(tag);
+      left.className = "name-wrap";
+      var nameText = document.createElement("span");
+      nameText.textContent = p.name + " (" + p.pct + ")";
+      left.appendChild(nameText);
+      if (saved[p.id] && (saved[p.id].answered || 0) > 0) {
+        var check = document.createElement("span");
+        check.className = "check";
+        check.textContent = " \u2713";
+        check.title = "Sparat resultat";
+        left.appendChild(check);
       }
-      var right = document.createElement("span");
-      right.className = "pct";
-      right.textContent = p.pct;
-      btn.appendChild(left);
-      btn.appendChild(right);
-      btn.onclick = function () { selectParty(p); };
-      partyList.appendChild(btn);
+
+      var answered = (saved[p.id] && saved[p.id].answered) || 0;
+      var total = partyBankCount(p.id) || 10;
+      var prog = document.createElement("span");
+      prog.className = "prog";
+      prog.textContent = answered + "/" + total;
+
+      row.appendChild(left);
+      row.appendChild(prog);
+
+      if (isSelected) {
+        var action = document.createElement("button");
+        action.className = "row-action";
+        action.type = "button";
+        action.textContent = saved[p.id] ? "Resultat" : "Starta";
+        action.onclick = function (e) {
+          e.stopPropagation();
+          startOrShow(p);
+        };
+        row.appendChild(action);
+      }
+
+      row.onclick = function () {
+        if (chosenParty && chosenParty.id === p.id) {
+          chosenParty = null;
+          Object.keys(markers).forEach(function (id) { markers[id].classList.remove("selected"); });
+          renderPartyList();
+        } else {
+          selectParty(p);
+        }
+      };
+      partyList.appendChild(row);
     });
   }
   renderPartyList();
@@ -151,25 +188,42 @@
   function selectParty(party) {
     chosenParty = party;
     Object.keys(markers).forEach(function (id) { markers[id].classList.remove("selected"); });
-    markers[party.id].classList.add("selected");
-    document.getElementById("selected-name").textContent = party.name;
-    document.getElementById("selection-panel").classList.remove("hidden");
+    if (markers[party.id]) markers[party.id].classList.add("selected");
     infoPopup.classList.add("hidden");
     renderPartyList();
-    var saved = getSaved(party.id);
-    document.getElementById("btn-start").textContent = saved ? "Visa sparat resultat" : "Starta test";
   }
 
-  document.getElementById("btn-back").onclick = function () {
-    chosenParty = null;
-    Object.keys(markers).forEach(function (id) { markers[id].classList.remove("selected"); });
-    document.getElementById("selection-panel").classList.add("hidden");
-    setSubtitle("Testa om du verkligen st\u00e4mmer med partiet du tror");
-    renderPartyList();
-  };
+  function startOrShow(party) {
+    chosenParty = party;
+    if (!partyQuestions) {
+      alert("Fr\u00e5gorna har inte laddats. Ladda om sidan.");
+      return;
+    }
+    var saved = getSaved(party.id);
+    if (saved) {
+      allAnswers = saved.allAnswers || [];
+      totalAnswered = saved.answered || 0;
+      answeredIds = {};
+      allAnswers.forEach(function (a) {
+        if (a && a.id) answeredIds[a.id] = true;
+      });
+      lastRanked = saved.ranked || [];
+      showResults();
+      return;
+    }
+    allAnswers = [];
+    totalAnswered = 0;
+    answeredIds = {};
+    var bank = (partyQuestions && partyQuestions[party.id]) || [];
+    if (!bank.length) {
+      alert("Inga fr\u00e5gor finns \u00e4nnu f\u00f6r detta parti.");
+      return;
+    }
+    startBatch();
+  }
 
   function getPartyBank() {
-    return (partyQuestions && partyQuestions[chosenParty.id]) || [];
+    return (partyQuestions && chosenParty && partyQuestions[chosenParty.id]) || [];
   }
 
   function remainingQuestions() {
@@ -199,35 +253,6 @@
     buildSegments();
     showQuestion();
   }
-
-  document.getElementById("btn-start").onclick = function () {
-    if (!chosenParty) return;
-    if (!partyQuestions) {
-      alert("Fr\u00e5gorna har inte laddats. Ladda om sidan.");
-      return;
-    }
-    var saved = getSaved(chosenParty.id);
-    if (saved) {
-      allAnswers = saved.allAnswers || [];
-      totalAnswered = saved.answered || 0;
-      answeredIds = {};
-      allAnswers.forEach(function (a) {
-        if (a && a.id) answeredIds[a.id] = true;
-      });
-      lastRanked = saved.ranked || [];
-      showResults();
-      return;
-    }
-    allAnswers = [];
-    totalAnswered = 0;
-    answeredIds = {};
-    var bank = getPartyBank();
-    if (!bank.length) {
-      alert("Inga fr\u00e5gor finns \u00e4nnu f\u00f6r detta parti.");
-      return;
-    }
-    startBatch();
-  };
 
   function buildSegments() {
     var cont = document.getElementById("segments");
@@ -263,18 +288,22 @@
     if (currentQ < currentQueue.length - 1) jumpTo(currentQ + 1);
     else finishBatch();
   };
-  document.getElementById("btn-finish-early").onclick = function () {
-    var answered = 0;
-    for (var i = 0; i < answers.length; i++) if (answers[i] !== null) answered++;
-    if (answered === 0 && totalAnswered === 0) {
-      alert("Svara p\u00e5 minst en fr\u00e5ga f\u00f6rst.");
-      return;
+
+  function allBatchAnswered() {
+    for (var i = 0; i < answers.length; i++) {
+      if (answers[i] === null) return false;
     }
-    mergeCurrentAnswers();
-    showResults();
-  };
+    return answers.length > 0;
+  }
 
   function finishBatch() {
+    if (!allBatchAnswered()) {
+      alert("Svara p\u00e5 alla " + currentQueue.length + " fr\u00e5gor innan du g\u00e5r vidare.");
+      for (var i = 0; i < answers.length; i++) {
+        if (answers[i] === null) { jumpTo(i); break; }
+      }
+      return;
+    }
     mergeCurrentAnswers();
     var left = remainingQuestions().length;
     document.getElementById("step-questions").classList.add("hidden");
@@ -322,7 +351,6 @@
     Object.keys(markers).forEach(function (id) { markers[id].classList.remove("selected"); });
     document.getElementById("step-results").classList.add("hidden");
     document.getElementById("step-party").classList.remove("hidden");
-    document.getElementById("selection-panel").classList.add("hidden");
     setSubtitle("Testa om du verkligen st\u00e4mmer med partiet du tror");
     renderPartyList();
   };
