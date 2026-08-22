@@ -66,6 +66,9 @@ button:disabled{opacity:0.4;cursor:not-allowed}
 .share-btn.fb:hover{background:#166fe5}
 .share-btn.copy{background:#475569}
 .share-btn.copy:hover{background:#64748b}
+.share-btn.native{background:#e2e8f0}
+.share-btn.native:hover{background:#cbd5e1}
+.share-btn.native svg{width:22px;height:22px}
 .share-btn:active{transform:scale(0.94)}
 .phase-info{font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem;text-align:center;overflow:hidden}
 .segments{display:flex;gap:3px;margin-bottom:1rem}
@@ -148,6 +151,14 @@ button:disabled{opacity:0.4;cursor:not-allowed}
 </button>
 <button class="share-btn copy" id="btn-share-copy" type="button" title="Kopiera text" aria-label="Kopiera text">
 <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+</button>
+<button class="share-btn native" id="btn-share-native" type="button" title="Dela via andra appar" aria-label="Dela via andra appar">
+<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="18" cy="5" r="2.6" fill="#0f172a"/>
+  <circle cx="6" cy="12" r="2.6" fill="#0f172a"/>
+  <circle cx="18" cy="19" r="2.6" fill="#0f172a"/>
+  <path d="M8.4 10.9L15.6 6.5M8.4 13.1L15.6 17.5" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round"/>
+</svg>
 </button>
 </div>
 <div class="btn-row" style="margin-top:0.85rem">
