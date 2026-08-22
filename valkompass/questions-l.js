@@ -12,11 +12,11 @@ Object.assign(window.partyQuestions, {
     },
     {
       id: "q-l02",
-      text: "Bör skolan fokusera mer på kunskap och betyg än på elevens välmående och sociala mål?",
+      text: "Vad ska skolan prioritera mest?",
       options: [
-        { label: "Ja, mer kunskap och tydliga krav", scores: { l: 2, m: 2, kd: 1, med: 1, sd: 1, c: 1, s: 0, v: -1, mp: -1, afs: 1, nyans: 0 } },
-        { label: "Nej, välmående och inkludering är lika viktigt", scores: { l: -1, m: -1, kd: 0, med: -1, sd: 0, c: 0, s: 1, v: 2, mp: 2, afs: 0, nyans: 1 } },
-        { label: "Båda behövs i ungefär samma utsträckning", scores: { l: 1, m: 1, kd: 1, med: 0, sd: 1, c: 1, s: 1, v: 0, mp: 0, afs: 0, nyans: 0 } }
+        { label: "Mer fokus på kunskap, betyg och krav", scores: { l: 2, m: 2, kd: 1, med: 1, sd: 1, c: 1, s: 0, v: -1, mp: -1, afs: 1, nyans: 0 } },
+        { label: "Mer fokus på välmående, inkludering och sociala mål", scores: { l: -1, m: -1, kd: 0, med: -1, sd: 0, c: 0, s: 1, v: 2, mp: 2, afs: 0, nyans: 1 } },
+        { label: "Ungefär som idag – balans mellan båda", scores: { l: 1, m: 1, kd: 1, med: 0, sd: 1, c: 1, s: 1, v: 0, mp: 0, afs: 0, nyans: 0 } }
       ]
     },
     {
