@@ -55,9 +55,9 @@ button:disabled{opacity:0.4;cursor:not-allowed}
 .nav-row button{flex:1}
 .nav-extra{display:flex;gap:0.5rem;margin-top:0.75rem}
 .nav-extra button{flex:1;font-size:0.85rem;padding:0.55rem 0.6rem}
-.share-row{display:flex;gap:0.65rem;margin-top:0.9rem;flex-wrap:wrap;justify-content:center;align-items:center}
-.share-btn{width:44px;height:44px;min-width:44px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#334155;border:none;cursor:pointer;flex:0 0 auto}
-.share-btn svg{width:22px;height:22px;display:block}
+.share-row{display:flex;gap:clamp(0.35rem,2.2vw,0.65rem);margin-top:0.9rem;flex-wrap:nowrap;justify-content:center;align-items:center;width:100%}
+.share-btn{width:clamp(36px,9.5vw,44px);height:clamp(36px,9.5vw,44px);min-width:0;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#334155;border:none;cursor:pointer;flex:0 0 auto;aspect-ratio:1/1}
+.share-btn svg{width:50%;height:50%;display:block}
 .share-btn.x{background:#000}
 .share-btn.x:hover{background:#222}
 .share-btn.wa{background:#25D366}
@@ -68,7 +68,6 @@ button:disabled{opacity:0.4;cursor:not-allowed}
 .share-btn.copy:hover{background:#64748b}
 .share-btn.native{background:#e2e8f0}
 .share-btn.native:hover{background:#cbd5e1}
-.share-btn.native svg{width:22px;height:22px}
 .share-btn:active{transform:scale(0.94)}
 .phase-info{font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem;text-align:center;overflow:hidden}
 .segments{display:flex;gap:3px;margin-bottom:1rem}
