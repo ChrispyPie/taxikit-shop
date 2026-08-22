@@ -687,4 +687,21 @@
       prompt("Kopiera texten:", t);
     }
   };
+
+  var btnNative = document.getElementById("btn-share-native");
+  if (btnNative) {
+    if (!navigator.share) {
+      btnNative.style.display = "none";
+    } else {
+      btnNative.onclick = function () {
+        var t = shareText();
+        if (!t) return;
+        navigator.share({
+          title: "Valkompass",
+          text: t,
+          url: "https://taxikit.shop/valkompass"
+        }).catch(function () {});
+      };
+    }
+  }
 })();
