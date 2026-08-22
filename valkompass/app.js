@@ -600,16 +600,54 @@
     });
   }
 
+  var shareLabel = {
+    s: "Socialdemokrat",
+    sd: "Sverigedemokrat",
+    m: "Moderat",
+    v: "V\u00e4nsterpartist",
+    c: "Centerpartist",
+    kd: "Kristdemokrat",
+    mp: "Milj\u00f6partist",
+    l: "Liberal",
+    nyans: "Nyans",
+    afs: "AFS:are",
+    med: "MED:are"
+  };
+  var shareFullName = {
+    s: "Socialdemokraterna",
+    sd: "Sverigedemokraterna",
+    m: "Moderaterna",
+    v: "V\u00e4nsterpartiet",
+    c: "Centerpartiet",
+    kd: "Kristdemokraterna",
+    mp: "Milj\u00f6partiet",
+    l: "Liberalerna",
+    nyans: "Nyans",
+    afs: "Alternativ f\u00f6r Sverige",
+    med: "Medborgerlig Samling"
+  };
+
+  function shareLineBelieved(partyId) {
+    if (partyId === "nyans") return "Jag trodde jag tillh\u00f6rde Nyans.";
+    var label = shareLabel[partyId] || "mitt parti";
+    return "Jag trodde jag var " + label + ".";
+  }
+
   function shareText() {
     if (!chosenParty || !lastRanked.length) return "";
-    var chosenMatch = null;
-    for (var i = 0; i < lastRanked.length; i++) {
-      if (lastRanked[i].id === chosenParty.id) { chosenMatch = lastRanked[i]; break; }
-    }
     var top = lastRanked[0];
-    return buildExplanation(chosenMatch, top) +
-      "\n\nBesvarade fr\u00e5gor: " + totalAnswered +
-      "\nTesta sj\u00e4lv: https://taxikit.shop/valkompass";
+    var line1 = shareLineBelieved(chosenParty.id);
+    var line2;
+    if (top.id === chosenParty.id) {
+      line2 = "Och det st\u00e4mde.";
+    } else {
+      var full = shareFullName[top.id] || top.name;
+      line2 = "Det visar sig att jag ligger n\u00e4rmare " + full + ".";
+    }
+    return line1 + "\n" + line2 +
+      "\n\nTesta om du st\u00e4mmer med partiet du tror.\n" +
+      "Partispecifikt \u2013 inte vanlig kompass.\n" +
+      "https://taxikit.shop/valkompass";
   }
   function openShare(url) {
     window.open(url, "_blank", "noopener,noreferrer");
