@@ -22,6 +22,12 @@ button:disabled{opacity:0.4;cursor:not-allowed}
 .party-btn.active{background:#1d4ed8;border:1px solid #60a5fa}
 .party-btn .pct{font-size:0.78rem;color:#94a3b8}
 .party-btn .saved{font-size:0.72rem;color:#4ade80;margin-left:0.4rem}
+.party-btn .name-wrap{display:flex;align-items:center;gap:0.35rem;flex:1;min-width:0}
+.party-btn .check{color:#4ade80;font-size:0.85rem}
+.party-btn .prog{font-size:0.78rem;color:#94a3b8;margin-right:0.5rem;white-space:nowrap}
+.party-btn .row-action{background:#3b82f6;border:none;color:#fff;padding:0.35rem 0.7rem;border-radius:6px;font-size:0.8rem;cursor:pointer;width:auto;flex-shrink:0}
+.party-btn .row-action:hover{background:#2563eb}
+.party-btn.active{background:#1d4ed8;border:1px solid #60a5fa}
 .hidden{display:none!important}
 .question{font-size:1.05rem;margin-bottom:1rem;line-height:1.45}
 .options button{background:#334155;text-align:left;margin-top:0.4rem}
@@ -87,15 +93,8 @@ button:disabled{opacity:0.4;cursor:not-allowed}
 <p style="font-size:0.78rem;color:#94a3b8">Placeringarna &auml;r ungef&auml;rliga.</p>
 </div>
 </div>
-<div id="selection-panel" class="hidden">
-<div class="selection-info">Du har valt: <strong id="selected-name"></strong></div>
-<div class="btn-row">
-<button class="secondary" id="btn-back">Tillbaka</button>
-<button id="btn-start">Starta test</button>
-</div>
-</div>
 <div id="list-section">
-<p style="font-size:0.78rem;color:#94a3b8;margin:0.7rem 0 0.55rem">Eller v&auml;lj fr&aring;n listan (st&ouml;rst f&ouml;rst enligt 2022):</p>
+<p style="font-size:0.78rem;color:#94a3b8;margin:0.7rem 0 0.55rem">V&auml;lj parti (st&ouml;rst f&ouml;rst enligt 2022). Tryck igen f&ouml;r att avmarkera.</p>
 <div id="party-list"></div>
 </div>
 </div>
@@ -108,7 +107,6 @@ button:disabled{opacity:0.4;cursor:not-allowed}
 <button class="secondary" id="btn-prev">&larr; Bak&aring;t</button>
 <button class="secondary" id="btn-next">Fram&aring;t &rarr;</button>
 </div>
-<div class="stop-row"><button class="secondary" id="btn-finish-early">Se resultat</button></div>
 </div>
 <div id="step-continue" class="card hidden">
 <p id="continue-text" style="text-align:center;margin-bottom:1rem;">Du har svarat p&aring; en omg&aring;ng fr&aring;gor.</p>
