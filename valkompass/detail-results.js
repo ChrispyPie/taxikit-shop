@@ -1,4 +1,13 @@
 (function () {
+  var partyNames = {
+    s: "Socialdemokraterna", sd: "Sverigedemokraterna", m: "Moderaterna",
+    v: "V\u00e4nsterpartiet", c: "Centerpartiet", kd: "Kristdemokraterna",
+    mp: "Milj\u00f6partiet", l: "Liberalerna", nyans: "Partiet Nyans",
+    afs: "Alternativ f\u00f6r Sverige", med: "Medborgerlig Samling"
+  };
+  var nameToId = {};
+  Object.keys(partyNames).forEach(function (id) { nameToId[partyNames[id]] = id; });
+
   function findQuestionById(qid) {
     var pq = window.partyQuestions;
     if (!pq || !qid) return null;
@@ -18,9 +27,31 @@
     if (s === -1) return "Skiljer dig delvis";
     return "Skiljer dig tydligt";
   }
+  function resolveStateFromDom() {
+    if (window.__vkState && window.__vkState.chosenParty && window.__vkState.allAnswers) {
+      return window.__vkState;
+    }
+    try {
+      var all = JSON.parse(localStorage.getItem("valkompass_results_v2") || "{}");
+      var summary = document.getElementById("chosen-summary");
+      var text = summary ? summary.textContent || "" : "";
+      var pid = null;
+      Object.keys(partyNames).forEach(function (id) {
+        if (text.indexOf(partyNames[id]) !== -1) pid = id;
+      });
+      if (pid && all[pid] && all[pid].allAnswers) {
+        return {
+          allAnswers: all[pid].allAnswers,
+          chosenParty: { id: pid, name: partyNames[pid] }
+        };
+      }
+    } catch (e) {}
+    return null;
+  }
   function buildDetailedResults() {
-    var st = window.__vkState;
+    var st = resolveStateFromDom();
     if (!st || !st.chosenParty) return;
+    window.__vkState = st;
     var allAnswers = st.allAnswers || [];
     var chosenParty = st.chosenParty;
     var disagreeEl = document.getElementById("detail-disagree");
