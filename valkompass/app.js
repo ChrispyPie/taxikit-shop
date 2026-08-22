@@ -489,7 +489,7 @@
       }
       btn.onclick = function (e) {
         if (e.target.closest(".term")) return;
-        selectAnswer(opt.scores, btn);
+        selectAnswer(opt, btn);
       };
       optionsDiv.appendChild(btn);
     });
@@ -497,18 +497,24 @@
     updateEarlyResultsBtn();
   }
 
-  function selectAnswer(scores, btnEl) {
+  function selectAnswer(opt, btnEl) {
+    var scores = opt.scores;
+    var label = opt.label || "";
     answers[currentQ] = scores;
     status[currentQ] = "answered";
     var q = currentQueue[currentQ];
     var qid = q && q.id ? q.id : ("x-" + currentQ);
     if (!answeredIds[qid]) {
       answeredIds[qid] = true;
-      allAnswers.push({ id: qid, scores: scores });
+      allAnswers.push({ id: qid, scores: scores, label: label });
       totalAnswered++;
     } else {
       for (var ai = 0; ai < allAnswers.length; ai++) {
-        if (allAnswers[ai].id === qid) { allAnswers[ai].scores = scores; break; }
+        if (allAnswers[ai].id === qid) {
+          allAnswers[ai].scores = scores;
+          allAnswers[ai].label = label;
+          break;
+        }
       }
     }
     persistProgress();
@@ -596,6 +602,12 @@
       div.appendChild(matchSpan);
       list.appendChild(div);
     });
+    window.__vkState = {
+      allAnswers: allAnswers,
+      chosenParty: chosenParty,
+      ranked: ranked
+    };
+    if (window.__vkDetail && window.__vkDetail.reset) window.__vkDetail.reset();
   }
 
   var shareLabel = {
