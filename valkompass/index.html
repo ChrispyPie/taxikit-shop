@@ -25,6 +25,9 @@ button:disabled{opacity:0.4;cursor:not-allowed}
 .party-btn .prog{font-size:0.78rem;color:#94a3b8;margin-right:0.15rem;white-space:nowrap;flex-shrink:0}
 .party-btn .row-action{background:#3b82f6;border:none;color:#fff;padding:0.35rem 0.65rem;border-radius:6px;font-size:0.8rem;cursor:pointer;width:auto;flex-shrink:0}
 .party-btn .row-action:hover{background:#2563eb}
+.party-btn .row-actions{display:flex;gap:0.3rem;flex-shrink:0;align-items:center}
+.party-btn .row-action.secondary{background:#475569}
+.party-btn .row-action:disabled,.btn-disabled{opacity:0.4;cursor:not-allowed;pointer-events:none}
 .list-header{display:flex;justify-content:space-between;align-items:center;margin:0.7rem 0 0.4rem;font-size:0.78rem;color:#94a3b8;padding:0 0.15rem}
 .hidden{display:none!important}
 .question{font-size:1.05rem;margin-bottom:1rem;line-height:1.45}
@@ -50,6 +53,14 @@ button:disabled{opacity:0.4;cursor:not-allowed}
 .btn-row button{flex:1}
 .nav-row{display:flex;gap:0.5rem;margin-top:1rem}
 .nav-row button{flex:1}
+.nav-extra{display:flex;gap:0.5rem;margin-top:0.75rem}
+.nav-extra button{flex:1;font-size:0.85rem;padding:0.55rem 0.6rem}
+.share-row{display:flex;gap:0.5rem;margin-top:0.85rem;flex-wrap:wrap;justify-content:center}
+.share-btn{width:auto;flex:1;min-width:5.5rem;padding:0.55rem 0.5rem;font-size:0.82rem;display:flex;align-items:center;justify-content:center;gap:0.35rem;background:#334155}
+.share-btn.x{background:#000}
+.share-btn.wa{background:#128C7E}
+.share-btn.fb{background:#1877F2}
+.share-btn.copy{background:#475569}
 .phase-info{font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem;text-align:center;overflow:hidden}
 .segments{display:flex;gap:3px;margin-bottom:1rem}
 .segment{flex:1;height:8px;border-radius:3px;background:#1e293b;border:1px solid #334155;cursor:pointer}
@@ -102,6 +113,10 @@ button:disabled{opacity:0.4;cursor:not-allowed}
 <button class="secondary" id="btn-prev">&larr; Bak&aring;t</button>
 <button class="secondary" id="btn-next">Fram&aring;t &rarr;</button>
 </div>
+<div class="nav-extra">
+<button class="secondary" id="btn-to-start">Till start</button>
+<button class="secondary" id="btn-early-results" disabled>Se resultat</button>
+</div>
 </div>
 <div id="step-continue" class="card hidden">
 <p id="continue-text" style="text-align:center;margin-bottom:1rem;">Du har svarat p&aring; en omg&aring;ng fr&aring;gor.</p>
@@ -115,12 +130,17 @@ button:disabled{opacity:0.4;cursor:not-allowed}
 <p id="chosen-summary" style="margin-bottom:0.7rem;color:#94a3b8;font-size:0.88rem;white-space:pre-line"></p>
 <p id="result-explanation" style="margin-bottom:1rem;font-size:0.92rem;line-height:1.45;color:#e2e8f0;background:#0f172a;border-radius:8px;padding:0.75rem 0.9rem"></p>
 <div id="results-list"></div>
-<div class="btn-row" style="margin-top:1.1rem">
-<button id="btn-share">Dela resultat</button>
+<div class="share-row">
+<button class="share-btn x" id="btn-share-x" type="button" title="Dela p&aring; X">𝕏 X</button>
+<button class="share-btn wa" id="btn-share-wa" type="button" title="Dela via WhatsApp">WhatsApp</button>
+<button class="share-btn fb" id="btn-share-fb" type="button" title="Dela p&aring; Facebook">Facebook</button>
+<button class="share-btn copy" id="btn-share-copy" type="button" title="Kopiera text">Kopiera</button>
 </div>
-<div class="btn-row" style="margin-top:0.6rem">
+<div class="btn-row" style="margin-top:0.85rem">
 <button id="btn-continue-from-results">Forts&auml;tt med fler fr&aring;gor</button>
-<button class="secondary" id="btn-save-exit">Avsluta & Spara</button>
+</div>
+<div class="btn-row" style="margin-top:0.5rem">
+<button class="secondary" id="btn-save-exit">Till start</button>
 </div>
 <button class="secondary" id="btn-retake" style="margin-top:0.6rem">G&ouml;r om detta partis test</button>
 </div>
