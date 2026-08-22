@@ -83,6 +83,18 @@ button:disabled{opacity:0.4;cursor:not-allowed}
 .term-popup{position:fixed;left:12px;right:12px;max-width:420px;margin:0 auto;background:#1e293b;border:1px solid #475569;border-radius:12px;padding:0.85rem 1rem;font-size:0.88rem;line-height:1.45;color:#e2e8f0;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,0.5)}
 .term-popup strong{display:block;color:#fbbf24;margin-bottom:0.3rem;font-size:0.92rem;padding-right:1.2rem}
 .term-popup .close-term{position:absolute;top:8px;right:12px;background:none;border:none;color:#94a3b8;font-size:1.2rem;cursor:pointer;width:auto;padding:0}
+.detail-toggle{margin-top:0.85rem;font-size:0.9rem}
+.detail-panel{margin-top:0.85rem;display:none}
+.detail-panel.open{display:block}
+.detail-section{margin-bottom:0.9rem}
+.detail-section h3{font-size:0.88rem;color:#94a3b8;margin-bottom:0.45rem;font-weight:600}
+.detail-item{background:#0f172a;border-radius:8px;padding:0.7rem 0.8rem;margin-bottom:0.45rem;font-size:0.86rem;line-height:1.4}
+.detail-item .qtext{color:#e2e8f0;margin-bottom:0.35rem}
+.detail-item .meta{font-size:0.78rem;color:#94a3b8}
+.detail-item.agree{border-left:3px solid #22c55e}
+.detail-item.disagree{border-left:3px solid #f87171}
+.detail-item.neutral{border-left:3px solid #64748b}
+.detail-empty{font-size:0.85rem;color:#94a3b8;padding:0.4rem 0}
 </style>
 </head>
 <body>
@@ -138,6 +150,21 @@ button:disabled{opacity:0.4;cursor:not-allowed}
 <p id="chosen-summary" style="margin-bottom:0.7rem;color:#94a3b8;font-size:0.88rem;white-space:pre-line"></p>
 <p id="result-explanation" style="margin-bottom:1rem;font-size:0.92rem;line-height:1.45;color:#e2e8f0;background:#0f172a;border-radius:8px;padding:0.75rem 0.9rem"></p>
 <div id="results-list"></div>
+<button class="secondary detail-toggle" id="btn-detail" type="button">Detaljerat resultat</button>
+<div class="detail-panel" id="detail-panel">
+  <div class="detail-section">
+    <h3 id="detail-disagree-title">Skiljer dig fr&aring;n partiet</h3>
+    <div id="detail-disagree"></div>
+  </div>
+  <div class="detail-section">
+    <h3 id="detail-agree-title">St&auml;mmer med partiet</h3>
+    <div id="detail-agree"></div>
+  </div>
+  <div class="detail-section" id="detail-neutral-wrap">
+    <h3 id="detail-neutral-title">Neutralt gentemot partiet</h3>
+    <div id="detail-neutral"></div>
+  </div>
+</div>
 <div class="share-row">
 <button class="share-btn x" id="btn-share-x" type="button" title="Dela p&aring; X" aria-label="Dela p&aring; X">
 <svg viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
