@@ -634,11 +634,17 @@
   if (btnCopy) btnCopy.onclick = function () {
     var t = shareText();
     if (!t) return;
+    function flashCopied() {
+      var prev = btnCopy.getAttribute("title") || "Kopiera text";
+      btnCopy.setAttribute("title", "Kopierat!");
+      btnCopy.style.outline = "2px solid #4ade80";
+      setTimeout(function () {
+        btnCopy.setAttribute("title", prev);
+        btnCopy.style.outline = "";
+      }, 1500);
+    }
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(t).then(function () {
-        btnCopy.textContent = "Kopierat!";
-        setTimeout(function () { btnCopy.textContent = "Kopiera"; }, 1500);
-      });
+      navigator.clipboard.writeText(t).then(flashCopied);
     } else {
       prompt("Kopiera texten:", t);
     }
