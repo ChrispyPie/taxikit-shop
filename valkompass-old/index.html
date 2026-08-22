@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valkompass (gammal layout)</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:1.25rem 0.9rem}
+.container{max-width:520px;width:100%}
+h1{font-size:1.45rem;margin-bottom:0.35rem;text-align:center}
+.subtitle{text-align:center;color:#94a3b8;margin-bottom:0.5rem;font-size:0.88rem;min-height:1.4em}
+.about-link{text-align:center;margin-bottom:1.1rem}
+.about-link a{color:#60a5fa;font-size:0.85rem;text-decoration:none}
+.card{background:#1e293b;border-radius:12px;padding:1.15rem;margin-bottom:1rem}
+button{background:#3b82f6;color:#fff;border:none;padding:0.7rem 1rem;border-radius:8px;font-size:0.95rem;cursor:pointer;width:100%}
+button:hover{background:#2563eb}
+button.secondary{background:#475569}
+button:disabled{opacity:0.4;cursor:not-allowed}
+.party-btn{background:#334155;margin-bottom:0.35rem;text-align:left;display:flex;justify-content:space-between;align-items:center;padding:0.7rem 0.85rem;gap:0.4rem;font-size:0.95rem;border:none;width:100%;color:#e2e8f0}
+.party-btn:hover{background:#475569}
+.party-btn.active{background:#1d4ed8;border:1px solid #60a5fa}
+.party-btn .name-wrap{display:flex;align-items:center;gap:0.35rem;flex:1;min-width:0}
+.party-btn .check{color:#4ade80;font-size:0.85rem}
+.party-btn .prog{font-size:0.78rem;color:#94a3b8;margin-right:0.4rem;white-space:nowrap;flex-shrink:0}
+.party-btn .row-action{background:#3b82f6;border:none;color:#fff;padding:0.35rem 0.7rem;border-radius:6px;font-size:0.8rem;cursor:pointer;width:auto;flex-shrink:0}
+.party-btn .row-action:hover{background:#2563eb}
+.hidden{display:none!important}
+.question{font-size:1.05rem;margin-bottom:1rem;line-height:1.45}
+.options button{background:#334155;text-align:left;margin-top:0.4rem}
+.options button.selected{background:#1d4ed8;border:1px solid #60a5fa}
+.result-item{display:flex;justify-content:space-between;align-items:center;padding:0.65rem 0;border-bottom:1px solid #334155}
+.match{font-weight:600;color:#4ade80}
+.low{color:#f87171}
+.compass-wrapper{margin-bottom:1.1rem;position:relative}
+.compass{position:relative;width:100%;aspect-ratio:1/0.78;border-radius:12px;border:1px solid #334155;overflow:hidden;background:radial-gradient(ellipse at 50% 0%,rgba(34,197,94,0.55) 0%,transparent 55%),radial-gradient(ellipse at 50% 100%,rgba(120,53,15,0.65) 0%,transparent 55%),radial-gradient(ellipse at 0% 50%,rgba(220,38,38,0.6) 0%,transparent 55%),radial-gradient(ellipse at 100% 50%,rgba(37,99,235,0.6) 0%,transparent 55%),linear-gradient(160deg,#1e1b4b 0%,#0f172a 50%,#1c1917 100%)}
+.compass::before{content:"";position:absolute;inset:0;background:linear-gradient(to right,transparent 49.3%,rgba(148,163,184,0.4) 49.3%,rgba(148,163,184,0.4) 50.7%,transparent 50.7%),linear-gradient(to bottom,transparent 49.3%,rgba(148,163,184,0.4) 49.3%,rgba(148,163,184,0.4) 50.7%,transparent 50.7%);pointer-events:none}
+.compass-label{position:absolute;font-size:0.68rem;color:#f1f5f9;font-weight:600;text-shadow:0 1px 4px rgba(0,0,0,0.85);z-index:1}
+.compass-label.left{left:8px;top:50%;transform:translateY(-50%)}
+.compass-label.right{right:8px;top:50%;transform:translateY(-50%)}
+.compass-label.top{top:7px;left:50%;transform:translateX(-50%)}
+.compass-label.bottom{bottom:7px;left:50%;transform:translateY(-50%)}
+.compass-marker{position:absolute;width:30px;height:30px;border-radius:50%;background:#0f172a;border:2px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-size:0.62rem;font-weight:700;color:#fff;cursor:pointer;transform:translate(-50%,-50%);box-shadow:0 2px 6px rgba(0,0,0,0.5);z-index:3}
+.compass-marker.selected{border-color:#fbbf24;box-shadow:0 0 0 3px rgba(251,191,36,0.5);transform:translate(-50%,-50%) scale(1.22);z-index:12}
+.info-btn{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(15,23,42,0.75);border:1.5px solid #94a3b8;color:#e2e8f0;font-size:0.85rem;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;padding:0}
+.info-popup{position:absolute;top:40px;right:8px;left:8px;background:#1e293b;border:1px solid #475569;border-radius:10px;padding:0.9rem 1rem;font-size:0.82rem;line-height:1.45;color:#cbd5e1;z-index:20;box-shadow:0 8px 24px rgba(0,0,0,0.45)}
+.info-popup .close-info{position:absolute;top:6px;right:10px;background:none;border:none;color:#94a3b8;font-size:1.1rem;cursor:pointer;width:auto;padding:0}
+.btn-row{display:flex;gap:0.6rem;margin-top:0.6rem}
+.btn-row button{flex:1}
+.nav-row{display:flex;gap:0.5rem;margin-top:1rem}
+.nav-row button{flex:1}
+.phase-info{font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem;text-align:center;overflow:hidden}
+.segments{display:flex;gap:3px;margin-bottom:1rem}
+.segment{flex:1;height:8px;border-radius:3px;background:#1e293b;border:1px solid #334155;cursor:pointer}
+.segment.unseen{background:#0f172a}
+.segment.answered{background:#22c55e;border-color:#16a34a}
+.segment.skipped{background:#ef4444;border-color:#dc2626}
+.segment.current{outline:2px solid #fbbf24;outline-offset:1px}
+.qid{float:right;font-size:0.68rem;color:#64748b;cursor:pointer;user-select:none;padding:2px 6px;border-radius:4px}
+.qid:hover{color:#94a3b8;background:#334155}
+.qid.copied{color:#4ade80}
+.term{font-weight:600;color:inherit;border-bottom:1px dotted #94a3b8;cursor:help}
+.term-popup{position:fixed;left:12px;right:12px;max-width:420px;margin:0 auto;background:#1e293b;border:1px solid #475569;border-radius:12px;padding:0.85rem 1rem;font-size:0.88rem;line-height:1.45;color:#e2e8f0;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,0.5)}
+.term-popup strong{display:block;color:#fbbf24;margin-bottom:0.3rem;font-size:0.92rem;padding-right:1.2rem}
+.term-popup .close-term{position:absolute;top:8px;right:12px;background:none;border:none;color:#94a3b8;font-size:1.2rem;cursor:pointer;width:auto;padding:0}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Valkompass <span style="font-size:0.65rem;color:#94a3b8;font-weight:500">(gammal layout)</span></h1>
+<p class="subtitle" id="subtitle">Testa om du verkligen st&auml;mmer med partiet du tror</p>
+<div class="about-link"><a href="/valkompass/om.html">Om testet</a> &middot; <a href="/valkompass/">Nuvarande layout</a></div>
+<div id="step-party" class="card">
+<p style="margin-bottom:0.85rem;font-size:0.92rem">Vilket parti st&ouml;der eller tror du dig st&aring; n&auml;rmast just nu?</p>
+<div class="compass-wrapper">
+<div class="compass" id="compass">
+<div class="compass-label top">GAL</div>
+<div class="compass-label bottom">TAN</div>
+<div class="compass-label left">V&auml;nster</div>
+<div class="compass-label right">H&ouml;ger</div>
+</div>
+<button class="info-btn" id="info-btn" title="Vad betyder skalorna?">i</button>
+<div class="info-popup hidden" id="info-popup">
+<button class="close-info" id="close-info">&times;</button>
+<p style="margin-bottom:0.5rem"><strong>V&auml;nster &ndash; H&ouml;ger</strong><br>Handlar fr&auml;mst om ekonomi, skatter, f&ouml;rdelning och statens storlek.</p>
+<p style="margin-bottom:0.5rem"><strong>GAL &ndash; TAN</strong><br><strong>GAL</strong> = Gr&ouml;n, Alternativ, Libert&auml;r<br><strong>TAN</strong> = Traditionell, Auktorit&auml;r, Nationalistisk</p>
+<p style="font-size:0.78rem;color:#94a3b8">Placeringarna &auml;r ungef&auml;rliga.</p>
+</div>
+</div>
+<div id="list-section">
+<p style="font-size:0.78rem;color:#94a3b8;margin:0.7rem 0 0.55rem">V&auml;lj parti (st&ouml;rst f&ouml;rst enligt 2022). Tryck igen f&ouml;r att avmarkera.</p>
+<div id="party-list"></div>
+</div>
+</div>
+<div id="step-questions" class="card hidden">
+<div class="phase-info"><span id="phase-info"></span><span class="qid" id="qid-label" title="Klicka f&ouml;r att kopiera"></span></div>
+<div class="segments" id="segments"></div>
+<div class="question" id="question-text"></div>
+<div class="options" id="options"></div>
+<div class="nav-row">
+<button class="secondary" id="btn-prev">&larr; Bak&aring;t</button>
+<button class="secondary" id="btn-next">Fram&aring;t &rarr;</button>
+</div>
+</div>
+<div id="step-continue" class="card hidden">
+<p id="continue-text" style="text-align:center;margin-bottom:1rem;">Du har svarat p&aring; en omg&aring;ng fr&aring;gor.</p>
+<div class="btn-row">
+<button class="secondary" id="btn-see-results">Se resultat</button>
+<button id="btn-continue">Forts&auml;tt med fler fr&aring;gor</button>
+</div>
+</div>
+<div id="step-results" class="card hidden">
+<h2 style="margin-bottom:0.9rem;font-size:1.1rem">Ditt resultat</h2>
+<p id="chosen-summary" style="margin-bottom:0.7rem;color:#94a3b8;font-size:0.88rem;white-space:pre-line"></p>
+<p id="result-explanation" style="margin-bottom:1rem;font-size:0.92rem;line-height:1.45;color:#e2e8f0;background:#0f172a;border-radius:8px;padding:0.75rem 0.9rem"></p>
+<div id="results-list"></div>
+<div class="btn-row" style="margin-top:1.1rem">
+<button id="btn-share">Dela resultat</button>
+</div>
+<div class="btn-row" style="margin-top:0.6rem">
+<button id="btn-continue-from-results">Forts&auml;tt med fler fr&aring;gor</button>
+<button class="secondary" id="btn-save-exit">Avsluta & Spara</button>
+</div>
+<button class="secondary" id="btn-retake" style="margin-top:0.6rem">G&ouml;r om detta partis test</button>
+</div>
+</div>
+<div id="term-popup" class="term-popup hidden">
+<button class="close-term" id="close-term">&times;</button>
+<strong id="term-title"></strong>
+<span id="term-body"></span>
+</div>
+<script src="../valkompass/glossary.js"></script>
+<script src="../valkompass/questions.js"></script>
+<script src="../valkompass/questions-vc.js"></script>
+<script src="../valkompass/questions-l.js"></script>
+<script src="../valkompass/questions-extra.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
