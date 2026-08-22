@@ -127,7 +127,7 @@
       var left = document.createElement("span");
       left.className = "name-wrap";
       var nameText = document.createElement("span");
-      nameText.textContent = p.name + " (" + p.pct + ")";
+      nameText.textContent = p.name;
       left.appendChild(nameText);
       if (saved[p.id] && (saved[p.id].answered || 0) > 0) {
         var check = document.createElement("span");
