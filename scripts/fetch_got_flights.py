@@ -41,48 +41,100 @@ def fetch(kind, date):
         return json.load(resp)
 
 
+def first_str(*vals):
+    for v in vals:
+        if isinstance(v, dict):
+            v = v.get("code") or v.get("text") or v.get("name") or ""
+        if isinstance(v, list) and v:
+            v = first_str(*v)
+        if v:
+            return str(v).strip()
+    return ""
+
+
+def airport_label(f, direction):
+    if direction == "ANK":
+        dep = f.get("departureAirport")
+        if isinstance(dep, dict):
+            iata = first_str(dep.get("iataCode"), dep.get("iata"))
+            name = first_str(dep.get("swedish"), dep.get("nameSwedish"), dep.get("name"))
+        else:
+            iata = first_str(f.get("departureAirportIata"), dep if isinstance(dep, str) else "")
+            name = first_str(f.get("departureAirportSwedish"), f.get("departureAirportEnglish"))
+    else:
+        arr = f.get("arrivalAirport")
+        if isinstance(arr, dict):
+            iata = first_str(arr.get("iataCode"), arr.get("iata"))
+            name = first_str(arr.get("swedish"), arr.get("nameSwedish"), arr.get("name"))
+        else:
+            iata = first_str(f.get("arrivalAirportIata"), arr if isinstance(arr, str) else "")
+            name = first_str(f.get("arrivalAirportSwedish"), f.get("arrivalAirportEnglish"))
+    other = (name + " " + iata).strip() or iata or name
+    return other, iata
+
+
+def remark_text(f):
+    for key in ("remarksSwedish", "remarksEnglish", "remark", "remarks"):
+        raw = f.get(key)
+        if isinstance(raw, list):
+            bits = []
+            for item in raw:
+                if isinstance(item, dict):
+                    bits.append(first_str(item.get("text"), item.get("remarkText"), item.get("remark")))
+                elif item:
+                    bits.append(str(item))
+            bits = [b for b in bits if b]
+            if bits:
+                return " · ".join(bits)
+        if isinstance(raw, str) and raw.strip():
+            return raw.strip()
+    return ""
+
+
 def slim_flight(f, direction):
     fi = f.get("flightIdentification") or {}
-    loc = f.get("location") or f.get("locationAndStatus") or {}
-    st = (
-        loc.get("flightLegStatus")
-        or f.get("flightLegStatus")
-        or f.get("status")
-        or ""
-    )
-    times = f.get("arrivalTime") or f.get("departureTime") or {}
-    if direction == "ANK":
-        times = f.get("arrivalTime") or times
-    else:
-        times = f.get("departureTime") or times
-    other = ""
-    if direction == "ANK":
-        other = ((f.get("departureAirport") or {}).get("iataCode")
-                 or (f.get("departureAirportSwedish") or "")
-                 or "")
-        if isinstance(f.get("departureAirport"), str):
-            other = f.get("departureAirport")
-    else:
-        other = ((f.get("arrivalAirport") or {}).get("iataCode") or "")
+    loc = f.get("locationAndStatus") or f.get("location") or {}
+    if not isinstance(loc, dict):
+        loc = {}
+    op = f.get("airlineOperator") or f.get("airline") or {}
+    if not isinstance(op, dict):
+        op = {}
+    times = f.get("arrivalTime") if direction == "ANK" else f.get("departureTime")
+    if not isinstance(times, dict):
+        times = f.get("arrivalTime") or f.get("departureTime") or {}
     baggage = f.get("baggage") or f.get("baggageClaim") or {}
-    if isinstance(baggage, dict):
-        bag = baggage.get("belt") or baggage.get("claim") or baggage.get("id") or ""
-    else:
-        bag = baggage or ""
+    if not isinstance(baggage, dict):
+        baggage = {}
+    other, iata = airport_label(f, direction)
+    st = first_str(
+        loc.get("flightLegStatus"),
+        loc.get("flightLegStatusEnglish"),
+        f.get("flightLegStatus"),
+        f.get("status"),
+    )
     return {
-        "id": fi.get("callSign") or fi.get("iataFlightNumber") or f.get("flightId") or "",
+        "id": first_str(fi.get("iataFlightNumber"), f.get("flightId"), fi.get("callSign")),
         "dir": direction,
         "other": other,
-        "status": st if isinstance(st, str) else (st.get("code") if isinstance(st, dict) else ""),
-        "sched": (times.get("scheduledUtc") or times.get("scheduled") or ""),
-        "est": (times.get("estimatedUtc") or times.get("estimated") or ""),
-        "act": (times.get("actualUtc") or times.get("actual") or ""),
-        "terminal": loc.get("terminal") or f.get("terminal") or "",
-        "gate": loc.get("gate") or f.get("gate") or "",
-        "baggage": bag,
-        "firstBag": (baggage.get("firstBagUtc") if isinstance(baggage, dict) else "") or "",
-        "lastBag": (baggage.get("lastBagUtc") if isinstance(baggage, dict) else "") or "",
-        "rawStatus": f.get("remark") or "",
+        "iata": iata,
+        "airline": first_str(op.get("name"), op.get("iata")),
+        "status": st,
+        "statusSv": first_str(loc.get("flightLegStatusSwedish"), f.get("flightLegStatusSwedish")),
+        "sched": first_str(times.get("scheduledUtc"), times.get("scheduled")),
+        "est": first_str(times.get("estimatedUtc"), times.get("estimated")),
+        "act": first_str(times.get("actualUtc"), times.get("actual")),
+        "terminal": first_str(loc.get("terminal"), f.get("terminal")),
+        "gate": first_str(loc.get("gate"), f.get("gate")),
+        "baggage": first_str(
+            baggage.get("baggageClaimUnit"),
+            baggage.get("belt"),
+            baggage.get("claim"),
+            baggage.get("id"),
+        ),
+        "firstBag": first_str(baggage.get("firstBagUtc"), baggage.get("firstBag")),
+        "firstBagEst": first_str(baggage.get("estimatedFirstBagUtc"), baggage.get("estimatedFirstBag")),
+        "lastBag": first_str(baggage.get("lastBagUtc"), baggage.get("lastBag")),
+        "rawStatus": remark_text(f),
     }
 
 
@@ -90,8 +142,10 @@ def flights_from(payload, direction):
     out = []
     if not isinstance(payload, dict):
         return out
-    for key in ("flights", "flight", "to", "arrivals", "departures"):
+    for key in ("flights", "flight", "arrivals", "departures", "to", "from"):
         arr = payload.get(key)
+        if isinstance(arr, dict):
+            arr = arr.get("flights") or arr.get("flight")
         if isinstance(arr, list):
             for item in arr:
                 if isinstance(item, dict):
