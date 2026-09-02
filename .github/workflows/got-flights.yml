@@ -1,0 +1,30 @@
+name: GOT flight cache
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch Swedavia GOT
+        env:
+          SWEDAVIA_KEY: ${{ secrets.SWEDAVIA_KEY }}
+          GOT_OUT: skiftlogg/feed/got.json
+        run: python3 scripts/fetch_got_flights.py
+      - name: Commit cache if changed
+        run: |
+          git config user.name "taxikit-bot"
+          git config user.email "bot@taxikit.local"
+          git add skiftlogg/feed/got.json
+          if git diff --staged --quiet; then
+            echo "Ingen ändring"
+          else
+            git commit -m "chore: uppdatera GOT-cache"
+            git push
+          fi
