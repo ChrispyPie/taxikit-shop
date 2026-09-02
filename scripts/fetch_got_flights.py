@@ -43,8 +43,13 @@ def fetch(kind, date):
 
 def slim_flight(f, direction):
     fi = f.get("flightIdentification") or {}
-    loc = f.get("location") or {}
-    st = f.get("flightLegStatus") or f.get("status") or ""
+    loc = f.get("location") or f.get("locationAndStatus") or {}
+    st = (
+        loc.get("flightLegStatus")
+        or f.get("flightLegStatus")
+        or f.get("status")
+        or ""
+    )
     times = f.get("arrivalTime") or f.get("departureTime") or {}
     if direction == "ANK":
         times = f.get("arrivalTime") or times
@@ -153,23 +158,34 @@ def main():
         "departures": prev.get("departures") or [],
     }
 
+    DONE = {"CAN", "DEL", "RER", "DIV", "FLS"}
+
     def when_of(f):
         return parse_ts(f.get("act") or f.get("est") or f.get("sched"))
 
-    def need_live_today(arrivals):
-        now = datetime.now(TZ)
-        for f in arrivals or []:
-            t = when_of(f)
-            if not t:
-                continue
-            if now <= t <= now + timedelta(hours=1):
-                return True
-            landed = now - timedelta(minutes=90) <= t <= now
-            if landed and not f.get("lastBag"):
-                return True
+    def code_of(f):
+        return str(f.get("status") or "").strip().upper()
+
+    def needs_live(f, now):
+        code = code_of(f)
+        if code in DONE:
+            return False
+        if f.get("lastBag"):
+            return False
+        t = when_of(f)
+        if not t:
+            return False
+        if now <= t <= now + timedelta(hours=1):
+            return True
+        if now - timedelta(hours=2) <= t <= now and code in ("", "ACT", "SEQ", "LAN"):
+            return True
         return False
 
-    live = need_live_today(cache["arrivals"])
+    def any_live(arrivals):
+        now = datetime.now(TZ)
+        return any(needs_live(f, now) for f in arrivals or [])
+
+    live = any_live(cache["arrivals"])
     if live or minutes_ago(prev.get("arrivalsUpdated")) >= 55:
         try:
             fresh_arr = flights_from(fetch("arrivals", day_str(0)), "ANK")
@@ -179,9 +195,15 @@ def main():
             cache["error"] = "ankomst: " + str(e)
             cache["arrivals"] = merge_keep(cache["arrivals"], [])
 
-    if hour == 0:
+    yday = day_str(-1)
+    y_items = []
+    for f in cache["arrivals"]:
+        t = when_of(f)
+        if t and t.strftime("%Y-%m-%d") == yday:
+            y_items.append(f)
+    if any_live(y_items):
         try:
-            yarr = flights_from(fetch("arrivals", day_str(-1)), "ANK")
+            yarr = flights_from(fetch("arrivals", yday), "ANK")
             cache["arrivals"] = merge_keep(cache["arrivals"], yarr)
             cache["yesterdayUpdated"] = now_iso()
         except Exception as e:
