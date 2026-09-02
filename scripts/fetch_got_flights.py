@@ -138,11 +138,14 @@ def main():
         except Exception:
             prev = {}
 
+    hour = datetime.now(TZ).hour
     cache = {
         "airport": AIRPORT,
         "updated": now_iso(),
         "arrivalsUpdated": prev.get("arrivalsUpdated"),
         "departuresUpdated": prev.get("departuresUpdated"),
+        "yesterdayUpdated": prev.get("yesterdayUpdated"),
+        "tomorrowUpdated": prev.get("tomorrowUpdated"),
         "error": None,
         "arrivals": prev.get("arrivals") or [],
         "departures": prev.get("departures") or [],
@@ -150,19 +153,31 @@ def main():
 
     try:
         fresh_arr = flights_from(fetch("arrivals", day_str(0)), "ANK")
-        if datetime.now(TZ).hour < 8:
-            fresh_arr += flights_from(fetch("arrivals", day_str(-1)), "ANK")
         cache["arrivals"] = merge_keep(cache["arrivals"], fresh_arr)
         cache["arrivalsUpdated"] = now_iso()
     except Exception as e:
         cache["error"] = "ankomst: " + str(e)
         cache["arrivals"] = merge_keep(cache["arrivals"], [])
 
+    if hour < 8 and minutes_ago(prev.get("yesterdayUpdated")) >= 55:
+        try:
+            yarr = flights_from(fetch("arrivals", day_str(-1)), "ANK")
+            cache["arrivals"] = merge_keep(cache["arrivals"], yarr)
+            cache["yesterdayUpdated"] = now_iso()
+        except Exception as e:
+            cache["error"] = ((cache.get("error") or "") + " igar: " + str(e)).strip()
+
+    if hour >= 12 and minutes_ago(prev.get("tomorrowUpdated")) >= 55:
+        try:
+            tarr = flights_from(fetch("arrivals", day_str(1)), "ANK")
+            cache["arrivals"] = merge_keep(cache["arrivals"], tarr)
+            cache["tomorrowUpdated"] = now_iso()
+        except Exception as e:
+            cache["error"] = ((cache.get("error") or "") + " imorgon: " + str(e)).strip()
+
     if minutes_ago(prev.get("departuresUpdated")) >= 55:
         try:
             fresh_dep = flights_from(fetch("departures", day_str(0)), "AVG")
-            if datetime.now(TZ).hour < 8:
-                fresh_dep += flights_from(fetch("departures", day_str(-1)), "AVG")
             cache["departures"] = merge_keep(cache["departures"], fresh_dep)
             cache["departuresUpdated"] = now_iso()
         except Exception as e:
