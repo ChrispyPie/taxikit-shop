@@ -75,6 +75,8 @@ def slim_flight(f, direction):
         "terminal": loc.get("terminal") or f.get("terminal") or "",
         "gate": loc.get("gate") or f.get("gate") or "",
         "baggage": bag,
+        "firstBag": (baggage.get("firstBagUtc") if isinstance(baggage, dict) else "") or "",
+        "lastBag": (baggage.get("lastBagUtc") if isinstance(baggage, dict) else "") or "",
         "rawStatus": f.get("remark") or "",
     }
 
@@ -151,15 +153,33 @@ def main():
         "departures": prev.get("departures") or [],
     }
 
-    try:
-        fresh_arr = flights_from(fetch("arrivals", day_str(0)), "ANK")
-        cache["arrivals"] = merge_keep(cache["arrivals"], fresh_arr)
-        cache["arrivalsUpdated"] = now_iso()
-    except Exception as e:
-        cache["error"] = "ankomst: " + str(e)
-        cache["arrivals"] = merge_keep(cache["arrivals"], [])
+    def when_of(f):
+        return parse_ts(f.get("act") or f.get("est") or f.get("sched"))
 
-    if hour < 8 and minutes_ago(prev.get("yesterdayUpdated")) >= 55:
+    def need_live_today(arrivals):
+        now = datetime.now(TZ)
+        for f in arrivals or []:
+            t = when_of(f)
+            if not t:
+                continue
+            if now <= t <= now + timedelta(hours=1):
+                return True
+            landed = now - timedelta(minutes=90) <= t <= now
+            if landed and not f.get("lastBag"):
+                return True
+        return False
+
+    live = need_live_today(cache["arrivals"])
+    if live or minutes_ago(prev.get("arrivalsUpdated")) >= 55:
+        try:
+            fresh_arr = flights_from(fetch("arrivals", day_str(0)), "ANK")
+            cache["arrivals"] = merge_keep(cache["arrivals"], fresh_arr)
+            cache["arrivalsUpdated"] = now_iso()
+        except Exception as e:
+            cache["error"] = "ankomst: " + str(e)
+            cache["arrivals"] = merge_keep(cache["arrivals"], [])
+
+    if hour == 0:
         try:
             yarr = flights_from(fetch("arrivals", day_str(-1)), "ANK")
             cache["arrivals"] = merge_keep(cache["arrivals"], yarr)
