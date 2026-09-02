@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Hämtar Landvetter (GOT) från Swedavia. Ankomst varje körning, avgång högst 1 gång/timme."""
+"""Hämtar Landvetter (GOT). Behåller 36 h historik över midnatt."""
 import json
 import os
 import sys
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 try:
@@ -16,18 +16,19 @@ except Exception:
 KEY = (os.environ.get("SWEDAVIA_KEY") or "").strip()
 OUT = Path(os.environ.get("GOT_OUT", "skiftlogg/feed/got.json"))
 AIRPORT = "GOT"
+KEEP_HOURS = 36
 
 
 def now_iso():
     return datetime.now(TZ).isoformat(timespec="seconds")
 
 
-def today():
-    return datetime.now(TZ).strftime("%Y-%m-%d")
+def day_str(offset=0):
+    return (datetime.now(TZ) + timedelta(days=offset)).strftime("%Y-%m-%d")
 
 
-def fetch(kind):
-    url = "https://api.swedavia.se/flightinfo/v2/%s/%s/%s" % (AIRPORT, kind, today())
+def fetch(kind, date):
+    url = "https://api.swedavia.se/flightinfo/v2/%s/%s/%s" % (AIRPORT, kind, date)
     req = urllib.request.Request(
         url,
         headers={
@@ -103,6 +104,28 @@ def minutes_ago(iso):
         return 10**9
 
 
+def parse_ts(iso):
+    if not iso:
+        return None
+    try:
+        dt = datetime.fromisoformat(iso.replace("Z", "+00:00"))
+        return dt.astimezone(TZ)
+    except Exception:
+        return None
+
+
+def merge_keep(old, new):
+    cutoff = datetime.now(TZ) - timedelta(hours=KEEP_HOURS)
+    by = {}
+    for f in (old or []) + (new or []):
+        ts = parse_ts(f.get("act") or f.get("est") or f.get("sched"))
+        if ts and ts < cutoff:
+            continue
+        key = (f.get("id"), f.get("dir"), f.get("sched"))
+        by[key] = f
+    return list(by.values())
+
+
 def main():
     if not KEY:
         print("SWEDAVIA_KEY saknas", file=sys.stderr)
@@ -126,23 +149,29 @@ def main():
     }
 
     try:
-        arr = fetch("arrivals")
-        cache["arrivals"] = flights_from(arr, "ANK")
+        fresh_arr = flights_from(fetch("arrivals", day_str(0)), "ANK")
+        if datetime.now(TZ).hour < 8:
+            fresh_arr += flights_from(fetch("arrivals", day_str(-1)), "ANK")
+        cache["arrivals"] = merge_keep(cache["arrivals"], fresh_arr)
         cache["arrivalsUpdated"] = now_iso()
     except Exception as e:
         cache["error"] = "ankomst: " + str(e)
+        cache["arrivals"] = merge_keep(cache["arrivals"], [])
 
     if minutes_ago(prev.get("departuresUpdated")) >= 55:
         try:
-            dep = fetch("departures")
-            cache["departures"] = flights_from(dep, "AVG")
+            fresh_dep = flights_from(fetch("departures", day_str(0)), "AVG")
+            if datetime.now(TZ).hour < 8:
+                fresh_dep += flights_from(fetch("departures", day_str(-1)), "AVG")
+            cache["departures"] = merge_keep(cache["departures"], fresh_dep)
             cache["departuresUpdated"] = now_iso()
         except Exception as e:
-            cache["error"] = ((cache.get("error") or "") + " avgång: " + str(e)).strip()
+            cache["error"] = ((cache.get("error") or "") + " avgang: " + str(e)).strip()
+            cache["departures"] = merge_keep(cache["departures"], [])
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(cache, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print("ankomster", len(cache["arrivals"]), "avgångar", len(cache["departures"]), "err", cache["error"])
+    print("ankomster", len(cache["arrivals"]), "avgangar", len(cache["departures"]), "err", cache["error"])
 
 
 if __name__ == "__main__":
