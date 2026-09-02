@@ -1,0 +1,30 @@
+name: GOT train cache
+on:
+  schedule:
+    - cron: "* * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch Trafikverket G
+        env:
+          TRAFIKVERKET_KEY: ${{ secrets.TRAFIKVERKET_KEY }}
+          TRAIN_OUT: skiftlogg/feed/tag.json
+        run: python3 scripts/fetch_got_trains.py
+      - name: Commit cache if changed
+        run: |
+          git config user.name "taxikit-bot"
+          git config user.email "bot@taxikit.local"
+          git add skiftlogg/feed/tag.json
+          if git diff --staged --quiet; then
+            echo "Ingen ändring"
+          else
+            git commit -m "chore: uppdatera tågcache"
+            git push
+          fi
