@@ -17,6 +17,12 @@ STATIONS = {"G":"Göteborg C","Cst":"Stockholm C","Arnc":"Arlanda C","M":"Malmö
 def now_iso():
     return datetime.now(TZ).isoformat(timespec="seconds")
 
+def as_text(v):
+    if v is None: return ""
+    if isinstance(v, list): return " ".join(as_text(x) for x in v if as_text(x))
+    if isinstance(v, dict): return v.get("Description") or v.get("Code") or v.get("Name") or ""
+    return str(v)
+
 def tv_query():
     xml = (
         "<REQUEST><LOGIN authenticationkey=\"%s\" />"
@@ -43,30 +49,22 @@ def loc_sig(item):
 def loc_list(raw):
     if not raw: return []
     if isinstance(raw, list): return [loc_sig(x) for x in raw if loc_sig(x)]
-    return [loc_sig(raw)] if loc_sig(raw) else []
+    s = loc_sig(raw)
+    return [s] if s else []
 
 def station_name(sig): return STATIONS.get(sig, sig or "")
 
-def product_name(f):
-    info = f.get("ProductInformation") or []
-    if isinstance(info, dict): info = [info]
-    bits = []
-    for p in info:
-        if isinstance(p, dict): bits.append(p.get("Description") or p.get("Code") or "")
-        elif p: bits.append(str(p))
-    return " ".join([b for b in bits if b])
-
 def slim_train(f):
-    act = f.get("ActivityType") or ""
+    act = as_text(f.get("ActivityType"))
     direction = "ANK" if act.lower().startswith("ank") else "AVG"
     frm = loc_list(f.get("FromLocation"))
     to = loc_list(f.get("ToLocation"))
     other_sig = (frm[0] if direction == "ANK" else (to[-1] if to else "")) or ""
-    traffic = f.get("TypeOfTraffic") or ""
-    prod = product_name(f)
+    traffic = as_text(f.get("TypeOfTraffic"))
+    prod = as_text(f.get("ProductInformation"))
     blob = (traffic + " " + prod).lower()
     snabb = any(w in blob for w in ("snabbtåg", "x 2000", "x2000"))
-    return {"id": f.get("AdvertisedTrainIdent") or "", "dir": direction, "other": station_name(other_sig) or other_sig, "otherSig": other_sig, "from": [station_name(s) or s for s in frm], "to": [station_name(s) or s for s in to], "sched": f.get("AdvertisedTimeAtLocation") or "", "est": f.get("EstimatedTimeAtLocation") or "", "act": f.get("TimeAtLocation") or "", "track": f.get("TrackAtLocation") or "", "canceled": bool(f.get("Canceled")), "product": prod, "traffic": traffic, "snabb": snabb}
+    return {"id": as_text(f.get("AdvertisedTrainIdent")), "dir": direction, "other": station_name(other_sig) or other_sig, "otherSig": other_sig, "from": [station_name(s) or s for s in frm], "to": [station_name(s) or s for s in to], "sched": as_text(f.get("AdvertisedTimeAtLocation")), "est": as_text(f.get("EstimatedTimeAtLocation")), "act": as_text(f.get("TimeAtLocation")), "track": as_text(f.get("TrackAtLocation")), "canceled": bool(f.get("Canceled")), "product": prod, "traffic": traffic, "snabb": snabb}
 
 def announcements(payload):
     out = []
@@ -87,7 +85,8 @@ def parse_ts(iso):
 def merge_keep(old, new):
     cutoff = datetime.now(TZ) - timedelta(hours=KEEP_HOURS)
     by = {}
-    for f in (old or []) + (new or []):
+    for f in list(old or []) + list(new or []):
+        if not isinstance(f, dict): continue
         ts = parse_ts(f.get("act") or f.get("est") or f.get("sched"))
         if ts and ts < cutoff: continue
         by[(f.get("id"), f.get("dir"), f.get("sched"))] = f
@@ -101,12 +100,14 @@ def main():
     if OUT.exists():
         try: prev = json.loads(OUT.read_text(encoding="utf-8"))
         except Exception: prev = {}
-    cache = {"station": "Göteborg C", "updated": now_iso(), "error": None, "trains": prev.get("trains") or []}
+    old = prev.get("trains") or []
+    if not isinstance(old, list): old = []
+    cache = {"station": "Göteborg C", "updated": now_iso(), "error": None, "trains": old}
     try:
-        cache["trains"] = merge_keep(cache["trains"], announcements(tv_query()))
+        cache["trains"] = merge_keep(old, announcements(tv_query()))
     except Exception as e:
         cache["error"] = str(e)
-        cache["trains"] = merge_keep(cache["trains"], [])
+        cache["trains"] = merge_keep(old, [])
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(cache, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print("tag", len(cache["trains"]), "err", cache["error"])
