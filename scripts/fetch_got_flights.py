@@ -229,9 +229,8 @@ def main():
         t = when_of(f)
         if not t:
             return False
-        if now <= t <= now + timedelta(hours=1):
-            return True
-        if now - timedelta(hours=2) <= t <= now and code in ("", "ACT", "SEQ", "LAN"):
+        # Keep polling from 1 h before until 4 h after (SCH often never flips to LAN)
+        if now - timedelta(hours=4) <= t <= now + timedelta(hours=1):
             return True
         return False
 
@@ -255,7 +254,7 @@ def main():
         t = when_of(f)
         if t and t.strftime("%Y-%m-%d") == yday:
             y_items.append(f)
-    if any_live(y_items):
+    if any_live(y_items) or (hour < 6 and minutes_ago(prev.get("yesterdayUpdated")) >= 55):
         try:
             yarr = flights_from(fetch("arrivals", yday), "ANK")
             cache["arrivals"] = merge_keep(cache["arrivals"], yarr)
