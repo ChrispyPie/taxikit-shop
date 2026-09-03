@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T04:29:16+02:00",
+  "updated": "2026-09-03T04:30:39+02:00",
   "error": null,
   "trains": [
     {
@@ -14216,7 +14216,7 @@
       ],
       "sched": "2026-09-03T04:30:00.000+02:00",
       "est": "",
-      "act": "",
+      "act": "2026-09-03T04:30:00.000+02:00",
       "track": "2",
       "canceled": false,
       "product": "Västtågen",
@@ -21221,6 +21221,66 @@
       "canceled": false,
       "product": "Västtågen",
       "traffic": "Pendeltåg",
+      "snabb": false
+    },
+    {
+      "id": "3254",
+      "dir": "AVG",
+      "other": "Vänersborg C",
+      "otherSig": "Vg",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Vänersborg C"
+      ],
+      "sched": "2026-09-03T13:30:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "9",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": "Tåg",
+      "snabb": false
+    },
+    {
+      "id": "73754",
+      "dir": "AVG",
+      "other": "Ytterby",
+      "otherSig": "Yb",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Ytterby"
+      ],
+      "sched": "2026-09-03T13:30:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": "Buss",
+      "snabb": false
+    },
+    {
+      "id": "73747",
+      "dir": "ANK",
+      "other": "Ytterby",
+      "otherSig": "Yb",
+      "from": [
+        "Ytterby"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-03T13:32:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": "Buss",
       "snabb": false
     }
   ]
