@@ -1,28 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T21:31:21+02:00",
+  "updated": "2026-09-03T21:32:18+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "322",
-      "dir": "ANK",
-      "other": "Kac",
-      "otherSig": "Kac",
-      "from": [
-        "Kac"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T09:10:00.000+02:00",
-      "est": "2026-09-02T09:35:00.000+02:00",
-      "act": "2026-09-02T09:32:00.000+02:00",
-      "track": "12",
-      "canceled": false,
-      "product": "SJ Regional",
-      "traffic": "Tåg",
-      "snabb": false
-    },
     {
       "id": "482",
       "dir": "ANK",
@@ -42,26 +22,6 @@
       "product": "SJ Snabbtåg",
       "traffic": "Tåg",
       "snabb": true
-    },
-    {
-      "id": "3238",
-      "dir": "AVG",
-      "other": "Vänersborg C",
-      "otherSig": "Vg",
-      "from": [
-        "Göteborg C"
-      ],
-      "to": [
-        "Vänersborg C"
-      ],
-      "sched": "2026-09-02T09:30:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T09:32:00.000+02:00",
-      "track": "6",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": "Tåg",
-      "snabb": false
     },
     {
       "id": "157",
@@ -67222,9 +67182,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-03T18:32:00.000+02:00",
       "stops": [
         {
           "sig": "Cst",
@@ -67397,7 +67354,10 @@
           "sched": "2026-09-03T18:30:00.000+02:00",
           "track": "6"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-03T18:32:00.000+02:00"
     },
     {
       "id": "20178",
@@ -74534,9 +74494,9 @@
         {
           "sig": "Hd",
           "name": "Halmstad C",
-          "t": "2026-09-03T21:37:00.000+02:00",
+          "t": "2026-09-03T21:42:00.000+02:00",
           "act": "",
-          "est": "",
+          "est": "2026-09-03T21:42:00.000+02:00",
           "sched": "2026-09-03T21:37:00.000+02:00",
           "track": "2"
         },
@@ -75722,27 +75682,27 @@
         {
           "sig": "Thn",
           "name": "Trollhättan",
-          "t": "2026-09-03T21:41:00.000+02:00",
+          "t": "2026-09-03T21:42:00.000+02:00",
           "act": "",
-          "est": "2026-09-03T21:41:00.000+02:00",
+          "est": "2026-09-03T21:42:00.000+02:00",
           "sched": "2026-09-03T21:39:00.000+02:00",
           "track": "1"
         },
         {
           "sig": "Öx",
           "name": "Öx",
-          "t": "2026-09-03T21:48:00.000+02:00",
+          "t": "2026-09-03T21:49:00.000+02:00",
           "act": "",
-          "est": "2026-09-03T21:48:00.000+02:00",
+          "est": "2026-09-03T21:49:00.000+02:00",
           "sched": "2026-09-03T21:46:00.000+02:00",
           "track": "1"
         },
         {
           "sig": "Ml",
           "name": "Ml",
-          "t": "2026-09-03T22:08:00.000+02:00",
+          "t": "2026-09-03T22:10:00.000+02:00",
           "act": "",
-          "est": "",
+          "est": "2026-09-03T22:10:00.000+02:00",
           "sched": "2026-09-03T22:08:00.000+02:00",
           "track": "2"
         },
@@ -76141,9 +76101,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Nol",
-      "lastSeenSig": "Nol",
-      "lastSeenTs": "2026-09-03T21:29:00.000+02:00",
+      "lastSeen": "Än",
+      "lastSeenSig": "Än",
+      "lastSeenTs": "2026-09-03T21:31:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -77176,9 +77136,9 @@
         }
       ],
       "snabb": true,
-      "lastSeen": "Gsv",
-      "lastSeenSig": "Gsv",
-      "lastSeenTs": "2026-09-03T21:30:00.000+02:00",
+      "lastSeen": "Olskroken",
+      "lastSeenSig": "Or",
+      "lastSeenTs": "2026-09-03T21:31:00.000+02:00",
       "stops": [
         {
           "sig": "So",
@@ -78292,9 +78252,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Vbgb",
-      "lastSeenSig": "Vbgb",
-      "lastSeenTs": "2026-09-03T21:27:00.000+02:00",
+      "lastSeen": "Vrö",
+      "lastSeenSig": "Vrö",
+      "lastSeenTs": "2026-09-03T21:31:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -78457,9 +78417,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Öx",
-      "lastSeenSig": "Öx",
-      "lastSeenTs": "2026-09-03T21:27:00.000+02:00",
+      "lastSeen": "Trollhättan",
+      "lastSeenSig": "Thn",
+      "lastSeenTs": "2026-09-03T21:32:00.000+02:00",
       "stops": [
         {
           "sig": "Sfl",
@@ -78501,7 +78461,7 @@
           "sig": "Thn",
           "name": "Trollhättan",
           "t": "2026-09-03T21:32:00.000+02:00",
-          "act": "",
+          "act": "2026-09-03T21:32:00.000+02:00",
           "est": "2026-09-03T21:32:00.000+02:00",
           "sched": "2026-09-03T21:25:00.000+02:00",
           "track": "2"
