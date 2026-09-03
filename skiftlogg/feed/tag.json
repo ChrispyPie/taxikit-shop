@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T08:36:17+02:00",
+  "updated": "2026-09-03T08:37:18+02:00",
   "error": null,
   "trains": [
     {
@@ -16026,9 +16026,9 @@
         }
       ],
       "snabb": true,
-      "lastSeen": "Södertälje Syd",
-      "lastSeenSig": "Söö",
-      "lastSeenTs": "2026-09-03T08:32:00.000+02:00",
+      "lastSeen": "Msj",
+      "lastSeenSig": "Msj",
+      "lastSeenTs": "2026-09-03T08:36:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -17981,7 +17981,7 @@
       "snabb": false,
       "lastSeen": "Alvesta",
       "lastSeenSig": "Av",
-      "lastSeenTs": "2026-09-03T08:33:00.000+02:00",
+      "lastSeenTs": "2026-09-03T08:36:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -19572,6 +19572,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-03T06:29:00.000+02:00",
       "stops": [
         {
           "sig": "F",
@@ -19627,10 +19630,7 @@
           "sched": "2026-09-03T06:30:00.000+02:00",
           "track": "6"
         }
-      ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-03T06:29:00.000+02:00"
+      ]
     },
     {
       "id": "3219",
@@ -20194,8 +20194,8 @@
         {
           "sig": "Lå",
           "name": "Lå",
-          "t": "2026-09-03T08:39:00.000+02:00",
-          "act": "",
+          "t": "2026-09-03T08:37:00.000+02:00",
+          "act": "2026-09-03T08:37:00.000+02:00",
           "est": "",
           "sched": "2026-09-03T08:39:00.000+02:00",
           "track": "2"
@@ -20237,9 +20237,9 @@
           "track": "1b"
         }
       ],
-      "lastSeen": "T",
-      "lastSeenSig": "T",
-      "lastSeenTs": "2026-09-03T08:18:00.000+02:00"
+      "lastSeen": "Lå",
+      "lastSeenSig": "Lå",
+      "lastSeenTs": "2026-09-03T08:37:00.000+02:00"
     },
     {
       "id": "20152",
@@ -24612,7 +24612,7 @@
         "Göteborg C"
       ],
       "sched": "2026-09-03T09:00:00.000+02:00",
-      "est": "",
+      "est": "2026-09-03T09:10:00.000+02:00",
       "act": "",
       "track": "16",
       "canceled": false,
