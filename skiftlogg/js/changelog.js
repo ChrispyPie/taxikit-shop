@@ -1,13 +1,15 @@
-window.TAXIKIT_BUILD = "1.1.0-wip57";
+window.TAXIKIT_BUILD = "1.1.0-wip58";
 window.TAXIKIT_CHANGELOG = [
   {
-    ver: "1.1.0-wip57",
+    ver: "1.1.0-wip58",
     date: "2026-09-04 · under utveckling",
-    items: ["Flyg: I luften / Startat när planet rört sig"]
+    items: ["Fix: appen låste sig vid omladdning"]
   }
 ];
 
 (function persistTab() {
+  if (window.__taxikitPersist) return;
+  window.__taxikitPersist = true;
   var KEY = "taxikit-tab";
   var SUB = "taxikit-flode-tab";
   document.addEventListener("click", function (ev) {
@@ -17,6 +19,8 @@ window.TAXIKIT_CHANGELOG = [
     if (fl) try { localStorage.setItem(SUB, fl.getAttribute("data-flode")); } catch (e) {}
   }, true);
   function restore() {
+    if (window.__taxikitRestored) return;
+    window.__taxikitRestored = true;
     var tab, sub;
     try { tab = localStorage.getItem(KEY); sub = localStorage.getItem(SUB); } catch (e) { return; }
     if (tab && tab !== "skift") {
@@ -28,11 +32,12 @@ window.TAXIKIT_CHANGELOG = [
       if (sbtn) sbtn.click();
     }
   }
-  setTimeout(restore, 80);
-  setTimeout(restore, 400);
+  setTimeout(restore, 200);
 })();
 
 (function longPressStar() {
+  if (window.__taxikitLongStar) return;
+  window.__taxikitLongStar = true;
   var timer = null, armed = null;
   function isItemStar(el) {
     return el && el.classList && el.classList.contains("feed-star") && el.id !== "flodeStarAllBtn";
@@ -48,8 +53,8 @@ window.TAXIKIT_CHANGELOG = [
       btn.click();
     }, 480);
   }, true);
-  ["pointerup", "pointercancel", "pointerleave"].forEach(function (name) {
-    document.addEventListener(name, clear, true);
+  ["pointerup", "pointercancel", "pointerleave"].forEach(function (n) {
+    document.addEventListener(n, clear, true);
   });
   document.addEventListener("click", function (ev) {
     var btn = ev.target.closest && ev.target.closest(".feed-star");
@@ -61,8 +66,8 @@ window.TAXIKIT_CHANGELOG = [
 })();
 
 (function restyleRows() {
-  if (window.__taxikitRowUi57) return;
-  window.__taxikitRowUi57 = true;
+  if (window.__taxikitRowUi58) return;
+  window.__taxikitRowUi58 = true;
   var css = document.createElement("style");
   css.textContent =
     ".feed-item .feed-city{color:var(--fg);font-weight:800;font-size:0.95rem}" +
@@ -76,12 +81,13 @@ window.TAXIKIT_CHANGELOG = [
       "border:1px solid #3a455c!important;border-radius:10px!important;" +
       "background:#151b27!important;min-width:36px;min-height:32px}" +
     ".dir-mini{display:flex;align-items:center;justify-content:center;gap:0;" +
-      "margin:0 8px;padding:0 8px;height:32px;font:inherit;letter-spacing:-0.02em}" +
+      "margin:0 8px;padding:0 8px;height:32px;font:inherit}" +
     ".dir-mini b{font-size:0.7rem;font-weight:800;color:var(--muted);padding:4px 0}" +
     ".dir-mini b.on{color:var(--fg)}" +
     ".dir-mini i{font-style:normal;color:var(--muted);font-size:0.7rem;opacity:.45;padding:0 1px}" +
     ".feed-item.dir-hide{display:none!important}";
   document.documentElement.appendChild(css);
+
   function trainType(title) {
     var t = String(title || "");
     if (/^[ÖO]T/i.test(t)) return "Öresundståg";
@@ -89,7 +95,6 @@ window.TAXIKIT_CHANGELOG = [
     if (/^(SX|X2)/i.test(t)) return "Snabbtåg";
     if (/^SJ/i.test(t)) return "SJ";
     if (/^VY/i.test(t)) return "VY";
-    if (/^MÄL/i.test(t)) return "Mälartåg";
     return "Regional";
   }
   function cleanCity(s) {
@@ -125,26 +130,23 @@ window.TAXIKIT_CHANGELOG = [
     if (g) g.classList.toggle("on", d === "avg" || d === "both");
   }
   function ensureMini() {
+    if (document.getElementById("dirMini")) { paintMini(); return; }
     var refresh = document.getElementById("flodeRefreshBtn");
-    var host = refresh && refresh.parentNode;
-    if (!host) return;
-    var box = document.getElementById("dirMini");
-    if (!box) {
-      box = document.createElement("div");
-      box.id = "dirMini";
-      box.className = "dir-mini";
-      box.innerHTML = '<b id="dirAnk">Ank</b><i>/</i><b id="dirAvg">Avg</b>';
-      box.addEventListener("click", function (ev) {
-        var t = ev.target;
-        if (t && t.id === "dirAnk") setDir(currentDir() === "ank" ? "both" : "ank");
-        else if (t && t.id === "dirAvg") setDir(currentDir() === "avg" ? "both" : "avg");
-        else {
-          var cur = currentDir();
-          setDir(cur === "both" ? "ank" : cur === "ank" ? "avg" : "both");
-        }
-      });
-    }
-    if (refresh.nextSibling !== box) host.insertBefore(box, refresh.nextSibling);
+    if (!refresh || !refresh.parentNode) return;
+    var box = document.createElement("div");
+    box.id = "dirMini";
+    box.className = "dir-mini";
+    box.innerHTML = '<b id="dirAnk">Ank</b><i>/</i><b id="dirAvg">Avg</b>';
+    box.addEventListener("click", function (ev) {
+      var t = ev.target;
+      if (t && t.id === "dirAnk") setDir(currentDir() === "ank" ? "both" : "ank");
+      else if (t && t.id === "dirAvg") setDir(currentDir() === "avg" ? "both" : "avg");
+      else {
+        var cur = currentDir();
+        setDir(cur === "both" ? "ank" : cur === "ank" ? "avg" : "both");
+      }
+    });
+    refresh.parentNode.insertBefore(box, refresh.nextSibling);
     paintMini();
   }
   function applyDir() {
@@ -154,37 +156,35 @@ window.TAXIKIT_CHANGELOG = [
       var row = rows[i];
       var hasAnk = !!row.querySelector(".feed-chip.ank");
       var hasAvg = !!row.querySelector(".feed-chip.avg");
-      var hide = false;
-      if (want === "ank" && hasAvg) hide = true;
-      if (want === "avg" && hasAnk) hide = true;
-      row.classList.toggle("dir-hide", hide);
+      var hide = (want === "ank" && hasAvg) || (want === "avg" && hasAnk);
+      if (hide) row.classList.add("dir-hide");
+      else row.classList.remove("dir-hide");
     }
   }
   function fixFlightStatus(row) {
+    if (row.getAttribute("data-flystat") === "58") return;
     var ev = row.querySelector(".feed-event");
     if (!ev) return;
     var txt = (ev.textContent || "").trim();
     if (/inställd|canceled|cancelled|borttagen|divert|omdiriger/i.test(txt)) {
       ev.classList.add("is-alert");
+      row.setAttribute("data-flystat", "58");
       return;
     }
-    if (!/schemalagd|beräknad|avgånget\/landat/i.test(txt)) return;
     var timeEl = row.querySelector(".feed-time");
     var planEl = row.querySelector(".feed-plan");
     var delay = row.querySelector(".feed-dev");
     var when = parseClock(timeEl && timeEl.textContent);
-    if (!when) return;
-    var mins = (when.getTime() - Date.now()) / 60000;
     var hasLive = !!(delay || (planEl && timeEl && planEl.textContent.replace(/[()]/g, "").trim() !== timeEl.textContent.trim()));
-    var isDep = /avg/i.test((row.querySelector(".feed-chip.avg") || {}).className || "") || false;
-    var chips = row.querySelectorAll(".feed-chip");
-    for (var c = 0; c < chips.length; c++) {
-      if (/\bavg\b/i.test(chips[c].className)) isDep = true;
+    var isDep = !!row.querySelector(".feed-chip.avg");
+    if (when) {
+      var mins = (when.getTime() - Date.now()) / 60000;
+      if (mins < -8) ev.textContent = isDep ? "Avgånget" : "Landat";
+      else if (hasLive && mins <= 240) ev.textContent = isDep ? "Startat" : "I luften";
+      else if (hasLive) ev.textContent = "Beräknad";
+      else if (/schemalagd/i.test(txt)) ev.textContent = "Schemalagd";
     }
-    if (mins < -8) ev.textContent = isDep ? "Avgånget" : "Landat";
-    else if (hasLive && mins <= 240) ev.textContent = isDep ? "Startat" : "I luften";
-    else if (hasLive) ev.textContent = "Beräknad";
-    else ev.textContent = "Schemalagd";
+    row.setAttribute("data-flystat", "58");
   }
   function restyleOne(row, kind) {
     if (row.getAttribute("data-rowui") === "55") return;
@@ -209,26 +209,40 @@ window.TAXIKIT_CHANGELOG = [
     if (meta) meta.style.display = "none";
     row.setAttribute("data-rowui", "55");
   }
+  var busy = false;
   function restyle() {
-    ensureMini();
-    var rows = document.querySelectorAll("#flodeList .feed-item");
-    for (var i = 0; i < rows.length; i++) {
-      var row = rows[i];
-      if (row.querySelector(".feed-chip.flyg")) {
-        restyleOne(row, "flyg");
-        fixFlightStatus(row);
-      } else if (row.querySelector(".feed-chip.tag")) {
-        restyleOne(row, "tag");
+    if (busy) return;
+    busy = true;
+    try {
+      ensureMini();
+      var rows = document.querySelectorAll("#flodeList .feed-item");
+      for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        if (row.querySelector(".feed-chip.flyg")) {
+          restyleOne(row, "flyg");
+          fixFlightStatus(row);
+        } else if (row.querySelector(".feed-chip.tag")) {
+          restyleOne(row, "tag");
+        }
       }
+      applyDir();
+    } finally {
+      busy = false;
     }
-    applyDir();
   }
   function boot() {
     restyle();
-    try {
-      new MutationObserver(restyle).observe(document.documentElement, { childList: true, subtree: true });
-    } catch (e) {}
+    var list = document.getElementById("flodeList");
+    if (list) {
+      var t = null;
+      new MutationObserver(function () {
+        if (t) return;
+        t = setTimeout(function () { t = null; restyle(); }, 50);
+      }).observe(list, { childList: true });
+    } else {
+      setTimeout(boot, 300);
+    }
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
-  else boot();
+  else setTimeout(boot, 50);
 })();
