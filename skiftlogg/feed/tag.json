@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T06:15:29+02:00",
+  "updated": "2026-09-03T06:16:17+02:00",
   "error": null,
   "trains": [
     {
@@ -15096,7 +15096,7 @@
       ],
       "sched": "2026-09-03T06:15:00.000+02:00",
       "est": "",
-      "act": "",
+      "act": "2026-09-03T06:16:00.000+02:00",
       "track": "12",
       "canceled": false,
       "product": "Västtågen",
@@ -15116,7 +15116,7 @@
       ],
       "sched": "2026-09-03T06:15:00.000+02:00",
       "est": "",
-      "act": "",
+      "act": "2026-09-03T06:15:00.000+02:00",
       "track": "13",
       "canceled": false,
       "product": "Västtågen",
@@ -15406,13 +15406,13 @@
     {
       "id": "3426",
       "dir": "AVG",
-      "other": "Skövde C",
-      "otherSig": "Sk",
+      "other": "Ör",
+      "otherSig": "Ör",
       "from": [
         "Göteborg C"
       ],
       "to": [
-        "Skövde C"
+        "Ör"
       ],
       "sched": "2026-09-03T06:30:00.000+02:00",
       "est": "",
@@ -21920,6 +21920,26 @@
       "track": "15",
       "canceled": false,
       "product": "Öresundståg",
+      "traffic": "Tåg",
+      "snabb": false
+    },
+    {
+      "id": "182",
+      "dir": "AVG",
+      "other": "Stockholm C",
+      "otherSig": "Cst",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Stockholm C"
+      ],
+      "sched": "2026-09-03T14:29:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "7",
+      "canceled": false,
+      "product": "SJ Regional",
       "traffic": "Tåg",
       "snabb": false
     }
