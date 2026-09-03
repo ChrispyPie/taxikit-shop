@@ -1,48 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T01:32:16+02:00",
+  "updated": "2026-09-04T01:34:50+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "2027",
-      "dir": "ANK",
-      "other": "Stockholm C",
-      "otherSig": "Cst",
-      "from": [
-        "Stockholm C"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T13:35:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T13:33:00.000+02:00",
-      "track": "5",
-      "canceled": false,
-      "product": "VR Snabbtåg",
-      "traffic": "Tåg",
-      "snabb": true
-    },
-    {
-      "id": "3247",
-      "dir": "ANK",
-      "other": "Vänersborg C",
-      "otherSig": "Vg",
-      "from": [
-        "Vänersborg C"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T13:35:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T13:33:00.000+02:00",
-      "track": "9",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": "Tåg",
-      "snabb": false
-    },
     {
       "id": "63747",
       "dir": "ANK",
@@ -76845,9 +76805,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-03T22:34:00.000+02:00",
       "stops": [
         {
           "sig": "Än",
@@ -76912,7 +76869,10 @@
           "sched": "2026-09-03T22:35:00.000+02:00",
           "track": "10"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-03T22:34:00.000+02:00"
     },
     {
       "id": "3590",
@@ -80604,6 +80564,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-04T00:35:00.000+02:00",
       "stops": [
         {
           "sig": "Än",
@@ -80668,10 +80631,7 @@
           "sched": "2026-09-04T00:35:00.000+02:00",
           "track": "10"
         }
-      ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-04T00:35:00.000+02:00"
+      ]
     },
     {
       "id": "3493",
@@ -81250,7 +81210,7 @@
       ],
       "sched": "2026-09-04T01:35:00.000+02:00",
       "est": "",
-      "act": "",
+      "act": "2026-09-04T01:35:00.000+02:00",
       "track": "10",
       "canceled": false,
       "product": "Västtågen",
@@ -81261,9 +81221,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Olskroken",
-      "lastSeenSig": "Or",
-      "lastSeenTs": "2026-09-04T01:31:00.000+02:00",
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-04T01:35:00.000+02:00",
       "stops": [
         {
           "sig": "Än",
@@ -81323,7 +81283,7 @@
           "sig": "G",
           "name": "Göteborg C",
           "t": "2026-09-04T01:35:00.000+02:00",
-          "act": "",
+          "act": "2026-09-04T01:35:00.000+02:00",
           "est": "",
           "sched": "2026-09-04T01:35:00.000+02:00",
           "track": "10"
@@ -91883,7 +91843,72 @@
           "Description": "Pendeltåg"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-04T07:35:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T07:35:00.000+02:00",
+          "track": "10"
+        },
+        {
+          "sig": "Gas",
+          "name": "Gas",
+          "t": "2026-09-04T07:39:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T07:39:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Sue",
+          "name": "Sue",
+          "t": "2026-09-04T07:45:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T07:45:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Bhs",
+          "name": "Bhs",
+          "t": "2026-09-04T07:48:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T07:48:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Nöe",
+          "name": "Nöe",
+          "t": "2026-09-04T07:52:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T07:52:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Nol",
+          "name": "Nol",
+          "t": "2026-09-04T07:55:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T07:55:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Än",
+          "name": "Än",
+          "t": "2026-09-04T08:02:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T08:02:00.000+02:00",
+          "track": "1"
+        }
+      ]
     },
     {
       "id": "7331",
