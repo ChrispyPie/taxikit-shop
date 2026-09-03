@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T09:16:18+02:00",
+  "updated": "2026-09-03T09:17:22+02:00",
   "error": null,
   "trains": [
     {
@@ -18546,6 +18546,9 @@
         }
       ],
       "snabb": true,
+      "lastSeen": "Ed",
+      "lastSeenSig": "Ed",
+      "lastSeenTs": "2026-09-03T07:30:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -18574,10 +18577,7 @@
           "sched": "2026-09-03T07:27:00.000+02:00",
           "track": "1"
         }
-      ],
-      "lastSeen": "Ed",
-      "lastSeenSig": "Ed",
-      "lastSeenTs": "2026-09-03T07:30:00.000+02:00"
+      ]
     },
     {
       "id": "3022",
@@ -19239,9 +19239,9 @@
         }
       ],
       "snabb": true,
-      "lastSeen": "Sp",
-      "lastSeenSig": "Sp",
-      "lastSeenTs": "2026-09-03T09:15:00.000+02:00",
+      "lastSeen": "Nsj",
+      "lastSeenSig": "Nsj",
+      "lastSeenTs": "2026-09-03T09:16:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -24222,7 +24222,7 @@
         "Malmö C"
       ],
       "sched": "2026-09-03T08:39:00.000+02:00",
-      "est": "2026-09-03T09:30:00.000+02:00",
+      "est": "2026-09-03T09:20:00.000+02:00",
       "act": "",
       "track": "15",
       "canceled": false,
@@ -24951,7 +24951,7 @@
       ],
       "sched": "2026-09-03T09:16:00.000+02:00",
       "est": "",
-      "act": "",
+      "act": "2026-09-03T09:16:00.000+02:00",
       "track": "2",
       "canceled": false,
       "product": "Västtågen",
@@ -25810,7 +25810,7 @@
       "sched": "2026-09-03T10:04:00.000+02:00",
       "est": "",
       "act": "",
-      "track": "12",
+      "track": "13",
       "canceled": false,
       "product": "SJ Regional",
       "traffic": [
