@@ -1,28 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T01:03:17+02:00",
+  "updated": "2026-09-04T01:04:17+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "3245",
-      "dir": "ANK",
-      "other": "Vänersborg C",
-      "otherSig": "Vg",
-      "from": [
-        "Vänersborg C"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T13:00:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T13:04:00.000+02:00",
-      "track": "9",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": "Tåg",
-      "snabb": false
-    },
     {
       "id": "1042",
       "dir": "ANK",
@@ -74955,6 +74935,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Fd",
+      "lastSeenSig": "Fd",
+      "lastSeenTs": "2026-09-03T22:05:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -75037,10 +75020,7 @@
           "sched": "2026-09-03T22:07:00.000+02:00",
           "track": "1"
         }
-      ],
-      "lastSeen": "Fd",
-      "lastSeenSig": "Fd",
-      "lastSeenTs": "2026-09-03T22:05:00.000+02:00"
+      ]
     },
     {
       "id": "3581",
@@ -78726,6 +78706,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-03T23:20:00.000+02:00",
       "stops": [
         {
           "sig": "Fd",
@@ -78808,10 +78791,7 @@
           "sched": "2026-09-03T23:21:00.000+02:00",
           "track": "1"
         }
-      ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-03T23:20:00.000+02:00"
+      ]
     },
     {
       "id": "1122",
@@ -79998,9 +79978,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Teo",
-      "lastSeenSig": "Teo",
-      "lastSeenTs": "2026-09-04T01:01:00.000+02:00",
+      "lastSeen": "Fabp",
+      "lastSeenSig": "Fabp",
+      "lastSeenTs": "2026-09-04T01:04:00.000+02:00",
       "stops": [
         {
           "sig": "G",
