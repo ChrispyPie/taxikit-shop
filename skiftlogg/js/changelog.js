@@ -1,38 +1,29 @@
-window.TAXIKIT_BUILD = "1.1.0-wip53";
+window.TAXIKIT_BUILD = "1.1.0-wip54";
 window.TAXIKIT_CHANGELOG = [
   {
-    ver: "1.1.0-wip53",
+    ver: "1.1.0-wip54",
     date: "2026-09-03 · under utveckling",
-    items: [
-      "Ank/Avg som liten text i menyraden",
-      "Appen minns fliken vid omladdning"
-    ]
+    items: ["Långtryck på stjärnan för att spara eller ta bort"]
+  },
+  {
+    ver: "1.1.0-wip53",
+    date: "2026-09-03",
+    items: ["Ank/Avg i menyraden", "Appen minns fliken vid omladdning"]
   }
 ];
 
 (function persistTab() {
   var KEY = "taxikit-tab";
   var SUB = "taxikit-flode-tab";
-  function saveMain(id) {
-    if (!id) return;
-    try { localStorage.setItem(KEY, id); } catch (e) {}
-  }
-  function saveSub(id) {
-    if (!id) return;
-    try { localStorage.setItem(SUB, id); } catch (e) {}
-  }
   document.addEventListener("click", function (ev) {
     var nav = ev.target.closest && ev.target.closest("[data-nav]");
-    if (nav) saveMain(nav.getAttribute("data-nav"));
+    if (nav) try { localStorage.setItem(KEY, nav.getAttribute("data-nav")); } catch (e) {}
     var fl = ev.target.closest && ev.target.closest("[data-flode]");
-    if (fl) saveSub(fl.getAttribute("data-flode"));
+    if (fl) try { localStorage.setItem(SUB, fl.getAttribute("data-flode")); } catch (e) {}
   }, true);
   function restore() {
     var tab, sub;
-    try {
-      tab = localStorage.getItem(KEY);
-      sub = localStorage.getItem(SUB);
-    } catch (e) { return; }
+    try { tab = localStorage.getItem(KEY); sub = localStorage.getItem(SUB); } catch (e) { return; }
     if (tab && tab !== "skift") {
       var btn = document.querySelector('[data-nav="' + tab + '"]');
       if (btn) btn.click();
@@ -44,6 +35,38 @@ window.TAXIKIT_CHANGELOG = [
   }
   setTimeout(restore, 80);
   setTimeout(restore, 400);
+})();
+
+(function longPressStar() {
+  var timer = null;
+  var armed = null;
+  function isItemStar(el) {
+    return el && el.classList && el.classList.contains("feed-star") && el.id !== "flodeStarAllBtn";
+  }
+  function clear() {
+    if (timer) { clearTimeout(timer); timer = null; }
+  }
+  document.addEventListener("pointerdown", function (ev) {
+    var btn = ev.target.closest && ev.target.closest(".feed-star");
+    if (!isItemStar(btn)) return;
+    clear();
+    timer = setTimeout(function () {
+      timer = null;
+      armed = btn;
+      try { if (navigator.vibrate) navigator.vibrate(20); } catch (e) {}
+      btn.click();
+    }, 480);
+  }, true);
+  ["pointerup", "pointercancel", "pointerleave"].forEach(function (name) {
+    document.addEventListener(name, clear, true);
+  });
+  document.addEventListener("click", function (ev) {
+    var btn = ev.target.closest && ev.target.closest(".feed-star");
+    if (!isItemStar(btn)) return;
+    if (armed === btn) { armed = null; return; }
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+  }, true);
 })();
 
 (function restyleTrainRows() {
@@ -63,7 +86,6 @@ window.TAXIKIT_CHANGELOG = [
     ".dir-mini i{font-style:normal;color:var(--muted);font-size:0.72rem;opacity:.5}" +
     ".feed-item.dir-hide{display:none!important}";
   document.documentElement.appendChild(css);
-
   function trainType(title) {
     var t = String(title || "");
     if (/^[ÖO]T/i.test(t)) return "Öresundståg";
