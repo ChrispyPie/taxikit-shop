@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T20:43:15+02:00",
+  "updated": "2026-09-03T20:44:18+02:00",
   "error": null,
   "trains": [
     {
@@ -121,26 +121,6 @@
       "canceled": false,
       "product": "Västtågen",
       "traffic": "Pendeltåg",
-      "snabb": false
-    },
-    {
-      "id": "3951",
-      "dir": "ANK",
-      "other": "Khn",
-      "otherSig": "Khn",
-      "from": [
-        "Khn"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T08:45:00.000+02:00",
-      "est": "2026-09-02T08:47:00.000+02:00",
-      "act": "2026-09-02T08:44:00.000+02:00",
-      "track": "10",
-      "canceled": false,
-      "product": "SJ Regional",
-      "traffic": "Tåg",
       "snabb": false
     },
     {
@@ -70538,8 +70518,8 @@
         {
           "sig": "Ål",
           "name": "Ål",
-          "t": "2026-09-03T20:44:00.000+02:00",
-          "act": "",
+          "t": "2026-09-03T20:43:00.000+02:00",
+          "act": "2026-09-03T20:43:00.000+02:00",
           "est": "",
           "sched": "2026-09-03T20:44:00.000+02:00",
           "track": "2"
@@ -70581,9 +70561,9 @@
           "track": "1b"
         }
       ],
-      "lastSeen": "Ml",
-      "lastSeenSig": "Ml",
-      "lastSeenTs": "2026-09-03T20:20:00.000+02:00"
+      "lastSeen": "Ål",
+      "lastSeenSig": "Ål",
+      "lastSeenTs": "2026-09-03T20:43:00.000+02:00"
     },
     {
       "id": "393",
@@ -76304,8 +76284,8 @@
         {
           "sig": "Sue",
           "name": "Sue",
-          "t": "2026-09-03T20:44:00.000+02:00",
-          "act": "",
+          "t": "2026-09-03T20:43:00.000+02:00",
+          "act": "2026-09-03T20:43:00.000+02:00",
           "est": "",
           "sched": "2026-09-03T20:44:00.000+02:00",
           "track": "1"
@@ -76329,9 +76309,9 @@
           "track": "10"
         }
       ],
-      "lastSeen": "Bhs",
-      "lastSeenSig": "Bhs",
-      "lastSeenTs": "2026-09-03T20:40:00.000+02:00"
+      "lastSeen": "Sue",
+      "lastSeenSig": "Sue",
+      "lastSeenTs": "2026-09-03T20:43:00.000+02:00"
     },
     {
       "id": "11159",
@@ -76885,9 +76865,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Vpm",
-      "lastSeenSig": "Vpm",
-      "lastSeenTs": "2026-09-03T20:41:00.000+02:00",
+      "lastSeen": "Tbn",
+      "lastSeenSig": "Tbn",
+      "lastSeenTs": "2026-09-03T20:43:00.000+02:00",
       "stops": [
         {
           "sig": "Dl",
@@ -80077,9 +80057,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "T",
-      "lastSeenSig": "T",
-      "lastSeenTs": "2026-09-03T20:39:00.000+02:00",
+      "lastSeen": "Mh",
+      "lastSeenSig": "Mh",
+      "lastSeenTs": "2026-09-03T20:43:00.000+02:00",
       "stops": [
         {
           "sig": "Cst",
@@ -85292,6 +85272,31 @@
       "track": "9",
       "canceled": false,
       "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "319",
+      "dir": "AVG",
+      "other": "Kalmar C",
+      "otherSig": "Kac",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Kalmar C"
+      ],
+      "sched": "2026-09-04T06:04:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "12",
+      "canceled": false,
+      "product": "SJ Regional",
       "traffic": [
         {
           "Code": "YNA001",
