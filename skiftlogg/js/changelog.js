@@ -1,9 +1,9 @@
-window.TAXIKIT_BUILD = "1.1.0-wip60";
+window.TAXIKIT_BUILD = "1.1.0-wip61";
 window.TAXIKIT_CHANGELOG = [
   {
-    ver: "1.1.0-wip60",
+    ver: "1.1.0-wip61",
     date: "2026-09-04 · under utveckling",
-    items: ["Flyg: max 3 rader kollapsat", "Expansion: Land, Gate, Bagage, Band"]
+    items: ["Bagage-rad alltid synlig i flyg-expansion"]
   }
 ];
 
@@ -66,8 +66,8 @@ window.TAXIKIT_CHANGELOG = [
 })();
 
 (function restyleRows() {
-  if (window.__taxikitRowUi60) return;
-  window.__taxikitRowUi60 = true;
+  if (window.__taxikitRowUi61) return;
+  window.__taxikitRowUi61 = true;
   var css = document.createElement("style");
   css.textContent =
     ".feed-item .feed-city{color:var(--fg);font-weight:800;font-size:0.95rem}" +
@@ -168,7 +168,10 @@ window.TAXIKIT_CHANGELOG = [
   function tidyFlightExtra(row) {
     var box = row.querySelector(".feed-kv");
     if (!box || box.getAttribute("data-tidy") === "1") return;
-    var eventTxt = ((row.querySelector(".feed-event") || {}).textContent || "").trim();
+    var evEl = row.querySelector(".feed-event");
+    var eventTxt = evEl ? evEl.textContent.trim() : "";
+    if (evEl && eventTxt.indexOf(" · ") >= 0) evEl.textContent = eventTxt.split(" · ")[0];
+    eventTxt = evEl ? evEl.textContent.trim() : "";
     var map = {};
     var keys = box.querySelectorAll(".feed-k");
     for (var i = 0; i < keys.length; i++) {
@@ -188,24 +191,25 @@ window.TAXIKIT_CHANGELOG = [
         }
       } else hidePair(map.Info.k);
     }
-    var bagLabel = "";
-    var bagVal = "";
-    if (map.Sista && !emptyVal(map.Sista.val)) { bagLabel = "Sista"; bagVal = map.Sista.val; }
-    else if (map.Väska && !emptyVal(map.Väska.val)) { bagLabel = "Första"; bagVal = map.Väska.val; }
+    var bagText = "—";
+    var lastT = map.Sista && !emptyVal(map.Sista.val) ? map.Sista.val : "";
+    var firstT = map.Väska && !emptyVal(map.Väska.val) ? map.Väska.val : "";
+    if (lastT) bagText = "Sista " + lastT;
+    else if (firstT && /landat|framme|första/i.test(eventTxt)) bagText = "Första " + firstT;
+    else if (firstT) bagText = "Beräknad " + firstT;
     if (map.Väska) hidePair(map.Väska.k);
     if (map.Sista) hidePair(map.Sista.k);
-    if (bagVal) {
-      var bk = document.createElement("div");
-      bk.className = "feed-k";
-      bk.textContent = bagLabel;
-      var bv = document.createElement("div");
-      bv.className = "feed-v";
-      bv.textContent = bagVal;
-      var band = map.Band && map.Band.k;
-      if (band) box.insertBefore(bv, band);
-      else box.appendChild(bv);
-      box.insertBefore(bk, bv);
-    }
+    var bk = document.createElement("div");
+    bk.className = "feed-k";
+    bk.textContent = "Bagage";
+    var bv = document.createElement("div");
+    bv.className = "feed-v";
+    bv.textContent = bagText;
+    var band = map.Band && map.Band.k;
+    if (band) box.insertBefore(bv, band);
+    else box.appendChild(bv);
+    box.insertBefore(bk, bv);
+    if (map.Land && emptyVal(map.Land.val)) hidePair(map.Land.k);
     if (map.Gate && emptyVal(map.Gate.val)) hidePair(map.Gate.k);
     if (map.Band && emptyVal(map.Band.val)) hidePair(map.Band.k);
     box.setAttribute("data-tidy", "1");
