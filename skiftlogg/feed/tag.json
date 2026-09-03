@@ -1,28 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T21:46:22+02:00",
+  "updated": "2026-09-03T21:47:14+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "421",
-      "dir": "ANK",
-      "other": "Stockholm C",
-      "otherSig": "Cst",
-      "from": [
-        "Stockholm C"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T09:47:00.000+02:00",
-      "est": "2026-09-02T09:50:00.000+02:00",
-      "act": "2026-09-02T09:47:00.000+02:00",
-      "track": "4",
-      "canceled": false,
-      "product": "SJ Snabbtåg",
-      "traffic": "Tåg",
-      "snabb": true
-    },
     {
       "id": "3638",
       "dir": "AVG",
@@ -76320,16 +76300,16 @@
         {
           "sig": "Än",
           "name": "Än",
-          "t": "2026-09-03T21:47:00.000+02:00",
-          "act": "",
+          "t": "2026-09-03T21:48:00.000+02:00",
+          "act": "2026-09-03T21:48:00.000+02:00",
           "est": "",
           "sched": "2026-09-03T21:47:00.000+02:00",
           "track": "1"
         }
       ],
-      "lastSeen": "Nol",
-      "lastSeenSig": "Nol",
-      "lastSeenTs": "2026-09-03T21:41:00.000+02:00"
+      "lastSeen": "Än",
+      "lastSeenSig": "Än",
+      "lastSeenTs": "2026-09-03T21:48:00.000+02:00"
     },
     {
       "id": "3579",
@@ -77157,8 +77137,8 @@
         {
           "sig": "P",
           "name": "P",
-          "t": "2026-09-03T21:47:00.000+02:00",
-          "act": "",
+          "t": "2026-09-03T21:46:00.000+02:00",
+          "act": "2026-09-03T21:46:00.000+02:00",
           "est": "",
           "sched": "2026-09-03T21:47:00.000+02:00",
           "track": "2"
@@ -77218,9 +77198,9 @@
           "track": "1"
         }
       ],
-      "lastSeen": "Gsv",
-      "lastSeenSig": "Gsv",
-      "lastSeenTs": "2026-09-03T21:42:00.000+02:00"
+      "lastSeen": "P",
+      "lastSeenSig": "P",
+      "lastSeenTs": "2026-09-03T21:46:00.000+02:00"
     },
     {
       "id": "3581",
@@ -78038,9 +78018,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Kungsbacka",
-      "lastSeenSig": "Kb",
-      "lastSeenTs": "2026-09-03T21:44:00.000+02:00",
+      "lastSeen": "Lgd",
+      "lastSeenSig": "Lgd",
+      "lastSeenTs": "2026-09-03T21:46:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -78422,9 +78402,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Veas",
-      "lastSeenSig": "Veas",
-      "lastSeenTs": "2026-09-03T21:43:00.000+02:00",
+      "lastSeen": "Vpm",
+      "lastSeenSig": "Vpm",
+      "lastSeenTs": "2026-09-03T21:46:00.000+02:00",
       "stops": [
         {
           "sig": "Uv",
@@ -86116,6 +86096,31 @@
         }
       ],
       "snabb": true
+    },
+    {
+      "id": "83723",
+      "dir": "ANK",
+      "other": "Snu",
+      "otherSig": "Snu",
+      "from": [
+        "Snu"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-04T07:14:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA002",
+          "Description": "Buss"
+        }
+      ],
+      "snabb": false
     }
   ]
 }
