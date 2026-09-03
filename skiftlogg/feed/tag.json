@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T02:19:18+02:00",
+  "updated": "2026-09-03T02:20:26+02:00",
   "error": null,
   "trains": [
     {
@@ -20081,6 +20081,26 @@
       "canceled": false,
       "product": "SJ Charter",
       "traffic": "Tåg",
+      "snabb": false
+    },
+    {
+      "id": "3646",
+      "dir": "AVG",
+      "other": "Än",
+      "otherSig": "Än",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Än"
+      ],
+      "sched": "2026-09-03T11:50:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "10",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": "Pendeltåg",
       "snabb": false
     }
   ]
