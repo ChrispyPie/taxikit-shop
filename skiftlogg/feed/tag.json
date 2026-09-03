@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T21:38:16+02:00",
+  "updated": "2026-09-03T21:39:15+02:00",
   "error": null,
   "trains": [
     {
@@ -41,26 +41,6 @@
       "canceled": false,
       "product": "Västtågen",
       "traffic": "Pendeltåg",
-      "snabb": false
-    },
-    {
-      "id": "63731",
-      "dir": "ANK",
-      "other": "Snu",
-      "otherSig": "Snu",
-      "from": [
-        "Snu"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T09:39:00.000+02:00",
-      "est": "",
-      "act": "",
-      "track": "x",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": "Buss",
       "snabb": false
     },
     {
@@ -68475,7 +68455,7 @@
       "snabb": false,
       "lastSeen": "Lund C",
       "lastSeenSig": "Lu",
-      "lastSeenTs": "2026-09-03T21:36:00.000+02:00",
+      "lastSeenTs": "2026-09-03T21:38:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -70558,9 +70538,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Äl",
-      "lastSeenSig": "Äl",
-      "lastSeenTs": "2026-09-03T21:35:00.000+02:00",
+      "lastSeen": "Gdö",
+      "lastSeenSig": "Gdö",
+      "lastSeenTs": "2026-09-03T21:37:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -76021,9 +76001,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Alingsås",
-      "lastSeenSig": "Alh",
-      "lastSeenTs": "2026-09-03T21:34:00.000+02:00",
+      "lastSeen": "Tbn",
+      "lastSeenSig": "Tbn",
+      "lastSeenTs": "2026-09-03T21:38:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -76046,18 +76026,18 @@
         {
           "sig": "Thn",
           "name": "Trollhättan",
-          "t": "2026-09-03T21:45:00.000+02:00",
+          "t": "2026-09-03T21:47:00.000+02:00",
           "act": "",
-          "est": "2026-09-03T21:45:00.000+02:00",
+          "est": "2026-09-03T21:47:00.000+02:00",
           "sched": "2026-09-03T21:43:00.000+02:00",
           "track": "1"
         },
         {
           "sig": "Uv",
           "name": "Uv",
-          "t": "2026-09-03T22:04:00.000+02:00",
+          "t": "2026-09-03T22:07:00.000+02:00",
           "act": "",
-          "est": "2026-09-03T22:04:00.000+02:00",
+          "est": "2026-09-03T22:07:00.000+02:00",
           "sched": "2026-09-03T22:02:00.000+02:00",
           "track": "2b"
         }
@@ -78172,9 +78152,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Åsa",
-      "lastSeenSig": "Åsa",
-      "lastSeenTs": "2026-09-03T21:36:00.000+02:00",
+      "lastSeen": "Lek",
+      "lastSeenSig": "Lek",
+      "lastSeenTs": "2026-09-03T21:38:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -82303,9 +82283,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Kg",
-      "lastSeenSig": "Kg",
-      "lastSeenTs": "2026-09-03T21:30:00.000+02:00",
+      "lastSeen": "Tp",
+      "lastSeenSig": "Tp",
+      "lastSeenTs": "2026-09-03T21:38:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -86047,6 +86027,56 @@
         {
           "Code": "YNA004",
           "Description": "Pendeltåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3228",
+      "dir": "AVG",
+      "other": "Vänersborg C",
+      "otherSig": "Vg",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Vänersborg C"
+      ],
+      "sched": "2026-09-04T07:00:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "9",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "73728",
+      "dir": "AVG",
+      "other": "Ytterby",
+      "otherSig": "Yb",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Ytterby"
+      ],
+      "sched": "2026-09-04T07:00:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA002",
+          "Description": "Buss"
         }
       ],
       "snabb": false
