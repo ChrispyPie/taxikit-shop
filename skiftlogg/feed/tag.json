@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T11:08:16+02:00",
+  "updated": "2026-09-03T11:09:16+02:00",
   "error": null,
   "trains": [
     {
@@ -36092,9 +36092,9 @@
         {
           "sig": "Thn",
           "name": "Trollhättan",
-          "t": "2026-09-03T11:11:00.000+02:00",
+          "t": "2026-09-03T11:12:00.000+02:00",
           "act": "",
-          "est": "2026-09-03T11:11:00.000+02:00",
+          "est": "2026-09-03T11:12:00.000+02:00",
           "sched": "2026-09-03T10:43:00.000+02:00",
           "track": "1"
         },
@@ -38299,9 +38299,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Än",
-      "lastSeenSig": "Än",
-      "lastSeenTs": "2026-09-03T11:05:00.000+02:00",
+      "lastSeen": "Alingsås",
+      "lastSeenSig": "Alh",
+      "lastSeenTs": "2026-09-03T11:08:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -38511,7 +38511,7 @@
       "snabb": false,
       "lastSeen": "Khe",
       "lastSeenSig": "Khe",
-      "lastSeenTs": "2026-09-03T11:07:00.000+02:00",
+      "lastSeenTs": "2026-09-03T11:08:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -48794,8 +48794,8 @@
         {
           "sig": "K",
           "name": "Katrineholm",
-          "t": "2026-09-03T11:12:00.000+02:00",
-          "act": "",
+          "t": "2026-09-03T11:08:00.000+02:00",
+          "act": "2026-09-03T11:08:00.000+02:00",
           "est": "",
           "sched": "2026-09-03T11:12:00.000+02:00",
           "track": "3"
@@ -48828,9 +48828,9 @@
           "track": "3"
         }
       ],
-      "lastSeen": "Stockholm C",
-      "lastSeenSig": "Cst",
-      "lastSeenTs": "2026-09-03T10:17:00.000+02:00"
+      "lastSeen": "Katrineholm",
+      "lastSeenSig": "K",
+      "lastSeenTs": "2026-09-03T11:08:00.000+02:00"
     },
     {
       "id": "486",
@@ -50953,6 +50953,31 @@
       "track": "13",
       "canceled": false,
       "product": "Öresundståg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3253",
+      "dir": "ANK",
+      "other": "Vänersborg C",
+      "otherSig": "Vg",
+      "from": [
+        "Vänersborg C"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-03T15:00:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "11",
+      "canceled": false,
+      "product": "Västtågen",
       "traffic": [
         {
           "Code": "YNA001",
