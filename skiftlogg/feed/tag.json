@@ -1,48 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T01:54:18+02:00",
+  "updated": "2026-09-04T01:56:18+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "332",
-      "dir": "ANK",
-      "other": "Kac",
-      "otherSig": "Kac",
-      "from": [
-        "Kac"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T13:55:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T13:55:00.000+02:00",
-      "track": "12",
-      "canceled": false,
-      "product": "SJ Regional",
-      "traffic": "Tåg",
-      "snabb": false
-    },
-    {
-      "id": "3651",
-      "dir": "ANK",
-      "other": "Än",
-      "otherSig": "Än",
-      "from": [
-        "Än"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T13:55:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T13:55:00.000+02:00",
-      "track": "10",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": "Pendeltåg",
-      "snabb": false
-    },
     {
       "id": "1103",
       "dir": "AVG",
@@ -92922,7 +92882,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Snu",
+          "name": "Snu",
+          "t": "2026-09-04T07:05:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T07:05:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-04T07:49:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T07:49:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "13128",
@@ -96770,6 +96750,81 @@
         {
           "Code": "YNA002",
           "Description": "Buss"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3641",
+      "dir": "ANK",
+      "other": "Än",
+      "otherSig": "Än",
+      "from": [
+        "Än"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-04T11:25:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "10",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA004",
+          "Description": "Pendeltåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3246",
+      "dir": "AVG",
+      "other": "Vänersborg C",
+      "otherSig": "Vg",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Vänersborg C"
+      ],
+      "sched": "2026-09-04T11:30:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "9",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3441",
+      "dir": "ANK",
+      "other": "Örebro C",
+      "otherSig": "Ör",
+      "from": [
+        "Örebro C"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-04T11:30:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "5",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
         }
       ],
       "snabb": false
