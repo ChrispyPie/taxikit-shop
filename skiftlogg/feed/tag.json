@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T04:14:17+02:00",
+  "updated": "2026-09-03T04:15:26+02:00",
   "error": null,
   "trains": [
     {
@@ -21101,6 +21101,46 @@
       "canceled": false,
       "product": "Västtågen",
       "traffic": "Buss",
+      "snabb": false
+    },
+    {
+      "id": "7350",
+      "dir": "ANK",
+      "other": "Bsc",
+      "otherSig": "Bsc",
+      "from": [
+        "Bsc"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-03T13:25:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "13",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": "Tåg",
+      "snabb": false
+    },
+    {
+      "id": "3649",
+      "dir": "ANK",
+      "other": "Än",
+      "otherSig": "Än",
+      "from": [
+        "Än"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-03T13:25:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "10",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": "Pendeltåg",
       "snabb": false
     }
   ]
