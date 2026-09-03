@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0c0e12" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>TaxiKit skiftlogg</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="css/app.css?v=48" />
+</head>
+<body>
+  <header class="top-bar">
+    <button type="button" class="top-nav-link active" id="navSkiftBtn">SKIFT</button>
+    <button type="button" class="top-nav-link" id="navFlodeBtn">FLÖDE</button>
+    <button type="button" class="top-nav-link" id="navTrafikBtn">TRAFIK</button>
+    <div class="top-bar-spacer"></div>
+    <button type="button" class="account-chip" id="accountChip" title="Konto">Logga in</button>
+  </header>
+
+  <div class="action-bar">
+    <button id="mainActionBtn" class="btn-primary btn-login" type="button">Starta skift</button>
+  </div>
+
+  <main>
+    <section id="view-skift" class="view active" role="tabpanel">
+      <div class="mode-pills" role="tablist" aria-label="Period">
+        <button type="button" class="mode-pill active" data-mode="day">Dag</button>
+        <button type="button" class="mode-pill" data-mode="week">Vecka</button>
+        <button type="button" class="mode-pill" data-mode="month">Månad</button>
+      </div>
+
+      <div id="historyDayPicker" class="day-picker-row">
+        <button type="button" class="btn-icon" id="histDayPrev" aria-label="Föregående dag">‹</button>
+        <div class="period-value-wrap" id="historyDateWrap">
+          <span class="period-value-label" id="historyDateLabel">26/08/03</span>
+          <label class="sr-only" for="historyDate">Välj dag</label>
+          <input type="date" id="historyDate" aria-label="Vald dag" />
+        </div>
+        <button type="button" class="btn-icon" id="histDayNext" aria-label="Nästa dag">›</button>
+        <button type="button" class="btn-period-now" id="historyTodayBtn" aria-label="Gå till idag" title="Idag">»</button>
+      </div>
+
+      <div id="historyWeekPicker" class="day-picker-row" style="display:none">
+        <button type="button" class="btn-icon" id="histWeekPrev" aria-label="Föregående vecka">‹</button>
+        <select id="histWeekSelect" aria-label="Välj veckonummer"></select>
+        <button type="button" class="btn-icon" id="histWeekNext" aria-label="Nästa vecka">›</button>
+        <button type="button" class="btn-period-now" id="histWeekNowBtn" aria-label="Gå till denna vecka" title="Denna vecka">»</button>
+      </div>
+
+      <div id="historyMonthPicker" class="day-picker-row" style="display:none">
+        <button type="button" class="btn-icon" id="histMonthPrev" aria-label="Föregående månad">‹</button>
+        <select id="histMonthSelect" aria-label="Välj månad"></select>
+        <button type="button" class="btn-icon" id="histMonthNext" aria-label="Nästa månad">›</button>
+        <button type="button" class="btn-period-now" id="histMonthNowBtn" aria-label="Gå till denna månad" title="Denna månad">»</button>
+      </div>
+
+      <!-- Summary card (shared for Dag / Vecka / Månad) -->
+      <div id="skiftSummary" class="card" style="margin-bottom:14px; padding:12px 14px">
+        <div id="skiftStats"></div>
+      </div>
+
+      <div id="historySummary" class="history-summary" style="display:none"></div>
+      <div id="historyList" class="shift-list">
+        <p class="empty-hint">Inga skift denna period.</p>
+      </div>
+    </section>
+
+    <section id="view-flode" class="view" role="tabpanel">
+      <div class="flode-sticky">
+      <div class="flode-icons" role="tablist" aria-label="Flöde">
+        <button type="button" class="flode-icon on" data-flode="summary" id="flodeTabSummary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h13"/></svg>
+          Allt
+        </button>
+        <button type="button" class="flode-icon" data-flode="star">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.6 5.4 6 .9-4.3 4.2 1 5.9L12 16.8 6.7 19.4l1-5.9L3.4 9.3l6-.9L12 3z"/></svg>
+          Sparat
+        </button>
+        <button type="button" class="flode-icon" data-flode="flyg">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2h0A1.5 1.5 0 0 0 10 3.5V9L2 14v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5L21 16z"/></svg>
+          Flyg
+        </button>
+        <button type="button" class="flode-icon" data-flode="tag">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="13" rx="2"/><path d="M5 12h14M8 21l2-5h4l2 5"/></svg>
+          Tåg
+        </button>
+        <button type="button" class="flode-icon" data-flode="bat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17c2 2 5 3 9 3s7-1 9-3M4 14l8-9 8 9M4 14h16"/></svg>
+          Båt
+        </button>
+        <button type="button" class="flode-icon" data-flode="bro">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14h16M6 14V9h12v5M4 18h16"/></svg>
+          Broar
+        </button>
+        <button type="button" class="flode-icon" data-flode="event">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+          Event
+        </button>
+      </div>
+
+      <div class="flode-toolbar">
+        <h2 id="flodeTitle" class="sr-only">Sammanfattning</h2>
+        <div class="flode-tools-left">
+          <button type="button" class="flode-tool" id="flodeNowBtn" title="Hoppa till nu" aria-label="Hoppa till nu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/></svg>
+          </button>
+          <button type="button" class="flode-tool" id="flodeRefreshBtn" title="Uppdatera" aria-label="Uppdatera">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-2.2-5.8"/><path d="M21 4v6h-6"/></svg>
+          </button>
+        </div>
+        <div class="flode-tools-right">
+          <button type="button" class="flode-tool" id="flodeFilterBtn" title="Filter" aria-label="Filter">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+          </button>
+          <button type="button" class="feed-star" id="flodeStarAllBtn" title="Märk eller rensa listan" aria-label="Märk alla">★</button>
+        </div>
+      </div>
+      </div>
+      <div id="flodeScroll" class="flode-scroll">
+      <div class="flode-ptr" id="flodePtr">Uppdaterar…</div>
+      <button type="button" class="flode-more" id="flodeMorePast" aria-label="Visa en timme bakåt">⌃</button>
+      <div id="flodeList" class="card" style="padding:4px 14px;margin-top:4px"></div>
+      <button type="button" class="flode-more" id="flodeMoreFuture" aria-label="Visa en timme framåt">⌄</button>
+      <p class="hint" id="flodeHint" style="margin-top:10px">Flöde = tider. Olyckor och köer ligger under TRAFIK-kartan.</p>
+      </div>
+    </section>
+
+    <section id="view-trafik" class="view" role="tabpanel">
+      <div class="flode-toolbar">
+        <h2>Trafik runt Göteborg</h2>
+        <button type="button" class="btn-secondary" id="trafikRefreshBtn" style="padding:6px 10px;width:auto">Uppdatera</button>
+      </div>
+      <div id="trafikMap"></div>
+      <div id="trafikList" class="card trafik-list" style="padding:4px 14px"></div>
+      <p class="hint">Ikoner från Trafikverket, ~3 mil runt stan. Tryck på nål eller rad för detaljer.</p>
+    </section>
+
+    <section id="view-settings" class="view" role="tabpanel">
+      <div style="margin-bottom:12px">
+        <button type="button" class="btn-secondary" id="backToSkiftBtn" style="width:100%">← Tillbaka till Skift</button>
+      </div>
+
+      <div class="card account-card">
+        <h2>Konto</h2>
+        <div class="account-status" id="accountStatus">
+          <span class="account-email" id="accountEmail">Ej inloggad</span>
+          <span class="account-meta" id="accountSyncMeta">Lokalt läge · fungerar offline</span>
+        </div>
+        <div class="settings-actions" id="accountActions">
+          <button type="button" class="btn-google" id="googleSignInBtn">
+            <svg viewBox="0 0 48 48" aria-hidden="true">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            </svg>
+            Logga in med Google
+          </button>
+        </div>
+        <p class="hint">Valfritt. Inloggning synkar skift mellan enheter. Appen fungerar alltid offline.</p>
+      </div>
+
+      <div class="card">
+        <h2>Backup</h2>
+        <div class="settings-actions">
+          <button type="button" class="btn-secondary" id="exportBtn">Exportera JSON</button>
+          <button type="button" class="btn-secondary" id="importBtn">Importera JSON</button>
+          <input type="file" id="importFile" accept="application/json,.json" class="sr-only" />
+        </div>
+        <p class="hint">Exportera för backup. Importera ersätter all data i appen.</p>
+      </div>
+
+      <div class="card">
+        <h2>Utseende</h2>
+        <p class="hint" style="margin-bottom:8px">Textstorlek för hela appen. Bra på surfplatta eller om texten känns liten.</p>
+        <div class="font-size-row" id="fontSizeRow">
+          <button type="button" data-font="sm">Liten</button>
+          <button type="button" data-font="md">Normal</button>
+          <button type="button" data-font="lg">Stor</button>
+          <button type="button" data-font="xl">Störst</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Om appen</h2>
+        <button type="button" class="btn-secondary" id="openAboutBtn" style="width:100%">Visa om & ändringslogg</button>
+      </div>
+    </section>
+
+    <section id="view-about" class="view" role="tabpanel">
+      <div style="margin-bottom:12px">
+        <button type="button" class="btn-secondary" id="backFromAboutBtn" style="width:100%">← Tillbaka</button>
+      </div>
+      <div class="card">
+        <div class="about-header">
+          <div class="about-name">TaxiKit skiftlogg</div>
+          <div class="about-version">Version 1.1.0-wip48</div>
+          <p class="about-desc">Offline skiftlogg för taxichaufförer. All data sparas lokalt i din webbläsare.</p>
+          <p class="about-contact">
+            Skapad av Christan Parsa<br />
+            <a href="mailto:Kontakt@taxikit.shop">Kontakt@taxikit.shop</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Ändringslogg</h2>
+        <ul class="changelog-list">
+          <li class="changelog-item current">
+            <div class="changelog-ver">1.1.0-wip48</div>
+            <div class="changelog-date">2026-09-03 · under utveckling</div>
+            <ul>
+              <li>Appen är uppdelad: skal + CSS + JS-moduler</li>
+            </ul>
+          </li>
+          <li class="changelog-item">
+            <div class="changelog-ver">1.1.0-wip47</div>
+            <div class="changelog-date">2026-09-03</div>
+            <ul>
+              <li>Stationslistan linjerar klockslag och namn med kortet</li>
+            </ul>
+          </li>
+          <li class="changelog-item">
+            <div class="changelog-ver">1.1.0-wip46</div>
+            <div class="changelog-date">2026-09-03</div>
+            <ul>
+              <li>Tryck på tidslinjen en gång till så öppnas hela stationslistan</li>
+            </ul>
+          </li>
+          <li class="changelog-item">
+            <div class="changelog-ver">1.1.0-wip45</div>
+            <div class="changelog-date">2026-09-03</div>
+            <ul>
+              <li>Flödesikonerna sitter fast under SKIFT/FLÖDE när listan scrollar</li>
+            </ul>
+          </li>
+          <li class="changelog-item">
+            <div class="changelog-ver">1.1.0-wip44</div>
+            <div class="changelog-date">2026-09-03</div>
+            <ul>
+              <li>Hela tågrutten ligger i den gemensamma cachen, ingen nyckel i appen</li>
+              <li>Flödet scrollar med sidan så pull-to-refresh funkar</li>
+            </ul>
+          </li>
+          <li class="changelog-item">
+            <div class="changelog-ver">1.1.0-wip43</div>
+            <div class="changelog-date">2026-09-03</div>
+            <ul>
+              <li>Tåg och flyg kräver ingen egen Trafikverket-nyckel</li>
+            </ul>
+          </li>
+          <li class="changelog-item">
+            <div class="changelog-ver">1.1.0-wip42</div>
+            <div class="changelog-date">2026-09-03</div>
+            <ul>
+              <li>Tågrutt: fulla stationsnamn, tid på kollapsad vy, senast sedd i mitten</li>
+              <li>Linje i grått, streckad bara fram till senast sedd, slutar vid G</li>
+              <li>Dra ner i flödet för att uppdatera</li>
+            </ul>
+          </li>
+          <li class="changelog-item">
+            <div class="changelog-ver">1.1.0-wip41</div>
+            <div class="changelog-date">2026-09-03</div>
+            <ul>
+              <li>Tågrutt: tidslinje med start / senast sedd / Göteborg, expandera till alla stopp</li>
+              <li>Textstorlek i inställningar · bredare flöde på surfplatta</li>
+            </ul>
+          </li>
+          <li class="changelog-item">
+            <div class="changelog-ver">1.1.0-wip40</div>
+            <div class="changelog-date">2026-09-03</div>
+            <ul>
+              <li>Flyg som passerat tiden visas som Landat/Avgånget även om Swedavia lämnar SCH</li>
+            </ul>
+          </li>
+          <li class="changelog-item">
+            <div class="changelog-ver">1.1.0-wip39</div>
+            <div class="changelog-date">2026-09-02</div>
+            <ul>
+              <li>Nya flygdestinationer läggs in i filtret automatiskt när de syns i cachen</li>
+            </ul>
+          </li>
+          <li class="changelog-item">
+            <div class="changelog-ver">1.1.0-wip35</div>
+            <div class="changelog-date">2026-09-02</div>
+            <ul>
+              <li>Gemensam tågcache tag.json</li>
+            </ul>
+          </li>
+          <li class="changelog-item">
+            <div class="changelog-ver">1.0.0</div>
+            <div class="changelog-date">2026-08-20</div>
+            <ul>
+              <li><strong>Skift</strong>-vy: Dag / Vecka / Månad med gemensam kompakt sammanfattning</li>
+              <li>Header: Starta/Avsluta skift, konto-chip (inloggning, backup, inställningar, om)</li>
+              <li>Uber-brutto per skift · justerat inkört = totalt − (Uber × 26 %)</li>
+              <li>Veckovis Uber-rapport (kundpris, kampanjer, utmaning, dricks, utbetalning)</li>
+              <li>Dricks: taxi på dag · taxi + Uber-dricks + Uber-bonus på vecka/månad</li>
+              <li>Körda km, kr/mil, kr/timme och kr/skift (endast avslutade skift)</li>
+              <li>Nattskift: aktiv skift stannar på startdagen efter midnatt</li>
+              <li>Prognos + kvar/skift på pågående vecka och månad</li>
+              <li><strong>Rapportkort</strong>: kumulativt diagram, mål-/prognoslinjer, fördelning, PDF och bild</li>
+              <li>Molnsynk inkluderar Uber-brutto, tips, km och veckorapporter</li>
+              <li>Säker redigering per fält på dagrapport (lås/upplås)</li>
+            </ul>
+          </li>
+          <li class="changelog-item">
+            <div class="changelog-ver">0.9.3</div>
+            <div class="changelog-date">2026-08-09</div>
+            <ul>
+              <li>Ny prognos: inkört hittills + (kr/h från avslutade skift) × kvarvarande skift × 13 h</li>
+              <li>kr/h räknas bara på avslutade skift (pågående skift påverkar inte snittet)</li>
+              <li>Kontaktmejl uppdaterat till @taxikit.shop</li>
+            </ul>
+          </li>
+          <li class="changelog-item">
+            <div class="changelog-ver">0.9.2</div>
+            <div class="changelog-date">2026-08-03</div>
+            <ul>
+              <li>Översikt: ingen vecko-/månadsnavigering – visar bara aktuell period</li>
+              <li>Kvarvarande skift = återstående dagar i perioden (max 1 skift/dag)</li>
+            </ul>
+          </li>
+          <li class="changelog-item">
+            <div class="changelog-ver">0.9.1</div>
+            <div class="changelog-date">2026-08-03</div>
+            <ul>
+              <li>Kompakt historiknav: ikon för Idag/Denna + korta periodtexter</li>
+              <li>Dag: ÅÅ/MM/DD · Vecka: v.32 '26 · Månad: Aug '26</li>
+            </ul>
+          </li>
+          <li class="changelog-item">
+            <div class="changelog-ver">0.9</div>
+            <div class="changelog-date">2026-08-03</div>
+            <ul>
+              <li>Skift räknas alltid till <strong>startdagen</strong> (dygnsskifte 00:00) i historik dag/vecka/månad</li>
+              <li>Dagsvy i historik: samma pilnavigering som vecka/månad</li>
+              <li>Knappar Denna/Idag + markering av nuvarande period i historik</li>
+            </ul>
+          </li>
+          <li class="changelog-item">
+            <div class="changelog-ver">0.8</div>
+            <div class="changelog-date">2026-07-31</div>
+            <ul>
+              <li>Valfri Google-inloggning via Firebase Auth</li>
+              <li>Molnsynk av skift till Firestore (users/{uid}/shifts)</li>
+              <li>localStorage förblir primär lagring – fungerar 100 % offline</li>
+              <li>Automatisk synk vid skiftändringar när online och inloggad</li>
+            </ul>
+          </li>
+          <li class="changelog-item">
+            <div class="changelog-ver">0.7</div>
+            <div class="changelog-date">2026-07-31</div>
+            <ul>
+              <li>Dagsrapport som vecka/månad: datum, arbetade timmar, totalt inkört, kr/h och rast totalt</li>
+              <li>Redigera in-/utloggning, belopp samt rast start/slut</li>
+              <li>Nytt skift som standard; textlänk “Fortsätt föregående skift” loggar rast mellan sessionerna</li>
+            </ul>
+          </li>
+          <li class="changelog-item">
+            <div class="changelog-ver">0.6</div>
+            <div class="changelog-date">2026-07-31</div>
+            <ul>
+              <li>Vecko-/månadsrapport: platsbyte mellan inkört/timme och arbetade skift</li>
+              <li>Dagsrapport: en rad per slutdatum (utan klockslag) med timmar, belopp och kr/h</li>
+              <li>Flera loggar samma dag slås ihop; redigering öppnar alla delar med start/slut och belopp</li>
+            </ul>
+          </li>
+          <li class="changelog-item">
+            <div class="changelog-ver">0.5</div>
+            <div class="changelog-date">2026-07-31</div>
+            <ul>
+              <li>Ny flik <strong>Om</strong> med produktinfo och ändringslogg</li>
+              <li>Förberedelse inför <strong>TaxiKit skiftlogg 1.0</strong></li>
+            </ul>
+          </li>
+          <li class="changelog-item">
+            <div class="changelog-ver">0.4</div>
+            <div class="changelog-date">2026-07-31</div>
+            <ul>
+              <li>Redigering endast i historik per dag (vecka/månad är översikt)</li>
+              <li>Flera poster samma dag räknas som ett skift (med rast)</li>
+              <li>Max antal skift = antal dagar i perioden</li>
+              <li>Uppdaterad Om-text och kontaktuppgifter</li>
+            </ul>
+          </li>
+          <li class="changelog-item">
+            <div class="changelog-ver">0.3</div>
+            <div class="changelog-date">2026-07-31</div>
+            <ul>
+              <li>Veckonummer utan datumperiod i parentes</li>
+              <li>Inloggningsruta flyttad högst upp på skärmen</li>
+              <li>Vecko- och månadsrapport i historik: timmar av max (13 h/dygn), kr/h, totalt inkört, skift x/y</li>
+            </ul>
+          </li>
+          <li class="changelog-item">
+            <div class="changelog-ver">0.2</div>
+            <div class="changelog-date">2026-07-31</div>
+            <ul>
+              <li>Datumformat överallt: ÅÅÅÅ-MM-DD</li>
+              <li>Historik för dag, vecka (veckonummer) och månad (månadsnamn)</li>
+              <li>Bläddra tidigare veckor/månader på översikten</li>
+              <li>LEDIG = grön, AKTIV = röd</li>
+            </ul>
+          </li>
+          <li class="changelog-item">
+            <div class="changelog-ver">0.1</div>
+            <div class="changelog-date">2026-07-31 · första version</div>
+            <ul>
+              <li>Logga in / ut med skiftstart och inkört belopp</li>
+              <li>Översikt: aktuellt skift, vecka- och månadsstatistik med mål</li>
+              <li>Historik per dag med redigering och borttagning</li>
+              <li>Inställningar: vecko-/månadsmål, export/import JSON</li>
+              <li>Offline – all data i localStorage</li>
+            </ul>
+          </li>
+        </ul>
+        <p class="hint" style="margin-top:14px">Planerad första färdiga release: <strong>TaxiKit skiftlogg 1.0</strong></p>
+      </div>
+    </section>
+  </main>
+
+  <div id="reportOverlay" class="report-overlay" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
+    <div class="report-card" id="reportCard">
+      <div class="report-top">
+        <button type="button" class="btn-icon" id="reportCloseBtn" aria-label="Stäng">‹</button>
+        <h2 id="reportTitle">Rapportkort</h2>
+      </div>
+      <div class="report-chart-wrap">
+        <canvas id="reportBarCanvas" width="480" height="220"></canvas>
+      </div>
+      <div class="report-pie-wrap" id="reportPieWrap"></div>
+      <div class="report-stats" id="reportStats"></div>
+      <div class="report-actions">
+        <button type="button" class="btn-secondary" id="reportCloseBtn2">Stäng</button>
+        <button type="button" class="btn-secondary" id="reportImageBtn">Exportera bild</button>
+        <button type="button" class="btn-primary" id="reportPrintBtn">Exportera PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <h3 id="modalTitle">Bekräfta</h3>
+      <div id="modalBody"></div>
+      <div class="modal-actions">
+        <button type="button" class="cancel" id="modalCancel">Avbryt</button>
+        <button type="button" class="ok" id="modalOk">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Firebase (CDN / compat – ingen npm) -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="js/modules.js?v=48"></script>
+  <script src="js/app-1.js?v=48"></script>
+  <script src="js/app-2.js?v=48"></script>
+  <script src="js/app-3.js?v=48"></script>
+</body>
+</html>
