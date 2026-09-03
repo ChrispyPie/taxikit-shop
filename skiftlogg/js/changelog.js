@@ -1,9 +1,9 @@
-window.TAXIKIT_BUILD = "1.1.0-wip59";
+window.TAXIKIT_BUILD = "1.1.0-wip60";
 window.TAXIKIT_CHANGELOG = [
   {
-    ver: "1.1.0-wip59",
+    ver: "1.1.0-wip60",
     date: "2026-09-04 · under utveckling",
-    items: ["Flyg-expansion: ingen dubbel Status, extra text på rad 3"]
+    items: ["Flyg: max 3 rader kollapsat", "Expansion: Land, Gate, Bagage, Band"]
   }
 ];
 
@@ -66,13 +66,13 @@ window.TAXIKIT_CHANGELOG = [
 })();
 
 (function restyleRows() {
-  if (window.__taxikitRowUi59) return;
-  window.__taxikitRowUi59 = true;
+  if (window.__taxikitRowUi60) return;
+  window.__taxikitRowUi60 = true;
   var css = document.createElement("style");
   css.textContent =
     ".feed-item .feed-city{color:var(--fg);font-weight:800;font-size:0.95rem}" +
     ".feed-item .feed-idline{color:var(--muted);font-weight:650;font-size:0.78rem;margin-top:2px}" +
-    ".feed-item .feed-event{color:var(--muted);font-weight:600}" +
+    ".feed-item .feed-event{color:var(--muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}" +
     ".feed-item .feed-event.is-alert{color:#f07178}" +
     ".feed-item .feed-chips .feed-id{display:none}" +
     ".feed-chip.ank,.feed-chip.avg{display:none!important}" +
@@ -162,25 +162,52 @@ window.TAXIKIT_CHANGELOG = [
     k.style.display = "none";
     if (v) v.style.display = "none";
   }
+  function emptyVal(val) {
+    return !val || val === "—" || val === "-" || val === "–";
+  }
   function tidyFlightExtra(row) {
     var box = row.querySelector(".feed-kv");
     if (!box || box.getAttribute("data-tidy") === "1") return;
-    var eventEl = row.querySelector(".feed-event");
-    var eventTxt = eventEl ? eventEl.textContent.trim() : "";
-    var infoVal = "";
+    var eventTxt = ((row.querySelector(".feed-event") || {}).textContent || "").trim();
+    var map = {};
     var keys = box.querySelectorAll(".feed-k");
     for (var i = 0; i < keys.length; i++) {
       var k = keys[i];
       var v = k.nextElementSibling;
-      var label = (k.textContent || "").trim();
-      var val = v ? (v.textContent || "").trim() : "";
-      if (label === "Status") hidePair(k);
-      else if (label === "Info") { infoVal = val; hidePair(k); }
-      else if ((label === "Väska" || label === "Sista" || label === "Gate" || label === "Band") && (!val || val === "—" || val === "-")) hidePair(k);
+      map[(k.textContent || "").trim()] = { k: k, v: v, val: v ? (v.textContent || "").trim() : "" };
     }
-    if (eventEl && infoVal && !/^schemalagd$/i.test(infoVal) && eventTxt.indexOf(infoVal) < 0) {
-      eventEl.textContent = eventTxt ? eventTxt + " · " + infoVal : infoVal;
+    if (map.Status) hidePair(map.Status.k);
+    if (map.Info) {
+      var info = map.Info.val;
+      if (info && !/^schemalagd$/i.test(info) && eventTxt.indexOf(info) < 0) {
+        map.Info.k.textContent = "";
+        map.Info.k.style.display = "none";
+        if (map.Info.v) {
+          map.Info.v.textContent = info;
+          map.Info.v.style.gridColumn = "1 / -1";
+        }
+      } else hidePair(map.Info.k);
     }
+    var bagLabel = "";
+    var bagVal = "";
+    if (map.Sista && !emptyVal(map.Sista.val)) { bagLabel = "Sista"; bagVal = map.Sista.val; }
+    else if (map.Väska && !emptyVal(map.Väska.val)) { bagLabel = "Första"; bagVal = map.Väska.val; }
+    if (map.Väska) hidePair(map.Väska.k);
+    if (map.Sista) hidePair(map.Sista.k);
+    if (bagVal) {
+      var bk = document.createElement("div");
+      bk.className = "feed-k";
+      bk.textContent = bagLabel;
+      var bv = document.createElement("div");
+      bv.className = "feed-v";
+      bv.textContent = bagVal;
+      var band = map.Band && map.Band.k;
+      if (band) box.insertBefore(bv, band);
+      else box.appendChild(bv);
+      box.insertBefore(bk, bv);
+    }
+    if (map.Gate && emptyVal(map.Gate.val)) hidePair(map.Gate.k);
+    if (map.Band && emptyVal(map.Band.val)) hidePair(map.Band.k);
     box.setAttribute("data-tidy", "1");
   }
   function fixFlightStatus(row) {
