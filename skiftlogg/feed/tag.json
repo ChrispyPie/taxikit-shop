@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T00:57:15+02:00",
+  "updated": "2026-09-04T00:58:17+02:00",
   "error": null,
   "trains": [
     {
@@ -80445,6 +80445,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Alvesta",
+      "lastSeenSig": "A",
+      "lastSeenTs": "2026-09-04T00:56:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -80527,10 +80530,7 @@
           "sched": "2026-09-04T00:57:00.000+02:00",
           "track": "3"
         }
-      ],
-      "lastSeen": "Alvesta",
-      "lastSeenSig": "A",
-      "lastSeenTs": "2026-09-04T00:56:00.000+02:00"
+      ]
     },
     {
       "id": "3094",
@@ -81542,7 +81542,7 @@
           "sig": "Sn",
           "name": "Sn",
           "t": "2026-09-04T00:56:00.000+02:00",
-          "act": "",
+          "act": "2026-09-04T00:56:00.000+02:00",
           "est": "",
           "sched": "2026-09-04T00:56:00.000+02:00",
           "track": "3"
@@ -81611,9 +81611,9 @@
           "track": "1"
         }
       ],
-      "lastSeen": "Fd",
-      "lastSeenSig": "Fd",
-      "lastSeenTs": "2026-09-04T00:53:00.000+02:00"
+      "lastSeen": "Sn",
+      "lastSeenSig": "Sn",
+      "lastSeenTs": "2026-09-04T00:56:00.000+02:00"
     },
     {
       "id": "3004",
