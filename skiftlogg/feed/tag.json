@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T09:05:20+02:00",
+  "updated": "2026-09-03T09:06:17+02:00",
   "error": null,
   "trains": [
     {
@@ -16026,9 +16026,9 @@
         }
       ],
       "snabb": true,
-      "lastSeen": "Nbt",
-      "lastSeenSig": "Nbt",
-      "lastSeenTs": "2026-09-03T09:04:00.000+02:00",
+      "lastSeen": "Ke",
+      "lastSeenSig": "Ke",
+      "lastSeenTs": "2026-09-03T09:06:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -16746,6 +16746,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Fd",
+      "lastSeenSig": "Fd",
+      "lastSeenTs": "2026-09-03T06:07:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -16828,10 +16831,7 @@
           "sched": "2026-09-03T06:07:00.000+02:00",
           "track": "1"
         }
-      ],
-      "lastSeen": "Fd",
-      "lastSeenSig": "Fd",
-      "lastSeenTs": "2026-09-03T06:07:00.000+02:00"
+      ]
     },
     {
       "id": "3517",
@@ -18807,6 +18807,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Alvesta",
+      "lastSeenSig": "A",
+      "lastSeenTs": "2026-09-03T06:58:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -18889,10 +18892,7 @@
           "sched": "2026-09-03T06:57:00.000+02:00",
           "track": "3"
         }
-      ],
-      "lastSeen": "Alvesta",
-      "lastSeenSig": "A",
-      "lastSeenTs": "2026-09-03T06:58:00.000+02:00"
+      ]
     },
     {
       "id": "3624",
@@ -24717,7 +24717,7 @@
       ],
       "sched": "2026-09-03T09:05:00.000+02:00",
       "est": "",
-      "act": "",
+      "act": "2026-09-03T09:05:00.000+02:00",
       "track": "11",
       "canceled": false,
       "product": "Västtågen",
@@ -25290,8 +25290,8 @@
       "sched": "2026-09-03T09:30:00.000+02:00",
       "est": "",
       "act": "",
-      "track": "15",
-      "canceled": false,
+      "track": "x",
+      "canceled": true,
       "product": "Västtågen",
       "traffic": [
         {
