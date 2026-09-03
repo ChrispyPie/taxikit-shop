@@ -1,28 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T01:06:18+02:00",
+  "updated": "2026-09-04T01:07:14+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "1042",
-      "dir": "ANK",
-      "other": "Dk.kh",
-      "otherSig": "Dk.kh",
-      "from": [
-        "Dk.kh"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T13:05:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T13:07:00.000+02:00",
-      "track": "13",
-      "canceled": false,
-      "product": "Öresundståg",
-      "traffic": "Tåg",
-      "snabb": false
-    },
     {
       "id": "13153",
       "dir": "AVG",
@@ -73681,9 +73661,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Uv",
-      "lastSeenSig": "Uv",
-      "lastSeenTs": "2026-09-03T22:07:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -73721,7 +73698,10 @@
           "sched": "2026-09-03T22:02:00.000+02:00",
           "track": "2b"
         }
-      ]
+      ],
+      "lastSeen": "Uv",
+      "lastSeenSig": "Uv",
+      "lastSeenTs": "2026-09-03T22:07:00.000+02:00"
     },
     {
       "id": "3082",
@@ -81497,8 +81477,8 @@
         {
           "sig": "Jv",
           "name": "Jv",
-          "t": "2026-09-04T01:08:00.000+02:00",
-          "act": "",
+          "t": "2026-09-04T01:07:00.000+02:00",
+          "act": "2026-09-04T01:07:00.000+02:00",
           "est": "",
           "sched": "2026-09-04T01:08:00.000+02:00",
           "track": "1"
@@ -81531,9 +81511,9 @@
           "track": "1"
         }
       ],
-      "lastSeen": "Apn",
-      "lastSeenSig": "Apn",
-      "lastSeenTs": "2026-09-04T01:04:00.000+02:00"
+      "lastSeen": "Jv",
+      "lastSeenSig": "Jv",
+      "lastSeenTs": "2026-09-04T01:07:00.000+02:00"
     },
     {
       "id": "3004",
