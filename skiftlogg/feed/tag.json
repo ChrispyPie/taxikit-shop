@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T21:43:14+02:00",
+  "updated": "2026-09-03T21:44:17+02:00",
   "error": null,
   "trains": [
     {
@@ -42,26 +42,6 @@
       "product": "Västtågen",
       "traffic": "Pendeltåg",
       "snabb": false
-    },
-    {
-      "id": "383",
-      "dir": "ANK",
-      "other": "No.osl",
-      "otherSig": "No.osl",
-      "from": [
-        "No.osl"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T09:45:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T09:44:00.000+02:00",
-      "track": "7",
-      "canceled": false,
-      "product": "Vy Snabbtåg",
-      "traffic": "Tåg",
-      "snabb": true
     },
     {
       "id": "3036",
@@ -68413,9 +68393,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Hjp",
-      "lastSeenSig": "Hjp",
-      "lastSeenTs": "2026-09-03T21:42:00.000+02:00",
+      "lastSeen": "Åk",
+      "lastSeenSig": "Åk",
+      "lastSeenTs": "2026-09-03T21:43:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -73305,7 +73285,7 @@
       "snabb": false,
       "lastSeen": "Falköping C",
       "lastSeenSig": "F",
-      "lastSeenTs": "2026-09-03T21:40:00.000+02:00",
+      "lastSeenTs": "2026-09-03T21:43:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -75386,9 +75366,9 @@
         {
           "sig": "Fabp",
           "name": "Fabp",
-          "t": "2026-09-03T21:47:00.000+02:00",
+          "t": "2026-09-03T21:48:00.000+02:00",
           "act": "",
-          "est": "",
+          "est": "2026-09-03T21:48:00.000+02:00",
           "sched": "2026-09-03T21:47:00.000+02:00",
           "track": "1"
         },
@@ -76392,7 +76372,7 @@
           "sig": "Nol",
           "name": "Nol",
           "t": "2026-09-03T21:41:00.000+02:00",
-          "act": "",
+          "act": "2026-09-03T21:41:00.000+02:00",
           "est": "2026-09-03T21:41:00.000+02:00",
           "sched": "2026-09-03T21:40:00.000+02:00",
           "track": "2"
@@ -76407,9 +76387,9 @@
           "track": "1"
         }
       ],
-      "lastSeen": "Nöe",
-      "lastSeenSig": "Nöe",
-      "lastSeenTs": "2026-09-03T21:38:00.000+02:00"
+      "lastSeen": "Nol",
+      "lastSeenSig": "Nol",
+      "lastSeenTs": "2026-09-03T21:41:00.000+02:00"
     },
     {
       "id": "3579",
@@ -77483,7 +77463,7 @@
       ],
       "sched": "2026-09-03T21:45:00.000+02:00",
       "est": "2026-09-03T21:47:00.000+02:00",
-      "act": "",
+      "act": "2026-09-03T21:46:00.000+02:00",
       "track": "15",
       "canceled": false,
       "product": "Västtågen",
@@ -77561,16 +77541,16 @@
         {
           "sig": "G",
           "name": "Göteborg C",
-          "t": "2026-09-03T21:47:00.000+02:00",
-          "act": "",
+          "t": "2026-09-03T21:46:00.000+02:00",
+          "act": "2026-09-03T21:46:00.000+02:00",
           "est": "2026-09-03T21:47:00.000+02:00",
           "sched": "2026-09-03T21:45:00.000+02:00",
           "track": "15"
         }
       ],
-      "lastSeen": "Lis",
-      "lastSeenSig": "Lis",
-      "lastSeenTs": "2026-09-03T21:40:00.000+02:00"
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-03T21:46:00.000+02:00"
     },
     {
       "id": "3087",
@@ -78341,9 +78321,9 @@
         {
           "sig": "Än",
           "name": "Än",
-          "t": "2026-09-03T21:48:00.000+02:00",
+          "t": "2026-09-03T21:49:00.000+02:00",
           "act": "",
-          "est": "2026-09-03T21:48:00.000+02:00",
+          "est": "2026-09-03T21:49:00.000+02:00",
           "sched": "2026-09-03T21:45:00.000+02:00",
           "track": "3"
         },
@@ -86065,6 +86045,31 @@
         {
           "Code": "YNA001",
           "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "13676",
+      "dir": "AVG",
+      "other": "Än",
+      "otherSig": "Än",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Än"
+      ],
+      "sched": "2026-09-04T07:05:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "10",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA004",
+          "Description": "Pendeltåg"
         }
       ],
       "snabb": false
