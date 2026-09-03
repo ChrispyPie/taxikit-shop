@@ -1,28 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T00:33:14+02:00",
+  "updated": "2026-09-04T00:34:15+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "3243",
-      "dir": "ANK",
-      "other": "Vänersborg C",
-      "otherSig": "Vg",
-      "from": [
-        "Vänersborg C"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T12:30:00.000+02:00",
-      "est": "2026-09-02T12:33:00.000+02:00",
-      "act": "2026-09-02T12:34:00.000+02:00",
-      "track": "8",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": "Tåg",
-      "snabb": false
-    },
     {
       "id": "3550",
       "dir": "AVG",
@@ -75056,9 +75036,6 @@
         }
       ],
       "snabb": true,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-03T21:34:00.000+02:00",
       "stops": [
         {
           "sig": "So",
@@ -75132,7 +75109,10 @@
           "sched": "2026-09-03T21:35:00.000+02:00",
           "track": "5"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-03T21:34:00.000+02:00"
     },
     {
       "id": "63779",
@@ -80126,9 +80106,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Les",
-      "lastSeenSig": "Les",
-      "lastSeenTs": "2026-09-04T00:28:00.000+02:00",
+      "lastSeen": "Tbn",
+      "lastSeenSig": "Tbn",
+      "lastSeenTs": "2026-09-04T00:33:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -81104,9 +81084,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-04T00:30:00.000+02:00",
+      "lastSeen": "Gubbero",
+      "lastSeenSig": "Gro",
+      "lastSeenTs": "2026-09-04T00:33:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -81333,7 +81313,7 @@
       ],
       "sched": "2026-09-04T00:35:00.000+02:00",
       "est": "",
-      "act": "",
+      "act": "2026-09-04T00:35:00.000+02:00",
       "track": "10",
       "canceled": false,
       "product": "Västtågen",
@@ -81403,15 +81383,15 @@
           "sig": "G",
           "name": "Göteborg C",
           "t": "2026-09-04T00:35:00.000+02:00",
-          "act": "",
+          "act": "2026-09-04T00:35:00.000+02:00",
           "est": "",
           "sched": "2026-09-04T00:35:00.000+02:00",
           "track": "10"
         }
       ],
-      "lastSeen": "Gas",
-      "lastSeenSig": "Gas",
-      "lastSeenTs": "2026-09-04T00:30:00.000+02:00"
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-04T00:35:00.000+02:00"
     },
     {
       "id": "3493",
@@ -81567,9 +81547,9 @@
         {
           "sig": "P",
           "name": "P",
-          "t": "2026-09-04T00:38:00.000+02:00",
+          "t": "2026-09-04T00:39:00.000+02:00",
           "act": "",
-          "est": "2026-09-04T00:38:00.000+02:00",
+          "est": "2026-09-04T00:39:00.000+02:00",
           "sched": "2026-09-04T00:36:00.000+02:00",
           "track": "1"
         },
