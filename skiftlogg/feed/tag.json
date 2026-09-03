@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T09:23:14+02:00",
+  "updated": "2026-09-03T09:24:17+02:00",
   "error": null,
   "trains": [
     {
@@ -15378,6 +15378,9 @@
         }
       ],
       "snabb": true,
+      "lastSeen": "Stockholm C",
+      "lastSeenSig": "Cst",
+      "lastSeenTs": "2026-09-03T08:38:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -15415,10 +15418,7 @@
           "sched": "2026-09-03T08:35:00.000+02:00",
           "track": "18b"
         }
-      ],
-      "lastSeen": "Stockholm C",
-      "lastSeenSig": "Cst",
-      "lastSeenTs": "2026-09-03T08:38:00.000+02:00"
+      ]
     },
     {
       "id": "3620",
@@ -19341,9 +19341,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-03T06:24:00.000+02:00",
       "stops": [
         {
           "sig": "Än",
@@ -19408,7 +19405,10 @@
           "sched": "2026-09-03T06:25:00.000+02:00",
           "track": "10"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-03T06:24:00.000+02:00"
     },
     {
       "id": "73726",
@@ -20109,9 +20109,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Öb",
-      "lastSeenSig": "Öb",
-      "lastSeenTs": "2026-09-03T09:20:00.000+02:00",
+      "lastSeen": "Örebro C",
+      "lastSeenSig": "Ör",
+      "lastSeenTs": "2026-09-03T09:24:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -20234,7 +20234,7 @@
           "sig": "Ör",
           "name": "Örebro C",
           "t": "2026-09-03T09:24:00.000+02:00",
-          "act": "",
+          "act": "2026-09-03T09:24:00.000+02:00",
           "est": "",
           "sched": "2026-09-03T09:24:00.000+02:00",
           "track": "1b"
@@ -24326,7 +24326,7 @@
         "Göteborg C"
       ],
       "sched": "2026-09-03T08:45:00.000+02:00",
-      "est": "2026-09-03T09:30:00.000+02:00",
+      "est": "2026-09-03T09:40:00.000+02:00",
       "act": "",
       "track": "13",
       "canceled": false,
