@@ -1,48 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T00:49:17+02:00",
+  "updated": "2026-09-04T00:51:15+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "3650",
-      "dir": "AVG",
-      "other": "Än",
-      "otherSig": "Än",
-      "from": [
-        "Göteborg C"
-      ],
-      "to": [
-        "Än"
-      ],
-      "sched": "2026-09-02T12:50:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T12:50:00.000+02:00",
-      "track": "10",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": "Pendeltåg",
-      "snabb": false
-    },
-    {
-      "id": "13148",
-      "dir": "ANK",
-      "other": "Vbc",
-      "otherSig": "Vbc",
-      "from": [
-        "Vbc"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T12:50:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T12:51:00.000+02:00",
-      "track": "15",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": "Tåg",
-      "snabb": false
-    },
     {
       "id": "1095",
       "dir": "AVG",
@@ -80118,9 +80078,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Vrö",
-      "lastSeenSig": "Vrö",
-      "lastSeenTs": "2026-09-04T00:45:00.000+02:00",
+      "lastSeen": "Vbgb",
+      "lastSeenSig": "Vbgb",
+      "lastSeenTs": "2026-09-04T00:50:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -80179,9 +80139,9 @@
         {
           "sig": "Hd",
           "name": "Halmstad C",
-          "t": "2026-09-04T01:18:00.000+02:00",
+          "t": "2026-09-04T01:21:00.000+02:00",
           "act": "",
-          "est": "2026-09-04T01:18:00.000+02:00",
+          "est": "2026-09-04T01:21:00.000+02:00",
           "sched": "2026-09-04T01:07:00.000+02:00",
           "track": "1b"
         }
@@ -80572,8 +80532,8 @@
         {
           "sig": "Vbd",
           "name": "Vbd",
-          "t": "2026-09-04T00:51:00.000+02:00",
-          "act": "",
+          "t": "2026-09-04T00:50:00.000+02:00",
+          "act": "2026-09-04T00:50:00.000+02:00",
           "est": "",
           "sched": "2026-09-04T00:51:00.000+02:00",
           "track": "1"
@@ -80588,9 +80548,9 @@
           "track": "3"
         }
       ],
-      "lastSeen": "Ns",
-      "lastSeenSig": "Ns",
-      "lastSeenTs": "2026-09-04T00:45:00.000+02:00"
+      "lastSeen": "Vbd",
+      "lastSeenSig": "Vbd",
+      "lastSeenTs": "2026-09-04T00:50:00.000+02:00"
     },
     {
       "id": "3094",
@@ -80904,9 +80864,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Ldo",
-      "lastSeenSig": "Ldo",
-      "lastSeenTs": "2026-09-04T00:47:00.000+02:00",
+      "lastSeen": "Ag",
+      "lastSeenSig": "Ag",
+      "lastSeenTs": "2026-09-04T00:50:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -81400,7 +81360,7 @@
       ],
       "sched": "2026-09-04T00:47:00.000+02:00",
       "est": "",
-      "act": "",
+      "act": "2026-09-04T00:51:00.000+02:00",
       "track": "3",
       "canceled": false,
       "product": "SJ Snabbtåg",
@@ -81442,16 +81402,16 @@
         {
           "sig": "G",
           "name": "Göteborg C",
-          "t": "2026-09-04T00:47:00.000+02:00",
-          "act": "",
+          "t": "2026-09-04T00:51:00.000+02:00",
+          "act": "2026-09-04T00:51:00.000+02:00",
           "est": "",
           "sched": "2026-09-04T00:47:00.000+02:00",
           "track": "3"
         }
       ],
-      "lastSeen": "Skövde C",
-      "lastSeenSig": "Sk",
-      "lastSeenTs": "2026-09-03T23:20:00.000+02:00"
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-04T00:51:00.000+02:00"
     },
     {
       "id": "3979",
@@ -89579,7 +89539,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Yb",
+          "name": "Ytterby",
+          "t": "2026-09-04T06:32:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T06:32:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-04T07:00:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T07:00:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "3179",
@@ -90000,7 +89980,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-04T07:00:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T07:00:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Yb",
+          "name": "Ytterby",
+          "t": "2026-09-04T07:30:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T07:30:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "20154",
@@ -94063,6 +94063,56 @@
         {
           "Code": "YNA004",
           "Description": "Pendeltåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3535",
+      "dir": "ANK",
+      "other": "Alvesta",
+      "otherSig": "A",
+      "from": [
+        "Alvesta"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-04T10:21:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "1",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA004",
+          "Description": "Pendeltåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "63742",
+      "dir": "AVG",
+      "other": "Uv",
+      "otherSig": "Uv",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Uv"
+      ],
+      "sched": "2026-09-04T10:22:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA002",
+          "Description": "Buss"
         }
       ],
       "snabb": false
