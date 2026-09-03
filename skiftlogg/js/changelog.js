@@ -1,9 +1,9 @@
-window.TAXIKIT_BUILD = "1.1.0-wip55";
+window.TAXIKIT_BUILD = "1.1.0-wip56";
 window.TAXIKIT_CHANGELOG = [
   {
-    ver: "1.1.0-wip55",
+    ver: "1.1.0-wip56",
     date: "2026-09-03 · under utveckling",
-    items: ["Flyglistan samma layout som tåg: ort vitt, nummer och status grått"]
+    items: ["Ank/Avg direkt efter uppdatera", "Ram runt verktygsknapparna"]
   }
 ];
 
@@ -61,8 +61,8 @@ window.TAXIKIT_CHANGELOG = [
 })();
 
 (function restyleRows() {
-  if (window.__taxikitRowUi55) return;
-  window.__taxikitRowUi55 = true;
+  if (window.__taxikitRowUi56) return;
+  window.__taxikitRowUi56 = true;
   var css = document.createElement("style");
   css.textContent =
     ".feed-item .feed-city{color:var(--fg);font-weight:800;font-size:0.95rem}" +
@@ -72,7 +72,11 @@ window.TAXIKIT_CHANGELOG = [
     ".feed-item .feed-chips .feed-id{display:none}" +
     ".feed-chip.ank,.feed-chip.avg{display:none!important}" +
     "#dirSlider{display:none!important}" +
-    ".dir-mini{display:flex;align-items:center;gap:0;margin:0 10px 0 -18px;padding:0;height:36px;background:none;border:0;font:inherit;letter-spacing:-0.02em}" +
+    "#flodeNowBtn,#flodeRefreshBtn,#flodeFilterBtn,#flodeStarAllBtn,.dir-mini{" +
+      "border:1px solid #3a455c!important;border-radius:10px!important;" +
+      "background:#151b27!important;min-width:36px;min-height:32px}" +
+    ".dir-mini{display:flex;align-items:center;justify-content:center;gap:0;" +
+      "margin:0 8px;padding:0 8px;height:32px;font:inherit;letter-spacing:-0.02em}" +
     ".dir-mini b{font-size:0.7rem;font-weight:800;color:var(--muted);padding:4px 0}" +
     ".dir-mini b.on{color:var(--fg)}" +
     ".dir-mini i{font-style:normal;color:var(--muted);font-size:0.7rem;opacity:.45;padding:0 1px}" +
@@ -111,24 +115,26 @@ window.TAXIKIT_CHANGELOG = [
     if (g) g.classList.toggle("on", d === "avg" || d === "both");
   }
   function ensureMini() {
-    if (document.getElementById("dirMini")) return;
-    var filter = document.getElementById("flodeFilterBtn");
-    var host = filter && filter.parentNode;
+    var refresh = document.getElementById("flodeRefreshBtn");
+    var host = refresh && refresh.parentNode;
     if (!host) return;
-    var box = document.createElement("div");
-    box.id = "dirMini";
-    box.className = "dir-mini";
-    box.innerHTML = '<b id="dirAnk">Ank</b><i>/</i><b id="dirAvg">Avg</b>';
-    box.addEventListener("click", function (ev) {
-      var t = ev.target;
-      if (t && t.id === "dirAnk") setDir(currentDir() === "ank" ? "both" : "ank");
-      else if (t && t.id === "dirAvg") setDir(currentDir() === "avg" ? "both" : "avg");
-      else {
-        var cur = currentDir();
-        setDir(cur === "both" ? "ank" : cur === "ank" ? "avg" : "both");
-      }
-    });
-    host.insertBefore(box, filter);
+    var box = document.getElementById("dirMini");
+    if (!box) {
+      box = document.createElement("div");
+      box.id = "dirMini";
+      box.className = "dir-mini";
+      box.innerHTML = '<b id="dirAnk">Ank</b><i>/</i><b id="dirAvg">Avg</b>';
+      box.addEventListener("click", function (ev) {
+        var t = ev.target;
+        if (t && t.id === "dirAnk") setDir(currentDir() === "ank" ? "both" : "ank");
+        else if (t && t.id === "dirAvg") setDir(currentDir() === "avg" ? "both" : "avg");
+        else {
+          var cur = currentDir();
+          setDir(cur === "both" ? "ank" : cur === "ank" ? "avg" : "both");
+        }
+      });
+    }
+    if (refresh.nextSibling !== box) host.insertBefore(box, refresh.nextSibling);
     paintMini();
   }
   function applyDir() {
@@ -191,7 +197,6 @@ window.TAXIKIT_CHANGELOG = [
   }
   function restyle() {
     ensureMini();
-    paintMini();
     var rows = document.querySelectorAll("#flodeList .feed-item");
     for (var i = 0; i < rows.length; i++) {
       var row = rows[i];
