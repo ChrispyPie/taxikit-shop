@@ -1,12 +1,9 @@
-window.TAXIKIT_BUILD = "1.1.0-wip54";
+window.TAXIKIT_BUILD = "1.1.0-wip55";
 window.TAXIKIT_CHANGELOG = [
   {
-    ver: "1.1.0-wip54",
+    ver: "1.1.0-wip55",
     date: "2026-09-03 · under utveckling",
-    items: [
-      "Långtryck på stjärnan",
-      "Flyg: Schemalagd blir Beräknad/Landat när det finns live-tid"
-    ]
+    items: ["Flyglistan samma layout som tåg: ort vitt, nummer och status grått"]
   }
 ];
 
@@ -63,14 +60,15 @@ window.TAXIKIT_CHANGELOG = [
   }, true);
 })();
 
-(function restyleTrainRows() {
-  if (window.__taxikitTrainUi54c) return;
-  window.__taxikitTrainUi54c = true;
+(function restyleRows() {
+  if (window.__taxikitRowUi55) return;
+  window.__taxikitRowUi55 = true;
   var css = document.createElement("style");
   css.textContent =
     ".feed-item .feed-city{color:var(--fg);font-weight:800;font-size:0.95rem}" +
     ".feed-item .feed-idline{color:var(--muted);font-weight:650;font-size:0.78rem;margin-top:2px}" +
     ".feed-item .feed-event{color:var(--muted);font-weight:600}" +
+    ".feed-item .feed-event.is-alert{color:#f07178}" +
     ".feed-item .feed-chips .feed-id{display:none}" +
     ".feed-chip.ank,.feed-chip.avg{display:none!important}" +
     "#dirSlider{display:none!important}" +
@@ -91,7 +89,7 @@ window.TAXIKIT_CHANGELOG = [
     return "Regional";
   }
   function cleanCity(s) {
-    return String(s || "").replace(/\s+(SE|DK|NO|FI|DE|GB|ES|NL|PL|BE)$/i, "").trim();
+    return String(s || "").replace(/\s+[A-Z]{2}$/g, "").trim();
   }
   function currentDir() {
     try {
@@ -147,26 +145,49 @@ window.TAXIKIT_CHANGELOG = [
     }
   }
   function fixFlightStatus(row) {
-    if (!row.querySelector(".feed-chip.flyg")) return;
     var ev = row.querySelector(".feed-event");
     if (!ev) return;
     var txt = (ev.textContent || "").trim();
-    if (txt !== "Schemalagd") return;
-    var delay = row.querySelector(".feed-dev");
-    var timeEl = row.querySelector(".feed-time");
-    var planEl = row.querySelector(".feed-plan");
-    var now = new Date();
-    var hhmm = timeEl ? timeEl.textContent.trim() : "";
-    var passed = false;
-    if (/^\d{2}:\d{2}$/.test(hhmm)) {
-      var parts = hhmm.split(":");
-      var t = new Date();
-      t.setHours(+parts[0], +parts[1], 0, 0);
-      if (t.getTime() < now.getTime() - 3 * 60000) passed = true;
+    if (txt === "Schemalagd") {
+      var delay = row.querySelector(".feed-dev");
+      var timeEl = row.querySelector(".feed-time");
+      var planEl = row.querySelector(".feed-plan");
+      var hhmm = timeEl ? timeEl.textContent.trim() : "";
+      var passed = false;
+      if (/^\d{2}:\d{2}$/.test(hhmm)) {
+        var p = hhmm.split(":");
+        var t = new Date();
+        t.setHours(+p[0], +p[1], 0, 0);
+        if (t.getTime() < Date.now() - 3 * 60000) passed = true;
+      }
+      if (passed) ev.textContent = "Avgånget/Landat";
+      else if (delay || (planEl && timeEl && planEl.textContent.replace(/[()]/g, "") !== hhmm)) ev.textContent = "Beräknad";
+      txt = ev.textContent;
     }
-    if (passed) ev.textContent = "Avgånget/Landat";
-    else if (delay) ev.textContent = "Beräknad";
-    else if (planEl && timeEl && planEl.textContent.replace(/[()]/g, "") !== hhmm) ev.textContent = "Beräknad";
+    if (/inställd|canceled|cancelled|borttagen|divert|omdiriger/i.test(txt)) ev.classList.add("is-alert");
+  }
+  function restyleOne(row, kind) {
+    if (row.getAttribute("data-rowui") === "55") return;
+    var idEl = row.querySelector(".feed-id");
+    var meta = row.querySelector(".feed-meta");
+    var titleBox = row.querySelector(".feed-title");
+    if (!titleBox) return;
+    var ident = idEl ? (idEl.textContent || "").trim() : "";
+    var city = cleanCity(meta ? meta.textContent : "");
+    if (city) {
+      var cityEl = document.createElement("span");
+      cityEl.className = "feed-city";
+      cityEl.textContent = city;
+      titleBox.appendChild(cityEl);
+    }
+    if (ident) {
+      var line = document.createElement("div");
+      line.className = "feed-idline";
+      line.textContent = kind === "tag" ? (trainType(ident) + " · " + ident) : ident;
+      titleBox.parentNode.insertBefore(line, titleBox.nextSibling);
+    }
+    if (meta) meta.style.display = "none";
+    row.setAttribute("data-rowui", "55");
   }
   function restyle() {
     ensureMini();
@@ -174,25 +195,12 @@ window.TAXIKIT_CHANGELOG = [
     var rows = document.querySelectorAll("#flodeList .feed-item");
     for (var i = 0; i < rows.length; i++) {
       var row = rows[i];
-      fixFlightStatus(row);
-      if (row.getAttribute("data-trainui") === "51") continue;
-      if (!row.querySelector(".feed-chip.tag")) continue;
-      var idEl = row.querySelector(".feed-id");
-      var meta = row.querySelector(".feed-meta");
-      var titleBox = row.querySelector(".feed-title");
-      if (!idEl || !titleBox) continue;
-      var ident = (idEl.textContent || "").trim();
-      var city = cleanCity(meta ? meta.textContent : "");
-      var cityEl = document.createElement("span");
-      cityEl.className = "feed-city";
-      cityEl.textContent = city;
-      titleBox.appendChild(cityEl);
-      var line = document.createElement("div");
-      line.className = "feed-idline";
-      line.textContent = trainType(ident) + " · " + ident;
-      titleBox.parentNode.insertBefore(line, titleBox.nextSibling);
-      if (meta) meta.style.display = "none";
-      row.setAttribute("data-trainui", "51");
+      if (row.querySelector(".feed-chip.flyg")) {
+        restyleOne(row, "flyg");
+        fixFlightStatus(row);
+      } else if (row.querySelector(".feed-chip.tag")) {
+        restyleOne(row, "tag");
+      }
     }
     applyDir();
   }
