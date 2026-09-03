@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T02:10:28+02:00",
+  "updated": "2026-09-03T02:11:16+02:00",
   "error": null,
   "trains": [
     {
@@ -20002,6 +20002,26 @@
       "product": "Västtågen",
       "traffic": "Pendeltåg",
       "snabb": false
+    },
+    {
+      "id": "385",
+      "dir": "ANK",
+      "other": "No.osl",
+      "otherSig": "No.osl",
+      "from": [
+        "No.osl"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-03T11:45:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "11",
+      "canceled": false,
+      "product": "Vy Snabbtåg",
+      "traffic": "Tåg",
+      "snabb": true
     }
   ]
 }
