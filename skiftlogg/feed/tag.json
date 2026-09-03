@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T22:28:23+02:00",
+  "updated": "2026-09-03T22:29:18+02:00",
   "error": null,
   "trains": [
     {
@@ -69978,9 +69978,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Öb",
-      "lastSeenSig": "Öb",
-      "lastSeenTs": "2026-09-03T22:28:00.000+02:00",
+      "lastSeen": "Örebro C",
+      "lastSeenSig": "Ör",
+      "lastSeenTs": "2026-09-03T22:29:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -70085,7 +70085,7 @@
           "sig": "Ör",
           "name": "Örebro C",
           "t": "2026-09-03T22:29:00.000+02:00",
-          "act": "",
+          "act": "2026-09-03T22:29:00.000+02:00",
           "est": "2026-09-03T22:29:00.000+02:00",
           "sched": "2026-09-03T22:28:00.000+02:00",
           "track": "3"
@@ -74823,9 +74823,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Ea",
-      "lastSeenSig": "Ea",
-      "lastSeenTs": "2026-09-03T22:24:00.000+02:00",
+      "lastSeen": "Laov",
+      "lastSeenSig": "Laov",
+      "lastSeenTs": "2026-09-03T22:28:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -77253,9 +77253,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Les",
-      "lastSeenSig": "Les",
-      "lastSeenTs": "2026-09-03T22:24:00.000+02:00",
+      "lastSeen": "Tbn",
+      "lastSeenSig": "Tbn",
+      "lastSeenTs": "2026-09-03T22:28:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -77475,9 +77475,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Få",
-      "lastSeenSig": "Få",
-      "lastSeenTs": "2026-09-03T22:25:00.000+02:00",
+      "lastSeen": "Vrö",
+      "lastSeenSig": "Vrö",
+      "lastSeenTs": "2026-09-03T22:28:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -78601,7 +78601,7 @@
       ],
       "sched": "2026-09-03T22:30:00.000+02:00",
       "est": "",
-      "act": "",
+      "act": "2026-09-03T22:29:00.000+02:00",
       "track": "5",
       "canceled": false,
       "product": "SJ Regional",
@@ -78612,9 +78612,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Olskroken",
-      "lastSeenSig": "Or",
-      "lastSeenTs": "2026-09-03T22:26:00.000+02:00",
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-03T22:29:00.000+02:00",
       "stops": [
         {
           "sig": "Cst",
@@ -78781,8 +78781,8 @@
         {
           "sig": "G",
           "name": "Göteborg C",
-          "t": "2026-09-03T22:30:00.000+02:00",
-          "act": "",
+          "t": "2026-09-03T22:29:00.000+02:00",
+          "act": "2026-09-03T22:29:00.000+02:00",
           "est": "",
           "sched": "2026-09-03T22:30:00.000+02:00",
           "track": "5"
@@ -86564,7 +86564,7 @@
       "snabb": false,
       "lastSeen": "Bån",
       "lastSeenSig": "Bån",
-      "lastSeenTs": "2026-09-03T22:26:00.000+02:00",
+      "lastSeenTs": "2026-09-03T22:28:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -86702,6 +86702,31 @@
           "track": "14"
         }
       ]
+    },
+    {
+      "id": "83725",
+      "dir": "ANK",
+      "other": "Snu",
+      "otherSig": "Snu",
+      "from": [
+        "Snu"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-04T07:49:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA002",
+          "Description": "Buss"
+        }
+      ],
+      "snabb": false
     }
   ]
 }
