@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T09:18:17+02:00",
+  "updated": "2026-09-03T09:19:14+02:00",
   "error": null,
   "trains": [
     {
@@ -15150,6 +15150,9 @@
         }
       ],
       "snabb": true,
+      "lastSeen": "Stockholm C",
+      "lastSeenSig": "Cst",
+      "lastSeenTs": "2026-09-03T08:57:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -15241,10 +15244,7 @@
           "sched": "2026-09-03T08:58:00.000+02:00",
           "track": "18a"
         }
-      ],
-      "lastSeen": "Stockholm C",
-      "lastSeenSig": "Cst",
-      "lastSeenTs": "2026-09-03T08:57:00.000+02:00"
+      ]
     },
     {
       "id": "3950",
@@ -16968,9 +16968,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Än",
-      "lastSeenSig": "Än",
-      "lastSeenTs": "2026-09-03T06:19:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -17035,7 +17032,10 @@
           "sched": "2026-09-03T06:17:00.000+02:00",
           "track": "1"
         }
-      ]
+      ],
+      "lastSeen": "Än",
+      "lastSeenSig": "Än",
+      "lastSeenTs": "2026-09-03T06:19:00.000+02:00"
     },
     {
       "id": "3020",
@@ -18546,9 +18546,9 @@
         }
       ],
       "snabb": true,
-      "lastSeen": "Mon",
-      "lastSeenSig": "Mon",
-      "lastSeenTs": "2026-09-03T07:38:00.000+02:00",
+      "lastSeen": "Kogr",
+      "lastSeenSig": "Kogr",
+      "lastSeenTs": "2026-09-03T07:43:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -20109,9 +20109,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Ms",
-      "lastSeenSig": "Ms",
-      "lastSeenTs": "2026-09-03T09:15:00.000+02:00",
+      "lastSeen": "Öb",
+      "lastSeenSig": "Öb",
+      "lastSeenTs": "2026-09-03T09:20:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -20224,8 +20224,8 @@
         {
           "sig": "Öb",
           "name": "Öb",
-          "t": "2026-09-03T09:21:00.000+02:00",
-          "act": "",
+          "t": "2026-09-03T09:20:00.000+02:00",
+          "act": "2026-09-03T09:20:00.000+02:00",
           "est": "",
           "sched": "2026-09-03T09:21:00.000+02:00",
           "track": "30"
