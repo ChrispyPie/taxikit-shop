@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T00:36:17+02:00",
+  "updated": "2026-09-04T00:37:14+02:00",
   "error": null,
   "trains": [
     {
@@ -68538,9 +68538,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Varberg",
-      "lastSeenSig": "Vå",
-      "lastSeenTs": "2026-09-03T23:31:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -68677,7 +68674,10 @@
           "sched": "2026-09-03T23:33:00.000+02:00",
           "track": "2"
         }
-      ]
+      ],
+      "lastSeen": "Varberg",
+      "lastSeenSig": "Vå",
+      "lastSeenTs": "2026-09-03T23:31:00.000+02:00"
     },
     {
       "id": "177",
@@ -79671,6 +79671,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-03T23:48:00.000+02:00",
       "stops": [
         {
           "sig": "Sk",
@@ -79807,10 +79810,7 @@
           "sched": "2026-09-03T23:44:00.000+02:00",
           "track": "2"
         }
-      ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-03T23:48:00.000+02:00"
+      ]
     },
     {
       "id": "3095",
@@ -80298,9 +80298,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Kungsbacka",
-      "lastSeenSig": "Kb",
-      "lastSeenTs": "2026-09-04T00:32:00.000+02:00",
+      "lastSeen": "Lek",
+      "lastSeenSig": "Lek",
+      "lastSeenTs": "2026-09-04T00:36:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -81086,7 +81086,7 @@
       "snabb": false,
       "lastSeen": "Lis",
       "lastSeenSig": "Lis",
-      "lastSeenTs": "2026-09-04T00:34:00.000+02:00",
+      "lastSeenTs": "2026-09-04T00:36:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -81101,7 +81101,7 @@
           "sig": "Lis",
           "name": "Lis",
           "t": "2026-09-04T00:34:00.000+02:00",
-          "act": "",
+          "act": "2026-09-04T00:34:00.000+02:00",
           "est": "",
           "sched": "2026-09-04T00:34:00.000+02:00",
           "track": "2"
