@@ -3,12 +3,7 @@ window.TAXIKIT_CHANGELOG = [
   {
     ver: "1.1.0-wip54",
     date: "2026-09-03 · under utveckling",
-    items: ["Långtryck på stjärnan för att spara eller ta bort"]
-  },
-  {
-    ver: "1.1.0-wip53",
-    date: "2026-09-03",
-    items: ["Ank/Avg i menyraden", "Appen minns fliken vid omladdning"]
+    items: ["Långtryck på stjärnan", "Ank/Avg tätare och mer åt vänster"]
   }
 ];
 
@@ -70,8 +65,8 @@ window.TAXIKIT_CHANGELOG = [
 })();
 
 (function restyleTrainRows() {
-  if (window.__taxikitTrainUi53) return;
-  window.__taxikitTrainUi53 = true;
+  if (window.__taxikitTrainUi54b) return;
+  window.__taxikitTrainUi54b = true;
   var css = document.createElement("style");
   css.textContent =
     ".feed-item .feed-city{color:var(--fg);font-weight:800;font-size:0.95rem}" +
@@ -80,10 +75,10 @@ window.TAXIKIT_CHANGELOG = [
     ".feed-item .feed-chips .feed-id{display:none}" +
     ".feed-chip.ank,.feed-chip.avg{display:none!important}" +
     "#dirSlider{display:none!important}" +
-    ".dir-mini{display:flex;align-items:center;gap:5px;margin:0 4px;padding:0 2px;height:36px;background:none;border:0;font:inherit}" +
-    ".dir-mini b{font-size:0.72rem;font-weight:800;letter-spacing:.03em;color:var(--muted);padding:4px 2px}" +
+    ".dir-mini{display:flex;align-items:center;gap:0;margin:0 10px 0 -18px;padding:0;height:36px;background:none;border:0;font:inherit;letter-spacing:-0.02em}" +
+    ".dir-mini b{font-size:0.7rem;font-weight:800;color:var(--muted);padding:4px 0}" +
     ".dir-mini b.on{color:var(--fg)}" +
-    ".dir-mini i{font-style:normal;color:var(--muted);font-size:0.72rem;opacity:.5}" +
+    ".dir-mini i{font-style:normal;color:var(--muted);font-size:0.7rem;opacity:.45;padding:0 1px}" +
     ".feed-item.dir-hide{display:none!important}";
   document.documentElement.appendChild(css);
   function trainType(title) {
