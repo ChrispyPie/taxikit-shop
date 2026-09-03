@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T03:44:16+02:00",
+  "updated": "2026-09-03T03:46:16+02:00",
   "error": null,
   "trains": [
     {
@@ -20878,6 +20878,66 @@
       "est": "",
       "act": "",
       "track": "7",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": "Tåg",
+      "snabb": false
+    },
+    {
+      "id": "1042",
+      "dir": "ANK",
+      "other": "Dk.kh",
+      "otherSig": "Dk.kh",
+      "from": [
+        "Dk.kh"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-03T13:05:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "14",
+      "canceled": false,
+      "product": "Öresundståg",
+      "traffic": "Tåg",
+      "snabb": false
+    },
+    {
+      "id": "13153",
+      "dir": "AVG",
+      "other": "Vbc",
+      "otherSig": "Vbc",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Vbc"
+      ],
+      "sched": "2026-09-03T13:10:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "16",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": "Tåg",
+      "snabb": false
+    },
+    {
+      "id": "13750",
+      "dir": "AVG",
+      "other": "Smd",
+      "otherSig": "Smd",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Smd"
+      ],
+      "sched": "2026-09-03T13:10:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "8",
       "canceled": false,
       "product": "Västtågen",
       "traffic": "Tåg",
