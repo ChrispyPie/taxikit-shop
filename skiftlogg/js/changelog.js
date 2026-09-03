@@ -1,26 +1,23 @@
-window.TAXIKIT_BUILD = "1.1.0-wip52";
+window.TAXIKIT_BUILD = "1.1.0-wip53";
 window.TAXIKIT_CHANGELOG = [
   {
-    ver: "1.1.0-wip52",
+    ver: "1.1.0-wip53",
     date: "2026-09-03 · under utveckling",
     items: [
-      "Ank/Avg-reglage ovanför listan",
-      "ANK/AVG-taggar bort från raderna"
+      "Ank/Avg som liten text i menyraden",
+      "Tryck Ank, Avg eller båda vita"
     ]
   },
   {
-    ver: "1.1.0-wip51",
+    ver: "1.1.0-wip52",
     date: "2026-09-03",
-    items: [
-      "Tåglistan: ortnamn överst i vitt",
-      "Rad 2: tågtyp + beteckning i grått"
-    ]
+    items: ["Första Ank/Avg-reglaget"]
   }
 ];
 
 (function restyleTrainRows() {
-  if (window.__taxikitTrainUi) return;
-  window.__taxikitTrainUi = true;
+  if (window.__taxikitTrainUi53) return;
+  window.__taxikitTrainUi53 = true;
   var css = document.createElement("style");
   css.textContent =
     ".feed-item .feed-city{color:var(--fg);font-weight:800;font-size:0.95rem}" +
@@ -28,13 +25,11 @@ window.TAXIKIT_CHANGELOG = [
     ".feed-item .feed-event{color:var(--muted);font-weight:600}" +
     ".feed-item .feed-chips .feed-id{display:none}" +
     ".feed-chip.ank,.feed-chip.avg{display:none!important}" +
-    ".dir-slider{display:flex;align-items:center;justify-content:center;gap:10px;padding:6px 12px 2px;user-select:none}" +
-    ".dir-slider span{font-size:0.78rem;font-weight:800;letter-spacing:.04em;color:var(--muted);transition:color .15s}" +
-    ".dir-slider[data-dir=ank] .dir-ank,.dir-slider[data-dir=avg] .dir-avg{color:var(--fg)}" +
-    ".dir-track{width:52px;height:22px;border-radius:99px;background:#1b2130;border:1px solid #2a3346;position:relative;flex:none}" +
-    ".dir-knob{position:absolute;top:2px;width:16px;height:16px;border-radius:50%;background:#eef1f6;transition:left .15s}" +
-    ".dir-slider[data-dir=ank] .dir-knob{left:3px}" +
-    ".dir-slider[data-dir=avg] .dir-knob{left:31px}" +
+    "#dirSlider{display:none!important}" +
+    ".dir-mini{display:flex;align-items:center;gap:5px;margin:0 4px;padding:0 2px;height:36px;background:none;border:0;font:inherit}" +
+    ".dir-mini b{font-size:0.72rem;font-weight:800;letter-spacing:.03em;color:var(--muted);padding:4px 2px}" +
+    ".dir-mini b.on{color:var(--fg)}" +
+    ".dir-mini i{font-style:normal;color:var(--muted);font-size:0.72rem;opacity:.5}" +
     ".feed-item.dir-hide{display:none!important}";
   document.documentElement.appendChild(css);
 
@@ -52,28 +47,46 @@ window.TAXIKIT_CHANGELOG = [
     return String(s || "").replace(/\s+(SE|DK|NO|FI|DE)$/i, "").trim();
   }
   function currentDir() {
-    try { return localStorage.getItem("taxikit-dir") === "avg" ? "avg" : "ank"; }
-    catch (e) { return "ank"; }
+    try {
+      var v = localStorage.getItem("taxikit-dir");
+      if (v === "avg" || v === "ank" || v === "both") return v;
+    } catch (e) {}
+    return "both";
   }
   function setDir(dir) {
     try { localStorage.setItem("taxikit-dir", dir); } catch (e) {}
-    var sl = document.getElementById("dirSlider");
-    if (sl) sl.setAttribute("data-dir", dir);
+    paintMini();
     applyDir();
   }
-  function ensureSlider() {
-    if (document.getElementById("dirSlider")) return;
-    var list = document.getElementById("flodeList");
-    if (!list || !list.parentNode) return;
+  function paintMini() {
+    var d = currentDir();
+    var a = document.getElementById("dirAnk");
+    var g = document.getElementById("dirAvg");
+    if (a) a.classList.toggle("on", d === "ank" || d === "both");
+    if (g) g.classList.toggle("on", d === "avg" || d === "both");
+  }
+  function ensureMini() {
+    if (document.getElementById("dirMini")) return;
+    var filter = document.getElementById("flodeFilterBtn");
+    var host = filter && filter.parentNode;
+    if (!host) return;
     var box = document.createElement("div");
-    box.id = "dirSlider";
-    box.className = "dir-slider";
-    box.setAttribute("data-dir", currentDir());
-    box.innerHTML = '<span class="dir-ank">ANK</span><div class="dir-track" role="switch" aria-label="Ankomst eller avgång"><div class="dir-knob"></div></div><span class="dir-avg">AVG</span>';
-    box.addEventListener("click", function () {
-      setDir(currentDir() === "ank" ? "avg" : "ank");
+    box.id = "dirMini";
+    box.className = "dir-mini";
+    box.innerHTML = '<b id="dirAnk">Ank</b><i>/</i><b id="dirAvg">Avg</b>';
+    box.addEventListener("click", function (ev) {
+      var t = ev.target;
+      if (t && t.id === "dirAnk") {
+        setDir(currentDir() === "ank" ? "both" : "ank");
+      } else if (t && t.id === "dirAvg") {
+        setDir(currentDir() === "avg" ? "both" : "avg");
+      } else {
+        var cur = currentDir();
+        setDir(cur === "both" ? "ank" : cur === "ank" ? "avg" : "both");
+      }
     });
-    list.parentNode.insertBefore(box, list);
+    host.insertBefore(box, filter);
+    paintMini();
   }
   function applyDir() {
     var want = currentDir();
@@ -83,15 +96,14 @@ window.TAXIKIT_CHANGELOG = [
       var hasAnk = !!row.querySelector(".feed-chip.ank");
       var hasAvg = !!row.querySelector(".feed-chip.avg");
       var hide = false;
-      if (hasAnk && want === "avg") hide = true;
-      if (hasAvg && want === "ank") hide = true;
+      if (want === "ank" && hasAvg) hide = true;
+      if (want === "avg" && hasAnk) hide = true;
       row.classList.toggle("dir-hide", hide);
     }
   }
   function restyle() {
-    ensureSlider();
-    var sl = document.getElementById("dirSlider");
-    if (sl) sl.setAttribute("data-dir", currentDir());
+    ensureMini();
+    paintMini();
     var rows = document.querySelectorAll("#flodeList .feed-item");
     for (var i = 0; i < rows.length; i++) {
       var row = rows[i];
