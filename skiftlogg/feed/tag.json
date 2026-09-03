@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T08:03:16+02:00",
+  "updated": "2026-09-03T08:04:16+02:00",
   "error": null,
   "trains": [
     {
@@ -17373,6 +17373,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Vänersborg C",
+      "lastSeenSig": "Vg",
+      "lastSeenTs": "2026-09-03T06:54:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -17446,10 +17449,7 @@
           "sched": "2026-09-03T06:54:00.000+02:00",
           "track": "1"
         }
-      ],
-      "lastSeen": "Vänersborg C",
-      "lastSeenSig": "Vg",
-      "lastSeenTs": "2026-09-03T06:54:00.000+02:00"
+      ]
     },
     {
       "id": "1039",
@@ -23313,7 +23313,7 @@
       ],
       "sched": "2026-09-03T08:00:00.000+02:00",
       "est": "",
-      "act": "",
+      "act": "2026-09-03T08:03:00.000+02:00",
       "track": "5",
       "canceled": false,
       "product": "Västtågen",
