@@ -1,28 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T01:38:17+02:00",
+  "updated": "2026-09-04T01:39:14+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "63747",
-      "dir": "ANK",
-      "other": "Snu",
-      "otherSig": "Snu",
-      "from": [
-        "Snu"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T13:39:00.000+02:00",
-      "est": "",
-      "act": "",
-      "track": "x",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": "Buss",
-      "snabb": false
-    },
     {
       "id": "3554",
       "dir": "AVG",
@@ -92122,7 +92102,90 @@
           "Description": "Pendeltåg"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-04T07:39:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T07:39:00.000+02:00",
+          "track": "1"
+        },
+        {
+          "sig": "Gsv",
+          "name": "Gsv",
+          "t": "2026-09-04T07:43:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T07:43:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "P",
+          "name": "P",
+          "t": "2026-09-04T07:47:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T07:47:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Jv",
+          "name": "Jv",
+          "t": "2026-09-04T07:51:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T07:51:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Apn",
+          "name": "Apn",
+          "t": "2026-09-04T07:54:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T07:54:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Asd",
+          "name": "Asd",
+          "t": "2026-09-04T07:56:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T07:56:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Lr",
+          "name": "Lr",
+          "t": "2026-09-04T07:59:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T07:59:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Sn",
+          "name": "Sn",
+          "t": "2026-09-04T08:03:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T08:03:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Fd",
+          "name": "Fd",
+          "t": "2026-09-04T08:07:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T08:07:00.000+02:00",
+          "track": "1"
+        }
+      ]
     },
     {
       "id": "63723",
@@ -96181,6 +96244,56 @@
       "track": "11",
       "canceled": false,
       "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "432",
+      "dir": "AVG",
+      "other": "Stockholm C",
+      "otherSig": "Cst",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Stockholm C"
+      ],
+      "sched": "2026-09-04T11:11:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "4",
+      "canceled": false,
+      "product": "SJ Snabbtåg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": true
+    },
+    {
+      "id": "3960",
+      "dir": "AVG",
+      "other": "Ksc",
+      "otherSig": "Ksc",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Ksc"
+      ],
+      "sched": "2026-09-04T11:14:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "12",
+      "canceled": false,
+      "product": "SJ Regional",
       "traffic": [
         {
           "Code": "YNA001",
