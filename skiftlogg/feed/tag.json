@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T02:44:35+02:00",
+  "updated": "2026-09-03T02:45:27+02:00",
   "error": null,
   "trains": [
     {
@@ -20361,6 +20361,46 @@
       "canceled": false,
       "product": "Västtågen",
       "traffic": "Pendeltåg",
+      "snabb": false
+    },
+    {
+      "id": "3543",
+      "dir": "ANK",
+      "other": "Alvesta",
+      "otherSig": "A",
+      "from": [
+        "Alvesta"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-03T12:21:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "1",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": "Pendeltåg",
+      "snabb": false
+    },
+    {
+      "id": "63750",
+      "dir": "AVG",
+      "other": "Uv",
+      "otherSig": "Uv",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Uv"
+      ],
+      "sched": "2026-09-03T12:22:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": "Buss",
       "snabb": false
     }
   ]
