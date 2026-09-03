@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T02:04:17+02:00",
+  "updated": "2026-09-03T02:07:15+02:00",
   "error": null,
   "trains": [
     {
@@ -19941,6 +19941,26 @@
       "canceled": false,
       "product": "Västtågen",
       "traffic": "Tåg",
+      "snabb": false
+    },
+    {
+      "id": "63739",
+      "dir": "ANK",
+      "other": "Snu",
+      "otherSig": "Snu",
+      "from": [
+        "Snu"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-03T11:39:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": "Buss",
       "snabb": false
     }
   ]
