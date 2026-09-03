@@ -1,28 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T20:36:17+02:00",
+  "updated": "2026-09-03T20:37:16+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "11002",
-      "dir": "ANK",
-      "other": "Hie",
-      "otherSig": "Hie",
-      "from": [
-        "Hie"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T08:05:00.000+02:00",
-      "est": "2026-09-02T08:35:00.000+02:00",
-      "act": "2026-09-02T08:37:00.000+02:00",
-      "track": "16",
-      "canceled": false,
-      "product": "Öresundståg",
-      "traffic": "Tåg",
-      "snabb": false
-    },
     {
       "id": "20157",
       "dir": "AVG",
@@ -73360,7 +73340,7 @@
       "snabb": false,
       "lastSeen": "Vbc",
       "lastSeenSig": "Vbc",
-      "lastSeenTs": "2026-09-03T20:32:00.000+02:00",
+      "lastSeenTs": "2026-09-03T20:36:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -73985,9 +73965,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Kungsbacka",
-      "lastSeenSig": "Kb",
-      "lastSeenTs": "2026-09-03T20:31:00.000+02:00",
+      "lastSeen": "Lek",
+      "lastSeenSig": "Lek",
+      "lastSeenTs": "2026-09-03T20:36:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -75913,7 +75893,7 @@
           "sig": "Mdn",
           "name": "Mdn",
           "t": "2026-09-03T20:35:00.000+02:00",
-          "act": "",
+          "act": "2026-09-03T20:35:00.000+02:00",
           "est": "",
           "sched": "2026-09-03T20:35:00.000+02:00",
           "track": "3"
@@ -75937,9 +75917,9 @@
           "track": "12"
         }
       ],
-      "lastSeen": "Krd",
-      "lastSeenSig": "Krd",
-      "lastSeenTs": "2026-09-03T20:31:00.000+02:00"
+      "lastSeen": "Mdn",
+      "lastSeenSig": "Mdn",
+      "lastSeenTs": "2026-09-03T20:35:00.000+02:00"
     },
     {
       "id": "3083",
@@ -76814,9 +76794,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Vrö",
-      "lastSeenSig": "Vrö",
-      "lastSeenTs": "2026-09-03T20:33:00.000+02:00",
+      "lastSeen": "Få",
+      "lastSeenSig": "Få",
+      "lastSeenTs": "2026-09-03T20:37:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -79273,7 +79253,7 @@
           "act": "",
           "est": "",
           "sched": "2026-09-03T20:46:00.000+02:00",
-          "track": "1a"
+          "track": "2"
         },
         {
           "sig": "Fabp",
@@ -80171,9 +80151,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Sle",
-      "lastSeenSig": "Sle",
-      "lastSeenTs": "2026-09-03T20:34:00.000+02:00",
+      "lastSeen": "T",
+      "lastSeenSig": "T",
+      "lastSeenTs": "2026-09-03T20:37:00.000+02:00",
       "stops": [
         {
           "sig": "Cst",
@@ -83911,7 +83891,54 @@
           "Description": "Tåg"
         }
       ],
-      "snabb": true
+      "snabb": true,
+      "stops": [
+        {
+          "sig": "Mc",
+          "name": "Malmö C",
+          "t": "2026-09-03T21:34:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-03T21:34:00.000+02:00",
+          "track": "8"
+        },
+        {
+          "sig": "Lu",
+          "name": "Lund C",
+          "t": "2026-09-03T21:52:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-03T21:52:00.000+02:00",
+          "track": "5"
+        },
+        {
+          "sig": "Åp",
+          "name": "Åp",
+          "t": "2026-09-03T22:36:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-03T22:36:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Hd",
+          "name": "Halmstad C",
+          "t": "2026-09-03T23:10:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-03T23:10:00.000+02:00",
+          "track": "4"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-04T00:25:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T00:25:00.000+02:00",
+          "track": "13"
+        }
+      ]
     },
     {
       "id": "3003",
