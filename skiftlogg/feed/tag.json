@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T04:31:20+02:00",
+  "updated": "2026-09-03T04:32:19+02:00",
   "error": null,
   "trains": [
     {
@@ -21282,6 +21282,26 @@
       "product": "Västtågen",
       "traffic": "Buss",
       "snabb": false
+    },
+    {
+      "id": "2027",
+      "dir": "ANK",
+      "other": "Stockholm C",
+      "otherSig": "Cst",
+      "from": [
+        "Stockholm C"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-03T13:35:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "5",
+      "canceled": false,
+      "product": "VR Snabbtåg",
+      "traffic": "Tåg",
+      "snabb": true
     }
   ]
 }
