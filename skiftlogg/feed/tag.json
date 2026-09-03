@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T01:52:19+02:00",
+  "updated": "2026-09-04T01:53:15+02:00",
   "error": null,
   "trains": [
     {
@@ -92361,7 +92361,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Yb",
+          "name": "Ytterby",
+          "t": "2026-09-04T07:15:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T07:15:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-04T07:45:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T07:45:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "3028",
