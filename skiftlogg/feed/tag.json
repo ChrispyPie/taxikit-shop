@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T05:15:30+02:00",
+  "updated": "2026-09-03T05:16:18+02:00",
   "error": null,
   "trains": [
     {
@@ -14456,7 +14456,7 @@
       ],
       "sched": "2026-09-03T05:15:00.000+02:00",
       "est": "",
-      "act": "",
+      "act": "2026-09-03T05:15:00.000+02:00",
       "track": "13",
       "canceled": false,
       "product": "Västtågen",
@@ -21581,6 +21581,26 @@
       "canceled": false,
       "product": "Västtågen",
       "traffic": "Pendeltåg",
+      "snabb": false
+    },
+    {
+      "id": "1103",
+      "dir": "AVG",
+      "other": "Dk.kh",
+      "otherSig": "Dk.kh",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Dk.kh"
+      ],
+      "sched": "2026-09-03T13:55:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "14",
+      "canceled": false,
+      "product": "Öresundståg",
+      "traffic": "Tåg",
       "snabb": false
     }
   ]
