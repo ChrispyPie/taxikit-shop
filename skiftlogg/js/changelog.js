@@ -3,7 +3,10 @@ window.TAXIKIT_CHANGELOG = [
   {
     ver: "1.1.0-wip54",
     date: "2026-09-03 · under utveckling",
-    items: ["Långtryck på stjärnan", "Ank/Avg tätare och mer åt vänster"]
+    items: [
+      "Långtryck på stjärnan",
+      "Flyg: Schemalagd blir Beräknad/Landat när det finns live-tid"
+    ]
   }
 ];
 
@@ -33,21 +36,17 @@ window.TAXIKIT_CHANGELOG = [
 })();
 
 (function longPressStar() {
-  var timer = null;
-  var armed = null;
+  var timer = null, armed = null;
   function isItemStar(el) {
     return el && el.classList && el.classList.contains("feed-star") && el.id !== "flodeStarAllBtn";
   }
-  function clear() {
-    if (timer) { clearTimeout(timer); timer = null; }
-  }
+  function clear() { if (timer) { clearTimeout(timer); timer = null; } }
   document.addEventListener("pointerdown", function (ev) {
     var btn = ev.target.closest && ev.target.closest(".feed-star");
     if (!isItemStar(btn)) return;
     clear();
     timer = setTimeout(function () {
-      timer = null;
-      armed = btn;
+      timer = null; armed = btn;
       try { if (navigator.vibrate) navigator.vibrate(20); } catch (e) {}
       btn.click();
     }, 480);
@@ -65,8 +64,8 @@ window.TAXIKIT_CHANGELOG = [
 })();
 
 (function restyleTrainRows() {
-  if (window.__taxikitTrainUi54b) return;
-  window.__taxikitTrainUi54b = true;
+  if (window.__taxikitTrainUi54c) return;
+  window.__taxikitTrainUi54c = true;
   var css = document.createElement("style");
   css.textContent =
     ".feed-item .feed-city{color:var(--fg);font-weight:800;font-size:0.95rem}" +
@@ -92,7 +91,7 @@ window.TAXIKIT_CHANGELOG = [
     return "Regional";
   }
   function cleanCity(s) {
-    return String(s || "").replace(/\s+(SE|DK|NO|FI|DE)$/i, "").trim();
+    return String(s || "").replace(/\s+(SE|DK|NO|FI|DE|GB|ES|NL|PL|BE)$/i, "").trim();
   }
   function currentDir() {
     try {
@@ -147,12 +146,35 @@ window.TAXIKIT_CHANGELOG = [
       row.classList.toggle("dir-hide", hide);
     }
   }
+  function fixFlightStatus(row) {
+    if (!row.querySelector(".feed-chip.flyg")) return;
+    var ev = row.querySelector(".feed-event");
+    if (!ev) return;
+    var txt = (ev.textContent || "").trim();
+    if (txt !== "Schemalagd") return;
+    var delay = row.querySelector(".feed-dev");
+    var timeEl = row.querySelector(".feed-time");
+    var planEl = row.querySelector(".feed-plan");
+    var now = new Date();
+    var hhmm = timeEl ? timeEl.textContent.trim() : "";
+    var passed = false;
+    if (/^\d{2}:\d{2}$/.test(hhmm)) {
+      var parts = hhmm.split(":");
+      var t = new Date();
+      t.setHours(+parts[0], +parts[1], 0, 0);
+      if (t.getTime() < now.getTime() - 3 * 60000) passed = true;
+    }
+    if (passed) ev.textContent = "Avgånget/Landat";
+    else if (delay) ev.textContent = "Beräknad";
+    else if (planEl && timeEl && planEl.textContent.replace(/[()]/g, "") !== hhmm) ev.textContent = "Beräknad";
+  }
   function restyle() {
     ensureMini();
     paintMini();
     var rows = document.querySelectorAll("#flodeList .feed-item");
     for (var i = 0; i < rows.length; i++) {
       var row = rows[i];
+      fixFlightStatus(row);
       if (row.getAttribute("data-trainui") === "51") continue;
       if (!row.querySelector(".feed-chip.tag")) continue;
       var idEl = row.querySelector(".feed-id");
