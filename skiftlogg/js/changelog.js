@@ -1,9 +1,9 @@
-window.TAXIKIT_BUILD = "1.1.0-wip56";
+window.TAXIKIT_BUILD = "1.1.0-wip57";
 window.TAXIKIT_CHANGELOG = [
   {
-    ver: "1.1.0-wip56",
-    date: "2026-09-03 · under utveckling",
-    items: ["Ank/Avg direkt efter uppdatera", "Ram runt verktygsknapparna"]
+    ver: "1.1.0-wip57",
+    date: "2026-09-04 · under utveckling",
+    items: ["Flyg: I luften / Startat när planet rört sig"]
   }
 ];
 
@@ -61,8 +61,8 @@ window.TAXIKIT_CHANGELOG = [
 })();
 
 (function restyleRows() {
-  if (window.__taxikitRowUi56) return;
-  window.__taxikitRowUi56 = true;
+  if (window.__taxikitRowUi57) return;
+  window.__taxikitRowUi57 = true;
   var css = document.createElement("style");
   css.textContent =
     ".feed-item .feed-city{color:var(--fg);font-weight:800;font-size:0.95rem}" +
@@ -94,6 +94,16 @@ window.TAXIKIT_CHANGELOG = [
   }
   function cleanCity(s) {
     return String(s || "").replace(/\s+[A-Z]{2}$/g, "").trim();
+  }
+  function parseClock(s) {
+    var m = String(s || "").match(/(\d{2}):(\d{2})/);
+    if (!m) return null;
+    var now = new Date();
+    var t = new Date(now.getFullYear(), now.getMonth(), now.getDate(), +m[1], +m[2], 0, 0);
+    var diff = t.getTime() - now.getTime();
+    if (diff > 18 * 3600000) t.setDate(t.getDate() - 1);
+    if (diff < -18 * 3600000) t.setDate(t.getDate() + 1);
+    return t;
   }
   function currentDir() {
     try {
@@ -154,23 +164,27 @@ window.TAXIKIT_CHANGELOG = [
     var ev = row.querySelector(".feed-event");
     if (!ev) return;
     var txt = (ev.textContent || "").trim();
-    if (txt === "Schemalagd") {
-      var delay = row.querySelector(".feed-dev");
-      var timeEl = row.querySelector(".feed-time");
-      var planEl = row.querySelector(".feed-plan");
-      var hhmm = timeEl ? timeEl.textContent.trim() : "";
-      var passed = false;
-      if (/^\d{2}:\d{2}$/.test(hhmm)) {
-        var p = hhmm.split(":");
-        var t = new Date();
-        t.setHours(+p[0], +p[1], 0, 0);
-        if (t.getTime() < Date.now() - 3 * 60000) passed = true;
-      }
-      if (passed) ev.textContent = "Avgånget/Landat";
-      else if (delay || (planEl && timeEl && planEl.textContent.replace(/[()]/g, "") !== hhmm)) ev.textContent = "Beräknad";
-      txt = ev.textContent;
+    if (/inställd|canceled|cancelled|borttagen|divert|omdiriger/i.test(txt)) {
+      ev.classList.add("is-alert");
+      return;
     }
-    if (/inställd|canceled|cancelled|borttagen|divert|omdiriger/i.test(txt)) ev.classList.add("is-alert");
+    if (!/schemalagd|beräknad|avgånget\/landat/i.test(txt)) return;
+    var timeEl = row.querySelector(".feed-time");
+    var planEl = row.querySelector(".feed-plan");
+    var delay = row.querySelector(".feed-dev");
+    var when = parseClock(timeEl && timeEl.textContent);
+    if (!when) return;
+    var mins = (when.getTime() - Date.now()) / 60000;
+    var hasLive = !!(delay || (planEl && timeEl && planEl.textContent.replace(/[()]/g, "").trim() !== timeEl.textContent.trim()));
+    var isDep = /avg/i.test((row.querySelector(".feed-chip.avg") || {}).className || "") || false;
+    var chips = row.querySelectorAll(".feed-chip");
+    for (var c = 0; c < chips.length; c++) {
+      if (/\bavg\b/i.test(chips[c].className)) isDep = true;
+    }
+    if (mins < -8) ev.textContent = isDep ? "Avgånget" : "Landat";
+    else if (hasLive && mins <= 240) ev.textContent = isDep ? "Startat" : "I luften";
+    else if (hasLive) ev.textContent = "Beräknad";
+    else ev.textContent = "Schemalagd";
   }
   function restyleOne(row, kind) {
     if (row.getAttribute("data-rowui") === "55") return;
