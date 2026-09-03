@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-03T09:02:18+02:00",
+  "updated": "2026-09-03T09:03:15+02:00",
   "error": null,
   "trains": [
     {
@@ -16028,7 +16028,7 @@
       "snabb": true,
       "lastSeen": "Stockholm C",
       "lastSeenSig": "Cst",
-      "lastSeenTs": "2026-09-03T08:54:00.000+02:00",
+      "lastSeenTs": "2026-09-03T09:02:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -17477,7 +17477,7 @@
       "snabb": false,
       "lastSeen": "Hie",
       "lastSeenSig": "Hie",
-      "lastSeenTs": "2026-09-03T09:00:00.000+02:00",
+      "lastSeenTs": "2026-09-03T09:02:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -20997,6 +20997,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-03T06:44:00.000+02:00",
       "stops": [
         {
           "sig": "A",
@@ -21079,10 +21082,7 @@
           "sched": "2026-09-03T06:44:00.000+02:00",
           "track": "1"
         }
-      ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-03T06:44:00.000+02:00"
+      ]
     },
     {
       "id": "13721",
@@ -24144,7 +24144,7 @@
         "Göteborg C"
       ],
       "sched": "2026-09-03T08:35:00.000+02:00",
-      "est": "2026-09-03T09:05:00.000+02:00",
+      "est": "2026-09-03T09:20:00.000+02:00",
       "act": "",
       "track": "14",
       "canceled": false,
@@ -25420,8 +25420,8 @@
       "sched": "2026-09-03T09:35:00.000+02:00",
       "est": "",
       "act": "",
-      "track": "13",
-      "canceled": false,
+      "track": "x",
+      "canceled": true,
       "product": "Öresundståg",
       "traffic": [
         {
