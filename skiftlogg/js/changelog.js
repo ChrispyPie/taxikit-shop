@@ -5,15 +5,46 @@ window.TAXIKIT_CHANGELOG = [
     date: "2026-09-03 · under utveckling",
     items: [
       "Ank/Avg som liten text i menyraden",
-      "Tryck Ank, Avg eller båda vita"
+      "Appen minns fliken vid omladdning"
     ]
-  },
-  {
-    ver: "1.1.0-wip52",
-    date: "2026-09-03",
-    items: ["Första Ank/Avg-reglaget"]
   }
 ];
+
+(function persistTab() {
+  var KEY = "taxikit-tab";
+  var SUB = "taxikit-flode-tab";
+  function saveMain(id) {
+    if (!id) return;
+    try { localStorage.setItem(KEY, id); } catch (e) {}
+  }
+  function saveSub(id) {
+    if (!id) return;
+    try { localStorage.setItem(SUB, id); } catch (e) {}
+  }
+  document.addEventListener("click", function (ev) {
+    var nav = ev.target.closest && ev.target.closest("[data-nav]");
+    if (nav) saveMain(nav.getAttribute("data-nav"));
+    var fl = ev.target.closest && ev.target.closest("[data-flode]");
+    if (fl) saveSub(fl.getAttribute("data-flode"));
+  }, true);
+  function restore() {
+    var tab, sub;
+    try {
+      tab = localStorage.getItem(KEY);
+      sub = localStorage.getItem(SUB);
+    } catch (e) { return; }
+    if (tab && tab !== "skift") {
+      var btn = document.querySelector('[data-nav="' + tab + '"]');
+      if (btn) btn.click();
+    }
+    if (sub && sub !== "summary") {
+      var sbtn = document.querySelector('[data-flode="' + sub + '"]');
+      if (sbtn) sbtn.click();
+    }
+  }
+  setTimeout(restore, 80);
+  setTimeout(restore, 400);
+})();
 
 (function restyleTrainRows() {
   if (window.__taxikitTrainUi53) return;
@@ -76,11 +107,9 @@ window.TAXIKIT_CHANGELOG = [
     box.innerHTML = '<b id="dirAnk">Ank</b><i>/</i><b id="dirAvg">Avg</b>';
     box.addEventListener("click", function (ev) {
       var t = ev.target;
-      if (t && t.id === "dirAnk") {
-        setDir(currentDir() === "ank" ? "both" : "ank");
-      } else if (t && t.id === "dirAvg") {
-        setDir(currentDir() === "avg" ? "both" : "avg");
-      } else {
+      if (t && t.id === "dirAnk") setDir(currentDir() === "ank" ? "both" : "ank");
+      else if (t && t.id === "dirAvg") setDir(currentDir() === "avg" ? "both" : "avg");
+      else {
         var cur = currentDir();
         setDir(cur === "both" ? "ank" : cur === "ank" ? "avg" : "both");
       }
