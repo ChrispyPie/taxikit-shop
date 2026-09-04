@@ -1,9 +1,9 @@
-window.TAXIKIT_BUILD = "1.1.0-wip64";
+window.TAXIKIT_BUILD = "1.1.0-wip65";
 window.TAXIKIT_CHANGELOG = [
   {
-    ver: "1.1.0-wip64",
+    ver: "1.1.0-wip65",
     date: "2026-09-04 · under utveckling",
-    items: ["Tåg: bort med dubbla namnrader"]
+    items: ["Båt: Stena expansionskort", "Samma 3-raders vy som flyg/tåg"]
   }
 ];
 
@@ -127,8 +127,8 @@ window.TAXIKIT_CHANGELOG = [
 })();
 
 (function restyleRows() {
-  if (window.__taxikitRowUi64) return;
-  window.__taxikitRowUi64 = true;
+  if (window.__taxikitRowUi65) return;
+  window.__taxikitRowUi65 = true;
   var css = document.createElement("style");
   css.textContent =
     ".feed-item .feed-city{color:var(--fg);font-weight:800;font-size:0.95rem}" +
@@ -168,6 +168,9 @@ window.TAXIKIT_CHANGELOG = [
     if (diff > 18 * 3600000) t.setDate(t.getDate() - 1);
     if (diff < -18 * 3600000) t.setDate(t.getDate() + 1);
     return t;
+  }
+  function hhmm(d) {
+    return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
   }
   function currentDir() {
     try {
@@ -228,6 +231,60 @@ window.TAXIKIT_CHANGELOG = [
   function emptyVal(val) {
     return !val || val === "—" || val === "-" || val === "–";
   }
+  function kvHtml(k, v) {
+    return '<div class="feed-k">' + k + '</div><div class="feed-v">' + v + "</div>";
+  }
+  function tidyBoatExtra(row) {
+    if (row.getAttribute("data-boatex") === "1") return;
+    var title = ((row.querySelector(".feed-id") || {}).textContent || "").trim();
+    var isDep = !!row.querySelector(".feed-chip.avg");
+    var timeEl = row.querySelector(".feed-time");
+    var when = parseClock(timeEl && timeEl.textContent);
+    var extra = row.querySelector(".feed-extra");
+    if (!extra) return;
+    var rows = [];
+    if (/stena danmark/i.test(title)) {
+      rows.push(kvHtml("Kaj", "Danmarksterminalen"));
+      rows.push(kvHtml(isDep ? "Mot" : "Från", "Frederikshavn"));
+      rows.push(kvHtml("Restid", "3 t 35 min"));
+      if (when && isDep) {
+        var eta = new Date(when.getTime() + 215 * 60000);
+        rows.push(kvHtml("Framme", hhmm(eta)));
+      }
+    } else if (/stena kiel/i.test(title)) {
+      rows.push(kvHtml("Kaj", "Älvsborgshamnen"));
+      rows.push(kvHtml(isDep ? "Mot" : "Från", "Kiel"));
+      rows.push(kvHtml("Restid", "ca 14 t"));
+      if (when && isDep) {
+        var eta2 = new Date(when.getTime() + 14 * 3600000 + 30 * 60000);
+        rows.push(kvHtml("Framme", hhmm(eta2) + " +1"));
+      }
+    } else if (/hönö/i.test(title)) {
+      rows.push(kvHtml("Kaj", "Lilla Varholmen"));
+      rows.push(kvHtml("Mot", "Hönö"));
+      rows.push(kvHtml("Täthet", "var 20:e min"));
+      rows.push(kvHtml("Restid", "ca 13 min"));
+    } else if (/kornhall/i.test(title)) {
+      row.style.display = "none";
+      row.setAttribute("data-boatex", "1");
+      return;
+    }
+    if (rows.length) extra.innerHTML = '<div class="feed-kv">' + rows.join("") + "</div>";
+    row.setAttribute("data-boatex", "1");
+  }
+  function fixBoatStatus(row) {
+    var ev = row.querySelector(".feed-event");
+    if (!ev) return;
+    var title = ((row.querySelector(".feed-id") || {}).textContent || "").trim();
+    if (/kornhall/i.test(title)) return;
+    var isDep = !!row.querySelector(".feed-chip.avg");
+    var when = parseClock((row.querySelector(".feed-time") || {}).textContent);
+    if (!when) return;
+    var mins = (when.getTime() - Date.now()) / 60000;
+    if (mins < -8) ev.textContent = isDep ? "Avgånget" : "Framme";
+    else if (mins <= 15) ev.textContent = isDep ? "Avgår snart" : "Ankommer snart";
+    else ev.textContent = isDep ? "Avgår" : "Ankommer";
+  }
   function tidyFlightExtra(row) {
     var box = row.querySelector(".feed-kv");
     if (!box || box.getAttribute("data-tidy") === "1") return;
@@ -244,13 +301,6 @@ window.TAXIKIT_CHANGELOG = [
     }
     if (map.Status) hidePair(map.Status.k);
     if (map.Info) hidePair(map.Info.k);
-    var nodes = box.querySelectorAll(".feed-v");
-    for (var n = 0; n < nodes.length; n++) {
-      if (/^(ankommer|avgår|startat)\b/i.test((nodes[n].textContent || "").trim())) {
-        nodes[n].style.display = "none";
-        if (nodes[n].previousElementSibling) nodes[n].previousElementSibling.style.display = "none";
-      }
-    }
     var bagText = "—";
     var lastT = map.Sista && !emptyVal(map.Sista.val) ? map.Sista.val : "";
     var firstT = map.Väska && !emptyVal(map.Väska.val) ? map.Väska.val : "";
@@ -308,6 +358,9 @@ window.TAXIKIT_CHANGELOG = [
     var ident = idEl ? (idEl.textContent || "").trim() : "";
     ident = ident.replace(/\s+[A-Z]{3}$/, "");
     var city = cleanCity(meta ? meta.textContent : "");
+    if (kind === "bat" && /stena danmark/i.test(ident)) city = "Frederikshavn";
+    if (kind === "bat" && /stena kiel/i.test(ident)) city = "Kiel";
+    if (kind === "bat" && /hönö/i.test(ident)) city = "Lilla Varholmen";
     if (city) {
       var cityEl = document.createElement("span");
       cityEl.className = "feed-city";
@@ -336,6 +389,10 @@ window.TAXIKIT_CHANGELOG = [
           tidyFlightExtra(row);
         } else if (row.querySelector(".feed-chip.tag")) {
           restyleOne(row, "tag");
+        } else if (row.querySelector(".feed-chip.bat")) {
+          restyleOne(row, "bat");
+          fixBoatStatus(row);
+          tidyBoatExtra(row);
         }
       }
       applyDir();
