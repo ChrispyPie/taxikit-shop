@@ -1,5 +1,5 @@
 /* Taxikit module registry + small live patches I can push. */
-window.TAXIKIT_BUILD = "1.1.0-wip51";
+window.TAXIKIT_BUILD = "1.1.0-wip67";
 window.TAXIKIT_MODULES = [
   { id: "skift", label: "SKIFT", enabled: true },
   { id: "flode", label: "FLÖDE", enabled: true },
@@ -10,6 +10,7 @@ window.TAXIKIT_MODULES = [
   var s = document.createElement("script");
   s.src = "js/changelog.js?v=" + Date.now();
   s.onload = function () {
+    window.TAXIKIT_BUILD = "1.1.0-wip67";
     var build = window.TAXIKIT_BUILD || "";
     var verEl = document.querySelector(".about-version");
     if (verEl && build) verEl.textContent = "Version " + build;
@@ -27,6 +28,34 @@ window.TAXIKIT_MODULES = [
   document.head.appendChild(s);
 })();
 
+(function dirToggle() {
+  if (window.__taxikitDirToggle) return;
+  window.__taxikitDirToggle = true;
+  document.addEventListener("click", function (ev) {
+    var box = ev.target.closest && ev.target.closest("#dirMini");
+    if (!box) return;
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+    var cur = "ank";
+    try { if (localStorage.getItem("taxikit-dir") === "avg") cur = "avg"; } catch (e) {}
+    var next = cur === "avg" ? "ank" : "avg";
+    try { localStorage.setItem("taxikit-dir", next); } catch (e) {}
+    var a = document.getElementById("dirAnk");
+    var g = document.getElementById("dirAvg");
+    if (a) a.classList.toggle("on", next === "ank");
+    if (g) g.classList.toggle("on", next === "avg");
+    var rows = document.querySelectorAll("#flodeList .feed-item");
+    for (var i = 0; i < rows.length; i++) {
+      var row = rows[i];
+      var hasAnk = !!row.querySelector(".feed-chip.ank");
+      var hasAvg = !!row.querySelector(".feed-chip.avg");
+      var hide = (next === "ank" && hasAvg) || (next === "avg" && hasAnk);
+      if (hide) row.classList.add("dir-hide");
+      else row.classList.remove("dir-hide");
+    }
+  }, true);
+})();
+
 (function patchRutt() {
   var css = document.createElement("style");
   css.setAttribute("data-taxikit", "rutt-50");
@@ -41,7 +70,8 @@ window.TAXIKIT_MODULES = [
     ".feed-item .feed-city{color:var(--fg);font-weight:800;font-size:0.95rem}" +
     ".feed-item .feed-idline{color:var(--muted);font-weight:650;font-size:0.78rem;margin-top:2px}" +
     ".feed-item .feed-event{color:var(--muted);font-weight:600}" +
-    ".feed-item .feed-chips .feed-id{display:none}";
+    ".feed-item .feed-chips .feed-id{display:none}" +
+    ".dir-mini{cursor:pointer}";
   document.documentElement.appendChild(css);
   function markHome() {
     var nodes = document.querySelectorAll(".rutt-n");
@@ -50,52 +80,10 @@ window.TAXIKIT_MODULES = [
       if (t.indexOf("göteborg c") >= 0 || t.indexOf("goteborg c") >= 0) nodes[i].classList.add("is-home");
     }
   }
-  function trainType(title) {
-    var t = String(title || "");
-    if (/^[ÖO]T/i.test(t)) return "Öresundståg";
-    if (/^VT/i.test(t)) return "Västtågen";
-    if (/^(SX|X2)/i.test(t)) return "Snabbtåg";
-    if (/^SJ/i.test(t)) return "SJ";
-    if (/^VY/i.test(t)) return "VY";
-    if (/^MÄL/i.test(t)) return "Mälartåg";
-    return "Regional";
-  }
-  function cleanCity(s) {
-    return String(s || "").replace(/\s+(SE|DK|NO|FI|DE)$/i, "").trim();
-  }
-  function restyleTrains() {
-    var rows = document.querySelectorAll("#flodeList .feed-item");
-    for (var i = 0; i < rows.length; i++) {
-      var row = rows[i];
-      if (row.getAttribute("data-trainui") === "51") continue;
-      if (!row.querySelector(".feed-chip.tag")) continue;
-      var idEl = row.querySelector(".feed-id");
-      var meta = row.querySelector(".feed-meta");
-      var titleBox = row.querySelector(".feed-title");
-      if (!idEl || !titleBox) continue;
-      var ident = (idEl.textContent || "").trim();
-      var city = cleanCity(meta ? meta.textContent : "");
-      var cityEl = document.createElement("span");
-      cityEl.className = "feed-city";
-      cityEl.textContent = city;
-      titleBox.appendChild(cityEl);
-      var line = document.createElement("div");
-      line.className = "feed-idline";
-      line.textContent = trainType(ident) + " · " + ident;
-      titleBox.parentNode.insertBefore(line, titleBox.nextSibling);
-      if (meta) meta.style.display = "none";
-      row.setAttribute("data-trainui", "51");
-    }
-    markHome();
-  }
   function boot() {
     markHome();
-    restyleTrains();
     try {
-      new MutationObserver(function () {
-        markHome();
-        restyleTrains();
-      }).observe(document.documentElement, { childList: true, subtree: true });
+      new MutationObserver(markHome).observe(document.documentElement, { childList: true, subtree: true });
     } catch (e) {}
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
