@@ -1,28 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T04:01:14+02:00",
+  "updated": "2026-09-04T04:02:17+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "3257",
-      "dir": "ANK",
-      "other": "Vänersborg C",
-      "otherSig": "Vg",
-      "from": [
-        "Vänersborg C"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T16:00:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T16:02:00.000+02:00",
-      "track": "9",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": "Tåg",
-      "snabb": false
-    },
     {
       "id": "3112",
       "dir": "ANK",
@@ -97901,7 +97881,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Snu",
+          "name": "Snu",
+          "t": "2026-09-04T08:35:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T08:35:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-04T09:19:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T09:19:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "3636",
