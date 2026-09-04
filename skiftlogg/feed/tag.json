@@ -1,48 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T04:09:14+02:00",
+  "updated": "2026-09-04T04:11:16+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "392",
-      "dir": "AVG",
-      "other": "No.osl",
-      "otherSig": "No.osl",
-      "from": [
-        "Göteborg C"
-      ],
-      "to": [
-        "No.osl"
-      ],
-      "sched": "2026-09-02T16:10:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T16:11:00.000+02:00",
-      "track": "8",
-      "canceled": false,
-      "product": "Vy Snabbtåg",
-      "traffic": "Tåg",
-      "snabb": true
-    },
-    {
-      "id": "13167",
-      "dir": "AVG",
-      "other": "Vbc",
-      "otherSig": "Vbc",
-      "from": [
-        "Göteborg C"
-      ],
-      "to": [
-        "Vbc"
-      ],
-      "sched": "2026-09-02T16:10:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T16:10:00.000+02:00",
-      "track": "10",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": "Tåg",
-      "snabb": false
-    },
     {
       "id": "7362",
       "dir": "ANK",
@@ -82,26 +42,6 @@
       "product": "SJ Snabbtåg",
       "traffic": "Tåg",
       "snabb": true
-    },
-    {
-      "id": "83766",
-      "dir": "AVG",
-      "other": "Snu",
-      "otherSig": "Snu",
-      "from": [
-        "Göteborg C"
-      ],
-      "to": [
-        "Snu"
-      ],
-      "sched": "2026-09-02T16:11:00.000+02:00",
-      "est": "",
-      "act": "",
-      "track": "x",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": "Buss",
-      "snabb": false
     },
     {
       "id": "13216",
@@ -79769,7 +79709,7 @@
       "snabb": false,
       "lastSeen": "Vbd",
       "lastSeenSig": "Vbd",
-      "lastSeenTs": "2026-09-04T04:07:00.000+02:00",
+      "lastSeenTs": "2026-09-04T04:08:00.000+02:00",
       "stops": [
         {
           "sig": "A",
