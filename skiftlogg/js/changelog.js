@@ -1,9 +1,9 @@
-window.TAXIKIT_BUILD = "1.1.0-wip61";
+window.TAXIKIT_BUILD = "1.1.0-wip62";
 window.TAXIKIT_CHANGELOG = [
   {
-    ver: "1.1.0-wip61",
+    ver: "1.1.0-wip62",
     date: "2026-09-04 · under utveckling",
-    items: ["Bagage-rad i flyg-expansion", "Tog bort Ankommer-raden"]
+    items: ["Live-uppdatering flyttar inte listan och stänger inte expansion"]
   }
 ];
 
@@ -33,6 +33,60 @@ window.TAXIKIT_CHANGELOG = [
     }
   }
   setTimeout(restore, 200);
+})();
+
+(function keepFlodePlace() {
+  if (window.__taxikitKeepPlace) return;
+  window.__taxikitKeepPlace = true;
+  var snap = { y: 0, open: {}, rutt: {} };
+  function snapshot() {
+    snap.y = window.scrollY || 0;
+    snap.open = {};
+    snap.rutt = {};
+    var rows = document.querySelectorAll("#flodeList .feed-item[data-sid]");
+    for (var i = 0; i < rows.length; i++) {
+      var id = rows[i].getAttribute("data-sid");
+      if (rows[i].classList.contains("open")) snap.open[id] = 1;
+      if (rows[i].classList.contains("rutt-open")) snap.rutt[id] = 1;
+    }
+  }
+  function restorePlace() {
+    var rows = document.querySelectorAll("#flodeList .feed-item[data-sid]");
+    for (var i = 0; i < rows.length; i++) {
+      var id = rows[i].getAttribute("data-sid");
+      if (snap.open[id]) {
+        rows[i].classList.add("open");
+        var rr = rows[i].querySelector(".rutt");
+        if (rr && snap.rutt[id]) {
+          rows[i].classList.add("rutt-open");
+          rr.classList.remove("collapsed");
+        }
+      }
+    }
+    window.scrollTo(0, snap.y);
+  }
+  document.addEventListener("click", function (ev) {
+    var btn = ev.target.closest && ev.target.closest("#flodeRefreshBtn");
+    if (!btn) {
+      if (ev.target.closest && ev.target.closest("#flodeList")) snapshot();
+      return;
+    }
+    snapshot();
+    [50, 120, 250, 500, 900].forEach(function (ms) {
+      setTimeout(restorePlace, ms);
+    });
+  }, true);
+  setInterval(snapshot, 1500);
+  var list = document.getElementById("flodeList");
+  function watch() {
+    list = document.getElementById("flodeList");
+    if (!list) { setTimeout(watch, 300); return; }
+    new MutationObserver(function () {
+      restorePlace();
+      setTimeout(restorePlace, 80);
+    }).observe(list, { childList: true });
+  }
+  watch();
 })();
 
 (function longPressStar() {
