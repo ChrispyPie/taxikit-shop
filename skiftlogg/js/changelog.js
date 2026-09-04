@@ -1,9 +1,9 @@
-window.TAXIKIT_BUILD = "1.1.0-wip63";
+window.TAXIKIT_BUILD = "1.1.0-wip64";
 window.TAXIKIT_CHANGELOG = [
   {
-    ver: "1.1.0-wip63",
+    ver: "1.1.0-wip64",
     date: "2026-09-04 · under utveckling",
-    items: ["Bullseye hoppar till nu och stänger expansioner"]
+    items: ["Tåg: bort med dubbla namnrader"]
   }
 ];
 
@@ -127,15 +127,17 @@ window.TAXIKIT_CHANGELOG = [
 })();
 
 (function restyleRows() {
-  if (window.__taxikitRowUi61b) return;
-  window.__taxikitRowUi61b = true;
+  if (window.__taxikitRowUi64) return;
+  window.__taxikitRowUi64 = true;
   var css = document.createElement("style");
   css.textContent =
     ".feed-item .feed-city{color:var(--fg);font-weight:800;font-size:0.95rem}" +
     ".feed-item .feed-idline{color:var(--muted);font-weight:650;font-size:0.78rem;margin-top:2px}" +
     ".feed-item .feed-event{color:var(--muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}" +
     ".feed-item .feed-event.is-alert{color:#f07178}" +
-    ".feed-item .feed-chips .feed-id{display:none}" +
+    ".feed-item .feed-chips .feed-id{display:none!important}" +
+    ".feed-item .feed-meta{display:none!important}" +
+    ".feed-item .feed-type{display:none!important}" +
     ".feed-chip.ank,.feed-chip.avg{display:none!important}" +
     "#dirSlider{display:none!important}" +
     "#flodeNowBtn,#flodeRefreshBtn,#flodeFilterBtn,#flodeStarAllBtn,.dir-mini{" +
@@ -297,7 +299,8 @@ window.TAXIKIT_CHANGELOG = [
     row.setAttribute("data-flystat", "58");
   }
   function restyleOne(row, kind) {
-    if (row.getAttribute("data-rowui") === "55") return;
+    var extras = row.querySelectorAll(".feed-idline,.feed-city");
+    for (var x = 0; x < extras.length; x++) extras[x].parentNode.removeChild(extras[x]);
     var idEl = row.querySelector(".feed-id");
     var meta = row.querySelector(".feed-meta");
     var titleBox = row.querySelector(".feed-title");
@@ -317,8 +320,6 @@ window.TAXIKIT_CHANGELOG = [
       line.textContent = kind === "tag" ? (trainType(ident) + " · " + ident) : ident;
       titleBox.parentNode.insertBefore(line, titleBox.nextSibling);
     }
-    if (meta) meta.style.display = "none";
-    row.setAttribute("data-rowui", "55");
   }
   var busy = false;
   function restyle() {
@@ -347,7 +348,7 @@ window.TAXIKIT_CHANGELOG = [
       var t = null;
       new MutationObserver(function () {
         if (t) return;
-        t = setTimeout(function () { t = null; restyle(); }, 50);
+        t = setTimeout(function () { t = null; restyle(); }, 80);
       }).observe(list, { childList: true });
     } else setTimeout(boot, 300);
   }
