@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-05T00:46:18+02:00",
+  "updated": "2026-09-05T00:47:17+02:00",
   "error": null,
   "trains": [
     {
@@ -110655,9 +110655,6 @@
         }
       ],
       "snabb": true,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-04T21:47:00.000+02:00",
       "stops": [
         {
           "sig": "Cst",
@@ -110704,7 +110701,10 @@
           "sched": "2026-09-04T21:47:00.000+02:00",
           "track": "3"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-04T21:47:00.000+02:00"
     },
     {
       "id": "17384",
@@ -116520,9 +116520,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Alingsås",
-      "lastSeenSig": "Alh",
-      "lastSeenTs": "2026-09-05T00:44:00.000+02:00",
+      "lastSeen": "Än",
+      "lastSeenSig": "Än",
+      "lastSeenTs": "2026-09-05T00:47:00.000+02:00",
       "stops": [
         {
           "sig": "Vg",
@@ -116563,8 +116563,8 @@
         {
           "sig": "Än",
           "name": "Än",
-          "t": "2026-09-05T00:48:00.000+02:00",
-          "act": "",
+          "t": "2026-09-05T00:47:00.000+02:00",
+          "act": "2026-09-05T00:47:00.000+02:00",
           "est": "2026-09-05T00:48:00.000+02:00",
           "sched": "2026-09-05T00:44:00.000+02:00",
           "track": "3"
@@ -124760,7 +124760,45 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Hrc",
+          "name": "Hrc",
+          "t": "2026-09-05T07:34:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T07:34:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Vgå",
+          "name": "Vårgårda",
+          "t": "2026-09-05T07:54:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T07:54:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "A",
+          "name": "Alvesta",
+          "t": "2026-09-05T08:15:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T08:15:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-05T09:00:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T09:00:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "3236",
@@ -128735,6 +128773,31 @@
         }
       ],
       "snabb": true
+    },
+    {
+      "id": "1103",
+      "dir": "AVG",
+      "other": "Dk.kh",
+      "otherSig": "Dk.kh",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Dk.kh"
+      ],
+      "sched": "2026-09-05T13:55:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "14",
+      "canceled": false,
+      "product": "Öresundståg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
     }
   ]
 }
