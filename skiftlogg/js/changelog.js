@@ -1,9 +1,9 @@
-window.TAXIKIT_BUILD = "1.1.0-wip62";
+window.TAXIKIT_BUILD = "1.1.0-wip63";
 window.TAXIKIT_CHANGELOG = [
   {
-    ver: "1.1.0-wip62",
+    ver: "1.1.0-wip63",
     date: "2026-09-04 · under utveckling",
-    items: ["Live-uppdatering flyttar inte listan och stänger inte expansion"]
+    items: ["Bullseye hoppar till nu och stänger expansioner"]
   }
 ];
 
@@ -36,10 +36,12 @@ window.TAXIKIT_CHANGELOG = [
 })();
 
 (function keepFlodePlace() {
-  if (window.__taxikitKeepPlace) return;
-  window.__taxikitKeepPlace = true;
+  if (window.__taxikitKeepPlace63) return;
+  window.__taxikitKeepPlace63 = true;
   var snap = { y: 0, open: {}, rutt: {} };
+  var pinNow = false;
   function snapshot() {
+    if (pinNow) return;
     snap.y = window.scrollY || 0;
     snap.open = {};
     snap.rutt = {};
@@ -51,6 +53,7 @@ window.TAXIKIT_CHANGELOG = [
     }
   }
   function restorePlace() {
+    if (pinNow) return;
     var rows = document.querySelectorAll("#flodeList .feed-item[data-sid]");
     for (var i = 0; i < rows.length; i++) {
       var id = rows[i].getAttribute("data-sid");
@@ -66,22 +69,26 @@ window.TAXIKIT_CHANGELOG = [
     window.scrollTo(0, snap.y);
   }
   document.addEventListener("click", function (ev) {
-    var btn = ev.target.closest && ev.target.closest("#flodeRefreshBtn");
-    if (!btn) {
-      if (ev.target.closest && ev.target.closest("#flodeList")) snapshot();
+    if (ev.target.closest && ev.target.closest("#flodeNowBtn")) {
+      pinNow = true;
+      snap.open = {};
+      snap.rutt = {};
+      setTimeout(function () { pinNow = false; snapshot(); }, 800);
       return;
     }
-    snapshot();
-    [50, 120, 250, 500, 900].forEach(function (ms) {
-      setTimeout(restorePlace, ms);
-    });
+    if (ev.target.closest && ev.target.closest("#flodeRefreshBtn")) {
+      snapshot();
+      [50, 120, 250, 500, 900].forEach(function (ms) { setTimeout(restorePlace, ms); });
+      return;
+    }
+    if (ev.target.closest && ev.target.closest("#flodeList")) snapshot();
   }, true);
-  setInterval(snapshot, 1500);
-  var list = document.getElementById("flodeList");
+  setInterval(function () { if (!pinNow) snapshot(); }, 1500);
   function watch() {
-    list = document.getElementById("flodeList");
+    var list = document.getElementById("flodeList");
     if (!list) { setTimeout(watch, 300); return; }
     new MutationObserver(function () {
+      if (pinNow) return;
       restorePlace();
       setTimeout(restorePlace, 80);
     }).observe(list, { childList: true });
