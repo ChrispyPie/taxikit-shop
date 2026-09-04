@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T16:02:18+02:00",
+  "updated": "2026-09-04T16:03:15+02:00",
   "error": null,
   "trains": [
     {
@@ -112456,9 +112456,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-04T14:33:00.000+02:00",
       "stops": [
         {
           "sig": "Vg",
@@ -112532,7 +112529,10 @@
           "sched": "2026-09-04T14:35:00.000+02:00",
           "track": "5"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-04T14:33:00.000+02:00"
     },
     {
       "id": "63751",
@@ -115936,9 +115936,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Få",
-      "lastSeenSig": "Få",
-      "lastSeenTs": "2026-09-04T15:59:00.000+02:00",
+      "lastSeen": "Vrö",
+      "lastSeenSig": "Vrö",
+      "lastSeenTs": "2026-09-04T16:02:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -116029,9 +116029,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Ns",
-      "lastSeenSig": "Ns",
-      "lastSeenTs": "2026-09-04T15:57:00.000+02:00",
+      "lastSeen": "Bgs",
+      "lastSeenSig": "Bgs",
+      "lastSeenTs": "2026-09-04T16:03:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -117606,7 +117606,7 @@
       "snabb": false,
       "lastSeen": "Krd",
       "lastSeenSig": "Krd",
-      "lastSeenTs": "2026-09-04T16:01:00.000+02:00",
+      "lastSeenTs": "2026-09-04T16:02:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -117808,9 +117808,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Nol",
-      "lastSeenSig": "Nol",
-      "lastSeenTs": "2026-09-04T16:00:00.000+02:00",
+      "lastSeen": "Än",
+      "lastSeenSig": "Än",
+      "lastSeenTs": "2026-09-04T16:02:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -119698,9 +119698,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg Marieholm",
-      "lastSeenSig": "Gbm",
-      "lastSeenTs": "2026-09-04T16:01:00.000+02:00",
+      "lastSeen": "Gas",
+      "lastSeenSig": "Gas",
+      "lastSeenTs": "2026-09-04T16:02:00.000+02:00",
       "stops": [
         {
           "sig": "Än",
@@ -119750,8 +119750,8 @@
         {
           "sig": "Gas",
           "name": "Gas",
-          "t": "2026-09-04T16:04:00.000+02:00",
-          "act": "",
+          "t": "2026-09-04T16:02:00.000+02:00",
+          "act": "2026-09-04T16:02:00.000+02:00",
           "est": "",
           "sched": "2026-09-04T16:04:00.000+02:00",
           "track": "1"
@@ -120036,7 +120036,7 @@
       "snabb": false,
       "lastSeen": "Krd",
       "lastSeenSig": "Krd",
-      "lastSeenTs": "2026-09-04T16:01:00.000+02:00",
+      "lastSeenTs": "2026-09-04T16:02:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
@@ -130948,7 +130948,54 @@
           "Description": "Pendeltåg"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Än",
+          "name": "Än",
+          "t": "2026-09-04T18:13:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T18:13:00.000+02:00",
+          "track": "1"
+        },
+        {
+          "sig": "Nol",
+          "name": "Nol",
+          "t": "2026-09-04T18:17:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T18:17:00.000+02:00",
+          "track": "1"
+        },
+        {
+          "sig": "Nöe",
+          "name": "Nöe",
+          "t": "2026-09-04T18:20:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T18:20:00.000+02:00",
+          "track": "1"
+        },
+        {
+          "sig": "Gas",
+          "name": "Gas",
+          "t": "2026-09-04T18:30:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T18:30:00.000+02:00",
+          "track": "1"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-04T18:35:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T18:35:00.000+02:00",
+          "track": "7"
+        }
+      ]
     },
     {
       "id": "63767",
