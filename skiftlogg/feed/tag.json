@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T11:47:52+02:00",
+  "updated": "2026-09-04T11:48:17+02:00",
   "error": null,
   "trains": [
     {
@@ -99493,7 +99493,7 @@
       "snabb": false,
       "lastSeen": "Fabp",
       "lastSeenSig": "Fabp",
-      "lastSeenTs": "2026-09-04T11:45:00.000+02:00",
+      "lastSeenTs": "2026-09-04T11:47:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -100272,8 +100272,8 @@
         {
           "sig": "Thn",
           "name": "Trollhättan",
-          "t": "2026-09-04T11:47:00.000+02:00",
-          "act": "",
+          "t": "2026-09-04T11:48:00.000+02:00",
+          "act": "2026-09-04T11:48:00.000+02:00",
           "est": "",
           "sched": "2026-09-04T11:47:00.000+02:00",
           "track": "1"
@@ -100342,9 +100342,9 @@
           "track": "1b"
         }
       ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-04T11:15:00.000+02:00"
+      "lastSeen": "Trollhättan",
+      "lastSeenSig": "Thn",
+      "lastSeenTs": "2026-09-04T11:48:00.000+02:00"
     },
     {
       "id": "3042",
@@ -104660,9 +104660,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Vårgårda",
-      "lastSeenSig": "Vgå",
-      "lastSeenTs": "2026-09-04T11:43:00.000+02:00",
+      "lastSeen": "Agg",
+      "lastSeenSig": "Agg",
+      "lastSeenTs": "2026-09-04T11:48:00.000+02:00",
       "stops": [
         {
           "sig": "Cst",
@@ -114513,6 +114513,31 @@
         {
           "Code": "YNA004",
           "Description": "Pendeltåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "7358",
+      "dir": "ANK",
+      "other": "Borås C",
+      "otherSig": "Bsc",
+      "from": [
+        "Borås C"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-04T15:25:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "13",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
         }
       ],
       "snabb": false
