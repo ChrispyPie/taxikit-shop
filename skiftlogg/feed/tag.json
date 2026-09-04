@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T03:31:15+02:00",
+  "updated": "2026-09-04T03:32:22+02:00",
   "error": null,
   "trains": [
     {
@@ -21,26 +21,6 @@
       "canceled": false,
       "product": "SJ Regional",
       "traffic": "Tåg",
-      "snabb": false
-    },
-    {
-      "id": "3113",
-      "dir": "AVG",
-      "other": "Kungsbacka",
-      "otherSig": "Kb",
-      "from": [
-        "Göteborg C"
-      ],
-      "to": [
-        "Kungsbacka"
-      ],
-      "sched": "2026-09-02T15:30:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T15:32:00.000+02:00",
-      "track": "15",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": "Pendeltåg",
       "snabb": false
     },
     {
@@ -100081,6 +100061,31 @@
         }
       ],
       "snabb": true
+    },
+    {
+      "id": "13148",
+      "dir": "ANK",
+      "other": "Vbc",
+      "otherSig": "Vbc",
+      "from": [
+        "Vbc"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-04T12:50:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "16",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
     }
   ]
 }
