@@ -1,9 +1,9 @@
-window.TAXIKIT_BUILD = "1.1.0-wip65";
+window.TAXIKIT_BUILD = "1.1.0-wip66";
 window.TAXIKIT_CHANGELOG = [
   {
-    ver: "1.1.0-wip65",
+    ver: "1.1.0-wip66",
     date: "2026-09-04 · under utveckling",
-    items: ["Båt: Stena expansionskort", "Samma 3-raders vy som flyg/tåg"]
+    items: ["Ank/Avg är ett val, inte båda samtidigt"]
   }
 ];
 
@@ -127,8 +127,8 @@ window.TAXIKIT_CHANGELOG = [
 })();
 
 (function restyleRows() {
-  if (window.__taxikitRowUi65) return;
-  window.__taxikitRowUi65 = true;
+  if (window.__taxikitRowUi66) return;
+  window.__taxikitRowUi66 = true;
   var css = document.createElement("style");
   css.textContent =
     ".feed-item .feed-city{color:var(--fg);font-weight:800;font-size:0.95rem}" +
@@ -175,9 +175,9 @@ window.TAXIKIT_CHANGELOG = [
   function currentDir() {
     try {
       var v = localStorage.getItem("taxikit-dir");
-      if (v === "avg" || v === "ank" || v === "both") return v;
+      if (v === "avg") return "avg";
     } catch (e) {}
-    return "both";
+    return "ank";
   }
   function setDir(dir) {
     try { localStorage.setItem("taxikit-dir", dir); } catch (e) {}
@@ -188,8 +188,8 @@ window.TAXIKIT_CHANGELOG = [
     var d = currentDir();
     var a = document.getElementById("dirAnk");
     var g = document.getElementById("dirAvg");
-    if (a) a.classList.toggle("on", d === "ank" || d === "both");
-    if (g) g.classList.toggle("on", d === "avg" || d === "both");
+    if (a) a.classList.toggle("on", d === "ank");
+    if (g) g.classList.toggle("on", d === "avg");
   }
   function ensureMini() {
     if (document.getElementById("dirMini")) { paintMini(); return; }
@@ -201,12 +201,8 @@ window.TAXIKIT_CHANGELOG = [
     box.innerHTML = '<b id="dirAnk">Ank</b><i>/</i><b id="dirAvg">Avg</b>';
     box.addEventListener("click", function (ev) {
       var t = ev.target;
-      if (t && t.id === "dirAnk") setDir(currentDir() === "ank" ? "both" : "ank");
-      else if (t && t.id === "dirAvg") setDir(currentDir() === "avg" ? "both" : "avg");
-      else {
-        var cur = currentDir();
-        setDir(cur === "both" ? "ank" : cur === "ank" ? "avg" : "both");
-      }
+      if (t && t.id === "dirAvg") setDir("avg");
+      else setDir("ank");
     });
     refresh.parentNode.insertBefore(box, refresh.nextSibling);
     paintMini();
