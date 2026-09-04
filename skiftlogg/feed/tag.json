@@ -1,28 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T02:11:14+02:00",
+  "updated": "2026-09-04T02:12:16+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "1103",
-      "dir": "AVG",
-      "other": "Dk.kh",
-      "otherSig": "Dk.kh",
-      "from": [
-        "Göteborg C"
-      ],
-      "to": [
-        "Dk.kh"
-      ],
-      "sched": "2026-09-02T13:55:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T14:12:00.000+02:00",
-      "track": "14",
-      "canceled": false,
-      "product": "Öresundståg",
-      "traffic": "Tåg",
-      "snabb": false
-    },
     {
       "id": "390",
       "dir": "AVG",
@@ -93489,7 +93469,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-04T08:00:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T08:00:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Yb",
+          "name": "Ytterby",
+          "t": "2026-09-04T08:30:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T08:30:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "3180",
