@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T22:46:18+02:00",
+  "updated": "2026-09-04T22:47:15+02:00",
   "error": null,
   "trains": [
     {
@@ -109866,9 +109866,9 @@
         }
       ],
       "snabb": true,
-      "lastSeen": "Gn",
-      "lastSeenSig": "Gn",
-      "lastSeenTs": "2026-09-04T22:43:00.000+02:00",
+      "lastSeen": "Mö",
+      "lastSeenSig": "Mö",
+      "lastSeenTs": "2026-09-04T22:46:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -114804,9 +114804,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "För",
-      "lastSeenSig": "För",
-      "lastSeenTs": "2026-09-04T22:45:00.000+02:00",
+      "lastSeen": "Vip",
+      "lastSeenSig": "Vip",
+      "lastSeenTs": "2026-09-04T22:46:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -115692,9 +115692,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Falköping C",
-      "lastSeenSig": "F",
-      "lastSeenTs": "2026-09-04T22:45:00.000+02:00",
+      "lastSeen": "Fn",
+      "lastSeenSig": "Fn",
+      "lastSeenTs": "2026-09-04T22:46:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -117192,9 +117192,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Trollhättan",
-      "lastSeenSig": "Thn",
-      "lastSeenTs": "2026-09-04T22:40:00.000+02:00",
+      "lastSeen": "Öx",
+      "lastSeenSig": "Öx",
+      "lastSeenTs": "2026-09-04T22:48:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -117283,15 +117283,15 @@
           "t": "2026-09-04T22:46:00.000+02:00",
           "act": "",
           "est": "2026-09-04T22:46:00.000+02:00",
-          "sched": "2026-09-04T22:41:00.000+02:00",
+          "sched": "2026-09-04T22:42:00.000+02:00",
           "track": "3"
         },
         {
           "sig": "Vg",
           "name": "Vänersborg C",
-          "t": "2026-09-04T22:52:00.000+02:00",
+          "t": "2026-09-04T22:53:00.000+02:00",
           "act": "",
-          "est": "2026-09-04T22:52:00.000+02:00",
+          "est": "2026-09-04T22:53:00.000+02:00",
           "sched": "2026-09-04T22:47:00.000+02:00",
           "track": "1"
         }
@@ -119697,9 +119697,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Nol",
-      "lastSeenSig": "Nol",
-      "lastSeenTs": "2026-09-04T22:45:00.000+02:00",
+      "lastSeen": "Nöe",
+      "lastSeenSig": "Nöe",
+      "lastSeenTs": "2026-09-04T22:47:00.000+02:00",
       "stops": [
         {
           "sig": "Vg",
@@ -128246,6 +128246,31 @@
         {
           "Code": "YNA001",
           "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "60159",
+      "dir": "ANK",
+      "other": "Hrc",
+      "otherSig": "Hrc",
+      "from": [
+        "Hrc"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-05T11:08:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": false,
+      "product": "SJ Regional",
+      "traffic": [
+        {
+          "Code": "YNA002",
+          "Description": "Buss"
         }
       ],
       "snabb": false
