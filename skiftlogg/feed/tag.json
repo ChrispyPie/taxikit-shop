@@ -1,68 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T03:54:16+02:00",
+  "updated": "2026-09-04T03:56:17+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "488",
-      "dir": "ANK",
-      "other": "Mc",
-      "otherSig": "Mc",
-      "from": [
-        "Mc"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T15:50:00.000+02:00",
-      "est": "2026-09-02T15:57:00.000+02:00",
-      "act": "2026-09-02T15:55:00.000+02:00",
-      "track": "13",
-      "canceled": false,
-      "product": "SJ Snabbtåg",
-      "traffic": "Tåg",
-      "snabb": true
-    },
-    {
-      "id": "1119",
-      "dir": "AVG",
-      "other": "Dk.kh",
-      "otherSig": "Dk.kh",
-      "from": [
-        "Göteborg C"
-      ],
-      "to": [
-        "Dk.kh"
-      ],
-      "sched": "2026-09-02T15:55:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T15:56:00.000+02:00",
-      "track": "14",
-      "canceled": false,
-      "product": "Öresundståg",
-      "traffic": "Tåg",
-      "snabb": false
-    },
-    {
-      "id": "3659",
-      "dir": "ANK",
-      "other": "Än",
-      "otherSig": "Än",
-      "from": [
-        "Än"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T15:55:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T15:56:00.000+02:00",
-      "track": "6",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": "Pendeltåg",
-      "snabb": false
-    },
     {
       "id": "3264",
       "dir": "AVG",
@@ -77386,9 +77326,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Öx",
-      "lastSeenSig": "Öx",
-      "lastSeenTs": "2026-09-04T00:55:12.100+02:00",
       "stops": [
         {
           "sig": "G",
@@ -77480,7 +77417,10 @@
           "sched": "2026-09-04T00:44:00.000+02:00",
           "track": "4"
         }
-      ]
+      ],
+      "lastSeen": "Öx",
+      "lastSeenSig": "Öx",
+      "lastSeenTs": "2026-09-04T00:55:12.100+02:00"
     },
     {
       "id": "93787",
@@ -77965,9 +77905,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Alvesta",
-      "lastSeenSig": "A",
-      "lastSeenTs": "2026-09-04T00:56:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -78050,7 +77987,10 @@
           "sched": "2026-09-04T00:57:00.000+02:00",
           "track": "3"
         }
-      ]
+      ],
+      "lastSeen": "Alvesta",
+      "lastSeenSig": "A",
+      "lastSeenTs": "2026-09-04T00:56:00.000+02:00"
     },
     {
       "id": "3094",
@@ -78466,9 +78406,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Än",
-      "lastSeenSig": "Än",
-      "lastSeenTs": "2026-09-04T00:56:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -78533,7 +78470,10 @@
           "sched": "2026-09-04T00:57:00.000+02:00",
           "track": "1"
         }
-      ]
+      ],
+      "lastSeen": "Än",
+      "lastSeenSig": "Än",
+      "lastSeenTs": "2026-09-04T00:56:00.000+02:00"
     },
     {
       "id": "73791",
@@ -101056,6 +100996,56 @@
       "track": "8",
       "canceled": false,
       "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "436",
+      "dir": "AVG",
+      "other": "Stockholm C",
+      "otherSig": "Cst",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Stockholm C"
+      ],
+      "sched": "2026-09-04T13:11:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "4",
+      "canceled": false,
+      "product": "SJ Snabbtåg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": true
+    },
+    {
+      "id": "3964",
+      "dir": "AVG",
+      "other": "Ksc",
+      "otherSig": "Ksc",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Ksc"
+      ],
+      "sched": "2026-09-04T13:14:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "11",
+      "canceled": false,
+      "product": "SJ Regional",
       "traffic": [
         {
           "Code": "YNA001",
