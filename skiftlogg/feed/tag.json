@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-05T01:46:17+02:00",
+  "updated": "2026-09-05T01:47:16+02:00",
   "error": null,
   "trains": [
     {
@@ -124286,7 +124286,45 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Hrc",
+          "name": "Hrc",
+          "t": "2026-09-05T08:36:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T08:36:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Vgå",
+          "name": "Vårgårda",
+          "t": "2026-09-05T09:00:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T09:00:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "A",
+          "name": "Alvesta",
+          "t": "2026-09-05T09:27:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T09:27:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-05T10:11:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T10:11:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "386",
@@ -128327,6 +128365,31 @@
         }
       ],
       "snabb": true
+    },
+    {
+      "id": "3253",
+      "dir": "ANK",
+      "other": "Vänersborg C",
+      "otherSig": "Vg",
+      "from": [
+        "Vänersborg C"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-05T15:00:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "8",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
     }
   ]
 }
