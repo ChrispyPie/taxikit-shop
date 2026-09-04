@@ -1,28 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T06:02:17+02:00",
-  "error": null,
+  "updated": "2026-09-04T06:04:15+02:00",
+  "error": "The read operation timed out",
   "trains": [
-    {
-      "id": "3265",
-      "dir": "ANK",
-      "other": "Vänersborg C",
-      "otherSig": "Vg",
-      "from": [
-        "Vänersborg C"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T18:00:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T18:04:00.000+02:00",
-      "track": "8",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": "Tåg",
-      "snabb": false
-    },
     {
       "id": "3120",
       "dir": "ANK",
@@ -41,26 +21,6 @@
       "canceled": false,
       "product": "Västtågen",
       "traffic": "Pendeltåg",
-      "snabb": false
-    },
-    {
-      "id": "343",
-      "dir": "AVG",
-      "other": "Kac",
-      "otherSig": "Kac",
-      "from": [
-        "Göteborg C"
-      ],
-      "to": [
-        "Kac"
-      ],
-      "sched": "2026-09-02T18:04:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T18:04:00.000+02:00",
-      "track": "12",
-      "canceled": false,
-      "product": "SJ Regional",
-      "traffic": "Tåg",
       "snabb": false
     },
     {
