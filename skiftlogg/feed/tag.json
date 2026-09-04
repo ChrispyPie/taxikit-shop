@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-05T00:31:15+02:00",
+  "updated": "2026-09-05T00:32:18+02:00",
   "error": null,
   "trains": [
     {
@@ -104,51 +104,6 @@
       "lastSeen": "Göteborg C",
       "lastSeenSig": "G",
       "lastSeenTs": "2026-09-03T12:44:00.000+02:00"
-    },
-    {
-      "id": "73743",
-      "dir": "ANK",
-      "other": "Ytterby",
-      "otherSig": "Yb",
-      "from": [
-        "Ytterby"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-03T12:32:00.000+02:00",
-      "est": "",
-      "act": "",
-      "track": "x",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": [
-        {
-          "Code": "YNA002",
-          "Description": "Buss"
-        }
-      ],
-      "snabb": false,
-      "stops": [
-        {
-          "sig": "Yb",
-          "name": "Ytterby",
-          "t": "2026-09-03T12:02:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-03T12:02:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "G",
-          "name": "Göteborg C",
-          "t": "2026-09-03T12:32:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-03T12:32:00.000+02:00",
-          "track": "x"
-        }
-      ]
     },
     {
       "id": "63743",
@@ -106830,6 +106785,9 @@
         }
       ],
       "snabb": true,
+      "lastSeen": "Kogr",
+      "lastSeenSig": "Kogr",
+      "lastSeenTs": "2026-09-04T21:43:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -106858,10 +106816,7 @@
           "sched": "2026-09-04T21:28:00.000+02:00",
           "track": "1"
         }
-      ],
-      "lastSeen": "Ed",
-      "lastSeenSig": "Ed",
-      "lastSeenTs": "2026-09-04T21:31:00.000+02:00"
+      ]
     },
     {
       "id": "450",
@@ -108729,6 +108684,9 @@
         }
       ],
       "snabb": true,
+      "lastSeen": "Uv",
+      "lastSeenSig": "Uv",
+      "lastSeenTs": "2026-09-04T22:31:00.000+02:00",
       "stops": [
         {
           "sig": "Cst",
@@ -108802,10 +108760,7 @@
           "sched": "2026-09-04T21:49:00.000+02:00",
           "track": "3b"
         }
-      ],
-      "lastSeen": "Uv",
-      "lastSeenSig": "Uv",
-      "lastSeenTs": "2026-09-04T22:31:00.000+02:00"
+      ]
     },
     {
       "id": "3682",
@@ -108924,6 +108879,9 @@
         }
       ],
       "snabb": true,
+      "lastSeen": "Uv",
+      "lastSeenSig": "Uv",
+      "lastSeenTs": "2026-09-04T22:31:00.000+02:00",
       "stops": [
         {
           "sig": "Cst",
@@ -108997,10 +108955,7 @@
           "sched": "2026-09-04T21:49:00.000+02:00",
           "track": "3b"
         }
-      ],
-      "lastSeen": "Uv",
-      "lastSeenSig": "Uv",
-      "lastSeenTs": "2026-09-04T22:31:00.000+02:00"
+      ]
     },
     {
       "id": "3679",
@@ -110724,9 +110679,6 @@
         }
       ],
       "snabb": true,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-04T21:32:00.000+02:00",
       "stops": [
         {
           "sig": "So",
@@ -110800,7 +110752,10 @@
           "sched": "2026-09-04T21:35:00.000+02:00",
           "track": "5"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-04T21:32:00.000+02:00"
     },
     {
       "id": "63779",
@@ -113508,9 +113463,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Ånm",
-      "lastSeenSig": "Ånm",
-      "lastSeenTs": "2026-09-05T00:25:00.000+02:00",
+      "lastSeen": "Töe",
+      "lastSeenSig": "Töe",
+      "lastSeenTs": "2026-09-05T00:31:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -116856,9 +116811,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Ldo",
-      "lastSeenSig": "Ldo",
-      "lastSeenTs": "2026-09-05T00:29:00.000+02:00",
+      "lastSeen": "Krd",
+      "lastSeenSig": "Krd",
+      "lastSeenTs": "2026-09-05T00:32:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
@@ -116917,9 +116872,9 @@
         {
           "sig": "Lis",
           "name": "Lis",
-          "t": "2026-09-05T00:39:00.000+02:00",
+          "t": "2026-09-05T00:40:00.000+02:00",
           "act": "",
-          "est": "",
+          "est": "2026-09-05T00:40:00.000+02:00",
           "sched": "2026-09-05T00:39:00.000+02:00",
           "track": "1"
         },
