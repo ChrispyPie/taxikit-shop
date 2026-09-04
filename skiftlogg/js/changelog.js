@@ -3,7 +3,7 @@ window.TAXIKIT_CHANGELOG = [
   {
     ver: "1.1.0-wip61",
     date: "2026-09-04 · under utveckling",
-    items: ["Bagage-rad alltid synlig i flyg-expansion"]
+    items: ["Bagage-rad i flyg-expansion", "Tog bort Ankommer-raden"]
   }
 ];
 
@@ -66,8 +66,8 @@ window.TAXIKIT_CHANGELOG = [
 })();
 
 (function restyleRows() {
-  if (window.__taxikitRowUi61) return;
-  window.__taxikitRowUi61 = true;
+  if (window.__taxikitRowUi61b) return;
+  window.__taxikitRowUi61b = true;
   var css = document.createElement("style");
   css.textContent =
     ".feed-item .feed-city{color:var(--fg);font-weight:800;font-size:0.95rem}" +
@@ -180,16 +180,13 @@ window.TAXIKIT_CHANGELOG = [
       map[(k.textContent || "").trim()] = { k: k, v: v, val: v ? (v.textContent || "").trim() : "" };
     }
     if (map.Status) hidePair(map.Status.k);
-    if (map.Info) {
-      var info = map.Info.val;
-      if (info && !/^schemalagd$/i.test(info) && eventTxt.indexOf(info) < 0) {
-        map.Info.k.textContent = "";
-        map.Info.k.style.display = "none";
-        if (map.Info.v) {
-          map.Info.v.textContent = info;
-          map.Info.v.style.gridColumn = "1 / -1";
-        }
-      } else hidePair(map.Info.k);
+    if (map.Info) hidePair(map.Info.k);
+    var nodes = box.querySelectorAll(".feed-v");
+    for (var n = 0; n < nodes.length; n++) {
+      if (/^(ankommer|avgår|startat)\b/i.test((nodes[n].textContent || "").trim())) {
+        nodes[n].style.display = "none";
+        if (nodes[n].previousElementSibling) nodes[n].previousElementSibling.style.display = "none";
+      }
     }
     var bagText = "—";
     var lastT = map.Sista && !emptyVal(map.Sista.val) ? map.Sista.val : "";
