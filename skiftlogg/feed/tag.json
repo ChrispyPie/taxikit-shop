@@ -1,28 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T03:26:18+02:00",
+  "updated": "2026-09-04T03:27:15+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "20173",
-      "dir": "AVG",
-      "other": "Halmstad C",
-      "otherSig": "Hd",
-      "from": [
-        "Göteborg C"
-      ],
-      "to": [
-        "Halmstad C"
-      ],
-      "sched": "2026-09-02T15:25:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T15:27:00.000+02:00",
-      "track": "14",
-      "canceled": false,
-      "product": "Öresundståg",
-      "traffic": "Tåg",
-      "snabb": false
-    },
     {
       "id": "184",
       "dir": "AVG",
@@ -78556,9 +78536,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-04T00:27:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
@@ -78632,7 +78609,10 @@
           "sched": "2026-09-04T00:20:00.000+02:00",
           "track": "16"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-04T00:27:00.000+02:00"
     },
     {
       "id": "3591",
