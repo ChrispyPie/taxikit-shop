@@ -1,9 +1,9 @@
-window.TAXIKIT_BUILD = "1.1.0-wip66";
+window.TAXIKIT_BUILD = "1.1.0-wip67";
 window.TAXIKIT_CHANGELOG = [
   {
-    ver: "1.1.0-wip66",
+    ver: "1.1.0-wip67",
     date: "2026-09-04 · under utveckling",
-    items: ["Ank/Avg är ett val, inte båda samtidigt"]
+    items: ["Hela Ank/Avg-ytan växlar läge"]
   }
 ];
 
@@ -127,8 +127,8 @@ window.TAXIKIT_CHANGELOG = [
 })();
 
 (function restyleRows() {
-  if (window.__taxikitRowUi66) return;
-  window.__taxikitRowUi66 = true;
+  if (window.__taxikitRowUi67) return;
+  window.__taxikitRowUi67 = true;
   var css = document.createElement("style");
   css.textContent =
     ".feed-item .feed-city{color:var(--fg);font-weight:800;font-size:0.95rem}" +
@@ -143,7 +143,8 @@ window.TAXIKIT_CHANGELOG = [
     "#flodeNowBtn,#flodeRefreshBtn,#flodeFilterBtn,#flodeStarAllBtn,.dir-mini{" +
       "border:1px solid #3a455c!important;border-radius:10px!important;" +
       "background:#151b27!important;min-width:36px;min-height:32px}" +
-    ".dir-mini{display:flex;align-items:center;justify-content:center;gap:0;margin:0 8px;padding:0 8px;height:32px;font:inherit}" +
+    ".dir-mini{display:flex;align-items:center;justify-content:center;gap:0;margin:0 8px;padding:0 8px;height:32px;font:inherit;cursor:pointer}" +
+    ".dir-mini b,.dir-mini i{pointer-events:none}" +
     ".dir-mini b{font-size:0.7rem;font-weight:800;color:var(--muted);padding:4px 0}" +
     ".dir-mini b.on{color:var(--fg)}" +
     ".dir-mini i{font-style:normal;color:var(--muted);font-size:0.7rem;opacity:.45;padding:0 1px}" +
@@ -199,10 +200,8 @@ window.TAXIKIT_CHANGELOG = [
     box.id = "dirMini";
     box.className = "dir-mini";
     box.innerHTML = '<b id="dirAnk">Ank</b><i>/</i><b id="dirAvg">Avg</b>';
-    box.addEventListener("click", function (ev) {
-      var t = ev.target;
-      if (t && t.id === "dirAvg") setDir("avg");
-      else setDir("ank");
+    box.addEventListener("click", function () {
+      setDir(currentDir() === "avg" ? "ank" : "avg");
     });
     refresh.parentNode.insertBefore(box, refresh.nextSibling);
     paintMini();
