@@ -1,48 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T03:23:14+02:00",
+  "updated": "2026-09-04T03:24:17+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "2042",
-      "dir": "AVG",
-      "other": "Stockholm C",
-      "otherSig": "Cst",
-      "from": [
-        "Göteborg C"
-      ],
-      "to": [
-        "Stockholm C"
-      ],
-      "sched": "2026-09-02T15:24:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T15:24:00.000+02:00",
-      "track": "5",
-      "canceled": false,
-      "product": "VR Snabbtåg",
-      "traffic": "Tåg",
-      "snabb": true
-    },
-    {
-      "id": "3657",
-      "dir": "ANK",
-      "other": "Än",
-      "otherSig": "Än",
-      "from": [
-        "Än"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T15:25:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T15:24:00.000+02:00",
-      "track": "10",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": "Pendeltåg",
-      "snabb": false
-    },
     {
       "id": "7358",
       "dir": "ANK",
@@ -96493,7 +96453,54 @@
           "Description": "Tåg"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Vbc",
+          "name": "Vbc",
+          "t": "2026-09-04T08:05:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T08:05:00.000+02:00",
+          "track": "5b"
+        },
+        {
+          "sig": "Åsa",
+          "name": "Åsa",
+          "t": "2026-09-04T08:19:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T08:19:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Kb",
+          "name": "Kungsbacka",
+          "t": "2026-09-04T08:29:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T08:29:00.000+02:00",
+          "track": "3"
+        },
+        {
+          "sig": "Mdn",
+          "name": "Mdn",
+          "t": "2026-09-04T08:40:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T08:40:00.000+02:00",
+          "track": "3"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-04T08:50:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T08:50:00.000+02:00",
+          "track": "15"
+        }
+      ]
     },
     {
       "id": "1063",
