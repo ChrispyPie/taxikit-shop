@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T22:41:15+02:00",
+  "updated": "2026-09-04T22:42:19+02:00",
   "error": null,
   "trains": [
     {
@@ -111654,6 +111654,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Kungsbacka",
+      "lastSeenSig": "Kb",
+      "lastSeenTs": "2026-09-04T20:14:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -111727,10 +111730,7 @@
           "sched": "2026-09-04T20:11:00.000+02:00",
           "track": "4"
         }
-      ],
-      "lastSeen": "Kungsbacka",
-      "lastSeenSig": "Kb",
-      "lastSeenTs": "2026-09-04T20:14:00.000+02:00"
+      ]
     },
     {
       "id": "3076",
@@ -112239,9 +112239,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Lund C",
-      "lastSeenSig": "Lu",
-      "lastSeenTs": "2026-09-04T22:38:00.000+02:00",
+      "lastSeen": "Kgå",
+      "lastSeenSig": "Kgå",
+      "lastSeenTs": "2026-09-04T22:41:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -120179,7 +120179,7 @@
       "snabb": false,
       "lastSeen": "Än",
       "lastSeenSig": "Än",
-      "lastSeenTs": "2026-09-04T22:40:00.000+02:00",
+      "lastSeenTs": "2026-09-04T22:41:00.000+02:00",
       "stops": [
         {
           "sig": "Vg",
@@ -120221,7 +120221,7 @@
           "sig": "Än",
           "name": "Än",
           "t": "2026-09-04T22:40:00.000+02:00",
-          "act": "",
+          "act": "2026-09-04T22:40:00.000+02:00",
           "est": "2026-09-04T22:40:00.000+02:00",
           "sched": "2026-09-04T22:39:00.000+02:00",
           "track": "3"
