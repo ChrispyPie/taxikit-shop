@@ -1,8 +1,8 @@
 {
   "airport": "GOT",
-  "updated": "2026-09-04T05:35:20+02:00",
+  "updated": "2026-09-04T05:40:28+02:00",
   "arrivalsUpdated": "2026-09-04T04:50:31+02:00",
-  "departuresUpdated": "2026-09-04T04:40:30+02:00",
+  "departuresUpdated": "2026-09-04T05:40:30+02:00",
   "yesterdayUpdated": "2026-09-04T05:00:58+02:00",
   "tomorrowUpdated": "2026-09-03T23:10:33+02:00",
   "error": null,
@@ -3848,25 +3848,6 @@
       "rawStatus": ""
     },
     {
-      "id": "FR5737",
-      "dir": "AVG",
-      "other": "London STN",
-      "iata": "",
-      "airline": "Ryanair Ltd",
-      "status": "DEL",
-      "statusSv": "Borttagen",
-      "sched": "2026-09-02T14:50:00Z",
-      "est": "",
-      "act": "",
-      "terminal": "T1",
-      "gate": "",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": ""
-    },
-    {
       "id": "TK1800",
       "dir": "AVG",
       "other": "Istanbul IST",
@@ -4245,25 +4226,6 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 20:00"
-    },
-    {
-      "id": "D85272",
-      "dir": "AVG",
-      "other": "Nice",
-      "iata": "",
-      "airline": "Norwegian",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-09-02T14:50:00Z",
-      "est": "",
-      "act": "2026-09-02T14:55:56Z",
-      "terminal": "T1",
-      "gate": "13",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 17:02"
     },
     {
       "id": "D85059",
@@ -6120,7 +6082,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "17",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6779,18 +6741,18 @@
       "other": "London STN",
       "iata": "",
       "airline": "Ryanair Ltd",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-09-04T03:45:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-09-04T03:34:42Z",
       "terminal": "T1",
       "gate": "23",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gå till gate"
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "KL1228",
@@ -6809,7 +6771,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Omedelbar avgång"
     },
     {
       "id": "AF1553",
@@ -6828,7 +6790,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Omedelbar avgång"
     },
     {
       "id": "SK1439",
@@ -6847,7 +6809,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Omedelbar avgång"
     },
     {
       "id": "OJ812",
@@ -6923,7 +6885,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Omedelbar avgång"
     },
     {
       "id": "LH821",
@@ -6942,7 +6904,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Boarding"
     },
     {
       "id": "SN2324",
@@ -7075,7 +7037,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gå till gate"
     },
     {
       "id": "SK144",
@@ -7089,7 +7051,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "14",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -7265,7 +7227,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Boarding"
     },
     {
       "id": "SK7955",
@@ -7284,7 +7246,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gå till gate"
     }
   ]
 }
