@@ -1,28 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T02:47:16+02:00",
+  "updated": "2026-09-04T02:48:17+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "431",
-      "dir": "ANK",
-      "other": "Stockholm C",
-      "otherSig": "Cst",
-      "from": [
-        "Stockholm C"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T14:47:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T14:48:00.000+02:00",
-      "track": "4",
-      "canceled": false,
-      "product": "SJ Snabbtåg",
-      "traffic": "Tåg",
-      "snabb": true
-    },
     {
       "id": "13156",
       "dir": "ANK",
@@ -77971,9 +77951,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-03T23:48:00.000+02:00",
       "stops": [
         {
           "sig": "Sk",
@@ -78110,7 +78087,10 @@
           "sched": "2026-09-03T23:44:00.000+02:00",
           "track": "2"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-03T23:48:00.000+02:00"
     },
     {
       "id": "3095",
