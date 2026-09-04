@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T03:52:17+02:00",
+  "updated": "2026-09-04T03:53:14+02:00",
   "error": null,
   "trains": [
     {
@@ -40,26 +40,6 @@
       "track": "14",
       "canceled": false,
       "product": "Öresundståg",
-      "traffic": "Tåg",
-      "snabb": false
-    },
-    {
-      "id": "336",
-      "dir": "ANK",
-      "other": "Kac",
-      "otherSig": "Kac",
-      "from": [
-        "Kac"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T15:55:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T15:53:00.000+02:00",
-      "track": "11",
-      "canceled": false,
-      "product": "SJ Regional",
       "traffic": "Tåg",
       "snabb": false
     },
@@ -97460,7 +97440,54 @@
           "Description": "Tåg"
         }
       ],
-      "snabb": true
+      "snabb": true,
+      "stops": [
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-04T09:11:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T09:11:00.000+02:00",
+          "track": "4"
+        },
+        {
+          "sig": "Sk",
+          "name": "Skövde C",
+          "t": "2026-09-04T10:27:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T10:27:00.000+02:00",
+          "track": "1"
+        },
+        {
+          "sig": "K",
+          "name": "Katrineholm",
+          "t": "2026-09-04T11:40:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T11:40:00.000+02:00",
+          "track": "1"
+        },
+        {
+          "sig": "Söö",
+          "name": "Södertälje Syd",
+          "t": "2026-09-04T12:20:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T12:20:00.000+02:00",
+          "track": "6"
+        },
+        {
+          "sig": "Cst",
+          "name": "Stockholm C",
+          "t": "2026-09-04T12:40:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-04T12:40:00.000+02:00",
+          "track": "19"
+        }
+      ]
     },
     {
       "id": "3956",
