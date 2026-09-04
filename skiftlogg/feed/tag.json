@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T10:13:16+02:00",
+  "updated": "2026-09-04T10:14:18+02:00",
   "error": null,
   "trains": [
     {
@@ -21,46 +21,6 @@
       "canceled": false,
       "product": "Öresundståg",
       "traffic": "Tåg",
-      "snabb": false
-    },
-    {
-      "id": "3688",
-      "dir": "AVG",
-      "other": "Än",
-      "otherSig": "Än",
-      "from": [
-        "Göteborg C"
-      ],
-      "to": [
-        "Än"
-      ],
-      "sched": "2026-09-02T22:14:00.000+02:00",
-      "est": "",
-      "act": "",
-      "track": "x",
-      "canceled": true,
-      "product": "Västtågen",
-      "traffic": "Pendeltåg",
-      "snabb": false
-    },
-    {
-      "id": "3086",
-      "dir": "ANK",
-      "other": "Kungsbacka",
-      "otherSig": "Kb",
-      "from": [
-        "Kungsbacka"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T22:15:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T22:14:00.000+02:00",
-      "track": "16",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": "Pendeltåg",
       "snabb": false
     },
     {
@@ -87936,9 +87896,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-04T08:12:00.000+02:00",
       "stops": [
         {
           "sig": "Än",
@@ -88003,7 +87960,10 @@
           "sched": "2026-09-04T08:10:00.000+02:00",
           "track": "10"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-04T08:12:00.000+02:00"
     },
     {
       "id": "7330",
@@ -94774,8 +94734,8 @@
         {
           "sig": "Öx",
           "name": "Öx",
-          "t": "2026-09-04T10:16:00.000+02:00",
-          "act": "",
+          "t": "2026-09-04T10:15:00.000+02:00",
+          "act": "2026-09-04T10:15:00.000+02:00",
           "est": "",
           "sched": "2026-09-04T10:16:00.000+02:00",
           "track": "3"
@@ -94790,9 +94750,9 @@
           "track": "1"
         }
       ],
-      "lastSeen": "Trollhättan",
-      "lastSeenSig": "Thn",
-      "lastSeenTs": "2026-09-04T10:09:00.000+02:00"
+      "lastSeen": "Öx",
+      "lastSeenSig": "Öx",
+      "lastSeenTs": "2026-09-04T10:15:00.000+02:00"
     },
     {
       "id": "3186",
@@ -96697,8 +96657,8 @@
         {
           "sig": "Bhs",
           "name": "Bhs",
-          "t": "2026-09-04T10:16:00.000+02:00",
-          "act": "",
+          "t": "2026-09-04T10:14:00.000+02:00",
+          "act": "2026-09-04T10:14:00.000+02:00",
           "est": "2026-09-04T10:16:00.000+02:00",
           "sched": "2026-09-04T10:12:00.000+02:00",
           "track": "2"
@@ -96749,9 +96709,9 @@
           "track": "1"
         }
       ],
-      "lastSeen": "Gas",
-      "lastSeenSig": "Gas",
-      "lastSeenTs": "2026-09-04T10:07:00.000+02:00"
+      "lastSeen": "Bhs",
+      "lastSeenSig": "Bhs",
+      "lastSeenTs": "2026-09-04T10:14:00.000+02:00"
     },
     {
       "id": "327",
@@ -98868,6 +98828,9 @@
         }
       ],
       "snabb": true,
+      "lastSeen": "Alvesta",
+      "lastSeenSig": "A",
+      "lastSeenTs": "2026-09-04T09:57:00.000+02:00",
       "stops": [
         {
           "sig": "Cst",
@@ -98923,10 +98886,7 @@
           "sched": "2026-09-04T10:35:00.000+02:00",
           "track": "5"
         }
-      ],
-      "lastSeen": "Alvesta",
-      "lastSeenSig": "A",
-      "lastSeenTs": "2026-09-04T09:57:00.000+02:00"
+      ]
     },
     {
       "id": "63735",
@@ -99417,9 +99377,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Trollhättan",
-      "lastSeenSig": "Thn",
-      "lastSeenTs": "2026-09-04T10:10:00.000+02:00",
+      "lastSeen": "Veas",
+      "lastSeenSig": "Veas",
+      "lastSeenTs": "2026-09-04T10:14:00.000+02:00",
       "stops": [
         {
           "sig": "Uv",
@@ -103825,9 +103785,9 @@
         {
           "sig": "Lkp",
           "name": "Lkp",
-          "t": "2026-09-04T10:15:00.000+02:00",
+          "t": "2026-09-04T10:16:00.000+02:00",
           "act": "",
-          "est": "",
+          "est": "2026-09-04T10:16:00.000+02:00",
           "sched": "2026-09-04T10:15:00.000+02:00",
           "track": "1"
         },
