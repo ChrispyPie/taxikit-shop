@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-04T02:03:44+02:00",
+  "updated": "2026-09-04T02:04:18+02:00",
   "error": null,
   "trains": [
     {
@@ -20,26 +20,6 @@
       "track": "14",
       "canceled": false,
       "product": "Öresundståg",
-      "traffic": "Tåg",
-      "snabb": false
-    },
-    {
-      "id": "3249",
-      "dir": "ANK",
-      "other": "Vänersborg C",
-      "otherSig": "Vg",
-      "from": [
-        "Vänersborg C"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-02T14:05:00.000+02:00",
-      "est": "",
-      "act": "2026-09-02T14:04:00.000+02:00",
-      "track": "9",
-      "canceled": false,
-      "product": "Västtågen",
       "traffic": "Tåg",
       "snabb": false
     },
@@ -73789,9 +73769,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Skövde C",
-      "lastSeenSig": "Sk",
-      "lastSeenTs": "2026-09-03T23:04:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -73865,7 +73842,10 @@
           "sched": "2026-09-03T23:00:00.000+02:00",
           "track": "3b"
         }
-      ]
+      ],
+      "lastSeen": "Skövde C",
+      "lastSeenSig": "Sk",
+      "lastSeenTs": "2026-09-03T23:04:00.000+02:00"
     },
     {
       "id": "73779",
@@ -76558,9 +76538,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Fd",
-      "lastSeenSig": "Fd",
-      "lastSeenTs": "2026-09-03T23:04:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -76625,7 +76602,10 @@
           "sched": "2026-09-03T23:06:00.000+02:00",
           "track": "1"
         }
-      ]
+      ],
+      "lastSeen": "Fd",
+      "lastSeenSig": "Fd",
+      "lastSeenTs": "2026-09-03T23:04:00.000+02:00"
     },
     {
       "id": "63783",
