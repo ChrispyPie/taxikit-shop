@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-05T22:07:28+02:00",
+  "updated": "2026-09-05T22:08:29+02:00",
   "error": null,
   "trains": [
     {
@@ -91653,9 +91653,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Ss",
-      "lastSeenSig": "Ss",
-      "lastSeenTs": "2026-09-05T22:05:00.000+02:00",
+      "lastSeen": "Rmtp",
+      "lastSeenSig": "Rmtp",
+      "lastSeenTs": "2026-09-05T22:08:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -95553,9 +95553,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Öx",
-      "lastSeenSig": "Öx",
-      "lastSeenTs": "2026-09-05T22:00:00.000+02:00",
+      "lastSeen": "Ryr",
+      "lastSeenSig": "Ryr",
+      "lastSeenTs": "2026-09-05T22:07:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -97866,9 +97866,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg Marieholm",
-      "lastSeenSig": "Gbm",
-      "lastSeenTs": "2026-09-05T22:06:00.000+02:00",
+      "lastSeen": "Gas",
+      "lastSeenSig": "Gas",
+      "lastSeenTs": "2026-09-05T22:08:00.000+02:00",
       "stops": [
         {
           "sig": "Dl",
@@ -97909,8 +97909,8 @@
         {
           "sig": "Gas",
           "name": "Gas",
-          "t": "2026-09-05T22:09:00.000+02:00",
-          "act": "",
+          "t": "2026-09-05T22:08:00.000+02:00",
+          "act": "2026-09-05T22:08:00.000+02:00",
           "est": "",
           "sched": "2026-09-05T22:09:00.000+02:00",
           "track": "2"
@@ -101208,9 +101208,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Mia",
-      "lastSeenSig": "Mia",
-      "lastSeenTs": "2026-09-05T22:06:00.000+02:00",
+      "lastSeen": "Öda",
+      "lastSeenSig": "Öda",
+      "lastSeenTs": "2026-09-05T22:07:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -108558,6 +108558,31 @@
       "track": "9",
       "canceled": false,
       "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "1095",
+      "dir": "AVG",
+      "other": "Dk.kh",
+      "otherSig": "Dk.kh",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Dk.kh"
+      ],
+      "sched": "2026-09-06T12:55:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "9",
+      "canceled": false,
+      "product": "Öresundståg",
       "traffic": [
         {
           "Code": "YNA001",
