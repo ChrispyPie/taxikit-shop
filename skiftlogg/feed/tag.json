@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-05T21:57:25+02:00",
+  "updated": "2026-09-05T21:58:28+02:00",
   "error": null,
   "trains": [
     {
@@ -92390,7 +92390,7 @@
           "act": "",
           "est": "",
           "sched": "2026-09-05T22:14:00.000+02:00",
-          "track": "3a"
+          "track": "3b"
         }
       ]
     },
@@ -97554,9 +97554,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Gas",
-      "lastSeenSig": "Gas",
-      "lastSeenTs": "2026-09-05T21:56:00.000+02:00",
+      "lastSeen": "Göteborg Marieholm",
+      "lastSeenSig": "Gbm",
+      "lastSeenTs": "2026-09-05T21:57:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -98529,9 +98529,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Alingsås",
-      "lastSeenSig": "Alh",
-      "lastSeenTs": "2026-09-05T21:56:00.000+02:00",
+      "lastSeen": "Än",
+      "lastSeenSig": "Än",
+      "lastSeenTs": "2026-09-05T21:57:00.000+02:00",
       "stops": [
         {
           "sig": "Dl",
@@ -108983,6 +108983,31 @@
         {
           "Code": "YNA001",
           "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "60163",
+      "dir": "ANK",
+      "other": "Alvesta",
+      "otherSig": "A",
+      "from": [
+        "Alvesta"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-06T12:44:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": false,
+      "product": "SJ Regional",
+      "traffic": [
+        {
+          "Code": "YNA002",
+          "Description": "Buss"
         }
       ],
       "snabb": false
