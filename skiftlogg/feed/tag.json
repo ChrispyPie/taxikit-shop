@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-05T14:18:28+02:00",
+  "updated": "2026-09-05T14:19:24+02:00",
   "error": null,
   "trains": [
     {
@@ -90591,9 +90591,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Glv",
-      "lastSeenSig": "Glv",
-      "lastSeenTs": "2026-09-05T14:15:00.000+02:00",
+      "lastSeen": "Lkö",
+      "lastSeenSig": "Lkö",
+      "lastSeenTs": "2026-09-05T14:19:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -95077,9 +95077,9 @@
         {
           "sig": "Bsc",
           "name": "Borås C",
-          "t": "2026-09-05T14:50:00.000+02:00",
+          "t": "2026-09-05T14:52:00.000+02:00",
           "act": "",
-          "est": "2026-09-05T14:50:00.000+02:00",
+          "est": "2026-09-05T14:52:00.000+02:00",
           "sched": "2026-09-05T14:16:00.000+02:00",
           "track": "2"
         },
@@ -95304,9 +95304,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-05T13:23:00.000+02:00",
       "stops": [
         {
           "sig": "Än",
@@ -95371,7 +95368,10 @@
           "sched": "2026-09-05T13:25:00.000+02:00",
           "track": "10"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-05T13:23:00.000+02:00"
     },
     {
       "id": "73754",
@@ -98076,9 +98076,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Gubbero",
-      "lastSeenSig": "Gro",
-      "lastSeenTs": "2026-09-05T14:17:00.000+02:00",
+      "lastSeen": "Lis",
+      "lastSeenSig": "Lis",
+      "lastSeenTs": "2026-09-05T14:19:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -100182,9 +100182,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Öx",
-      "lastSeenSig": "Öx",
-      "lastSeenTs": "2026-09-05T14:14:00.000+02:00",
+      "lastSeen": "Trollhättan",
+      "lastSeenSig": "Thn",
+      "lastSeenTs": "2026-09-05T14:19:00.000+02:00",
       "stops": [
         {
           "sig": "Vg",
@@ -100207,8 +100207,8 @@
         {
           "sig": "Thn",
           "name": "Trollhättan",
-          "t": "2026-09-05T14:20:00.000+02:00",
-          "act": "",
+          "t": "2026-09-05T14:19:00.000+02:00",
+          "act": "2026-09-05T14:19:00.000+02:00",
           "est": "",
           "sched": "2026-09-05T14:20:00.000+02:00",
           "track": "2"
@@ -100902,12 +100902,15 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Uv",
+      "lastSeenSig": "Uv",
+      "lastSeenTs": "2026-09-05T14:18:00.000+02:00",
       "stops": [
         {
           "sig": "Uv",
           "name": "Uv",
           "t": "2026-09-05T14:18:00.000+02:00",
-          "act": "",
+          "act": "2026-09-05T14:18:00.000+02:00",
           "est": "",
           "sched": "2026-09-05T14:18:00.000+02:00",
           "track": "2b"
@@ -102544,9 +102547,9 @@
         {
           "sig": "Ed",
           "name": "Ed",
-          "t": "2026-09-05T14:28:00.000+02:00",
+          "t": "2026-09-05T14:30:00.000+02:00",
           "act": "",
-          "est": "2026-09-05T14:28:00.000+02:00",
+          "est": "2026-09-05T14:30:00.000+02:00",
           "sched": "2026-09-05T14:25:00.000+02:00",
           "track": "1"
         },
@@ -111104,6 +111107,31 @@
         {
           "Code": "YNA002",
           "Description": "Buss"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "1106",
+      "dir": "ANK",
+      "other": "Dk.kh",
+      "otherSig": "Dk.kh",
+      "from": [
+        "Dk.kh"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-05T21:05:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "14",
+      "canceled": false,
+      "product": "Öresundståg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
         }
       ],
       "snabb": false
