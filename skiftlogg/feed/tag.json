@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-06T01:34:30+02:00",
+  "updated": "2026-09-06T01:35:57+02:00",
   "error": null,
   "trains": [
     {
@@ -101302,10 +101302,10 @@
         {
           "sig": "Lu",
           "name": "Lund C",
-          "t": "2026-09-05T13:35:00.000+02:00",
-          "act": "2026-09-05T13:35:00.000+02:00",
+          "t": "2026-09-05T13:38:00.000+02:00",
+          "act": "2026-09-05T13:38:00.000+02:00",
           "est": "",
-          "sched": "2026-09-05T13:36:00.000+02:00",
+          "sched": "2026-09-05T13:38:00.000+02:00",
           "track": "1"
         },
         {
@@ -101903,7 +101903,27 @@
           "Description": "Tåg"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Cst",
+          "name": "Stockholm C",
+          "t": "2026-09-06T05:43:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-06T05:43:00.000+02:00",
+          "track": "19"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-06T11:10:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-06T11:10:00.000+02:00",
+          "track": "6"
+        }
+      ]
     },
     {
       "id": "93537",
@@ -106069,6 +106089,31 @@
         {
           "Code": "YNA004",
           "Description": "Pendeltåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3967",
+      "dir": "ANK",
+      "other": "Ksc",
+      "otherSig": "Ksc",
+      "from": [
+        "Ksc"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-06T16:40:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "8",
+      "canceled": false,
+      "product": "SJ Regional",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
         }
       ],
       "snabb": false
