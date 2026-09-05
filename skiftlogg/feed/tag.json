@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-05T04:06:17+02:00",
+  "updated": "2026-09-05T04:07:16+02:00",
   "error": null,
   "trains": [
     {
@@ -104493,9 +104493,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Nöe",
-      "lastSeenSig": "Nöe",
-      "lastSeenTs": "2026-09-05T04:05:00.000+02:00",
+      "lastSeen": "Bhs",
+      "lastSeenSig": "Bhs",
+      "lastSeenTs": "2026-09-05T04:07:00.000+02:00",
       "stops": [
         {
           "sig": "Än",
@@ -104527,8 +104527,8 @@
         {
           "sig": "Bhs",
           "name": "Bhs",
-          "t": "2026-09-05T04:09:00.000+02:00",
-          "act": "",
+          "t": "2026-09-05T04:07:00.000+02:00",
+          "act": "2026-09-05T04:07:00.000+02:00",
           "est": "",
           "sched": "2026-09-05T04:09:00.000+02:00",
           "track": "3"
@@ -119630,7 +119630,45 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Hr",
+          "name": "Herrljunga",
+          "t": "2026-09-05T10:39:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T10:39:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Vgå",
+          "name": "Vårgårda",
+          "t": "2026-09-05T10:59:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T10:59:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "A",
+          "name": "Alvesta",
+          "t": "2026-09-05T11:20:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T11:20:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-05T12:05:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T12:05:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "63546",
@@ -123718,6 +123756,31 @@
         {
           "Code": "YNA004",
           "Description": "Pendeltåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "73559",
+      "dir": "ANK",
+      "other": "Lr",
+      "otherSig": "Lr",
+      "from": [
+        "Lr"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-05T16:55:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA002",
+          "Description": "Buss"
         }
       ],
       "snabb": false
