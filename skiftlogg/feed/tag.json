@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-05T23:01:31+02:00",
+  "updated": "2026-09-05T23:02:30+02:00",
   "error": null,
   "trains": [
     {
@@ -88566,6 +88566,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Än",
+      "lastSeenSig": "Än",
+      "lastSeenTs": "2026-09-05T20:15:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -88630,10 +88633,7 @@
           "sched": "2026-09-05T20:17:00.000+02:00",
           "track": "1"
         }
-      ],
-      "lastSeen": "Än",
-      "lastSeenSig": "Än",
-      "lastSeenTs": "2026-09-05T20:15:00.000+02:00"
+      ]
     },
     {
       "id": "3675",
@@ -88752,9 +88752,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Hie",
-      "lastSeenSig": "Hie",
-      "lastSeenTs": "2026-09-05T22:59:00.000+02:00",
+      "lastSeen": "Lnk",
+      "lastSeenSig": "Lnk",
+      "lastSeenTs": "2026-09-05T23:01:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -91476,9 +91476,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Pö",
-      "lastSeenSig": "Pö",
-      "lastSeenTs": "2026-09-05T23:00:00.000+02:00",
+      "lastSeen": "Helsingborg C",
+      "lastSeenSig": "Hb",
+      "lastSeenTs": "2026-09-05T23:01:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -91564,8 +91564,8 @@
         {
           "sig": "Hb",
           "name": "Helsingborg C",
-          "t": "2026-09-05T23:03:00.000+02:00",
-          "act": "",
+          "t": "2026-09-05T23:01:00.000+02:00",
+          "act": "2026-09-05T23:01:00.000+02:00",
           "est": "",
           "sched": "2026-09-05T23:03:00.000+02:00",
           "track": "3a"
@@ -96253,7 +96253,7 @@
       ],
       "sched": "2026-09-05T23:05:00.000+02:00",
       "est": "",
-      "act": "",
+      "act": "2026-09-05T23:04:00.000+02:00",
       "track": "13",
       "canceled": false,
       "product": "Öresundståg",
@@ -96264,9 +96264,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Gubbero",
-      "lastSeenSig": "Gro",
-      "lastSeenTs": "2026-09-05T23:01:00.000+02:00",
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-05T23:04:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -96397,8 +96397,8 @@
         {
           "sig": "G",
           "name": "Göteborg C",
-          "t": "2026-09-05T23:05:00.000+02:00",
-          "act": "",
+          "t": "2026-09-05T23:04:00.000+02:00",
+          "act": "2026-09-05T23:04:00.000+02:00",
           "est": "",
           "sched": "2026-09-05T23:05:00.000+02:00",
           "track": "13"
@@ -96998,7 +96998,7 @@
           "sig": "Krd",
           "name": "Krd",
           "t": "2026-09-05T23:01:00.000+02:00",
-          "act": "",
+          "act": "2026-09-05T23:01:00.000+02:00",
           "est": "",
           "sched": "2026-09-05T23:01:00.000+02:00",
           "track": "1"
