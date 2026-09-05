@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-05T22:30:55+02:00",
+  "updated": "2026-09-05T22:31:45+02:00",
   "error": null,
   "trains": [
     {
@@ -96741,9 +96741,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Mdn",
-      "lastSeenSig": "Mdn",
-      "lastSeenTs": "2026-09-05T22:28:00.000+02:00",
+      "lastSeen": "Krd",
+      "lastSeenSig": "Krd",
+      "lastSeenTs": "2026-09-05T22:31:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -96775,8 +96775,8 @@
         {
           "sig": "Krd",
           "name": "Krd",
-          "t": "2026-09-05T22:32:00.000+02:00",
-          "act": "",
+          "t": "2026-09-05T22:31:00.000+02:00",
+          "act": "2026-09-05T22:31:00.000+02:00",
           "est": "2026-09-05T22:32:00.000+02:00",
           "sched": "2026-09-05T22:28:00.000+02:00",
           "track": "2"
@@ -98244,9 +98244,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Vpm",
-      "lastSeenSig": "Vpm",
-      "lastSeenTs": "2026-09-05T22:29:00.000+02:00",
+      "lastSeen": "Tbn",
+      "lastSeenSig": "Tbn",
+      "lastSeenTs": "2026-09-05T22:31:00.000+02:00",
       "stops": [
         {
           "sig": "Vg",
@@ -107737,6 +107737,31 @@
       "est": "",
       "act": "",
       "track": "16",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA004",
+          "Description": "Pendeltåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3053",
+      "dir": "AVG",
+      "other": "Kungsbacka",
+      "otherSig": "Kb",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Kungsbacka"
+      ],
+      "sched": "2026-09-06T13:15:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "15",
       "canceled": false,
       "product": "Västtågen",
       "traffic": [
