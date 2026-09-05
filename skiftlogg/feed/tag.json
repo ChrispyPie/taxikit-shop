@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-05T18:34:27+02:00",
+  "updated": "2026-09-05T18:35:33+02:00",
   "error": null,
   "trains": [
     {
@@ -97033,8 +97033,8 @@
         {
           "sig": "Lu",
           "name": "Lund C",
-          "t": "2026-09-05T18:36:00.000+02:00",
-          "act": "",
+          "t": "2026-09-05T18:35:00.000+02:00",
+          "act": "2026-09-05T18:35:00.000+02:00",
           "est": "",
           "sched": "2026-09-05T18:36:00.000+02:00",
           "track": "1"
@@ -97067,9 +97067,9 @@
           "track": "1b"
         }
       ],
-      "lastSeen": "Lkö",
-      "lastSeenSig": "Lkö",
-      "lastSeenTs": "2026-09-05T18:18:00.000+02:00"
+      "lastSeen": "Lund C",
+      "lastSeenSig": "Lu",
+      "lastSeenTs": "2026-09-05T18:35:00.000+02:00"
     },
     {
       "id": "63460",
@@ -97239,9 +97239,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-05T16:00:00.000+02:00",
       "stops": [
         {
           "sig": "Vg",
@@ -97315,7 +97312,10 @@
           "sched": "2026-09-05T16:00:00.000+02:00",
           "track": "9"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-05T16:00:00.000+02:00"
     },
     {
       "id": "3264",
@@ -101819,7 +101819,7 @@
           "act": "",
           "est": "",
           "sched": "2026-09-05T18:52:00.000+02:00",
-          "track": "1"
+          "track": "5"
         }
       ],
       "lastSeen": "Boy",
@@ -102569,7 +102569,7 @@
       "snabb": false,
       "lastSeen": "Vbc",
       "lastSeenSig": "Vbc",
-      "lastSeenTs": "2026-09-05T18:32:00.000+02:00",
+      "lastSeenTs": "2026-09-05T18:34:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -102978,9 +102978,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Vpm",
-      "lastSeenSig": "Vpm",
-      "lastSeenTs": "2026-09-05T18:31:00.000+02:00",
+      "lastSeen": "Veas",
+      "lastSeenSig": "Veas",
+      "lastSeenTs": "2026-09-05T18:34:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -104076,6 +104076,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-05T18:25:00.000+02:00",
       "stops": [
         {
           "sig": "Än",
@@ -104140,10 +104143,7 @@
           "sched": "2026-09-05T18:25:00.000+02:00",
           "track": "10"
         }
-      ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-05T18:25:00.000+02:00"
+      ]
     },
     {
       "id": "73767",
@@ -104739,9 +104739,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg Marieholm",
-      "lastSeenSig": "Gbm",
-      "lastSeenTs": "2026-09-05T18:33:00.000+02:00",
+      "lastSeen": "Gas",
+      "lastSeenSig": "Gas",
+      "lastSeenTs": "2026-09-05T18:35:00.000+02:00",
       "stops": [
         {
           "sig": "Dl",
@@ -104782,8 +104782,8 @@
         {
           "sig": "Gas",
           "name": "Gas",
-          "t": "2026-09-05T18:40:00.000+02:00",
-          "act": "",
+          "t": "2026-09-05T18:35:00.000+02:00",
+          "act": "2026-09-05T18:35:00.000+02:00",
           "est": "",
           "sched": "2026-09-05T18:40:00.000+02:00",
           "track": "1"
@@ -105024,9 +105024,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Lgd",
-      "lastSeenSig": "Lgd",
-      "lastSeenTs": "2026-09-05T18:32:00.000+02:00",
+      "lastSeen": "Ldo",
+      "lastSeenSig": "Ldo",
+      "lastSeenTs": "2026-09-05T18:34:00.000+02:00",
       "stops": [
         {
           "sig": "Vbc",
@@ -117231,6 +117231,31 @@
         {
           "Code": "YNA001",
           "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "60170",
+      "dir": "AVG",
+      "other": "Alvesta",
+      "otherSig": "A",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Alvesta"
+      ],
+      "sched": "2026-09-06T08:14:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": false,
+      "product": "SJ Regional",
+      "traffic": [
+        {
+          "Code": "YNA002",
+          "Description": "Buss"
         }
       ],
       "snabb": false
