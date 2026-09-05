@@ -4,6 +4,10 @@ on:
     - cron: "* * * * *"
   workflow_dispatch:
 
+concurrency:
+  group: got-cache-push
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
@@ -12,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Fetch Trafikverket G
         env:
           TRAFIKVERKET_KEY: ${{ secrets.TRAFIKVERKET_KEY }}
@@ -19,12 +25,24 @@ jobs:
         run: python3 scripts/fetch_got_trains.py
       - name: Commit cache if changed
         run: |
+          set -e
           git config user.name "taxikit-bot"
           git config user.email "bot@taxikit.local"
           git add skiftlogg/feed/tag.json
           if git diff --staged --quiet; then
             echo "Ingen ändring"
-          else
-            git commit -m "chore: uppdatera tågcache"
-            git push
+            exit 0
           fi
+          git commit -m "chore: uppdatera tågcache"
+          for i in 1 2 3 4 5; do
+            git fetch origin main
+            git pull --rebase origin main
+            if git push origin HEAD:main; then
+              echo "Push ok ($i)"
+              exit 0
+            fi
+            echo "Push krockade, försöker igen ($i)"
+            sleep 4
+          done
+          echo "Kunde inte pusha efter 5 försök"
+          exit 1
