@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-05T14:04:28+02:00",
+  "updated": "2026-09-05T14:05:33+02:00",
   "error": null,
   "trains": [
     {
@@ -96358,8 +96358,8 @@
         {
           "sig": "Nöe",
           "name": "Nöe",
-          "t": "2026-09-05T14:07:00.000+02:00",
-          "act": "",
+          "t": "2026-09-05T14:05:00.000+02:00",
+          "act": "2026-09-05T14:05:00.000+02:00",
           "est": "",
           "sched": "2026-09-05T14:07:00.000+02:00",
           "track": "2"
@@ -96383,9 +96383,9 @@
           "track": "2"
         }
       ],
-      "lastSeen": "Bhs",
-      "lastSeenSig": "Bhs",
-      "lastSeenTs": "2026-09-05T14:02:00.000+02:00"
+      "lastSeen": "Nöe",
+      "lastSeenSig": "Nöe",
+      "lastSeenTs": "2026-09-05T14:05:00.000+02:00"
     },
     {
       "id": "60182",
@@ -96723,9 +96723,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Am",
-      "lastSeenSig": "Am",
-      "lastSeenTs": "2026-09-05T14:03:00.000+02:00",
+      "lastSeen": "Mdn",
+      "lastSeenSig": "Mdn",
+      "lastSeenTs": "2026-09-05T14:05:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -97155,9 +97155,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-05T14:02:00.000+02:00",
+      "lastSeen": "Olskroken",
+      "lastSeenSig": "Or",
+      "lastSeenTs": "2026-09-05T14:04:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -97446,9 +97446,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Am",
-      "lastSeenSig": "Am",
-      "lastSeenTs": "2026-09-05T14:02:00.000+02:00",
+      "lastSeen": "Gubbero",
+      "lastSeenSig": "Gro",
+      "lastSeenTs": "2026-09-05T14:06:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -98162,7 +98162,7 @@
       "sched": "2026-09-05T14:19:00.000+02:00",
       "est": "",
       "act": "",
-      "track": "12",
+      "track": "11",
       "canceled": false,
       "product": "SJ Charter",
       "traffic": [
@@ -98180,7 +98180,7 @@
           "act": "",
           "est": "",
           "sched": "2026-09-05T14:19:00.000+02:00",
-          "track": "12"
+          "track": "11"
         },
         {
           "sig": "Cst",
@@ -103554,9 +103554,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Helsingborg C",
-      "lastSeenSig": "Hb",
-      "lastSeenTs": "2026-09-05T14:02:00.000+02:00",
+      "lastSeen": "Pö",
+      "lastSeenSig": "Pö",
+      "lastSeenTs": "2026-09-05T14:04:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -110606,6 +110606,31 @@
         }
       ],
       "snabb": true
+    },
+    {
+      "id": "11159",
+      "dir": "AVG",
+      "other": "Hie",
+      "otherSig": "Hie",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Hie"
+      ],
+      "sched": "2026-09-05T20:55:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "14",
+      "canceled": false,
+      "product": "Öresundståg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
     }
   ]
 }
