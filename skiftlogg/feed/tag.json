@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-05T13:04:26+02:00",
+  "updated": "2026-09-05T13:05:33+02:00",
   "error": null,
   "trains": [
     {
@@ -90899,7 +90899,7 @@
       "snabb": false,
       "lastSeen": "Halmstad C",
       "lastSeenSig": "Hd",
-      "lastSeenTs": "2026-09-05T13:04:13.607+02:00",
+      "lastSeenTs": "2026-09-05T13:04:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -93518,7 +93518,7 @@
           "sig": "Bhs",
           "name": "Bhs",
           "t": "2026-09-05T13:03:00.000+02:00",
-          "act": "",
+          "act": "2026-09-05T13:03:00.000+02:00",
           "est": "",
           "sched": "2026-09-05T13:03:00.000+02:00",
           "track": "2"
@@ -93551,9 +93551,9 @@
           "track": "1"
         }
       ],
-      "lastSeen": "Sue",
-      "lastSeenSig": "Sue",
-      "lastSeenTs": "2026-09-05T13:00:00.000+02:00"
+      "lastSeen": "Bhs",
+      "lastSeenSig": "Bhs",
+      "lastSeenTs": "2026-09-05T13:03:00.000+02:00"
     },
     {
       "id": "13148",
@@ -94242,9 +94242,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Olskroken",
-      "lastSeenSig": "Or",
-      "lastSeenTs": "2026-09-05T13:03:00.000+02:00",
+      "lastSeen": "Gas",
+      "lastSeenSig": "Gas",
+      "lastSeenTs": "2026-09-05T13:05:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -97710,9 +97710,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Btp",
-      "lastSeenSig": "Btp",
-      "lastSeenTs": "2026-09-05T13:01:00.000+02:00",
+      "lastSeen": "Bp",
+      "lastSeenSig": "Bp",
+      "lastSeenTs": "2026-09-05T13:05:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -105729,7 +105729,54 @@
           "Description": "Tåg"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Vbc",
+          "name": "Vbc",
+          "t": "2026-09-05T16:05:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T16:05:00.000+02:00",
+          "track": "5b"
+        },
+        {
+          "sig": "Åsa",
+          "name": "Åsa",
+          "t": "2026-09-05T16:19:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T16:19:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Kb",
+          "name": "Kungsbacka",
+          "t": "2026-09-05T16:29:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T16:29:00.000+02:00",
+          "track": "3"
+        },
+        {
+          "sig": "Mdn",
+          "name": "Mdn",
+          "t": "2026-09-05T16:40:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T16:40:00.000+02:00",
+          "track": "3"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-05T16:50:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T16:50:00.000+02:00",
+          "track": "16"
+        }
+      ]
     },
     {
       "id": "60188",
@@ -108277,6 +108324,31 @@
         {
           "Code": "YNA001",
           "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "60177",
+      "dir": "ANK",
+      "other": "Hrc",
+      "otherSig": "Hrc",
+      "from": [
+        "Hrc"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-05T20:10:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": false,
+      "product": "SJ Regional",
+      "traffic": [
+        {
+          "Code": "YNA002",
+          "Description": "Buss"
         }
       ],
       "snabb": false
