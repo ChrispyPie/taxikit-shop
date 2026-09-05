@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-05T17:30:51+02:00",
+  "updated": "2026-09-05T17:31:40+02:00",
   "error": null,
   "trains": [
     {
@@ -103647,9 +103647,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Vrö",
-      "lastSeenSig": "Vrö",
-      "lastSeenTs": "2026-09-05T17:26:00.000+02:00",
+      "lastSeen": "Vbgb",
+      "lastSeenSig": "Vbgb",
+      "lastSeenTs": "2026-09-05T17:31:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -106551,9 +106551,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Vpm",
-      "lastSeenSig": "Vpm",
-      "lastSeenTs": "2026-09-05T17:28:00.000+02:00",
+      "lastSeen": "Tbn",
+      "lastSeenSig": "Tbn",
+      "lastSeenTs": "2026-09-05T17:31:00.000+02:00",
       "stops": [
         {
           "sig": "Vg",
@@ -108154,8 +108154,8 @@
         {
           "sig": "Sae",
           "name": "Sae",
-          "t": "2026-09-05T17:31:00.000+02:00",
-          "act": "",
+          "t": "2026-09-05T17:32:00.000+02:00",
+          "act": "2026-09-05T17:32:00.000+02:00",
           "est": "",
           "sched": "2026-09-05T17:31:00.000+02:00",
           "track": "2"
@@ -108215,9 +108215,9 @@
           "track": "7"
         }
       ],
-      "lastSeen": "Borås C",
-      "lastSeenSig": "Bsc",
-      "lastSeenTs": "2026-09-05T17:23:00.000+02:00"
+      "lastSeen": "Sae",
+      "lastSeenSig": "Sae",
+      "lastSeenTs": "2026-09-05T17:32:00.000+02:00"
     },
     {
       "id": "63572",
@@ -118211,6 +118211,31 @@
       "act": "",
       "track": "15",
       "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA004",
+          "Description": "Pendeltåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3612",
+      "dir": "AVG",
+      "other": "Än",
+      "otherSig": "Än",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Än"
+      ],
+      "sched": "2026-09-06T03:15:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": true,
       "product": "Västtågen",
       "traffic": [
         {
