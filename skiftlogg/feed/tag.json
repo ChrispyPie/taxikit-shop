@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-05T12:38:26+02:00",
+  "updated": "2026-09-05T12:39:25+02:00",
   "error": null,
   "trains": [
     {
@@ -86472,9 +86472,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-05T10:13:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
@@ -86548,7 +86545,10 @@
           "sched": "2026-09-05T10:15:00.000+02:00",
           "track": "16"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-05T10:13:00.000+02:00"
     },
     {
       "id": "3041",
@@ -88107,9 +88107,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Bån",
-      "lastSeenSig": "Bån",
-      "lastSeenTs": "2026-09-05T12:33:00.000+02:00",
+      "lastSeen": "Vip",
+      "lastSeenSig": "Vip",
+      "lastSeenTs": "2026-09-05T12:39:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -89922,6 +89922,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-05T11:23:00.000+02:00",
       "stops": [
         {
           "sig": "Än",
@@ -89986,10 +89989,7 @@
           "sched": "2026-09-05T11:25:00.000+02:00",
           "track": "10"
         }
-      ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-05T11:23:00.000+02:00"
+      ]
     },
     {
       "id": "73746",
@@ -93624,9 +93624,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Gas",
-      "lastSeenSig": "Gas",
-      "lastSeenTs": "2026-09-05T12:37:00.000+02:00",
+      "lastSeen": "Olskroken",
+      "lastSeenSig": "Or",
+      "lastSeenTs": "2026-09-05T12:39:00.000+02:00",
       "stops": [
         {
           "sig": "Dl",
@@ -93807,9 +93807,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Mdn",
-      "lastSeenSig": "Mdn",
-      "lastSeenTs": "2026-09-05T12:36:00.000+02:00",
+      "lastSeen": "Lis",
+      "lastSeenSig": "Lis",
+      "lastSeenTs": "2026-09-05T12:39:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
@@ -94947,9 +94947,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Få",
-      "lastSeenSig": "Få",
-      "lastSeenTs": "2026-09-05T12:36:00.000+02:00",
+      "lastSeen": "Åsa",
+      "lastSeenSig": "Åsa",
+      "lastSeenTs": "2026-09-05T12:37:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -99565,8 +99565,8 @@
         {
           "sig": "Gms",
           "name": "Gms",
-          "t": "2026-09-05T12:40:00.000+02:00",
-          "act": "",
+          "t": "2026-09-05T12:39:00.000+02:00",
+          "act": "2026-09-05T12:39:00.000+02:00",
           "est": "",
           "sched": "2026-09-05T12:40:00.000+02:00",
           "track": "1"
@@ -99626,9 +99626,9 @@
           "track": "6"
         }
       ],
-      "lastSeen": "Kil",
-      "lastSeenSig": "Kil",
-      "lastSeenTs": "2026-09-05T12:24:00.000+02:00"
+      "lastSeen": "Gms",
+      "lastSeenSig": "Gms",
+      "lastSeenTs": "2026-09-05T12:39:00.000+02:00"
     },
     {
       "id": "63556",
@@ -101228,7 +101228,7 @@
       "snabb": false,
       "lastSeen": "Lkö",
       "lastSeenSig": "Lkö",
-      "lastSeenTs": "2026-09-05T12:36:00.000+02:00",
+      "lastSeenTs": "2026-09-05T12:39:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -104936,7 +104936,45 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-05T16:22:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T16:22:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Kde",
+          "name": "Kde",
+          "t": "2026-09-05T16:48:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T16:48:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Sth",
+          "name": "Sth",
+          "t": "2026-09-05T16:57:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T16:57:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Snu",
+          "name": "Snu",
+          "t": "2026-09-05T17:14:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T17:14:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "63307",
