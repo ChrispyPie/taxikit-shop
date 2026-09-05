@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-05T15:33:25+02:00",
+  "updated": "2026-09-05T15:34:32+02:00",
   "error": null,
   "trains": [
     {
@@ -93772,8 +93772,8 @@
         {
           "sig": "Lu",
           "name": "Lund C",
-          "t": "2026-09-05T15:36:00.000+02:00",
-          "act": "",
+          "t": "2026-09-05T15:34:00.000+02:00",
+          "act": "2026-09-05T15:34:00.000+02:00",
           "est": "",
           "sched": "2026-09-05T15:36:00.000+02:00",
           "track": "1"
@@ -93806,9 +93806,9 @@
           "track": "1b"
         }
       ],
-      "lastSeen": "Lkö",
-      "lastSeenSig": "Lkö",
-      "lastSeenTs": "2026-09-05T15:19:00.000+02:00"
+      "lastSeen": "Lund C",
+      "lastSeenSig": "Lu",
+      "lastSeenTs": "2026-09-05T15:34:00.000+02:00"
     },
     {
       "id": "3245",
@@ -101175,9 +101175,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Tbn",
-      "lastSeenSig": "Tbn",
-      "lastSeenTs": "2026-09-05T15:30:00.000+02:00",
+      "lastSeen": "Vpm",
+      "lastSeenSig": "Vpm",
+      "lastSeenTs": "2026-09-05T15:33:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -102489,9 +102489,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Ldo",
-      "lastSeenSig": "Ldo",
-      "lastSeenTs": "2026-09-05T15:32:00.000+02:00",
+      "lastSeen": "Krd",
+      "lastSeenSig": "Krd",
+      "lastSeenTs": "2026-09-05T15:35:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
@@ -102940,8 +102940,8 @@
         {
           "sig": "Nöe",
           "name": "Nöe",
-          "t": "2026-09-05T15:35:00.000+02:00",
-          "act": "",
+          "t": "2026-09-05T15:34:00.000+02:00",
+          "act": "2026-09-05T15:34:00.000+02:00",
           "est": "",
           "sched": "2026-09-05T15:35:00.000+02:00",
           "track": "1"
@@ -102983,9 +102983,9 @@
           "track": "10"
         }
       ],
-      "lastSeen": "Nol",
-      "lastSeenSig": "Nol",
-      "lastSeenTs": "2026-09-05T15:31:00.000+02:00"
+      "lastSeen": "Nöe",
+      "lastSeenSig": "Nöe",
+      "lastSeenTs": "2026-09-05T15:34:00.000+02:00"
     },
     {
       "id": "1119",
@@ -114859,6 +114859,31 @@
         {
           "Code": "YNA002",
           "Description": "Buss"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3685",
+      "dir": "ANK",
+      "other": "Än",
+      "otherSig": "Än",
+      "from": [
+        "Än"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-05T22:35:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": true,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA004",
+          "Description": "Pendeltåg"
         }
       ],
       "snabb": false
