@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-05T13:15:58+02:00",
+  "updated": "2026-09-05T13:16:28+02:00",
   "error": null,
   "trains": [
     {
@@ -87507,9 +87507,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-05T10:53:00.000+02:00",
       "stops": [
         {
           "sig": "Än",
@@ -87574,7 +87571,10 @@
           "sched": "2026-09-05T10:55:00.000+02:00",
           "track": "10"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-05T10:53:00.000+02:00"
     },
     {
       "id": "73535",
@@ -90723,6 +90723,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-05T11:54:00.000+02:00",
       "stops": [
         {
           "sig": "Än",
@@ -90787,10 +90790,7 @@
           "sched": "2026-09-05T11:55:00.000+02:00",
           "track": "10"
         }
-      ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-05T11:54:00.000+02:00"
+      ]
     },
     {
       "id": "73539",
@@ -94242,9 +94242,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Bhs",
-      "lastSeenSig": "Bhs",
-      "lastSeenTs": "2026-09-05T13:13:00.000+02:00",
+      "lastSeen": "Nöe",
+      "lastSeenSig": "Nöe",
+      "lastSeenTs": "2026-09-05T13:15:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -94980,9 +94980,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Am",
-      "lastSeenSig": "Am",
-      "lastSeenTs": "2026-09-05T13:14:00.000+02:00",
+      "lastSeen": "Mdn",
+      "lastSeenSig": "Mdn",
+      "lastSeenTs": "2026-09-05T13:17:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -106361,7 +106361,45 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Hrc",
+          "name": "Hrc",
+          "t": "2026-09-05T15:33:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T15:33:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Vgå",
+          "name": "Vårgårda",
+          "t": "2026-09-05T15:53:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T15:53:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "A",
+          "name": "Alvesta",
+          "t": "2026-09-05T16:14:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T16:14:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-05T16:59:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T16:59:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "3261",
