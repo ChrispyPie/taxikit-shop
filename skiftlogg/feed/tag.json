@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-05T15:18:29+02:00",
+  "updated": "2026-09-05T15:19:23+02:00",
   "error": null,
   "trains": [
     {
@@ -93492,9 +93492,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-05T12:53:00.000+02:00",
       "stops": [
         {
           "sig": "Än",
@@ -93559,7 +93556,10 @@
           "sched": "2026-09-05T12:55:00.000+02:00",
           "track": "5"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-05T12:53:00.000+02:00"
     },
     {
       "id": "425",
@@ -93669,9 +93669,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Glv",
-      "lastSeenSig": "Glv",
-      "lastSeenTs": "2026-09-05T15:17:00.000+02:00",
+      "lastSeen": "Lkö",
+      "lastSeenSig": "Lkö",
+      "lastSeenTs": "2026-09-05T15:19:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -98436,6 +98436,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-05T14:23:00.000+02:00",
       "stops": [
         {
           "sig": "Än",
@@ -98500,10 +98503,7 @@
           "sched": "2026-09-05T14:25:00.000+02:00",
           "track": "10"
         }
-      ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-05T14:23:00.000+02:00"
+      ]
     },
     {
       "id": "73758",
@@ -99954,9 +99954,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Khe",
-      "lastSeenSig": "Khe",
-      "lastSeenTs": "2026-09-05T15:16:00.000+02:00",
+      "lastSeen": "Kungsbacka",
+      "lastSeenSig": "Kb",
+      "lastSeenTs": "2026-09-05T15:19:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -100305,9 +100305,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Nol",
-      "lastSeenSig": "Nol",
-      "lastSeenTs": "2026-09-05T15:16:00.000+02:00",
+      "lastSeen": "Än",
+      "lastSeenSig": "Än",
+      "lastSeenTs": "2026-09-05T15:18:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -100339,8 +100339,8 @@
         {
           "sig": "Än",
           "name": "Än",
-          "t": "2026-09-05T15:19:00.000+02:00",
-          "act": "",
+          "t": "2026-09-05T15:18:00.000+02:00",
+          "act": "2026-09-05T15:18:00.000+02:00",
           "est": "",
           "sched": "2026-09-05T15:19:00.000+02:00",
           "track": "2"
@@ -101370,9 +101370,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Gubbero",
-      "lastSeenSig": "Gro",
-      "lastSeenTs": "2026-09-05T15:17:00.000+02:00",
+      "lastSeen": "Lis",
+      "lastSeenSig": "Lis",
+      "lastSeenTs": "2026-09-05T15:19:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -101840,7 +101840,7 @@
           "sig": "Gas",
           "name": "Gas",
           "t": "2026-09-05T15:18:00.000+02:00",
-          "act": "",
+          "act": "2026-09-05T15:18:00.000+02:00",
           "est": "",
           "sched": "2026-09-05T15:18:00.000+02:00",
           "track": "1"
@@ -101855,9 +101855,9 @@
           "track": "10"
         }
       ],
-      "lastSeen": "Sue",
-      "lastSeenSig": "Sue",
-      "lastSeenTs": "2026-09-05T15:11:00.000+02:00"
+      "lastSeen": "Gas",
+      "lastSeenSig": "Gas",
+      "lastSeenTs": "2026-09-05T15:18:00.000+02:00"
     },
     {
       "id": "73755",
@@ -106605,9 +106605,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Ä",
-      "lastSeenSig": "Ä",
-      "lastSeenTs": "2026-09-05T15:16:00.000+02:00",
+      "lastSeen": "Baa",
+      "lastSeenSig": "Baa",
+      "lastSeenTs": "2026-09-05T15:18:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -114065,6 +114065,31 @@
         }
       ],
       "snabb": true
+    },
+    {
+      "id": "3086",
+      "dir": "ANK",
+      "other": "Kungsbacka",
+      "otherSig": "Kb",
+      "from": [
+        "Kungsbacka"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-05T22:15:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "15",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA004",
+          "Description": "Pendeltåg"
+        }
+      ],
+      "snabb": false
     }
   ]
 }
