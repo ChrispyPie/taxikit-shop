@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-05T17:07:29+02:00",
+  "updated": "2026-09-05T17:08:28+02:00",
   "error": null,
   "trains": [
     {
@@ -104419,8 +104419,8 @@
         {
           "sig": "Nol",
           "name": "Nol",
-          "t": "2026-09-05T17:10:00.000+02:00",
-          "act": "",
+          "t": "2026-09-05T17:09:00.000+02:00",
+          "act": "2026-09-05T17:09:00.000+02:00",
           "est": "",
           "sched": "2026-09-05T17:10:00.000+02:00",
           "track": "2"
@@ -104435,9 +104435,9 @@
           "track": "1"
         }
       ],
-      "lastSeen": "Nöe",
-      "lastSeenSig": "Nöe",
-      "lastSeenTs": "2026-09-05T17:06:00.000+02:00"
+      "lastSeen": "Nol",
+      "lastSeenSig": "Nol",
+      "lastSeenTs": "2026-09-05T17:09:00.000+02:00"
     },
     {
       "id": "13164",
@@ -106972,9 +106972,9 @@
         {
           "sig": "Thn",
           "name": "Trollhättan",
-          "t": "2026-09-05T17:10:00.000+02:00",
+          "t": "2026-09-05T17:11:00.000+02:00",
           "act": "",
-          "est": "",
+          "est": "2026-09-05T17:11:00.000+02:00",
           "sched": "2026-09-05T17:10:00.000+02:00",
           "track": "2"
         },
@@ -108132,9 +108132,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Bp",
-      "lastSeenSig": "Bp",
-      "lastSeenTs": "2026-09-05T17:04:00.000+02:00",
+      "lastSeen": "He",
+      "lastSeenSig": "He",
+      "lastSeenTs": "2026-09-05T17:07:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -118239,6 +118239,31 @@
         {
           "Code": "YNA002",
           "Description": "Buss"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "17391",
+      "dir": "ANK",
+      "other": "Vänersborg C",
+      "otherSig": "Vg",
+      "from": [
+        "Vänersborg C"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-06T01:15:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": true,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
         }
       ],
       "snabb": false
