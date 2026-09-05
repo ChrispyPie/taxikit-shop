@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-06T01:24:32+02:00",
+  "updated": "2026-09-06T01:25:34+02:00",
   "error": null,
   "trains": [
     {
@@ -12254,81 +12254,6 @@
       "lastSeen": "Göteborg C",
       "lastSeenSig": "G",
       "lastSeenTs": "2026-09-04T16:57:00.000+02:00"
-    },
-    {
-      "id": "3448",
-      "dir": "AVG",
-      "other": "Skövde C",
-      "otherSig": "Sk",
-      "from": [
-        "Göteborg C"
-      ],
-      "to": [
-        "Skövde C"
-      ],
-      "sched": "2026-09-04T13:25:00.000+02:00",
-      "est": "",
-      "act": "2026-09-04T13:25:00.000+02:00",
-      "track": "5",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": [
-        {
-          "Code": "YNA001",
-          "Description": "Tåg"
-        }
-      ],
-      "snabb": false,
-      "stops": [
-        {
-          "sig": "G",
-          "name": "Göteborg C",
-          "t": "2026-09-04T13:25:00.000+02:00",
-          "act": "2026-09-04T13:25:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-04T13:25:00.000+02:00",
-          "track": "5"
-        },
-        {
-          "sig": "A",
-          "name": "Alvesta",
-          "t": "2026-09-04T13:59:00.000+02:00",
-          "act": "2026-09-04T13:59:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-04T14:00:00.000+02:00",
-          "track": "1"
-        },
-        {
-          "sig": "Hrc",
-          "name": "Hrc",
-          "t": "2026-09-04T14:18:00.000+02:00",
-          "act": "2026-09-04T14:18:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-04T14:18:00.000+02:00",
-          "track": "5"
-        },
-        {
-          "sig": "F",
-          "name": "Falköping C",
-          "t": "2026-09-04T14:34:00.000+02:00",
-          "act": "2026-09-04T14:34:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-04T14:35:00.000+02:00",
-          "track": "3"
-        },
-        {
-          "sig": "Sk",
-          "name": "Skövde C",
-          "t": "2026-09-04T14:50:00.000+02:00",
-          "act": "2026-09-04T14:50:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-04T14:51:00.000+02:00",
-          "track": "3b"
-        }
-      ],
-      "lastSeen": "Skövde C",
-      "lastSeenSig": "Sk",
-      "lastSeenTs": "2026-09-04T14:50:00.000+02:00"
     },
     {
       "id": "7362",
@@ -92024,7 +91949,7 @@
       "snabb": false,
       "lastSeen": "Mdn",
       "lastSeenSig": "Mdn",
-      "lastSeenTs": "2026-09-06T01:23:00.000+02:00",
+      "lastSeenTs": "2026-09-06T01:24:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -92352,9 +92277,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Sue",
-      "lastSeenSig": "Sue",
-      "lastSeenTs": "2026-09-06T01:22:00.000+02:00",
+      "lastSeen": "Agb",
+      "lastSeenSig": "Agb",
+      "lastSeenTs": "2026-09-06T01:24:00.000+02:00",
       "stops": [
         {
           "sig": "Än",
@@ -102998,7 +102923,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": true
+      "snabb": true,
+      "stops": [
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-06T11:05:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-06T11:05:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "A",
+          "name": "Alvesta",
+          "t": "2026-09-06T11:50:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-06T11:50:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "83871",
@@ -106915,6 +106860,31 @@
       "est": "",
       "act": "",
       "track": "2",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "13216",
+      "dir": "AVG",
+      "other": "Säffle",
+      "otherSig": "Sfl",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Säffle"
+      ],
+      "sched": "2026-09-06T16:30:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "8",
       "canceled": false,
       "product": "Västtågen",
       "traffic": [
