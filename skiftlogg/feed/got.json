@@ -1,10 +1,10 @@
 {
   "airport": "GOT",
-  "updated": "2026-09-05T15:01:02+02:00",
-  "arrivalsUpdated": "2026-09-05T15:01:04+02:00",
-  "departuresUpdated": "2026-09-05T14:06:22+02:00",
+  "updated": "2026-09-05T15:05:32+02:00",
+  "arrivalsUpdated": "2026-09-05T15:05:34+02:00",
+  "departuresUpdated": "2026-09-05T15:05:39+02:00",
   "yesterdayUpdated": "2026-09-05T05:00:53+02:00",
-  "tomorrowUpdated": "2026-09-05T14:06:20+02:00",
+  "tomorrowUpdated": "2026-09-05T15:05:37+02:00",
   "error": null,
   "arrivals": [
     {
@@ -1574,7 +1574,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-05T15:10:00Z",
-      "est": "2026-09-05T14:55:00Z",
+      "est": "2026-09-05T15:03:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "14",
@@ -1582,7 +1582,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 16:55"
+      "rawStatus": "Ankommer 17:03"
     },
     {
       "id": "BLX362",
@@ -2521,11 +2521,11 @@
       "other": "Samos",
       "iata": "",
       "airline": "SAS Scandinavian Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 15:03",
       "sched": "2026-09-05T12:30:00Z",
       "est": "2026-09-05T13:01:00Z",
-      "act": "",
+      "act": "2026-09-05T13:03:00Z",
       "terminal": "T1",
       "gate": "16",
       "baggage": "1",
@@ -5658,18 +5658,18 @@
       "other": "Zürich",
       "iata": "",
       "airline": "Swiss",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-09-05T12:55:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-09-05T13:01:29Z",
       "terminal": "T1",
       "gate": "13",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gå till gate"
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "OS972",
@@ -5677,18 +5677,18 @@
       "other": "Wien",
       "iata": "",
       "airline": "Austrian Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-09-05T12:50:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-09-05T12:56:12Z",
       "terminal": "T1",
       "gate": "19",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "LH2431",
@@ -5835,7 +5835,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "14",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -5848,18 +5848,18 @@
       "other": "Amsterdam",
       "iata": "",
       "airline": "KLM",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-09-05T12:20:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-09-05T13:02:03Z",
       "terminal": "T1",
       "gate": "17",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gå till gate"
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "KL1236",
@@ -5930,7 +5930,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "15",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -5949,7 +5949,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "22",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6087,7 +6087,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd"
+      "rawStatus": "Startat 14:13"
     },
     {
       "id": "FR5658",
@@ -6120,7 +6120,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "16",
+      "gate": "",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6144,7 +6144,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Omedelbar avgång"
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "FR8732",
