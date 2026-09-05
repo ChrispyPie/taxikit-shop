@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-05T23:48:27+02:00",
+  "updated": "2026-09-05T23:49:24+02:00",
   "error": null,
   "trains": [
     {
@@ -84126,6 +84126,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Khn",
+      "lastSeenSig": "Khn",
+      "lastSeenTs": "2026-09-05T22:13:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -84217,10 +84220,7 @@
           "sched": "2026-09-05T22:06:00.000+02:00",
           "track": "1"
         }
-      ],
-      "lastSeen": "Khn",
-      "lastSeenSig": "Khn",
-      "lastSeenTs": "2026-09-05T22:13:00.000+02:00"
+      ]
     },
     {
       "id": "3077",
@@ -88701,9 +88701,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-05T20:49:00.000+02:00",
       "stops": [
         {
           "sig": "Vbc",
@@ -88750,7 +88747,10 @@
           "sched": "2026-09-05T20:50:00.000+02:00",
           "track": "15"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-05T20:49:00.000+02:00"
     },
     {
       "id": "441",
@@ -91215,9 +91215,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Ä",
-      "lastSeenSig": "Ä",
-      "lastSeenTs": "2026-09-05T23:45:00.000+02:00",
+      "lastSeen": "Vh",
+      "lastSeenSig": "Vh",
+      "lastSeenTs": "2026-09-05T23:48:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -93128,7 +93128,7 @@
       "snabb": false,
       "lastSeen": "Öx",
       "lastSeenSig": "Öx",
-      "lastSeenTs": "2026-09-05T23:46:00.000+02:00",
+      "lastSeenTs": "2026-09-05T23:49:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -93223,9 +93223,9 @@
         {
           "sig": "Vg",
           "name": "Vänersborg C",
-          "t": "2026-09-05T23:51:00.000+02:00",
+          "t": "2026-09-05T23:52:00.000+02:00",
           "act": "",
-          "est": "",
+          "est": "2026-09-05T23:52:00.000+02:00",
           "sched": "2026-09-05T23:51:00.000+02:00",
           "track": "1"
         }
