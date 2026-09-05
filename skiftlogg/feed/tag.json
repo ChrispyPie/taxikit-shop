@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-05T13:48:26+02:00",
+  "updated": "2026-09-05T13:49:24+02:00",
   "error": null,
   "trains": [
     {
@@ -89190,9 +89190,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-05T11:23:00.000+02:00",
       "stops": [
         {
           "sig": "Än",
@@ -89257,7 +89254,10 @@
           "sched": "2026-09-05T11:25:00.000+02:00",
           "track": "10"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-05T11:23:00.000+02:00"
     },
     {
       "id": "73746",
@@ -94500,9 +94500,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Trollhättan",
-      "lastSeenSig": "Thn",
-      "lastSeenTs": "2026-09-05T13:43:00.000+02:00",
+      "lastSeen": "Öx",
+      "lastSeenSig": "Öx",
+      "lastSeenTs": "2026-09-05T13:48:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -96009,9 +96009,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Gubbero",
-      "lastSeenSig": "Gro",
-      "lastSeenTs": "2026-09-05T13:47:00.000+02:00",
+      "lastSeen": "Lis",
+      "lastSeenSig": "Lis",
+      "lastSeenTs": "2026-09-05T13:49:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -96468,6 +96468,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Gas",
+      "lastSeenSig": "Gas",
+      "lastSeenTs": "2026-09-05T13:48:00.000+02:00",
       "stops": [
         {
           "sig": "Än",
@@ -96518,7 +96521,7 @@
           "sig": "Gas",
           "name": "Gas",
           "t": "2026-09-05T13:48:00.000+02:00",
-          "act": "",
+          "act": "2026-09-05T13:48:00.000+02:00",
           "est": "",
           "sched": "2026-09-05T13:48:00.000+02:00",
           "track": "1"
@@ -96532,10 +96535,7 @@
           "sched": "2026-09-05T13:55:00.000+02:00",
           "track": "10"
         }
-      ],
-      "lastSeen": "Sue",
-      "lastSeenSig": "Sue",
-      "lastSeenTs": "2026-09-05T13:41:00.000+02:00"
+      ]
     },
     {
       "id": "73547",
@@ -97044,9 +97044,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Nöe",
-      "lastSeenSig": "Nöe",
-      "lastSeenTs": "2026-09-05T13:47:00.000+02:00",
+      "lastSeen": "Bhs",
+      "lastSeenSig": "Bhs",
+      "lastSeenTs": "2026-09-05T13:49:00.000+02:00",
       "stops": [
         {
           "sig": "Vg",
@@ -103536,9 +103536,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Lkö",
-      "lastSeenSig": "Lkö",
-      "lastSeenTs": "2026-09-05T13:45:00.000+02:00",
+      "lastSeen": "Glv",
+      "lastSeenSig": "Glv",
+      "lastSeenTs": "2026-09-05T13:49:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -107510,7 +107510,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-05T17:30:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T17:30:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Yb",
+          "name": "Ytterby",
+          "t": "2026-09-05T18:00:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-05T18:00:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "63561",
