@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-06T12:49:30+02:00",
+  "updated": "2026-09-06T12:51:08+02:00",
   "error": null,
   "trains": [
     {
@@ -95,90 +95,6 @@
       "lastSeen": "Mdn",
       "lastSeenSig": "Mdn",
       "lastSeenTs": "2026-09-05T01:02:00.000+02:00"
-    },
-    {
-      "id": "449",
-      "dir": "ANK",
-      "other": "Stockholm C",
-      "otherSig": "Cst",
-      "from": [
-        "Stockholm C"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-05T00:55:00.000+02:00",
-      "est": "",
-      "act": "2026-09-05T00:51:00.000+02:00",
-      "track": "3",
-      "canceled": false,
-      "product": "SJ Snabbtåg",
-      "traffic": [
-        {
-          "Code": "YNA001",
-          "Description": "Tåg"
-        }
-      ],
-      "snabb": true,
-      "stops": [
-        {
-          "sig": "Cst",
-          "name": "Stockholm C",
-          "t": "2026-09-04T20:22:00.000+02:00",
-          "act": "2026-09-04T20:22:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-04T20:22:00.000+02:00",
-          "track": "10"
-        },
-        {
-          "sig": "K",
-          "name": "Katrineholm",
-          "t": "2026-09-04T21:16:00.000+02:00",
-          "act": "2026-09-04T21:16:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-04T21:18:00.000+02:00",
-          "track": "3"
-        },
-        {
-          "sig": "Sk",
-          "name": "Skövde C",
-          "t": "2026-09-04T22:38:00.000+02:00",
-          "act": "2026-09-04T22:38:00.000+02:00",
-          "est": "2026-09-04T22:40:00.000+02:00",
-          "sched": "2026-09-04T22:28:00.000+02:00",
-          "track": "2"
-        },
-        {
-          "sig": "Hrc",
-          "name": "Hrc",
-          "t": "2026-09-04T23:05:00.000+02:00",
-          "act": "2026-09-04T23:05:00.000+02:00",
-          "est": "2026-09-04T23:07:00.000+02:00",
-          "sched": "2026-09-04T22:57:00.000+02:00",
-          "track": "3"
-        },
-        {
-          "sig": "Bsc",
-          "name": "Borås C",
-          "t": "2026-09-04T23:48:00.000+02:00",
-          "act": "2026-09-04T23:48:00.000+02:00",
-          "est": "2026-09-04T23:48:00.000+02:00",
-          "sched": "2026-09-04T23:43:00.000+02:00",
-          "track": "2"
-        },
-        {
-          "sig": "G",
-          "name": "Göteborg C",
-          "t": "2026-09-05T00:51:00.000+02:00",
-          "act": "2026-09-05T00:51:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-05T00:55:00.000+02:00",
-          "track": "3"
-        }
-      ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-05T00:51:00.000+02:00"
     },
     {
       "id": "73795",
@@ -68895,9 +68811,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Lgd",
-      "lastSeenSig": "Lgd",
-      "lastSeenTs": "2026-09-06T12:47:00.000+02:00",
+      "lastSeen": "Ldo",
+      "lastSeenSig": "Ldo",
+      "lastSeenTs": "2026-09-06T12:49:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -74436,9 +74352,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Ryä",
-      "lastSeenSig": "Ryä",
-      "lastSeenTs": "2026-09-06T12:46:00.000+02:00",
+      "lastSeen": "Hbgb",
+      "lastSeenSig": "Hbgb",
+      "lastSeenTs": "2026-09-06T12:49:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -75845,7 +75761,7 @@
       "snabb": false,
       "lastSeen": "Kla",
       "lastSeenSig": "Kla",
-      "lastSeenTs": "2026-09-06T12:49:00.000+02:00",
+      "lastSeenTs": "2026-09-06T12:50:00.000+02:00",
       "stops": [
         {
           "sig": "Cst",
@@ -75931,8 +75847,8 @@
         {
           "sig": "Kla",
           "name": "Kla",
-          "t": "2026-09-06T12:47:00.000+02:00",
-          "act": "",
+          "t": "2026-09-06T12:49:00.000+02:00",
+          "act": "2026-09-06T12:49:00.000+02:00",
           "est": "2026-09-06T12:47:00.000+02:00",
           "sched": "2026-09-06T12:46:00.000+02:00",
           "track": "2"
@@ -84384,6 +84300,31 @@
         {
           "Code": "YNA001",
           "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3086",
+      "dir": "ANK",
+      "other": "Kungsbacka",
+      "otherSig": "Kb",
+      "from": [
+        "Kungsbacka"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-06T22:15:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "16",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA004",
+          "Description": "Pendeltåg"
         }
       ],
       "snabb": false
