@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-06T23:46:49+02:00",
+  "updated": "2026-09-06T23:47:32+02:00",
   "error": null,
   "trains": [
     {
@@ -73731,9 +73731,9 @@
         }
       ],
       "snabb": true,
-      "lastSeen": "Hu",
-      "lastSeenSig": "Hu",
-      "lastSeenTs": "2026-09-06T23:44:00.000+02:00",
+      "lastSeen": "Äs",
+      "lastSeenSig": "Äs",
+      "lastSeenTs": "2026-09-06T23:46:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -81074,7 +81074,7 @@
           "sig": "Nol",
           "name": "Nol",
           "t": "2026-09-06T23:46:00.000+02:00",
-          "act": "",
+          "act": "2026-09-06T23:46:00.000+02:00",
           "est": "2026-09-06T23:46:00.000+02:00",
           "sched": "2026-09-06T23:44:00.000+02:00",
           "track": "2"
@@ -81089,9 +81089,9 @@
           "track": "1"
         }
       ],
-      "lastSeen": "Nöe",
-      "lastSeenSig": "Nöe",
-      "lastSeenTs": "2026-09-06T23:43:00.000+02:00"
+      "lastSeen": "Nol",
+      "lastSeenSig": "Nol",
+      "lastSeenTs": "2026-09-06T23:46:00.000+02:00"
     },
     {
       "id": "73794",
@@ -90282,7 +90282,54 @@
           "Description": "Tåg"
         }
       ],
-      "snabb": true
+      "snabb": true,
+      "stops": [
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-07T06:39:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-07T06:39:00.000+02:00",
+          "track": "12"
+        },
+        {
+          "sig": "Hd",
+          "name": "Halmstad C",
+          "t": "2026-09-07T07:41:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-07T07:41:00.000+02:00",
+          "track": "3"
+        },
+        {
+          "sig": "Hb",
+          "name": "Helsingborg C",
+          "t": "2026-09-07T08:18:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-07T08:18:00.000+02:00",
+          "track": "2a"
+        },
+        {
+          "sig": "Lu",
+          "name": "Lund C",
+          "t": "2026-09-07T08:45:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-07T08:45:00.000+02:00",
+          "track": "1"
+        },
+        {
+          "sig": "Mc",
+          "name": "Malmö C",
+          "t": "2026-09-07T08:57:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-07T08:57:00.000+02:00",
+          "track": "7"
+        }
+      ]
     },
     {
       "id": "7324",
@@ -94230,6 +94277,31 @@
         {
           "Code": "YNA001",
           "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3638",
+      "dir": "AVG",
+      "other": "Än",
+      "otherSig": "Än",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Än"
+      ],
+      "sched": "2026-09-07T09:50:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "10",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA004",
+          "Description": "Pendeltåg"
         }
       ],
       "snabb": false
