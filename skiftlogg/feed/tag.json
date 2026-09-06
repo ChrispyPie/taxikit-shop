@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-07T00:12:34+02:00",
+  "updated": "2026-09-07T00:13:32+02:00",
   "error": null,
   "trains": [
     {
@@ -78462,6 +78462,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Kungsbacka",
+      "lastSeenSig": "Kb",
+      "lastSeenTs": "2026-09-06T23:10:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -78535,10 +78538,7 @@
           "sched": "2026-09-06T23:11:00.000+02:00",
           "track": "4"
         }
-      ],
-      "lastSeen": "Kungsbacka",
-      "lastSeenSig": "Kb",
-      "lastSeenTs": "2026-09-06T23:10:00.000+02:00"
+      ]
     },
     {
       "id": "447",
@@ -80502,9 +80502,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Khe",
-      "lastSeenSig": "Khe",
-      "lastSeenTs": "2026-09-07T00:12:00.000+02:00",
+      "lastSeen": "Kungsbacka",
+      "lastSeenSig": "Kb",
+      "lastSeenTs": "2026-09-07T00:13:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -80527,8 +80527,8 @@
         {
           "sig": "Kb",
           "name": "Kungsbacka",
-          "t": "2026-09-07T00:14:00.000+02:00",
-          "act": "",
+          "t": "2026-09-07T00:13:00.000+02:00",
+          "act": "2026-09-07T00:13:00.000+02:00",
           "est": "",
           "sched": "2026-09-07T00:14:00.000+02:00",
           "track": "2"
@@ -81212,7 +81212,7 @@
       "sched": "2026-09-07T00:16:00.000+02:00",
       "est": "",
       "act": "",
-      "track": "1",
+      "track": "2",
       "canceled": false,
       "product": "Västtågen",
       "traffic": [
@@ -81230,7 +81230,7 @@
           "act": "",
           "est": "",
           "sched": "2026-09-07T00:16:00.000+02:00",
-          "track": "1"
+          "track": "2"
         },
         {
           "sig": "P",
@@ -83135,7 +83135,7 @@
           "act": "",
           "est": "",
           "sched": "2026-09-07T05:05:00.000+02:00",
-          "track": "1"
+          "track": "2"
         },
         {
           "sig": "Khe",
@@ -85502,7 +85502,7 @@
           "act": "",
           "est": "",
           "sched": "2026-09-07T06:05:00.000+02:00",
-          "track": "1"
+          "track": "2"
         },
         {
           "sig": "Khe",
