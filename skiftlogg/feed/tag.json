@@ -1,92 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-06T20:18:48+02:00",
+  "updated": "2026-09-06T20:19:32+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "428",
-      "dir": "AVG",
-      "other": "Stockholm C",
-      "otherSig": "Cst",
-      "from": [
-        "Göteborg C"
-      ],
-      "to": [
-        "Stockholm C"
-      ],
-      "sched": "2026-09-05T08:19:00.000+02:00",
-      "est": "",
-      "act": "2026-09-05T08:19:00.000+02:00",
-      "track": "12",
-      "canceled": false,
-      "product": "SJ Snabbtåg",
-      "traffic": [
-        {
-          "Code": "YNA001",
-          "Description": "Tåg"
-        }
-      ],
-      "snabb": true,
-      "stops": [
-        {
-          "sig": "G",
-          "name": "Göteborg C",
-          "t": "2026-09-05T08:19:00.000+02:00",
-          "act": "2026-09-05T08:19:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-05T08:19:00.000+02:00",
-          "track": "12"
-        },
-        {
-          "sig": "Bsc",
-          "name": "Borås C",
-          "t": "2026-09-05T09:17:00.000+02:00",
-          "act": "2026-09-05T09:17:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-05T09:16:00.000+02:00",
-          "track": "2"
-        },
-        {
-          "sig": "Hrc",
-          "name": "Hrc",
-          "t": "2026-09-05T09:49:00.000+02:00",
-          "act": "2026-09-05T09:49:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-05T09:52:00.000+02:00",
-          "track": "1"
-        },
-        {
-          "sig": "Sk",
-          "name": "Skövde C",
-          "t": "2026-09-05T10:25:00.000+02:00",
-          "act": "2026-09-05T10:25:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-05T10:28:00.000+02:00",
-          "track": "1"
-        },
-        {
-          "sig": "Vå",
-          "name": "Varberg",
-          "t": "2026-09-05T12:18:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-05T12:18:00.000+02:00",
-          "track": "3"
-        },
-        {
-          "sig": "Cst",
-          "name": "Stockholm C",
-          "t": "2026-09-05T13:20:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-05T13:20:00.000+02:00",
-          "track": "15"
-        }
-      ],
-      "lastSeen": "Skövde C",
-      "lastSeenSig": "Sk",
-      "lastSeenTs": "2026-09-05T10:25:00.000+02:00"
-    },
     {
       "id": "3632",
       "dir": "AVG",
@@ -68741,7 +68657,7 @@
           "sig": "Bål",
           "name": "Bål",
           "t": "2026-09-06T20:17:00.000+02:00",
-          "act": "",
+          "act": "2026-09-06T20:17:00.000+02:00",
           "est": "",
           "sched": "2026-09-06T20:17:00.000+02:00",
           "track": "2"
@@ -68765,9 +68681,9 @@
           "track": "16"
         }
       ],
-      "lastSeen": "Ep",
-      "lastSeenSig": "Ep",
-      "lastSeenTs": "2026-09-06T20:05:00.000+02:00"
+      "lastSeen": "Bål",
+      "lastSeenSig": "Bål",
+      "lastSeenTs": "2026-09-06T20:17:00.000+02:00"
     },
     {
       "id": "73755",
@@ -83161,7 +83077,7 @@
       ],
       "sched": "2026-09-06T20:21:00.000+02:00",
       "est": "",
-      "act": "",
+      "act": "2026-09-06T20:20:00.000+02:00",
       "track": "2",
       "canceled": false,
       "product": "Västtågen",
@@ -83248,16 +83164,16 @@
         {
           "sig": "G",
           "name": "Göteborg C",
-          "t": "2026-09-06T20:21:00.000+02:00",
-          "act": "",
+          "t": "2026-09-06T20:20:00.000+02:00",
+          "act": "2026-09-06T20:20:00.000+02:00",
           "est": "",
           "sched": "2026-09-06T20:21:00.000+02:00",
           "track": "2"
         }
       ],
-      "lastSeen": "Gsv",
-      "lastSeenSig": "Gsv",
-      "lastSeenTs": "2026-09-06T20:15:00.000+02:00"
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-06T20:20:00.000+02:00"
     },
     {
       "id": "63782",
@@ -83580,9 +83496,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Ndv",
-      "lastSeenSig": "Ndv",
-      "lastSeenTs": "2026-09-06T20:13:00.000+02:00",
+      "lastSeen": "Fd",
+      "lastSeenSig": "Fd",
+      "lastSeenTs": "2026-09-06T20:18:00.000+02:00",
       "stops": [
         {
           "sig": "Cst",
@@ -84383,7 +84299,7 @@
           "sig": "Kb",
           "name": "Kungsbacka",
           "t": "2026-09-06T20:19:00.000+02:00",
-          "act": "",
+          "act": "2026-09-06T20:19:00.000+02:00",
           "est": "",
           "sched": "2026-09-06T20:19:00.000+02:00",
           "track": "4"
@@ -84451,7 +84367,10 @@
           "sched": "2026-09-06T20:45:00.000+02:00",
           "track": "15"
         }
-      ]
+      ],
+      "lastSeen": "Kungsbacka",
+      "lastSeenSig": "Kb",
+      "lastSeenTs": "2026-09-06T20:19:00.000+02:00"
     },
     {
       "id": "3083",
@@ -85023,9 +84942,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Teo",
-      "lastSeenSig": "Teo",
-      "lastSeenTs": "2026-09-06T20:15:00.000+02:00",
+      "lastSeen": "Tye",
+      "lastSeenSig": "Tye",
+      "lastSeenTs": "2026-09-06T20:18:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -86075,7 +85994,7 @@
           "act": "",
           "est": "",
           "sched": "2026-09-06T21:00:00.000+02:00",
-          "track": "3"
+          "track": "2"
         },
         {
           "sig": "Asd",
@@ -87660,9 +87579,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Ä",
-      "lastSeenSig": "Ä",
-      "lastSeenTs": "2026-09-06T20:16:00.000+02:00",
+      "lastSeen": "Baa",
+      "lastSeenSig": "Baa",
+      "lastSeenTs": "2026-09-06T20:19:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -89739,9 +89658,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Hjp",
-      "lastSeenSig": "Hjp",
-      "lastSeenTs": "2026-09-06T20:17:00.000+02:00",
+      "lastSeen": "Kgå",
+      "lastSeenSig": "Kgå",
+      "lastSeenTs": "2026-09-06T20:18:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
