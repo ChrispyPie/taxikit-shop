@@ -1,65 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-06T22:13:32+02:00",
+  "updated": "2026-09-06T22:14:32+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "386",
-      "dir": "AVG",
-      "other": "No.osl",
-      "otherSig": "No.osl",
-      "from": [
-        "Göteborg C"
-      ],
-      "to": [
-        "No.osl"
-      ],
-      "sched": "2026-09-05T10:14:00.000+02:00",
-      "est": "",
-      "act": "2026-09-05T10:14:00.000+02:00",
-      "track": "8",
-      "canceled": false,
-      "product": "Vy Snabbtåg",
-      "traffic": [
-        {
-          "Code": "YNA001",
-          "Description": "Tåg"
-        }
-      ],
-      "snabb": true,
-      "stops": [
-        {
-          "sig": "G",
-          "name": "Göteborg C",
-          "t": "2026-09-05T10:14:00.000+02:00",
-          "act": "2026-09-05T10:14:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-05T10:14:00.000+02:00",
-          "track": "8"
-        },
-        {
-          "sig": "Thn",
-          "name": "Trollhättan",
-          "t": "2026-09-05T10:43:00.000+02:00",
-          "act": "2026-09-05T10:43:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-05T10:43:00.000+02:00",
-          "track": "1"
-        },
-        {
-          "sig": "Ed",
-          "name": "Ed",
-          "t": "2026-09-05T11:39:00.000+02:00",
-          "act": "2026-09-05T11:39:00.000+02:00",
-          "est": "2026-09-05T11:37:00.000+02:00",
-          "sched": "2026-09-05T11:28:00.000+02:00",
-          "track": "1"
-        }
-      ],
-      "lastSeen": "Ed",
-      "lastSeenSig": "Ed",
-      "lastSeenTs": "2026-09-05T11:39:00.000+02:00"
-    },
     {
       "id": "3041",
       "dir": "AVG",
@@ -69532,8 +69475,8 @@
         {
           "sig": "Bål",
           "name": "Bål",
-          "t": "2026-09-06T22:17:00.000+02:00",
-          "act": "",
+          "t": "2026-09-06T22:15:00.000+02:00",
+          "act": "2026-09-06T22:15:00.000+02:00",
           "est": "",
           "sched": "2026-09-06T22:17:00.000+02:00",
           "track": "2"
@@ -69557,9 +69500,9 @@
           "track": "16"
         }
       ],
-      "lastSeen": "Ep",
-      "lastSeenSig": "Ep",
-      "lastSeenTs": "2026-09-06T22:03:00.000+02:00"
+      "lastSeen": "Bål",
+      "lastSeenSig": "Bål",
+      "lastSeenTs": "2026-09-06T22:15:00.000+02:00"
     },
     {
       "id": "73763",
@@ -72324,9 +72267,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Öa",
-      "lastSeenSig": "Öa",
-      "lastSeenTs": "2026-09-06T22:13:00.000+02:00",
+      "lastSeen": "Jbk",
+      "lastSeenSig": "Jbk",
+      "lastSeenTs": "2026-09-06T22:15:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -82392,9 +82335,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Khe",
-      "lastSeenSig": "Khe",
-      "lastSeenTs": "2026-09-06T22:12:00.000+02:00",
+      "lastSeen": "Kungsbacka",
+      "lastSeenSig": "Kb",
+      "lastSeenTs": "2026-09-06T22:14:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -83737,8 +83680,8 @@
         {
           "sig": "Nöe",
           "name": "Nöe",
-          "t": "2026-09-06T22:15:00.000+02:00",
-          "act": "",
+          "t": "2026-09-06T22:14:00.000+02:00",
+          "act": "2026-09-06T22:14:00.000+02:00",
           "est": "",
           "sched": "2026-09-06T22:15:00.000+02:00",
           "track": "1"
@@ -83780,9 +83723,9 @@
           "track": "10"
         }
       ],
-      "lastSeen": "Nol",
-      "lastSeenSig": "Nol",
-      "lastSeenTs": "2026-09-06T22:11:00.000+02:00"
+      "lastSeen": "Nöe",
+      "lastSeenSig": "Nöe",
+      "lastSeenTs": "2026-09-06T22:14:00.000+02:00"
     },
     {
       "id": "63783",
@@ -84782,7 +84725,7 @@
       "snabb": false,
       "lastSeen": "Öx",
       "lastSeenSig": "Öx",
-      "lastSeenTs": "2026-09-06T22:12:00.000+02:00",
+      "lastSeenTs": "2026-09-06T22:13:00.000+02:00",
       "stops": [
         {
           "sig": "Vg",
