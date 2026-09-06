@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-06T20:33:31+02:00",
+  "updated": "2026-09-06T20:34:34+02:00",
   "error": null,
   "trains": [
     {
@@ -75552,9 +75552,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Kg",
-      "lastSeenSig": "Kg",
-      "lastSeenTs": "2026-09-06T20:28:00.000+02:00",
+      "lastSeen": "Gnb",
+      "lastSeenSig": "Gnb",
+      "lastSeenTs": "2026-09-06T20:33:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -77019,9 +77019,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "T",
-      "lastSeenSig": "T",
-      "lastSeenTs": "2026-09-06T20:30:00.000+02:00",
+      "lastSeen": "Sle",
+      "lastSeenSig": "Sle",
+      "lastSeenTs": "2026-09-06T20:34:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -82592,7 +82592,7 @@
           "sig": "Bhs",
           "name": "Bhs",
           "t": "2026-09-06T20:33:00.000+02:00",
-          "act": "",
+          "act": "2026-09-06T20:33:00.000+02:00",
           "est": "",
           "sched": "2026-09-06T20:33:00.000+02:00",
           "track": "2"
@@ -82625,9 +82625,9 @@
           "track": "1"
         }
       ],
-      "lastSeen": "Sue",
-      "lastSeenSig": "Sue",
-      "lastSeenTs": "2026-09-06T20:30:00.000+02:00"
+      "lastSeen": "Bhs",
+      "lastSeenSig": "Bhs",
+      "lastSeenTs": "2026-09-06T20:33:00.000+02:00"
     },
     {
       "id": "3575",
@@ -83067,9 +83067,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Sel",
-      "lastSeenSig": "Sel",
-      "lastSeenTs": "2026-09-06T20:32:00.000+02:00",
+      "lastSeen": "Olskroken",
+      "lastSeenSig": "Or",
+      "lastSeenTs": "2026-09-06T20:34:00.000+02:00",
       "stops": [
         {
           "sig": "Cst",
@@ -83795,7 +83795,7 @@
           "sig": "Sn",
           "name": "Sn",
           "t": "2026-09-06T20:32:00.000+02:00",
-          "act": "",
+          "act": "2026-09-06T20:32:00.000+02:00",
           "est": "2026-09-06T20:32:00.000+02:00",
           "sched": "2026-09-06T20:24:00.000+02:00",
           "track": "3"
@@ -83803,9 +83803,9 @@
         {
           "sig": "Lr",
           "name": "Lr",
-          "t": "2026-09-06T20:35:00.000+02:00",
+          "t": "2026-09-06T20:36:00.000+02:00",
           "act": "",
-          "est": "2026-09-06T20:35:00.000+02:00",
+          "est": "2026-09-06T20:36:00.000+02:00",
           "sched": "2026-09-06T20:27:00.000+02:00",
           "track": "2"
         },
@@ -83837,9 +83837,9 @@
           "track": "1"
         }
       ],
-      "lastSeen": "Fd",
-      "lastSeenSig": "Fd",
-      "lastSeenTs": "2026-09-06T20:28:00.000+02:00"
+      "lastSeen": "Sn",
+      "lastSeenSig": "Sn",
+      "lastSeenTs": "2026-09-06T20:32:00.000+02:00"
     },
     {
       "id": "3080",
@@ -83914,8 +83914,8 @@
         {
           "sig": "Mdn",
           "name": "Mdn",
-          "t": "2026-09-06T20:35:00.000+02:00",
-          "act": "",
+          "t": "2026-09-06T20:34:00.000+02:00",
+          "act": "2026-09-06T20:34:00.000+02:00",
           "est": "",
           "sched": "2026-09-06T20:35:00.000+02:00",
           "track": "3"
@@ -83939,9 +83939,9 @@
           "track": "15"
         }
       ],
-      "lastSeen": "Krd",
-      "lastSeenSig": "Krd",
-      "lastSeenTs": "2026-09-06T20:30:00.000+02:00"
+      "lastSeen": "Mdn",
+      "lastSeenSig": "Mdn",
+      "lastSeenTs": "2026-09-06T20:34:00.000+02:00"
     },
     {
       "id": "3083",
@@ -95847,6 +95847,31 @@
         {
           "Code": "YNA002",
           "Description": "Buss"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "13128",
+      "dir": "ANK",
+      "other": "Vbc",
+      "otherSig": "Vbc",
+      "from": [
+        "Vbc"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-07T07:50:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "13",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
         }
       ],
       "snabb": false
