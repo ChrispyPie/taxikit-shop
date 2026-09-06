@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-06T03:39:28+02:00",
+  "updated": "2026-09-06T03:40:43+02:00",
   "error": null,
   "trains": [
     {
@@ -251,63 +251,6 @@
       "lastSeen": "Göteborg C",
       "lastSeenSig": "G",
       "lastSeenTs": "2026-09-04T15:47:00.000+02:00"
-    },
-    {
-      "id": "389",
-      "dir": "ANK",
-      "other": "No.osl",
-      "otherSig": "No.osl",
-      "from": [
-        "No.osl"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-04T15:45:00.000+02:00",
-      "est": "",
-      "act": "2026-09-04T15:40:00.000+02:00",
-      "track": "8",
-      "canceled": false,
-      "product": "Vy Snabbtåg",
-      "traffic": [
-        {
-          "Code": "YNA001",
-          "Description": "Tåg"
-        }
-      ],
-      "snabb": true,
-      "stops": [
-        {
-          "sig": "Ed",
-          "name": "Ed",
-          "t": "2026-09-04T14:26:00.000+02:00",
-          "act": "2026-09-04T14:26:00.000+02:00",
-          "est": "2026-09-04T14:26:00.000+02:00",
-          "sched": "2026-09-04T14:25:00.000+02:00",
-          "track": "1"
-        },
-        {
-          "sig": "Thn",
-          "name": "Trollhättan",
-          "t": "2026-09-04T15:12:00.000+02:00",
-          "act": "2026-09-04T15:12:00.000+02:00",
-          "est": "2026-09-04T15:13:00.000+02:00",
-          "sched": "2026-09-04T15:11:00.000+02:00",
-          "track": "2"
-        },
-        {
-          "sig": "G",
-          "name": "Göteborg C",
-          "t": "2026-09-04T15:40:00.000+02:00",
-          "act": "2026-09-04T15:40:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-04T15:45:00.000+02:00",
-          "track": "8"
-        }
-      ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-04T15:40:00.000+02:00"
     },
     {
       "id": "3063",
@@ -98525,7 +98468,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "A",
+          "name": "Alvesta",
+          "t": "2026-09-06T12:25:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-06T12:25:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-06T13:10:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-06T13:10:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "13153",
@@ -102705,6 +102668,31 @@
       "track": "8",
       "canceled": false,
       "product": "SJ Regional",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3569",
+      "dir": "ANK",
+      "other": "Alvesta",
+      "otherSig": "A",
+      "from": [
+        "Alvesta"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-06T18:44:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "2",
+      "canceled": false,
+      "product": "Västtågen",
       "traffic": [
         {
           "Code": "YNA001",
