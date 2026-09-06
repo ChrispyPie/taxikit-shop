@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-06T09:21:09+02:00",
+  "updated": "2026-09-06T09:22:32+02:00",
   "error": null,
   "trains": [
     {
@@ -206,69 +206,6 @@
       "lastSeen": "Uv",
       "lastSeenSig": "Uv",
       "lastSeenTs": "2026-09-04T22:31:00.000+02:00"
-    },
-    {
-      "id": "63786",
-      "dir": "AVG",
-      "other": "Uv",
-      "otherSig": "Uv",
-      "from": [
-        "Göteborg C"
-      ],
-      "to": [
-        "Uv"
-      ],
-      "sched": "2026-09-04T21:22:00.000+02:00",
-      "est": "",
-      "act": "",
-      "track": "x",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": [
-        {
-          "Code": "YNA002",
-          "Description": "Buss"
-        }
-      ],
-      "snabb": false,
-      "stops": [
-        {
-          "sig": "G",
-          "name": "Göteborg C",
-          "t": "2026-09-04T21:22:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-04T21:22:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "Kde",
-          "name": "Kde",
-          "t": "2026-09-04T21:48:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-04T21:48:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "Sth",
-          "name": "Sth",
-          "t": "2026-09-04T21:57:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-04T21:57:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "Snu",
-          "name": "Snu",
-          "t": "2026-09-04T22:14:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-04T22:14:00.000+02:00",
-          "track": "x"
-        }
-      ]
     },
     {
       "id": "3681",
@@ -64920,9 +64857,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Alingsås",
-      "lastSeenSig": "Alh",
-      "lastSeenTs": "2026-09-06T09:20:00.000+02:00",
+      "lastSeen": "Les",
+      "lastSeenSig": "Les",
+      "lastSeenTs": "2026-09-06T09:21:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -64991,7 +64928,7 @@
           "sig": "Les",
           "name": "Les",
           "t": "2026-09-06T09:20:00.000+02:00",
-          "act": "",
+          "act": "2026-09-06T09:20:00.000+02:00",
           "est": "",
           "sched": "2026-09-06T09:20:00.000+02:00",
           "track": "2"
@@ -65124,9 +65061,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Lek",
-      "lastSeenSig": "Lek",
-      "lastSeenTs": "2026-09-06T09:19:00.000+02:00",
+      "lastSeen": "Åsa",
+      "lastSeenSig": "Åsa",
+      "lastSeenTs": "2026-09-06T09:21:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -65808,9 +65745,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Krd",
-      "lastSeenSig": "Krd",
-      "lastSeenTs": "2026-09-06T09:19:00.000+02:00",
+      "lastSeen": "Ldo",
+      "lastSeenSig": "Ldo",
+      "lastSeenTs": "2026-09-06T09:21:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -66141,9 +66078,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Lis",
-      "lastSeenSig": "Lis",
-      "lastSeenTs": "2026-09-06T09:19:00.000+02:00",
+      "lastSeen": "Am",
+      "lastSeenSig": "Am",
+      "lastSeenTs": "2026-09-06T09:21:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -66232,7 +66169,7 @@
       ],
       "sched": "2026-09-06T09:19:00.000+02:00",
       "est": "",
-      "act": "",
+      "act": "2026-09-06T09:21:00.000+02:00",
       "track": "12",
       "canceled": false,
       "product": "SJ Snabbtåg",
@@ -66243,12 +66180,15 @@
         }
       ],
       "snabb": true,
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-06T09:21:00.000+02:00",
       "stops": [
         {
           "sig": "G",
           "name": "Göteborg C",
-          "t": "2026-09-06T09:19:00.000+02:00",
-          "act": "",
+          "t": "2026-09-06T09:21:00.000+02:00",
+          "act": "2026-09-06T09:21:00.000+02:00",
           "est": "",
           "sched": "2026-09-06T09:19:00.000+02:00",
           "track": "12"
@@ -66313,7 +66253,7 @@
       ],
       "sched": "2026-09-06T09:20:00.000+02:00",
       "est": "",
-      "act": "",
+      "act": "2026-09-06T09:21:00.000+02:00",
       "track": "10",
       "canceled": false,
       "product": "Västtågen",
@@ -66324,12 +66264,15 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-06T09:21:00.000+02:00",
       "stops": [
         {
           "sig": "G",
           "name": "Göteborg C",
-          "t": "2026-09-06T09:20:00.000+02:00",
-          "act": "",
+          "t": "2026-09-06T09:21:00.000+02:00",
+          "act": "2026-09-06T09:21:00.000+02:00",
           "est": "",
           "sched": "2026-09-06T09:20:00.000+02:00",
           "track": "10"
@@ -67644,9 +67587,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Tye",
-      "lastSeenSig": "Tye",
-      "lastSeenTs": "2026-09-06T09:18:00.000+02:00",
+      "lastSeen": "Haa",
+      "lastSeenSig": "Haa",
+      "lastSeenTs": "2026-09-06T09:21:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -67811,7 +67754,7 @@
       "snabb": false,
       "lastSeen": "Trollhättan",
       "lastSeenSig": "Thn",
-      "lastSeenTs": "2026-09-06T09:19:00.000+02:00",
+      "lastSeenTs": "2026-09-06T09:21:00.000+02:00",
       "stops": [
         {
           "sig": "Vg",
@@ -69048,9 +68991,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Töe",
-      "lastSeenSig": "Töe",
-      "lastSeenTs": "2026-09-06T09:15:00.000+02:00",
+      "lastSeen": "Ånm",
+      "lastSeenSig": "Ånm",
+      "lastSeenTs": "2026-09-06T09:21:00.000+02:00",
       "stops": [
         {
           "sig": "Ksc",
@@ -73017,9 +72960,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Kgå",
-      "lastSeenSig": "Kgå",
-      "lastSeenTs": "2026-09-06T09:20:00.000+02:00",
+      "lastSeen": "Lund C",
+      "lastSeenSig": "Lu",
+      "lastSeenTs": "2026-09-06T09:21:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -73051,8 +72994,8 @@
         {
           "sig": "Lu",
           "name": "Lund C",
-          "t": "2026-09-06T09:22:00.000+02:00",
-          "act": "",
+          "t": "2026-09-06T09:21:00.000+02:00",
+          "act": "2026-09-06T09:21:00.000+02:00",
           "est": "",
           "sched": "2026-09-06T09:22:00.000+02:00",
           "track": "6"
