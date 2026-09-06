@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-06T02:31:45+02:00",
+  "updated": "2026-09-06T02:32:30+02:00",
   "error": null,
   "trains": [
     {
@@ -212,51 +212,6 @@
       "lastSeen": "Göteborg C",
       "lastSeenSig": "G",
       "lastSeenTs": "2026-09-04T14:35:00.000+02:00"
-    },
-    {
-      "id": "73751",
-      "dir": "ANK",
-      "other": "Ytterby",
-      "otherSig": "Yb",
-      "from": [
-        "Ytterby"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-04T14:32:00.000+02:00",
-      "est": "",
-      "act": "",
-      "track": "x",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": [
-        {
-          "Code": "YNA002",
-          "Description": "Buss"
-        }
-      ],
-      "snabb": false,
-      "stops": [
-        {
-          "sig": "Yb",
-          "name": "Ytterby",
-          "t": "2026-09-04T14:02:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-04T14:02:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "G",
-          "name": "Göteborg C",
-          "t": "2026-09-04T14:32:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-04T14:32:00.000+02:00",
-          "track": "x"
-        }
-      ]
     },
     {
       "id": "3251",
@@ -87890,7 +87845,7 @@
       "snabb": false,
       "lastSeen": "Ldo",
       "lastSeenSig": "Ldo",
-      "lastSeenTs": "2026-09-06T02:31:00.000+02:00",
+      "lastSeenTs": "2026-09-06T02:32:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -101046,7 +101001,90 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-06T12:10:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-06T12:10:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "P",
+          "name": "P",
+          "t": "2026-09-06T12:22:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-06T12:22:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Apn",
+          "name": "Apn",
+          "t": "2026-09-06T12:37:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-06T12:37:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Asd",
+          "name": "Asd",
+          "t": "2026-09-06T12:38:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-06T12:38:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Lr",
+          "name": "Lr",
+          "t": "2026-09-06T12:41:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-06T12:41:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Fd",
+          "name": "Fd",
+          "t": "2026-09-06T12:55:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-06T12:55:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Ns",
+          "name": "Ns",
+          "t": "2026-09-06T13:07:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-06T13:07:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Vbd",
+          "name": "Vbd",
+          "t": "2026-09-06T13:14:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-06T13:14:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "A",
+          "name": "Alvesta",
+          "t": "2026-09-06T13:21:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-06T13:21:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "60178",
@@ -104947,6 +104985,31 @@
         }
       ],
       "snabb": false
+    },
+    {
+      "id": "2075",
+      "dir": "ANK",
+      "other": "Stockholm C",
+      "otherSig": "Cst",
+      "from": [
+        "Stockholm C"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-06T17:35:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "5",
+      "canceled": false,
+      "product": "VR Snabbtåg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": true
     }
   ]
 }
