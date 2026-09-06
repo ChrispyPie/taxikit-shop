@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-07T00:27:28+02:00",
+  "updated": "2026-09-07T00:28:34+02:00",
   "error": null,
   "trains": [
     {
@@ -74808,6 +74808,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-06T21:36:00.000+02:00",
       "stops": [
         {
           "sig": "T",
@@ -74881,10 +74884,7 @@
           "sched": "2026-09-06T21:30:00.000+02:00",
           "track": "2"
         }
-      ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-06T21:36:00.000+02:00"
+      ]
     },
     {
       "id": "3486",
@@ -81275,7 +81275,7 @@
           "sig": "Lr",
           "name": "Lr",
           "t": "2026-09-07T00:27:00.000+02:00",
-          "act": "",
+          "act": "2026-09-07T00:27:00.000+02:00",
           "est": "",
           "sched": "2026-09-07T00:27:00.000+02:00",
           "track": "3"
@@ -81308,9 +81308,9 @@
           "track": "2"
         }
       ],
-      "lastSeen": "Sn",
-      "lastSeenSig": "Sn",
-      "lastSeenTs": "2026-09-07T00:22:00.000+02:00"
+      "lastSeen": "Lr",
+      "lastSeenSig": "Lr",
+      "lastSeenTs": "2026-09-07T00:27:00.000+02:00"
     },
     {
       "id": "451",
