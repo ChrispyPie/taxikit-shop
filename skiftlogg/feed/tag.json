@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-06T03:07:28+02:00",
+  "updated": "2026-09-06T03:08:29+02:00",
   "error": null,
   "trains": [
     {
@@ -78084,6 +78084,15 @@
           "est": "",
           "sched": "2026-09-06T18:26:00.000+02:00",
           "track": "x"
+        },
+        {
+          "sig": "Rbh",
+          "name": "Rbh",
+          "t": "2026-09-06T19:08:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-06T19:08:00.000+02:00",
+          "track": "x"
         }
       ]
     },
@@ -86145,9 +86154,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Mdn",
-      "lastSeenSig": "Mdn",
-      "lastSeenTs": "2026-09-06T03:05:00.000+02:00",
+      "lastSeen": "Lis",
+      "lastSeenSig": "Lis",
+      "lastSeenTs": "2026-09-06T03:09:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
@@ -100106,7 +100115,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "A",
+          "name": "Alvesta",
+          "t": "2026-09-06T12:00:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-06T12:00:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-06T12:44:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-06T12:44:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "3051",
@@ -104023,6 +104052,31 @@
       "est": "",
       "act": "",
       "track": "16",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA004",
+          "Description": "Pendeltåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3073",
+      "dir": "AVG",
+      "other": "Kungsbacka",
+      "otherSig": "Kb",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Kungsbacka"
+      ],
+      "sched": "2026-09-06T18:15:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "15",
       "canceled": false,
       "product": "Västtågen",
       "traffic": [
