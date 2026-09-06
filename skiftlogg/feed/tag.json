@@ -1,53 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-06T11:29:31+02:00",
+  "updated": "2026-09-06T11:30:54+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "73794",
-      "dir": "AVG",
-      "other": "Ytterby",
-      "otherSig": "Yb",
-      "from": [
-        "Göteborg C"
-      ],
-      "to": [
-        "Ytterby"
-      ],
-      "sched": "2026-09-04T23:30:00.000+02:00",
-      "est": "",
-      "act": "",
-      "track": "x",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": [
-        {
-          "Code": "YNA002",
-          "Description": "Buss"
-        }
-      ],
-      "snabb": false,
-      "stops": [
-        {
-          "sig": "G",
-          "name": "Göteborg C",
-          "t": "2026-09-04T23:30:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-04T23:30:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "Yb",
-          "name": "Ytterby",
-          "t": "2026-09-04T23:58:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-04T23:58:00.000+02:00",
-          "track": "x"
-        }
-      ]
-    },
     {
       "id": "73787",
       "dir": "ANK",
@@ -65193,9 +65148,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Vpm",
-      "lastSeenSig": "Vpm",
-      "lastSeenTs": "2026-09-06T11:26:00.000+02:00",
+      "lastSeen": "Veas",
+      "lastSeenSig": "Veas",
+      "lastSeenTs": "2026-09-06T11:29:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -66104,7 +66059,7 @@
       "snabb": false,
       "lastSeen": "Kungsbacka",
       "lastSeenSig": "Kb",
-      "lastSeenTs": "2026-09-06T11:26:00.000+02:00",
+      "lastSeenTs": "2026-09-06T11:29:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -66559,8 +66514,8 @@
         {
           "sig": "Ldo",
           "name": "Ldo",
-          "t": "2026-09-06T11:32:00.000+02:00",
-          "act": "",
+          "t": "2026-09-06T11:30:00.000+02:00",
+          "act": "2026-09-06T11:30:00.000+02:00",
           "est": "",
           "sched": "2026-09-06T11:32:00.000+02:00",
           "track": "1"
@@ -66593,9 +66548,9 @@
           "track": "4"
         }
       ],
-      "lastSeen": "Krd",
-      "lastSeenSig": "Krd",
-      "lastSeenTs": "2026-09-06T11:27:00.000+02:00"
+      "lastSeen": "Ldo",
+      "lastSeenSig": "Ldo",
+      "lastSeenTs": "2026-09-06T11:30:00.000+02:00"
     },
     {
       "id": "7034",
@@ -68193,9 +68148,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Ldo",
-      "lastSeenSig": "Ldo",
-      "lastSeenTs": "2026-09-06T11:28:00.000+02:00",
+      "lastSeen": "Krd",
+      "lastSeenSig": "Krd",
+      "lastSeenTs": "2026-09-06T11:30:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
@@ -68236,8 +68191,8 @@
         {
           "sig": "Krd",
           "name": "Krd",
-          "t": "2026-09-06T11:31:00.000+02:00",
-          "act": "",
+          "t": "2026-09-06T11:30:00.000+02:00",
+          "act": "2026-09-06T11:30:00.000+02:00",
           "est": "",
           "sched": "2026-09-06T11:31:00.000+02:00",
           "track": "1"
