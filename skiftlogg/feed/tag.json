@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-07T01:30:56+02:00",
+  "updated": "2026-09-07T01:32:03+02:00",
   "error": null,
   "trains": [
     {
@@ -86,51 +86,6 @@
       "lastSeen": "Skövde C",
       "lastSeenSig": "Sk",
       "lastSeenTs": "2026-09-05T16:14:00.000+02:00"
-    },
-    {
-      "id": "73747",
-      "dir": "ANK",
-      "other": "Ytterby",
-      "otherSig": "Yb",
-      "from": [
-        "Ytterby"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-05T13:32:00.000+02:00",
-      "est": "",
-      "act": "",
-      "track": "x",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": [
-        {
-          "Code": "YNA002",
-          "Description": "Buss"
-        }
-      ],
-      "snabb": false,
-      "stops": [
-        {
-          "sig": "Yb",
-          "name": "Ytterby",
-          "t": "2026-09-05T13:02:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-05T13:02:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "G",
-          "name": "Göteborg C",
-          "t": "2026-09-05T13:32:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-05T13:32:00.000+02:00",
-          "track": "x"
-        }
-      ]
     },
     {
       "id": "335",
@@ -89293,7 +89248,72 @@
           "Description": "Pendeltåg"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-07T07:35:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-07T07:35:00.000+02:00",
+          "track": "10"
+        },
+        {
+          "sig": "Gas",
+          "name": "Gas",
+          "t": "2026-09-07T07:39:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-07T07:39:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Sue",
+          "name": "Sue",
+          "t": "2026-09-07T07:45:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-07T07:45:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Bhs",
+          "name": "Bhs",
+          "t": "2026-09-07T07:48:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-07T07:48:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Nöe",
+          "name": "Nöe",
+          "t": "2026-09-07T07:52:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-07T07:52:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Nol",
+          "name": "Nol",
+          "t": "2026-09-07T07:55:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-07T07:55:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Än",
+          "name": "Än",
+          "t": "2026-09-07T08:02:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-07T08:02:00.000+02:00",
+          "track": "1"
+        }
+      ]
     },
     {
       "id": "63723",
@@ -93219,6 +93239,31 @@
         }
       ],
       "snabb": true
+    },
+    {
+      "id": "3960",
+      "dir": "AVG",
+      "other": "Ksc",
+      "otherSig": "Ksc",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Ksc"
+      ],
+      "sched": "2026-09-07T11:14:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "12",
+      "canceled": false,
+      "product": "SJ Regional",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
     }
   ]
 }
