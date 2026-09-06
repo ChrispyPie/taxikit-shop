@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-06T20:43:32+02:00",
+  "updated": "2026-09-06T20:44:35+02:00",
   "error": null,
   "trains": [
     {
@@ -76755,9 +76755,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Fa",
-      "lastSeenSig": "Fa",
-      "lastSeenTs": "2026-09-06T20:42:00.000+02:00",
+      "lastSeen": "Väv",
+      "lastSeenSig": "Väv",
+      "lastSeenTs": "2026-09-06T20:43:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -83038,7 +83038,7 @@
       ],
       "sched": "2026-09-06T20:35:00.000+02:00",
       "est": "2026-09-06T20:45:00.000+02:00",
-      "act": "",
+      "act": "2026-09-06T20:44:00.000+02:00",
       "track": "5",
       "canceled": false,
       "product": "VR Snabbtåg",
@@ -83080,16 +83080,16 @@
         {
           "sig": "G",
           "name": "Göteborg C",
-          "t": "2026-09-06T20:45:00.000+02:00",
-          "act": "",
+          "t": "2026-09-06T20:44:00.000+02:00",
+          "act": "2026-09-06T20:44:00.000+02:00",
           "est": "2026-09-06T20:45:00.000+02:00",
           "sched": "2026-09-06T20:35:00.000+02:00",
           "track": "5"
         }
       ],
-      "lastSeen": "Alvesta",
-      "lastSeenSig": "A",
-      "lastSeenTs": "2026-09-06T20:00:00.000+02:00"
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-06T20:44:00.000+02:00"
     },
     {
       "id": "3677",
@@ -87689,7 +87689,7 @@
       "snabb": false,
       "lastSeen": "T",
       "lastSeenSig": "T",
-      "lastSeenTs": "2026-09-06T20:41:00.000+02:00",
+      "lastSeenTs": "2026-09-06T20:43:00.000+02:00",
       "stops": [
         {
           "sig": "Cst",
@@ -87803,7 +87803,7 @@
           "sig": "T",
           "name": "T",
           "t": "2026-09-06T20:41:00.000+02:00",
-          "act": "",
+          "act": "2026-09-06T20:41:00.000+02:00",
           "est": "2026-09-06T20:41:00.000+02:00",
           "sched": "2026-09-06T20:36:00.000+02:00",
           "track": "1"
@@ -88971,9 +88971,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Glv",
-      "lastSeenSig": "Glv",
-      "lastSeenTs": "2026-09-06T20:42:00.000+02:00",
+      "lastSeen": "Ryä",
+      "lastSeenSig": "Ryä",
+      "lastSeenTs": "2026-09-06T20:43:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -95799,6 +95799,31 @@
         {
           "Code": "YNA002",
           "Description": "Buss"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3180",
+      "dir": "ANK",
+      "other": "Ldo",
+      "otherSig": "Ldo",
+      "from": [
+        "Ldo"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-07T08:00:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "12",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA004",
+          "Description": "Pendeltåg"
         }
       ],
       "snabb": false
