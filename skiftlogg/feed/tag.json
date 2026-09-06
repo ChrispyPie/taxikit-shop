@@ -1,74 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-06T10:11:15+02:00",
+  "updated": "2026-09-06T10:12:28+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "13783",
-      "dir": "ANK",
-      "other": "Uv",
-      "otherSig": "Uv",
-      "from": [
-        "Uv"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-04T22:15:00.000+02:00",
-      "est": "",
-      "act": "2026-09-04T22:12:00.000+02:00",
-      "track": "12",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": [
-        {
-          "Code": "YNA001",
-          "Description": "Tåg"
-        }
-      ],
-      "snabb": false,
-      "stops": [
-        {
-          "sig": "Uv",
-          "name": "Uv",
-          "t": "2026-09-04T21:19:00.000+02:00",
-          "act": "2026-09-04T21:19:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-04T21:19:00.000+02:00",
-          "track": "2b"
-        },
-        {
-          "sig": "Thn",
-          "name": "Trollhättan",
-          "t": "2026-09-04T21:38:00.000+02:00",
-          "act": "2026-09-04T21:38:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-04T21:38:00.000+02:00",
-          "track": "2"
-        },
-        {
-          "sig": "Gas",
-          "name": "Gas",
-          "t": "2026-09-04T22:07:00.000+02:00",
-          "act": "2026-09-04T22:07:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-04T22:09:00.000+02:00",
-          "track": "1"
-        },
-        {
-          "sig": "G",
-          "name": "Göteborg C",
-          "t": "2026-09-04T22:12:00.000+02:00",
-          "act": "2026-09-04T22:12:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-04T22:15:00.000+02:00",
-          "track": "12"
-        }
-      ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-04T22:12:00.000+02:00"
-    },
     {
       "id": "3086",
       "dir": "ANK",
@@ -61431,9 +61365,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Helsingborg C",
-      "lastSeenSig": "Hb",
-      "lastSeenTs": "2026-09-06T10:06:00.000+02:00",
+      "lastSeen": "Hbgb",
+      "lastSeenSig": "Hbgb",
+      "lastSeenTs": "2026-09-06T10:11:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -64431,9 +64365,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Trollhättan",
-      "lastSeenSig": "Thn",
-      "lastSeenTs": "2026-09-06T10:06:00.000+02:00",
+      "lastSeen": "Öx",
+      "lastSeenSig": "Öx",
+      "lastSeenTs": "2026-09-06T10:10:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -64515,9 +64449,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-06T09:35:00.000+02:00",
       "stops": [
         {
           "sig": "Än",
@@ -64582,7 +64513,10 @@
           "sched": "2026-09-06T09:35:00.000+02:00",
           "track": "10"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-06T09:35:00.000+02:00"
     },
     {
       "id": "7337",
@@ -65250,9 +65184,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Lgd",
-      "lastSeenSig": "Lgd",
-      "lastSeenTs": "2026-09-06T10:10:00.000+02:00",
+      "lastSeen": "Kungsbacka",
+      "lastSeenSig": "Kb",
+      "lastSeenTs": "2026-09-06T10:12:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -65275,8 +65209,8 @@
         {
           "sig": "Kb",
           "name": "Kungsbacka",
-          "t": "2026-09-06T10:14:00.000+02:00",
-          "act": "",
+          "t": "2026-09-06T10:12:00.000+02:00",
+          "act": "2026-09-06T10:12:00.000+02:00",
           "est": "",
           "sched": "2026-09-06T10:14:00.000+02:00",
           "track": "2"
@@ -66024,9 +65958,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Lis",
-      "lastSeenSig": "Lis",
-      "lastSeenTs": "2026-09-06T10:10:00.000+02:00",
+      "lastSeen": "Gubbero",
+      "lastSeenSig": "Gro",
+      "lastSeenTs": "2026-09-06T10:12:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
@@ -67530,9 +67464,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Vbc",
-      "lastSeenSig": "Vbc",
-      "lastSeenTs": "2026-09-06T10:06:00.000+02:00",
+      "lastSeen": "Vrö",
+      "lastSeenSig": "Vrö",
+      "lastSeenTs": "2026-09-06T10:11:00.000+02:00",
       "stops": [
         {
           "sig": "Vbc",
@@ -70908,9 +70842,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Ka",
-      "lastSeenSig": "Ka",
-      "lastSeenTs": "2026-09-06T10:09:00.000+02:00",
+      "lastSeen": "Vh",
+      "lastSeenSig": "Vh",
+      "lastSeenTs": "2026-09-06T10:10:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
