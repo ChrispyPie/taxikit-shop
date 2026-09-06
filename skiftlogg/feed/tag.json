@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-06T21:43:29+02:00",
+  "updated": "2026-09-06T21:44:33+02:00",
   "error": null,
   "trains": [
     {
@@ -75450,9 +75450,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Åk",
-      "lastSeenSig": "Åk",
-      "lastSeenTs": "2026-09-06T21:43:00.000+02:00",
+      "lastSeen": "Al",
+      "lastSeenSig": "Al",
+      "lastSeenTs": "2026-09-06T21:44:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -81704,7 +81704,7 @@
       "snabb": false,
       "lastSeen": "Trollhättan",
       "lastSeenSig": "Thn",
-      "lastSeenTs": "2026-09-06T21:39:00.000+02:00",
+      "lastSeenTs": "2026-09-06T21:43:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -81768,9 +81768,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Få",
-      "lastSeenSig": "Få",
-      "lastSeenTs": "2026-09-06T21:40:00.000+02:00",
+      "lastSeen": "Vrö",
+      "lastSeenSig": "Vrö",
+      "lastSeenTs": "2026-09-06T21:44:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -82423,16 +82423,16 @@
         {
           "sig": "Än",
           "name": "Än",
-          "t": "2026-09-06T21:47:00.000+02:00",
-          "act": "",
+          "t": "2026-09-06T21:46:00.000+02:00",
+          "act": "2026-09-06T21:46:00.000+02:00",
           "est": "",
           "sched": "2026-09-06T21:47:00.000+02:00",
           "track": "1"
         }
       ],
-      "lastSeen": "Nol",
-      "lastSeenSig": "Nol",
-      "lastSeenTs": "2026-09-06T21:40:00.000+02:00"
+      "lastSeen": "Än",
+      "lastSeenSig": "Än",
+      "lastSeenTs": "2026-09-06T21:46:00.000+02:00"
     },
     {
       "id": "3579",
@@ -88044,9 +88044,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Lkö",
-      "lastSeenSig": "Lkö",
-      "lastSeenTs": "2026-09-06T21:40:00.000+02:00",
+      "lastSeen": "Glv",
+      "lastSeenSig": "Glv",
+      "lastSeenTs": "2026-09-06T21:44:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -90065,7 +90065,90 @@
           "Description": "Pendeltåg"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-07T04:39:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-07T04:39:00.000+02:00",
+          "track": "1"
+        },
+        {
+          "sig": "Gsv",
+          "name": "Gsv",
+          "t": "2026-09-07T04:43:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-07T04:43:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "P",
+          "name": "P",
+          "t": "2026-09-07T04:47:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-07T04:47:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Jv",
+          "name": "Jv",
+          "t": "2026-09-07T04:51:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-07T04:51:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Apn",
+          "name": "Apn",
+          "t": "2026-09-07T04:54:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-07T04:54:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Asd",
+          "name": "Asd",
+          "t": "2026-09-07T04:56:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-07T04:56:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Lr",
+          "name": "Lr",
+          "t": "2026-09-07T04:59:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-07T04:59:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Sn",
+          "name": "Sn",
+          "t": "2026-09-07T05:03:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-07T05:03:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Fd",
+          "name": "Fd",
+          "t": "2026-09-07T05:07:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-07T05:07:00.000+02:00",
+          "track": "1"
+        }
+      ]
     },
     {
       "id": "3513",
@@ -94038,6 +94121,31 @@
         {
           "Code": "YNA004",
           "Description": "Pendeltåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "73727",
+      "dir": "ANK",
+      "other": "Ytterby",
+      "otherSig": "Yb",
+      "from": [
+        "Ytterby"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-07T08:30:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA002",
+          "Description": "Buss"
         }
       ],
       "snabb": false
