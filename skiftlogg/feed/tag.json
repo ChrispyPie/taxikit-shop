@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-06T04:30:55+02:00",
+  "updated": "2026-09-06T04:31:27+02:00",
   "error": null,
   "trains": [
     {
@@ -96383,7 +96383,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": true
+      "snabb": true,
+      "stops": [
+        {
+          "sig": "A",
+          "name": "Alvesta",
+          "t": "2026-09-06T13:05:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-06T13:05:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-06T13:50:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-06T13:50:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "17352",
@@ -100435,6 +100455,31 @@
         }
       ],
       "snabb": false
+    },
+    {
+      "id": "2070",
+      "dir": "AVG",
+      "other": "Stockholm C",
+      "otherSig": "Cst",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Stockholm C"
+      ],
+      "sched": "2026-09-06T19:24:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "5",
+      "canceled": false,
+      "product": "VR Snabbtåg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": true
     }
   ]
 }
