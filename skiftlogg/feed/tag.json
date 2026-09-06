@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-06T07:03:30+02:00",
+  "updated": "2026-09-06T07:04:32+02:00",
   "error": null,
   "trains": [
     {
@@ -70155,9 +70155,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Krd",
-      "lastSeenSig": "Krd",
-      "lastSeenTs": "2026-09-06T07:01:00.000+02:00",
+      "lastSeen": "Mdn",
+      "lastSeenSig": "Mdn",
+      "lastSeenTs": "2026-09-06T07:04:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
@@ -70207,8 +70207,8 @@
         {
           "sig": "Mdn",
           "name": "Mdn",
-          "t": "2026-09-06T07:05:00.000+02:00",
-          "act": "",
+          "t": "2026-09-06T07:04:00.000+02:00",
+          "act": "2026-09-06T07:04:00.000+02:00",
           "est": "",
           "sched": "2026-09-06T07:05:00.000+02:00",
           "track": "3"
@@ -71205,9 +71205,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Btp",
-      "lastSeenSig": "Btp",
-      "lastSeenTs": "2026-09-06T07:00:00.000+02:00",
+      "lastSeen": "Bp",
+      "lastSeenSig": "Bp",
+      "lastSeenTs": "2026-09-06T07:03:00.000+02:00",
       "stops": [
         {
           "sig": "Hb",
@@ -72729,9 +72729,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Helsingborg C",
-      "lastSeenSig": "Hb",
-      "lastSeenTs": "2026-09-06T07:01:00.000+02:00",
+      "lastSeen": "Pö",
+      "lastSeenSig": "Pö",
+      "lastSeenTs": "2026-09-06T07:04:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -72884,7 +72884,7 @@
       "sched": "2026-09-06T09:05:00.000+02:00",
       "est": "",
       "act": "",
-      "track": "8",
+      "track": "9",
       "canceled": false,
       "product": "Västtågen",
       "traffic": [
@@ -72992,7 +72992,7 @@
           "act": "",
           "est": "",
           "sched": "2026-09-06T09:05:00.000+02:00",
-          "track": "8"
+          "track": "9"
         }
       ]
     },
@@ -73235,7 +73235,7 @@
       "sched": "2026-09-06T09:14:00.000+02:00",
       "est": "",
       "act": "",
-      "track": "9",
+      "track": "8",
       "canceled": false,
       "product": "SJ Regional",
       "traffic": [
@@ -73253,7 +73253,7 @@
           "act": "",
           "est": "",
           "sched": "2026-09-06T09:14:00.000+02:00",
-          "track": "9"
+          "track": "8"
         },
         {
           "sig": "Thn",
@@ -74540,7 +74540,7 @@
       "sched": "2026-09-06T09:55:00.000+02:00",
       "est": "",
       "act": "",
-      "track": "8",
+      "track": "9",
       "canceled": false,
       "product": "Västtågen",
       "traffic": [
@@ -74558,7 +74558,7 @@
           "act": "",
           "est": "",
           "sched": "2026-09-06T09:55:00.000+02:00",
-          "track": "8"
+          "track": "9"
         },
         {
           "sig": "Gas",
@@ -86438,15 +86438,6 @@
       "snabb": false,
       "stops": [
         {
-          "sig": "Ep",
-          "name": "Ep",
-          "t": "2026-09-05T19:02:00.000+02:00",
-          "act": "2026-09-05T19:02:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-05T19:04:00.000+02:00",
-          "track": "2"
-        },
-        {
           "sig": "Bål",
           "name": "Bål",
           "t": "2026-09-05T19:14:00.000+02:00",
@@ -86616,6 +86607,15 @@
           "est": "",
           "sched": "2026-09-06T18:47:00.000+02:00",
           "track": "1a"
+        },
+        {
+          "sig": "Ep",
+          "name": "Ep",
+          "t": "2026-09-06T19:04:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-06T19:04:00.000+02:00",
+          "track": "2"
         }
       ],
       "lastSeen": "Stockholm C",
@@ -89726,7 +89726,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Yb",
+          "name": "Ytterby",
+          "t": "2026-09-06T15:00:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-06T15:00:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-06T15:30:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-06T15:30:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "169",
@@ -93868,6 +93888,31 @@
       "track": "14",
       "canceled": false,
       "product": "Öresundståg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "17375",
+      "dir": "ANK",
+      "other": "Vänersborg C",
+      "otherSig": "Vg",
+      "from": [
+        "Vänersborg C"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-06T21:05:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "8",
+      "canceled": false,
+      "product": "Västtågen",
       "traffic": [
         {
           "Code": "YNA001",
