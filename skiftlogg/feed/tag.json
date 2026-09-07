@@ -1,53 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-07T03:41:21+02:00",
+  "updated": "2026-09-07T03:42:35+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "93560",
-      "dir": "AVG",
-      "other": "Alvesta",
-      "otherSig": "A",
-      "from": [
-        "Göteborg C"
-      ],
-      "to": [
-        "Alvesta"
-      ],
-      "sched": "2026-09-05T15:42:00.000+02:00",
-      "est": "",
-      "act": "",
-      "track": "x",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": [
-        {
-          "Code": "YNA002",
-          "Description": "Buss"
-        }
-      ],
-      "snabb": false,
-      "stops": [
-        {
-          "sig": "G",
-          "name": "Göteborg C",
-          "t": "2026-09-05T15:42:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-05T15:42:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "A",
-          "name": "Alvesta",
-          "t": "2026-09-05T16:27:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-05T16:27:00.000+02:00",
-          "track": "x"
-        }
-      ]
-    },
     {
       "id": "3060",
       "dir": "ANK",
@@ -70941,9 +70896,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-07T00:42:00.000+02:00",
       "stops": [
         {
           "sig": "T",
@@ -71089,7 +71041,10 @@
           "sched": "2026-09-07T00:44:00.000+02:00",
           "track": "2"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-07T00:42:00.000+02:00"
     },
     {
       "id": "451",
