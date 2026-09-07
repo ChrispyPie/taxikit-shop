@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-07T04:15:48+02:00",
+  "updated": "2026-09-07T04:16:52+02:00",
   "error": null,
   "trains": [
     {
@@ -69970,7 +69970,7 @@
       ],
       "sched": "2026-09-07T04:16:00.000+02:00",
       "est": "",
-      "act": "",
+      "act": "2026-09-07T04:16:00.000+02:00",
       "track": "1",
       "canceled": false,
       "product": "Västtågen",
@@ -69981,12 +69981,15 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-07T04:16:00.000+02:00",
       "stops": [
         {
           "sig": "G",
           "name": "Göteborg C",
           "t": "2026-09-07T04:16:00.000+02:00",
-          "act": "",
+          "act": "2026-09-07T04:16:00.000+02:00",
           "est": "",
           "sched": "2026-09-07T04:16:00.000+02:00",
           "track": "1"
@@ -92273,6 +92276,31 @@
         {
           "Code": "YNA001",
           "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3649",
+      "dir": "ANK",
+      "other": "Än",
+      "otherSig": "Än",
+      "from": [
+        "Än"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-07T13:25:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "10",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA004",
+          "Description": "Pendeltåg"
         }
       ],
       "snabb": false
