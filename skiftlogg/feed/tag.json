@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-08T21:18:13+02:00",
+  "updated": "2026-09-08T21:19:40+02:00",
   "error": null,
   "trains": [
     {
@@ -104,51 +104,6 @@
       "lastSeen": "Göteborg C",
       "lastSeenSig": "G",
       "lastSeenTs": "2026-09-07T09:23:00.000+02:00"
-    },
-    {
-      "id": "83731",
-      "dir": "ANK",
-      "other": "Snu",
-      "otherSig": "Snu",
-      "from": [
-        "Snu"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-07T09:19:00.000+02:00",
-      "est": "",
-      "act": "",
-      "track": "x",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": [
-        {
-          "Code": "YNA002",
-          "Description": "Buss"
-        }
-      ],
-      "snabb": false,
-      "stops": [
-        {
-          "sig": "Snu",
-          "name": "Snu",
-          "t": "2026-09-07T08:35:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-07T08:35:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "G",
-          "name": "Göteborg C",
-          "t": "2026-09-07T09:19:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-07T09:19:00.000+02:00",
-          "track": "x"
-        }
-      ]
     },
     {
       "id": "3636",
@@ -117525,9 +117480,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Hdr",
-      "lastSeenSig": "Hdr",
-      "lastSeenTs": "2026-09-08T21:16:00.000+02:00",
+      "lastSeen": "Kst",
+      "lastSeenSig": "Kst",
+      "lastSeenTs": "2026-09-08T21:19:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -118574,7 +118529,7 @@
       "snabb": false,
       "lastSeen": "Vårgårda",
       "lastSeenSig": "Vgå",
-      "lastSeenTs": "2026-09-08T21:12:00.000+02:00",
+      "lastSeenTs": "2026-09-08T21:18:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -119035,9 +118990,9 @@
         {
           "sig": "Hrc",
           "name": "Hrc",
-          "t": "2026-09-08T21:21:00.000+02:00",
+          "t": "2026-09-08T21:23:00.000+02:00",
           "act": "",
-          "est": "2026-09-08T21:21:00.000+02:00",
+          "est": "2026-09-08T21:23:00.000+02:00",
           "sched": "2026-09-08T21:16:00.000+02:00",
           "track": "5"
         },
@@ -120390,9 +120345,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Kungsbacka",
-      "lastSeenSig": "Kb",
-      "lastSeenTs": "2026-09-08T21:14:00.000+02:00",
+      "lastSeen": "Lek",
+      "lastSeenSig": "Lek",
+      "lastSeenTs": "2026-09-08T21:19:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -120666,6 +120621,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Gas",
+      "lastSeenSig": "Gas",
+      "lastSeenTs": "2026-09-08T21:18:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -120679,8 +120637,8 @@
         {
           "sig": "Gas",
           "name": "Gas",
-          "t": "2026-09-08T21:15:00.000+02:00",
-          "act": "",
+          "t": "2026-09-08T21:18:00.000+02:00",
+          "act": "2026-09-08T21:18:00.000+02:00",
           "est": "",
           "sched": "2026-09-08T21:15:00.000+02:00",
           "track": "1"
@@ -122034,9 +121992,9 @@
         }
       ],
       "snabb": true,
-      "lastSeen": "Fd",
-      "lastSeenSig": "Fd",
-      "lastSeenTs": "2026-09-08T21:17:00.000+02:00",
+      "lastSeen": "Sn",
+      "lastSeenSig": "Sn",
+      "lastSeenTs": "2026-09-08T21:19:00.000+02:00",
       "stops": [
         {
           "sig": "So",
@@ -122633,7 +122591,7 @@
           "sig": "Kb",
           "name": "Kungsbacka",
           "t": "2026-09-08T21:19:00.000+02:00",
-          "act": "",
+          "act": "2026-09-08T21:19:00.000+02:00",
           "est": "",
           "sched": "2026-09-08T21:19:00.000+02:00",
           "track": "4"
@@ -122701,7 +122659,10 @@
           "sched": "2026-09-08T21:45:00.000+02:00",
           "track": "15"
         }
-      ]
+      ],
+      "lastSeen": "Kungsbacka",
+      "lastSeenSig": "Kb",
+      "lastSeenTs": "2026-09-08T21:19:00.000+02:00"
     },
     {
       "id": "445",
@@ -123300,9 +123261,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Fdf",
-      "lastSeenSig": "Fdf",
-      "lastSeenTs": "2026-09-08T21:16:00.000+02:00",
+      "lastSeen": "Bjh",
+      "lastSeenSig": "Bjh",
+      "lastSeenTs": "2026-09-08T21:19:00.000+02:00",
       "stops": [
         {
           "sig": "Sfl",
@@ -127191,9 +127152,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Al",
-      "lastSeenSig": "Al",
-      "lastSeenTs": "2026-09-08T21:17:00.000+02:00",
+      "lastSeen": "Blv",
+      "lastSeenSig": "Blv",
+      "lastSeenTs": "2026-09-08T21:18:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
