@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-08T03:21:58+02:00",
+  "updated": "2026-09-08T03:22:36+02:00",
   "error": null,
   "trains": [
     {
@@ -115527,7 +115527,54 @@
           "Description": "Tåg"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Vbc",
+          "name": "Vbc",
+          "t": "2026-09-08T08:05:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-08T08:05:00.000+02:00",
+          "track": "5b"
+        },
+        {
+          "sig": "Åsa",
+          "name": "Åsa",
+          "t": "2026-09-08T08:19:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-08T08:19:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Kb",
+          "name": "Kungsbacka",
+          "t": "2026-09-08T08:29:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-08T08:29:00.000+02:00",
+          "track": "3"
+        },
+        {
+          "sig": "Mdn",
+          "name": "Mdn",
+          "t": "2026-09-08T08:40:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-08T08:40:00.000+02:00",
+          "track": "3"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-08T08:50:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-08T08:50:00.000+02:00",
+          "track": "15"
+        }
+      ]
     },
     {
       "id": "1063",
@@ -119075,6 +119122,31 @@
         {
           "Code": "YNA004",
           "Description": "Pendeltåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "13747",
+      "dir": "ANK",
+      "other": "Smd",
+      "otherSig": "Smd",
+      "from": [
+        "Smd"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-08T12:45:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "7",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
         }
       ],
       "snabb": false
