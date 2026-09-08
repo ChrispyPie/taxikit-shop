@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-08T02:43:36+02:00",
+  "updated": "2026-09-08T02:44:33+02:00",
   "error": null,
   "trains": [
     {
@@ -119123,6 +119123,31 @@
         }
       ],
       "snabb": false
+    },
+    {
+      "id": "484",
+      "dir": "ANK",
+      "other": "Malmö C",
+      "otherSig": "Mc",
+      "from": [
+        "Malmö C"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-08T12:20:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "13",
+      "canceled": false,
+      "product": "SJ Snabbtåg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": true
     }
   ]
 }
