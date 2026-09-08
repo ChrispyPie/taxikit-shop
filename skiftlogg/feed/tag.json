@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-09T00:31:48+02:00",
+  "updated": "2026-09-09T00:32:43+02:00",
   "error": null,
   "trains": [
     {
@@ -608,51 +608,6 @@
       "lastSeen": "Göteborg C",
       "lastSeenSig": "G",
       "lastSeenTs": "2026-09-07T12:37:00.000+02:00"
-    },
-    {
-      "id": "73743",
-      "dir": "ANK",
-      "other": "Ytterby",
-      "otherSig": "Yb",
-      "from": [
-        "Ytterby"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-07T12:32:00.000+02:00",
-      "est": "",
-      "act": "",
-      "track": "x",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": [
-        {
-          "Code": "YNA002",
-          "Description": "Buss"
-        }
-      ],
-      "snabb": false,
-      "stops": [
-        {
-          "sig": "Yb",
-          "name": "Ytterby",
-          "t": "2026-09-07T12:02:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-07T12:02:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "G",
-          "name": "Göteborg C",
-          "t": "2026-09-07T12:32:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-07T12:32:00.000+02:00",
-          "track": "x"
-        }
-      ]
     },
     {
       "id": "63743",
@@ -110406,6 +110361,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Skövde C",
+      "lastSeenSig": "Sk",
+      "lastSeenTs": "2026-09-08T23:11:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -110479,10 +110437,7 @@
           "sched": "2026-09-08T23:00:00.000+02:00",
           "track": "1"
         }
-      ],
-      "lastSeen": "Skövde C",
-      "lastSeenSig": "Sk",
-      "lastSeenTs": "2026-09-08T23:11:00.000+02:00"
+      ]
     },
     {
       "id": "3481",
@@ -110508,6 +110463,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-08T21:33:00.000+02:00",
       "stops": [
         {
           "sig": "T",
@@ -110581,10 +110539,7 @@
           "sched": "2026-09-08T21:30:00.000+02:00",
           "track": "2"
         }
-      ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-08T21:33:00.000+02:00"
+      ]
     },
     {
       "id": "73779",
@@ -128390,7 +128345,7 @@
       "sched": "2026-09-09T09:47:00.000+02:00",
       "est": "",
       "act": "",
-      "track": "4",
+      "track": "6",
       "canceled": false,
       "product": "SJ Snabbtåg",
       "traffic": [
