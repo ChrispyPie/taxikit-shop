@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-08T15:22:41+02:00",
+  "updated": "2026-09-08T15:23:40+02:00",
   "error": null,
   "trains": [
     {
@@ -111747,9 +111747,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Fabp",
-      "lastSeenSig": "Fabp",
-      "lastSeenTs": "2026-09-08T15:19:00.000+02:00",
+      "lastSeen": "He",
+      "lastSeenSig": "He",
+      "lastSeenTs": "2026-09-08T15:23:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -112767,9 +112767,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-08T14:32:00.000+02:00",
       "stops": [
         {
           "sig": "Vg",
@@ -112843,7 +112840,10 @@
           "sched": "2026-09-08T14:35:00.000+02:00",
           "track": "5"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-08T14:32:00.000+02:00"
     },
     {
       "id": "63751",
@@ -114000,9 +114000,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Åsa",
-      "lastSeenSig": "Åsa",
-      "lastSeenTs": "2026-09-08T15:20:00.000+02:00",
+      "lastSeen": "Få",
+      "lastSeenSig": "Få",
+      "lastSeenTs": "2026-09-08T15:22:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -115505,7 +115505,7 @@
           "sig": "Lis",
           "name": "Lis",
           "t": "2026-09-08T15:21:00.000+02:00",
-          "act": "",
+          "act": "2026-09-08T15:21:00.000+02:00",
           "est": "2026-09-08T15:21:00.000+02:00",
           "sched": "2026-09-08T15:19:00.000+02:00",
           "track": "2"
@@ -117033,9 +117033,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Ndv",
-      "lastSeenSig": "Ndv",
-      "lastSeenTs": "2026-09-08T15:16:00.000+02:00",
+      "lastSeen": "Fd",
+      "lastSeenSig": "Fd",
+      "lastSeenTs": "2026-09-08T15:22:00.000+02:00",
       "stops": [
         {
           "sig": "Cst",
@@ -117234,9 +117234,9 @@
         }
       ],
       "snabb": true,
-      "lastSeen": "Bgs",
-      "lastSeenSig": "Bgs",
-      "lastSeenTs": "2026-09-08T15:21:00.000+02:00",
+      "lastSeen": "Vbd",
+      "lastSeenSig": "Vbd",
+      "lastSeenTs": "2026-09-08T15:22:00.000+02:00",
       "stops": [
         {
           "sig": "Cst",
@@ -117417,9 +117417,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Ag",
-      "lastSeenSig": "Ag",
-      "lastSeenTs": "2026-09-08T15:20:00.000+02:00",
+      "lastSeen": "Ldo",
+      "lastSeenSig": "Ldo",
+      "lastSeenTs": "2026-09-08T15:22:00.000+02:00",
       "stops": [
         {
           "sig": "Hd",
@@ -117896,7 +117896,7 @@
       "snabb": false,
       "lastSeen": "Khe",
       "lastSeenSig": "Khe",
-      "lastSeenTs": "2026-09-08T15:21:00.000+02:00",
+      "lastSeenTs": "2026-09-08T15:22:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
@@ -117911,7 +117911,7 @@
           "sig": "Khe",
           "name": "Khe",
           "t": "2026-09-08T15:21:00.000+02:00",
-          "act": "",
+          "act": "2026-09-08T15:21:00.000+02:00",
           "est": "",
           "sched": "2026-09-08T15:21:00.000+02:00",
           "track": "1"
@@ -122067,12 +122067,15 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Halmstad C",
+      "lastSeenSig": "Hd",
+      "lastSeenTs": "2026-09-08T15:23:00.000+02:00",
       "stops": [
         {
           "sig": "Hd",
           "name": "Halmstad C",
           "t": "2026-09-08T15:23:00.000+02:00",
-          "act": "",
+          "act": "2026-09-08T15:23:00.000+02:00",
           "est": "",
           "sched": "2026-09-08T15:23:00.000+02:00",
           "track": "1"
@@ -128516,7 +128519,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-08T18:00:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-08T18:00:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Yb",
+          "name": "Ytterby",
+          "t": "2026-09-08T18:30:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-08T18:30:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "3123",
