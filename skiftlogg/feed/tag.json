@@ -1,53 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-08T02:31:05+02:00",
+  "updated": "2026-09-08T02:32:39+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "73751",
-      "dir": "ANK",
-      "other": "Ytterby",
-      "otherSig": "Yb",
-      "from": [
-        "Ytterby"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-06T14:32:00.000+02:00",
-      "est": "",
-      "act": "",
-      "track": "x",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": [
-        {
-          "Code": "YNA002",
-          "Description": "Buss"
-        }
-      ],
-      "snabb": false,
-      "stops": [
-        {
-          "sig": "Yb",
-          "name": "Ytterby",
-          "t": "2026-09-06T14:02:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-06T14:02:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "G",
-          "name": "Göteborg C",
-          "t": "2026-09-06T14:32:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-06T14:32:00.000+02:00",
-          "track": "x"
-        }
-      ]
-    },
     {
       "id": "63549",
       "dir": "ANK",
@@ -115745,7 +115700,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Yb",
+          "name": "Ytterby",
+          "t": "2026-09-08T07:45:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-08T07:45:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-08T08:15:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-08T08:15:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "3532",
@@ -119489,6 +119464,31 @@
       "track": "14",
       "canceled": false,
       "product": "Öresundståg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "13305",
+      "dir": "ANK",
+      "other": "Mst",
+      "otherSig": "Mst",
+      "from": [
+        "Mst"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-08T12:10:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "12",
+      "canceled": false,
+      "product": "Västtågen",
       "traffic": [
         {
           "Code": "YNA001",
