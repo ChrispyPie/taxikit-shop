@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-09T02:23:44+02:00",
+  "updated": "2026-09-09T02:24:45+02:00",
   "error": null,
   "trains": [
     {
@@ -127344,6 +127344,31 @@
       "track": "14",
       "canceled": false,
       "product": "Öresundståg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "13305",
+      "dir": "ANK",
+      "other": "Mst",
+      "otherSig": "Mst",
+      "from": [
+        "Mst"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-09T12:10:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "12",
+      "canceled": false,
+      "product": "Västtågen",
       "traffic": [
         {
           "Code": "YNA001",
