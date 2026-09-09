@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-10T01:03:04+02:00",
+  "updated": "2026-09-10T01:04:49+02:00",
   "error": null,
   "trains": [
     {
@@ -103479,9 +103479,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Malmö C",
-      "lastSeenSig": "Mc",
-      "lastSeenTs": "2026-09-09T22:46:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -103609,7 +103606,10 @@
           "sched": "2026-09-09T22:48:00.000+02:00",
           "track": "1b"
         }
-      ]
+      ],
+      "lastSeen": "Malmö C",
+      "lastSeenSig": "Mc",
+      "lastSeenTs": "2026-09-09T22:46:00.000+02:00"
     },
     {
       "id": "3675",
@@ -111192,6 +111192,9 @@
         }
       ],
       "snabb": true,
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-09T22:48:00.000+02:00",
       "stops": [
         {
           "sig": "Cst",
@@ -111238,10 +111241,7 @@
           "sched": "2026-09-09T22:47:00.000+02:00",
           "track": "3"
         }
-      ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-09T22:48:00.000+02:00"
+      ]
     },
     {
       "id": "67388",
@@ -114225,9 +114225,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Asd",
-      "lastSeenSig": "Asd",
-      "lastSeenTs": "2026-09-10T01:01:00.000+02:00",
+      "lastSeen": "Apn",
+      "lastSeenSig": "Apn",
+      "lastSeenTs": "2026-09-10T01:03:00.000+02:00",
       "stops": [
         {
           "sig": "Fd",
@@ -114268,8 +114268,8 @@
         {
           "sig": "Apn",
           "name": "Apn",
-          "t": "2026-09-10T01:04:00.000+02:00",
-          "act": "",
+          "t": "2026-09-10T01:03:00.000+02:00",
+          "act": "2026-09-10T01:03:00.000+02:00",
           "est": "",
           "sched": "2026-09-10T01:04:00.000+02:00",
           "track": "1"
@@ -114336,12 +114336,15 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Kungsbacka",
+      "lastSeenSig": "Kb",
+      "lastSeenTs": "2026-09-10T01:04:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
           "name": "Kungsbacka",
           "t": "2026-09-10T01:04:00.000+02:00",
-          "act": "",
+          "act": "2026-09-10T01:04:00.000+02:00",
           "est": "",
           "sched": "2026-09-10T01:04:00.000+02:00",
           "track": "3"
