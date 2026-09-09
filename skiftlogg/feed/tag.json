@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-10T01:04:49+02:00",
+  "updated": "2026-09-10T01:06:43+02:00",
   "error": null,
   "trains": [
     {
@@ -103511,7 +103511,7 @@
           "sig": "Åsa",
           "name": "Åsa",
           "t": "2026-09-09T20:22:00.000+02:00",
-          "act": "",
+          "act": "2026-09-09T20:22:00.000+02:00",
           "est": "",
           "sched": "2026-09-09T20:22:00.000+02:00",
           "track": "1"
@@ -108219,9 +108219,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Fd",
-      "lastSeenSig": "Fd",
-      "lastSeenTs": "2026-09-09T22:06:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -108304,7 +108301,10 @@
           "sched": "2026-09-09T22:07:00.000+02:00",
           "track": "1"
         }
-      ]
+      ],
+      "lastSeen": "Fd",
+      "lastSeenSig": "Fd",
+      "lastSeenTs": "2026-09-09T22:06:00.000+02:00"
     },
     {
       "id": "63779",
@@ -109233,9 +109233,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-09T22:05:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -109372,7 +109369,10 @@
           "sched": "2026-09-09T22:05:00.000+02:00",
           "track": "14"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-09T22:05:00.000+02:00"
     },
     {
       "id": "13233",
@@ -109398,9 +109398,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-09T22:05:00.000+02:00",
       "stops": [
         {
           "sig": "Sfl",
@@ -109492,7 +109489,10 @@
           "sched": "2026-09-09T22:05:00.000+02:00",
           "track": "9"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-09T22:05:00.000+02:00"
     },
     {
       "id": "13783",
@@ -113010,9 +113010,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Bp",
-      "lastSeenSig": "Bp",
-      "lastSeenTs": "2026-09-10T01:02:00.000+02:00",
+      "lastSeen": "Btp",
+      "lastSeenSig": "Btp",
+      "lastSeenTs": "2026-09-10T01:06:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -114225,9 +114225,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Apn",
-      "lastSeenSig": "Apn",
-      "lastSeenTs": "2026-09-10T01:03:00.000+02:00",
+      "lastSeen": "Jv",
+      "lastSeenSig": "Jv",
+      "lastSeenTs": "2026-09-10T01:07:00.000+02:00",
       "stops": [
         {
           "sig": "Fd",
@@ -114277,8 +114277,8 @@
         {
           "sig": "Jv",
           "name": "Jv",
-          "t": "2026-09-10T01:08:00.000+02:00",
-          "act": "",
+          "t": "2026-09-10T01:07:00.000+02:00",
+          "act": "2026-09-10T01:07:00.000+02:00",
           "est": "",
           "sched": "2026-09-10T01:08:00.000+02:00",
           "track": "1"
@@ -114336,9 +114336,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Kungsbacka",
-      "lastSeenSig": "Kb",
-      "lastSeenTs": "2026-09-10T01:04:00.000+02:00",
+      "lastSeen": "Khe",
+      "lastSeenSig": "Khe",
+      "lastSeenTs": "2026-09-10T01:06:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
@@ -123260,7 +123260,81 @@
           "Description": "Tåg"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Sfl",
+          "name": "Säffle",
+          "t": "2026-09-10T05:30:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-10T05:30:00.000+02:00",
+          "track": "1"
+        },
+        {
+          "sig": "Ål",
+          "name": "Ål",
+          "t": "2026-09-10T05:39:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-10T05:39:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Ml",
+          "name": "Ml",
+          "t": "2026-09-10T06:02:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-10T06:02:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Öx",
+          "name": "Öx",
+          "t": "2026-09-10T06:29:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-10T06:29:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Thn",
+          "name": "Trollhättan",
+          "t": "2026-09-10T06:35:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-10T06:35:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Les",
+          "name": "Les",
+          "t": "2026-09-10T06:51:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-10T06:51:00.000+02:00",
+          "track": "1"
+        },
+        {
+          "sig": "Gas",
+          "name": "Gas",
+          "t": "2026-09-10T07:09:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-10T07:09:00.000+02:00",
+          "track": "1"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-10T07:15:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-10T07:15:00.000+02:00",
+          "track": "11"
+        }
+      ]
     },
     {
       "id": "3528",
@@ -127301,6 +127375,31 @@
         }
       ],
       "snabb": false
+    },
+    {
+      "id": "2021",
+      "dir": "ANK",
+      "other": "Stockholm C",
+      "otherSig": "Cst",
+      "from": [
+        "Stockholm C"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-10T10:35:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "5",
+      "canceled": false,
+      "product": "VR Snabbtåg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": true
     }
   ]
 }
