@@ -1,8 +1,8 @@
 {
   "airport": "GOT",
-  "updated": "2026-09-09T12:01:25+02:00",
-  "arrivalsUpdated": "2026-09-09T12:01:28+02:00",
-  "departuresUpdated": "2026-09-09T11:08:04+02:00",
+  "updated": "2026-09-09T12:06:33+02:00",
+  "arrivalsUpdated": "2026-09-09T12:06:35+02:00",
+  "departuresUpdated": "2026-09-09T12:06:38+02:00",
   "yesterdayUpdated": "2026-09-09T05:26:41+02:00",
   "tomorrowUpdated": "2026-09-09T12:01:30+02:00",
   "error": null,
@@ -1707,7 +1707,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-09T12:55:00Z",
-      "est": "2026-09-09T12:53:00Z",
+      "est": "2026-09-09T12:52:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "",
@@ -1715,7 +1715,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 14:53"
+      "rawStatus": "Beräknad 14:52"
     },
     {
       "id": "SK143",
@@ -2448,7 +2448,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-09T12:05:00Z",
-      "est": "2026-09-09T11:49:00Z",
+      "est": "2026-09-09T11:55:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "17",
@@ -2456,7 +2456,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 13:49"
+      "rawStatus": "Beräknad 13:55"
     },
     {
       "id": "LH2428",
@@ -2508,7 +2508,7 @@
       "est": "2026-09-09T11:00:00Z",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "21A",
       "baggage": "1",
       "firstBag": "",
       "firstBagEst": "",
@@ -2616,18 +2616,18 @@
       "other": "Helsingfors",
       "iata": "",
       "airline": "Finnair",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 12:01",
       "sched": "2026-09-09T10:15:00Z",
       "est": "2026-09-09T10:05:00Z",
-      "act": "",
+      "act": "2026-09-09T10:01:00Z",
       "terminal": "T1",
       "gate": "17",
       "baggage": "1",
       "firstBag": "",
-      "firstBagEst": "",
+      "firstBagEst": "2026-09-09T10:21:00Z",
       "lastBag": "",
-      "rawStatus": "Ankommer 12:05"
+      "rawStatus": "Landat 12:01"
     },
     {
       "id": "AF1552",
@@ -4380,25 +4380,6 @@
   ],
   "departures": [
     {
-      "id": "FR5658",
-      "dir": "AVG",
-      "other": "Edinburgh",
-      "iata": "",
-      "airline": "Ryanair Ltd",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-09-07T20:45:00Z",
-      "est": "",
-      "act": "2026-09-07T21:30:18Z",
-      "terminal": "T1",
-      "gate": "23",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 23:40"
-    },
-    {
       "id": "LH2431",
       "dir": "AVG",
       "other": "München",
@@ -6068,7 +6049,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "FR6094",
@@ -6095,18 +6076,18 @@
       "other": "Prag",
       "iata": "",
       "airline": "Ryanair Ltd",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-09-09T09:30:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-09-09T09:35:49Z",
       "terminal": "T1",
       "gate": "13",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Boarding"
+      "rawStatus": "Startat 11:44"
     },
     {
       "id": "FR4013",
@@ -6190,18 +6171,18 @@
       "other": "Amsterdam",
       "iata": "",
       "airline": "KLM",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-09-09T10:05:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-09-09T09:58:27Z",
       "terminal": "T1",
       "gate": "19",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "SN2318",
@@ -6310,7 +6291,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "21A",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6391,7 +6372,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gå till gate"
     },
     {
       "id": "SK2142",
@@ -6437,18 +6418,18 @@
       "other": "Frankfurt",
       "iata": "",
       "airline": "Lufthansa",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-09-09T08:40:00Z",
-      "est": "2026-09-09T09:35:00Z",
-      "act": "",
+      "est": "",
+      "act": "2026-09-09T09:34:34Z",
       "terminal": "T1",
       "gate": "12",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Försenad till 11:35 · Gå till gate"
+      "rawStatus": "Startat 11:41"
     },
     {
       "id": "BLX495",
@@ -6494,18 +6475,18 @@
       "other": "München",
       "iata": "",
       "airline": "Lufthansa",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-09-09T09:50:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-09-09T09:45:57Z",
       "terminal": "T1",
       "gate": "15",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gå till gate"
+      "rawStatus": "Startat 11:54"
     },
     {
       "id": "FR5658",
@@ -6600,7 +6581,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Boarding"
     },
     {
       "id": "VL2431",
@@ -6935,7 +6916,7 @@
       "statusSv": "Startat",
       "sched": "2026-09-09T08:40:00Z",
       "est": "",
-      "act": "2026-09-09T08:53:00Z",
+      "act": "2026-09-09T08:43:00Z",
       "terminal": "T1",
       "gate": "16",
       "baggage": "",
