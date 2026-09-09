@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-09T23:04:51+02:00",
+  "updated": "2026-09-09T23:05:47+02:00",
   "error": null,
   "trains": [
     {
@@ -108362,7 +108362,7 @@
       "snabb": false,
       "lastSeen": "Arb",
       "lastSeenSig": "Arb",
-      "lastSeenTs": "2026-09-09T23:03:00.000+02:00",
+      "lastSeenTs": "2026-09-09T23:05:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -115742,7 +115742,7 @@
           "act": "",
           "est": "",
           "sched": "2026-09-09T23:45:00.000+02:00",
-          "track": "1"
+          "track": "-"
         }
       ]
     },
@@ -121931,7 +121931,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-10T05:00:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-10T05:00:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Yb",
+          "name": "Ytterby",
+          "t": "2026-09-10T05:30:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-10T05:30:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "400",
@@ -125704,6 +125724,81 @@
         {
           "Code": "YNA004",
           "Description": "Pendeltåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "170",
+      "dir": "AVG",
+      "other": "Stockholm C",
+      "otherSig": "Cst",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Stockholm C"
+      ],
+      "sched": "2026-09-10T08:29:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "3",
+      "canceled": false,
+      "product": "SJ Regional",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3182",
+      "dir": "ANK",
+      "other": "Kungsbacka",
+      "otherSig": "Kb",
+      "from": [
+        "Kungsbacka"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-10T08:30:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "16",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA004",
+          "Description": "Pendeltåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "73727",
+      "dir": "ANK",
+      "other": "Ytterby",
+      "otherSig": "Yb",
+      "from": [
+        "Ytterby"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-10T08:30:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA002",
+          "Description": "Buss"
         }
       ],
       "snabb": false
