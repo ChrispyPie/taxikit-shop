@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-09T02:10:57+02:00",
+  "updated": "2026-09-09T02:12:15+02:00",
   "error": null,
   "trains": [
     {
@@ -104064,9 +104064,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Skövde C",
-      "lastSeenSig": "Sk",
-      "lastSeenTs": "2026-09-08T23:11:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -104140,7 +104137,10 @@
           "sched": "2026-09-08T23:00:00.000+02:00",
           "track": "1"
         }
-      ]
+      ],
+      "lastSeen": "Skövde C",
+      "lastSeenSig": "Sk",
+      "lastSeenTs": "2026-09-08T23:11:00.000+02:00"
     },
     {
       "id": "3481",
@@ -107100,9 +107100,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Kungsbacka",
-      "lastSeenSig": "Kb",
-      "lastSeenTs": "2026-09-08T23:11:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -107176,7 +107173,10 @@
           "sched": "2026-09-08T23:11:00.000+02:00",
           "track": "4"
         }
-      ]
+      ],
+      "lastSeen": "Kungsbacka",
+      "lastSeenSig": "Kb",
+      "lastSeenTs": "2026-09-08T23:11:00.000+02:00"
     },
     {
       "id": "3088",
@@ -127571,6 +127571,31 @@
         }
       ],
       "snabb": false
+    },
+    {
+      "id": "425",
+      "dir": "ANK",
+      "other": "Stockholm C",
+      "otherSig": "Cst",
+      "from": [
+        "Stockholm C"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-09T11:47:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "4",
+      "canceled": false,
+      "product": "SJ Snabbtåg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": true
     }
   ]
 }
