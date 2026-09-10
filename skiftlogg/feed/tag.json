@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-10T15:43:51+02:00",
+  "updated": "2026-09-10T15:44:51+02:00",
   "error": null,
   "trains": [
     {
@@ -109093,9 +109093,9 @@
         {
           "sig": "Trm",
           "name": "Trm",
-          "t": "2026-09-10T15:46:00.000+02:00",
+          "t": "2026-09-10T15:47:00.000+02:00",
           "act": "",
-          "est": "",
+          "est": "2026-09-10T15:47:00.000+02:00",
           "sched": "2026-09-10T15:46:00.000+02:00",
           "track": "1"
         },
@@ -115539,9 +115539,9 @@
         }
       ],
       "snabb": true,
-      "lastSeen": "Sn",
-      "lastSeenSig": "Sn",
-      "lastSeenTs": "2026-09-10T15:40:00.000+02:00",
+      "lastSeen": "Fd",
+      "lastSeenSig": "Fd",
+      "lastSeenTs": "2026-09-10T15:43:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -118256,7 +118256,7 @@
           "sig": "Sue",
           "name": "Sue",
           "t": "2026-09-10T15:43:00.000+02:00",
-          "act": "2026-09-10T15:43:00.000+02:00",
+          "act": "",
           "est": "2026-09-10T15:43:00.000+02:00",
           "sched": "2026-09-10T15:42:00.000+02:00",
           "track": "1"
@@ -118280,9 +118280,9 @@
           "track": "6"
         }
       ],
-      "lastSeen": "Sue",
-      "lastSeenSig": "Sue",
-      "lastSeenTs": "2026-09-10T15:43:00.000+02:00"
+      "lastSeen": "Bhs",
+      "lastSeenSig": "Bhs",
+      "lastSeenTs": "2026-09-10T15:40:00.000+02:00"
     },
     {
       "id": "336",
@@ -118556,7 +118556,7 @@
       "snabb": false,
       "lastSeen": "Ldo",
       "lastSeenSig": "Ldo",
-      "lastSeenTs": "2026-09-10T15:42:00.000+02:00",
+      "lastSeenTs": "2026-09-10T15:43:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
@@ -119850,7 +119850,7 @@
           "name": "Ag",
           "t": "2026-09-10T15:54:00.000+02:00",
           "act": "",
-          "est": "2026-09-10T15:54:00.000+02:00",
+          "est": "",
           "sched": "2026-09-10T15:54:00.000+02:00",
           "track": "1"
         },
@@ -123873,9 +123873,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Hdr",
-      "lastSeenSig": "Hdr",
-      "lastSeenTs": "2026-09-10T15:43:00.000+02:00",
+      "lastSeen": "Halmstad C",
+      "lastSeenSig": "Hd",
+      "lastSeenTs": "2026-09-10T15:45:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -123961,8 +123961,8 @@
         {
           "sig": "Hd",
           "name": "Halmstad C",
-          "t": "2026-09-10T15:46:00.000+02:00",
-          "act": "",
+          "t": "2026-09-10T15:45:00.000+02:00",
+          "act": "2026-09-10T15:45:00.000+02:00",
           "est": "",
           "sched": "2026-09-10T15:46:00.000+02:00",
           "track": "2"
@@ -130388,6 +130388,31 @@
         }
       ],
       "snabb": false
+    },
+    {
+      "id": "2050",
+      "dir": "AVG",
+      "other": "Stockholm C",
+      "otherSig": "Cst",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Stockholm C"
+      ],
+      "sched": "2026-09-10T19:24:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "5",
+      "canceled": false,
+      "product": "VR Snabbtåg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": true
     }
   ]
 }
