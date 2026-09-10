@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-10T03:45:57+02:00",
+  "updated": "2026-09-10T03:47:32+02:00",
   "error": null,
   "trains": [
     {
@@ -329,81 +329,6 @@
       "lastSeen": "Göteborg C",
       "lastSeenSig": "G",
       "lastSeenTs": "2026-09-08T16:00:00.000+02:00"
-    },
-    {
-      "id": "488",
-      "dir": "ANK",
-      "other": "Malmö C",
-      "otherSig": "Mc",
-      "from": [
-        "Malmö C"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-08T15:50:00.000+02:00",
-      "est": "",
-      "act": "2026-09-08T15:47:00.000+02:00",
-      "track": "13",
-      "canceled": false,
-      "product": "SJ Snabbtåg",
-      "traffic": [
-        {
-          "Code": "YNA001",
-          "Description": "Tåg"
-        }
-      ],
-      "snabb": true,
-      "stops": [
-        {
-          "sig": "Mc",
-          "name": "Malmö C",
-          "t": "2026-09-08T13:32:00.000+02:00",
-          "act": "2026-09-08T13:32:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-08T13:32:00.000+02:00",
-          "track": "8"
-        },
-        {
-          "sig": "Lu",
-          "name": "Lund C",
-          "t": "2026-09-08T13:46:00.000+02:00",
-          "act": "2026-09-08T13:46:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-08T13:46:00.000+02:00",
-          "track": "6"
-        },
-        {
-          "sig": "Hb",
-          "name": "Helsingborg C",
-          "t": "2026-09-08T14:13:00.000+02:00",
-          "act": "2026-09-08T14:13:00.000+02:00",
-          "est": "2026-09-08T14:14:00.000+02:00",
-          "sched": "2026-09-08T14:12:00.000+02:00",
-          "track": "4a"
-        },
-        {
-          "sig": "Hd",
-          "name": "Halmstad C",
-          "t": "2026-09-08T14:48:00.000+02:00",
-          "act": "2026-09-08T14:48:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-08T14:49:00.000+02:00",
-          "track": "2"
-        },
-        {
-          "sig": "G",
-          "name": "Göteborg C",
-          "t": "2026-09-08T15:47:00.000+02:00",
-          "act": "2026-09-08T15:47:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-08T15:50:00.000+02:00",
-          "track": "13"
-        }
-      ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-08T15:47:00.000+02:00"
     },
     {
       "id": "63764",
@@ -124393,6 +124318,31 @@
         }
       ],
       "snabb": false
+    },
+    {
+      "id": "436",
+      "dir": "AVG",
+      "other": "Stockholm C",
+      "otherSig": "Cst",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Stockholm C"
+      ],
+      "sched": "2026-09-10T13:11:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "4",
+      "canceled": false,
+      "product": "SJ Snabbtåg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": true
     }
   ]
 }
