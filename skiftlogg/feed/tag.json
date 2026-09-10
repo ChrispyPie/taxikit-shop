@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-10T02:34:43+02:00",
+  "updated": "2026-09-10T02:36:30+02:00",
   "error": null,
   "trains": [
     {
@@ -107358,7 +107358,7 @@
           "name": "Fd",
           "t": "2026-09-10T00:45:00.000+02:00",
           "act": "2026-09-10T00:45:00.000+02:00",
-          "est": "2026-09-10T00:43:00.000+02:00",
+          "est": "2026-09-10T00:45:00.000+02:00",
           "sched": "2026-09-10T00:39:00.000+02:00",
           "track": "2"
         },
@@ -126120,6 +126120,31 @@
         }
       ],
       "snabb": true
+    },
+    {
+      "id": "3046",
+      "dir": "ANK",
+      "other": "Kungsbacka",
+      "otherSig": "Kb",
+      "from": [
+        "Kungsbacka"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-10T12:15:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "15",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA004",
+          "Description": "Pendeltåg"
+        }
+      ],
+      "snabb": false
     }
   ]
 }
