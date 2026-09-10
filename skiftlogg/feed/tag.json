@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-10T04:31:56+02:00",
+  "updated": "2026-09-10T04:32:49+02:00",
   "error": null,
   "trains": [
     {
@@ -99332,7 +99332,7 @@
       "snabb": false,
       "lastSeen": "Lr",
       "lastSeenSig": "Lr",
-      "lastSeenTs": "2026-09-10T04:31:00.000+02:00",
+      "lastSeenTs": "2026-09-10T04:32:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -99793,8 +99793,8 @@
         {
           "sig": "Apn",
           "name": "Apn",
-          "t": "2026-09-10T04:30:00.000+02:00",
-          "act": "",
+          "t": "2026-09-10T04:31:00.000+02:00",
+          "act": "2026-09-10T04:31:00.000+02:00",
           "est": "",
           "sched": "2026-09-10T04:30:00.000+02:00",
           "track": "1"
@@ -122626,6 +122626,31 @@
         }
       ],
       "snabb": false
+    },
+    {
+      "id": "2027",
+      "dir": "ANK",
+      "other": "Stockholm C",
+      "otherSig": "Cst",
+      "from": [
+        "Stockholm C"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-10T13:35:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "5",
+      "canceled": false,
+      "product": "VR Snabbtåg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": true
     }
   ]
 }
