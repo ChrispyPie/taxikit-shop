@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-11T05:04:58+02:00",
+  "updated": "2026-09-11T05:05:59+02:00",
   "error": null,
   "trains": [
     {
@@ -97188,9 +97188,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Ns",
-      "lastSeenSig": "Ns",
-      "lastSeenTs": "2026-09-11T05:01:00.000+02:00",
+      "lastSeen": "Vbd",
+      "lastSeenSig": "Vbd",
+      "lastSeenTs": "2026-09-11T05:05:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -97353,9 +97353,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Sn",
-      "lastSeenSig": "Sn",
-      "lastSeenTs": "2026-09-11T05:03:00.000+02:00",
+      "lastSeen": "Fd",
+      "lastSeenSig": "Fd",
+      "lastSeenTs": "2026-09-11T05:05:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -97432,8 +97432,8 @@
         {
           "sig": "Fd",
           "name": "Fd",
-          "t": "2026-09-11T05:07:00.000+02:00",
-          "act": "",
+          "t": "2026-09-11T05:05:00.000+02:00",
+          "act": "2026-09-11T05:05:00.000+02:00",
           "est": "",
           "sched": "2026-09-11T05:07:00.000+02:00",
           "track": "1"
@@ -105327,9 +105327,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Mia",
-      "lastSeenSig": "Mia",
-      "lastSeenTs": "2026-09-11T05:03:00.000+02:00",
+      "lastSeen": "Öda",
+      "lastSeenSig": "Öda",
+      "lastSeenTs": "2026-09-11T05:05:00.000+02:00",
       "stops": [
         {
           "sig": "Hb",
@@ -121758,6 +121758,56 @@
         }
       ],
       "snabb": false
+    },
+    {
+      "id": "13306",
+      "dir": "AVG",
+      "other": "Mst",
+      "otherSig": "Mst",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Mst"
+      ],
+      "sched": "2026-09-11T13:45:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "12",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "429",
+      "dir": "ANK",
+      "other": "Stockholm C",
+      "otherSig": "Cst",
+      "from": [
+        "Stockholm C"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-11T13:47:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "3",
+      "canceled": false,
+      "product": "SJ Snabbtåg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": true
     }
   ]
 }
