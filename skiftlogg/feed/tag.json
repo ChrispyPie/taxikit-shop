@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-11T22:40:05+02:00",
+  "updated": "2026-09-11T22:41:01+02:00",
   "error": null,
   "trains": [
     {
@@ -110178,9 +110178,9 @@
         }
       ],
       "snabb": true,
-      "lastSeen": "Katrineholm",
-      "lastSeenSig": "K",
-      "lastSeenTs": "2026-09-11T21:54:00.000+02:00",
+      "lastSeen": "Spn",
+      "lastSeenSig": "Spn",
+      "lastSeenTs": "2026-09-11T21:59:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -115017,9 +115017,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "För",
-      "lastSeenSig": "För",
-      "lastSeenTs": "2026-09-11T22:39:00.000+02:00",
+      "lastSeen": "Vip",
+      "lastSeenSig": "Vip",
+      "lastSeenTs": "2026-09-11T22:40:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -116647,9 +116647,9 @@
         {
           "sig": "F",
           "name": "Falköping C",
-          "t": "2026-09-11T22:49:00.000+02:00",
+          "t": "2026-09-11T22:51:00.000+02:00",
           "act": "",
-          "est": "2026-09-11T22:49:00.000+02:00",
+          "est": "2026-09-11T22:51:00.000+02:00",
           "sched": "2026-09-11T22:41:00.000+02:00",
           "track": "3"
         },
@@ -117651,9 +117651,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Vbc",
-      "lastSeenSig": "Vbc",
-      "lastSeenTs": "2026-09-11T22:37:00.000+02:00",
+      "lastSeen": "Haa",
+      "lastSeenSig": "Haa",
+      "lastSeenTs": "2026-09-11T22:39:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -118274,7 +118274,7 @@
           "sig": "Khe",
           "name": "Khe",
           "t": "2026-09-11T22:39:00.000+02:00",
-          "act": "",
+          "act": "2026-09-11T22:39:00.000+02:00",
           "est": "2026-09-11T22:39:00.000+02:00",
           "sched": "2026-09-11T22:38:00.000+02:00",
           "track": "2"
@@ -118289,9 +118289,9 @@
           "track": "4"
         }
       ],
-      "lastSeen": "Ag",
-      "lastSeenSig": "Ag",
-      "lastSeenTs": "2026-09-11T22:37:00.000+02:00"
+      "lastSeen": "Khe",
+      "lastSeenSig": "Khe",
+      "lastSeenTs": "2026-09-11T22:39:00.000+02:00"
     },
     {
       "id": "3086",
@@ -119579,7 +119579,7 @@
           "sig": "Apn",
           "name": "Apn",
           "t": "2026-09-11T22:39:00.000+02:00",
-          "act": "",
+          "act": "2026-09-11T22:39:00.000+02:00",
           "est": "2026-09-11T22:39:00.000+02:00",
           "sched": "2026-09-11T22:30:00.000+02:00",
           "track": "1"
@@ -119603,9 +119603,9 @@
           "track": "1"
         }
       ],
-      "lastSeen": "Lr",
-      "lastSeenSig": "Lr",
-      "lastSeenTs": "2026-09-11T22:36:00.000+02:00"
+      "lastSeen": "Apn",
+      "lastSeenSig": "Apn",
+      "lastSeenTs": "2026-09-11T22:39:00.000+02:00"
     },
     {
       "id": "3088",
@@ -121029,9 +121029,9 @@
         }
       ],
       "snabb": true,
-      "lastSeen": "Hrc",
-      "lastSeenSig": "Hrc",
-      "lastSeenTs": "2026-09-11T22:38:00.000+02:00",
+      "lastSeen": "Hrv",
+      "lastSeenSig": "Hrv",
+      "lastSeenTs": "2026-09-11T22:40:00.000+02:00",
       "stops": [
         {
           "sig": "Cst",
@@ -123603,9 +123603,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Tp",
-      "lastSeenSig": "Tp",
-      "lastSeenTs": "2026-09-11T22:36:00.000+02:00",
+      "lastSeen": "Sal",
+      "lastSeenSig": "Sal",
+      "lastSeenTs": "2026-09-11T22:40:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -128819,6 +128819,31 @@
         {
           "Code": "YNA004",
           "Description": "Pendeltåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "159",
+      "dir": "ANK",
+      "other": "Hallsberg",
+      "otherSig": "Hpbg",
+      "from": [
+        "Hallsberg"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-12T10:47:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "7",
+      "canceled": false,
+      "product": "SJ Regional",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
         }
       ],
       "snabb": false
