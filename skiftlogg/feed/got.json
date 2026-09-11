@@ -1,8 +1,8 @@
 {
   "airport": "GOT",
-  "updated": "2026-09-11T17:41:51+02:00",
-  "arrivalsUpdated": "2026-09-11T17:41:53+02:00",
-  "departuresUpdated": "2026-09-11T16:56:04+02:00",
+  "updated": "2026-09-11T17:56:09+02:00",
+  "arrivalsUpdated": "2026-09-11T17:56:10+02:00",
+  "departuresUpdated": "2026-09-11T17:56:12+02:00",
   "yesterdayUpdated": "2026-09-11T05:31:17+02:00",
   "tomorrowUpdated": "2026-09-11T17:16:14+02:00",
   "error": null,
@@ -1742,18 +1742,18 @@
       "other": "Gdansk",
       "iata": "",
       "airline": "Ryanair Ltd",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 17:48",
       "sched": "2026-09-11T16:10:00Z",
       "est": "2026-09-11T15:48:00Z",
-      "act": "",
+      "act": "2026-09-11T15:48:00Z",
       "terminal": "T1",
       "gate": "16",
       "baggage": "2",
       "firstBag": "",
-      "firstBagEst": "",
+      "firstBagEst": "2026-09-11T16:12:56Z",
       "lastBag": "",
-      "rawStatus": "Ankommer 17:48"
+      "rawStatus": "Landat 17:48"
     },
     {
       "id": "FR966",
@@ -1826,10 +1826,10 @@
       "terminal": "T1",
       "gate": "22",
       "baggage": "4",
-      "firstBag": "",
+      "firstBag": "2026-09-11T15:43:18Z",
       "firstBagEst": "2026-09-11T15:43:54Z",
-      "lastBag": "",
-      "rawStatus": "Landat 17:23"
+      "lastBag": "2026-09-11T15:49:19Z",
+      "rawStatus": "Landat 17:23 · Sista bagage"
     },
     {
       "id": "KL1229",
@@ -4874,25 +4874,6 @@
       "rawStatus": "Startat 18:56"
     },
     {
-      "id": "AF1553",
-      "dir": "AVG",
-      "other": "Paris CDG",
-      "iata": "",
-      "airline": "Air France",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-09-10T03:55:00Z",
-      "est": "",
-      "act": "2026-09-10T03:54:44Z",
-      "terminal": "T1",
-      "gate": "24B",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 06:04"
-    },
-    {
       "id": "SK443",
       "dir": "AVG",
       "other": "Köpenhamn",
@@ -5829,18 +5810,18 @@
       "other": "Larnaca",
       "iata": "",
       "airline": "Tui Fly Nordic",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-09-11T15:25:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-09-11T15:17:45Z",
       "terminal": "T1",
       "gate": "23",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Omedelbar avgång"
+      "rawStatus": "Startat 17:27"
     },
     {
       "id": "BLX385",
@@ -6038,18 +6019,18 @@
       "other": "Budapest",
       "iata": "",
       "airline": "Ryanair Ltd",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-09-11T15:20:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-09-11T15:15:00Z",
       "terminal": "T1",
       "gate": "16",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Boarding"
+      "rawStatus": "Startat 17:24"
     },
     {
       "id": "KL1232",
@@ -6266,18 +6247,18 @@
       "other": "Gdansk",
       "iata": "",
       "airline": "Wizz Air",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-09-11T15:45:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-09-11T15:36:59Z",
       "terminal": "T1",
       "gate": "12",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Startat 17:45"
     },
     {
       "id": "SK443",
@@ -6315,7 +6296,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Boarding"
     },
     {
       "id": "SK449",
@@ -6329,7 +6310,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "19",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6505,7 +6486,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Boarding"
     },
     {
       "id": "FR967",
@@ -6581,7 +6562,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "SK146",
@@ -6614,7 +6595,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "22",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6836,18 +6817,18 @@
       "other": "Berlin",
       "iata": "",
       "airline": "Eurowings",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-09-11T15:45:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-09-11T15:40:00Z",
       "terminal": "T1",
       "gate": "13",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gå till gate"
+      "rawStatus": "Startat 17:47"
     },
     {
       "id": "FR8790",
@@ -6893,18 +6874,18 @@
       "other": "Cagliari",
       "iata": "",
       "airline": "Ryanair Ltd",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-09-11T15:50:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-09-11T15:55:26Z",
       "terminal": "T1",
       "gate": "20A",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "AY866",
@@ -6923,7 +6904,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "SN2318",
@@ -6937,7 +6918,7 @@
       "est": "2026-09-11T16:45:00Z",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "12",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -7032,7 +7013,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "13",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
