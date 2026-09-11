@@ -1,8 +1,8 @@
 {
   "airport": "GOT",
-  "updated": "2026-09-11T16:41:26+02:00",
-  "arrivalsUpdated": "2026-09-11T16:41:28+02:00",
-  "departuresUpdated": "2026-09-11T15:56:06+02:00",
+  "updated": "2026-09-11T16:56:01+02:00",
+  "arrivalsUpdated": "2026-09-11T16:56:03+02:00",
+  "departuresUpdated": "2026-09-11T16:56:04+02:00",
   "yesterdayUpdated": "2026-09-11T05:31:17+02:00",
   "tomorrowUpdated": "2026-09-11T16:16:18+02:00",
   "error": null,
@@ -1789,9 +1789,9 @@
       "gate": "16",
       "baggage": "5",
       "firstBag": "",
-      "firstBagEst": "",
+      "firstBagEst": "2026-09-11T15:06:00Z",
       "lastBag": "",
-      "rawStatus": "Landat 19:40"
+      "rawStatus": "Landat 16:40"
     },
     {
       "id": "W61735",
@@ -1799,18 +1799,18 @@
       "other": "Gdansk",
       "iata": "",
       "airline": "Wizz Air",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 16:51",
       "sched": "2026-09-11T15:10:00Z",
       "est": "2026-09-11T14:51:00Z",
-      "act": "",
+      "act": "2026-09-11T14:51:00Z",
       "terminal": "T1",
       "gate": "12",
       "baggage": "5",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 16:51"
+      "rawStatus": "Landat 16:51"
     },
     {
       "id": "BA788",
@@ -2540,18 +2540,18 @@
       "other": "Berlin",
       "iata": "",
       "airline": "Eurowings",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 16:49",
       "sched": "2026-09-11T15:05:00Z",
       "est": "2026-09-11T14:46:00Z",
-      "act": "",
+      "act": "2026-09-11T14:49:00Z",
       "terminal": "T1",
       "gate": "13",
       "baggage": "1",
       "firstBag": "",
-      "firstBagEst": "",
+      "firstBagEst": "2026-09-11T15:08:07Z",
       "lastBag": "",
-      "rawStatus": "Ankommer 16:46"
+      "rawStatus": "Landat 16:49"
     },
     {
       "id": "DK1791",
@@ -2559,18 +2559,18 @@
       "other": "Larnaca",
       "iata": "",
       "airline": "Sunclass Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 16:43",
       "sched": "2026-09-11T15:00:00Z",
       "est": "2026-09-11T14:40:00Z",
-      "act": "",
+      "act": "2026-09-11T14:43:00Z",
       "terminal": "T1",
       "gate": "21B",
       "baggage": "3",
       "firstBag": "",
-      "firstBagEst": "",
+      "firstBagEst": "2026-09-11T15:02:06Z",
       "lastBag": "",
-      "rawStatus": "Ankommer 16:40"
+      "rawStatus": "Landat 16:43"
     },
     {
       "id": "SN2317",
@@ -2581,7 +2581,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-11T15:35:00Z",
-      "est": "2026-09-11T16:10:00Z",
+      "est": "2026-09-11T16:06:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "",
@@ -2589,7 +2589,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 18:10"
+      "rawStatus": "Ankommer 18:06"
     },
     {
       "id": "VL2430",
@@ -2619,7 +2619,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-11T16:15:00Z",
-      "est": "2026-09-11T16:24:00Z",
+      "est": "2026-09-11T16:27:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "20A",
@@ -2627,7 +2627,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 18:24"
+      "rawStatus": "Beräknad 18:27"
     },
     {
       "id": "EW9222",
@@ -2657,7 +2657,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-11T17:50:00Z",
-      "est": "2026-09-11T17:41:00Z",
+      "est": "2026-09-11T17:56:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "",
@@ -2665,7 +2665,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 19:41"
+      "rawStatus": "Beräknad 19:56"
     },
     {
       "id": "LH2432",
@@ -5840,7 +5840,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Omedelbar avgång"
     },
     {
       "id": "BLX385",
@@ -6049,7 +6049,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Boarding"
     },
     {
       "id": "KL1232",
@@ -6234,7 +6234,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "23",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6386,7 +6386,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "20A",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6551,18 +6551,18 @@
       "other": "Stockholm ARN",
       "iata": "",
       "airline": "SAS Scandinavian Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-09-11T14:10:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-09-11T14:33:55Z",
       "terminal": "T1",
       "gate": "15",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gå till gate"
+      "rawStatus": "Startat 16:45"
     },
     {
       "id": "AF1453",
@@ -6722,18 +6722,18 @@
       "other": "Chania",
       "iata": "",
       "airline": "SAS Scandinavian Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-09-11T13:40:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-09-11T14:09:34Z",
       "terminal": "T1",
       "gate": "12",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Omedelbar avgång"
+      "rawStatus": "Startat 16:18"
     },
     {
       "id": "SK2142",
@@ -6847,7 +6847,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gå till gate"
     },
     {
       "id": "FR8790",
