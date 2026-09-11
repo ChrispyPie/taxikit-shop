@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-11T03:45:28+02:00",
+  "updated": "2026-09-11T03:47:10+02:00",
   "error": null,
   "trains": [
     {
@@ -101702,10 +101702,10 @@
           "sig": "Ä",
           "name": "Ä",
           "t": "2026-09-10T22:15:00.000+02:00",
-          "act": "",
+          "act": "2026-09-10T22:15:00.000+02:00",
           "est": "",
           "sched": "2026-09-10T22:15:00.000+02:00",
-          "track": "x"
+          "track": "1"
         },
         {
           "sig": "Bån",
@@ -102591,9 +102591,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-11T00:46:00.000+02:00",
       "stops": [
         {
           "sig": "F",
@@ -102712,7 +102709,10 @@
           "sched": "2026-09-11T00:44:00.000+02:00",
           "track": "5"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-11T00:46:00.000+02:00"
     },
     {
       "id": "496",
@@ -124511,6 +124511,31 @@
       "est": "",
       "act": "",
       "track": "8",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "13153",
+      "dir": "AVG",
+      "other": "Vbc",
+      "otherSig": "Vbc",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Vbc"
+      ],
+      "sched": "2026-09-11T13:10:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "16",
       "canceled": false,
       "product": "Västtågen",
       "traffic": [
