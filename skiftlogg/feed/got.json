@@ -1,8 +1,8 @@
 {
   "airport": "GOT",
-  "updated": "2026-09-11T12:46:08+02:00",
-  "arrivalsUpdated": "2026-09-11T12:46:10+02:00",
-  "departuresUpdated": "2026-09-11T11:56:04+02:00",
+  "updated": "2026-09-11T12:56:23+02:00",
+  "arrivalsUpdated": "2026-09-11T12:56:25+02:00",
+  "departuresUpdated": "2026-09-11T12:56:26+02:00",
   "yesterdayUpdated": "2026-09-11T05:31:17+02:00",
   "tomorrowUpdated": "2026-09-11T12:01:36+02:00",
   "error": null,
@@ -1631,7 +1631,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-11T14:00:00Z",
-      "est": "2026-09-11T13:53:00Z",
+      "est": "2026-09-11T13:51:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "",
@@ -1639,7 +1639,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 15:53"
+      "rawStatus": "Ankommer 15:51"
     },
     {
       "id": "D85058",
@@ -1821,7 +1821,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-11T12:30:00Z",
-      "est": "2026-09-11T12:21:00Z",
+      "est": "2026-09-11T12:20:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "20B",
@@ -1829,7 +1829,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 14:21"
+      "rawStatus": "Ankommer 14:20"
     },
     {
       "id": "FR6748",
@@ -1973,7 +1973,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-11T12:35:00Z",
-      "est": "2026-09-11T12:30:00Z",
+      "est": "2026-09-11T12:26:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "21B",
@@ -1981,7 +1981,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 14:30"
+      "rawStatus": "Ankommer 14:26"
     },
     {
       "id": "FR7088",
@@ -2695,7 +2695,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-11T17:25:00Z",
-      "est": "",
+      "est": "2026-09-11T17:45:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "",
@@ -4189,25 +4189,6 @@
     }
   ],
   "departures": [
-    {
-      "id": "FR967",
-      "dir": "AVG",
-      "other": "London STN",
-      "iata": "",
-      "airline": "Ryanair Ltd",
-      "status": "SCH",
-      "statusSv": "Planerad",
-      "sched": "2026-09-09T20:25:00Z",
-      "est": "2026-09-09T22:20:00Z",
-      "act": "",
-      "terminal": "T1",
-      "gate": "23",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Försenad till 00:20 · Gå till gate"
-    },
     {
       "id": "LH2431",
       "dir": "AVG",
@@ -5886,18 +5867,18 @@
       "other": "Helsingfors",
       "iata": "",
       "airline": "Finnair",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-09-11T11:00:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-09-11T10:47:00Z",
       "terminal": "T1",
       "gate": "20A",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "BLX361",
@@ -6082,7 +6063,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "21A",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6133,18 +6114,18 @@
       "other": "Amsterdam",
       "iata": "",
       "airline": "KLM",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-09-11T10:05:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-09-11T10:00:46Z",
       "terminal": "T1",
       "gate": "19",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd"
+      "rawStatus": "Startat 12:09"
     },
     {
       "id": "D85059",
@@ -6253,7 +6234,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "20A",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6291,7 +6272,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "16",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6494,18 +6475,18 @@
       "other": "London LHR",
       "iata": "",
       "airline": "British Airways",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-09-11T10:05:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-09-11T10:02:00Z",
       "terminal": "T1",
       "gate": "22",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd"
+      "rawStatus": "Startat 12:28"
     },
     {
       "id": "SK1439",
@@ -6633,7 +6614,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "15",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6752,7 +6733,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "FR5636",
@@ -6840,7 +6821,7 @@
       "statusSv": "Startat",
       "sched": "2026-09-11T09:30:00Z",
       "est": "",
-      "act": "2026-09-11T09:31:00Z",
+      "act": "2026-09-11T09:30:00Z",
       "terminal": "T1",
       "gate": "17",
       "baggage": "",
@@ -6896,7 +6877,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-11T12:55:00Z",
-      "est": "",
+      "est": "2026-09-11T13:05:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "13",
@@ -6904,7 +6885,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Försenad till 15:05"
     },
     {
       "id": "EW8221",
@@ -7094,7 +7075,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Boarding"
     },
     {
       "id": "SK166",
