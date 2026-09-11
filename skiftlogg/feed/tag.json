@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-11T03:05:58+02:00",
+  "updated": "2026-09-11T03:07:34+02:00",
   "error": null,
   "trains": [
     {
@@ -103779,9 +103779,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Fd",
-      "lastSeenSig": "Fd",
-      "lastSeenTs": "2026-09-11T00:06:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -103864,7 +103861,10 @@
           "sched": "2026-09-11T00:07:00.000+02:00",
           "track": "1"
         }
-      ]
+      ],
+      "lastSeen": "Fd",
+      "lastSeenSig": "Fd",
+      "lastSeenTs": "2026-09-11T00:06:00.000+02:00"
     },
     {
       "id": "63787",
@@ -104610,9 +104610,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-11T00:07:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -104749,7 +104746,10 @@
           "sched": "2026-09-11T00:05:00.000+02:00",
           "track": "14"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-11T00:07:00.000+02:00"
     },
     {
       "id": "17387",
@@ -106307,7 +106307,7 @@
           "act": "",
           "est": "",
           "sched": "2026-09-11T04:39:00.000+02:00",
-          "track": "1"
+          "track": "x"
         }
       ]
     },
