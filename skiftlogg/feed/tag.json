@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-12T14:28:58+02:00",
+  "updated": "2026-09-12T14:29:46+02:00",
   "error": null,
   "trains": [
     {
@@ -100810,8 +100810,8 @@
         {
           "sig": "Lr",
           "name": "Lr",
-          "t": "2026-09-12T14:27:00.000+02:00",
-          "act": "",
+          "t": "2026-09-12T14:28:00.000+02:00",
+          "act": "2026-09-12T14:28:00.000+02:00",
           "est": "",
           "sched": "2026-09-12T14:27:00.000+02:00",
           "track": "3"
@@ -100844,9 +100844,9 @@
           "track": "1"
         }
       ],
-      "lastSeen": "Sn",
-      "lastSeenSig": "Sn",
-      "lastSeenTs": "2026-09-12T14:23:00.000+02:00"
+      "lastSeen": "Lr",
+      "lastSeenSig": "Lr",
+      "lastSeenTs": "2026-09-12T14:28:00.000+02:00"
     },
     {
       "id": "3059",
@@ -101240,7 +101240,7 @@
       "snabb": false,
       "lastSeen": "Kungsbacka",
       "lastSeenSig": "Kb",
-      "lastSeenTs": "2026-09-12T14:26:00.000+02:00",
+      "lastSeenTs": "2026-09-12T14:29:00.000+02:00",
       "stops": [
         {
           "sig": "Vbc",
@@ -101318,7 +101318,7 @@
           "sig": "Än",
           "name": "Än",
           "t": "2026-09-12T14:29:00.000+02:00",
-          "act": "",
+          "act": "2026-09-12T14:29:00.000+02:00",
           "est": "",
           "sched": "2026-09-12T14:29:00.000+02:00",
           "track": "1"
@@ -101377,7 +101377,10 @@
           "sched": "2026-09-12T14:55:00.000+02:00",
           "track": "10"
         }
-      ]
+      ],
+      "lastSeen": "Än",
+      "lastSeenSig": "Än",
+      "lastSeenTs": "2026-09-12T14:29:00.000+02:00"
     },
     {
       "id": "332",
@@ -107973,9 +107976,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Gnb",
-      "lastSeenSig": "Gnb",
-      "lastSeenTs": "2026-09-12T14:25:00.000+02:00",
+      "lastSeen": "Kg",
+      "lastSeenSig": "Kg",
+      "lastSeenTs": "2026-09-12T14:28:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -114084,6 +114087,31 @@
         }
       ],
       "snabb": false
+    },
+    {
+      "id": "397",
+      "dir": "ANK",
+      "other": "No.osl",
+      "otherSig": "No.osl",
+      "from": [
+        "No.osl"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-12T21:45:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "8",
+      "canceled": false,
+      "product": "Vy Snabbtåg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": true
     }
   ]
 }
