@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-12T03:24:59+02:00",
+  "updated": "2026-09-12T03:26:02+02:00",
   "error": null,
   "trains": [
     {
@@ -108182,7 +108182,7 @@
           "sig": "Lis",
           "name": "Lis",
           "t": "2026-09-12T03:24:00.000+02:00",
-          "act": "",
+          "act": "2026-09-12T03:24:00.000+02:00",
           "est": "",
           "sched": "2026-09-12T03:24:00.000+02:00",
           "track": "2"
@@ -122303,7 +122303,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Yb",
+          "name": "Ytterby",
+          "t": "2026-09-12T11:02:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-12T11:02:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-12T11:32:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-12T11:32:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "2023",
@@ -126242,6 +126262,31 @@
         "Ytterby"
       ],
       "sched": "2026-09-12T16:30:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA002",
+          "Description": "Buss"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "63759",
+      "dir": "ANK",
+      "other": "Snu",
+      "otherSig": "Snu",
+      "from": [
+        "Snu"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-12T16:39:00.000+02:00",
       "est": "",
       "act": "",
       "track": "x",
