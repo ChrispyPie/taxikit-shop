@@ -1,53 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-12T03:40:08+02:00",
+  "updated": "2026-09-12T03:41:09+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "83764",
-      "dir": "AVG",
-      "other": "Snu",
-      "otherSig": "Snu",
-      "from": [
-        "Göteborg C"
-      ],
-      "to": [
-        "Snu"
-      ],
-      "sched": "2026-09-10T15:41:00.000+02:00",
-      "est": "",
-      "act": "",
-      "track": "x",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": [
-        {
-          "Code": "YNA002",
-          "Description": "Buss"
-        }
-      ],
-      "snabb": false,
-      "stops": [
-        {
-          "sig": "G",
-          "name": "Göteborg C",
-          "t": "2026-09-10T15:41:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-10T15:41:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "Snu",
-          "name": "Snu",
-          "t": "2026-09-10T16:25:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-10T16:25:00.000+02:00",
-          "track": "x"
-        }
-      ]
-    },
     {
       "id": "3557",
       "dir": "ANK",
@@ -103257,9 +103212,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Kungsbacka",
-      "lastSeenSig": "Kb",
-      "lastSeenTs": "2026-09-12T00:41:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -103333,7 +103285,10 @@
           "sched": "2026-09-12T00:41:00.000+02:00",
           "track": "4"
         }
-      ]
+      ],
+      "lastSeen": "Kungsbacka",
+      "lastSeenSig": "Kb",
+      "lastSeenTs": "2026-09-12T00:41:00.000+02:00"
     },
     {
       "id": "3500",
@@ -106499,7 +106454,7 @@
       "snabb": false,
       "lastSeen": "Fd",
       "lastSeenSig": "Fd",
-      "lastSeenTs": "2026-09-12T03:39:00.000+02:00",
+      "lastSeenTs": "2026-09-12T03:40:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -106550,7 +106505,7 @@
           "sig": "Fd",
           "name": "Fd",
           "t": "2026-09-12T03:39:00.000+02:00",
-          "act": "",
+          "act": "2026-09-12T03:39:00.000+02:00",
           "est": "",
           "sched": "2026-09-12T03:39:00.000+02:00",
           "track": "2"
@@ -106610,7 +106565,7 @@
       "snabb": false,
       "lastSeen": "Nol",
       "lastSeenSig": "Nol",
-      "lastSeenTs": "2026-09-12T03:39:00.000+02:00",
+      "lastSeenTs": "2026-09-12T03:40:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -106703,7 +106658,7 @@
       "snabb": false,
       "lastSeen": "Ag",
       "lastSeenSig": "Ag",
-      "lastSeenTs": "2026-09-12T03:39:00.000+02:00",
+      "lastSeenTs": "2026-09-12T03:40:00.000+02:00",
       "stops": [
         {
           "sig": "G",
