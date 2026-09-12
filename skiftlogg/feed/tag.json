@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-13T00:52:19+02:00",
+  "updated": "2026-09-13T00:54:18+02:00",
   "error": null,
   "trains": [
     {
@@ -87744,9 +87744,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Vänersborg C",
-      "lastSeenSig": "Vg",
-      "lastSeenTs": "2026-09-12T21:54:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -87820,7 +87817,10 @@
           "sched": "2026-09-12T21:52:00.000+02:00",
           "track": "1"
         }
-      ]
+      ],
+      "lastSeen": "Vänersborg C",
+      "lastSeenSig": "Vg",
+      "lastSeenTs": "2026-09-12T21:54:00.000+02:00"
     },
     {
       "id": "3277",
@@ -95109,9 +95109,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Fd",
-      "lastSeenSig": "Fd",
-      "lastSeenTs": "2026-09-13T00:46:00.000+02:00",
+      "lastSeen": "Ndv",
+      "lastSeenSig": "Ndv",
+      "lastSeenTs": "2026-09-13T00:53:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -95778,9 +95778,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Ldo",
-      "lastSeenSig": "Ldo",
-      "lastSeenTs": "2026-09-13T00:50:00.000+02:00",
+      "lastSeen": "Krd",
+      "lastSeenSig": "Krd",
+      "lastSeenTs": "2026-09-13T00:52:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -95925,9 +95925,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Nol",
-      "lastSeenSig": "Nol",
-      "lastSeenTs": "2026-09-13T00:51:00.000+02:00",
+      "lastSeen": "Nöe",
+      "lastSeenSig": "Nöe",
+      "lastSeenTs": "2026-09-13T00:53:00.000+02:00",
       "stops": [
         {
           "sig": "Vg",
@@ -96153,9 +96153,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Khe",
-      "lastSeenSig": "Khe",
-      "lastSeenTs": "2026-09-13T00:51:00.000+02:00",
+      "lastSeen": "Ag",
+      "lastSeenSig": "Ag",
+      "lastSeenTs": "2026-09-13T00:54:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
@@ -96494,7 +96494,7 @@
           "sig": "Fd",
           "name": "Fd",
           "t": "2026-09-13T00:53:00.000+02:00",
-          "act": "",
+          "act": "2026-09-13T00:53:00.000+02:00",
           "est": "",
           "sched": "2026-09-13T00:53:00.000+02:00",
           "track": "1"
@@ -96571,7 +96571,10 @@
           "sched": "2026-09-13T01:21:00.000+02:00",
           "track": "1"
         }
-      ]
+      ],
+      "lastSeen": "Fd",
+      "lastSeenSig": "Fd",
+      "lastSeenTs": "2026-09-13T00:53:00.000+02:00"
     },
     {
       "id": "3603",
@@ -100403,7 +100406,7 @@
       "sched": "2026-09-13T07:55:00.000+02:00",
       "est": "",
       "act": "",
-      "track": "9",
+      "track": "14",
       "canceled": false,
       "product": "Öresundståg",
       "traffic": [
@@ -102260,7 +102263,7 @@
       "sched": "2026-09-13T08:55:00.000+02:00",
       "est": "",
       "act": "",
-      "track": "9",
+      "track": "14",
       "canceled": false,
       "product": "Öresundståg",
       "traffic": [
@@ -102278,7 +102281,7 @@
           "act": "",
           "est": "",
           "sched": "2026-09-13T08:55:00.000+02:00",
-          "track": "9"
+          "track": "14"
         },
         {
           "sig": "Mdn",
@@ -104495,7 +104498,7 @@
       "sched": "2026-09-13T09:55:00.000+02:00",
       "est": "",
       "act": "",
-      "track": "9",
+      "track": "14",
       "canceled": false,
       "product": "Öresundståg",
       "traffic": [
@@ -104506,15 +104509,6 @@
       ],
       "snabb": false,
       "stops": [
-        {
-          "sig": "Tri",
-          "name": "Tri",
-          "t": "2026-09-12T13:03:00.000+02:00",
-          "act": "2026-09-12T13:03:00.000+02:00",
-          "est": "2026-09-12T13:03:00.000+02:00",
-          "sched": "2026-09-12T12:53:00.000+02:00",
-          "track": "1"
-        },
         {
           "sig": "Hie",
           "name": "Hie",
@@ -104531,7 +104525,7 @@
           "act": "",
           "est": "",
           "sched": "2026-09-13T09:55:00.000+02:00",
-          "track": "9"
+          "track": "14"
         },
         {
           "sig": "Mdn",
@@ -104640,6 +104634,15 @@
           "est": "",
           "sched": "2026-09-13T12:48:00.000+02:00",
           "track": "1b"
+        },
+        {
+          "sig": "Tri",
+          "name": "Tri",
+          "t": "2026-09-13T12:53:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-13T12:53:00.000+02:00",
+          "track": "1"
         }
       ],
       "lastSeen": "Hie",
@@ -105029,7 +105032,7 @@
       "sched": "2026-09-13T10:05:00.000+02:00",
       "est": "",
       "act": "",
-      "track": "9",
+      "track": "11",
       "canceled": false,
       "product": "Västtågen",
       "traffic": [
@@ -105137,7 +105140,7 @@
           "act": "",
           "est": "",
           "sched": "2026-09-13T10:05:00.000+02:00",
-          "track": "9"
+          "track": "11"
         }
       ]
     },
@@ -106146,7 +106149,7 @@
       "sched": "2026-09-13T10:55:00.000+02:00",
       "est": "",
       "act": "",
-      "track": "9",
+      "track": "14",
       "canceled": false,
       "product": "Öresundståg",
       "traffic": [
@@ -106221,7 +106224,7 @@
       "sched": "2026-09-13T11:05:00.000+02:00",
       "est": "",
       "act": "",
-      "track": "9",
+      "track": "12",
       "canceled": false,
       "product": "Västtågen",
       "traffic": [
