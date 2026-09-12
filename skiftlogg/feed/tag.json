@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-12T03:21:55+02:00",
+  "updated": "2026-09-12T03:22:58+02:00",
   "error": null,
   "trains": [
     {
@@ -108231,9 +108231,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Sel",
-      "lastSeenSig": "Sel",
-      "lastSeenTs": "2026-09-12T03:21:00.000+02:00",
+      "lastSeen": "P",
+      "lastSeenSig": "P",
+      "lastSeenTs": "2026-09-12T03:23:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -108248,7 +108248,7 @@
           "sig": "P",
           "name": "P",
           "t": "2026-09-12T03:23:00.000+02:00",
-          "act": "",
+          "act": "2026-09-12T03:23:00.000+02:00",
           "est": "",
           "sched": "2026-09-12T03:23:00.000+02:00",
           "track": "2"
@@ -122438,7 +122438,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-12T11:30:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-12T11:30:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Yb",
+          "name": "Ytterby",
+          "t": "2026-09-12T12:00:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-12T12:00:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "13289",
@@ -126476,6 +126496,31 @@
         {
           "Code": "YNA001",
           "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "73766",
+      "dir": "AVG",
+      "other": "Ytterby",
+      "otherSig": "Yb",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Ytterby"
+      ],
+      "sched": "2026-09-12T16:30:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA002",
+          "Description": "Buss"
         }
       ],
       "snabb": false
