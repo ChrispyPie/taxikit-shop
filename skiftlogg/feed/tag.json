@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-12T14:15:00+02:00",
+  "updated": "2026-09-12T14:16:01+02:00",
   "error": null,
   "trains": [
     {
@@ -91905,9 +91905,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Ryä",
-      "lastSeenSig": "Ryä",
-      "lastSeenTs": "2026-09-12T14:14:00.000+02:00",
+      "lastSeen": "Glv",
+      "lastSeenSig": "Glv",
+      "lastSeenTs": "2026-09-12T14:15:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -93321,9 +93321,9 @@
         }
       ],
       "snabb": true,
-      "lastSeen": "Äl",
-      "lastSeenSig": "Äl",
-      "lastSeenTs": "2026-09-12T14:01:00.000+02:00",
+      "lastSeen": "Mh",
+      "lastSeenSig": "Mh",
+      "lastSeenTs": "2026-09-12T13:51:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -93507,9 +93507,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Skövde C",
-      "lastSeenSig": "Sk",
-      "lastSeenTs": "2026-09-12T14:11:00.000+02:00",
+      "lastSeen": "Vä",
+      "lastSeenSig": "Vä",
+      "lastSeenTs": "2026-09-12T14:15:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -96726,9 +96726,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Agg",
-      "lastSeenSig": "Agg",
-      "lastSeenTs": "2026-09-12T14:12:00.000+02:00",
+      "lastSeen": "Vårgårda",
+      "lastSeenSig": "Vgå",
+      "lastSeenTs": "2026-09-12T14:16:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -96752,7 +96752,7 @@
           "sig": "Vgå",
           "name": "Vårgårda",
           "t": "2026-09-12T14:16:00.000+02:00",
-          "act": "",
+          "act": "2026-09-12T14:16:00.000+02:00",
           "est": "",
           "sched": "2026-09-12T14:16:00.000+02:00",
           "track": "1"
@@ -98210,7 +98210,7 @@
       "snabb": false,
       "lastSeen": "Kungsbacka",
       "lastSeenSig": "Kb",
-      "lastSeenTs": "2026-09-12T14:13:00.000+02:00",
+      "lastSeenTs": "2026-09-12T14:15:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -99094,7 +99094,7 @@
       ],
       "sched": "2026-09-12T14:15:00.000+02:00",
       "est": "",
-      "act": "",
+      "act": "2026-09-12T14:15:00.000+02:00",
       "track": "15",
       "canceled": false,
       "product": "Västtågen",
@@ -99110,7 +99110,7 @@
           "sig": "G",
           "name": "Göteborg C",
           "t": "2026-09-12T14:15:00.000+02:00",
-          "act": "",
+          "act": "2026-09-12T14:15:00.000+02:00",
           "est": "",
           "sched": "2026-09-12T14:15:00.000+02:00",
           "track": "15"
@@ -99178,7 +99178,10 @@
           "sched": "2026-09-12T14:41:00.000+02:00",
           "track": "4"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-12T14:15:00.000+02:00"
     },
     {
       "id": "390",
@@ -99193,7 +99196,7 @@
       ],
       "sched": "2026-09-12T14:15:00.000+02:00",
       "est": "",
-      "act": "",
+      "act": "2026-09-12T14:15:00.000+02:00",
       "track": "8",
       "canceled": false,
       "product": "Vy Snabbtåg",
@@ -100143,9 +100146,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Ndv",
-      "lastSeenSig": "Ndv",
-      "lastSeenTs": "2026-09-12T14:09:00.000+02:00",
+      "lastSeen": "Fd",
+      "lastSeenSig": "Fd",
+      "lastSeenTs": "2026-09-12T14:15:00.000+02:00",
       "stops": [
         {
           "sig": "Cst",
@@ -101226,9 +101229,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Vrö",
-      "lastSeenSig": "Vrö",
-      "lastSeenTs": "2026-09-12T14:11:00.000+02:00",
+      "lastSeen": "Få",
+      "lastSeenSig": "Få",
+      "lastSeenTs": "2026-09-12T14:15:00.000+02:00",
       "stops": [
         {
           "sig": "Vbc",
@@ -113563,6 +113566,31 @@
         {
           "Code": "YNA001",
           "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "73779",
+      "dir": "ANK",
+      "other": "Ytterby",
+      "otherSig": "Yb",
+      "from": [
+        "Ytterby"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-12T21:32:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA002",
+          "Description": "Buss"
         }
       ],
       "snabb": false
