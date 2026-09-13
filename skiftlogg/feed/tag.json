@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-13T05:56:16+02:00",
+  "updated": "2026-09-13T05:58:14+02:00",
   "error": null,
   "trains": [
     {
@@ -74472,9 +74472,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Alvesta",
-      "lastSeenSig": "A",
-      "lastSeenTs": "2026-09-13T02:57:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -74557,7 +74554,10 @@
           "sched": "2026-09-13T02:57:00.000+02:00",
           "track": "3"
         }
-      ]
+      ],
+      "lastSeen": "Alvesta",
+      "lastSeenSig": "A",
+      "lastSeenTs": "2026-09-13T02:57:00.000+02:00"
     },
     {
       "id": "17308",
@@ -75657,9 +75657,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Tbn",
-      "lastSeenSig": "Tbn",
-      "lastSeenTs": "2026-09-13T05:53:00.000+02:00",
+      "lastSeen": "Vpm",
+      "lastSeenSig": "Vpm",
+      "lastSeenTs": "2026-09-13T05:56:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -75786,9 +75786,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Jv",
-      "lastSeenSig": "Jv",
-      "lastSeenTs": "2026-09-13T05:55:00.000+02:00",
+      "lastSeen": "P",
+      "lastSeenSig": "P",
+      "lastSeenTs": "2026-09-13T05:57:00.000+02:00",
       "stops": [
         {
           "sig": "A",
@@ -75996,9 +75996,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Ag",
-      "lastSeenSig": "Ag",
-      "lastSeenTs": "2026-09-13T05:54:00.000+02:00",
+      "lastSeen": "Ldo",
+      "lastSeenSig": "Ldo",
+      "lastSeenTs": "2026-09-13T05:58:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
@@ -76022,7 +76022,7 @@
           "sig": "Ag",
           "name": "Ag",
           "t": "2026-09-13T05:54:00.000+02:00",
-          "act": "",
+          "act": "2026-09-13T05:54:00.000+02:00",
           "est": "",
           "sched": "2026-09-13T05:54:00.000+02:00",
           "track": "1"
@@ -76031,7 +76031,7 @@
           "sig": "Ldo",
           "name": "Ldo",
           "t": "2026-09-13T05:58:00.000+02:00",
-          "act": "",
+          "act": "2026-09-13T05:58:00.000+02:00",
           "est": "",
           "sched": "2026-09-13T05:58:00.000+02:00",
           "track": "2"
@@ -76206,9 +76206,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Les",
-      "lastSeenSig": "Les",
-      "lastSeenTs": "2026-09-13T05:55:00.000+02:00",
+      "lastSeen": "Alingsås",
+      "lastSeenSig": "Alh",
+      "lastSeenTs": "2026-09-13T05:56:00.000+02:00",
       "stops": [
         {
           "sig": "Vg",
@@ -95204,15 +95204,6 @@
       "snabb": false,
       "stops": [
         {
-          "sig": "Ör",
-          "name": "Örebro C",
-          "t": "2026-09-12T17:58:00.000+02:00",
-          "act": "2026-09-12T17:58:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-12T17:57:00.000+02:00",
-          "track": "3"
-        },
-        {
           "sig": "Arb",
           "name": "Arb",
           "t": "2026-09-12T18:15:00.000+02:00",
@@ -95382,6 +95373,15 @@
           "est": "",
           "sched": "2026-09-13T17:25:00.000+02:00",
           "track": "30"
+        },
+        {
+          "sig": "Ör",
+          "name": "Örebro C",
+          "t": "2026-09-13T17:28:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-13T17:28:00.000+02:00",
+          "track": "3"
         }
       ],
       "lastSeen": "Stockholm C",
