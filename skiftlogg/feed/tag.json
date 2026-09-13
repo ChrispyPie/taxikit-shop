@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-14T01:30:09+02:00",
+  "updated": "2026-09-14T01:31:30+02:00",
   "error": null,
   "trains": [
     {
@@ -77517,9 +77517,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-13T22:31:00.000+02:00",
       "stops": [
         {
           "sig": "Cst",
@@ -77692,7 +77689,10 @@
           "sched": "2026-09-13T22:30:00.000+02:00",
           "track": "6"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-13T22:31:00.000+02:00"
     },
     {
       "id": "73790",
@@ -78411,6 +78411,9 @@
         }
       ],
       "snabb": true,
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-13T23:31:00.000+02:00",
       "stops": [
         {
           "sig": "Cst",
@@ -78457,10 +78460,7 @@
           "sched": "2026-09-13T22:47:00.000+02:00",
           "track": "3"
         }
-      ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-13T23:31:00.000+02:00"
+      ]
     },
     {
       "id": "17388",
@@ -82084,7 +82084,7 @@
       ],
       "sched": "2026-09-14T01:35:00.000+02:00",
       "est": "",
-      "act": "",
+      "act": "2026-09-14T01:32:00.000+02:00",
       "track": "9",
       "canceled": false,
       "product": "Västtågen",
@@ -82095,9 +82095,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Olskroken",
-      "lastSeenSig": "Or",
-      "lastSeenTs": "2026-09-14T01:29:00.000+02:00",
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-14T01:32:00.000+02:00",
       "stops": [
         {
           "sig": "Än",
@@ -82156,8 +82156,8 @@
         {
           "sig": "G",
           "name": "Göteborg C",
-          "t": "2026-09-14T01:35:00.000+02:00",
-          "act": "",
+          "t": "2026-09-14T01:32:00.000+02:00",
+          "act": "2026-09-14T01:32:00.000+02:00",
           "est": "",
           "sched": "2026-09-14T01:35:00.000+02:00",
           "track": "9"
@@ -82307,7 +82307,7 @@
           "act": "",
           "est": "",
           "sched": "2026-09-14T04:39:00.000+02:00",
-          "track": "x"
+          "track": "1"
         }
       ]
     },
@@ -92594,7 +92594,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Yb",
+          "name": "Ytterby",
+          "t": "2026-09-14T07:00:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-14T07:00:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-14T07:30:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-14T07:30:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "73730",
@@ -92619,7 +92639,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-14T07:30:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-14T07:30:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Yb",
+          "name": "Ytterby",
+          "t": "2026-09-14T08:00:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-14T08:00:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "3181",
