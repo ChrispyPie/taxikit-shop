@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-14T04:33:00+02:00",
+  "updated": "2026-09-14T04:34:59+02:00",
   "error": null,
   "trains": [
     {
@@ -72588,9 +72588,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Apn",
-      "lastSeenSig": "Apn",
-      "lastSeenTs": "2026-09-14T04:29:00.000+02:00",
+      "lastSeen": "Lr",
+      "lastSeenSig": "Lr",
+      "lastSeenTs": "2026-09-14T04:34:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -72622,18 +72622,18 @@
         {
           "sig": "Lr",
           "name": "Lr",
-          "t": "2026-09-14T04:32:00.000+02:00",
-          "act": "",
-          "est": "",
+          "t": "2026-09-14T04:34:00.000+02:00",
+          "act": "2026-09-14T04:34:00.000+02:00",
+          "est": "2026-09-14T04:34:00.000+02:00",
           "sched": "2026-09-14T04:32:00.000+02:00",
           "track": "2"
         },
         {
           "sig": "Sn",
           "name": "Sn",
-          "t": "2026-09-14T04:35:00.000+02:00",
+          "t": "2026-09-14T04:37:00.000+02:00",
           "act": "",
-          "est": "",
+          "est": "2026-09-14T04:37:00.000+02:00",
           "sched": "2026-09-14T04:35:00.000+02:00",
           "track": "2"
         },
@@ -72672,9 +72672,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Sue",
-      "lastSeenSig": "Sue",
-      "lastSeenTs": "2026-09-14T04:31:00.000+02:00",
+      "lastSeen": "Bhs",
+      "lastSeenSig": "Bhs",
+      "lastSeenTs": "2026-09-14T04:34:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -72765,9 +72765,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-14T04:30:00.000+02:00",
+      "lastSeen": "Gsv",
+      "lastSeenSig": "Gsv",
+      "lastSeenTs": "2026-09-14T04:33:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -73040,7 +73040,7 @@
       "snabb": false,
       "lastSeen": "Apn",
       "lastSeenSig": "Apn",
-      "lastSeenTs": "2026-09-14T04:32:00.000+02:00",
+      "lastSeenTs": "2026-09-14T04:33:00.000+02:00",
       "stops": [
         {
           "sig": "A",
@@ -95811,6 +95811,31 @@
         "Ytterby"
       ],
       "sched": "2026-09-14T13:30:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA002",
+          "Description": "Buss"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "73747",
+      "dir": "ANK",
+      "other": "Ytterby",
+      "otherSig": "Yb",
+      "from": [
+        "Ytterby"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-14T13:32:00.000+02:00",
       "est": "",
       "act": "",
       "track": "x",
