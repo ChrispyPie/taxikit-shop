@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-15T01:56:51+02:00",
+  "updated": "2026-09-15T01:58:59+02:00",
   "error": null,
   "trains": [
     {
@@ -98922,9 +98922,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Alvesta",
-      "lastSeenSig": "A",
-      "lastSeenTs": "2026-09-14T22:58:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -99007,7 +99004,10 @@
           "sched": "2026-09-14T22:57:00.000+02:00",
           "track": "2"
         }
-      ]
+      ],
+      "lastSeen": "Alvesta",
+      "lastSeenSig": "A",
+      "lastSeenTs": "2026-09-14T22:58:00.000+02:00"
     },
     {
       "id": "3688",
@@ -115943,7 +115943,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Snu",
+          "name": "Snu",
+          "t": "2026-09-15T07:05:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-15T07:05:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-15T07:49:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-15T07:49:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "13128",
