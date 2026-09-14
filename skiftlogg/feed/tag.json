@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-14T03:42:13+02:00",
+  "updated": "2026-09-14T03:44:01+02:00",
   "error": null,
   "trains": [
     {
@@ -215,63 +215,6 @@
       "lastSeen": "Göteborg C",
       "lastSeenSig": "G",
       "lastSeenTs": "2026-09-12T15:47:00.000+02:00"
-    },
-    {
-      "id": "389",
-      "dir": "ANK",
-      "other": "No.osl",
-      "otherSig": "No.osl",
-      "from": [
-        "No.osl"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-12T15:45:00.000+02:00",
-      "est": "",
-      "act": "2026-09-12T15:44:00.000+02:00",
-      "track": "7",
-      "canceled": false,
-      "product": "Vy Snabbtåg",
-      "traffic": [
-        {
-          "Code": "YNA001",
-          "Description": "Tåg"
-        }
-      ],
-      "snabb": true,
-      "stops": [
-        {
-          "sig": "Ed",
-          "name": "Ed",
-          "t": "2026-09-12T14:22:00.000+02:00",
-          "act": "2026-09-12T14:22:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-12T14:25:00.000+02:00",
-          "track": "1"
-        },
-        {
-          "sig": "Thn",
-          "name": "Trollhättan",
-          "t": "2026-09-12T15:12:00.000+02:00",
-          "act": "2026-09-12T15:12:00.000+02:00",
-          "est": "2026-09-12T15:12:00.000+02:00",
-          "sched": "2026-09-12T15:11:00.000+02:00",
-          "track": "2"
-        },
-        {
-          "sig": "G",
-          "name": "Göteborg C",
-          "t": "2026-09-12T15:44:00.000+02:00",
-          "act": "2026-09-12T15:44:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-12T15:45:00.000+02:00",
-          "track": "7"
-        }
-      ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-12T15:44:00.000+02:00"
     },
     {
       "id": "3063",
@@ -96125,6 +96068,31 @@
       "est": "",
       "act": "",
       "track": "9",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3252",
+      "dir": "AVG",
+      "other": "Vänersborg C",
+      "otherSig": "Vg",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Vänersborg C"
+      ],
+      "sched": "2026-09-14T13:00:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "7",
       "canceled": false,
       "product": "Västtågen",
       "traffic": [
