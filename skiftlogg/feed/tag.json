@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-16T01:10:05+02:00",
+  "updated": "2026-09-16T01:11:19+02:00",
   "error": null,
   "trains": [
     {
@@ -108249,9 +108249,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Kungsbacka",
-      "lastSeenSig": "Kb",
-      "lastSeenTs": "2026-09-15T22:11:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -108325,7 +108322,10 @@
           "sched": "2026-09-15T22:11:00.000+02:00",
           "track": "4"
         }
-      ]
+      ],
+      "lastSeen": "Kungsbacka",
+      "lastSeenSig": "Kb",
+      "lastSeenTs": "2026-09-15T22:11:00.000+02:00"
     },
     {
       "id": "17384",
@@ -114442,8 +114442,8 @@
         {
           "sig": "P",
           "name": "P",
-          "t": "2026-09-16T01:12:00.000+02:00",
-          "act": "",
+          "t": "2026-09-16T01:11:00.000+02:00",
+          "act": "2026-09-16T01:11:00.000+02:00",
           "est": "",
           "sched": "2026-09-16T01:12:00.000+02:00",
           "track": "1"
@@ -114467,9 +114467,9 @@
           "track": "1"
         }
       ],
-      "lastSeen": "Jv",
-      "lastSeenSig": "Jv",
-      "lastSeenTs": "2026-09-16T01:07:00.000+02:00"
+      "lastSeen": "P",
+      "lastSeenSig": "P",
+      "lastSeenTs": "2026-09-16T01:11:00.000+02:00"
     },
     {
       "id": "3004",
@@ -114497,7 +114497,7 @@
       "snabb": false,
       "lastSeen": "Ag",
       "lastSeenSig": "Ag",
-      "lastSeenTs": "2026-09-16T01:08:00.000+02:00",
+      "lastSeenTs": "2026-09-16T01:09:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
@@ -123734,7 +123734,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Yb",
+          "name": "Ytterby",
+          "t": "2026-09-16T06:45:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-16T06:45:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-16T07:15:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-16T07:15:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "13273",
@@ -127784,6 +127804,31 @@
         }
       ],
       "snabb": false
+    },
+    {
+      "id": "485",
+      "dir": "AVG",
+      "other": "Malmö C",
+      "otherSig": "Mc",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Malmö C"
+      ],
+      "sched": "2026-09-16T10:39:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "3",
+      "canceled": false,
+      "product": "SJ Snabbtåg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": true
     }
   ]
 }
