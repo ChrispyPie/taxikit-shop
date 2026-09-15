@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-16T01:25:31+02:00",
+  "updated": "2026-09-16T01:27:46+02:00",
   "error": null,
   "trains": [
     {
@@ -103977,9 +103977,6 @@
         }
       ],
       "snabb": true,
-      "lastSeen": "Stockholm C",
-      "lastSeenSig": "Cst",
-      "lastSeenTs": "2026-09-16T00:02:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -104035,7 +104032,10 @@
           "sched": "2026-09-15T23:57:00.000+02:00",
           "track": "17b"
         }
-      ]
+      ],
+      "lastSeen": "Stockholm C",
+      "lastSeenSig": "Cst",
+      "lastSeenTs": "2026-09-16T00:02:00.000+02:00"
     },
     {
       "id": "3677",
@@ -111387,6 +111387,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Fd",
+      "lastSeenSig": "Fd",
+      "lastSeenTs": "2026-09-16T00:06:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -111469,10 +111472,7 @@
           "sched": "2026-09-16T00:07:00.000+02:00",
           "track": "1"
         }
-      ],
-      "lastSeen": "Fd",
-      "lastSeenSig": "Fd",
-      "lastSeenTs": "2026-09-16T00:06:00.000+02:00"
+      ]
     },
     {
       "id": "3095",
@@ -113616,6 +113616,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-16T01:20:00.000+02:00",
       "stops": [
         {
           "sig": "Fd",
@@ -113698,10 +113701,7 @@
           "sched": "2026-09-16T01:21:00.000+02:00",
           "track": "1"
         }
-      ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-16T01:20:00.000+02:00"
+      ]
     },
     {
       "id": "3004",
@@ -113716,7 +113716,7 @@
       ],
       "sched": "2026-09-16T01:30:00.000+02:00",
       "est": "",
-      "act": "",
+      "act": "2026-09-16T01:28:00.000+02:00",
       "track": "13",
       "canceled": false,
       "product": "Västtågen",
@@ -113727,9 +113727,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Lis",
-      "lastSeenSig": "Lis",
-      "lastSeenTs": "2026-09-16T01:24:00.000+02:00",
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-16T01:28:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
@@ -113797,8 +113797,8 @@
         {
           "sig": "G",
           "name": "Göteborg C",
-          "t": "2026-09-16T01:30:00.000+02:00",
-          "act": "",
+          "t": "2026-09-16T01:28:00.000+02:00",
+          "act": "2026-09-16T01:28:00.000+02:00",
           "est": "",
           "sched": "2026-09-16T01:30:00.000+02:00",
           "track": "13"
