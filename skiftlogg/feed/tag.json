@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-17T01:17:41+02:00",
+  "updated": "2026-09-17T01:19:50+02:00",
   "error": null,
   "trains": [
     {
@@ -104004,9 +104004,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "T",
-      "lastSeenSig": "T",
-      "lastSeenTs": "2026-09-16T22:18:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -104152,7 +104149,10 @@
           "sched": "2026-09-16T22:15:00.000+02:00",
           "track": "3"
         }
-      ]
+      ],
+      "lastSeen": "T",
+      "lastSeenSig": "T",
+      "lastSeenTs": "2026-09-16T22:18:00.000+02:00"
     },
     {
       "id": "3680",
@@ -111804,6 +111804,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Fd",
+      "lastSeenSig": "Fd",
+      "lastSeenTs": "2026-09-17T00:12:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -111886,10 +111889,7 @@
           "sched": "2026-09-17T00:07:00.000+02:00",
           "track": "1"
         }
-      ],
-      "lastSeen": "Fd",
-      "lastSeenSig": "Fd",
-      "lastSeenTs": "2026-09-17T00:12:00.000+02:00"
+      ]
     },
     {
       "id": "3689",
@@ -114111,9 +114111,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Krd",
-      "lastSeenSig": "Krd",
-      "lastSeenTs": "2026-09-17T01:16:00.000+02:00",
+      "lastSeen": "Mdn",
+      "lastSeenSig": "Mdn",
+      "lastSeenTs": "2026-09-17T01:19:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
@@ -114163,8 +114163,8 @@
         {
           "sig": "Mdn",
           "name": "Mdn",
-          "t": "2026-09-17T01:20:00.000+02:00",
-          "act": "",
+          "t": "2026-09-17T01:19:00.000+02:00",
+          "act": "2026-09-17T01:19:00.000+02:00",
           "est": "",
           "sched": "2026-09-17T01:20:00.000+02:00",
           "track": "2"
