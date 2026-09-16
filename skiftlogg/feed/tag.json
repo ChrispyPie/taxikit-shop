@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-16T03:54:58+02:00",
+  "updated": "2026-09-16T03:56:51+02:00",
   "error": null,
   "trains": [
     {
@@ -103370,7 +103370,7 @@
           "act": "",
           "est": "",
           "sched": "2026-09-16T05:24:00.000+02:00",
-          "track": "4"
+          "track": "5"
         },
         {
           "sig": "Fby",
@@ -124523,6 +124523,31 @@
         }
       ],
       "snabb": true
+    },
+    {
+      "id": "3964",
+      "dir": "AVG",
+      "other": "Ksc",
+      "otherSig": "Ksc",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Ksc"
+      ],
+      "sched": "2026-09-16T13:14:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "11",
+      "canceled": false,
+      "product": "SJ Regional",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
     }
   ]
 }
