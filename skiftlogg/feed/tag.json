@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-17T04:42:16+02:00",
+  "updated": "2026-09-17T04:44:06+02:00",
   "error": null,
   "trains": [
     {
@@ -98822,7 +98822,7 @@
       "snabb": false,
       "lastSeen": "Nol",
       "lastSeenSig": "Nol",
-      "lastSeenTs": "2026-09-17T04:41:00.000+02:00",
+      "lastSeenTs": "2026-09-17T04:43:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -98873,7 +98873,7 @@
           "sig": "Nol",
           "name": "Nol",
           "t": "2026-09-17T04:41:00.000+02:00",
-          "act": "",
+          "act": "2026-09-17T04:41:00.000+02:00",
           "est": "2026-09-17T04:41:00.000+02:00",
           "sched": "2026-09-17T04:40:00.000+02:00",
           "track": "2"
@@ -98999,7 +98999,7 @@
       "snabb": false,
       "lastSeen": "Lr",
       "lastSeenSig": "Lr",
-      "lastSeenTs": "2026-09-17T04:42:00.000+02:00",
+      "lastSeenTs": "2026-09-17T04:43:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -99162,9 +99162,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Olskroken",
-      "lastSeenSig": "Or",
-      "lastSeenTs": "2026-09-17T04:41:00.000+02:00",
+      "lastSeen": "Gsv",
+      "lastSeenSig": "Gsv",
+      "lastSeenTs": "2026-09-17T04:43:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -99273,9 +99273,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "P",
-      "lastSeenSig": "P",
-      "lastSeenTs": "2026-09-17T04:37:00.000+02:00",
+      "lastSeen": "Gsv",
+      "lastSeenSig": "Gsv",
+      "lastSeenTs": "2026-09-17T04:43:00.000+02:00",
       "stops": [
         {
           "sig": "A",
@@ -101175,9 +101175,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Vänersborg C",
-      "lastSeenSig": "Vg",
-      "lastSeenTs": "2026-09-17T04:39:00.000+02:00",
+      "lastSeen": "Öx",
+      "lastSeenSig": "Öx",
+      "lastSeenTs": "2026-09-17T04:43:00.000+02:00",
       "stops": [
         {
           "sig": "Vg",
@@ -101191,8 +101191,8 @@
         {
           "sig": "Öx",
           "name": "Öx",
-          "t": "2026-09-17T04:44:00.000+02:00",
-          "act": "",
+          "t": "2026-09-17T04:43:00.000+02:00",
+          "act": "2026-09-17T04:43:00.000+02:00",
           "est": "",
           "sched": "2026-09-17T04:44:00.000+02:00",
           "track": "4"
@@ -122384,6 +122384,31 @@
         {
           "Code": "YNA001",
           "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "63747",
+      "dir": "ANK",
+      "other": "Snu",
+      "otherSig": "Snu",
+      "from": [
+        "Snu"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-17T13:39:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA002",
+          "Description": "Buss"
         }
       ],
       "snabb": false
