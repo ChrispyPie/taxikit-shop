@@ -1,7 +1,7 @@
 {
   "airport": "GOT",
-  "updated": "2026-09-17T19:16:25+02:00",
-  "arrivalsUpdated": "2026-09-17T19:16:27+02:00",
+  "updated": "2026-09-17T19:21:18+02:00",
+  "arrivalsUpdated": "2026-09-17T19:21:19+02:00",
   "departuresUpdated": "2026-09-17T18:26:59+02:00",
   "yesterdayUpdated": "2026-09-17T04:56:28+02:00",
   "tomorrowUpdated": "2026-09-17T18:26:58+02:00",
@@ -1562,8 +1562,8 @@
       "baggage": "4",
       "firstBag": "2026-09-17T17:12:58Z",
       "firstBagEst": "2026-09-17T17:07:13Z",
-      "lastBag": "",
-      "rawStatus": "Första bagage · Landat 18:47"
+      "lastBag": "2026-09-17T17:18:10Z",
+      "rawStatus": "Landat 18:47 · Sista bagage"
     },
     {
       "id": "D85504",
@@ -2410,7 +2410,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-17T20:05:00Z",
-      "est": "2026-09-17T19:53:00Z",
+      "est": "2026-09-17T19:55:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "",
@@ -2418,7 +2418,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 21:53"
+      "rawStatus": "Ankommer 21:55"
     },
     {
       "id": "FR966",
@@ -2619,7 +2619,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-17T18:05:00Z",
-      "est": "2026-09-17T17:59:00Z",
+      "est": "2026-09-17T17:57:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "12",
@@ -2627,7 +2627,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 19:59"
+      "rawStatus": "Ankommer 19:57"
     },
     {
       "id": "LO495",
@@ -4364,8 +4364,8 @@
       "other": "Helsingfors",
       "iata": "",
       "airline": "Finnair",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "CAN",
+      "statusSv": "Inställd",
       "sched": "2026-09-17T15:20:00Z",
       "est": "",
       "act": "",
@@ -4375,7 +4375,26 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Inställd"
+    },
+    {
+      "id": "AY865",
+      "dir": "ANK",
+      "other": "Helsingfors",
+      "iata": "",
+      "airline": "Finnair",
+      "status": "SCH",
+      "statusSv": "Planerad",
+      "sched": "2026-09-17T17:17:00Z",
+      "est": "2026-09-17T17:35:00Z",
+      "act": "",
+      "terminal": "T1",
+      "gate": "20A",
+      "baggage": "",
+      "firstBag": "",
+      "firstBagEst": "",
+      "lastBag": "",
+      "rawStatus": "Ankommer 19:35"
     }
   ],
   "departures": [
