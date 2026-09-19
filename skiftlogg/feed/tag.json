@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-19T02:01:08+02:00",
+  "updated": "2026-09-19T02:03:17+02:00",
   "error": null,
   "trains": [
     {
@@ -107274,9 +107274,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-18T23:03:00.000+02:00",
       "stops": [
         {
           "sig": "Vg",
@@ -107377,7 +107374,10 @@
           "sched": "2026-09-18T23:05:00.000+02:00",
           "track": "12"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-18T23:03:00.000+02:00"
     },
     {
       "id": "63592",
@@ -110217,9 +110217,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Bp",
-      "lastSeenSig": "Bp",
-      "lastSeenTs": "2026-09-19T01:58:00.000+02:00",
+      "lastSeen": "Btp",
+      "lastSeenSig": "Btp",
+      "lastSeenTs": "2026-09-19T02:01:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -111105,9 +111105,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Vpm",
-      "lastSeenSig": "Vpm",
-      "lastSeenTs": "2026-09-19T01:59:00.000+02:00",
+      "lastSeen": "Veas",
+      "lastSeenSig": "Veas",
+      "lastSeenTs": "2026-09-19T02:02:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -111855,9 +111855,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Vpm",
-      "lastSeenSig": "Vpm",
-      "lastSeenTs": "2026-09-19T01:58:00.000+02:00",
+      "lastSeen": "Tbn",
+      "lastSeenSig": "Tbn",
+      "lastSeenTs": "2026-09-19T02:01:00.000+02:00",
       "stops": [
         {
           "sig": "Vg",
@@ -114764,7 +114764,7 @@
           "act": "",
           "est": "",
           "sched": "2026-09-19T06:46:00.000+02:00",
-          "track": "3"
+          "track": "x"
         },
         {
           "sig": "Mdn",
@@ -122081,15 +122081,6 @@
       "snabb": false,
       "stops": [
         {
-          "sig": "Smd",
-          "name": "Smd",
-          "t": "2026-09-18T14:02:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-18T14:02:00.000+02:00",
-          "track": "x"
-        },
-        {
           "sig": "G",
           "name": "Göteborg C",
           "t": "2026-09-19T10:22:00.000+02:00",
@@ -122168,6 +122159,15 @@
           "act": "",
           "est": "",
           "sched": "2026-09-19T13:47:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Smd",
+          "name": "Smd",
+          "t": "2026-09-19T14:03:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-19T14:03:00.000+02:00",
           "track": "x"
         }
       ]
