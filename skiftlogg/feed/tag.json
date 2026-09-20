@@ -1,110 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-20T12:10:39+02:00",
+  "updated": "2026-09-20T12:13:00+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "3094",
-      "dir": "ANK",
-      "other": "Kungsbacka",
-      "otherSig": "Kb",
-      "from": [
-        "Kungsbacka"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-09-19T00:15:00.000+02:00",
-      "est": "",
-      "act": "2026-09-19T00:12:00.000+02:00",
-      "track": "12",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": [
-        {
-          "Code": "YNA004",
-          "Description": "Pendeltåg"
-        }
-      ],
-      "snabb": false,
-      "stops": [
-        {
-          "sig": "Kb",
-          "name": "Kungsbacka",
-          "t": "2026-09-18T23:49:00.000+02:00",
-          "act": "2026-09-18T23:49:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-18T23:49:00.000+02:00",
-          "track": "4"
-        },
-        {
-          "sig": "Khe",
-          "name": "Khe",
-          "t": "2026-09-18T23:51:00.000+02:00",
-          "act": "2026-09-18T23:51:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-18T23:51:00.000+02:00",
-          "track": "1"
-        },
-        {
-          "sig": "Ag",
-          "name": "Ag",
-          "t": "2026-09-18T23:53:00.000+02:00",
-          "act": "2026-09-18T23:53:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-18T23:54:00.000+02:00",
-          "track": "1"
-        },
-        {
-          "sig": "Ldo",
-          "name": "Ldo",
-          "t": "2026-09-18T23:57:00.000+02:00",
-          "act": "2026-09-18T23:57:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-18T23:58:00.000+02:00",
-          "track": "2"
-        },
-        {
-          "sig": "Krd",
-          "name": "Krd",
-          "t": "2026-09-19T00:00:00.000+02:00",
-          "act": "2026-09-19T00:00:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-19T00:01:00.000+02:00",
-          "track": "1"
-        },
-        {
-          "sig": "Mdn",
-          "name": "Mdn",
-          "t": "2026-09-19T00:04:00.000+02:00",
-          "act": "2026-09-19T00:04:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-19T00:05:00.000+02:00",
-          "track": "3"
-        },
-        {
-          "sig": "Lis",
-          "name": "Lis",
-          "t": "2026-09-19T00:08:00.000+02:00",
-          "act": "2026-09-19T00:08:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-19T00:09:00.000+02:00",
-          "track": "1"
-        },
-        {
-          "sig": "G",
-          "name": "Göteborg C",
-          "t": "2026-09-19T00:12:00.000+02:00",
-          "act": "2026-09-19T00:12:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-19T00:15:00.000+02:00",
-          "track": "12"
-        }
-      ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-19T00:12:00.000+02:00"
-    },
     {
       "id": "3001",
       "dir": "AVG",
@@ -65100,9 +64998,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Ryr",
-      "lastSeenSig": "Ryr",
-      "lastSeenTs": "2026-09-20T12:03:00.000+02:00",
+      "lastSeen": "Uv",
+      "lastSeenSig": "Uv",
+      "lastSeenTs": "2026-09-20T12:13:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -65134,8 +65032,8 @@
         {
           "sig": "Uv",
           "name": "Uv",
-          "t": "2026-09-20T12:14:00.000+02:00",
-          "act": "",
+          "t": "2026-09-20T12:13:00.000+02:00",
+          "act": "2026-09-20T12:13:00.000+02:00",
           "est": "2026-09-20T12:14:00.000+02:00",
           "sched": "2026-09-20T12:09:00.000+02:00",
           "track": "1"
@@ -67319,15 +67217,15 @@
           "sig": "Kb",
           "name": "Kungsbacka",
           "t": "2026-09-20T12:11:00.000+02:00",
-          "act": "",
+          "act": "2026-09-20T12:11:00.000+02:00",
           "est": "",
           "sched": "2026-09-20T12:11:00.000+02:00",
           "track": "4"
         }
       ],
-      "lastSeen": "Khe",
-      "lastSeenSig": "Khe",
-      "lastSeenTs": "2026-09-20T12:08:00.000+02:00"
+      "lastSeen": "Kungsbacka",
+      "lastSeenSig": "Kb",
+      "lastSeenTs": "2026-09-20T12:11:00.000+02:00"
     },
     {
       "id": "3044",
@@ -67581,9 +67479,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Nöe",
-      "lastSeenSig": "Nöe",
-      "lastSeenTs": "2026-09-20T12:08:00.000+02:00",
+      "lastSeen": "Nol",
+      "lastSeenSig": "Nol",
+      "lastSeenTs": "2026-09-20T12:12:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -67755,9 +67653,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Lgd",
-      "lastSeenSig": "Lgd",
-      "lastSeenTs": "2026-09-20T12:10:00.000+02:00",
+      "lastSeen": "Kungsbacka",
+      "lastSeenSig": "Kb",
+      "lastSeenTs": "2026-09-20T12:12:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -67780,8 +67678,8 @@
         {
           "sig": "Kb",
           "name": "Kungsbacka",
-          "t": "2026-09-20T12:14:00.000+02:00",
-          "act": "",
+          "t": "2026-09-20T12:12:00.000+02:00",
+          "act": "2026-09-20T12:12:00.000+02:00",
           "est": "",
           "sched": "2026-09-20T12:14:00.000+02:00",
           "track": "2"
@@ -69247,8 +69145,8 @@
         {
           "sig": "Nol",
           "name": "Nol",
-          "t": "2026-09-20T12:12:00.000+02:00",
-          "act": "",
+          "t": "2026-09-20T12:11:00.000+02:00",
+          "act": "2026-09-20T12:11:00.000+02:00",
           "est": "",
           "sched": "2026-09-20T12:12:00.000+02:00",
           "track": "1"
@@ -69299,9 +69197,9 @@
           "track": "10"
         }
       ],
-      "lastSeen": "Än",
-      "lastSeenSig": "Än",
-      "lastSeenTs": "2026-09-20T12:08:00.000+02:00"
+      "lastSeen": "Nol",
+      "lastSeenSig": "Nol",
+      "lastSeenTs": "2026-09-20T12:11:00.000+02:00"
     },
     {
       "id": "487",
@@ -70056,9 +69954,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Vbgb",
-      "lastSeenSig": "Vbgb",
-      "lastSeenTs": "2026-09-20T12:06:00.000+02:00",
+      "lastSeen": "Vrö",
+      "lastSeenSig": "Vrö",
+      "lastSeenTs": "2026-09-20T12:11:00.000+02:00",
       "stops": [
         {
           "sig": "Vbc",
@@ -70658,7 +70556,7 @@
       "snabb": false,
       "lastSeen": "Fabp",
       "lastSeenSig": "Fabp",
-      "lastSeenTs": "2026-09-20T12:10:00.000+02:00",
+      "lastSeenTs": "2026-09-20T12:11:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -70821,12 +70719,15 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Vänersborg C",
+      "lastSeenSig": "Vg",
+      "lastSeenTs": "2026-09-20T12:12:00.000+02:00",
       "stops": [
         {
           "sig": "Vg",
           "name": "Vänersborg C",
           "t": "2026-09-20T12:12:00.000+02:00",
-          "act": "",
+          "act": "2026-09-20T12:12:00.000+02:00",
           "est": "",
           "sched": "2026-09-20T12:12:00.000+02:00",
           "track": "1"
@@ -71361,9 +71262,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Gop",
-      "lastSeenSig": "Gop",
-      "lastSeenTs": "2026-09-20T12:00:00.000+02:00",
+      "lastSeen": "Vag",
+      "lastSeenSig": "Vag",
+      "lastSeenTs": "2026-09-20T12:11:00.000+02:00",
       "stops": [
         {
           "sig": "Lkp",
@@ -72773,7 +72674,7 @@
           "sig": "Hb",
           "name": "Helsingborg C",
           "t": "2026-09-20T12:12:00.000+02:00",
-          "act": "",
+          "act": "2026-09-20T12:12:00.000+02:00",
           "est": "",
           "sched": "2026-09-20T12:12:00.000+02:00",
           "track": "4a"
@@ -72797,9 +72698,9 @@
           "track": "12"
         }
       ],
-      "lastSeen": "Lund C",
-      "lastSeenSig": "Lu",
-      "lastSeenTs": "2026-09-20T11:46:00.000+02:00"
+      "lastSeen": "Helsingborg C",
+      "lastSeenSig": "Hb",
+      "lastSeenTs": "2026-09-20T12:12:00.000+02:00"
     },
     {
       "id": "1103",
@@ -73530,9 +73431,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Öda",
-      "lastSeenSig": "Öda",
-      "lastSeenTs": "2026-09-20T12:10:00.000+02:00",
+      "lastSeen": "Ka",
+      "lastSeenSig": "Ka",
+      "lastSeenTs": "2026-09-20T12:12:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -74955,9 +74856,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Öj",
-      "lastSeenSig": "Öj",
-      "lastSeenTs": "2026-09-20T12:09:00.000+02:00",
+      "lastSeen": "Vt",
+      "lastSeenSig": "Vt",
+      "lastSeenTs": "2026-09-20T12:12:00.000+02:00",
       "stops": [
         {
           "sig": "Cst",
@@ -79351,8 +79252,8 @@
         {
           "sig": "Nyb",
           "name": "Nyb",
-          "t": "2026-09-20T12:13:00.000+02:00",
-          "act": "",
+          "t": "2026-09-20T12:11:00.000+02:00",
+          "act": "2026-09-20T12:11:00.000+02:00",
           "est": "",
           "sched": "2026-09-20T12:13:00.000+02:00",
           "track": "2"
@@ -79457,9 +79358,9 @@
           "track": "11"
         }
       ],
-      "lastSeen": "Kalmar C",
-      "lastSeenSig": "Kac",
-      "lastSeenTs": "2026-09-20T11:55:00.000+02:00"
+      "lastSeen": "Nyb",
+      "lastSeenSig": "Nyb",
+      "lastSeenTs": "2026-09-20T12:11:00.000+02:00"
     },
     {
       "id": "1066",
