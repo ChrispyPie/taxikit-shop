@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-20T06:45:59+02:00",
+  "updated": "2026-09-20T06:48:29+02:00",
   "error": null,
   "trains": [
     {
@@ -70842,9 +70842,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Åsa",
-      "lastSeenSig": "Åsa",
-      "lastSeenTs": "2026-09-20T06:43:00.000+02:00",
+      "lastSeen": "Lek",
+      "lastSeenSig": "Lek",
+      "lastSeenTs": "2026-09-20T06:46:00.000+02:00",
       "stops": [
         {
           "sig": "Hd",
@@ -87619,10 +87619,10 @@
         {
           "sig": "Vå",
           "name": "Varberg",
-          "t": "2026-09-19T18:48:00.000+02:00",
-          "act": "2026-09-19T18:48:00.000+02:00",
-          "est": "2026-09-19T18:48:00.000+02:00",
-          "sched": "2026-09-19T18:47:00.000+02:00",
+          "t": "2026-09-19T18:51:00.000+02:00",
+          "act": "2026-09-19T18:51:00.000+02:00",
+          "est": "",
+          "sched": "2026-09-19T18:49:00.000+02:00",
           "track": "1a"
         },
         {
@@ -94699,6 +94699,31 @@
         {
           "Code": "YNA002",
           "Description": "Buss"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3080",
+      "dir": "ANK",
+      "other": "Kungsbacka",
+      "otherSig": "Kb",
+      "from": [
+        "Kungsbacka"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-20T20:45:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "15",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA004",
+          "Description": "Pendeltåg"
         }
       ],
       "snabb": false
