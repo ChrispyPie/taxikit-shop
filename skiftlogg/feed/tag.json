@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-20T02:40:36+02:00",
+  "updated": "2026-09-20T02:42:41+02:00",
   "error": null,
   "trains": [
     {
@@ -83571,9 +83571,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Kungsbacka",
-      "lastSeenSig": "Kb",
-      "lastSeenTs": "2026-09-19T23:41:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -83647,7 +83644,10 @@
           "sched": "2026-09-19T23:41:00.000+02:00",
           "track": "4"
         }
-      ]
+      ],
+      "lastSeen": "Kungsbacka",
+      "lastSeenSig": "Kb",
+      "lastSeenTs": "2026-09-19T23:41:00.000+02:00"
     },
     {
       "id": "3692",
@@ -87605,7 +87605,7 @@
       "snabb": false,
       "lastSeen": "Sue",
       "lastSeenSig": "Sue",
-      "lastSeenTs": "2026-09-20T02:40:00.000+02:00",
+      "lastSeenTs": "2026-09-20T02:41:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -99329,15 +99329,6 @@
       "snabb": false,
       "stops": [
         {
-          "sig": "Fhm",
-          "name": "Fhm",
-          "t": "2026-09-19T14:41:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-19T14:41:00.000+02:00",
-          "track": "4"
-        },
-        {
           "sig": "Öäg",
           "name": "Öäg",
           "t": "2026-09-19T14:45:00.000+02:00",
@@ -99525,6 +99516,15 @@
           "est": "",
           "sched": "2026-09-20T14:21:00.000+02:00",
           "track": "1"
+        },
+        {
+          "sig": "Fhm",
+          "name": "Fhm",
+          "t": "2026-09-20T14:25:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-20T14:25:00.000+02:00",
+          "track": "5"
         }
       ],
       "lastSeen": "Mst",
