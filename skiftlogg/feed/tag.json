@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-20T06:50:58+02:00",
+  "updated": "2026-09-20T06:53:35+02:00",
   "error": null,
   "trains": [
     {
@@ -69994,7 +69994,7 @@
       ],
       "sched": "2026-09-20T06:50:00.000+02:00",
       "est": "",
-      "act": "",
+      "act": "2026-09-20T06:50:00.000+02:00",
       "track": "2",
       "canceled": false,
       "product": "Västtågen",
@@ -70005,12 +70005,15 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Olskroken",
+      "lastSeenSig": "Or",
+      "lastSeenTs": "2026-09-20T06:52:00.000+02:00",
       "stops": [
         {
           "sig": "G",
           "name": "Göteborg C",
           "t": "2026-09-20T06:50:00.000+02:00",
-          "act": "",
+          "act": "2026-09-20T06:50:00.000+02:00",
           "est": "",
           "sched": "2026-09-20T06:50:00.000+02:00",
           "track": "2"
@@ -70131,7 +70134,19 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Kungsbacka",
+      "lastSeenSig": "Kb",
+      "lastSeenTs": "2026-09-20T06:51:24.410+02:00",
       "stops": [
+        {
+          "sig": "Kb",
+          "name": "Kungsbacka",
+          "t": "2026-09-20T06:51:24.410+02:00",
+          "act": "2026-09-20T06:51:24.410+02:00",
+          "est": "",
+          "sched": "2026-09-20T07:14:00.000+02:00",
+          "track": "x"
+        },
         {
           "sig": "G",
           "name": "Göteborg C",
@@ -70148,15 +70163,6 @@
           "act": "",
           "est": "",
           "sched": "2026-09-20T07:02:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "Kb",
-          "name": "Kungsbacka",
-          "t": "2026-09-20T07:14:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-20T07:14:00.000+02:00",
           "track": "x"
         },
         {
@@ -70728,9 +70734,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Vpm",
-      "lastSeenSig": "Vpm",
-      "lastSeenTs": "2026-09-20T06:49:00.000+02:00",
+      "lastSeen": "Tbn",
+      "lastSeenSig": "Tbn",
+      "lastSeenTs": "2026-09-20T06:51:00.000+02:00",
       "stops": [
         {
           "sig": "Vg",
