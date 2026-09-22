@@ -1,89 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-22T03:23:03+02:00",
+  "updated": "2026-09-22T03:25:25+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "2072",
-      "dir": "AVG",
-      "other": "Stockholm C",
-      "otherSig": "Cst",
-      "from": [
-        "Göteborg C"
-      ],
-      "to": [
-        "Stockholm C"
-      ],
-      "sched": "2026-09-20T15:24:00.000+02:00",
-      "est": "",
-      "act": "",
-      "track": "x",
-      "canceled": true,
-      "product": "VR Snabbtåg",
-      "traffic": [
-        {
-          "Code": "YNA001",
-          "Description": "Tåg"
-        }
-      ],
-      "snabb": true,
-      "stops": [
-        {
-          "sig": "G",
-          "name": "Göteborg C",
-          "t": "2026-09-20T15:24:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-20T15:24:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "A",
-          "name": "Alvesta",
-          "t": "2026-09-20T16:00:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-20T16:00:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "Hrc",
-          "name": "Hrc",
-          "t": "2026-09-20T16:16:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-20T16:16:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "Sk",
-          "name": "Skövde C",
-          "t": "2026-09-20T16:43:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-20T16:43:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "Flb",
-          "name": "Flb",
-          "t": "2026-09-20T18:45:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-20T18:45:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "Cst",
-          "name": "Stockholm C",
-          "t": "2026-09-20T18:57:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-20T18:57:00.000+02:00",
-          "track": "x"
-        }
-      ]
-    },
     {
       "id": "184",
       "dir": "AVG",
@@ -118490,6 +118409,31 @@
         {
           "Code": "YNA001",
           "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3545",
+      "dir": "ANK",
+      "other": "Alvesta",
+      "otherSig": "A",
+      "from": [
+        "Alvesta"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-22T12:44:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "1",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA004",
+          "Description": "Pendeltåg"
         }
       ],
       "snabb": false
