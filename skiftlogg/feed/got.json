@@ -1,9 +1,9 @@
 {
   "airport": "GOT",
-  "updated": "2026-09-22T23:52:04+02:00",
-  "arrivalsUpdated": "2026-09-22T23:52:06+02:00",
+  "updated": "2026-09-23T00:02:14+02:00",
+  "arrivalsUpdated": "2026-09-23T00:02:19+02:00",
   "departuresUpdated": "2026-09-22T23:07:29+02:00",
-  "yesterdayUpdated": "2026-09-22T04:57:23+02:00",
+  "yesterdayUpdated": "2026-09-23T00:02:23+02:00",
   "tomorrowUpdated": "2026-09-22T23:07:27+02:00",
   "error": null,
   "arrivals": [
@@ -253,25 +253,6 @@
       "firstBagEst": "2026-09-21T14:50:01Z",
       "lastBag": "2026-09-21T15:01:45Z",
       "rawStatus": "Landat 16:30 · Sista bagage"
-    },
-    {
-      "id": "FR091",
-      "dir": "ANK",
-      "other": "Malaga",
-      "iata": "",
-      "airline": "Ryanair Ltd",
-      "status": "LAN",
-      "statusSv": "Landat 12:00",
-      "sched": "2026-09-21T10:00:00Z",
-      "est": "2026-09-21T10:04:00Z",
-      "act": "2026-09-21T10:00:00Z",
-      "terminal": "T1",
-      "gate": "20A",
-      "baggage": "4",
-      "firstBag": "2026-09-21T10:21:11Z",
-      "firstBagEst": "2026-09-21T10:22:40Z",
-      "lastBag": "2026-09-21T10:26:06Z",
-      "rawStatus": "Landat 12:00 · Sista bagage"
     },
     {
       "id": "FR7088",
@@ -2038,7 +2019,7 @@
       "firstBag": "2026-09-22T21:47:56Z",
       "firstBagEst": "2026-09-22T21:50:28Z",
       "lastBag": "2026-09-22T21:51:05Z",
-      "rawStatus": "Första bagage · Landat 23:28"
+      "rawStatus": "Landat 23:28 · Sista bagage"
     },
     {
       "id": "SK173",
@@ -2111,10 +2092,10 @@
       "terminal": "T1",
       "gate": "20A",
       "baggage": "1",
-      "firstBag": "",
+      "firstBag": "2026-09-22T21:55:47Z",
       "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Ankommer 23:39"
+      "lastBag": "2026-09-22T21:58:13Z",
+      "rawStatus": "Ankommer 23:39 · Sista bagage"
     },
     {
       "id": "LH814",
@@ -2379,8 +2360,8 @@
       "baggage": "3",
       "firstBag": "2026-09-22T21:47:35Z",
       "firstBagEst": "2026-09-22T21:54:19Z",
-      "lastBag": "",
-      "rawStatus": "Första bagage · Landat 23:26"
+      "lastBag": "2026-09-22T21:54:16Z",
+      "rawStatus": "Landat 23:26 · Sista bagage"
     },
     {
       "id": "LH820",
@@ -2388,18 +2369,18 @@
       "other": "Frankfurt",
       "iata": "",
       "airline": "Lufthansa",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 23:51",
       "sched": "2026-09-22T21:45:00Z",
       "est": "2026-09-22T21:53:00Z",
-      "act": "",
+      "act": "2026-09-22T21:51:00Z",
       "terminal": "T1",
       "gate": "A1",
       "baggage": "3",
       "firstBag": "",
-      "firstBagEst": "",
+      "firstBagEst": "2026-09-22T22:17:32Z",
       "lastBag": "",
-      "rawStatus": "Ankommer 23:53"
+      "rawStatus": "Landat 23:51"
     },
     {
       "id": "SK448",
@@ -2407,18 +2388,18 @@
       "other": "Köpenhamn",
       "iata": "",
       "airline": "SAS Scandinavian Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 23:48",
       "sched": "2026-09-22T21:55:00Z",
       "est": "2026-09-22T21:45:00Z",
-      "act": "",
+      "act": "2026-09-22T21:48:00Z",
       "terminal": "T1",
       "gate": "16",
       "baggage": "2",
       "firstBag": "",
-      "firstBagEst": "",
+      "firstBagEst": "2026-09-22T22:15:11Z",
       "lastBag": "",
-      "rawStatus": "Ankommer 23:45"
+      "rawStatus": "Landat 23:48"
     },
     {
       "id": "JTD676",
@@ -3873,7 +3854,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-22T22:40:00Z",
-      "est": "2026-09-22T22:48:00Z",
+      "est": "2026-09-22T22:43:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "19",
@@ -3881,7 +3862,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 00:48"
+      "rawStatus": "Ankommer 00:43"
     },
     {
       "id": "BLX364",
@@ -3892,7 +3873,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-23T01:15:00Z",
-      "est": "",
+      "est": "2026-09-23T01:24:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "A1",
@@ -3900,7 +3881,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Ankommer 03:24"
     }
   ],
   "departures": [
