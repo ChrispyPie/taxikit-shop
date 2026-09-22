@@ -1,9 +1,9 @@
 {
   "airport": "GOT",
-  "updated": "2026-09-23T00:12:10+02:00",
-  "arrivalsUpdated": "2026-09-23T00:12:13+02:00",
+  "updated": "2026-09-23T00:21:29+02:00",
+  "arrivalsUpdated": "2026-09-23T00:21:30+02:00",
   "departuresUpdated": "2026-09-23T00:12:14+02:00",
-  "yesterdayUpdated": "2026-09-23T00:12:14+02:00",
+  "yesterdayUpdated": "2026-09-23T00:21:31+02:00",
   "tomorrowUpdated": "2026-09-22T23:07:27+02:00",
   "error": null,
   "arrivals": [
@@ -443,25 +443,6 @@
       "firstBagEst": "2026-09-21T10:49:35Z",
       "lastBag": "2026-09-21T10:50:40Z",
       "rawStatus": "Landat 12:30 · Sista bagage"
-    },
-    {
-      "id": "BA786",
-      "dir": "ANK",
-      "other": "London LHR",
-      "iata": "",
-      "airline": "British Airways",
-      "status": "LAN",
-      "statusSv": "Landat 12:21",
-      "sched": "2026-09-21T10:15:00Z",
-      "est": "2026-09-21T10:23:00Z",
-      "act": "2026-09-21T10:21:00Z",
-      "terminal": "T1",
-      "gate": "22",
-      "baggage": "3",
-      "firstBag": "2026-09-21T10:36:41Z",
-      "firstBagEst": "2026-09-21T10:41:46Z",
-      "lastBag": "2026-09-21T10:42:31Z",
-      "rawStatus": "Landat 12:21 · Sista bagage"
     },
     {
       "id": "BLX262",
@@ -2084,18 +2065,18 @@
       "other": "Alicante",
       "iata": "",
       "airline": "Ryanair Ltd",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 23:39",
       "sched": "2026-09-22T21:30:00Z",
       "est": "2026-09-22T21:39:00Z",
-      "act": "",
+      "act": "2026-09-22T21:39:00Z",
       "terminal": "T1",
       "gate": "20A",
       "baggage": "1",
       "firstBag": "2026-09-22T21:55:47Z",
       "firstBagEst": "",
       "lastBag": "2026-09-22T21:58:13Z",
-      "rawStatus": "Ankommer 23:39 · Sista bagage"
+      "rawStatus": "Landat 23:39 · Sista bagage"
     },
     {
       "id": "LH814",
@@ -3873,7 +3854,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-23T01:15:00Z",
-      "est": "2026-09-23T01:24:00Z",
+      "est": "2026-09-23T01:23:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "A1",
@@ -3881,7 +3862,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 03:24"
+      "rawStatus": "Ankommer 03:23"
     }
   ],
   "departures": [
