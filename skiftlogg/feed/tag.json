@@ -1,125 +1,8 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-23T02:20:45+02:00",
+  "updated": "2026-09-23T02:23:22+02:00",
   "error": null,
   "trains": [
-    {
-      "id": "63758",
-      "dir": "AVG",
-      "other": "Uv",
-      "otherSig": "Uv",
-      "from": [
-        "Göteborg C"
-      ],
-      "to": [
-        "Uv"
-      ],
-      "sched": "2026-09-21T14:22:00.000+02:00",
-      "est": "",
-      "act": "",
-      "track": "x",
-      "canceled": false,
-      "product": "Västtågen",
-      "traffic": [
-        {
-          "Code": "YNA002",
-          "Description": "Buss"
-        }
-      ],
-      "snabb": false,
-      "stops": [
-        {
-          "sig": "G",
-          "name": "Göteborg C",
-          "t": "2026-09-21T14:22:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-21T14:22:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "Kde",
-          "name": "Kde",
-          "t": "2026-09-21T14:48:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-21T14:48:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "Sth",
-          "name": "Sth",
-          "t": "2026-09-21T14:57:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-21T14:57:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "Snu",
-          "name": "Snu",
-          "t": "2026-09-21T15:14:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-21T15:14:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "Dl",
-          "name": "Dl",
-          "t": "2026-09-21T16:36:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-21T16:36:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "Hlv",
-          "name": "Hlv",
-          "t": "2026-09-21T16:45:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-21T16:45:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "Rbh",
-          "name": "Rbh",
-          "t": "2026-09-21T16:53:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-21T16:53:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "Övb",
-          "name": "Övb",
-          "t": "2026-09-21T17:28:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-21T17:28:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "Ske",
-          "name": "Ske",
-          "t": "2026-09-21T17:37:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-21T17:37:00.000+02:00",
-          "track": "x"
-        },
-        {
-          "sig": "Smd",
-          "name": "Smd",
-          "t": "2026-09-21T17:53:00.000+02:00",
-          "act": "",
-          "est": "",
-          "sched": "2026-09-21T17:53:00.000+02:00",
-          "track": "x"
-        }
-      ]
-    },
     {
       "id": "3653",
       "dir": "ANK",
@@ -107748,9 +107631,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-22T23:23:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
@@ -107824,7 +107704,10 @@
           "sched": "2026-09-22T23:20:00.000+02:00",
           "track": "16"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-22T23:23:00.000+02:00"
     },
     {
       "id": "3587",
@@ -110807,7 +110690,7 @@
           "act": "",
           "est": "",
           "sched": "2026-09-23T04:39:00.000+02:00",
-          "track": "x"
+          "track": "1"
         }
       ]
     },
@@ -123749,7 +123632,45 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Snu",
+          "name": "Snu",
+          "t": "2026-09-23T07:17:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-23T07:17:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Sth",
+          "name": "Sth",
+          "t": "2026-09-23T07:27:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-23T07:27:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Kde",
+          "name": "Kde",
+          "t": "2026-09-23T07:37:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-23T07:37:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-23T08:09:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-23T08:09:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "13133",
@@ -127525,6 +127446,56 @@
         }
       ],
       "snabb": true
+    },
+    {
+      "id": "3047",
+      "dir": "AVG",
+      "other": "Kungsbacka",
+      "otherSig": "Kb",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Kungsbacka"
+      ],
+      "sched": "2026-09-23T11:45:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "15",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA004",
+          "Description": "Pendeltåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3044",
+      "dir": "ANK",
+      "other": "Kungsbacka",
+      "otherSig": "Kb",
+      "from": [
+        "Kungsbacka"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-23T11:45:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "16",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA004",
+          "Description": "Pendeltåg"
+        }
+      ],
+      "snabb": false
     }
   ]
 }
