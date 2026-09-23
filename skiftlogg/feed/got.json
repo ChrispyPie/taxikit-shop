@@ -1,7 +1,7 @@
 {
   "airport": "GOT",
-  "updated": "2026-09-23T09:31:53+02:00",
-  "arrivalsUpdated": "2026-09-23T09:31:56+02:00",
+  "updated": "2026-09-23T09:51:43+02:00",
+  "arrivalsUpdated": "2026-09-23T09:51:46+02:00",
   "departuresUpdated": "2026-09-23T09:26:54+02:00",
   "yesterdayUpdated": "2026-09-23T05:22:04+02:00",
   "tomorrowUpdated": "2026-09-22T23:07:27+02:00",
@@ -35,25 +35,6 @@
       "status": "DEL",
       "statusSv": "Borttagen",
       "sched": "2026-09-21T21:20:00Z",
-      "est": "",
-      "act": "",
-      "terminal": "T1",
-      "gate": "",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": ""
-    },
-    {
-      "id": "WF208",
-      "dir": "ANK",
-      "other": "Bergen",
-      "iata": "",
-      "airline": "Wideroe",
-      "status": "DEL",
-      "statusSv": "Borttagen",
-      "sched": "2026-09-21T19:40:00Z",
       "est": "",
       "act": "",
       "terminal": "T1",
@@ -1859,7 +1840,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-23T10:45:00Z",
-      "est": "",
+      "est": "2026-09-23T10:33:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "22",
@@ -1867,7 +1848,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Beräknad 12:33"
     },
     {
       "id": "BLX524",
@@ -1902,10 +1883,10 @@
       "terminal": "T1",
       "gate": "20A",
       "baggage": "1",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Landat 09:28"
+      "firstBag": "2026-09-23T07:40:42Z",
+      "firstBagEst": "2026-09-23T07:53:32Z",
+      "lastBag": "2026-09-23T07:42:28Z",
+      "rawStatus": "Landat 09:28 · Sista bagage"
     },
     {
       "id": "FR5657",
@@ -2011,7 +1992,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-23T09:55:00Z",
-      "est": "2026-09-23T09:57:00Z",
+      "est": "2026-09-23T10:07:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "13",
@@ -2019,7 +2000,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 11:57"
+      "rawStatus": "Beräknad 12:07"
     },
     {
       "id": "KL1233",
@@ -2056,8 +2037,8 @@
       "baggage": "1",
       "firstBag": "2026-09-23T07:31:05Z",
       "firstBagEst": "2026-09-23T07:37:39Z",
-      "lastBag": "",
-      "rawStatus": "Landat 09:16"
+      "lastBag": "2026-09-23T07:32:46Z",
+      "rawStatus": "Landat 09:16 · Sista bagage"
     },
     {
       "id": "FR8789",
@@ -2111,10 +2092,10 @@
       "terminal": "T1",
       "gate": "23",
       "baggage": "3",
-      "firstBag": "",
+      "firstBag": "2026-09-23T07:43:50Z",
       "firstBagEst": "2026-09-23T07:49:26Z",
       "lastBag": "",
-      "rawStatus": "Landat 09:19"
+      "rawStatus": "Första bagage · Landat 09:19"
     },
     {
       "id": "D85356",
@@ -2372,7 +2353,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-23T10:40:00Z",
-      "est": "",
+      "est": "2026-09-23T10:33:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "15",
@@ -2380,7 +2361,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Beräknad 12:33"
     },
     {
       "id": "SK163",
@@ -2472,10 +2453,10 @@
       "terminal": "T1",
       "gate": "15",
       "baggage": "2",
-      "firstBag": "",
+      "firstBag": "2026-09-23T07:36:11Z",
       "firstBagEst": "2026-09-23T07:48:12Z",
-      "lastBag": "",
-      "rawStatus": "Landat 09:22"
+      "lastBag": "2026-09-23T07:37:31Z",
+      "rawStatus": "Landat 09:22 · Sista bagage"
     },
     {
       "id": "SK2141",
@@ -2673,18 +2654,18 @@
       "other": "Köpenhamn",
       "iata": "",
       "airline": "SAS Scandinavian Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 09:31",
       "sched": "2026-09-23T07:30:00Z",
       "est": "2026-09-23T07:30:00Z",
-      "act": "",
+      "act": "2026-09-23T07:31:00Z",
       "terminal": "T1",
       "gate": "19",
       "baggage": "5",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Ankommer 09:30"
+      "firstBag": "2026-09-23T07:44:47Z",
+      "firstBagEst": "2026-09-23T07:57:25Z",
+      "lastBag": "2026-09-23T07:47:24Z",
+      "rawStatus": "Landat 09:31 · Sista bagage"
     },
     {
       "id": "LH814",
@@ -2999,7 +2980,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-23T11:15:00Z",
-      "est": "",
+      "est": "2026-09-23T11:15:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "",
@@ -3007,7 +2988,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Ankommer 13:15"
     },
     {
       "id": "BLX152",
