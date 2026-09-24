@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-24T03:05:46+02:00",
+  "updated": "2026-09-24T03:08:37+02:00",
   "error": null,
   "trains": [
     {
@@ -102333,9 +102333,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Skövde C",
-      "lastSeenSig": "Sk",
-      "lastSeenTs": "2026-09-24T00:27:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -102409,7 +102406,10 @@
           "sched": "2026-09-23T23:59:00.000+02:00",
           "track": "1"
         }
-      ]
+      ],
+      "lastSeen": "Skövde C",
+      "lastSeenSig": "Sk",
+      "lastSeenTs": "2026-09-24T00:27:00.000+02:00"
     },
     {
       "id": "183",
@@ -104730,9 +104730,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Fd",
-      "lastSeenSig": "Fd",
-      "lastSeenTs": "2026-09-24T00:06:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -104815,7 +104812,10 @@
           "sched": "2026-09-24T00:07:00.000+02:00",
           "track": "1"
         }
-      ]
+      ],
+      "lastSeen": "Fd",
+      "lastSeenSig": "Fd",
+      "lastSeenTs": "2026-09-24T00:06:00.000+02:00"
     },
     {
       "id": "3489",
@@ -105735,9 +105735,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-24T00:07:00.000+02:00",
       "stops": [
         {
           "sig": "Vg",
@@ -105838,7 +105835,10 @@
           "sched": "2026-09-24T00:05:00.000+02:00",
           "track": "4"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-24T00:07:00.000+02:00"
     },
     {
       "id": "3500",
@@ -122699,7 +122699,72 @@
           "Description": "Tåg"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Hd",
+          "name": "Halmstad C",
+          "t": "2026-09-24T07:23:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-24T07:23:00.000+02:00",
+          "track": "1"
+        },
+        {
+          "sig": "Fabp",
+          "name": "Fabp",
+          "t": "2026-09-24T07:41:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-24T07:41:00.000+02:00",
+          "track": "4"
+        },
+        {
+          "sig": "Vbc",
+          "name": "Vbc",
+          "t": "2026-09-24T07:54:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-24T07:54:00.000+02:00",
+          "track": "4b"
+        },
+        {
+          "sig": "Åsa",
+          "name": "Åsa",
+          "t": "2026-09-24T08:07:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-24T08:07:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Kb",
+          "name": "Kungsbacka",
+          "t": "2026-09-24T08:16:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-24T08:16:00.000+02:00",
+          "track": "3"
+        },
+        {
+          "sig": "Mdn",
+          "name": "Mdn",
+          "t": "2026-09-24T08:27:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-24T08:27:00.000+02:00",
+          "track": "3"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-24T08:35:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-24T08:35:00.000+02:00",
+          "track": "14"
+        }
+      ]
     },
     {
       "id": "483",
@@ -126318,6 +126383,31 @@
       "track": "7",
       "canceled": false,
       "product": "SJ Regional",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3243",
+      "dir": "ANK",
+      "other": "Vänersborg C",
+      "otherSig": "Vg",
+      "from": [
+        "Vänersborg C"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-24T12:30:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "8",
+      "canceled": false,
+      "product": "Västtågen",
       "traffic": [
         {
           "Code": "YNA001",
