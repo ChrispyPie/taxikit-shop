@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-25T02:33:59+02:00",
+  "updated": "2026-09-25T02:38:24+02:00",
   "error": null,
   "trains": [
     {
@@ -103881,9 +103881,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Helsingborg C",
-      "lastSeenSig": "Hb",
-      "lastSeenTs": "2026-09-24T23:59:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -103984,7 +103981,10 @@
           "sched": "2026-09-24T23:59:00.000+02:00",
           "track": "4a"
         }
-      ]
+      ],
+      "lastSeen": "Helsingborg C",
+      "lastSeenSig": "Hb",
+      "lastSeenTs": "2026-09-24T23:59:00.000+02:00"
     },
     {
       "id": "13233",
@@ -111395,7 +111395,7 @@
           "act": "",
           "est": "",
           "sched": "2026-09-25T05:01:00.000+02:00",
-          "track": "1"
+          "track": "2"
         },
         {
           "sig": "Mdn",
@@ -124028,7 +124028,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "A",
+          "name": "Alvesta",
+          "t": "2026-09-25T07:32:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-25T07:32:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-25T08:17:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-25T08:17:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "83727",
@@ -127697,6 +127717,31 @@
       "track": "12",
       "canceled": false,
       "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "1034",
+      "dir": "ANK",
+      "other": "Dk.kh",
+      "otherSig": "Dk.kh",
+      "from": [
+        "Dk.kh"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-09-25T12:05:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "14",
+      "canceled": false,
+      "product": "Öresundståg",
       "traffic": [
         {
           "Code": "YNA001",
