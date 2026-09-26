@@ -1,31 +1,12 @@
 {
   "airport": "GOT",
-  "updated": "2026-09-26T10:06:37+02:00",
-  "arrivalsUpdated": "2026-09-26T10:06:40+02:00",
+  "updated": "2026-09-26T10:47:00+02:00",
+  "arrivalsUpdated": "2026-09-26T10:47:03+02:00",
   "departuresUpdated": "2026-09-26T10:06:41+02:00",
   "yesterdayUpdated": "2026-09-26T05:27:01+02:00",
   "tomorrowUpdated": "2026-09-25T23:07:17+02:00",
   "error": null,
   "arrivals": [
-    {
-      "id": "SK169",
-      "dir": "ANK",
-      "other": "Stockholm ARN",
-      "iata": "",
-      "airline": "SAS Scandinavian Airlines",
-      "status": "LAN",
-      "statusSv": "Landat 22:08",
-      "sched": "2026-09-24T20:10:00Z",
-      "est": "2026-09-24T20:11:00Z",
-      "act": "2026-09-24T20:08:00Z",
-      "terminal": "T1",
-      "gate": "16",
-      "baggage": "2",
-      "firstBag": "2026-09-24T20:18:27Z",
-      "firstBagEst": "2026-09-24T20:33:09Z",
-      "lastBag": "2026-09-24T20:19:58Z",
-      "rawStatus": "Landat 22:08 · Sista bagage"
-    },
     {
       "id": "SK171",
       "dir": "ANK",
@@ -63,25 +44,6 @@
       "firstBagEst": "2026-09-24T21:34:38Z",
       "lastBag": "2026-09-24T21:37:43Z",
       "rawStatus": "Landat 23:14 · Sista bagage"
-    },
-    {
-      "id": "FR966",
-      "dir": "ANK",
-      "other": "London STN",
-      "iata": "",
-      "airline": "Ryanair Ltd",
-      "status": "LAN",
-      "statusSv": "Landat 22:35",
-      "sched": "2026-09-24T20:40:00Z",
-      "est": "2026-09-24T20:38:00Z",
-      "act": "2026-09-24T20:35:00Z",
-      "terminal": "T1",
-      "gate": "23",
-      "baggage": "4",
-      "firstBag": "2026-09-24T20:47:29Z",
-      "firstBagEst": "2026-09-24T20:59:07Z",
-      "lastBag": "2026-09-24T20:48:50Z",
-      "rawStatus": "Landat 22:35 · Sista bagage"
     },
     {
       "id": "AF1552",
@@ -158,25 +120,6 @@
       "firstBagEst": "2026-09-24T21:52:13Z",
       "lastBag": "2026-09-24T21:43:15Z",
       "rawStatus": "Landat 23:26 · Sista bagage"
-    },
-    {
-      "id": "LO495",
-      "dir": "ANK",
-      "other": "Warszawa",
-      "iata": "",
-      "airline": "LOT",
-      "status": "LAN",
-      "statusSv": "Landat 22:39",
-      "sched": "2026-09-24T20:20:00Z",
-      "est": "2026-09-24T20:36:00Z",
-      "act": "2026-09-24T20:39:00Z",
-      "terminal": "T1",
-      "gate": "A1",
-      "baggage": "1",
-      "firstBag": "2026-09-24T21:02:50Z",
-      "firstBagEst": "2026-09-24T21:05:00Z",
-      "lastBag": "2026-09-24T21:06:03Z",
-      "rawStatus": "Landat 22:39 · Sista bagage"
     },
     {
       "id": "SN2319",
@@ -1764,15 +1707,15 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-26T10:20:00Z",
-      "est": "2026-09-26T10:32:00Z",
+      "est": "2026-09-26T10:44:00Z",
       "act": "",
       "terminal": "T1",
-      "gate": "14",
+      "gate": "",
       "baggage": "1",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 12:32"
+      "rawStatus": "Ankommer 12:44"
     },
     {
       "id": "KL1233",
@@ -1783,7 +1726,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-26T11:45:00Z",
-      "est": "",
+      "est": "2026-09-26T11:40:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "17",
@@ -1791,7 +1734,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Beräknad 13:40"
     },
     {
       "id": "RK3088",
@@ -1799,18 +1742,18 @@
       "other": "Manchester",
       "iata": "",
       "airline": "Ryanair UK",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 10:10",
       "sched": "2026-09-26T08:35:00Z",
       "est": "2026-09-26T08:14:00Z",
-      "act": "",
+      "act": "2026-09-26T08:10:00Z",
       "terminal": "T1",
       "gate": "22",
       "baggage": "1",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Ankommer 10:14"
+      "firstBag": "2026-09-26T08:25:06Z",
+      "firstBagEst": "2026-09-26T08:30:18Z",
+      "lastBag": "2026-09-26T08:26:31Z",
+      "rawStatus": "Landat 10:10 · Sista bagage"
     },
     {
       "id": "FR5637",
@@ -1840,15 +1783,15 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-26T10:15:00Z",
-      "est": "2026-09-26T10:03:00Z",
+      "est": "2026-09-26T10:00:00Z",
       "act": "",
       "terminal": "T1",
-      "gate": "17",
+      "gate": "",
       "baggage": "5",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 12:03"
+      "rawStatus": "Ankommer 12:00"
     },
     {
       "id": "TK1797",
@@ -1878,7 +1821,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-26T10:50:00Z",
-      "est": "2026-09-26T10:43:00Z",
+      "est": "2026-09-26T10:46:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "19",
@@ -1886,7 +1829,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 12:43"
+      "rawStatus": "Ankommer 12:46"
     },
     {
       "id": "BLX362",
@@ -1913,18 +1856,18 @@
       "other": "Malaga",
       "iata": "",
       "airline": "Ryanair Ltd",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 10:34",
       "sched": "2026-09-26T08:55:00Z",
       "est": "2026-09-26T08:34:00Z",
-      "act": "",
+      "act": "2026-09-26T08:34:00Z",
       "terminal": "T1",
       "gate": "16",
       "baggage": "4",
       "firstBag": "",
-      "firstBagEst": "",
+      "firstBagEst": "2026-09-26T08:59:42Z",
       "lastBag": "",
-      "rawStatus": "Ankommer 10:34"
+      "rawStatus": "Landat 10:34"
     },
     {
       "id": "FR9662",
@@ -1962,7 +1905,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Beräknad 13:04"
     },
     {
       "id": "KL1231",
@@ -1973,7 +1916,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-26T09:20:00Z",
-      "est": "2026-09-26T09:17:00Z",
+      "est": "2026-09-26T09:22:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "19",
@@ -1981,7 +1924,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 11:17"
+      "rawStatus": "Ankommer 11:22"
     },
     {
       "id": "FR6095",
@@ -2315,7 +2258,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-09-26T09:20:00Z",
-      "est": "2026-09-26T09:24:00Z",
+      "est": "2026-09-26T09:14:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "17",
@@ -2323,7 +2266,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 11:24"
+      "rawStatus": "Ankommer 11:14"
     },
     {
       "id": "W64709",
