@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-26T03:00:07+02:00",
+  "updated": "2026-09-26T03:03:02+02:00",
   "error": null,
   "trains": [
     {
@@ -102364,9 +102364,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Helsingborg C",
-      "lastSeenSig": "Hb",
-      "lastSeenTs": "2026-09-26T00:02:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -102467,7 +102464,10 @@
           "sched": "2026-09-25T23:59:00.000+02:00",
           "track": "4a"
         }
-      ]
+      ],
+      "lastSeen": "Helsingborg C",
+      "lastSeenSig": "Hb",
+      "lastSeenTs": "2026-09-26T00:02:00.000+02:00"
     },
     {
       "id": "1114",
@@ -109660,9 +109660,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Vpm",
-      "lastSeenSig": "Vpm",
-      "lastSeenTs": "2026-09-26T02:59:00.000+02:00",
+      "lastSeen": "Veas",
+      "lastSeenSig": "Veas",
+      "lastSeenTs": "2026-09-26T03:02:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -110031,7 +110031,7 @@
       "snabb": false,
       "lastSeen": "Krd",
       "lastSeenSig": "Krd",
-      "lastSeenTs": "2026-09-26T03:00:00.000+02:00",
+      "lastSeenTs": "2026-09-26T03:01:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
@@ -119646,7 +119646,7 @@
           "act": "",
           "est": "",
           "sched": "2026-09-26T12:09:00.000+02:00",
-          "track": "x"
+          "track": "3a"
         },
         {
           "sig": "Av",
@@ -120954,15 +120954,6 @@
       "snabb": false,
       "stops": [
         {
-          "sig": "Ep",
-          "name": "Ep",
-          "t": "2026-09-25T15:02:00.000+02:00",
-          "act": "2026-09-25T15:02:00.000+02:00",
-          "est": "",
-          "sched": "2026-09-25T15:03:00.000+02:00",
-          "track": "2"
-        },
-        {
           "sig": "Bål",
           "name": "Bål",
           "t": "2026-09-25T15:14:00.000+02:00",
@@ -121114,6 +121105,15 @@
           "est": "",
           "sched": "2026-09-26T14:46:00.000+02:00",
           "track": "1a"
+        },
+        {
+          "sig": "Ep",
+          "name": "Ep",
+          "t": "2026-09-26T15:03:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-26T15:03:00.000+02:00",
+          "track": "2"
         },
         {
           "sig": "Sub",
