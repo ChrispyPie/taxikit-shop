@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-09-28T02:34:28+02:00",
+  "updated": "2026-09-28T02:38:29+02:00",
   "error": null,
   "trains": [
     {
@@ -77750,7 +77750,7 @@
           "act": "",
           "est": "",
           "sched": "2026-09-28T04:39:00.000+02:00",
-          "track": "x"
+          "track": "1"
         }
       ]
     },
@@ -91820,7 +91820,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Snu",
+          "name": "Snu",
+          "t": "2026-09-28T07:35:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-28T07:35:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-09-28T08:19:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-09-28T08:19:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "480",
@@ -95546,6 +95566,31 @@
         }
       ],
       "snabb": false
+    },
+    {
+      "id": "434",
+      "dir": "AVG",
+      "other": "Stockholm C",
+      "otherSig": "Cst",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Stockholm C"
+      ],
+      "sched": "2026-09-28T12:11:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "3",
+      "canceled": false,
+      "product": "SJ Snabbtåg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": true
     }
   ]
 }
