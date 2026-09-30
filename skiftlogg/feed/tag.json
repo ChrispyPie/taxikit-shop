@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-10-01T01:32:55+02:00",
+  "updated": "2026-10-01T01:35:41+02:00",
   "error": null,
   "trains": [
     {
@@ -108984,9 +108984,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-09-30T22:34:00.000+02:00",
       "stops": [
         {
           "sig": "Cst",
@@ -109159,7 +109156,10 @@
           "sched": "2026-09-30T22:30:00.000+02:00",
           "track": "7"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-09-30T22:34:00.000+02:00"
     },
     {
       "id": "73790",
@@ -110745,6 +110745,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Än",
+      "lastSeenSig": "Än",
+      "lastSeenTs": "2026-09-30T23:46:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -110809,10 +110812,7 @@
           "sched": "2026-09-30T23:47:00.000+02:00",
           "track": "1"
         }
-      ],
-      "lastSeen": "Än",
-      "lastSeenSig": "Än",
-      "lastSeenTs": "2026-09-30T23:46:00.000+02:00"
+      ]
     },
     {
       "id": "3587",
@@ -123869,7 +123869,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "Yb",
+          "name": "Ytterby",
+          "t": "2026-10-01T07:00:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-10-01T07:00:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-10-01T07:30:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-10-01T07:30:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "3425",
@@ -124101,7 +124121,27 @@
           "Description": "Buss"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-10-01T07:30:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-10-01T07:30:00.000+02:00",
+          "track": "x"
+        },
+        {
+          "sig": "Yb",
+          "name": "Ytterby",
+          "t": "2026-10-01T08:00:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-10-01T08:00:00.000+02:00",
+          "track": "x"
+        }
+      ]
     },
     {
       "id": "3181",
@@ -128362,6 +128402,56 @@
         {
           "Code": "YNA004",
           "Description": "Pendeltåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "1079",
+      "dir": "AVG",
+      "other": "Dk.kh",
+      "otherSig": "Dk.kh",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Dk.kh"
+      ],
+      "sched": "2026-10-01T10:55:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "14",
+      "canceled": false,
+      "product": "Öresundståg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3237",
+      "dir": "ANK",
+      "other": "Vänersborg C",
+      "otherSig": "Vg",
+      "from": [
+        "Vänersborg C"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-10-01T11:00:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "9",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
         }
       ],
       "snabb": false
