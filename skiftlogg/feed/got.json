@@ -1,10 +1,10 @@
 {
   "airport": "GOT",
-  "updated": "2026-10-01T17:22:03+02:00",
-  "arrivalsUpdated": "2026-10-01T17:22:07+02:00",
-  "departuresUpdated": "2026-10-01T16:42:13+02:00",
+  "updated": "2026-10-01T17:46:34+02:00",
+  "arrivalsUpdated": "2026-10-01T17:46:37+02:00",
+  "departuresUpdated": "2026-10-01T17:46:47+02:00",
   "yesterdayUpdated": "2026-10-01T05:17:28+02:00",
-  "tomorrowUpdated": "2026-10-01T16:42:09+02:00",
+  "tomorrowUpdated": "2026-10-01T17:46:39+02:00",
   "error": null,
   "arrivals": [
     {
@@ -139,25 +139,6 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": ""
-    },
-    {
-      "id": "BLX152",
-      "dir": "ANK",
-      "other": "Palma",
-      "iata": "",
-      "airline": "Tui Fly Nordic",
-      "status": "LAN",
-      "statusSv": "Landat 05:23",
-      "sched": "2026-09-30T03:35:00Z",
-      "est": "2026-09-30T03:22:00Z",
-      "act": "2026-09-30T03:23:00Z",
-      "terminal": "T1",
-      "gate": "13",
-      "baggage": "3",
-      "firstBag": "2026-09-30T03:54:44Z",
-      "firstBagEst": "2026-09-30T03:51:56Z",
-      "lastBag": "",
-      "rawStatus": "Första bagage · Landat 05:23"
     },
     {
       "id": "D85058",
@@ -1856,18 +1837,18 @@
       "other": "Paris CDG",
       "iata": "",
       "airline": "Air France",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 17:25",
       "sched": "2026-10-01T15:10:00Z",
       "est": "2026-10-01T15:28:00Z",
-      "act": "",
+      "act": "2026-10-01T15:25:00Z",
       "terminal": "T1",
       "gate": "14",
       "baggage": "1",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Ankommer 17:28"
+      "firstBag": "2026-10-01T15:40:33Z",
+      "firstBagEst": "2026-10-01T15:44:50Z",
+      "lastBag": "2026-10-01T15:43:08Z",
+      "rawStatus": "Landat 17:25 · Sista bagage"
     },
     {
       "id": "BA788",
@@ -1902,10 +1883,10 @@
       "terminal": "T1",
       "gate": "21B",
       "baggage": "1",
-      "firstBag": "",
+      "firstBag": "2026-10-01T15:23:15Z",
       "firstBagEst": "2026-10-01T15:31:11Z",
-      "lastBag": "",
-      "rawStatus": "Landat 17:06"
+      "lastBag": "2026-10-01T15:26:51Z",
+      "rawStatus": "Landat 17:06 · Sista bagage"
     },
     {
       "id": "W61735",
@@ -1940,10 +1921,10 @@
       "terminal": "T1",
       "gate": "19",
       "baggage": "5",
-      "firstBag": "",
+      "firstBag": "2026-10-01T15:22:52Z",
       "firstBagEst": "2026-10-01T15:31:46Z",
-      "lastBag": "",
-      "rawStatus": "Landat 17:09"
+      "lastBag": "2026-10-01T15:24:17Z",
+      "rawStatus": "Landat 17:09 · Sista bagage"
     },
     {
       "id": "KL1235",
@@ -1951,11 +1932,11 @@
       "other": "Amsterdam",
       "iata": "",
       "airline": "KLM",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 17:45",
       "sched": "2026-10-01T15:45:00Z",
       "est": "2026-10-01T15:46:00Z",
-      "act": "",
+      "act": "2026-10-01T15:45:00Z",
       "terminal": "T1",
       "gate": "17",
       "baggage": "1",
@@ -1973,15 +1954,15 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-01T16:00:00Z",
-      "est": "2026-10-01T15:51:00Z",
+      "est": "2026-10-01T15:48:00Z",
       "act": "",
       "terminal": "T1",
-      "gate": "21A",
+      "gate": "A1",
       "baggage": "5",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 17:51"
+      "rawStatus": "Ankommer 17:48"
     },
     {
       "id": "TK1799",
@@ -1992,7 +1973,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-01T15:55:00Z",
-      "est": "2026-10-01T15:57:00Z",
+      "est": "2026-10-01T15:55:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "23",
@@ -2000,7 +1981,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 17:57"
+      "rawStatus": "Ankommer 17:55"
     },
     {
       "id": "FR3713",
@@ -2011,7 +1992,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-01T16:05:00Z",
-      "est": "2026-10-01T16:02:00Z",
+      "est": "2026-10-01T15:54:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "A4",
@@ -2019,7 +2000,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 18:02"
+      "rawStatus": "Ankommer 17:54"
     },
     {
       "id": "D85058",
@@ -2049,7 +2030,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-01T16:50:00Z",
-      "est": "2026-10-01T16:35:00Z",
+      "est": "2026-10-01T16:34:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "",
@@ -2057,7 +2038,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 18:35"
+      "rawStatus": "Ankommer 18:34"
     },
     {
       "id": "BA790",
@@ -2068,7 +2049,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-01T17:15:00Z",
-      "est": "2026-10-01T17:13:00Z",
+      "est": "2026-10-01T17:09:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "",
@@ -2076,7 +2057,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 19:13"
+      "rawStatus": "Ankommer 19:09"
     },
     {
       "id": "D85504",
@@ -2209,7 +2190,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 18:03"
+      "rawStatus": "Ankommer 18:00"
     },
     {
       "id": "SK161",
@@ -2635,18 +2616,18 @@
       "other": "Bryssel",
       "iata": "",
       "airline": "Brussels Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 17:34",
       "sched": "2026-10-01T15:35:00Z",
       "est": "2026-10-01T15:36:00Z",
-      "act": "",
+      "act": "2026-10-01T15:34:00Z",
       "terminal": "T1",
       "gate": "15",
       "baggage": "5",
       "firstBag": "",
-      "firstBagEst": "",
+      "firstBagEst": "2026-10-01T15:57:19Z",
       "lastBag": "",
-      "rawStatus": "Ankommer 17:42"
+      "rawStatus": "Landat 17:34"
     },
     {
       "id": "OS971",
@@ -2698,7 +2679,7 @@
       "est": "2026-10-01T16:13:00Z",
       "act": "",
       "terminal": "T1",
-      "gate": "19",
+      "gate": "",
       "baggage": "2",
       "firstBag": "",
       "firstBagEst": "",
@@ -2752,7 +2733,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-01T17:45:00Z",
-      "est": "2026-10-01T17:49:00Z",
+      "est": "2026-10-01T17:39:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "",
@@ -2760,7 +2741,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 19:49"
+      "rawStatus": "Beräknad 19:39"
     },
     {
       "id": "SK1444",
@@ -6082,7 +6063,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "19",
+      "gate": "",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6177,7 +6158,7 @@
       "est": "2026-10-01T17:00:00Z",
       "act": "",
       "terminal": "T1",
-      "gate": "20A",
+      "gate": "12",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6201,7 +6182,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gå till gate"
     },
     {
       "id": "KL1232",
@@ -6277,7 +6258,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gå till gate"
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "AY862",
@@ -6386,7 +6367,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "21B",
+      "gate": "24D",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6505,7 +6486,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gå till gate"
     },
     {
       "id": "AY866",
@@ -6524,7 +6505,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "D85059",
@@ -6600,7 +6581,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "TK1800",
@@ -6657,7 +6638,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Boarding"
     },
     {
       "id": "FR4011",
@@ -6728,7 +6709,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "13",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6836,18 +6817,18 @@
       "other": "Gdansk",
       "iata": "",
       "airline": "Wizz Air",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-10-01T15:45:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-10-01T15:38:35Z",
       "terminal": "T1",
       "gate": "16",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "LO496",
@@ -7032,7 +7013,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "20A",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -7292,18 +7273,18 @@
       "other": "Chania",
       "iata": "",
       "airline": "SAS Scandinavian Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-10-01T14:15:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-10-01T15:02:31Z",
       "terminal": "T1",
       "gate": "21A",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Boarding"
+      "rawStatus": "Startat 17:11"
     },
     {
       "id": "SK1439",
