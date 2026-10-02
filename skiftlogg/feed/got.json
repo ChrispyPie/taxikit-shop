@@ -1,8 +1,8 @@
 {
   "airport": "GOT",
-  "updated": "2026-10-02T12:47:37+02:00",
-  "arrivalsUpdated": "2026-10-02T12:47:38+02:00",
-  "departuresUpdated": "2026-10-02T11:57:01+02:00",
+  "updated": "2026-10-02T12:53:07+02:00",
+  "arrivalsUpdated": "2026-10-02T12:53:08+02:00",
+  "departuresUpdated": "2026-10-02T12:53:09+02:00",
   "yesterdayUpdated": "2026-10-02T05:31:43+02:00",
   "tomorrowUpdated": "2026-10-02T12:47:39+02:00",
   "error": null,
@@ -1650,7 +1650,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-02T12:30:00Z",
-      "est": "2026-10-02T12:28:00Z",
+      "est": "2026-10-02T12:30:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "",
@@ -1658,7 +1658,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 14:28"
+      "rawStatus": "Ankommer 14:30"
     },
     {
       "id": "D85261",
@@ -2206,9 +2206,9 @@
       "terminal": "T1",
       "gate": "16",
       "baggage": "2",
-      "firstBag": "",
+      "firstBag": "2026-10-02T10:52:47Z",
       "firstBagEst": "2026-10-02T10:55:46Z",
-      "lastBag": "",
+      "lastBag": "2026-10-02T10:52:48Z",
       "rawStatus": "Landat 12:29"
     },
     {
@@ -2284,7 +2284,7 @@
       "baggage": "2",
       "firstBag": "2026-10-02T09:08:14Z",
       "firstBagEst": "2026-10-02T09:17:49Z",
-      "lastBag": "",
+      "lastBag": "2026-10-02T10:52:44Z",
       "rawStatus": "Första bagage · Landat 10:52"
     },
     {
@@ -2942,7 +2942,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-02T15:00:00Z",
-      "est": "",
+      "est": "2026-10-02T14:56:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "",
@@ -5943,18 +5943,18 @@
       "other": "Amsterdam",
       "iata": "",
       "airline": "KLM",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-10-02T10:05:00Z",
       "est": "2026-10-02T10:15:00Z",
-      "act": "",
+      "act": "2026-10-02T10:27:32Z",
       "terminal": "T1",
       "gate": "16",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Försenad till 12:15 · Gå till gate"
+      "rawStatus": "Startat 12:37"
     },
     {
       "id": "EW8221",
@@ -6068,7 +6068,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd"
+      "rawStatus": "Startat 12:02"
     },
     {
       "id": "FR4011",
@@ -6095,18 +6095,18 @@
       "other": "Helsingfors",
       "iata": "",
       "airline": "Finnair",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-10-02T11:00:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-10-02T10:46:08Z",
       "terminal": "T1",
       "gate": "19",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "KL1236",
@@ -6372,7 +6372,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd"
+      "rawStatus": "Startat 11:42"
     },
     {
       "id": "SK144",
@@ -6422,14 +6422,14 @@
       "statusSv": "Startat",
       "sched": "2026-10-02T10:05:00Z",
       "est": "",
-      "act": "2026-10-02T09:55:00Z",
+      "act": "2026-10-02T10:03:21Z",
       "terminal": "T1",
       "gate": "22",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd"
+      "rawStatus": "Startat 12:14"
     },
     {
       "id": "FR5636",
@@ -6494,8 +6494,8 @@
       "other": "München",
       "iata": "",
       "airline": "Lufthansa City",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "CAN",
+      "statusSv": "Inställd",
       "sched": "2026-10-02T16:35:00Z",
       "est": "",
       "act": "",
@@ -6505,7 +6505,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Inställd"
     },
     {
       "id": "OJ812",
@@ -7018,7 +7018,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "FR6094",
@@ -7056,7 +7056,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Omedelbar avgång"
     }
   ]
 }
