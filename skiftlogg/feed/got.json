@@ -1,10 +1,10 @@
 {
   "airport": "GOT",
-  "updated": "2026-10-02T15:41:51+02:00",
-  "arrivalsUpdated": "2026-10-02T15:41:54+02:00",
-  "departuresUpdated": "2026-10-02T15:07:17+02:00",
+  "updated": "2026-10-02T16:07:18+02:00",
+  "arrivalsUpdated": "2026-10-02T16:07:19+02:00",
+  "departuresUpdated": "2026-10-02T16:07:22+02:00",
   "yesterdayUpdated": "2026-10-02T05:31:43+02:00",
-  "tomorrowUpdated": "2026-10-02T15:07:16+02:00",
+  "tomorrowUpdated": "2026-10-02T16:07:20+02:00",
   "error": null,
   "arrivals": [
     {
@@ -1780,11 +1780,11 @@
       "other": "Rhodos",
       "iata": "",
       "airline": "Tui Fly Nordic",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 16:06",
       "sched": "2026-10-02T14:00:00Z",
       "est": "2026-10-02T14:02:00Z",
-      "act": "",
+      "act": "2026-10-02T14:06:00Z",
       "terminal": "T1",
       "gate": "12",
       "baggage": "3",
@@ -1843,7 +1843,7 @@
       "est": "2026-10-02T15:05:00Z",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "20B",
       "baggage": "2",
       "firstBag": "",
       "firstBagEst": "",
@@ -2068,7 +2068,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-02T15:10:00Z",
-      "est": "2026-10-02T15:02:00Z",
+      "est": "2026-10-02T14:57:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "15",
@@ -2076,7 +2076,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 17:02"
+      "rawStatus": "Ankommer 16:57"
     },
     {
       "id": "FR6095",
@@ -2189,8 +2189,8 @@
       "baggage": "2",
       "firstBag": "2026-10-02T13:38:37Z",
       "firstBagEst": "2026-10-02T13:50:00Z",
-      "lastBag": "",
-      "rawStatus": "Första bagage · Landat 15:23"
+      "lastBag": "2026-10-02T13:42:53Z",
+      "rawStatus": "Landat 15:23 · Sista bagage"
     },
     {
       "id": "SK165",
@@ -2201,7 +2201,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-02T16:55:00Z",
-      "est": "",
+      "est": "2026-10-02T16:48:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "",
@@ -2209,7 +2209,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Beräknad 18:48"
     },
     {
       "id": "SK145",
@@ -2638,7 +2638,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-02T15:35:00Z",
-      "est": "2026-10-02T15:25:00Z",
+      "est": "2026-10-02T15:27:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "13",
@@ -2646,7 +2646,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 17:25"
+      "rawStatus": "Beräknad 17:27"
     },
     {
       "id": "LH818",
@@ -2657,7 +2657,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-02T16:15:00Z",
-      "est": "2026-10-02T16:58:00Z",
+      "est": "2026-10-02T16:48:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "",
@@ -2665,7 +2665,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 18:58"
+      "rawStatus": "Beräknad 18:48"
     },
     {
       "id": "VL2430",
@@ -2888,7 +2888,7 @@
       "est": "2026-10-02T14:55:00Z",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "21B",
       "baggage": "4",
       "firstBag": "",
       "firstBagEst": "",
@@ -5753,18 +5753,18 @@
       "other": "Zürich",
       "iata": "",
       "airline": "Swiss",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-10-02T12:55:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-10-02T13:52:04Z",
       "terminal": "T1",
       "gate": "13",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd"
+      "rawStatus": "Startat 16:00"
     },
     {
       "id": "D85272",
@@ -5772,18 +5772,18 @@
       "other": "Nice",
       "iata": "",
       "airline": "Norwegian",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-10-02T13:35:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-10-02T13:52:26Z",
       "terminal": "T1",
       "gate": "21A",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Omedelbar avgång"
+      "rawStatus": "Startat 16:03"
     },
     {
       "id": "FR6749",
@@ -5816,7 +5816,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "20A",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -5859,7 +5859,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gå till gate"
     },
     {
       "id": "DK1766",
@@ -5873,7 +5873,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "21A",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6608,18 +6608,18 @@
       "other": "Stockholm ARN",
       "iata": "",
       "airline": "SAS Scandinavian Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-10-02T14:10:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-10-02T14:05:39Z",
       "terminal": "T1",
       "gate": "15",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "SK166",
@@ -6657,7 +6657,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gå till gate"
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "SK443",
@@ -6779,18 +6779,18 @@
       "other": "Chania",
       "iata": "",
       "airline": "SAS Scandinavian Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-10-02T13:40:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-10-02T13:40:04Z",
       "terminal": "T1",
       "gate": "19",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gå till gate"
+      "rawStatus": "Startat 15:47"
     },
     {
       "id": "LH2433",
@@ -6969,18 +6969,18 @@
       "other": "Gdansk",
       "iata": "",
       "airline": "Ryanair Ltd",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-10-02T13:20:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-10-02T13:07:15Z",
       "terminal": "T1",
       "gate": "20A",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd"
+      "rawStatus": "Startat 15:14"
     },
     {
       "id": "SK158",
