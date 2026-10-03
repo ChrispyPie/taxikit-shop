@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-10-03T03:05:01+02:00",
+  "updated": "2026-10-03T03:08:15+02:00",
   "error": null,
   "trains": [
     {
@@ -103137,9 +103137,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Halmstad C",
-      "lastSeenSig": "Hd",
-      "lastSeenTs": "2026-10-03T00:06:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -103204,7 +103201,10 @@
           "sched": "2026-10-03T00:07:00.000+02:00",
           "track": "1b"
         }
-      ]
+      ],
+      "lastSeen": "Halmstad C",
+      "lastSeenSig": "Hd",
+      "lastSeenTs": "2026-10-03T00:06:00.000+02:00"
     },
     {
       "id": "63585",
@@ -105759,9 +105759,6 @@
         }
       ],
       "snabb": true,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-10-03T00:08:00.000+02:00",
       "stops": [
         {
           "sig": "Mc",
@@ -105808,7 +105805,10 @@
           "sched": "2026-10-03T00:18:00.000+02:00",
           "track": "13"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-10-03T00:08:00.000+02:00"
     },
     {
       "id": "3600",
@@ -108170,7 +108170,7 @@
       "snabb": false,
       "lastSeen": "Trollhättan",
       "lastSeenSig": "Thn",
-      "lastSeenTs": "2026-10-03T03:04:00.000+02:00",
+      "lastSeenTs": "2026-10-03T03:05:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -108248,7 +108248,7 @@
           "sig": "Thn",
           "name": "Trollhättan",
           "t": "2026-10-03T03:04:00.000+02:00",
-          "act": "",
+          "act": "2026-10-03T03:04:00.000+02:00",
           "est": "",
           "sched": "2026-10-03T03:04:00.000+02:00",
           "track": "1"
@@ -108851,7 +108851,7 @@
       "snabb": false,
       "lastSeen": "Mdn",
       "lastSeenSig": "Mdn",
-      "lastSeenTs": "2026-10-03T03:05:00.000+02:00",
+      "lastSeenTs": "2026-10-03T03:06:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
@@ -116322,7 +116322,7 @@
           "act": "",
           "est": "",
           "sched": "2026-10-03T13:44:00.000+02:00",
-          "track": "1"
+          "track": "x"
         },
         {
           "sig": "Kac",
