@@ -1,9 +1,9 @@
 {
   "airport": "GOT",
-  "updated": "2026-10-04T00:57:18+02:00",
-  "arrivalsUpdated": "2026-10-04T00:57:19+02:00",
+  "updated": "2026-10-04T01:27:24+02:00",
+  "arrivalsUpdated": "2026-10-04T01:27:29+02:00",
   "departuresUpdated": "2026-10-04T00:37:31+02:00",
-  "yesterdayUpdated": "2026-10-04T00:17:48+02:00",
+  "yesterdayUpdated": "2026-10-04T01:27:30+02:00",
   "tomorrowUpdated": "2026-10-03T23:27:43+02:00",
   "error": null,
   "arrivals": [
@@ -576,25 +576,6 @@
       "firstBagEst": "2026-10-02T22:01:52Z",
       "lastBag": "2026-10-02T21:55:20Z",
       "rawStatus": "Landat 23:39 · Sista bagage"
-    },
-    {
-      "id": "LH816",
-      "dir": "ANK",
-      "other": "Frankfurt",
-      "iata": "",
-      "airline": "Lufthansa",
-      "status": "LAN",
-      "statusSv": "Landat 13:13",
-      "sched": "2026-10-02T11:25:00Z",
-      "est": "2026-10-02T11:15:00Z",
-      "act": "2026-10-02T11:13:00Z",
-      "terminal": "T1",
-      "gate": "15",
-      "baggage": "3",
-      "firstBag": "2026-10-02T11:26:33Z",
-      "firstBagEst": "2026-10-02T11:40:18Z",
-      "lastBag": "2026-10-02T11:41:38Z",
-      "rawStatus": "Landat 13:13 · Sista bagage"
     },
     {
       "id": "LX1222",
@@ -1666,18 +1647,18 @@
       "other": "Edinburgh",
       "iata": "",
       "airline": "Ryanair Ltd",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 00:41",
       "sched": "2026-10-03T20:30:00Z",
-      "est": "2026-10-03T22:46:00Z",
-      "act": "",
+      "est": "2026-10-03T22:41:00Z",
+      "act": "2026-10-03T22:41:00Z",
       "terminal": "T1",
       "gate": "20B",
       "baggage": "1",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Ankommer 00:46"
+      "firstBag": "2026-10-03T23:04:02Z",
+      "firstBagEst": "2026-10-03T23:04:54Z",
+      "lastBag": "2026-10-03T23:04:03Z",
+      "rawStatus": "Landat 00:41 · Sista bagage"
     },
     {
       "id": "FR5738",
@@ -2122,18 +2103,18 @@
       "other": "Köpenhamn",
       "iata": "",
       "airline": "SAS Scandinavian Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 00:38",
       "sched": "2026-10-03T21:55:00Z",
       "est": "2026-10-03T22:43:00Z",
-      "act": "",
+      "act": "2026-10-03T22:38:00Z",
       "terminal": "T1",
       "gate": "A1",
       "baggage": "2",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Ankommer 00:43"
+      "firstBag": "2026-10-03T22:52:42Z",
+      "firstBagEst": "2026-10-03T23:06:22Z",
+      "lastBag": "2026-10-03T23:04:23Z",
+      "rawStatus": "Landat 00:38 · Sista bagage"
     },
     {
       "id": "IV6930",
@@ -3574,10 +3555,10 @@
       "terminal": "T1",
       "gate": "A1",
       "baggage": "1",
-      "firstBag": "",
+      "firstBag": "2026-10-03T22:58:41Z",
       "firstBagEst": "2026-10-03T23:01:20Z",
-      "lastBag": "",
-      "rawStatus": "Landat 00:37"
+      "lastBag": "2026-10-03T23:04:00Z",
+      "rawStatus": "Landat 00:37 · Sista bagage"
     }
   ],
   "departures": [
