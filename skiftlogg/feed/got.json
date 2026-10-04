@@ -1,31 +1,12 @@
 {
   "airport": "GOT",
-  "updated": "2026-10-04T11:12:17+02:00",
-  "arrivalsUpdated": "2026-10-04T11:12:20+02:00",
+  "updated": "2026-10-04T11:22:45+02:00",
+  "arrivalsUpdated": "2026-10-04T11:22:49+02:00",
   "departuresUpdated": "2026-10-04T11:07:05+02:00",
   "yesterdayUpdated": "2026-10-04T05:57:15+02:00",
   "tomorrowUpdated": "2026-10-03T23:27:43+02:00",
   "error": null,
   "arrivals": [
-    {
-      "id": "AF1552",
-      "dir": "ANK",
-      "other": "Paris CDG",
-      "iata": "",
-      "airline": "Air France",
-      "status": "LAN",
-      "statusSv": "Landat 23:18",
-      "sched": "2026-10-02T21:30:00Z",
-      "est": "2026-10-02T21:17:00Z",
-      "act": "2026-10-02T21:18:00Z",
-      "terminal": "T1",
-      "gate": "14",
-      "baggage": "1",
-      "firstBag": "2026-10-02T21:35:51Z",
-      "firstBagEst": "2026-10-02T21:37:30Z",
-      "lastBag": "2026-10-02T21:38:28Z",
-      "rawStatus": "Landat 23:18 · Sista bagage"
-    },
     {
       "id": "FR8058",
       "dir": "ANK",
@@ -44,25 +25,6 @@
       "firstBagEst": "2026-10-02T22:01:52Z",
       "lastBag": "2026-10-02T21:55:20Z",
       "rawStatus": "Landat 23:39 · Sista bagage"
-    },
-    {
-      "id": "LH2432",
-      "dir": "ANK",
-      "other": "München",
-      "iata": "",
-      "airline": "Lufthansa",
-      "status": "LAN",
-      "statusSv": "Landat 23:14",
-      "sched": "2026-10-02T21:05:00Z",
-      "est": "2026-10-02T21:11:00Z",
-      "act": "2026-10-02T21:14:00Z",
-      "terminal": "T1",
-      "gate": "12",
-      "baggage": "3",
-      "firstBag": "2026-10-02T21:30:01Z",
-      "firstBagEst": "2026-10-02T21:41:45Z",
-      "lastBag": "2026-10-02T21:47:18Z",
-      "rawStatus": "Landat 23:14 · Sista bagage"
     },
     {
       "id": "LH820",
@@ -1533,18 +1495,18 @@
       "other": "Amsterdam",
       "iata": "",
       "airline": "KLM",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 11:13",
       "sched": "2026-10-04T09:20:00Z",
       "est": "2026-10-04T09:12:00Z",
-      "act": "",
+      "act": "2026-10-04T09:13:00Z",
       "terminal": "T1",
       "gate": "17",
       "baggage": "1",
       "firstBag": "",
-      "firstBagEst": "",
+      "firstBagEst": "2026-10-04T09:34:51Z",
       "lastBag": "",
-      "rawStatus": "Ankommer 11:12"
+      "rawStatus": "Landat 11:13"
     },
     {
       "id": "W64295",
@@ -2312,18 +2274,18 @@
       "other": "München",
       "iata": "",
       "airline": "Lufthansa",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 11:17",
       "sched": "2026-10-04T09:05:00Z",
       "est": "2026-10-04T09:15:00Z",
-      "act": "",
+      "act": "2026-10-04T09:17:00Z",
       "terminal": "T1",
       "gate": "15",
       "baggage": "3",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 11:15"
+      "rawStatus": "Landat 11:17"
     },
     {
       "id": "LX1222",
@@ -2334,7 +2296,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-04T12:05:00Z",
-      "est": "2026-10-04T12:00:00Z",
+      "est": "2026-10-04T11:54:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "12",
@@ -2342,7 +2304,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 14:00"
+      "rawStatus": "Beräknad 13:54"
     },
     {
       "id": "OS971",
@@ -2600,7 +2562,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-04T12:20:00Z",
-      "est": "2026-10-04T12:30:00Z",
+      "est": "2026-10-04T12:25:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "",
@@ -2608,7 +2570,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 14:30"
+      "rawStatus": "Ankommer 14:25"
     },
     {
       "id": "SK430",
