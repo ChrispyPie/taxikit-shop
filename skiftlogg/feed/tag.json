@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-10-04T02:05:29+02:00",
+  "updated": "2026-10-04T02:09:08+02:00",
   "error": null,
   "trains": [
     {
@@ -78232,6 +78232,15 @@
           "est": "",
           "sched": "2026-10-03T21:39:00.000+02:00",
           "track": "x"
+        },
+        {
+          "sig": "Smd",
+          "name": "Smd",
+          "t": "2026-10-04T18:06:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-10-04T18:06:00.000+02:00",
+          "track": "x"
         }
       ]
     },
@@ -83860,9 +83869,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Btp",
-      "lastSeenSig": "Btp",
-      "lastSeenTs": "2026-10-04T02:01:00.000+02:00",
+      "lastSeen": "Halmstad C",
+      "lastSeenSig": "Hd",
+      "lastSeenTs": "2026-10-04T02:08:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -83921,9 +83930,9 @@
         {
           "sig": "Hd",
           "name": "Halmstad C",
-          "t": "2026-10-04T02:07:00.000+02:00",
-          "act": "",
-          "est": "",
+          "t": "2026-10-04T02:08:00.000+02:00",
+          "act": "2026-10-04T02:08:00.000+02:00",
+          "est": "2026-10-04T02:08:00.000+02:00",
           "sched": "2026-10-04T02:07:00.000+02:00",
           "track": "2"
         }
@@ -84466,9 +84475,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Vpm",
-      "lastSeenSig": "Vpm",
-      "lastSeenTs": "2026-10-04T02:03:00.000+02:00",
+      "lastSeen": "Veas",
+      "lastSeenSig": "Veas",
+      "lastSeenTs": "2026-10-04T02:07:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -85210,9 +85219,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Mdn",
-      "lastSeenSig": "Mdn",
-      "lastSeenTs": "2026-10-04T02:04:00.000+02:00",
+      "lastSeen": "Lis",
+      "lastSeenSig": "Lis",
+      "lastSeenTs": "2026-10-04T02:09:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
@@ -85272,7 +85281,7 @@
           "sig": "Lis",
           "name": "Lis",
           "t": "2026-10-04T02:09:00.000+02:00",
-          "act": "",
+          "act": "2026-10-04T02:09:00.000+02:00",
           "est": "",
           "sched": "2026-10-04T02:09:00.000+02:00",
           "track": "2"
@@ -97434,15 +97443,6 @@
       "snabb": false,
       "stops": [
         {
-          "sig": "Hb",
-          "name": "Helsingborg C",
-          "t": "2026-10-03T14:06:00.000+02:00",
-          "act": "2026-10-03T14:06:00.000+02:00",
-          "est": "",
-          "sched": "2026-10-03T14:06:00.000+02:00",
-          "track": "3a"
-        },
-        {
           "sig": "Lkö",
           "name": "Lkö",
           "t": "2026-10-03T14:18:00.000+02:00",
@@ -97567,6 +97567,15 @@
           "est": "",
           "sched": "2026-10-04T13:45:00.000+02:00",
           "track": "2"
+        },
+        {
+          "sig": "Hb",
+          "name": "Helsingborg C",
+          "t": "2026-10-04T14:03:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-10-04T14:03:00.000+02:00",
+          "track": "3a"
         }
       ],
       "lastSeen": "Hie",
@@ -102244,6 +102253,56 @@
         }
       ],
       "snabb": false
+    },
+    {
+      "id": "60190",
+      "dir": "AVG",
+      "other": "Alvesta",
+      "otherSig": "A",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Alvesta"
+      ],
+      "sched": "2026-10-04T18:09:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": false,
+      "product": "SJ Regional",
+      "traffic": [
+        {
+          "Code": "YNA002",
+          "Description": "Buss"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "446",
+      "dir": "AVG",
+      "other": "Stockholm C",
+      "otherSig": "Cst",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Stockholm C"
+      ],
+      "sched": "2026-10-04T18:09:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "11",
+      "canceled": false,
+      "product": "SJ Snabbtåg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": true
     }
   ]
 }
