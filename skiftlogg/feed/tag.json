@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-10-08T01:39:36+02:00",
+  "updated": "2026-10-08T01:43:20+02:00",
   "error": null,
   "trains": [
     {
@@ -215,63 +215,6 @@
       "lastSeen": "Göteborg C",
       "lastSeenSig": "G",
       "lastSeenTs": "2026-10-06T13:45:00.000+02:00"
-    },
-    {
-      "id": "387",
-      "dir": "ANK",
-      "other": "No.osl",
-      "otherSig": "No.osl",
-      "from": [
-        "No.osl"
-      ],
-      "to": [
-        "Göteborg C"
-      ],
-      "sched": "2026-10-06T13:45:00.000+02:00",
-      "est": "",
-      "act": "2026-10-06T13:41:00.000+02:00",
-      "track": "8",
-      "canceled": false,
-      "product": "Vy Snabbtåg",
-      "traffic": [
-        {
-          "Code": "YNA001",
-          "Description": "Tåg"
-        }
-      ],
-      "snabb": true,
-      "stops": [
-        {
-          "sig": "Ed",
-          "name": "Ed",
-          "t": "2026-10-06T12:25:00.000+02:00",
-          "act": "2026-10-06T12:25:00.000+02:00",
-          "est": "",
-          "sched": "2026-10-06T12:25:00.000+02:00",
-          "track": "1"
-        },
-        {
-          "sig": "Thn",
-          "name": "Trollhättan",
-          "t": "2026-10-06T13:12:00.000+02:00",
-          "act": "2026-10-06T13:12:00.000+02:00",
-          "est": "2026-10-06T13:12:00.000+02:00",
-          "sched": "2026-10-06T13:11:00.000+02:00",
-          "track": "2"
-        },
-        {
-          "sig": "G",
-          "name": "Göteborg C",
-          "t": "2026-10-06T13:41:00.000+02:00",
-          "act": "2026-10-06T13:41:00.000+02:00",
-          "est": "",
-          "sched": "2026-10-06T13:45:00.000+02:00",
-          "track": "8"
-        }
-      ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-10-06T13:41:00.000+02:00"
     },
     {
       "id": "13306",
@@ -103327,9 +103270,6 @@
         }
       ],
       "snabb": true,
-      "lastSeen": "Malmö C",
-      "lastSeenSig": "Mc",
-      "lastSeenTs": "2026-10-07T23:19:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -103376,7 +103316,10 @@
           "sched": "2026-10-07T23:10:00.000+02:00",
           "track": "9"
         }
-      ]
+      ],
+      "lastSeen": "Malmö C",
+      "lastSeenSig": "Mc",
+      "lastSeenTs": "2026-10-07T23:19:00.000+02:00"
     },
     {
       "id": "3975",
@@ -108853,9 +108796,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-10-07T22:43:00.000+02:00",
       "stops": [
         {
           "sig": "Kb",
@@ -108929,7 +108869,10 @@
           "sched": "2026-10-07T22:45:00.000+02:00",
           "track": "16"
         }
-      ]
+      ],
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-10-07T22:43:00.000+02:00"
     },
     {
       "id": "447",
@@ -112671,7 +112614,7 @@
           "act": "",
           "est": "",
           "sched": "2026-10-08T04:39:00.000+02:00",
-          "track": "1"
+          "track": "x"
         }
       ]
     },
