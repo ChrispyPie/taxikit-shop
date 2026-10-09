@@ -1,7 +1,7 @@
 {
   "airport": "GOT",
-  "updated": "2026-10-09T19:37:04+02:00",
-  "arrivalsUpdated": "2026-10-09T19:37:06+02:00",
+  "updated": "2026-10-09T20:12:14+02:00",
+  "arrivalsUpdated": "2026-10-09T20:12:16+02:00",
   "departuresUpdated": "2026-10-09T19:27:23+02:00",
   "yesterdayUpdated": "2026-10-09T05:22:26+02:00",
   "tomorrowUpdated": "2026-10-09T19:27:22+02:00",
@@ -92,25 +92,6 @@
       "status": "DEL",
       "statusSv": "Borttagen",
       "sched": "2026-10-08T17:25:00Z",
-      "est": "",
-      "act": "",
-      "terminal": "T1",
-      "gate": "",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": ""
-    },
-    {
-      "id": "BT121",
-      "dir": "ANK",
-      "other": "Riga",
-      "iata": "",
-      "airline": "Air Baltic",
-      "status": "DEL",
-      "statusSv": "Borttagen",
-      "sched": "2026-10-08T05:40:00Z",
       "est": "",
       "act": "",
       "terminal": "T1",
@@ -253,25 +234,6 @@
       "firstBagEst": "2026-10-08T08:52:32Z",
       "lastBag": "2026-10-08T08:40:33Z",
       "rawStatus": "Landat 10:27 · Sista bagage"
-    },
-    {
-      "id": "AY861",
-      "dir": "ANK",
-      "other": "Helsingfors",
-      "iata": "",
-      "airline": "Finnair",
-      "status": "LAN",
-      "statusSv": "Landat 07:39",
-      "sched": "2026-10-08T05:45:00Z",
-      "est": "2026-10-08T05:36:00Z",
-      "act": "2026-10-08T05:39:00Z",
-      "terminal": "T1",
-      "gate": "17",
-      "baggage": "1",
-      "firstBag": "2026-10-08T05:57:31Z",
-      "firstBagEst": "2026-10-08T05:59:54Z",
-      "lastBag": "2026-10-08T05:59:28Z",
-      "rawStatus": "Landat 07:39 · Sista bagage"
     },
     {
       "id": "D85261",
@@ -2171,7 +2133,7 @@
       "firstBag": "2026-10-09T17:34:48Z",
       "firstBagEst": "2026-10-09T17:42:01Z",
       "lastBag": "2026-10-09T17:36:05Z",
-      "rawStatus": "Första bagage · Landat 19:20"
+      "rawStatus": "Landat 19:20 · Sista bagage"
     },
     {
       "id": "AY867",
@@ -2179,18 +2141,18 @@
       "other": "Helsingfors",
       "iata": "",
       "airline": "Finnair",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 20:02",
       "sched": "2026-10-09T18:15:00Z",
       "est": "2026-10-09T17:59:00Z",
-      "act": "",
+      "act": "2026-10-09T18:02:00Z",
       "terminal": "T1",
       "gate": "17",
       "baggage": "5",
       "firstBag": "",
-      "firstBagEst": "",
+      "firstBagEst": "2026-10-09T18:22:00Z",
       "lastBag": "",
-      "rawStatus": "Ankommer 19:59"
+      "rawStatus": "Landat 20:02"
     },
     {
       "id": "SK163",
@@ -2208,8 +2170,8 @@
       "baggage": "2",
       "firstBag": "2026-10-09T17:31:11Z",
       "firstBagEst": "2026-10-09T17:41:44Z",
-      "lastBag": "",
-      "rawStatus": "Första bagage · Landat 19:16"
+      "lastBag": "2026-10-09T17:43:37Z",
+      "rawStatus": "Landat 19:16 · Sista bagage"
     },
     {
       "id": "SK165",
@@ -2353,7 +2315,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-09T20:55:00Z",
-      "est": "",
+      "est": "2026-10-09T20:51:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "",
@@ -2361,7 +2323,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Beräknad 22:51"
     },
     {
       "id": "SK2051",
@@ -2391,7 +2353,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-09T20:05:00Z",
-      "est": "2026-10-09T19:57:00Z",
+      "est": "2026-10-09T19:56:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "",
@@ -2399,7 +2361,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 21:57"
+      "rawStatus": "Ankommer 21:56"
     },
     {
       "id": "FR4010",
@@ -2410,15 +2372,15 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-09T20:50:00Z",
-      "est": "",
+      "est": "2026-10-09T20:42:00Z",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "15",
       "baggage": "5",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Beräknad 22:42"
     },
     {
       "id": "KL1239",
@@ -2429,7 +2391,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-09T20:50:00Z",
-      "est": "",
+      "est": "2026-10-09T20:39:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "",
@@ -2437,7 +2399,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Beräknad 22:39"
     },
     {
       "id": "AF1552",
@@ -2711,18 +2673,18 @@
       "other": "Belgrad",
       "iata": "",
       "airline": "Air Serbia",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 20:06",
       "sched": "2026-10-09T17:50:00Z",
-      "est": "2026-10-09T18:03:00Z",
-      "act": "",
+      "est": "2026-10-09T18:15:00Z",
+      "act": "2026-10-09T18:06:00Z",
       "terminal": "T1",
       "gate": "23",
       "baggage": "1",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 20:03"
+      "rawStatus": "Landat 20:06"
     },
     {
       "id": "SK1444",
@@ -2790,7 +2752,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-09T21:05:00Z",
-      "est": "",
+      "est": "2026-10-09T20:56:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "",
@@ -2798,7 +2760,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Beräknad 22:56"
     },
     {
       "id": "SK448",
