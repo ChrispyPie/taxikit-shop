@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-10-10T06:58:02+02:00",
+  "updated": "2026-10-10T06:59:16+02:00",
   "error": null,
   "trains": [
     {
@@ -90672,10 +90672,10 @@
           "sig": "Kb",
           "name": "Kungsbacka",
           "t": "2026-10-10T00:44:00.000+02:00",
-          "act": "2026-10-10T00:44:00.000+02:00",
+          "act": "",
           "est": "",
           "sched": "2026-10-10T00:44:00.000+02:00",
-          "track": "2"
+          "track": "x"
         },
         {
           "sig": "Mdn",
@@ -93223,9 +93223,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Rmtp",
-      "lastSeenSig": "Rmtp",
-      "lastSeenTs": "2026-10-10T06:54:00.000+02:00",
+      "lastSeen": "Skövde C",
+      "lastSeenSig": "Sk",
+      "lastSeenTs": "2026-10-10T06:58:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -93275,8 +93275,8 @@
         {
           "sig": "Sk",
           "name": "Skövde C",
-          "t": "2026-10-10T07:00:00.000+02:00",
-          "act": "",
+          "t": "2026-10-10T06:58:00.000+02:00",
+          "act": "2026-10-10T06:58:00.000+02:00",
           "est": "",
           "sched": "2026-10-10T07:00:00.000+02:00",
           "track": "1"
@@ -94720,9 +94720,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-10-10T06:55:00.000+02:00",
+      "lastSeen": "Gubbero",
+      "lastSeenSig": "Gro",
+      "lastSeenTs": "2026-10-10T06:57:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -94966,9 +94966,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Gas",
-      "lastSeenSig": "Gas",
-      "lastSeenTs": "2026-10-10T06:57:00.000+02:00",
+      "lastSeen": "Olskroken",
+      "lastSeenSig": "Or",
+      "lastSeenTs": "2026-10-10T06:58:00.000+02:00",
       "stops": [
         {
           "sig": "Vg",
@@ -95070,7 +95070,7 @@
       "snabb": false,
       "lastSeen": "Mdn",
       "lastSeenSig": "Mdn",
-      "lastSeenTs": "2026-10-10T06:57:00.000+02:00",
+      "lastSeenTs": "2026-10-10T06:58:00.000+02:00",
       "stops": [
         {
           "sig": "Fabp",
@@ -95776,12 +95776,15 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Än",
+      "lastSeenSig": "Än",
+      "lastSeenTs": "2026-10-10T06:58:00.000+02:00",
       "stops": [
         {
           "sig": "Än",
           "name": "Än",
           "t": "2026-10-10T06:58:00.000+02:00",
-          "act": "",
+          "act": "2026-10-10T06:58:00.000+02:00",
           "est": "",
           "sched": "2026-10-10T06:58:00.000+02:00",
           "track": "1"
@@ -96913,9 +96916,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Fur",
-      "lastSeenSig": "Fur",
-      "lastSeenTs": "2026-10-10T06:55:00.000+02:00",
+      "lastSeen": "Btp",
+      "lastSeenSig": "Btp",
+      "lastSeenTs": "2026-10-10T06:58:00.000+02:00",
       "stops": [
         {
           "sig": "Hb",
@@ -100860,7 +100863,7 @@
       "snabb": false,
       "lastSeen": "Hallsberg",
       "lastSeenSig": "Hpbg",
-      "lastSeenTs": "2026-10-10T06:53:00.000+02:00",
+      "lastSeenTs": "2026-10-10T06:58:00.000+02:00",
       "stops": [
         {
           "sig": "Arb",
@@ -103729,9 +103732,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Hsa",
-      "lastSeenSig": "Hsa",
-      "lastSeenTs": "2026-10-10T06:55:00.000+02:00",
+      "lastSeen": "Örebro C",
+      "lastSeenSig": "Ör",
+      "lastSeenTs": "2026-10-10T07:00:00.000+02:00",
       "stops": [
         {
           "sig": "Arb",
@@ -103745,8 +103748,8 @@
         {
           "sig": "Ör",
           "name": "Örebro C",
-          "t": "2026-10-10T07:02:00.000+02:00",
-          "act": "",
+          "t": "2026-10-10T07:00:00.000+02:00",
+          "act": "2026-10-10T07:00:00.000+02:00",
           "est": "",
           "sched": "2026-10-10T07:02:00.000+02:00",
           "track": "1a"
@@ -106999,6 +107002,9 @@
         }
       ],
       "snabb": true,
+      "lastSeen": "Stockholm C",
+      "lastSeenSig": "Cst",
+      "lastSeenTs": "2026-10-10T06:57:00.000+02:00",
       "stops": [
         {
           "sig": "Cst",
@@ -107063,10 +107069,7 @@
           "sched": "2026-10-10T11:35:00.000+02:00",
           "track": "5"
         }
-      ],
-      "lastSeen": "Stockholm C",
-      "lastSeenSig": "Cst",
-      "lastSeenTs": "2026-10-10T06:57:00.000+02:00"
+      ]
     },
     {
       "id": "3546",
