@@ -1,10 +1,10 @@
 {
   "airport": "GOT",
-  "updated": "2026-10-18T17:16:44+02:00",
-  "arrivalsUpdated": "2026-10-18T17:16:49+02:00",
-  "departuresUpdated": "2026-10-18T16:38:09+02:00",
+  "updated": "2026-10-18T17:36:44+02:00",
+  "arrivalsUpdated": "2026-10-18T17:36:47+02:00",
+  "departuresUpdated": "2026-10-18T17:36:51+02:00",
   "yesterdayUpdated": "2026-10-18T05:42:38+02:00",
-  "tomorrowUpdated": "2026-10-18T16:38:08+02:00",
+  "tomorrowUpdated": "2026-10-18T17:36:48+02:00",
   "error": null,
   "arrivals": [
     {
@@ -1384,7 +1384,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-18T15:40:00Z",
-      "est": "2026-10-18T15:37:00Z",
+      "est": "2026-10-18T15:35:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "17",
@@ -1392,7 +1392,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 17:37"
+      "rawStatus": "Ankommer 17:35"
     },
     {
       "id": "AY863",
@@ -1780,18 +1780,18 @@
       "other": "London LHR",
       "iata": "",
       "airline": "British Airways",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 17:23",
       "sched": "2026-10-18T15:35:00Z",
-      "est": "2026-10-18T15:28:00Z",
-      "act": "",
+      "est": "2026-10-18T15:22:00Z",
+      "act": "2026-10-18T15:23:00Z",
       "terminal": "T1",
       "gate": "22",
       "baggage": "3",
       "firstBag": "",
-      "firstBagEst": "",
+      "firstBagEst": "2026-10-18T15:43:38Z",
       "lastBag": "",
-      "rawStatus": "Ankommer 17:28"
+      "rawStatus": "Landat 17:23"
     },
     {
       "id": "D82026",
@@ -1840,7 +1840,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-18T17:15:00Z",
-      "est": "2026-10-18T17:51:00Z",
+      "est": "2026-10-18T17:46:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "13",
@@ -2407,18 +2407,18 @@
       "other": "Bryssel",
       "iata": "",
       "airline": "Brussels Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 17:26",
       "sched": "2026-10-18T15:35:00Z",
       "est": "2026-10-18T15:26:00Z",
-      "act": "",
+      "act": "2026-10-18T15:26:00Z",
       "terminal": "T1",
       "gate": "15",
       "baggage": "4",
       "firstBag": "",
-      "firstBagEst": "",
+      "firstBagEst": "2026-10-18T15:46:30Z",
       "lastBag": "",
-      "rawStatus": "Ankommer 17:26"
+      "rawStatus": "Landat 17:26"
     },
     {
       "id": "LH2428",
@@ -5487,18 +5487,18 @@
       "other": "Gdansk",
       "iata": "",
       "airline": "Wizz Air",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-10-18T15:45:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-10-18T15:28:57Z",
       "terminal": "T1",
       "gate": "16",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "SK166",
@@ -5512,7 +5512,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "15",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -5840,7 +5840,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gå till gate"
     },
     {
       "id": "AF1453",
@@ -5859,7 +5859,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Omedelbar avgång"
     },
     {
       "id": "TK1800",
@@ -6019,18 +6019,18 @@
       "other": "Helsingfors",
       "iata": "",
       "airline": "Finnair",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-10-18T15:30:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-10-18T15:17:40Z",
       "terminal": "T1",
       "gate": "19",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Startat 17:27"
     },
     {
       "id": "AY868",
@@ -6101,7 +6101,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "13",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6120,7 +6120,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "12",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
