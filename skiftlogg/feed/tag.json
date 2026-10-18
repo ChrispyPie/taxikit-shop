@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-10-18T12:48:57+02:00",
+  "updated": "2026-10-18T12:50:22+02:00",
   "error": null,
   "trains": [
     {
@@ -69107,7 +69107,7 @@
           "sig": "Lis",
           "name": "Lis",
           "t": "2026-10-18T12:49:00.000+02:00",
-          "act": "",
+          "act": "2026-10-18T12:49:00.000+02:00",
           "est": "",
           "sched": "2026-10-18T12:49:00.000+02:00",
           "track": "2"
@@ -69167,9 +69167,9 @@
           "track": "4"
         }
       ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-10-18T12:45:00.000+02:00"
+      "lastSeen": "Lis",
+      "lastSeenSig": "Lis",
+      "lastSeenTs": "2026-10-18T12:49:00.000+02:00"
     },
     {
       "id": "13747",
@@ -69936,9 +69936,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Lgd",
-      "lastSeenSig": "Lgd",
-      "lastSeenTs": "2026-10-18T12:47:00.000+02:00",
+      "lastSeen": "Ag",
+      "lastSeenSig": "Ag",
+      "lastSeenTs": "2026-10-18T12:48:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -70146,9 +70146,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Nol",
-      "lastSeenSig": "Nol",
-      "lastSeenTs": "2026-10-18T12:47:00.000+02:00",
+      "lastSeen": "Nöe",
+      "lastSeenSig": "Nöe",
+      "lastSeenTs": "2026-10-18T12:50:00.000+02:00",
       "stops": [
         {
           "sig": "Vg",
@@ -70208,7 +70208,7 @@
           "sig": "Nöe",
           "name": "Nöe",
           "t": "2026-10-18T12:50:00.000+02:00",
-          "act": "",
+          "act": "2026-10-18T12:50:00.000+02:00",
           "est": "",
           "sched": "2026-10-18T12:50:00.000+02:00",
           "track": "1"
@@ -70739,7 +70739,7 @@
           "sig": "Kb",
           "name": "Kungsbacka",
           "t": "2026-10-18T12:49:00.000+02:00",
-          "act": "",
+          "act": "2026-10-18T12:49:00.000+02:00",
           "est": "",
           "sched": "2026-10-18T12:49:00.000+02:00",
           "track": "4"
@@ -70807,7 +70807,10 @@
           "sched": "2026-10-18T13:15:00.000+02:00",
           "track": "16"
         }
-      ]
+      ],
+      "lastSeen": "Kungsbacka",
+      "lastSeenSig": "Kb",
+      "lastSeenTs": "2026-10-18T12:49:00.000+02:00"
     },
     {
       "id": "3053",
@@ -84993,6 +84996,31 @@
         {
           "Code": "YNA001",
           "Description": "Tåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "73786",
+      "dir": "AVG",
+      "other": "Ytterby",
+      "otherSig": "Yb",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Ytterby"
+      ],
+      "sched": "2026-10-18T21:30:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "x",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA002",
+          "Description": "Buss"
         }
       ],
       "snabb": false
