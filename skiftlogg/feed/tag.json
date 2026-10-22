@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-10-23T01:01:58+02:00",
+  "updated": "2026-10-23T01:03:28+02:00",
   "error": null,
   "trains": [
     {
@@ -126555,9 +126555,6 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Malmö C",
-      "lastSeenSig": "Mc",
-      "lastSeenTs": "2026-10-22T22:49:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -126676,7 +126673,10 @@
           "sched": "2026-10-22T22:48:00.000+02:00",
           "track": "7a"
         }
-      ]
+      ],
+      "lastSeen": "Malmö C",
+      "lastSeenSig": "Mc",
+      "lastSeenTs": "2026-10-22T22:49:00.000+02:00"
     },
     {
       "id": "3273",
@@ -133131,6 +133131,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-10-22T22:20:00.000+02:00",
       "stops": [
         {
           "sig": "Fd",
@@ -133213,10 +133216,7 @@
           "sched": "2026-10-22T22:21:00.000+02:00",
           "track": "1"
         }
-      ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-10-22T22:20:00.000+02:00"
+      ]
     },
     {
       "id": "63790",
@@ -133947,6 +133947,9 @@
         }
       ],
       "snabb": false,
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-10-22T22:45:00.000+02:00",
       "stops": [
         {
           "sig": "A",
@@ -134029,10 +134032,7 @@
           "sched": "2026-10-22T22:44:00.000+02:00",
           "track": "1"
         }
-      ],
-      "lastSeen": "Göteborg C",
-      "lastSeenSig": "G",
-      "lastSeenTs": "2026-10-22T22:45:00.000+02:00"
+      ]
     },
     {
       "id": "3091",
@@ -136377,9 +136377,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "He",
-      "lastSeenSig": "He",
-      "lastSeenTs": "2026-10-23T00:57:00.000+02:00",
+      "lastSeen": "Bp",
+      "lastSeenSig": "Bp",
+      "lastSeenTs": "2026-10-23T01:02:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -137860,8 +137860,8 @@
         {
           "sig": "Apn",
           "name": "Apn",
-          "t": "2026-10-23T01:04:00.000+02:00",
-          "act": "",
+          "t": "2026-10-23T01:03:00.000+02:00",
+          "act": "2026-10-23T01:03:00.000+02:00",
           "est": "",
           "sched": "2026-10-23T01:04:00.000+02:00",
           "track": "1"
@@ -137903,9 +137903,9 @@
           "track": "1"
         }
       ],
-      "lastSeen": "Asd",
-      "lastSeenSig": "Asd",
-      "lastSeenTs": "2026-10-23T01:02:00.000+02:00"
+      "lastSeen": "Apn",
+      "lastSeenSig": "Apn",
+      "lastSeenTs": "2026-10-23T01:03:00.000+02:00"
     },
     {
       "id": "3004",
@@ -138173,7 +138173,7 @@
           "act": "",
           "est": "",
           "sched": "2026-10-23T04:39:00.000+02:00",
-          "track": "1"
+          "track": "x"
         }
       ]
     },
@@ -140468,7 +140468,7 @@
           "act": "",
           "est": "",
           "sched": "2026-10-23T04:39:00.000+02:00",
-          "track": "2"
+          "track": "1"
         },
         {
           "sig": "Öx",
