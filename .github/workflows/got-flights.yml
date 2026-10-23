@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: got-cache-push
+  group: got-flights
   cancel-in-progress: false
 
 permissions:
@@ -17,7 +17,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          ref: main
+          fetch-depth: 1
       - name: Fetch Swedavia GOT
         env:
           SWEDAVIA_KEY: ${{ secrets.SWEDAVIA_KEY }}
@@ -34,15 +35,26 @@ jobs:
             exit 0
           fi
           git commit -m "chore: uppdatera GOT-cache"
-          for i in 1 2 3 4 5; do
-            git fetch origin main
-            git pull --rebase origin main
+          # Spara den nya filen. Bara detta workflow skriver skiftlogg/feed/got.json,
+          # så vid krock: hämta senaste main, lägg tillbaka filen och committa igen
+          # (inga nya API-anrop).
+          cp skiftlogg/feed/got.json "$RUNNER_TEMP/cache.json"
+          for i in 1 2 3; do
             if git push origin HEAD:main; then
               echo "Push ok ($i)"
               exit 0
             fi
             echo "Push krockade, försöker igen ($i)"
-            sleep 4
+            sleep $((i * 3))
+            git fetch --depth 1 origin main
+            git reset --hard origin/main
+            cp "$RUNNER_TEMP/cache.json" skiftlogg/feed/got.json
+            git add skiftlogg/feed/got.json
+            if git diff --staged --quiet; then
+              echo "Ingen ändring efter reset"
+              exit 0
+            fi
+            git commit -m "chore: uppdatera GOT-cache"
           done
-          echo "Kunde inte pusha efter 5 försök"
+          echo "Kunde inte pusha efter 3 försök"
           exit 1
