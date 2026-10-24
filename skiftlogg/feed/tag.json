@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-10-24T14:30:47+02:00",
+  "updated": "2026-10-24T14:31:14+02:00",
   "error": null,
   "trains": [
     {
@@ -92646,9 +92646,9 @@
         }
       ],
       "snabb": true,
-      "lastSeen": "Skövde C",
-      "lastSeenSig": "Sk",
-      "lastSeenTs": "2026-10-24T13:44:00.000+02:00",
+      "lastSeen": "Vä",
+      "lastSeenSig": "Vä",
+      "lastSeenTs": "2026-10-24T13:51:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -100235,7 +100235,7 @@
           "sig": "Lr",
           "name": "Lr",
           "t": "2026-10-24T14:30:00.000+02:00",
-          "act": "",
+          "act": "2026-10-24T14:30:00.000+02:00",
           "est": "2026-10-24T14:30:00.000+02:00",
           "sched": "2026-10-24T14:27:00.000+02:00",
           "track": "3"
@@ -100268,9 +100268,9 @@
           "track": "1"
         }
       ],
-      "lastSeen": "Sn",
-      "lastSeenSig": "Sn",
-      "lastSeenTs": "2026-10-24T14:26:00.000+02:00"
+      "lastSeen": "Lr",
+      "lastSeenSig": "Lr",
+      "lastSeenTs": "2026-10-24T14:30:00.000+02:00"
     },
     {
       "id": "3059",
@@ -100436,7 +100436,7 @@
           "sig": "Krd",
           "name": "Krd",
           "t": "2026-10-24T14:31:00.000+02:00",
-          "act": "",
+          "act": "2026-10-24T14:31:00.000+02:00",
           "est": "",
           "sched": "2026-10-24T14:31:00.000+02:00",
           "track": "1"
@@ -100469,9 +100469,9 @@
           "track": "15"
         }
       ],
-      "lastSeen": "Ldo",
-      "lastSeenSig": "Ldo",
-      "lastSeenTs": "2026-10-24T14:27:00.000+02:00"
+      "lastSeen": "Krd",
+      "lastSeenSig": "Krd",
+      "lastSeenTs": "2026-10-24T14:31:00.000+02:00"
     },
     {
       "id": "431",
@@ -100572,9 +100572,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Kungsbacka",
-      "lastSeenSig": "Kb",
-      "lastSeenTs": "2026-10-24T14:29:00.000+02:00",
+      "lastSeen": "Khe",
+      "lastSeenSig": "Khe",
+      "lastSeenTs": "2026-10-24T14:30:00.000+02:00",
       "stops": [
         {
           "sig": "Vbc",
@@ -100912,9 +100912,9 @@
         {
           "sig": "Nol",
           "name": "Nol",
-          "t": "2026-10-24T14:33:00.000+02:00",
+          "t": "2026-10-24T14:34:00.000+02:00",
           "act": "",
-          "est": "",
+          "est": "2026-10-24T14:34:00.000+02:00",
           "sched": "2026-10-24T14:33:00.000+02:00",
           "track": "1"
         },
@@ -113741,6 +113741,31 @@
       "est": "",
       "act": "",
       "track": "16",
+      "canceled": false,
+      "product": "Västtågen",
+      "traffic": [
+        {
+          "Code": "YNA004",
+          "Description": "Pendeltåg"
+        }
+      ],
+      "snabb": false
+    },
+    {
+      "id": "3087",
+      "dir": "AVG",
+      "other": "Kungsbacka",
+      "otherSig": "Kb",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "Kungsbacka"
+      ],
+      "sched": "2026-10-24T21:45:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "15",
       "canceled": false,
       "product": "Västtågen",
       "traffic": [
