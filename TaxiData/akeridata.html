@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Åkeridata – TaxiData</title>
-  <link rel="stylesheet" href="style.css?v=20261024p">
+  <link rel="stylesheet" href="style.css?v=20261024q">
   <style>
     header { display: flex; align-items: center; justify-content: space-between; }
     header h1 { position: absolute; left: 50%; transform: translateX(-50%); }
@@ -46,8 +46,8 @@
   </div>
 
   <script>window.TAXI_MODE = 'company';</script>
-  <script src="serverstatus.js?v=20261024p"></script>
-  <script src="script.js?v=20261024p"></script>
+  <script src="serverstatus.js?v=20261024q"></script>
+  <script src="script.js?v=20261024q"></script>
   <script>
     // Åkeridata är för ägaren. TILLFÄLLIGT får även S admin se åkeriets nivå (utan förar-id)
     // under utvecklingen – samma lista som private.company_view_roles() på servern.
@@ -57,6 +57,7 @@
       if (!localStorage.getItem('taxi_session')) { location.href = 'index.html'; return; }
       let me = null;
       try { me = await tripRpc('get_me'); } catch (e) { location.href = 'index.html'; return; }
+      if (me && me.must_change_password) { location.href = 'index.html'; return; }
       if (!me || !AKERI_ROLES.includes(me.category)) {
         document.getElementById('denied').classList.remove('hidden');
         return;

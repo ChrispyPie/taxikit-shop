@@ -99,9 +99,9 @@
     <div id="content"></div>
   </div>
 
-  <script src="serverstatus.js?v=20261024p"></script>
+  <script src="serverstatus.js?v=20261024q"></script>
   <script>
-    const APP_VERSION = '1.0.17';
+    const APP_VERSION = '1.0.18';
     console.log('Admin version:', APP_VERSION);
     const SUPABASE_URL = 'https://lpfdryvukqmjlgenuzpb.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_7LwIOZ5ygRvJqJKFxl4cNQ_LvrzrHrP';
@@ -246,6 +246,7 @@
     const errorTexts = {
       forbidden: 'Du har inte behörighet att göra det.',
       forbidden_self: 'Du kan inte ändra din egen aktivering.',
+      no_password: 'Föraren har inget lösenord än.',
       password_too_short: 'Lösenordet måste vara minst 6 tecken.',
       not_pending: 'Föraren har redan valt lösenord. Avaktivera och aktivera igen för en ny länk.',
       bad_id: 'Ogiltigt förar-ID.',
@@ -273,6 +274,8 @@
         location.href = 'index.html';
         return;
       }
+      // Måste föraren välja nytt lösenord? Då gäller det först (sköts i index.html)
+      try { const me = await rpc('get_me'); if (me && me.must_change_password) { location.href = 'index.html'; return; } } catch (e) {}
       let denied = false;
       try {
         await reloadDrivers();
@@ -553,6 +556,8 @@
           ${canToggle ? `<button onclick="toggleActive('${editingDriver}')" style="flex:1;">${isActive ? 'Avaktivera' : 'Aktivera'}</button>` : ''}
           <button onclick="shareDriver('${editingDriver}')" style="flex:1;">${status === 'pending' && canToggle ? 'Aktiveringslänk' : 'Dela'}</button>
         </div>
+        ${canToggle && status === 'active' ? `<button id="req-pw-btn" onclick="requirePasswordChange('${editingDriver}')" style="width:100%; margin-top:8px;">Nollställ lösenord</button>` : ''}
+        ${status === 'active' && d.must_change_password ? `<div class="acct-info" style="color:#c53030;">Måste välja nytt lösenord vid nästa inloggning.</div>` : ''}
         <div class="acct-info">${status === 'pending'
           ? 'Väntar på att föraren öppnar aktiveringslänken och väljer lösenord.' + (d.link_expires_at ? ' Länken går ut ' + fmtWhen(d.link_expires_at) + '.' : ' Länken har gått ut – skapa en ny.')
           : status === 'active'
@@ -718,6 +723,19 @@
         navigator.share({ title: 'TaxiData', text: msg }).catch(() => {});
       } else {
         alert(msg);
+      }
+    }
+
+    // Nollställ lösenord: föraren måste välja nytt lösenord vid nästa inloggning, alla förarens inloggningar avslutas direkt
+    async function requirePasswordChange(id) {
+      if (!confirm('Nollställ lösenordet för ' + id + '?\n\nFöraren loggas ut direkt och måste välja ett nytt lösenord nästa gång hen loggar in med sitt nuvarande lösenord.')) return;
+      try {
+        const r = await rpc('admin_require_password_change', { p_id: id });
+        if (r && r.ok === false) { alert(errorTexts[r.error] || 'Det gick inte.'); return; }
+        await reloadDrivers();
+        render();
+      } catch (e) {
+        alert(errText(e));
       }
     }
 
@@ -1136,6 +1154,8 @@
         case 'profile_update': return who + ' uppdaterade sina personuppgifter' + (e.via_master ? ' (med huvudlösenordet)' : '');
         case 'password_change': return who + ' bytte lösenord' + (e.via_master ? ' (med huvudlösenordet)' : '');
         case 'password_change_failed': return 'Misslyckat lösenordsbyte för ' + (e.target_id || '?') + ' (fel nuvarande lösenord)';
+        case 'require_password_change': return who + ' nollställde lösenordet för ' + (e.target_id || '?');
+        case 'password_forced_change': return who + ' valde nytt lösenord efter nollställning';
         case 'category_change': return who + ' ändrade kategori på ' + e.target_id + ' till ' + catName(d.to);
         default: return who + ': ' + e.action + ' ' + (e.target_id || '');
       }

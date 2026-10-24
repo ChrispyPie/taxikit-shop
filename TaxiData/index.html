@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaxiData</title>
-  <link rel="stylesheet" href="style.css?v=20261024p">
+  <link rel="stylesheet" href="style.css?v=20261024q">
   <style>
     #content { padding: 16px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 16px; }
@@ -99,9 +99,9 @@
     <main id="dashboard"></main>
   </div>
 
-  <script src="serverstatus.js?v=20261024p"></script>
-  <script src="badges.js?v=20261024p"></script>
-  <script src="script.js?v=20261024p"></script>
+  <script src="serverstatus.js?v=20261024q"></script>
+  <script src="badges.js?v=20261024q"></script>
+  <script src="script.js?v=20261024q"></script>
   <script>
     var menu = [
       { id: 'kordata', icon: '🚗', label: 'Körpassdata', roles: ['standard', 'admin', 'agare', 'superadmin'] },
@@ -122,6 +122,9 @@
     // Profilspärr: sann när profilsidan är öppen och namn/telefon saknas (gäller inte huvudlösenords-inloggning)
     var profileLock = false;
     var LOCK_MSG = 'Fyll i förnamn, efternamn och telefon och tryck Spara innan du lämnar profilen.';
+    // Tvingat lösenordsbyte: sann tills föraren valt ett nytt lösenord (utloggning fungerar alltid)
+    var forcePwLock = false;
+    var FORCE_MSG = 'Välj ett nytt lösenord innan du fortsätter.';
 
     var SB_URL = 'https://lpfdryvukqmjlgenuzpb.supabase.co';
     var SB_KEY = 'sb_publishable_7LwIOZ5ygRvJqJKFxl4cNQ_LvrzrHrP';
@@ -204,8 +207,12 @@
       updateProfileReminder();
 
       var savedView = localStorage.getItem('taxi_view');
-      // Profilen var spärrad (t.ex. sidan laddades om) – öppna den igen
-      if (driverData.needs_profile && !driverData.via_master && sessionStorage.getItem('taxi_profile_lock') === driverId) {
+      if (driverData.must_change_password) {
+        localStorage.removeItem('taxi_view');
+        document.getElementById('app').style.display = 'block';
+        setFullName();
+        showForcePassword();
+      } else if (driverData.needs_profile && !driverData.via_master && sessionStorage.getItem('taxi_profile_lock') === driverId) {
         localStorage.removeItem('taxi_view');
         document.getElementById('app').style.display = 'block';
         setFullName();
@@ -225,6 +232,7 @@
     async function logout() {
       // Utloggning fungerar alltid, även när profilen är spärrad
       profileLock = false;
+      forcePwLock = false;
       sessionStorage.removeItem('taxi_profile_lock');
       try { await rpc('logout', { p_token: localStorage.getItem('taxi_session') || '' }); } catch (e) {}
       clearSession();
@@ -236,6 +244,7 @@
     }
 
     function openProfile() {
+      if (forcePwLock) { lockBlocked(); return; }
       document.getElementById('profile-menu').classList.remove('show');
       if (current === 'profil') return;
       localStorage.removeItem('taxi_view');
@@ -259,6 +268,12 @@
 
     // Returnerar true (och visar varför) om profilen är spärrad
     function lockBlocked() {
+      if (forcePwLock) {
+        document.getElementById('profile-menu').classList.remove('show');
+        showToast(FORCE_MSG);
+        var f = document.getElementById('fp-new'); if (f) f.focus();
+        return true;
+      }
       if (!profileLock) return false;
       document.getElementById('profile-menu').classList.remove('show');
       showToast(LOCK_MSG);
@@ -426,9 +441,65 @@
       }
     }
 
+    // Skärmen "Välj ett nytt lösenord" (när ägaren/servern kräver nytt lösenord)
+    function showForcePassword() {
+      forcePwLock = true;
+      current = 'nytt-losenord';
+      try { history.pushState({ view: 'nytt-losenord' }, ''); } catch (e) {}
+      document.getElementById('title').textContent = 'Nytt lösenord';
+      document.getElementById('content').innerHTML =
+        '<div class="p-card"><h3>Välj ett nytt lösenord</h3>' +
+        '<p class="p-note">Av säkerhetsskäl behöver du välja ett eget nytt lösenord innan du kan använda appen. Minst 6 tecken. Stora och små bokstäver räknas som samma.</p>' +
+        '<div class="p-group"><label for="fp-new">Nytt lösenord</label><input id="fp-new" type="password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false"></div>' +
+        '<div class="p-group"><label for="fp-new2">Nytt lösenord igen</label><input id="fp-new2" type="password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false"></div>' +
+        '<button class="p-btn" id="fp-save" onclick="saveForcedPassword()">Spara nytt lösenord</button><p class="p-msg" id="fp-msg"></p>' +
+        '<p class="p-note" style="margin-top:12px; text-align:center;">Fel konto? <a href="#" onclick="logout(); return false;">Logga ut</a></p></div>';
+    }
+
+    async function saveForcedPassword() {
+      var n1 = document.getElementById('fp-new').value;
+      var n2 = document.getElementById('fp-new2').value;
+      if (!n1 || !n2) { setMsg('fp-msg', 'Fyll i båda fälten.'); return; }
+      if (n1.trim().toLowerCase().length < 6) { setMsg('fp-msg', 'Lösenordet måste ha minst 6 tecken.'); return; }
+      if (n1.trim().toLowerCase() !== n2.trim().toLowerCase()) { setMsg('fp-msg', 'Lösenorden är inte lika.'); return; }
+      var btn = document.getElementById('fp-save');
+      btn.disabled = true;
+      try {
+        var r = await rpc('set_new_password', { p_token: localStorage.getItem('taxi_session') || '', p_new: n1 });
+        if (r && (r.ok || r.error === 'not_required')) {
+          forcePwLock = false;
+          driverData.must_change_password = false;
+          current = null;
+          renderMenu();
+          showToastOk('Nytt lösenord sparat ✓');
+        } else {
+          setMsg('fp-msg', {
+            password_too_short: 'Lösenordet måste ha minst 6 tecken.',
+            same_password: 'Välj ett annat lösenord än det gamla.',
+            master_session: 'Inloggad med huvudlösenordet – föraren väljer själv sitt lösenord.'
+          }[r && r.error] || 'Kunde inte spara. Försök igen.');
+        }
+      } catch (e) {
+        if (e.code === '28000') { clearSession(); location.reload(); return; }
+        setMsg('fp-msg', 'Kunde inte spara. Försök igen.');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function showToastOk(msg) {
+      showToast(msg);
+      var t = document.getElementById('app-toast');
+      t.style.background = 'var(--ok)';
+      setTimeout(function () { t.style.background = ''; }, 4000);
+    }
+
     // Telefonens/webbläsarens bakåtknapp
     window.addEventListener('popstate', function () {
-      if (profileLock) {
+      if (forcePwLock) {
+        try { history.pushState({ view: 'nytt-losenord' }, ''); } catch (e) {}
+        lockBlocked();
+      } else if (profileLock) {
         try { history.pushState({ view: 'profil' }, ''); } catch (e) {}
         lockBlocked();
       } else if (current === 'profil') {
@@ -508,4 +579,4 @@
     }
   </script>
 </body>
-</html><!-- cache-bust 1792442332 -->
+</html><!-- cache-bust 1792442333 -->
