@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaxiData</title>
-  <link rel="stylesheet" href="style.css?v=20261024q">
+  <link rel="stylesheet" href="style.css?v=20261024r">
   <style>
     #content { padding: 16px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 16px; }
@@ -55,6 +55,16 @@
       <input type="password" id="password" placeholder="Lösenord" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false">
       <button onclick="checkPassword()">Logga in</button>
       <p id="login-error" style="color:#c53030; display:none; margin-top:8px;"></p>
+      <p style="margin-top:14px; text-align:center;"><a href="#" id="forgot-link" onclick="showForgot(true); return false;" style="color:var(--primary);">Glömt lösenord?</a></p>
+    </div>
+    <div class="login-box" id="forgot-box" style="display:none;">
+      <h2>Glömt lösenord</h2>
+      <p class="p-note">Skriv ditt förar-ID. Om kontot har en e-postadress skickar vi en länk där du kan välja ett nytt lösenord.</p>
+      <input type="text" id="forgot-id" placeholder="Förar-ID" inputmode="numeric" autocomplete="username" autocapitalize="off" autocorrect="off">
+      <button id="forgot-send" onclick="sendForgot()">Skicka länk</button>
+      <p id="forgot-msg" style="display:none; margin-top:10px; font-weight:600;"></p>
+      <p class="p-note" style="margin-top:12px;">Ingen e-post? Ring din åkare så kan hen nollställa ditt lösenord.</p>
+      <p style="margin-top:10px; text-align:center;"><a href="#" onclick="showForgot(false); return false;" style="color:var(--primary);">Tillbaka till inloggning</a></p>
     </div>
   </div>
 
@@ -99,9 +109,9 @@
     <main id="dashboard"></main>
   </div>
 
-  <script src="serverstatus.js?v=20261024q"></script>
-  <script src="badges.js?v=20261024q"></script>
-  <script src="script.js?v=20261024q"></script>
+  <script src="serverstatus.js?v=20261024r"></script>
+  <script src="badges.js?v=20261024r"></script>
+  <script src="script.js?v=20261024r"></script>
   <script>
     var menu = [
       { id: 'kordata', icon: '🚗', label: 'Körpassdata', roles: ['standard', 'admin', 'agare', 'superadmin'] },
@@ -121,7 +131,7 @@
     var driverData = { first_name: '', last_name: '', category: '' };
     // Profilspärr: sann när profilsidan är öppen och namn/telefon saknas (gäller inte huvudlösenords-inloggning)
     var profileLock = false;
-    var LOCK_MSG = 'Fyll i förnamn, efternamn och telefon och tryck Spara innan du lämnar profilen.';
+    var LOCK_MSG = 'Fyll i förnamn, efternamn, telefon och e-post och tryck Spara innan du lämnar profilen.';
     // Tvingat lösenordsbyte: sann tills föraren valt ett nytt lösenord (utloggning fungerar alltid)
     var forcePwLock = false;
     var FORCE_MSG = 'Välj ett nytt lösenord innan du fortsätter.';
@@ -163,6 +173,36 @@
       pending: 'Kontot är inte klart. Öppna aktiveringslänken du fick och välj ett lösenord.',
       bad_id: 'Ogiltigt förar-ID'
     };
+
+    function showForgot(on) {
+      var boxes = document.querySelectorAll('#login-screen .login-box');
+      boxes[0].style.display = on ? 'none' : '';
+      document.getElementById('forgot-box').style.display = on ? '' : 'none';
+      if (on) {
+        var id = document.getElementById('driver-id').value.trim();
+        if (id) document.getElementById('forgot-id').value = id;
+        document.getElementById('forgot-msg').style.display = 'none';
+        document.getElementById('forgot-id').focus();
+      }
+    }
+
+    async function sendForgot() {
+      var id = document.getElementById('forgot-id').value.trim();
+      var msg = document.getElementById('forgot-msg');
+      msg.style.display = 'block';
+      if (!id) { msg.style.color = 'var(--danger-text)'; msg.textContent = 'Skriv ditt förar-ID.'; return; }
+      var btn = document.getElementById('forgot-send');
+      btn.disabled = true;
+      try {
+        var r = await rpc('request_password_reset', { p_id: id });
+        msg.style.color = 'var(--ok)';
+        msg.textContent = (r && r.message) || 'Om kontot finns och har en e-postadress har vi skickat en länk.';
+      } catch (e) {
+        msg.style.color = 'var(--danger-text)';
+        msg.textContent = 'Något gick fel. Försök igen om en stund.';
+      }
+      btn.disabled = false;
+    }
 
     async function checkPassword() {
       var id = document.getElementById('driver-id').value.trim();
@@ -292,7 +332,7 @@
       ['p-em-postal', 'emergency_postal'], ['p-em-city', 'emergency_city'], ['p-em-phone', 'emergency_phone'],
       ['p-em-relation', 'emergency_relation']
     ];
-    var P_REQUIRED = ['p-first-name', 'p-last-name', 'p-phone'];
+    var P_REQUIRED = ['p-first-name', 'p-last-name', 'p-phone', 'p-email'];
 
     function phoneOk(v) { return /^\+?[0-9]{6,15}$/.test(String(v || '').replace(/[\s().-]/g, '')); }
 
@@ -332,11 +372,11 @@
       if (profileLock) sessionStorage.setItem('taxi_profile_lock', driverId); else sessionStorage.removeItem('taxi_profile_lock');
       var html = '';
       if (d.via_master) html += '<p class="p-note warn">Inloggad med huvudlösenordet (förare ' + pEsc(d.id) + ').</p>';
-      else if (missing) html += '<p class="p-note warn">Fyll i förnamn, efternamn och telefon för att fortsätta. Övriga uppgifter är frivilliga.</p>';
+      else if (missing) html += '<p class="p-note warn">Fyll i förnamn, efternamn, telefon och e-post för att fortsätta. Övriga uppgifter är frivilliga.</p>';
       html += '<div class="p-card"><h3>Personuppgifter <small>* obligatoriskt</small></h3>' +
         '<div class="p-row">' + pInput('p-first-name', 'Förnamn', d.first_name, { req: 1, ac: 'given-name' }) + pInput('p-last-name', 'Efternamn', d.last_name, { req: 1, ac: 'family-name' }) + '</div>' +
         pInput('p-phone', 'Telefon', d.phone, { req: 1, type: 'tel', im: 'tel', ac: 'tel' }) +
-        pInput('p-email', 'E-post', d.email, { type: 'email', ac: 'email' }) +
+        pInput('p-email', 'E-post', d.email, { req: 1, type: 'email', im: 'email', ac: 'email' }) +
         pInput('p-address', 'Adress', d.address, { ac: 'street-address' }) +
         '<div class="p-row">' + pInput('p-postal', 'Postnummer', d.postal_code, { im: 'numeric', ac: 'postal-code' }) + pInput('p-city', 'Ort', d.city, { ac: 'address-level2' }) + '</div>' +
         '</div>';
@@ -369,7 +409,7 @@
     }
 
     var profileErrors = {
-      profile_required: 'Förnamn, efternamn och telefon måste fyllas i.',
+      profile_required: 'Förnamn, efternamn, telefon och e-post måste fyllas i.',
       invalid_phone: 'Telefonnumret ser inte rätt ut. Skriv t.ex. 070-123 45 67 eller +46701234567.',
       invalid_emergency_phone: 'Anhörigs telefonnummer ser inte rätt ut.',
       invalid_email: 'E-postadressen ser inte rätt ut.',
@@ -384,7 +424,7 @@
       if (empty.length) { markMissing(); setMsg('p-msg', profileErrors.profile_required); return; }
       if (!phoneOk(data.phone)) { document.getElementById('p-phone').classList.add('invalid'); setMsg('p-msg', profileErrors.invalid_phone); return; }
       if (data.emergency_phone && !phoneOk(data.emergency_phone)) { document.getElementById('p-em-phone').classList.add('invalid'); setMsg('p-msg', profileErrors.invalid_emergency_phone); return; }
-      if (data.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email)) { document.getElementById('p-email').classList.add('invalid'); setMsg('p-msg', profileErrors.invalid_email); return; }
+      if (!/^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(data.email)) { document.getElementById('p-email').classList.add('invalid'); setMsg('p-msg', profileErrors.invalid_email); return; }
       var btn = document.getElementById('p-save');
       btn.disabled = true;
       try {
@@ -579,4 +619,4 @@
     }
   </script>
 </body>
-</html><!-- cache-bust 1792442333 -->
+</html><!-- cache-bust 1792443100 -->

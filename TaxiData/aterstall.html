@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex">
+  <title>Nytt lösenord – TaxiData</title>
+  <link rel="stylesheet" href="style.css?v=20261024r">
+  <style>
+    .login-box p.hint { font-size: 13px; color: var(--text-soft); margin: 0 0 12px; text-align: left; }
+    #msg { margin-top: 8px; display: none; }
+    #msg.err { color: var(--danger-text); }
+    #msg.ok { color: var(--ok); }
+  </style>
+</head>
+<body>
+  <div id="login-screen">
+    <div class="login-box">
+      <h2>Välj ett nytt lösenord</h2>
+      <div id="form" style="display:none;">
+        <p class="hint" id="who"></p>
+        <p class="hint">Minst 6 tecken. Stora och små bokstäver räknas som samma. Alla dina inloggningar avslutas när du byter.</p>
+        <input type="password" id="pw1" placeholder="Nytt lösenord (minst 6 tecken)" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <input type="password" id="pw2" placeholder="Nytt lösenord igen" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button id="go" onclick="save()">Spara nytt lösenord</button>
+      </div>
+      <p id="msg"></p>
+      <p id="back" style="display:none; margin-top:14px;"><a href="index.html" style="color:var(--primary);">Till inloggningen</a></p>
+    </div>
+  </div>
+  <script>
+    var SB_URL = 'https://lpfdryvukqmjlgenuzpb.supabase.co';
+    var SB_KEY = 'sb_publishable_7LwIOZ5ygRvJqJKFxl4cNQ_LvrzrHrP';
+    // Länken ser ut så här: aterstall.html#t=KOD (koden skickas aldrig till webbservern)
+    var LINK = (location.hash.match(/t=([0-9a-f]+)/i) || [])[1] || '';
+    history.replaceState(null, '', location.pathname);
+
+    async function rpc(name, args) {
+      var res = await fetch(SB_URL + '/rest/v1/rpc/' + name, {
+        method: 'POST',
+        headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify(args || {})
+      });
+      var text = await res.text();
+      var body = text ? JSON.parse(text) : null;
+      if (!res.ok) throw new Error((body && body.message) || ('HTTP ' + res.status));
+      return body;
+    }
+    var errors = {
+      invalid_link: 'Länken fungerar inte längre (redan använd, ersatt av en nyare eller äldre än 1 timme). Begär en ny under "Glömt lösenord?".',
+      password_too_short: 'Lösenordet måste vara minst 6 tecken.'
+    };
+    function show(text, ok) {
+      var el = document.getElementById('msg');
+      el.textContent = text; el.className = ok ? 'ok' : 'err'; el.style.display = 'block';
+    }
+    function done() { document.getElementById('form').style.display = 'none'; document.getElementById('back').style.display = 'block'; }
+    async function init() {
+      if (!LINK) { show(errors.invalid_link); done(); return; }
+      try {
+        var r = await rpc('check_password_reset', { p_token: LINK });
+        if (!r.ok) { show(errors[r.error] || errors.invalid_link); done(); return; }
+        document.getElementById('who').textContent = 'Förar-ID: ' + r.id;
+        document.getElementById('form').style.display = 'block';
+        document.getElementById('pw1').focus();
+      } catch (e) { show('Kunde inte kontakta servern. Försök igen om en stund.'); }
+    }
+    async function save() {
+      var p1 = document.getElementById('pw1').value, p2 = document.getElementById('pw2').value;
+      if (p1.trim().length < 6) { show(errors.password_too_short); return; }
+      if (p1 !== p2) { show('Lösenorden är inte lika.'); return; }
+      var btn = document.getElementById('go'); btn.disabled = true;
+      try {
+        var r = await rpc('reset_password', { p_token: LINK, p_new: p1 });
+        if (!r.ok) {
+          show(errors[r.error] || 'Det gick inte att byta lösenord.');
+          if (r.error !== 'password_too_short') done();
+          btn.disabled = false;
+          return;
+        }
+        localStorage.removeItem('taxi_session');
+        localStorage.removeItem('taxi_logged_in');
+        done();
+        show('Klart! Ditt lösenord är bytt. Logga in med det nya lösenordet.', true);
+      } catch (e) { show('Kunde inte kontakta servern. Försök igen.'); btn.disabled = false; }
+    }
+    init();
+  </script>
+</body>
+</html>

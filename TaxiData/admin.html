@@ -99,9 +99,9 @@
     <div id="content"></div>
   </div>
 
-  <script src="serverstatus.js?v=20261024q"></script>
+  <script src="serverstatus.js?v=20261024r"></script>
   <script>
-    const APP_VERSION = '1.0.18';
+    const APP_VERSION = '1.0.19';
     console.log('Admin version:', APP_VERSION);
     const SUPABASE_URL = 'https://lpfdryvukqmjlgenuzpb.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_7LwIOZ5ygRvJqJKFxl4cNQ_LvrzrHrP';
@@ -1126,6 +1126,7 @@
 
     // ---- Aktivitetslogg ----
     const logRoleLabels = { superadmin: 'S admin', agare: 'Ägare', admin: 'Admin', standard: 'Standard', semester: 'Semester', avslutad: 'Avslutad' };
+    const resetResults = { sent: 'länk skickad', email_not_configured: 'e-post ej konfigurerad', send_failed: 'e-post kunde inte skickas', no_email: 'ingen e-postadress', inactive: 'kontot inaktivt', unknown_id: 'okänt förar-ID', rate_limited_id: 'för många försök', rate_limited_total: 'för många försök totalt' };
     const failReasons = { wrong_password: 'fel lösenord', inactive: 'kontot inaktivt', ended: 'kontot avslutat', pending: 'har inte aktiverat kontot än' };
 
     function esc(x) {
@@ -1135,7 +1136,7 @@
     function catName(c) { return (logRoleLabels[c] || c || '').toLowerCase(); }
 
     function describeLog(e) {
-      const who = (logRoleLabels[e.actor_role] || 'Förare') + ' ' + (e.actor_id || '?');
+      const who = e.actor_role === 'system' ? 'Systemet' : (logRoleLabels[e.actor_role] || 'Förare') + ' ' + (e.actor_id || '?');
       const d = e.details || {};
       switch (e.action) {
         case 'login': return who + ' loggade in' + (e.via_master ? ' (med huvudlösenordet)' : '');
@@ -1155,6 +1156,8 @@
         case 'password_change': return who + ' bytte lösenord' + (e.via_master ? ' (med huvudlösenordet)' : '');
         case 'password_change_failed': return 'Misslyckat lösenordsbyte för ' + (e.target_id || '?') + ' (fel nuvarande lösenord)';
         case 'require_password_change': return who + ' nollställde lösenordet för ' + (e.target_id || '?');
+        case 'password_reset_request': return 'Glömt lösenord för ' + (e.target_id || '?') + ': ' + (resetResults[String(d.result || '').split(':')[0]] || d.result || '?');
+        case 'password_reset': return who + ' valde nytt lösenord via e-postlänken' + (d.sessions_ended ? ' (' + d.sessions_ended + ' inloggningar avslutades)' : '');
         case 'password_forced_change': return who + ' valde nytt lösenord efter nollställning';
         case 'category_change': return who + ' ändrade kategori på ' + e.target_id + ' till ' + catName(d.to);
         default: return who + ': ' + e.action + ' ' + (e.target_id || '');
