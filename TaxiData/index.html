@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaxiData</title>
-  <link rel="stylesheet" href="style.css?v=20261024w">
+  <link rel="stylesheet" href="style.css?v=20261024x">
   <style>
     #content { padding: 16px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 16px; }
@@ -102,18 +102,19 @@
         <button id="period-btn" title="Välj egen period" aria-label="Välj egen period">📅</button>
       </div>
       <!-- Serverstatus-lampan visas bara i vyer vars data kommer från servern (här Körpassdata).
-           Planerat: en kommande vy 'Topplistor' ska också visa den – lägg då en egen div där och anropa initServerStatus('<id>'). -->
+           Topplistor visar den också (tl-server-status i topplistor.js). -->
       <div id="server-status" class="server-status" style="display:none"></div>
       <div id="last-updated" style="text-align:center; font-size:0.8rem; color:#718096; margin-top:0.3rem;"></div>
     </div>
     <main id="dashboard"></main>
   </div>
 
-  <script src="serverstatus.js?v=20261024w"></script>
-  <script src="badges.js?v=20261024w"></script>
-  <script src="script.js?v=20261024w"></script>
-  <script src="ankomster.js?v=20261024w"></script>
-  <script src="hjalpbot.js?v=20261024w"></script>
+  <script src="serverstatus.js?v=20261024x"></script>
+  <script src="badges.js?v=20261024x"></script>
+  <script src="script.js?v=20261024x"></script>
+  <script src="ankomster.js?v=20261024x"></script>
+  <script src="topplistor.js?v=20261024x"></script>
+  <script src="hjalpbot.js?v=20261024x"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -126,7 +127,7 @@
       // Namn och ikon för Ankomster ändras i ankomster.js (ANKOMSTER.title / icon)
       { id: ANKOMSTER.id, icon: ANKOMSTER.icon, label: ANKOMSTER.title, roles: ALLA },
       { id: 'statistik', icon: '📈', label: 'Statistik', roles: ALLA },
-      { id: 'toplistor', icon: '🏆', label: 'Toplistor', roles: ALLA },
+      { id: TOPPLISTOR.id, icon: TOPPLISTOR.icon, label: TOPPLISTOR.title, roles: ALLA },
       { id: 'kommunikation', icon: '💬', label: 'Kommunikation', roles: ALLA },
       { id: 'kalender', icon: '📅', label: 'Kalender', roles: ALLA },
       { id: 'installningar', icon: '⚙️', label: 'Inställningar', roles: ALLA },
@@ -273,7 +274,7 @@
         document.getElementById('driver-label').textContent = driverId;
         if (typeof loadData === 'function') loadData().then(render);
       } else {
-        if (savedView === ANKOMSTER.id) {
+        if (savedView === ANKOMSTER.id || savedView === TOPPLISTOR.id) {
           current = savedView;
           try { history.pushState({ view: current }, ''); } catch (e) {}
         }
@@ -559,7 +560,7 @@
       } else if (profileLock) {
         try { history.pushState({ view: 'profil' }, ''); } catch (e) {}
         lockBlocked();
-      } else if (current === 'profil' || current === ANKOMSTER.id) {
+      } else if (current === 'profil' || current === ANKOMSTER.id || current === TOPPLISTOR.id) {
         goHome();
       }
     });
@@ -587,6 +588,9 @@
       } else if (current === ANKOMSTER.id) {
         title.textContent = ANKOMSTER.title;
         ANKOMSTER.render(content);
+      } else if (current === TOPPLISTOR.id) {
+        title.textContent = TOPPLISTOR.title;
+        TOPPLISTOR.render(content);
       } else if (current === 'installningar' && window.HJALPBOT) {
         title.textContent = 'Inställningar';
         window.HJALPBOT.renderSettings(content);
@@ -627,7 +631,7 @@
         if (window.initServerStatus) initServerStatus('server-status');
         document.getElementById('driver-label').textContent = driverId;
         if (typeof loadData === 'function') loadData().then(render);
-      } else if (id === ANKOMSTER.id) {
+      } else if (id === ANKOMSTER.id || id === TOPPLISTOR.id) {
         localStorage.setItem('taxi_view', id);
         current = id;
         try { history.pushState({ view: id }, ''); } catch (e) {}
@@ -663,4 +667,4 @@
     }
   </script>
 </body>
-</html><!-- cache-bust 1792443600 -->
+</html><!-- cache-bust 1792447200 -->

@@ -138,7 +138,10 @@
       idagNone: ['Bip… inga körningar registrerade idag än.'],
       mal: ['Beräkning klar. Bip bop:'],
       losen: ['Bip! Instruktion laddad:'],
-      err: ['Bip… anslutningsfel. Försök igen strax.']
+      err: ['Bip… anslutningsfel. Försök igen strax.'],
+      top: function (a) { return ['Bip bop! Plats 1 av ' + a.n + ' i "' + a.t + '" ' + a.p + ': ' + a.v + '. Mina kretsar jublar.', 'Beräkning klar: du leder "' + a.t + '" med ' + a.v + '. Bip!']; },
+      rank: function (a) { return ['Bip! Plats ' + a.pos + ' av ' + a.n + ' i "' + a.t + '" ' + a.p + ' (' + a.v + '). Jag har räknat två gånger.', 'Rankingdata: "' + a.t + '" – plats ' + a.pos + ' av ' + a.n + '. Uppgradering möjlig!']; },
+      rankNone: function (a) { return ['Bip… inga pass för dig ' + a.p + ', så du finns inte i listan än.']; }
     },
     chauffor: {
       hello: ['Hej! Vad undrar du?', 'Hoppa in! Vad vill du veta?', 'Taxametern är av – fråga gratis!'],
@@ -163,7 +166,10 @@
       idagNone: ['Inga körningar registrerade idag än.'],
       mal: ['Så här ser det ut:'],
       losen: ['Enkelt fixat:'],
-      err: ['Jag kunde inte hämta det just nu. Försök igen strax.']
+      err: ['Jag kunde inte hämta det just nu. Försök igen strax.'],
+      top: function (a) { return ['Etta i "' + a.t + '" ' + a.p + ' med ' + a.v + '. Snyggt jobbat!', 'Du toppar "' + a.t + '" ' + a.p + '. Bra kört!']; },
+      rank: function (a) { return ['Du ligger ' + a.o + ' av ' + a.n + ' i "' + a.t + '" ' + a.p + ' (' + a.v + '). Fint!', 'Plats ' + a.pos + ' av ' + a.n + ' i "' + a.t + '". Det rullar på.']; },
+      rankNone: function (a) { return ['Inga pass ' + a.p + ' än, så du syns inte i listan. Nästa pass kanske?']; }
     },
     cool: {
       hello: ['Yo. Vad behöver du?', 'Shoot. Jag har svar.', 'Lugnt. Fråga på.'],
@@ -186,7 +192,10 @@
       idagNone: ['Inget registrerat idag än. Lugnt, det kommer.'],
       mal: ['Läget:'],
       losen: ['Easy:'],
-      err: ['Hmm, fick inget svar. Testa igen strax.']
+      err: ['Hmm, fick inget svar. Testa igen strax.'],
+      top: function (a) { return ['Etta i "' + a.t + '". ' + a.v + '. Som väntat.', 'Plats 1 ' + a.p + '. Lugnt. Du vet hur man gör.']; },
+      rank: function (a) { return ['Plats ' + a.pos + ' av ' + a.n + ' i "' + a.t + '". ' + a.v + '. Chill, det finns tid kvar.', a.o + ' i "' + a.t + '". Inte illa. Inte illa alls.']; },
+      rankNone: function (a) { return ['Inga pass ' + a.p + '. Ibland är det coolt att vila.']; }
     },
     diva: {
       hello: ['Hej stjärna! Vad vill du veta? 😉', 'Fråga på, älskling – jag svarar med stil.', 'Ratten i ena handen, svaren i andra. Shoot!'],
@@ -212,7 +221,10 @@
       idagNone: ['Inga körningar idag än. Jag väntar… 😉'],
       mal: ['Mm, låt oss se hur du ligger till:'],
       losen: ['Hemligheter ska skyddas, stjärna:'],
-      err: ['Hmm, jag fick inget svar. Försök igen strax, älskling.']
+      err: ['Hmm, jag fick inget svar. Försök igen strax, älskling.'],
+      top: function (a) { return ['Etta i "' + a.t + '" med ' + a.v + '? Du vet hur man gör intryck, älskling. 😉', 'Plats 1 av ' + a.n + '. Alla tittar på dig nu… jag också. 😉']; },
+      rank: function (a) { return ['Plats ' + a.pos + ' av ' + a.n + ' i "' + a.t + '" (' + a.v + '). Lite till, stjärna, så blir du min favorit. 😉', a.o + ' i "' + a.t + '"? Charmigt. Jag gillar en som klättrar.']; },
+      rankNone: function (a) { return ['Inga pass ' + a.p + '? Spelar svårfångad, va? 😉']; }
     }
   };
   function lines() { return L[charId()] || L[DEFAULT_CHAR]; }
@@ -246,6 +258,7 @@
     if (c === 'nytt-losenord') return null;
     if (c === 'profil') return 'profil';
     if (window.ANKOMSTER && c === window.ANKOMSTER.id) return 'ankomster';
+    if (window.TOPPLISTOR && c === window.TOPPLISTOR.id) return 'topplistor';
     if (!c) return 'hem';
     return 'annat';
   }
@@ -301,6 +314,19 @@
     if (k === 'late') return line('late', { no: sum.worst.no, from: sum.worst.from, n: lateMin(sum.worst) });
     if (k === 'canceled') return line('canceled', { n: sum.canceled });
     return line('next', arrCtx(src, sum.next));
+  }
+  // Topplistor: bara den egna placeringen från serverns svar (window.TOPPLISTOR_LAST)
+  function ordSv(n) { var t = n % 100, e = n % 10; return n + ((e === 1 || e === 2) && t !== 11 && t !== 12 ? ':a' : ':e'); }
+  function topplistorComment(info) {
+    var T = window.TOPPLISTOR; if (!info || !info.data || !T) return null;
+    var lists = info.data.lists || {}, best = null;
+    T.lists.forEach(function (L) {
+      var x = lists[L.k];
+      if (x && x.me && (!best || x.me.pos < best.me.pos)) best = { L: L, me: x.me, n: x.n };
+    });
+    if (!best) return line('rankNone', { p: info.period });
+    var a = { t: best.L.t, pos: best.me.pos, o: ordSv(best.me.pos), n: best.n, v: T.fmt(best.me.v, best.L.f), p: info.period };
+    return line(best.me.pos === 1 ? 'top' : 'rank', a);
   }
   var FIELD = { first_name: 'förnamn', last_name: 'efternamn', phone: 'telefon', email: 'e-post' };
   function profilComment() {
@@ -427,6 +453,7 @@
     if (p === 'hem') setTimeout(function () { if (page() === 'hem' && state.pendingFor === 'hem') { state.pendingFor = null; say(hemComment()); } }, 1200);
     else if (p === 'kordata') { if (window.taxiStats && window.taxiStats('dag')) setTimeout(fireKordata, 1200); }
     else if (p === 'ankomster') setTimeout(fireAnk, 2500);
+    else if (p === 'topplistor') setTimeout(fireTopp, 1500);
     else if (p === 'profil' && window.HB_PROFILE && Date.now() - window.HB_PROFILE.at < 3000) setTimeout(fireProfil, 800);
   }
   function fireKordata() { if (state.pendingFor === 'kordata' && page() === 'kordata') { state.pendingFor = null; say(kordataComment()); } }
@@ -438,6 +465,12 @@
     window.ANKOMSTER.summary(id).then(function (s) { if (page() === 'ankomster') say(ankomsterComment(s)); });
   }
   document.addEventListener('taxidata:render', function () { if (state.pendingFor === 'kordata') setTimeout(fireKordata, 600); });
+  function fireTopp() {
+    var info = window.TOPPLISTOR_LAST;
+    if (state.pendingFor !== 'topplistor' || page() !== 'topplistor' || !info) return;
+    state.pendingFor = null; say(topplistorComment(info));
+  }
+  document.addEventListener('topplistor:data', function () { if (state.pendingFor === 'topplistor') setTimeout(fireTopp, 600); });
   document.addEventListener('profil:loaded', function () { if (state.pendingFor === 'profil') setTimeout(fireProfil, 600); });
 
   function tick() {
