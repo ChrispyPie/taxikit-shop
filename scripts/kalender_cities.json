@@ -1,0 +1,202 @@
+{
+ "_info": "En post per stad. Lagg till en ny stad = ny post + (vid behov) ny kalla i fetch_events.py. Inga stads-antaganden i koden.",
+ "cities": {
+  "goteborg": {
+   "name": "Göteborg",
+   "country": "SE",
+   "timezone": "Europe/Stockholm",
+   "center": [
+    57.7072,
+    11.9668
+   ],
+   "radius_km": 20,
+   "days_ahead": 180,
+   "sources": {
+    "goteborg_com": {
+     "base": "https://api.goteborg.com/v1/events",
+     "lang": "sv"
+    },
+    "gotevent": {
+     "base": "https://gotevent.se"
+    },
+    "svenskamassan": {
+     "url": "https://svenskamassan.se/wp-json/api/v2/getCalendarList",
+     "venue": "svenska-massan"
+    }
+   },
+   "venues": {
+    "scandinavium": {
+     "name": "Scandinavium",
+     "address": "Valhallagatan 1",
+     "lat": 57.6992,
+     "lon": 11.9878,
+     "aliases": [
+      "scandinavium"
+     ]
+    },
+    "ullevi": {
+     "name": "Ullevi",
+     "address": "Ullevigatan",
+     "lat": 57.7059,
+     "lon": 11.9873,
+     "aliases": [
+      "ullevi",
+      "nya ullevi"
+     ]
+    },
+    "gamla-ullevi": {
+     "name": "Gamla Ullevi",
+     "address": "Ullevigatan 5",
+     "lat": 57.7063,
+     "lon": 11.9811,
+     "aliases": [
+      "gamla ullevi"
+     ]
+    },
+    "svenska-massan": {
+     "name": "Svenska Mässan",
+     "address": "Mässans gata 18",
+     "lat": 57.6981,
+     "lon": 11.989,
+     "aliases": [
+      "svenska massan",
+      "massan",
+      "gothia towers"
+     ]
+    },
+    "liseberg": {
+     "name": "Liseberg",
+     "address": "Örgrytevägen",
+     "lat": 57.6952,
+     "lon": 11.9925,
+     "aliases": [
+      "liseberg"
+     ]
+    },
+    "lisebergsteatern": {
+     "name": "Lisebergsteatern",
+     "address": "Örgrytevägen 5",
+     "lat": 57.6967,
+     "lon": 11.992,
+     "aliases": [
+      "lisebergsteatern"
+     ]
+    },
+    "operan": {
+     "name": "Göteborgsoperan",
+     "address": "Christina Nilssons gata",
+     "lat": 57.71,
+     "lon": 11.9622,
+     "aliases": [
+      "goteborgsoperan",
+      "operan"
+     ]
+    },
+    "konserthuset": {
+     "name": "Konserthuset",
+     "address": "Götaplatsen",
+     "lat": 57.6974,
+     "lon": 11.9794,
+     "aliases": [
+      "konserthuset",
+      "goteborgs konserthus"
+     ]
+    },
+    "stadsteatern": {
+     "name": "Stadsteatern",
+     "address": "Götaplatsen 4",
+     "lat": 57.6976,
+     "lon": 11.9807,
+     "aliases": [
+      "stadsteatern",
+      "goteborgs stadsteater"
+     ]
+    },
+    "nordic-wellness-arena": {
+     "name": "Nordic Wellness Arena",
+     "address": "Inlandsgatan 48",
+     "lat": 57.7191,
+     "lon": 11.9308,
+     "aliases": [
+      "nordic wellness arena",
+      "bravida arena",
+      "hisingen arena"
+     ]
+    },
+    "partille-arena": {
+     "name": "Partille arena",
+     "address": "Arenatorget 2",
+     "lat": 57.74,
+     "lon": 12.117,
+     "aliases": [
+      "partille arena"
+     ]
+    },
+    "universeum": {
+     "name": "Universeum",
+     "address": "Södra Vägen 50",
+     "lat": 57.6955,
+     "lon": 11.9889,
+     "aliases": [
+      "universeum"
+     ]
+    },
+    "world-of-volvo": {
+     "name": "World of Volvo",
+     "address": "Lyckholms Torg 1",
+     "lat": 57.6895,
+     "lon": 11.9968,
+     "aliases": [
+      "world of volvo"
+     ]
+    },
+    "pustervik": {
+     "name": "Pustervik",
+     "address": "Järntorgsgatan 12",
+     "lat": 57.7006,
+     "lon": 11.9543,
+     "aliases": [
+      "pustervik"
+     ]
+    },
+    "lorensbergsteatern": {
+     "name": "Lorensbergsteatern",
+     "address": "Lorensbergsgatan 3",
+     "lat": 57.7003,
+     "lon": 11.9786,
+     "aliases": [
+      "lorensbergsteatern"
+     ]
+    },
+    "rondo": {
+     "name": "Rondo",
+     "address": "Örgrytevägen 5",
+     "lat": 57.6966,
+     "lon": 11.9915,
+     "aliases": [
+      "rondo"
+     ]
+    },
+    "valhalla-ip": {
+     "name": "Valhalla IP",
+     "address": "Valhallagatan 6",
+     "lat": 57.701,
+     "lon": 11.987,
+     "aliases": [
+      "valhalla ip",
+      "valhalla"
+     ]
+    },
+    "frolundaborg": {
+     "name": "Frölundaborg",
+     "address": "Klubbvägen 14",
+     "lat": 57.6521,
+     "lon": 11.9116,
+     "aliases": [
+      "frolundaborg"
+     ]
+    }
+   }
+  }
+ }
+}

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaxiData</title>
-  <link rel="stylesheet" href="style.css?v=20261024ar1">
+  <link rel="stylesheet" href="style.css?v=20261025k1">
   <style>
     #content { padding: 16px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 16px; }
@@ -116,6 +116,7 @@
   <script src="ankomster.js?v=20261024x"></script>
   <script src="topplistor.js?v=20261024ar1"></script>
   <script src="verkstad.js?v=20261024z"></script>
+  <script src="kalender.js?v=20261025k1"></script>
   <script src="hjalpbot.js?v=20261024z"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
@@ -132,7 +133,7 @@
       { id: TOPPLISTOR.id, icon: TOPPLISTOR.icon, label: TOPPLISTOR.title, roles: ALLA },
       { id: VERKSTAD.id, icon: VERKSTAD.icon, label: VERKSTAD.title, roles: ALLA },
       { id: 'kommunikation', icon: '💬', label: 'Kommunikation', roles: ALLA },
-      { id: 'kalender', icon: '📅', label: 'Kalender', roles: ALLA },
+      { id: KALENDER.id, icon: KALENDER.icon, label: KALENDER.title, roles: ALLA },
       { id: 'installningar', icon: '⚙️', label: 'Inställningar', roles: ALLA },
       { id: 'admin', icon: '🔐', label: 'Admin', roles: ADMIN_ROLLER, submenu: [
         { id: 'akeridata', icon: '📊', label: 'Åkeridata', roles: AKERI_ROLLER },
@@ -277,7 +278,7 @@
         document.getElementById('driver-label').textContent = driverId;
         if (typeof loadData === 'function') loadData().then(render);
       } else {
-        if (savedView === ANKOMSTER.id || savedView === TOPPLISTOR.id || savedView === VERKSTAD.id) {
+        if (savedView === ANKOMSTER.id || savedView === TOPPLISTOR.id || savedView === VERKSTAD.id || savedView === KALENDER.id) {
           current = savedView;
           try { history.pushState({ view: current }, ''); } catch (e) {}
         }
@@ -563,7 +564,7 @@
       } else if (profileLock) {
         try { history.pushState({ view: 'profil' }, ''); } catch (e) {}
         lockBlocked();
-      } else if (current === 'profil' || current === ANKOMSTER.id || current === TOPPLISTOR.id || current === VERKSTAD.id) {
+      } else if (current === 'profil' || current === ANKOMSTER.id || current === TOPPLISTOR.id || current === VERKSTAD.id || current === KALENDER.id) {
         goHome();
       }
     });
@@ -597,6 +598,9 @@
       } else if (current === VERKSTAD.id) {
         title.textContent = VERKSTAD.title;
         VERKSTAD.render(content);
+      } else if (current === KALENDER.id) {
+        title.textContent = KALENDER.title;
+        KALENDER.render(content);
       } else if (current === 'installningar' && window.HJALPBOT) {
         title.textContent = 'Inställningar';
         window.HJALPBOT.renderSettings(content);
@@ -654,7 +658,7 @@
         if (window.initServerStatus) initServerStatus('server-status');
         document.getElementById('driver-label').textContent = driverId;
         if (typeof loadData === 'function') loadData().then(render);
-      } else if (id === ANKOMSTER.id || id === TOPPLISTOR.id || id === VERKSTAD.id) {
+      } else if (id === ANKOMSTER.id || id === TOPPLISTOR.id || id === VERKSTAD.id || id === KALENDER.id) {
         localStorage.setItem('taxi_view', id);
         current = id;
         try { history.pushState({ view: id }, ''); } catch (e) {}

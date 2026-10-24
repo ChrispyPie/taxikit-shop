@@ -269,3 +269,52 @@ main { max-width: 900px; margin: 1rem auto; padding: 0 1rem; }
 .vk-iact { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
 .vk-iact button { flex: 1; padding: 0.5rem; border-radius: 8px; border: 2px solid var(--primary); background: var(--surface); color: var(--primary); font-size: 0.9rem; }
 .vk-iact .vk-del { border-color: var(--danger); color: var(--danger-text); }
+
+/* Kalender (kalender.js) – återanvänder .tabs, .date-nav, .pm-*, .ank-*, .vk-* */
+.kal-konsert { --kal-c: #805ad5; } .kal-sport { --kal-c: #2f855a; } .kal-massa { --kal-c: #c05621; } .kal-teater { --kal-c: #b83280; } .kal-ovrigt { --kal-c: #718096; }
+.kal-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+.kal-city { font-weight: 600; color: var(--primary); }
+.kal-city select { font: inherit; color: var(--primary); border: 1px solid var(--border); border-radius: 8px; padding: 0.2rem 0.4rem; background: var(--surface); }
+.kal-bell { position: relative; background: var(--surface); border: 2px solid var(--primary); border-radius: 10px; width: 42px; height: 38px; font-size: 1.1rem; cursor: pointer; }
+.kal-bell b { position: absolute; top: -7px; right: -7px; background: var(--danger); color: #fff; border-radius: 10px; font-size: 0.7rem; padding: 1px 6px; }
+.kal-tonight { border-left: 4px solid var(--primary); }
+.kal-tt { font-weight: 700; color: var(--primary); margin-bottom: 0.3rem; }
+.kal-tt span { font-weight: 400; font-size: 0.8rem; color: var(--muted); }
+.kal-trow { display: flex; width: 100%; gap: 0.6rem; align-items: baseline; text-align: left; background: none; border: none; border-top: 1px solid var(--border-soft); padding: 0.45rem 0; color: var(--text); font: inherit; cursor: pointer; }
+.kal-tend { font-weight: 800; font-size: 1.1rem; min-width: 4.4rem; color: var(--primary); font-variant-numeric: tabular-nums; }
+.kal-tend.est { color: #975a16; }
+.kal-tname { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+.kal-tname small { display: block; font-weight: 400; font-size: 0.8rem; color: var(--text-soft); }
+.kal-none { color: var(--muted); font-size: 0.9rem; padding: 0.3rem 0; } .kal-none.sm { font-size: 0.85rem; }
+.kal-tabs { margin: 0.6rem 0 0.6rem; }
+.kal-nav { margin-bottom: 0.4rem; } .kal-date { min-width: 150px; }
+.kal-back { text-align: center; margin-bottom: 0.4rem; }
+.kal-back button { background: none; border: none; color: var(--accent); text-decoration: underline; font-size: 0.85rem; cursor: pointer; }
+.kal-chips { flex-wrap: wrap; justify-content: center; margin: 0.4rem 0 0.6rem; }
+.kal-chip { display: inline-flex; align-items: center; gap: 5px; }
+.kal-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--kal-c, var(--muted)); }
+.kal-row { width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; border-left: 4px solid var(--kal-c); }
+.kal-row.kal-sugg { border-style: dashed; border-left-style: solid; }
+.kal-ico { font-size: 0.95rem; margin-top: 2px; }
+.kal-end { font-size: 0.9rem; font-weight: 700; color: var(--primary); margin-top: 2px; }
+.kal-end.est { color: #975a16; }
+.kal-cc { font-size: 0.75rem; color: var(--text-soft); }
+.kal-month { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; background: var(--surface); border-radius: 12px; padding: 0.5rem; }
+.kal-mday { position: relative; min-height: 54px; border: none; border-radius: 8px; background: var(--surface-soft); color: var(--primary); padding: 3px; display: flex; flex-direction: column; align-items: center; cursor: pointer; font: inherit; }
+.kal-mday.out { opacity: 0.4; } .kal-mday.today { outline: 2px solid var(--primary); }
+.kal-dn { font-size: 0.9rem; font-weight: 600; } .kal-n { font-size: 0.7rem; color: var(--text-soft); }
+.kal-dots { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; margin-top: 2px; } .kal-dots .kal-dot { width: 6px; height: 6px; }
+.kal-new { margin-top: 0.8rem; }
+.kal-backlink { background: none; border: none; color: var(--primary); font-size: 1rem; font-weight: 600; padding: 0.2rem 0 0.6rem; cursor: pointer; }
+.kal-detail { border-left: 4px solid var(--kal-c); }
+.kal-dtitle { font-weight: 700; font-size: 1.1rem; color: var(--text); }
+.kal-bigend { font-size: 1.4rem; font-weight: 800; color: var(--primary); margin: 0.35rem 0; }
+.kal-bigend.est { color: #975a16; } .kal-bigend small { font-size: 0.75rem; font-weight: 400; color: var(--muted); margin-left: 0.4rem; }
+.kal-detail a { color: var(--accent); }
+.kal-rem { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 0.6rem; } .kal-rem .ank-chip:disabled { opacity: 0.35; }
+.kal-com { border-top: 1px solid var(--border-soft); padding: 0.45rem 0; font-size: 0.92rem; } .kal-com.unread { background: #fefcbf; }
+.kal-cwho { font-size: 0.75rem; color: var(--muted); }
+.kal-cdel { background: none; border: none; color: var(--danger-text); cursor: pointer; font-size: 0.8rem; }
+.kal-input { width: 100%; padding: 0.55rem; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; font-size: 0.95rem; box-sizing: border-box; }
+.kal-unk { font-size: 0.8rem; margin-left: 0.5rem; } .kal-same { flex: 1; font-size: 0.85rem; color: var(--text-soft); }
+.vk-iact .kal-ok { border-color: var(--ok); color: var(--ok); }
