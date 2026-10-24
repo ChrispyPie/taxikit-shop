@@ -3,6 +3,7 @@
  * Anonymiteten avgörs på servern (public.get_leaderboard): vanliga förare och S admin får bara
  * placering och värde, och den egna raden markerad "Du". Bara ägaren får namn och förar-id.
  * Appen visar det servern skickar – inga andra förares id finns i svaret.
+ * Alla förare med pass i perioden räknas, även de utan konto i appen och avslutade förare.
  * Period: Dag / Vecka / Månad och egen period i kalendern, som i Körpassdata.
  */
 (function () {
@@ -170,7 +171,7 @@
         if (rows.length > 5) h += '<button type="button" class="tl-more" data-k="' + L.k + '">' + (open ? 'Visa färre' : 'Visa alla ' + rows.length) + '</button>';
         h += '</div>';
       });
-      h += '<div class="tl-foot">Kr/mil kräver minst 1 mil, kr/timme minst 30 min. Inkört räknas som i Körpassdata.</div>';
+      h += '<div class="tl-foot">Alla förare med pass i perioden räknas, även de utan konto i appen. Kr/mil kräver minst 1 mil, kr/timme minst 30 min. Inkört räknas som i Körpassdata.</div>';
     }
     body.innerHTML = h;
     body.querySelectorAll('.tl-more').forEach(function (b) { b.onclick = function () { st.open[b.dataset.k] = !st.open[b.dataset.k]; draw(); }; });
