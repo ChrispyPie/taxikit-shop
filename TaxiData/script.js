@@ -71,6 +71,7 @@ async function loadData() {
     data = {};
   }
   tripsByDriver = null;
+  orphanTrips = null;
   if (!myRole) {
     myRole = (window.driverData && window.driverData.category) || '';
     if (!myRole) { try { const me = await tripRpc('get_me'); myRole = (me && me.category) || ''; } catch (e) {} }
@@ -282,6 +283,33 @@ function getTripsForShift(shift) {
   });
 }
 
+// Resor som inte ligger i något av förarens pass (t.ex. när ett pass saknas i passrapporten).
+// De räknas på resans eget datum och tid, precis som i Topplistor, så att inget inkört försvinner.
+let orphanTrips = null;
+function tripTime(t) {
+  if (!t.startdatum || !t.starttid) return null;
+  const d = new Date(t.startdatum + 'T' + t.starttid);
+  return isNaN(d) ? null : d;
+}
+function getOrphanTripsInRange(start, end) {
+  if (!orphanTrips) {
+    const byDriver = {};
+    (data.shifts || []).forEach(s => {
+      const a = parseShiftTime(s.start), b = parseShiftTime(s.slut);
+      if (a && b && !isNaN(a) && !isNaN(b)) (byDriver[s.forar || '710022'] = byDriver[s.forar || '710022'] || []).push([a, b]);
+    });
+    orphanTrips = (data.trips || []).filter(t => {
+      const ts = tripTime(t);
+      return ts && !(byDriver[t.forar || '710022'] || []).some(r => ts >= r[0] && ts <= r[1]);
+    });
+  }
+  return orphanTrips.filter(t => {
+    if (!matchDriver(t)) return false;
+    const ts = tripTime(t);
+    return ts >= start && ts <= end;
+  });
+}
+
 function sumByType(trips, typeCode) {
   return trips.filter(t => t.kredittyp === typeCode).reduce((s, t) => s + parseAmount(t.belopp), 0);
 }
@@ -310,6 +338,24 @@ function tripDetailRows(t, cls) {
           <div class="sub ${cls}"><span>Betalt</span><span>${formatSEK(parseAmount(t.belopp))}</span></div>
           <div class="sub ${cls}"><span>Typ</span><span>${typeMap[t.kredittyp] || t.kredittyp || '?'}</span></div>
           <div class="sub ${cls}"><span>Dricks</span><span>${formatSEK(parseAmount(t.dricks))}</span></div>`;
+}
+
+// En rad i skiftlistan med resor som inte hör till något pass
+function looseTripsRow(list) {
+  list = list.slice().sort((a, b) => ((b.startdatum || '') + (b.starttid || '')).localeCompare((a.startdatum || '') + (a.starttid || '')));
+  const uber = list.filter(t => t.kredittyp === '164').reduce((sum, t) => sum + parseAmount(t.belopp), 0);
+  const other = list.filter(t => t.kredittyp !== '999' && t.kredittyp !== '164').reduce((sum, t) => sum + parseAmount(t.belopp), 0);
+  const tripsHtml = list.map(t => {
+    const isBom = t.kredittyp === '999';
+    const dd = (t.startdatum || '').slice(8, 10) + '/' + (t.startdatum || '').slice(5, 7);
+    return `<div class="sub shift-trip" data-key="lt:${escHtml(t.kvittonr)}|${escHtml(t.forar || '710022')}" onclick="toggleTrip(this, event)" style="${isBom ? 'opacity:0.6;' : ''}"><span class="toggle">+</span><span>${dd} ${escHtml(t.kvittonr)}${isBom ? ' (BOM)' : ''}</span><span>${formatSEK(parseAmount(t.belopp))}</span></div>
+          <div class="sub trip-detail"><span>Start</span><span>${t.starttid || '00:00'} – zon ${t.startzon || '?'}</span></div>
+          <div class="sub trip-detail"><span>Slut</span><span>${t.sluttid || '00:00'} – zon ${t.slutzon || '?'}</span></div>
+          <div class="sub trip-detail"><span>Typ</span><span>${typeMap[t.kredittyp] || t.kredittyp || '?'}</span></div>
+          <div class="sub trip-detail"><span>Dricks</span><span>${formatSEK(parseAmount(t.dricks))}</span></div>`;
+  }).join('');
+  return `<div class="stat-row" data-key="loose" onclick="toggleShift(this)"><span class="toggle">+</span><span class="label">Resor utan pass (${list.length} st)</span><span class="value">${formatSEK(other + uber * (1 - UBER_FEE))}</span></div>
+      <div class="shift-content">${tripsHtml}</div>`;
 }
 
 function render() {
@@ -361,6 +407,8 @@ function render() {
     allTrips = allTrips.concat(getTripsForShift(s));
     totalMinutes += parseTime(s.tid);
   });
+  const looseTrips = getOrphanTripsInRange(rangeStart, rangeEnd);
+  allTrips = allTrips.concat(looseTrips);
   if (currentTab === 'dag' && !COMPANY) allTrips.sort((a, b) => ((a.startdatum || '') + (a.starttid || '')).localeCompare((b.startdatum || '') + (b.starttid || '')));
 
   const trips = allTrips.filter(t => t.kredittyp !== '999');
@@ -512,7 +560,9 @@ function render() {
       }).join('');
       return `<div class="stat-row" data-key="shift:${escHtml(s.passnr)}|${escHtml(s.forar || '710022')}" onclick="toggleShift(this)"><span class="toggle">+</span><span class="label">${dateLabel}#${escHtml(s.passnr)}${who}</span><span class="value">${formatSEK(shiftInkort)}</span></div>
       <div class="shift-content">${tripsHtml}</div>`;
-    }).join('')}</div>`;
+    }).join('')}${looseTrips.length ? looseTripsRow(looseTrips) : ''}</div>`;
+  } else if (looseTrips.length) {
+    html += `<div class="section">${looseTripsRow(looseTrips)}</div>`;
   }
 
   const dash = document.getElementById('dashboard');
@@ -537,6 +587,7 @@ window.taxiStats = function (tab) {
   const shifts = getShiftsInRange(range[0], range[1]);
   let trips = [];
   shifts.forEach(s => { trips = trips.concat(getTripsForShift(s)); });
+  trips = trips.concat(getOrphanTripsInRange(range[0], range[1]));
   trips = trips.filter(t => t.kredittyp !== '999');
   const inkort = ['160', '283', '163', '1', '161', '185'].reduce((a, c) => a + sumByType(trips, c), 0)
     + sumByType(trips, '164') * (1 - UBER_FEE);
