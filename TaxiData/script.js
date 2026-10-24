@@ -518,12 +518,37 @@ function render() {
   const dash = document.getElementById('dashboard');
   dash.innerHTML = html;
   restoreOpen(dash);
+  if (!COMPANY) document.dispatchEvent(new CustomEvent('taxidata:render'));
 
   } catch (e) {
     const el = document.getElementById('dashboard') || document.getElementById('content');
     if (el) el.textContent = 'Fel: ' + e.message;
   }
 }
+
+// Hjälpboten läser riktiga siffror härifrån (samma beräkning som Inkört/Mål ovan, bara läsning).
+// tab: 'dag' | 'vecka' | 'manad'. Returnerar null om ingen data är hämtad ännu.
+window.taxiStats = function (tab) {
+  if (COMPANY || !data || !data.shifts) return null;
+  tab = tab || 'dag';
+  const now = new Date();
+  const range = tab === 'vecka' ? [getWeekStart(now), getWeekEnd(now)]
+    : tab === 'manad' ? [getMonthStart(now), getMonthEnd(now)] : [startOfDay(now), endOfDay(now)];
+  const shifts = getShiftsInRange(range[0], range[1]);
+  let trips = [];
+  shifts.forEach(s => { trips = trips.concat(getTripsForShift(s)); });
+  trips = trips.filter(t => t.kredittyp !== '999');
+  const inkort = ['160', '283', '163', '1', '161', '185'].reduce((a, c) => a + sumByType(trips, c), 0)
+    + sumByType(trips, '164') * (1 - UBER_FEE);
+  const goal = goals[tab] || goals.dag;
+  return { tab, inkort: Math.round(inkort), goal, diff: Math.round(inkort - goal), antal: trips.length,
+           skift: shifts.length, own: viewDriver === currentDriver, viewing: currentTab, viewingCurrent: isCurrentPeriod() };
+};
+// Hämtar förarens data om den inte redan finns (t.ex. när boten frågas från hemskärmen)
+window.taxiEnsureData = async function () {
+  if (COMPANY) return;
+  if (!data || !data.shifts) await loadData();
+};
 
 // Vilka rader som är utfällda sparas så att de förblir utfällda när man byter
 // datum, flik, egen period eller förare. Bara »-knappen (idag) fäller ihop allt.

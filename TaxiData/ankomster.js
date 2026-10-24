@@ -197,6 +197,7 @@
     state.loading[id] = true; if (!quiet) paint();
     s.load().then(function (r) {
       state.data[id] = r.items; state.updated[id] = r.updated; state.err[id] = false;
+      try { document.dispatchEvent(new CustomEvent('ankomster:data', { detail: { id: id } })); } catch (e) {}
     }).catch(function () { state.err[id] = true; })
       .then(function () { state.loading[id] = false; if (state.tab === id) paint(); });
   }
@@ -233,4 +234,26 @@
     document.addEventListener('visibilitychange', onVisible);
   };
   A.stop = stop;
+
+  // För hjälpboten: nästa ankomst (inte inställd, inte redan ankommen) och lite fakta. Bara verklig data.
+  A.current = function () { return state.el ? state.tab : null; };
+  A.summary = function (id) {
+    var s = null; A.sources.forEach(function (x) { if (x.id === id) s = x; });
+    if (!s) return Promise.resolve(null);
+    var p = state.data[id] ? Promise.resolve(state.data[id])
+      : s.load().then(function (r) { state.data[id] = r.items; state.updated[id] = r.updated; return r.items; });
+    return p.then(function (items) {
+      var now = Date.now(), filt = s.filter ? s.filter() : null;
+      var up = items.filter(function (it) {
+        var w = when(it); return w && !it.act && w >= now - 60000 && w <= now + 6 * 3600000 && (!filt || filt.test(it));
+      }).sort(function (a, b) { return when(a) - when(b); });
+      var live = up.filter(function (it) { return !it.canceled && !it.special; });
+      var delayed = live.filter(function (it) { return it.est && it.sched && it.est - it.sched >= 5 * 60000; });
+      return { source: s, next: live[0] || null, after: live[1] || null, canceled: up.length - live.length,
+               delayed: delayed.length, worst: delayed.sort(function (a, b) { return (b.est - b.sched) - (a.est - a.sched); })[0] || null,
+               inHour: live.filter(function (it) { return when(it) <= now + 3600000; }).length };
+    }).catch(function () { return null; });
+  };
+  A.when = when;
+  A.hm = hm;
 })();

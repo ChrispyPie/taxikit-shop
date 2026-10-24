@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaxiData</title>
-  <link rel="stylesheet" href="style.css?v=20261024v">
+  <link rel="stylesheet" href="style.css?v=20261024w">
   <style>
     #content { padding: 16px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 16px; }
@@ -109,10 +109,11 @@
     <main id="dashboard"></main>
   </div>
 
-  <script src="serverstatus.js?v=20261024v"></script>
-  <script src="badges.js?v=20261024v"></script>
-  <script src="script.js?v=20261024v"></script>
-  <script src="ankomster.js?v=20261024v"></script>
+  <script src="serverstatus.js?v=20261024w"></script>
+  <script src="badges.js?v=20261024w"></script>
+  <script src="script.js?v=20261024w"></script>
+  <script src="ankomster.js?v=20261024w"></script>
+  <script src="hjalpbot.js?v=20261024w"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -380,6 +381,9 @@
         return;
       }
       if (current !== 'profil') return;
+      // Hjälpboten läser bara vilka fält som saknas (inga värden)
+      window.HB_PROFILE = { missing: (d.missing || []).slice(), noEmergency: !d.emergency_phone, at: Date.now() };
+      try { document.dispatchEvent(new CustomEvent('profil:loaded')); } catch (e) {}
       var missing = (d.missing || []).length > 0;
       profileLock = missing && !d.via_master;
       if (profileLock) sessionStorage.setItem('taxi_profile_lock', driverId); else sessionStorage.removeItem('taxi_profile_lock');
@@ -583,6 +587,9 @@
       } else if (current === ANKOMSTER.id) {
         title.textContent = ANKOMSTER.title;
         ANKOMSTER.render(content);
+      } else if (current === 'installningar' && window.HJALPBOT) {
+        title.textContent = 'Inställningar';
+        window.HJALPBOT.renderSettings(content);
       } else if (current) {
         title.textContent = current;
         content.innerHTML = '<div class="section"><p>Kommer snart: ' + current + '</p></div>';
@@ -656,4 +663,4 @@
     }
   </script>
 </body>
-</html><!-- cache-bust 1792443500 -->
+</html><!-- cache-bust 1792443600 -->
