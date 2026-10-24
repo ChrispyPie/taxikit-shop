@@ -101,7 +101,7 @@
 
   <script src="serverstatus.js?v=20261024j"></script>
   <script>
-    const APP_VERSION = '1.0.15';
+    const APP_VERSION = '1.0.16';
     console.log('Admin version:', APP_VERSION);
     const SUPABASE_URL = 'https://lpfdryvukqmjlgenuzpb.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_7LwIOZ5ygRvJqJKFxl4cNQ_LvrzrHrP';
@@ -665,7 +665,8 @@
     }
 
     function linkMessage(id) {
-      return 'TaxiData – aktivera ditt konto\n\nÖppna länken, skriv ditt förar-ID (' + id + ') och välj ett lösenord:\n' + lastLinks[id].url +
+      // Förar-ID skickas aldrig med länken: hamnar den hos fel person kan de inte aktivera kontot
+      return 'TaxiData – aktivera ditt konto\n\nÖppna länken, skriv ditt förar-ID och välj ett lösenord:\n' + lastLinks[id].url +
         '\n\nLänken fungerar en gång och går ut ' + fmtWhen(lastLinks[id].expires) + '.';
     }
 
@@ -682,7 +683,7 @@
       m.className = 'modal'; m.id = 'link-modal';
       m.innerHTML = `<div class="modal-box">
         <h3 style="margin:0 0 8px; color:#1a365d;">Aktiveringslänk för ${esc(id)}</h3>
-        <p style="font-size:13px; color:#4a5568; margin:0 0 8px;">Skicka länken till föraren. Den fungerar en gång och går ut ${esc(fmtWhen(l.expires))}. Länken visas bara nu – annars kan du skapa en ny.</p>
+        <p style="font-size:13px; color:#4a5568; margin:0 0 8px;">Skicka länken till föraren. Den fungerar en gång och går ut ${esc(fmtWhen(l.expires))}. Länken visas bara nu – annars kan du skapa en ny.<br>Förar-ID står inte i länken eller meddelandet – föraren behöver kunna sitt förar-ID för att aktivera.</p>
         <input id="link-url" readonly value="${esc(l.url)}" style="width:100%; font-size:12px; box-sizing:border-box;" onclick="this.select()">
         <div class="modal-buttons">
           <button id="link-copy" onclick="copyLink('${esc(id)}')">Kopiera</button>
