@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Åkeridata – TaxiData</title>
+  <link rel="stylesheet" href="style.css?v=20261024f">
+  <style>
+    header { display: flex; align-items: center; justify-content: space-between; }
+    header h1 { position: absolute; left: 50%; transform: translateX(-50%); }
+    .hidden { display: none !important; }
+    #denied { text-align: center; padding: 48px 16px; }
+    #denied button { margin-top: 16px; padding: 0.6rem 1.2rem; border-radius: 8px; border: 2px solid #1a365d; background: white; color: #1a365d; }
+  </style>
+</head>
+<body>
+  <!-- Åkeridata: samma uppbyggnad som Körpassdata, men för hela åkeriet (alla förare och bilar). -->
+  <div id="denied" class="hidden">
+    <h2>Ingen behörighet</h2>
+    <p>Åkeridata kräver admin- eller ägarbehörighet.</p>
+    <button onclick="location.href='index.html'">Tillbaka</button>
+  </div>
+  <div id="dashboard-view" class="hidden">
+    <header>
+      <button onclick="location.href='admin.html'" aria-label="Tillbaka till admin">←</button>
+      <h1>Åkeridata</h1>
+      <span id="driver-label"></span>
+    </header>
+    <div class="controls">
+      <div class="tabs">
+        <button class="tab active" data-tab="dag">Dag</button>
+        <button class="tab" data-tab="vecka">Vecka</button>
+        <button class="tab" data-tab="manad">Månad</button>
+      </div>
+      <div class="date-nav">
+        <button id="prev">‹</button>
+        <div id="current-date">Idag</div>
+        <button id="next">›</button>
+        <button id="today">»</button>
+        <button id="period-btn" title="Välj egen period" aria-label="Välj egen period">📅</button>
+      </div>
+      <div id="server-status" class="server-status" style="display:none"></div>
+      <div id="last-updated" style="text-align:center; font-size:0.8rem; color:#718096; margin-top:0.3rem;"></div>
+    </div>
+    <main id="dashboard"><div class="section"><div class="stat-row">Laddar...</div></div></main>
+  </div>
+
+  <script>window.TAXI_MODE = 'company';</script>
+  <script src="serverstatus.js?v=20261024f"></script>
+  <script src="script.js?v=20261024f"></script>
+  <script>
+    // Behörigheten kontrolleras även på servern: get_trip_data ger bara hela åkeriets
+    // data till admin, ägare och superadmin.
+    (async function () {
+      if (!localStorage.getItem('taxi_session')) { location.href = 'index.html'; return; }
+      let me = null;
+      try { me = await tripRpc('get_me'); } catch (e) { location.href = 'index.html'; return; }
+      if (!me || !['admin', 'agare', 'superadmin'].includes(me.category)) {
+        document.getElementById('denied').classList.remove('hidden');
+        return;
+      }
+      document.getElementById('dashboard-view').classList.remove('hidden');
+      syncTabs();
+      if (window.initServerStatus) initServerStatus('server-status');
+      await loadData();
+      render();
+    })();
+  </script>
+</body>
+</html>

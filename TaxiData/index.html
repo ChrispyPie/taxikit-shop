@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaxiData</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20261024f">
   <style>
     #content { padding: 16px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 16px; }
@@ -63,6 +63,7 @@
         <div id="current-date">Idag</div>
         <button id="next">›</button>
         <button id="today">»</button>
+        <button id="period-btn" title="Välj egen period" aria-label="Välj egen period">📅</button>
       </div>
       <!-- Serverstatus-lampan visas bara i vyer vars data kommer från servern (här Körpassdata).
            Planerat: en kommande vy 'Topplistor' ska också visa den – lägg då en egen div där och anropa initServerStatus('<id>'). -->
@@ -72,8 +73,8 @@
     <main id="dashboard"></main>
   </div>
 
-  <script src="serverstatus.js?v=20261024e"></script>
-  <script src="script.js?v=20261024e"></script>
+  <script src="serverstatus.js?v=20261024f"></script>
+  <script src="script.js?v=20261024f"></script>
   <script>
     var menu = [
       { id: 'kordata', icon: '🚗', label: 'Körpassdata', roles: ['standard', 'admin', 'agare', 'superadmin'] },

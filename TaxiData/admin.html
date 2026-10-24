@@ -88,39 +88,14 @@
       <div onclick="logout()" style="padding:8px; cursor:pointer; color:#dc2626;">Logga ut</div>
     </div>
     <div class="breadcrumb" id="breadcrumb"></div>
-    <div class="controls hidden" id="controls">
-      <select id="category" onchange="changeCategory()">
-        <option value="inkort">Inkört</option>
-        <option value="timmar">Timmar</option>
-        <option value="km">Km</option>
-        <option value="chauffor">Chaufför</option>
-        <option value="bil">Bil</option>
-      </select>
-      <button onclick="openDateModal()">📅</button>
-    </div>
     <div id="server-status" class="server-status" data-show="0" data-updated="server-updated" style="display:none"></div>
     <div id="server-updated" style="display:none; text-align:center; font-size:0.8rem; color:#718096; margin-top:0.3rem;"></div>
     <div id="content"></div>
   </div>
 
-  <div class="modal hidden" id="date-modal">
-    <div class="modal-box">
-      <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-        <button onclick="prevMonth()">‹</button>
-        <span id="cal-title"></span>
-        <button onclick="nextMonth()">›</button>
-      </div>
-      <div class="calendar" id="calendar"></div>
-      <div class="modal-buttons">
-        <button onclick="closeDateModal()">Avbryt</button>
-        <button onclick="confirmDate()">OK</button>
-      </div>
-    </div>
-  </div>
-
-  <script src="serverstatus.js?v=20261024e"></script>
+  <script src="serverstatus.js?v=20261024f"></script>
   <script>
-    const APP_VERSION = '1.0.9';
+    const APP_VERSION = '1.0.10';
     console.log('Admin version:', APP_VERSION);
     const SUPABASE_URL = 'https://lpfdryvukqmjlgenuzpb.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_7LwIOZ5ygRvJqJKFxl4cNQ_LvrzrHrP';
@@ -298,7 +273,6 @@
         document.getElementById('admin-app').style.display = 'none';
         return;
       }
-      document.getElementById('category').value = category;
       render();
     }
 
@@ -366,13 +340,10 @@
     function renderBreadcrumb() {
       const bc = document.getElementById('breadcrumb');
       const back = document.getElementById('back');
-      const controls = document.getElementById('controls');
       if (path.length === 0) {
         bc.innerHTML = '';
-        controls.classList.add('hidden');
         return;
       }
-      controls.classList.toggle('hidden', path[0].id !== 'akeridata');
       let html = '<span onclick="goHome()">Hem</span>';
       path.forEach((p, i) => {
         html += '<span class="sep">›</span>';
@@ -383,74 +354,6 @@
         }
       });
       bc.innerHTML = html;
-    }
-
-    function openDateModal() {
-      tempStart = new Date(periodStart);
-      tempEnd = null;
-      calMonth = new Date(periodStart);
-      renderCalendar();
-      document.getElementById('date-modal').classList.remove('hidden');
-    }
-
-    function closeDateModal() {
-      document.getElementById('date-modal').classList.add('hidden');
-    }
-
-    async function confirmDate() {
-      if (tempStart) {
-        periodStart = tempStart;
-        periodEnd = tempEnd || tempStart;
-      }
-      selectedDay = null;
-      selectedCar = null;
-      closeDateModal();
-      await loadData();
-    }
-
-    function prevMonth() { calMonth.setMonth(calMonth.getMonth() - 1); renderCalendar(); }
-    function nextMonth() { calMonth.setMonth(calMonth.getMonth() + 1); renderCalendar(); }
-
-    function renderCalendar() {
-      document.getElementById('cal-title').textContent = months[calMonth.getMonth()] + ' ' + calMonth.getFullYear();
-      const cal = document.getElementById('calendar');
-      const first = new Date(calMonth.getFullYear(), calMonth.getMonth(), 1);
-      const last = new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 0);
-      let html = days.map(d => `<div class="header">${d}</div>`).join('');
-      for (let i = 0; i < first.getDay(); i++) html += '<div></div>';
-      for (let d = 1; d <= last.getDate(); d++) {
-        const date = new Date(calMonth.getFullYear(), calMonth.getMonth(), d);
-        const isStart = tempStart && date.toDateString() === tempStart.toDateString();
-        const isEnd = tempEnd && date.toDateString() === tempEnd.toDateString();
-        const inRange = tempStart && tempEnd && date > tempStart && date < tempEnd;
-        const cls = isStart || isEnd ? 'selected' : inRange ? 'in-range' : '';
-        html += `<div class="day ${cls}" onclick="selectDate(${d})">${d}</div>`;
-      }
-      cal.innerHTML = html;
-    }
-
-    function selectDate(d) {
-      const date = new Date(calMonth.getFullYear(), calMonth.getMonth(), d);
-      if (!tempStart || tempEnd) {
-        tempStart = date;
-        tempEnd = null;
-      } else {
-        if (date < tempStart) {
-          tempEnd = tempStart;
-          tempStart = date;
-        } else {
-          tempEnd = date;
-        }
-      }
-      renderCalendar();
-    }
-
-    function changeCategory() {
-      category = document.getElementById('category').value;
-      selectedDay = null;
-      selectedCar = null;
-      saveState();
-      render();
     }
 
     function toggleDay(ymd) {
@@ -497,8 +400,9 @@
           </div>
         `).join('')}</div>`;
       } else if (path[0].id === 'akeridata') {
-        title.textContent = 'Åkeridata';
-        renderAkeridata(content);
+        // Åkeridata är en egen sida med samma uppbyggnad som Körpassdata
+        location.href = 'akeridata.html';
+        return;
       } else if (path[0].id === 'chaufforer') {
         if (showLog) {
           title.textContent = 'Logg';
@@ -514,184 +418,6 @@
         title.textContent = path[0].label;
         content.innerHTML = '<div class="section"><p style="padding:16px;">Kommer snart</p></div>';
       }
-    }
-
-    function renderAkeridata(content) {
-      renderDayList(content);
-    }
-
-    function renderDayList(content) {
-      const trips = getTrips();
-      const total = trips.reduce((s, t) => s + parseAmount(t.belopp), 0);
-      const sameDay = toYMD(periodStart) === toYMD(periodEnd);
-      const periodText = sameDay ? formatDate(periodStart) : formatDate(periodStart) + ' – ' + formatDate(periodEnd);
-
-      const byDay = {};
-      trips.forEach(t => {
-        const ymd = (t.startdatum || '').slice(0, 10);
-        if (!byDay[ymd]) byDay[ymd] = 0;
-        byDay[ymd] += parseAmount(t.belopp);
-      });
-
-      let html = `<div class="category-header">${catLabels[category]}</div>`;
-      html += `<div class="period-display">${periodText}</div>`;
-      html += '<div class="section">';
-      html += `<div class="row total"><span class="label">Totalt</span><span class="value">${formatSEK(total)}</span></div>`;
-      Object.entries(byDay).sort().reverse().forEach(([date, amount]) => {
-        const parts = date.split('-');
-        const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-        const isExpanded = expandedDays[date];
-        const icon = isExpanded ? '−' : '+';
-        html += `<div class="row expandable" onclick="toggleDay('${date}')"><span class="expand-icon">${icon}</span><span class="label">${formatDate(d)}</span><span class="value">${formatSEK(amount)}</span></div>`;
-        
-        if (isExpanded) {
-          const dayTrips = trips.filter(t => (t.startdatum || '').slice(0, 10) === date);
-          const byCar = {};
-          dayTrips.forEach(t => {
-            const car = t.taxi || 'Okänd';
-            if (!byCar[car]) byCar[car] = { amount: 0, drivers: {} };
-            byCar[car].amount += parseAmount(t.belopp);
-            const driver = t.forar || 'Okänd';
-            if (!byCar[car].drivers[driver]) byCar[car].drivers[driver] = 0;
-            byCar[car].drivers[driver] += parseAmount(t.belopp);
-          });
-          
-          Object.entries(byCar).sort((a, b) => b[1].amount - a[1].amount).forEach(([car, data]) => {
-            const carKey = date + '_' + car;
-            const carExpanded = expandedCars[carKey];
-            const carIcon = carExpanded ? '−' : '+';
-            html += `<div class="row sub-row expandable" onclick="event.stopPropagation();toggleCar('${date}','${car}')"><span class="expand-icon">${carIcon}</span><span class="label">${car}</span><span class="value">${formatSEK(data.amount)}</span></div>`;
-            
-            if (carExpanded) {
-              Object.entries(data.drivers).sort((a, b) => b[1] - a[1]).forEach(([driver, driverAmount]) => {
-                const driverKey = date + '_' + car + '_' + driver;
-                const driverExpanded = expandedDrivers[driverKey];
-                const driverIcon = driverExpanded ? '−' : '+';
-                html += `<div class="row sub-sub-row expandable" onclick="event.stopPropagation();toggleDriver('${date}','${car}','${driver}')"><span class="expand-icon">${driverIcon}</span><span class="label">${getDisplayName(driver)}</span><span class="value">${formatSEK(driverAmount)}</span></div>`;
-                
-                if (driverExpanded) {
-                  const driverTrips = dayTrips.filter(t => t.taxi === car && t.forar === driver);
-                  const tripCount = driverTrips.length;
-                  const krPerTrip = tripCount > 0 ? driverAmount / tripCount : 0;
-                  
-                  // Find shift for this driver/car/day
-                  const shift = (data.shifts || []).find(s => {
-                    if (s.forar !== driver || s.taxi !== car) return false;
-                    const startStr = (s.start || '').replace(/\s/g, ' ');
-                    const slutStr = (s.slut || '').replace(/\s/g, ' ');
-                    const startDate = startStr.slice(0, 4) + '-' + startStr.slice(4, 6) + '-' + startStr.slice(6, 8);
-                    const slutDate = slutStr.slice(0, 4) + '-' + slutStr.slice(4, 6) + '-' + slutStr.slice(6, 8);
-                    return date >= startDate && date <= slutDate;
-                  });
-                  
-                  const hours = shift ? parseFloat((shift.tid || '0').replace(':', '.')) : 0;
-                  const km = shift ? parseFloat((shift.km || '0').replace(',', '.')) : 0;
-                  const krPerHour = hours > 0 ? driverAmount / hours : 0;
-                  const krPerMil = km > 0 ? driverAmount / (km / 10) : 0;
-                  
-                  // Arbetade timmar
-                  const hoursKey = driverKey + '_hours';
-                  const hoursExpanded = expandedCategories[hoursKey];
-                  html += `<div class="row detail-row expandable" onclick="event.stopPropagation();toggleCategory('${hoursKey}')"><span class="expand-icon">${hoursExpanded ? '−' : '+'}</span><span class="label">Arbetade timmar</span><span class="value">${hours.toFixed(1)} tim</span></div>`;
-                  if (hoursExpanded && shift) {
-                    html += `<div class="row trip-detail"><span class="label">Start</span><span class="value">${(shift.start || '').slice(9)}</span></div>`;
-                    html += `<div class="row trip-detail"><span class="label">Slut</span><span class="value">${(shift.slut || '').slice(9)}</span></div>`;
-                    html += `<div class="row trip-detail"><span class="label">Kr/timme</span><span class="value">${formatSEK(krPerHour)}</span></div>`;
-                  }
-                  
-                  // Körda km
-                  const kmKey = driverKey + '_km';
-                  const kmExpanded = expandedCategories[kmKey];
-                  html += `<div class="row detail-row expandable" onclick="event.stopPropagation();toggleCategory('${kmKey}')"><span class="expand-icon">${kmExpanded ? '−' : '+'}</span><span class="label">Körda km</span><span class="value">${km.toFixed(1)} km</span></div>`;
-                  if (kmExpanded) {
-                    html += `<div class="row trip-detail"><span class="label">Kr/mil</span><span class="value">${formatSEK(krPerMil)}</span></div>`;
-                  }
-                  
-                  // Antal körningar
-                  const tripsKey = driverKey + '_trips';
-                  const tripsExpanded = expandedCategories[tripsKey];
-                  html += `<div class="row detail-row expandable" onclick="event.stopPropagation();toggleCategory('${tripsKey}')"><span class="expand-icon">${tripsExpanded ? '−' : '+'}</span><span class="label">Antal körningar</span><span class="value">${tripCount} st</span></div>`;
-                  if (tripsExpanded) {
-                    html += `<div class="row trip-detail"><span class="label">Kr/körning</span><span class="value">${formatSEK(krPerTrip)}</span></div>`;
-                  }
-                  
-                  // Kvitton
-                  const kvittonKey = driverKey + '_kvitton';
-                  const kvittonExpanded = expandedCategories[kvittonKey];
-                  html += `<div class="row detail-row expandable" onclick="event.stopPropagation();toggleCategory('${kvittonKey}')"><span class="expand-icon">${kvittonExpanded ? '−' : '+'}</span><span class="label">Kvitton</span><span class="value">${tripCount} st</span></div>`;
-                  if (kvittonExpanded) {
-                    driverTrips.sort((a, b) => (a.kvittonr || '').localeCompare(b.kvittonr || '')).forEach(t => {
-                      const tripKey = driverKey + '_' + t.kvittonr;
-                      const tripExpanded = expandedTrips[tripKey];
-                      html += `<div class="row trip-row expandable" onclick="event.stopPropagation();toggleTrip('${tripKey}')"><span class="expand-icon">${tripExpanded ? '−' : '+'}</span><span class="label">${t.kvittonr || '-'}</span><span class="value">${formatSEK(parseAmount(t.belopp))}</span></div>`;
-                      if (tripExpanded) {
-                        html += `<div class="row trip-detail"><span class="label">Start</span><span class="value">${t.starttid || '-'} ${t.startzon || ''}</span></div>`;
-                        html += `<div class="row trip-detail"><span class="label">Slut</span><span class="value">${t.sluttid || '-'} ${t.slutzon || ''}</span></div>`;
-                        html += `<div class="row trip-detail"><span class="label">Betalt</span><span class="value">${formatSEK(parseAmount(t.belopp))}</span></div>`;
-                      }
-                    });
-                  }
-                }
-              });
-            }
-          });
-        }
-      });
-      html += '</div>';
-      content.innerHTML = html;
-    }
-
-    function renderDayCars(content) {
-      const trips = getTrips().filter(t => (t.startdatum || '').slice(0, 10) === selectedDay);
-
-      const byCar = {};
-      trips.forEach(t => {
-        const car = t.taxi || 'Okänd';
-        if (!byCar[car]) byCar[car] = 0;
-        byCar[car] += parseAmount(t.belopp);
-      });
-
-      const parts = selectedDay.split('-');
-      const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-      const total = Object.values(byCar).reduce((s, a) => s + a, 0);
-
-      let html = `<div class="category-header">${catLabels[category]}</div>`;
-      html += `<div class="period-display">${formatDate(d)}</div>`;
-      html += '<div class="section">';
-      html += `<div class="row total"><span class="label">Totalt</span><span class="value">${formatSEK(total)}</span></div>`;
-      Object.entries(byCar).sort((a, b) => b[1] - a[1]).forEach(([car, amount]) => {
-        html += `<div class="row" onclick="selectCar('${car}')"><span class="label">${car}</span><span class="value">${formatSEK(amount)}</span></div>`;
-      });
-      html += '</div>';
-      html += '<button onclick="selectedDay=null;render()" style="margin:16px;">← Tillbaka</button>';
-      content.innerHTML = html;
-    }
-
-    function renderCarDrivers(content) {
-      const trips = getTrips().filter(t => {
-        if ((t.startdatum || '').slice(0, 10) !== selectedDay) return false;
-        return t.taxi === selectedCar;
-      });
-
-      const byDriver = {};
-      trips.forEach(t => {
-        if (!byDriver[t.forar]) byDriver[t.forar] = 0;
-        byDriver[t.forar] += parseAmount(t.belopp);
-      });
-
-      const total = Object.values(byDriver).reduce((s, a) => s + a, 0);
-
-      let html = `<div class="category-header">${selectedCar}</div>`;
-      html += `<div class="period-display">${selectedDay}</div>`;
-      html += '<div class="section">';
-      html += `<div class="row total"><span class="label">Totalt</span><span class="value">${formatSEK(total)}</span></div>`;
-      Object.entries(byDriver).sort((a, b) => b[1] - a[1]).forEach(([driver, amount]) => {
-        const name = getDisplayName(driver);
-        html += `<div class="row"><span class="label">${name}</span><span class="value">${formatSEK(amount)}</span></div>`;
-      });
-      html += '</div>';
-      html += '<button onclick="selectedCar=null;render()" style="margin:16px;">← Tillbaka</button>';
-      content.innerHTML = html;
     }
 
     function renderChaufforer(content) {
@@ -984,6 +710,7 @@
     }
 
     function openMenu(id) {
+      if (id === 'akeridata') { location.href = 'akeridata.html'; return; }
       const item = menu.find(m => m.id === id);
       path = [{ id, label: item.label }];
       editingDriver = null;
