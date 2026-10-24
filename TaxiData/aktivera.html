@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
+  <title>Aktivera konto – TaxiData</title>
+  <link rel="stylesheet" href="style.css?v=20261024i">
+  <style>
+    .login-box p.hint { font-size: 13px; color: #4a5568; margin: 0 0 12px; text-align: left; }
+    #msg { margin-top: 8px; display: none; }
+    #msg.err { color: #c53030; }
+    #msg.ok { color: #276749; }
+  </style>
+</head>
+<body>
+  <div id="login-screen">
+    <div class="login-box">
+      <h2>Aktivera konto</h2>
+      <div id="form" style="display:none;">
+        <p class="hint">Skriv ditt förar-ID och välj ett lösenord (minst 6 tecken). Lösenordet sparas krypterat och ingen annan kan se det.</p>
+        <input type="text" id="driver-id" placeholder="Förar-ID" inputmode="numeric" autocomplete="username" autocapitalize="off" autocorrect="off">
+        <input type="password" id="pw1" placeholder="Nytt lösenord (minst 6 tecken)" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <input type="password" id="pw2" placeholder="Upprepa lösenordet" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button id="go" onclick="activate()">Aktivera och logga in</button>
+      </div>
+      <p id="msg"></p>
+    </div>
+  </div>
+  <script>
+    var SB_URL = 'https://lpfdryvukqmjlgenuzpb.supabase.co';
+    var SB_KEY = 'sb_publishable_7LwIOZ5ygRvJqJKFxl4cNQ_LvrzrHrP';
+    // Länken ser ut så här: aktivera.html#t=KOD (koden skickas aldrig till webbservern)
+    var LINK = (location.hash.match(/t=([0-9a-f]+)/i) || [])[1] || '';
+
+    async function rpc(name, args) {
+      var res = await fetch(SB_URL + '/rest/v1/rpc/' + name, {
+        method: 'POST',
+        headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify(args || {})
+      });
+      var text = await res.text();
+      var body = text ? JSON.parse(text) : null;
+      if (!res.ok) throw new Error((body && body.message) || ('HTTP ' + res.status));
+      return body;
+    }
+    var errors = {
+      invalid_link: 'Länken fungerar inte längre (redan använd eller ogiltig). Be din åkare om en ny länk.',
+      expired_link: 'Länken har gått ut. Be din åkare om en ny länk.',
+      wrong_id: 'Förar-ID:t stämmer inte med länken.',
+      password_too_short: 'Lösenordet måste vara minst 6 tecken.'
+    };
+    function show(text, ok) {
+      var el = document.getElementById('msg');
+      el.textContent = text; el.className = ok ? 'ok' : 'err'; el.style.display = 'block';
+    }
+    async function init() {
+      if (!LINK) { show(errors.invalid_link); return; }
+      try {
+        var r = await rpc('check_activation_link', { p_link: LINK });
+        if (!r.ok) { show(errors[r.error] || errors.invalid_link); return; }
+        document.getElementById('form').style.display = 'block';
+        document.getElementById('driver-id').focus();
+      } catch (e) { show('Kunde inte kontakta servern. Försök igen om en stund.'); }
+    }
+    async function activate() {
+      var id = document.getElementById('driver-id').value.trim();
+      var p1 = document.getElementById('pw1').value, p2 = document.getElementById('pw2').value;
+      if (!id) { show('Fyll i ditt förar-ID.'); return; }
+      if (p1.trim().length < 6) { show(errors.password_too_short); return; }
+      if (p1 !== p2) { show('Lösenorden är inte lika.'); return; }
+      var btn = document.getElementById('go'); btn.disabled = true;
+      try {
+        var r = await rpc('activate_account', { p_link: LINK, p_id: id, p_password: p1 });
+        if (!r.ok) {
+          var m = errors[r.error] || 'Aktiveringen misslyckades.';
+          if (r.error === 'wrong_id' && r.tries_left != null) m += ' Försök kvar: ' + r.tries_left + '.';
+          show(m);
+          if (r.error !== 'wrong_id' && r.error !== 'password_too_short') document.getElementById('form').style.display = 'none';
+          btn.disabled = false;
+          return;
+        }
+        localStorage.setItem('taxi_session', r.token);
+        localStorage.setItem('taxi_logged_in', '1');
+        localStorage.setItem('taxi_driver', r.driver.id);
+        document.getElementById('form').style.display = 'none';
+        show('Kontot är aktiverat! Du loggas in...', true);
+        history.replaceState(null, '', location.pathname);
+        setTimeout(function () { location.href = 'index.html'; }, 1200);
+      } catch (e) { show('Kunde inte kontakta servern. Försök igen.'); btn.disabled = false; }
+    }
+    init();
+  </script>
+</body>
+</html>

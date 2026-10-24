@@ -54,6 +54,8 @@
     .status { font-size: 11px; padding: 2px 6px; border-radius: 10px; margin-left: 8px; }
     .status-active { background: #c6f6d5; color: #276749; }
     .status-inactive { background: #fed7d7; color: #c53030; }
+    .status-pending { background: #fefcbf; color: #975a16; }
+    .acct-info { font-size: 13px; color: #4a5568; margin-top: 12px; line-height: 1.5; }
     .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 13px; margin-bottom: 4px; color: #4a5568; }
     .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; }
@@ -93,9 +95,9 @@
     <div id="content"></div>
   </div>
 
-  <script src="serverstatus.js?v=20261024h"></script>
+  <script src="serverstatus.js?v=20261024i"></script>
   <script>
-    const APP_VERSION = '1.0.13';
+    const APP_VERSION = '1.0.14';
     console.log('Admin version:', APP_VERSION);
     const SUPABASE_URL = 'https://lpfdryvukqmjlgenuzpb.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_7LwIOZ5ygRvJqJKFxl4cNQ_LvrzrHrP';
@@ -142,7 +144,7 @@
     let editingCar = null;     // null, 'new' eller bilens id
     let selectedDay = null, selectedCar = null;
     let logEntries = null;
-    const lastPasswords = {};
+    const lastLinks = {};   // aktiveringslänkar som skapats i den här sessionen (bara i minnet)
 
     function getMyCategory() {
       const me = drivers[currentUserId];
@@ -240,7 +242,8 @@
     const errorTexts = {
       forbidden: 'Du har inte behörighet att göra det.',
       forbidden_self: 'Du kan inte ändra din egen aktivering.',
-      password_too_short: 'Lösenordet måste vara minst 4 tecken.',
+      password_too_short: 'Lösenordet måste vara minst 6 tecken.',
+      not_pending: 'Föraren har redan valt lösenord. Avaktivera och aktivera igen för en ny länk.',
       bad_id: 'Ogiltigt förar-ID.',
       invalid_car: 'Kontrollera fälten (bilnummer, bilmodell, minst en kategori, bränslekostnad 0–1000 kr/mil).',
       duplicate_car: 'Det finns redan en bil med det bilnumret.',
@@ -329,9 +332,17 @@
 
     // Aktiv = activated i databasen. Ingen automatisk avaktivering
     // (tidigare blev alla "Inaktiv" när 24h-fristen i expiry hade passerat).
+    const statusLabels = { active: 'Aktiv', pending: 'Väntar', inactive: 'Inaktiv' };
+
+    function fmtWhen(t) {
+      if (!t) return '';
+      return new Date(t).toLocaleString('sv-SE', { timeZone: 'Europe/Stockholm', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+    }
+
     function getDriverStatus(id) {
       const d = drivers[id];
-      return (d && d.activated === true) ? 'active' : 'inactive';
+      if (d && d.activated === true) return d.pending ? 'pending' : 'active';
+      return 'inactive';
     }
 
     // Giltig kategori, annars standard (t.ex. gamla 'normal' eller tom)
@@ -448,7 +459,7 @@
         html += `<div class="section-header">${userCategories[cat]}</div>`;
         grouped[cat].sort().forEach(id => {
           const status = getDriverStatus(id);
-          const statusLabel = status === 'active' ? 'Aktiv' : 'Inaktiv';
+          const statusLabel = statusLabels[status];
           const displayName = getDisplayName(id);
           html += `<div class="row" onclick="editDriver('${id}')">
             <span class="label">${displayName}</span>
@@ -460,7 +471,7 @@
         html += `<div class="section-header">Övriga</div>`;
         unknown.sort().forEach(id => {
           const status = getDriverStatus(id);
-          const statusLabel = status === 'active' ? 'Aktiv' : 'Inaktiv';
+          const statusLabel = statusLabels[status];
           const displayName = getDisplayName(id);
           html += `<div class="row" onclick="editDriver('${id}')">
             <span class="label">${displayName}</span>
@@ -477,7 +488,8 @@
       const owner = isOwner();
       const targetCat = normCategory(d.category);
       const canEdit = canEditCategory(targetCat);
-      const isActive = getDriverStatus(editingDriver) === 'active';
+      const status = getDriverStatus(editingDriver);
+      const isActive = status !== 'inactive';
       const canToggle = canToggleDriver(editingDriver);
       const personalDisabled = owner ? '' : 'disabled';
       const catDisabled = canEdit ? '' : 'disabled';
@@ -534,8 +546,13 @@
         ${owner || canEdit ? `<button onclick="saveDriver()" style="width:100%; margin-top:16px;">Spara</button>` : ''}
         <div style="margin-top:16px; display:flex; gap:8px;">
           ${canToggle ? `<button onclick="toggleActive('${editingDriver}')" style="flex:1;">${isActive ? 'Avaktivera' : 'Aktivera'}</button>` : ''}
-          <button onclick="shareDriver('${editingDriver}')" style="flex:1;">Dela</button>
+          <button onclick="shareDriver('${editingDriver}')" style="flex:1;">${status === 'pending' && canToggle ? 'Aktiveringslänk' : 'Dela'}</button>
         </div>
+        <div class="acct-info">${status === 'pending'
+          ? 'Väntar på att föraren öppnar aktiveringslänken och väljer lösenord.' + (d.link_expires_at ? ' Länken går ut ' + fmtWhen(d.link_expires_at) + '.' : ' Länken har gått ut – skapa en ny.')
+          : status === 'active'
+            ? (d.last_login_at ? 'Senast inloggad: ' + fmtWhen(d.last_login_at) + '. ' : '') + 'Avaktiveras automatiskt efter 30 dagar utan inloggning' + (['agare', 'superadmin'].includes(targetCat) ? ' (gäller inte ägare/superadmin).' : '.')
+            : 'Inaktiv. Aktivera för att skapa en aktiveringslänk.'}</div>
       </div>`;
     }
 
@@ -594,7 +611,7 @@
 
     async function toggleActive(id) {
       if (!canToggleDriver(id)) { alert('Du har inte behörighet att ändra den här chauffören.'); return; }
-      if (getDriverStatus(id) === 'active') {
+      if (getDriverStatus(id) !== 'inactive') {
         await deactivateDriver(id);
       } else {
         await activateDriver(id);
@@ -602,10 +619,6 @@
     }
 
     async function activateDriver(id) {
-      const choice = prompt('Lösenord:\n1 = Autogenerera\nEller skriv eget lösenord:');
-      if (choice === null) return;
-      const typed = choice.trim();
-
       // Kategori: det som valts i listan, annars Standard
       const stored = drivers[id]?.category;
       const sel = document.getElementById('f-category');
@@ -614,35 +627,87 @@
       // Avslutad kan inte logga in – om ingen annan kategori valts blir det Standard
       if (cat === 'avslutad' && (!sel || sel.value === normCategory(stored))) cat = 'standard';
       if (!canEditCategory(cat)) cat = 'standard';
+      if (!confirm('Aktivera ' + id + ' som ' + (userCategories[cat] || cat) + '?\n\nDu får en aktiveringslänk (gäller i 7 dagar) som du skickar till föraren. Föraren väljer själv sitt lösenord.')) return;
 
       try {
-        // Servern skapar lösenordet, sparar bara en hash och kontrollerar att det fungerar
-        const r = await rpc('admin_activate', {
-          p_id: id, p_category: cat,
-          p_password: (typed === '1' || typed === '') ? null : typed
-        });
-        if (!r || !r.ok || !r.verified) {
-          alert('Fel: aktiveringen sparades inte korrekt. Försök igen.');
-          return;
-        }
-        lastPasswords[id] = r.password;
+        // Servern skapar en engångslänk; inget lösenord skapas eller visas
+        const r = await rpc('admin_activate', { p_id: id, p_category: cat });
+        if (!r || !r.ok || !r.link_token) { alert('Fel: aktiveringen sparades inte korrekt. Försök igen.'); return; }
+        lastLinks[id] = { url: activationUrl(r.link_token), expires: r.expires_at };
         await reloadDrivers();
-        alert('Aktiverad som ' + (userCategories[r.category] || r.category) + '!\nLösenord: ' + r.password +
-              '\n\nSpara eller dela lösenordet nu – det visas bara en gång.');
         render();
+        showLinkModal(id);
       } catch (e) {
         alert(errText(e));
       }
     }
 
+    function activationUrl(token) {
+      return new URL('aktivera.html', location.href.split('#')[0]).href + '#t=' + token;
+    }
+
+    async function newActivationLink(id) {
+      if (!confirm('Skapa en ny aktiveringslänk för ' + id + '? Den gamla länken slutar fungera.')) return;
+      try {
+        const r = await rpc('admin_new_activation_link', { p_id: id });
+        lastLinks[id] = { url: activationUrl(r.link_token), expires: r.expires_at };
+        await reloadDrivers();
+        render();
+        showLinkModal(id);
+      } catch (e) {
+        alert(errText(e));
+      }
+    }
+
+    function linkMessage(id) {
+      return 'TaxiData – aktivera ditt konto\n\nÖppna länken, skriv ditt förar-ID (' + id + ') och välj ett lösenord:\n' + lastLinks[id].url +
+        '\n\nLänken fungerar en gång och går ut ' + fmtWhen(lastLinks[id].expires) + '.';
+    }
+
+    function closeLinkModal() {
+      const m = document.getElementById('link-modal');
+      if (m) m.remove();
+    }
+
+    function showLinkModal(id) {
+      closeLinkModal();
+      const l = lastLinks[id];
+      if (!l) return;
+      const m = document.createElement('div');
+      m.className = 'modal'; m.id = 'link-modal';
+      m.innerHTML = `<div class="modal-box">
+        <h3 style="margin:0 0 8px; color:#1a365d;">Aktiveringslänk för ${esc(id)}</h3>
+        <p style="font-size:13px; color:#4a5568; margin:0 0 8px;">Skicka länken till föraren. Den fungerar en gång och går ut ${esc(fmtWhen(l.expires))}. Länken visas bara nu – annars kan du skapa en ny.</p>
+        <input id="link-url" readonly value="${esc(l.url)}" style="width:100%; font-size:12px; box-sizing:border-box;" onclick="this.select()">
+        <div class="modal-buttons">
+          <button id="link-copy" onclick="copyLink('${esc(id)}')">Kopiera</button>
+          ${navigator.share ? `<button onclick="navigator.share({ title: 'TaxiData', text: linkMessage('${esc(id)}') }).catch(() => {})">Dela</button>` : ''}
+        </div>
+        <div class="modal-buttons" style="margin-top:8px;">
+          <button onclick="closeLinkModal(); newActivationLink('${esc(id)}')">Ny länk</button>
+          <button onclick="closeLinkModal()" style="background:#1a365d; color:white;">Stäng</button>
+        </div>
+      </div>`;
+      document.body.appendChild(m);
+    }
+
+    async function copyLink(id) {
+      const text = linkMessage(id);
+      try { await navigator.clipboard.writeText(text); }
+      catch (e) { const i = document.getElementById('link-url'); i.select(); document.execCommand('copy'); }
+      const b = document.getElementById('link-copy');
+      if (b) b.textContent = 'Kopierad ✓';
+    }
+
     function shareDriver(id) {
-      const pw = lastPasswords[id];
-      if (!pw) {
-        alert('Lösenordet visas bara direkt efter aktivering.\nAvaktivera och aktivera igen för att få ett nytt lösenord att dela.');
+      const status = getDriverStatus(id);
+      if (status === 'pending' && canToggleDriver(id)) {
+        if (lastLinks[id]) showLinkModal(id); else newActivationLink(id);
         return;
       }
+      // Aktivt konto: dela bara adressen och förar-ID (lösenord visas aldrig)
       const link = new URL('./', location.href).href;
-      const msg = 'TaxiData\n\nLänk: ' + link + '\nFörar-ID: ' + id + '\nLösenord: ' + pw;
+      const msg = 'TaxiData\n\nLänk: ' + link + '\nFörar-ID: ' + id + '\nLogga in med lösenordet du valde när du aktiverade kontot.';
       if (navigator.share) {
         navigator.share({ title: 'TaxiData', text: msg }).catch(() => {});
       } else {
@@ -651,10 +716,10 @@
     }
 
     async function deactivateDriver(id) {
-      if (!confirm('Avaktivera ' + id + '?')) return;
+      if (!confirm('Avaktivera ' + id + '?\n\nLösenordet och alla inloggningar tas bort. All annan data sparas. För att aktivera igen behövs en ny aktiveringslänk och ett nytt lösenord.')) return;
       try {
         await rpc('admin_deactivate', { p_id: id });
-        delete lastPasswords[id];
+        delete lastLinks[id];
         await reloadDrivers();
         render();
       } catch (e) {
@@ -764,7 +829,7 @@
 
     // ---- Aktivitetslogg ----
     const logRoleLabels = { superadmin: 'S admin', agare: 'Ägare', admin: 'Admin', standard: 'Standard', semester: 'Semester', avslutad: 'Avslutad' };
-    const failReasons = { wrong_password: 'fel lösenord', inactive: 'kontot inaktivt', ended: 'kontot avslutat' };
+    const failReasons = { wrong_password: 'fel lösenord', inactive: 'kontot inaktivt', ended: 'kontot avslutat', pending: 'har inte aktiverat kontot än' };
 
     function esc(x) {
       return String(x == null ? '' : x).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -780,6 +845,10 @@
         case 'login_failed': return 'Misslyckad inloggning för ' + (e.target_id || '?') + (failReasons[d.reason] ? ' (' + failReasons[d.reason] + ')' : '');
         case 'activate': return who + ' aktiverade ' + e.target_id + (d.category ? ' som ' + catName(d.category) : '');
         case 'deactivate': return who + ' avaktiverade ' + e.target_id;
+        case 'auto_deactivate': return 'Systemet avaktiverade ' + e.target_id + ' (' + (d.days || 30) + ' dagar utan inloggning)';
+        case 'activation_link': return who + ' skapade ny aktiveringslänk för ' + e.target_id;
+        case 'activation_complete': return (e.target_id || '?') + ' aktiverade sitt konto och valde lösenord';
+        case 'activation_failed': return 'Misslyckad kontoaktivering för ' + (e.target_id || '?') + ' (fel förar-ID)';
         case 'goals_change': return who + ' ändrade åkeriets mål' + (d.to ? ' (per bil: ' + d.to.month + ' kr/mån, ' + d.to.week + ' kr/v, ' + d.to.day + ' kr/dag' + (d.to.cars ? ', ' + d.to.cars + ' bilar' : '') + ')' : '');
         case 'car_add': return who + ' lade till bil ' + (e.target_id || '') + (d.modell ? ' (' + d.modell + ')' : '');
         case 'car_edit': return who + ' ändrade bil ' + (e.target_id || '');
