@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaxiData</title>
-  <link rel="stylesheet" href="style.css?v=20261024h">
+  <link rel="stylesheet" href="style.css?v=20261024p">
   <style>
     #content { padding: 16px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 16px; }
@@ -19,6 +19,32 @@
     .profile-menu div { padding: 12px 16px; cursor: pointer; }
     .profile-menu div:hover { background: #f7fafc; }
     .hidden { display: none !important; }
+    .profile-btn.has-badge::after { top: -2px; right: -2px; }
+    .profile-menu div.has-badge::after { position: static; display: inline-block; margin-left: 8px; vertical-align: middle; border: none; }
+    /* Påminnelse på hemskärmen */
+    .profile-reminder { color: var(--danger-text); background: var(--danger-bg); border: 1px solid var(--danger); border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+    .profile-reminder .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--badge); flex-shrink: 0; }
+    .profile-reminder .arrow { margin-left: auto; }
+    /* Profilsidan */
+    .p-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 14px; }
+    .p-card h3 { font-size: 1rem; margin: 0 0 10px; color: var(--text); }
+    .p-card h3 small { font-weight: 400; color: var(--muted); font-size: 0.8rem; }
+    .p-row { display: flex; gap: 8px; }
+    .p-row .p-group { flex: 1; min-width: 0; }
+    .p-group { margin-bottom: 10px; }
+    .p-group label { display: block; font-size: 0.85rem; color: var(--text-soft); margin-bottom: 3px; }
+    .p-group label .req { color: var(--danger-text); }
+    .p-group input { width: 100%; padding: 10px; border: 2px solid var(--border); border-radius: 8px; font-size: 1rem; color: var(--text); background: var(--surface); }
+    .p-group input:focus { outline: none; border-color: var(--primary); }
+    .p-group input.invalid { border-color: var(--danger); background: var(--danger-bg); }
+    .p-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; background: var(--primary); color: var(--on-primary); font-size: 1rem; font-weight: 600; cursor: pointer; }
+    .p-btn:disabled { opacity: 0.5; }
+    .p-msg { min-height: 1.2em; margin-top: 8px; font-size: 0.9rem; text-align: center; }
+    .p-msg.err { color: var(--danger-text); }
+    .p-msg.ok { color: var(--ok); }
+    .p-note { font-size: 0.85rem; color: var(--text-soft); margin-bottom: 10px; }
+    .p-note.warn { color: var(--danger-text); font-weight: 600; }
+    .app-toast { position: fixed; left: 12px; right: 12px; top: 12px; z-index: 300; background: var(--danger-text); color: white; padding: 12px 14px; border-radius: 10px; font-weight: 600; box-shadow: 0 4px 14px rgba(0,0,0,0.25); text-align: center; }
   </style>
 </head>
 <body>
@@ -36,11 +62,11 @@
     <header>
       <button onclick="goHome()" style="font-size:20px;">🏠</button>
       <h1 id="title">TaxiData</h1>
-      <button class="profile-btn" id="profile-btn" onclick="toggleProfile()">👤</button>
+      <button class="profile-btn" id="profile-btn" data-badge="profile" onclick="toggleProfile()" aria-label="Profil">👤</button>
     </header>
     <div class="profile-menu" id="profile-menu">
       <div id="full-name" style="font-weight:600; border-bottom:1px solid #e2e8f0; cursor:default;"></div>
-      <div onclick="openProfile()">Profil</div>
+      <div id="menu-profile" data-badge="profile" onclick="openProfile()">Profil</div>
       <div onclick="logout()">Logga ut</div>
     </div>
     <div id="content">Laddar...</div>
@@ -73,8 +99,9 @@
     <main id="dashboard"></main>
   </div>
 
-  <script src="serverstatus.js?v=20261024h"></script>
-  <script src="script.js?v=20261024h"></script>
+  <script src="serverstatus.js?v=20261024p"></script>
+  <script src="badges.js?v=20261024p"></script>
+  <script src="script.js?v=20261024p"></script>
   <script>
     var menu = [
       { id: 'kordata', icon: '🚗', label: 'Körpassdata', roles: ['standard', 'admin', 'agare', 'superadmin'] },
@@ -92,6 +119,9 @@
     var current = null;
     var driverId = null;
     var driverData = { first_name: '', last_name: '', category: '' };
+    // Profilspärr: sann när profilsidan är öppen och namn/telefon saknas (gäller inte huvudlösenords-inloggning)
+    var profileLock = false;
+    var LOCK_MSG = 'Fyll i förnamn, efternamn och telefon och tryck Spara innan du lämnar profilen.';
 
     var SB_URL = 'https://lpfdryvukqmjlgenuzpb.supabase.co';
     var SB_KEY = 'sb_publishable_7LwIOZ5ygRvJqJKFxl4cNQ_LvrzrHrP';
@@ -158,26 +188,44 @@
       }
     }
 
+    function updateProfileReminder() {
+      if (window.setBadge) setBadge('profile', !!driverData.needs_profile);
+    }
+
+    function setFullName() {
+      var fullName = ((driverData.first_name || '') + ' ' + (driverData.last_name || '')).trim();
+      document.getElementById('full-name').textContent = fullName || driverId;
+    }
+
     async function showMenu() {
       driverId = localStorage.getItem('taxi_driver') || 'okänd';
       if (!(await loadDriverData())) return;
       document.getElementById('login-screen').style.display = 'none';
-      
+      updateProfileReminder();
+
       var savedView = localStorage.getItem('taxi_view');
-      if (savedView === 'kordata') {
+      // Profilen var spärrad (t.ex. sidan laddades om) – öppna den igen
+      if (driverData.needs_profile && !driverData.via_master && sessionStorage.getItem('taxi_profile_lock') === driverId) {
+        localStorage.removeItem('taxi_view');
+        document.getElementById('app').style.display = 'block';
+        setFullName();
+        openProfile();
+      } else if (savedView === 'kordata') {
         document.getElementById('dashboard-view').classList.remove('hidden');
         if (window.initServerStatus) initServerStatus('server-status');
         document.getElementById('driver-label').textContent = driverId;
         if (typeof loadData === 'function') loadData().then(render);
       } else {
         document.getElementById('app').style.display = 'block';
-        var fullName = ((driverData.first_name || '') + ' ' + (driverData.last_name || '')).trim();
-        document.getElementById('full-name').textContent = fullName || driverId;
+        setFullName();
         renderMenu();
       }
     }
 
     async function logout() {
+      // Utloggning fungerar alltid, även när profilen är spärrad
+      profileLock = false;
+      sessionStorage.removeItem('taxi_profile_lock');
       try { await rpc('logout', { p_token: localStorage.getItem('taxi_session') || '' }); } catch (e) {}
       clearSession();
       location.reload();
@@ -189,20 +237,222 @@
 
     function openProfile() {
       document.getElementById('profile-menu').classList.remove('show');
+      if (current === 'profil') return;
+      localStorage.removeItem('taxi_view');
+      document.getElementById('dashboard-view').classList.add('hidden');
+      document.getElementById('app').style.display = 'block';
       current = 'profil';
+      // Eget steg i webbläsarens historik, så att telefonens bakåtknapp kan fångas
+      try { history.pushState({ view: 'profil' }, ''); } catch (e) {}
       renderMenu();
     }
+
+    var toastTimer = null;
+    function showToast(msg) {
+      var t = document.getElementById('app-toast');
+      if (!t) { t = document.createElement('div'); t.id = 'app-toast'; t.className = 'app-toast'; t.setAttribute('role', 'alert'); document.body.appendChild(t); }
+      t.textContent = msg;
+      t.style.display = 'block';
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { t.style.display = 'none'; }, 4000);
+    }
+
+    // Returnerar true (och visar varför) om profilen är spärrad
+    function lockBlocked() {
+      if (!profileLock) return false;
+      document.getElementById('profile-menu').classList.remove('show');
+      showToast(LOCK_MSG);
+      markMissing();
+      return true;
+    }
+
+    function pEsc(v) {
+      return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    var P_FIELDS = [
+      ['p-first-name', 'first_name'], ['p-last-name', 'last_name'], ['p-address', 'address'],
+      ['p-postal', 'postal_code'], ['p-city', 'city'], ['p-email', 'email'], ['p-phone', 'phone'],
+      ['p-em-first', 'emergency_first_name'], ['p-em-last', 'emergency_last_name'], ['p-em-address', 'emergency_address'],
+      ['p-em-postal', 'emergency_postal'], ['p-em-city', 'emergency_city'], ['p-em-phone', 'emergency_phone'],
+      ['p-em-relation', 'emergency_relation']
+    ];
+    var P_REQUIRED = ['p-first-name', 'p-last-name', 'p-phone'];
+
+    function phoneOk(v) { return /^\+?[0-9]{6,15}$/.test(String(v || '').replace(/[\s().-]/g, '')); }
+
+    function markMissing() {
+      var first = null;
+      P_REQUIRED.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var bad = !el.value.trim();
+        el.classList.toggle('invalid', bad);
+        if (bad && !first) first = el;
+      });
+      if (first) first.focus();
+    }
+
+    function pInput(id, label, val, opts) {
+      opts = opts || {};
+      return '<div class="p-group"><label for="' + id + '">' + label + (opts.req ? ' <span class="req">*</span>' : '') + '</label>' +
+        '<input id="' + id + '" value="' + pEsc(val) + '"' + (opts.type ? ' type="' + opts.type + '"' : '') +
+        (opts.im ? ' inputmode="' + opts.im + '"' : '') + (opts.ac ? ' autocomplete="' + opts.ac + '"' : '') + ' maxlength="200"></div>';
+    }
+
+    async function renderProfile() {
+      var content = document.getElementById('content');
+      content.innerHTML = '<div class="p-card">Laddar…</div>';
+      var d;
+      try {
+        d = await rpc('get_my_profile', { p_token: localStorage.getItem('taxi_session') || '' });
+      } catch (e) {
+        if (e.code === '28000') { clearSession(); location.reload(); return; }
+        content.innerHTML = '<div class="p-card"><p class="p-msg err">Kunde inte hämta profilen. Försök igen.</p></div>';
+        return;
+      }
+      if (current !== 'profil') return;
+      var missing = (d.missing || []).length > 0;
+      profileLock = missing && !d.via_master;
+      if (profileLock) sessionStorage.setItem('taxi_profile_lock', driverId); else sessionStorage.removeItem('taxi_profile_lock');
+      var html = '';
+      if (d.via_master) html += '<p class="p-note warn">Inloggad med huvudlösenordet (förare ' + pEsc(d.id) + ').</p>';
+      else if (missing) html += '<p class="p-note warn">Fyll i förnamn, efternamn och telefon för att fortsätta. Övriga uppgifter är frivilliga.</p>';
+      html += '<div class="p-card"><h3>Personuppgifter <small>* obligatoriskt</small></h3>' +
+        '<div class="p-row">' + pInput('p-first-name', 'Förnamn', d.first_name, { req: 1, ac: 'given-name' }) + pInput('p-last-name', 'Efternamn', d.last_name, { req: 1, ac: 'family-name' }) + '</div>' +
+        pInput('p-phone', 'Telefon', d.phone, { req: 1, type: 'tel', im: 'tel', ac: 'tel' }) +
+        pInput('p-email', 'E-post', d.email, { type: 'email', ac: 'email' }) +
+        pInput('p-address', 'Adress', d.address, { ac: 'street-address' }) +
+        '<div class="p-row">' + pInput('p-postal', 'Postnummer', d.postal_code, { im: 'numeric', ac: 'postal-code' }) + pInput('p-city', 'Ort', d.city, { ac: 'address-level2' }) + '</div>' +
+        '</div>';
+      html += '<div class="p-card"><h3>Närmast anhörig <small>frivilligt</small></h3>' +
+        '<div class="p-row">' + pInput('p-em-first', 'Förnamn', d.emergency_first_name) + pInput('p-em-last', 'Efternamn', d.emergency_last_name) + '</div>' +
+        pInput('p-em-phone', 'Telefon', d.emergency_phone, { type: 'tel', im: 'tel' }) +
+        pInput('p-em-relation', 'Relation', d.emergency_relation) +
+        pInput('p-em-address', 'Adress', d.emergency_address) +
+        '<div class="p-row">' + pInput('p-em-postal', 'Postnummer', d.emergency_postal, { im: 'numeric' }) + pInput('p-em-city', 'Ort', d.emergency_city) + '</div>' +
+        '</div>';
+      html += '<button class="p-btn" id="p-save" onclick="saveProfile()">Spara</button><p class="p-msg" id="p-msg"></p>';
+      html += '<div class="p-card" style="margin-top:18px;"><h3>Byt lösenord</h3>' +
+        (d.via_master ? '<p class="p-note">Med huvudlösenordet krävs ändå förarens nuvarande lösenord.</p>' : '') +
+        '<p class="p-note">Minst 6 tecken. Stora och små bokstäver räknas som samma.</p>' +
+        '<div class="p-group"><label for="pw-cur">Nuvarande lösenord</label><input id="pw-cur" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false"></div>' +
+        '<div class="p-group"><label for="pw-new">Nytt lösenord</label><input id="pw-new" type="password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false"></div>' +
+        '<div class="p-group"><label for="pw-new2">Nytt lösenord igen</label><input id="pw-new2" type="password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false"></div>' +
+        '<button class="p-btn" id="pw-save" onclick="changePassword()">Byt lösenord</button><p class="p-msg" id="pw-msg"></p></div>';
+      content.innerHTML = html;
+      P_REQUIRED.forEach(function (id) {
+        document.getElementById(id).addEventListener('input', function () { if (this.value.trim()) this.classList.remove('invalid'); });
+      });
+    }
+
+    function setMsg(id, text, ok) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = text;
+      el.className = 'p-msg ' + (ok ? 'ok' : 'err');
+    }
+
+    var profileErrors = {
+      profile_required: 'Förnamn, efternamn och telefon måste fyllas i.',
+      invalid_phone: 'Telefonnumret ser inte rätt ut. Skriv t.ex. 070-123 45 67 eller +46701234567.',
+      invalid_emergency_phone: 'Anhörigs telefonnummer ser inte rätt ut.',
+      invalid_email: 'E-postadressen ser inte rätt ut.',
+      invalid_profile: 'Något fält är för långt eller ogiltigt.',
+      not_found: 'Föraren finns inte i registret.'
+    };
+
+    async function saveProfile() {
+      var data = {};
+      P_FIELDS.forEach(function (f) { data[f[1]] = document.getElementById(f[0]).value.trim().replace(/\s+/g, ' '); });
+      var empty = P_REQUIRED.filter(function (id) { return !document.getElementById(id).value.trim(); });
+      if (empty.length) { markMissing(); setMsg('p-msg', profileErrors.profile_required); return; }
+      if (!phoneOk(data.phone)) { document.getElementById('p-phone').classList.add('invalid'); setMsg('p-msg', profileErrors.invalid_phone); return; }
+      if (data.emergency_phone && !phoneOk(data.emergency_phone)) { document.getElementById('p-em-phone').classList.add('invalid'); setMsg('p-msg', profileErrors.invalid_emergency_phone); return; }
+      if (data.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email)) { document.getElementById('p-email').classList.add('invalid'); setMsg('p-msg', profileErrors.invalid_email); return; }
+      var btn = document.getElementById('p-save');
+      btn.disabled = true;
+      try {
+        await rpc('save_my_profile', { p_token: localStorage.getItem('taxi_session') || '', p_data: data });
+        ['p-phone', 'p-em-phone', 'p-email'].forEach(function (id) { document.getElementById(id).classList.remove('invalid'); });
+        P_FIELDS.forEach(function (f) { document.getElementById(f[0]).value = data[f[1]]; });
+        driverData.first_name = data.first_name;
+        driverData.last_name = data.last_name;
+        driverData.needs_profile = false;
+        profileLock = false;
+        sessionStorage.removeItem('taxi_profile_lock');
+        updateProfileReminder();
+        setFullName();
+        var warn = document.querySelector('#content .p-note.warn');
+        if (warn && !driverData.via_master) warn.remove();
+        setMsg('p-msg', 'Sparat ✓', true);
+      } catch (e) {
+        if (e.code === '28000') { clearSession(); location.reload(); return; }
+        setMsg('p-msg', profileErrors[e.message] || 'Kunde inte spara. Försök igen.');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function changePassword() {
+      var cur = document.getElementById('pw-cur').value;
+      var n1 = document.getElementById('pw-new').value;
+      var n2 = document.getElementById('pw-new2').value;
+      if (!cur || !n1 || !n2) { setMsg('pw-msg', 'Fyll i alla tre fälten.'); return; }
+      if (n1.trim().toLowerCase().length < 6) { setMsg('pw-msg', 'Det nya lösenordet måste ha minst 6 tecken.'); return; }
+      if (n1.trim().toLowerCase() !== n2.trim().toLowerCase()) { setMsg('pw-msg', 'De nya lösenorden är inte lika.'); return; }
+      var btn = document.getElementById('pw-save');
+      btn.disabled = true;
+      try {
+        var r = await rpc('change_password', { p_token: localStorage.getItem('taxi_session') || '', p_current: cur, p_new: n1 });
+        if (r && r.ok) {
+          ['pw-cur', 'pw-new', 'pw-new2'].forEach(function (id) { document.getElementById(id).value = ''; });
+          setMsg('pw-msg', 'Lösenordet är bytt ✓ Du är fortfarande inloggad här. Andra inloggningar har loggats ut.', true);
+        } else {
+          var err = r && r.error;
+          var msg = {
+            wrong_current: 'Nuvarande lösenord stämmer inte.' + (r && r.tries_left != null ? ' Försök kvar: ' + r.tries_left + '.' : ''),
+            locked: 'För många felaktiga försök. Vänta 15 minuter och försök igen.',
+            password_too_short: 'Det nya lösenordet måste ha minst 6 tecken.',
+            no_password: 'Kontot har inget lösenord än. Använd aktiveringslänken.'
+          }[err];
+          setMsg('pw-msg', msg || 'Kunde inte byta lösenord. Försök igen.');
+        }
+      } catch (e) {
+        if (e.code === '28000') { clearSession(); location.reload(); return; }
+        setMsg('pw-msg', 'Kunde inte byta lösenord. Försök igen.');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // Telefonens/webbläsarens bakåtknapp
+    window.addEventListener('popstate', function () {
+      if (profileLock) {
+        try { history.pushState({ view: 'profil' }, ''); } catch (e) {}
+        lockBlocked();
+      } else if (current === 'profil') {
+        goHome();
+      }
+    });
 
     function renderMenu() {
       var content = document.getElementById('content');
       var title = document.getElementById('title');
 
-      if (current) {
+      if (current === 'profil') {
+        title.textContent = 'Profil';
+        renderProfile();
+      } else if (current) {
         title.textContent = current;
         content.innerHTML = '<div class="section"><p>Kommer snart: ' + current + '</p></div>';
       } else {
         title.textContent = 'TaxiData';
-        var html = '<div class="grid">';
+        var html = '';
+        if (driverData.needs_profile) {
+          html += '<div class="profile-reminder" id="profile-reminder" role="button" onclick="openProfile()"><span class="dot"></span>Fyll i dina personuppgifter<span class="arrow">›</span></div>';
+        }
+        html += '<div class="grid">';
         for (var i = 0; i < menu.length; i++) {
           html += '<div class="icon" onclick="openItem(\'' + menu[i].id + '\')">';
           html += '<div class="emoji">' + menu[i].icon + '</div>';
@@ -211,9 +461,11 @@
         html += '</div>';
         content.innerHTML = html;
       }
+      if (window.refreshBadges) refreshBadges();
     }
 
     function openItem(id) {
+      if (lockBlocked()) return;
       if (id === 'admin') {
         location.href = 'admin.html';
         return;
@@ -233,6 +485,7 @@
     }
 
     function goHome() {
+      if (lockBlocked()) return;
       localStorage.removeItem('taxi_view');
       current = null;
       document.getElementById('profile-menu').classList.remove('show');
@@ -255,4 +508,4 @@
     }
   </script>
 </body>
-</html><!-- cache-bust 1792442331 -->
+</html><!-- cache-bust 1792442332 -->

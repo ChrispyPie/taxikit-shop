@@ -99,9 +99,9 @@
     <div id="content"></div>
   </div>
 
-  <script src="serverstatus.js?v=20261024j"></script>
+  <script src="serverstatus.js?v=20261024p"></script>
   <script>
-    const APP_VERSION = '1.0.16';
+    const APP_VERSION = '1.0.17';
     console.log('Admin version:', APP_VERSION);
     const SUPABASE_URL = 'https://lpfdryvukqmjlgenuzpb.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_7LwIOZ5ygRvJqJKFxl4cNQ_LvrzrHrP';
@@ -1133,6 +1133,9 @@
         case 'car_edit': return who + ' ändrade bil ' + (e.target_id || '');
         case 'fuel_settings': return who + ' ändrade åkeriets drivmedelspriser';
         case 'car_delete': return who + ' tog bort bil ' + (e.target_id || '') + (d.modell ? ' (' + d.modell + ')' : '');
+        case 'profile_update': return who + ' uppdaterade sina personuppgifter' + (e.via_master ? ' (med huvudlösenordet)' : '');
+        case 'password_change': return who + ' bytte lösenord' + (e.via_master ? ' (med huvudlösenordet)' : '');
+        case 'password_change_failed': return 'Misslyckat lösenordsbyte för ' + (e.target_id || '?') + ' (fel nuvarande lösenord)';
         case 'category_change': return who + ' ändrade kategori på ' + e.target_id + ' till ' + catName(d.to);
         default: return who + ': ' + e.action + ' ' + (e.target_id || '');
       }

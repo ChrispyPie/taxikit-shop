@@ -1,62 +1,84 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: system-ui, -apple-system, sans-serif; background: #e8f1f8; color: #1a365d; }
+:root {
+  /* Färger och textstorlek samlade här, så mörkt/ljust tema och större text kan läggas till senare
+     genom att bara byta värdena (t.ex. [data-theme="dark"] { ... } eller --font-scale: 1.15). */
+  --bg: #e8f1f8;
+  --surface: white;
+  --surface-soft: #f0f5fa;
+  --text: #1a365d;
+  --text-soft: #4a5568;
+  --muted: #718096;
+  --primary: #1a365d;
+  --on-primary: white;
+  --border: #cbd5e0;
+  --border-soft: #d0e0ea;
+  --accent: #3182ce;
+  --danger: #e53e3e;
+  --danger-text: #c53030;
+  --danger-bg: #fff5f5;
+  --ok: #276749;
+  --badge: #e53e3e;
+  --font-scale: 1;
+}
+html { font-size: calc(100% * var(--font-scale)); }
+body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); }
 
-#login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #1a365d; }
-.login-box { background: white; padding: 2rem; border-radius: 12px; text-align: center; width: 90%; max-width: 360px; }
+#login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--primary); }
+.login-box { background: var(--surface); padding: 2rem; border-radius: 12px; text-align: center; width: 90%; max-width: 360px; }
 .login-box input, .login-box button { width: 100%; padding: 0.7rem; margin-top: 0.5rem; border-radius: 6px; border: 1px solid #ccc; }
-.login-box button { background: #1a365d; color: white; border: none; }
+.login-box button { background: var(--primary); color: var(--on-primary); border: none; }
 
 header {
-  background: #e8f1f8;
-  color: #1a365d;
+  background: var(--bg);
+  color: var(--primary);
   padding: 0.8rem 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #d0e0ea;
+  border-bottom: 1px solid var(--border-soft);
   gap: 0.5rem;
 }
 header h1 { font-size: 1.1rem; }
 header select, header button {
-  background: white;
-  border: 2px solid #1a365d;
-  color: #1a365d;
+  background: var(--surface);
+  border: 2px solid var(--primary);
+  color: var(--primary);
   padding: 0.4rem 0.6rem;
   border-radius: 6px;
   font-size: 0.85rem;
 }
 header button { cursor: pointer; }
-header button:hover { background: #1a365d; color: white; }
+header button:hover { background: var(--primary); color: var(--on-primary); }
 
-.controls { background: #e8f1f8; padding: 1rem; }
+.controls { background: var(--bg); padding: 1rem; }
 
 .tabs { display: flex; justify-content: center; gap: 0.6rem; margin-bottom: 1rem; }
 .tab {
   padding: 0.5rem 1.4rem;
-  border: 2px solid #1a365d;
+  border: 2px solid var(--primary);
   border-radius: 20px;
-  background: white;
-  color: #1a365d;
+  background: var(--surface);
+  color: var(--primary);
   font-size: 0.95rem;
   font-weight: 500;
 }
-.tab.active { background: #1a365d; color: white; }
+.tab.active { background: var(--primary); color: var(--on-primary); }
 
 .date-nav { display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
 .date-nav button {
-  background: white;
-  color: #1a365d;
-  border: 2px solid #1a365d;
+  background: var(--surface);
+  color: var(--primary);
+  border: 2px solid var(--primary);
   width: 42px;
   height: 42px;
   border-radius: 10px;
   font-size: 1.3rem;
 }
-.date-nav button.active { background: #1a365d; color: white; }
+.date-nav button.active { background: var(--primary); color: var(--on-primary); }
 #current-date {
-  background: white;
-  color: #1a365d;
-  border: 2px solid #1a365d;
+  background: var(--surface);
+  color: var(--primary);
+  border: 2px solid var(--primary);
   padding: 0.6rem 1.4rem;
   border-radius: 10px;
   min-width: 130px;
@@ -65,7 +87,7 @@ header button:hover { background: #1a365d; color: white; }
 }
 
 main { max-width: 900px; margin: 1rem auto; padding: 0 1rem; }
-.section { background: white; border-radius: 12px; padding: 0.4rem 0; margin-bottom: 0.8rem; }
+.section { background: var(--surface); border-radius: 12px; padding: 0.4rem 0; margin-bottom: 0.8rem; }
 
 .stat-row {
   display: flex;
@@ -89,7 +111,7 @@ main { max-width: 900px; margin: 1rem auto; padding: 0 1rem; }
   padding: 0.25rem 1rem 0.25rem 2.2rem;
   font-size: 0.9rem;
   font-weight: 400;
-  color: #4a5568;
+  color: var(--text-soft);
 }
 .sub.visible { display: flex; justify-content: space-between; }
 
@@ -106,12 +128,12 @@ main { max-width: 900px; margin: 1rem auto; padding: 0 1rem; }
   display: none;
   padding: 0.2rem 1rem 0.2rem 3.5rem;
   font-size: 0.85rem;
-  color: #718096;
+  color: var(--muted);
 }
 .trip-detail.visible { display: flex; justify-content: space-between; }
 /* Förarväljare (ägare) i rubriken */
 #driver-label select { max-width: 104px; font-size: 0.8rem; padding: 0.3rem 0.3rem; }
-.shift-who { display: block; font-size: 0.8rem; font-weight: 400; color: #718096; margin-top: 2px; }
+.shift-who { display: block; font-size: 0.8rem; font-weight: 400; color: var(--muted); margin-top: 2px; }
 #current-date.period { font-size: 0.9rem; }
 .date-nav button#period-btn { font-size: 1.1rem; }
 @media (max-width: 400px) {
@@ -123,25 +145,38 @@ main { max-width: 900px; margin: 1rem auto; padding: 0 1rem; }
 /* Kalender för egen period */
 .pm-overlay { display: none; position: fixed; inset: 0; background: rgba(26,54,93,0.45); z-index: 100; align-items: center; justify-content: center; padding: 1rem; }
 .pm-overlay.open { display: flex; }
-.pm-box { background: white; border-radius: 14px; padding: 1rem; width: 100%; max-width: 360px; color: #1a365d; }
+.pm-box { background: var(--surface); border-radius: 14px; padding: 1rem; width: 100%; max-width: 360px; color: var(--primary); }
 .pm-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.3rem; font-weight: 600; }
-.pm-head button { background: white; color: #1a365d; border: 2px solid #1a365d; width: 40px; height: 40px; border-radius: 10px; font-size: 1.2rem; }
-.pm-hint { text-align: center; font-size: 0.8rem; color: #718096; margin-bottom: 0.5rem; }
+.pm-head button { background: var(--surface); color: var(--primary); border: 2px solid var(--primary); width: 40px; height: 40px; border-radius: 10px; font-size: 1.2rem; }
+.pm-hint { text-align: center; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.5rem; }
 .pm-cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
-.pm-wd { text-align: center; font-size: 0.75rem; color: #718096; padding: 0.2rem 0; }
-.pm-day { height: 40px; border: none; border-radius: 8px; background: #f0f5fa; color: #1a365d; font-size: 0.95rem; }
-.pm-day.today { border: 2px solid #1a365d; }
+.pm-wd { text-align: center; font-size: 0.75rem; color: var(--muted); padding: 0.2rem 0; }
+.pm-day { height: 40px; border: none; border-radius: 8px; background: var(--surface-soft); color: var(--primary); font-size: 0.95rem; }
+.pm-day.today { border: 2px solid var(--primary); }
 .pm-day.future { opacity: 0.4; }
 .pm-day.in { background: #bcd3ea; }
-.pm-day.sel { background: #1a365d; color: white; font-weight: 700; }
+.pm-day.sel { background: var(--primary); color: var(--on-primary); font-weight: 700; }
 .pm-sel { text-align: center; margin: 0.7rem 0; font-weight: 600; min-height: 1.2em; }
 .pm-btns { display: flex; gap: 0.5rem; }
-.pm-btns button { flex: 1; padding: 0.7rem; border-radius: 8px; border: 2px solid #1a365d; background: white; color: #1a365d; font-size: 1rem; }
-.pm-btns button.primary { background: #1a365d; color: white; }
+.pm-btns button { flex: 1; padding: 0.7rem; border-radius: 8px; border: 2px solid var(--primary); background: var(--surface); color: var(--primary); font-size: 1rem; }
+.pm-btns button.primary { background: var(--primary); color: var(--on-primary); }
 .pm-btns button:disabled { opacity: 0.4; }
 
 /* Åkeriets mål (ägaren) */
 .gm-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin: 0.45rem 0; font-size: 0.95rem; }
-.gm-row input { width: 120px; padding: 0.5rem; border: 2px solid #cbd5e0; border-radius: 8px; font-size: 1rem; text-align: right; color: #1a365d; }
-.gm-err { color: #e53e3e; font-size: 0.85rem; min-height: 1.1em; margin: 0.3rem 0 0.6rem; text-align: center; }
-.goal-hint { font-size: 0.85rem; font-weight: 600; color: #3182ce; text-decoration: underline; }
+.gm-row input { width: 120px; padding: 0.5rem; border: 2px solid var(--border); border-radius: 8px; font-size: 1rem; text-align: right; color: var(--primary); }
+.gm-err { color: var(--danger); font-size: 0.85rem; min-height: 1.1em; margin: 0.3rem 0 0.6rem; text-align: center; }
+.goal-hint { font-size: 0.85rem; font-weight: 600; color: var(--accent); text-decoration: underline; }
+
+/* Notisprickar (badges) – återanvändbara: lägg data-badge="nyckel" på ett element och anropa setBadge('nyckel', true eller ett antal) */
+.badge-host { position: relative; }
+.badge-host.has-badge::after {
+  content: attr(data-badge-text);
+  position: absolute; top: -4px; right: -4px;
+  min-width: 12px; height: 12px; padding: 0;
+  border-radius: 999px; background: var(--badge); color: white;
+  border: 2px solid var(--surface);
+  font-size: 10px; font-weight: 700; line-height: 12px; text-align: center;
+  box-sizing: content-box; pointer-events: none;
+}
+.badge-host.has-badge[data-badge-text]:not([data-badge-text=""])::after { min-width: 10px; padding: 0 3px; height: 16px; line-height: 16px; top: -6px; right: -6px; }
