@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sidan hittades inte – TaxiKit</title>
+<script>
+  // Fel stavning av /TaxiData (t.ex. /taxidata, /TAXIDATA) skickas vidare till rätt adress.
+  (function () {
+    var p = location.pathname, m = p.match(/^\/taxidata(\/.*)?$/i);
+    if (m && p.indexOf('/TaxiData') !== 0) {
+      location.replace('/TaxiData' + (m[1] || '/') + location.search + location.hash);
+    }
+  })();
+</script>
+<style>body{font-family:system-ui,sans-serif;text-align:center;padding:60px 20px;color:#222}a{color:#0a58ca}</style>
+</head>
+<body>
+<h1>Sidan hittades inte</h1>
+<p><a href="/">Till TaxiKit</a> · <a href="/TaxiData/">TaxiData</a></p>
+</body>
+</html>
