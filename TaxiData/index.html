@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaxiData</title>
-  <link rel="stylesheet" href="style.css?v=20261024u">
+  <link rel="stylesheet" href="style.css?v=20261024v">
   <style>
     #content { padding: 16px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 16px; }
@@ -109,23 +109,29 @@
     <main id="dashboard"></main>
   </div>
 
-  <script src="serverstatus.js?v=20261024u"></script>
-  <script src="badges.js?v=20261024u"></script>
-  <script src="script.js?v=20261024u"></script>
-  <script src="ankomster.js?v=20261024u"></script>
+  <script src="serverstatus.js?v=20261024v"></script>
+  <script src="badges.js?v=20261024v"></script>
+  <script src="script.js?v=20261024v"></script>
+  <script src="ankomster.js?v=20261024v"></script>
   <script>
+    // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
+    // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
+    var ALLA = ['standard', 'semester', 'admin', 'agare', 'superadmin'];
+    var ADMIN_ROLLER = ['admin', 'agare', 'superadmin'];
+    // Åkeridata: ägaren + tillfälligt S admin (samma som private.company_view_roles() på servern)
+    var AKERI_ROLLER = ['agare', 'superadmin'];
     var menu = [
-      { id: 'kordata', icon: '🚗', label: 'Körpassdata', roles: ['standard', 'admin', 'agare', 'superadmin'] },
+      { id: 'kordata', icon: '🚗', label: 'Körpassdata', roles: ALLA },
       // Namn och ikon för Ankomster ändras i ankomster.js (ANKOMSTER.title / icon)
-      { id: ANKOMSTER.id, icon: ANKOMSTER.icon, label: ANKOMSTER.title, roles: ['standard', 'admin', 'agare', 'superadmin'] },
-      { id: 'statistik', icon: '📈', label: 'Statistik', roles: ['standard', 'admin', 'agare', 'superadmin'] },
-      { id: 'toplistor', icon: '🏆', label: 'Toplistor', roles: ['standard', 'admin', 'agare', 'superadmin'] },
-      { id: 'kommunikation', icon: '💬', label: 'Kommunikation', roles: ['standard', 'admin', 'agare', 'superadmin'] },
-      { id: 'kalender', icon: '📅', label: 'Kalender', roles: ['standard', 'admin', 'agare', 'superadmin'] },
-      { id: 'installningar', icon: '⚙️', label: 'Inställningar', roles: ['standard', 'admin', 'agare', 'superadmin'] },
-      { id: 'admin', icon: '🔐', label: 'Admin', roles: ['admin', 'agare', 'superadmin'], submenu: [
-        { id: 'akeridata', icon: '📊', label: 'Åkeridata' },
-        { id: 'chaufforer', icon: '👥', label: 'Chaufförer' }
+      { id: ANKOMSTER.id, icon: ANKOMSTER.icon, label: ANKOMSTER.title, roles: ALLA },
+      { id: 'statistik', icon: '📈', label: 'Statistik', roles: ALLA },
+      { id: 'toplistor', icon: '🏆', label: 'Toplistor', roles: ALLA },
+      { id: 'kommunikation', icon: '💬', label: 'Kommunikation', roles: ALLA },
+      { id: 'kalender', icon: '📅', label: 'Kalender', roles: ALLA },
+      { id: 'installningar', icon: '⚙️', label: 'Inställningar', roles: ALLA },
+      { id: 'admin', icon: '🔐', label: 'Admin', roles: ADMIN_ROLLER, submenu: [
+        { id: 'akeridata', icon: '📊', label: 'Åkeridata', roles: AKERI_ROLLER },
+        { id: 'chaufforer', icon: '👥', label: 'Chaufförer', roles: ADMIN_ROLLER }
       ]}
     ];
 
@@ -554,6 +560,18 @@
       }
     });
 
+    function menuRole() {
+      var c = String(driverData.category || '');
+      return ALLA.indexOf(c) >= 0 ? c : 'standard';  // som private.norm_cat()
+    }
+    function canSee(item) {
+      return !item.roles || item.roles.indexOf(menuRole()) >= 0;
+    }
+    function findItem(id) {
+      for (var i = 0; i < menu.length; i++) if (menu[i].id === id) return menu[i];
+      return null;
+    }
+
     function renderMenu() {
       var content = document.getElementById('content');
       var title = document.getElementById('title');
@@ -576,6 +594,7 @@
         }
         html += '<div class="grid">';
         for (var i = 0; i < menu.length; i++) {
+          if (!canSee(menu[i])) continue;
           html += '<div class="icon" onclick="openItem(\'' + menu[i].id + '\')">';
           html += '<div class="emoji">' + menu[i].icon + '</div>';
           html += '<div class="label">' + menu[i].label + '</div></div>';
@@ -588,6 +607,8 @@
 
     function openItem(id) {
       if (lockBlocked()) return;
+      var item = findItem(id);
+      if (item && !canSee(item)) return;
       if (id === 'admin') {
         location.href = 'admin.html';
         return;
@@ -635,4 +656,4 @@
     }
   </script>
 </body>
-</html><!-- cache-bust 1792443400 -->
+</html><!-- cache-bust 1792443500 -->
