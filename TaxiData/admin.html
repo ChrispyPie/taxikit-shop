@@ -102,7 +102,7 @@
   <script src="serverstatus.js?v=20261024v"></script>
   <script src="verkstad-admin.js?v=20261024z"></script>
   <script>
-    const APP_VERSION = '1.0.22';
+    const APP_VERSION = '1.0.23';
     console.log('Admin version:', APP_VERSION);
     const SUPABASE_URL = 'https://lpfdryvukqmjlgenuzpb.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_7LwIOZ5ygRvJqJKFxl4cNQ_LvrzrHrP';
@@ -180,8 +180,15 @@
       return cat === 'admin' || cat === 'agare' || cat === 'superadmin';
     }
 
+    // S admin-kontot är skyddat (även på servern): ingen annan kan ändra, avaktivera eller nollställa det,
+    // och ingen kan ge rollen S admin via appen.
+    function isProtectedSadmin(id) {
+      return normCategory(drivers[id]?.category) === 'superadmin' && id !== currentUserId;
+    }
+
     function canEditCategory(targetCat) {
       const myCat = getMyCategory();
+      if (targetCat === 'superadmin') return false;
       if (myCat === 'superadmin') return true;
       if (myCat === 'agare') return targetCat !== 'superadmin';
       if (myCat === 'admin') return ['standard', 'semester', 'avslutad'].includes(targetCat);
@@ -190,7 +197,7 @@
 
     function getAllowedCategories() {
       const myCat = getMyCategory();
-      if (myCat === 'superadmin') return Object.entries(userCategories);
+      if (myCat === 'superadmin') return Object.entries(userCategories).filter(([k]) => k !== 'superadmin');
       if (myCat === 'agare') return Object.entries(userCategories).filter(([k]) => k !== 'superadmin');
       if (myCat === 'admin') return Object.entries(userCategories).filter(([k]) => ['standard', 'semester', 'avslutad'].includes(k));
       return [];
@@ -249,6 +256,8 @@
       forbidden: 'Du har inte behörighet att göra det.',
       forbidden_self: 'Du kan inte ändra din egen aktivering.',
       no_password: 'Föraren har inget lösenord än.',
+      sadmin_protected: 'S admin-kontot är skyddat. Det kan inte ändras, avaktiveras eller nollställas av någon annan.',
+      sadmin_grant: 'Rollen S admin kan inte ges i appen.',
       password_too_short: 'Lösenordet måste vara minst 6 tecken.',
       not_pending: 'Föraren har redan valt lösenord. Avaktivera och aktivera igen för en ny länk.',
       bad_id: 'Ogiltigt förar-ID.',
@@ -510,7 +519,8 @@
       const status = getDriverStatus(editingDriver);
       const isActive = status !== 'inactive';
       const canToggle = canToggleDriver(editingDriver);
-      const personalDisabled = owner ? '' : 'disabled';
+      const sadminLocked = isProtectedSadmin(editingDriver);
+      const personalDisabled = owner && !sadminLocked ? '' : 'disabled';
       const catDisabled = canEdit ? '' : 'disabled';
       const v = (val) => owner ? (val || '') : maskValue(val);
       const allowedCats = getAllowedCategories();
@@ -558,11 +568,12 @@
             <li><b>Standard:</b> All data, statistik, kommunikation, notiser.</li>
             <li><b>Admin:</b> Aktivera/avaktivera, ändra kategori på lägre. Ser ej personlig data.</li>
             <li><b>Ägare:</b> Allt + redigera personlig information.</li>
-            <li><b>Superadmin:</b> Kan ändra alla kategorier. Ser ej personlig data.</li>
+            <li><b>Superadmin:</b> Kan ändra alla kategorier utom S admin. Ser ej personlig data. Kontot är skyddat och kan inte ändras av någon annan.</li>
           </ul>
         </div>
         
-        ${owner || canEdit ? `<button onclick="saveDriver()" style="width:100%; margin-top:16px;">Spara</button>` : ''}
+        ${sadminLocked ? `<div class="info-box" style="margin-top:16px;"><h4>🔒 Skyddat konto</h4><p style="margin:4px 0 0;">S admin-kontot kan inte ändras, avaktiveras eller nollställas av någon annan. Bara S admin själv kan ändra sitt konto.</p></div>` : ''}
+        ${!sadminLocked && (owner || canEdit) ? `<button onclick="saveDriver()" style="width:100%; margin-top:16px;">Spara</button>` : ''}
         <div style="margin-top:16px; display:flex; gap:8px;">
           ${canToggle ? `<button onclick="toggleActive('${editingDriver}')" style="flex:1;">${isActive ? 'Avaktivera' : 'Aktivera'}</button>` : ''}
           <button onclick="shareDriver('${editingDriver}')" style="flex:1;">${status === 'pending' && canToggle ? 'Aktiveringslänk' : 'Dela'}</button>
@@ -586,6 +597,7 @@
       const d = drivers[editingDriver] || {};
       const owner = isOwner();
       const canEdit = canEditCategory(normCategory(d.category));
+      if (isProtectedSadmin(editingDriver)) { alert(errorTexts.sadmin_protected); return; }
       if (!owner && !canEdit) return;
 
       const driverData = { id: editingDriver };
@@ -627,6 +639,7 @@
     function canToggleDriver(id) {
       if (!hasAdminAccess()) return false;
       if (id === currentUserId) return false;
+      if (isProtectedSadmin(id)) return false;
       return canEditCategory(normCategory(drivers[id]?.category));
     }
 
@@ -1282,4 +1295,4 @@
     loadData();
   </script>
 </body>
-</html>
+</html><!-- cache-bust 1792453000 -->
