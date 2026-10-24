@@ -22,6 +22,13 @@
   }
   window.fmtSthlmTime = fmtTime;
 
+  // Valfri följerad (data-updated="<id>") som visar "Senast hämtad från servern HH:MM" under lampan
+  function companion(el) { return el.dataset.updated ? document.getElementById(el.dataset.updated) : null; }
+  function setDisp(el, show) {
+    el.style.display = show ? '' : 'none';
+    var u = companion(el); if (u) u.style.display = show ? '' : 'none';
+  }
+
   function paint(el, color, text, title) {
     el.innerHTML = '';
     el.className = 'server-status server-status-' + color;
@@ -33,8 +40,8 @@
 
   async function refresh(el) {
     var token = localStorage.getItem('taxi_session') || '';
-    if (!token) { el.style.display = 'none'; return; }
-    el.style.display = el.dataset.show === '0' ? 'none' : '';
+    if (!token) { setDisp(el, false); return; }
+    setDisp(el, el.dataset.show !== '0');
     try {
       var res = await fetch(API + '/rest/v1/rpc/get_server_status', {
         method: 'POST',
@@ -45,6 +52,8 @@
       var s = await res.json();
       var now = s.now ? new Date(s.now).getTime() : Date.now();
       var lastAt = s.last_attempt_at ? new Date(s.last_attempt_at).getTime() : 0;
+      var u = companion(el);
+      if (u) u.textContent = s.data_updated_at ? 'Senast hämtad från servern ' + fmtTime(s.data_updated_at) : '';
       if (s.last_result === 'down') {
         paint(el, 'red', 'Servern är nere sedan ' + fmtTime(s.down_since || s.last_attempt_at) + ' – datan kan vara gammal',
           'Senaste försök ' + fmtTime(s.last_attempt_at) + (s.last_ok_at ? ', senast OK ' + fmtTime(s.last_ok_at) : ''));
@@ -65,17 +74,17 @@
     var el = document.getElementById(id);
     if (!el) return;
     el.dataset.show = on ? '1' : '0';
-    if (!on) { el.style.display = 'none'; return; }
+    if (!on) { setDisp(el, false); return; }
     if (el._timer) refresh(el); else initServerStatus(id);
   };
 
   window.initServerStatus = function (id) {
     var el = document.getElementById(id);
     if (!el) return;
-    if (el.dataset.show === '0') { el.style.display = 'none'; return; }
+    if (el.dataset.show === '0') { setDisp(el, false); return; }
     if (!document.getElementById('server-status-css')) {
       var st = document.createElement('style'); st.id = 'server-status-css';
-      st.textContent = '.server-status{display:flex;align-items:center;justify-content:center;gap:8px;font-size:0.82rem;padding:6px 10px;margin:8px auto 0;width:calc(100% - 24px);box-sizing:border-box;border-radius:999px;max-width:520px;background:#f7fafc;color:#2d3748}' +
+      st.textContent = '.server-status{display:flex;align-items:center;justify-content:center;gap:8px;font-size:0.82rem;padding:5px 10px;margin:10px auto 0;width:calc(100% - 24px);box-sizing:border-box;border-radius:999px;max-width:520px;background:#f7fafc;color:#2d3748}' +
         '.server-status-lamp{width:10px;height:10px;border-radius:50%;flex:0 0 10px;background:#a0aec0}' +
         '.server-status-green .server-status-lamp{background:#22c55e;box-shadow:0 0 6px #22c55e}' +
         '.server-status-red{background:#fef2f2;color:#991b1b}.server-status-red .server-status-lamp{background:#ef4444;box-shadow:0 0 6px #ef4444}' +

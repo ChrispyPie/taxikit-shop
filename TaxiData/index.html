@@ -52,9 +52,6 @@
       <h1>Körpassdata</h1>
       <span id="driver-label"></span>
     </header>
-    <!-- Serverstatus-lampan visas bara i vyer vars data kommer från servern (här Körpassdata).
-         Planerat: en kommande vy 'Topplistor' ska också visa den – lägg då en egen div där och anropa initServerStatus('<id>'). -->
-    <div id="server-status" class="server-status" style="display:none"></div>
     <div class="controls">
       <div class="tabs">
         <button class="tab active" data-tab="dag">Dag</button>
@@ -67,13 +64,16 @@
         <button id="next">›</button>
         <button id="today">»</button>
       </div>
-      <div id="last-updated" style="text-align:center; font-size:0.8rem; color:#718096; margin-top:0.6rem;"></div>
+      <!-- Serverstatus-lampan visas bara i vyer vars data kommer från servern (här Körpassdata).
+           Planerat: en kommande vy 'Topplistor' ska också visa den – lägg då en egen div där och anropa initServerStatus('<id>'). -->
+      <div id="server-status" class="server-status" style="display:none"></div>
+      <div id="last-updated" style="text-align:center; font-size:0.8rem; color:#718096; margin-top:0.3rem;"></div>
     </div>
     <main id="dashboard"></main>
   </div>
 
-  <script src="serverstatus.js?v=20261024d"></script>
-  <script src="script.js?v=20261024c"></script>
+  <script src="serverstatus.js?v=20261024e"></script>
+  <script src="script.js?v=20261024e"></script>
   <script>
     var menu = [
       { id: 'kordata', icon: '🚗', label: 'Körpassdata', roles: ['standard', 'admin', 'agare', 'superadmin'] },
