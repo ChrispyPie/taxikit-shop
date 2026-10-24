@@ -58,6 +58,10 @@
     .acct-info { font-size: 13px; color: #4a5568; margin-top: 12px; line-height: 1.5; }
     .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 13px; margin-bottom: 4px; color: #4a5568; }
+    .form-group label.radio-l { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #1a365d; margin: 6px 0; }
+    .form-group label.radio-l input { width: 20px; height: 20px; margin: 0; }
+    .form-group select { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; background: white; box-sizing: border-box; }
+    .fuel-own { background: #fefcbf; color: #744210; padding: 0 4px; border-radius: 4px; }
     .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; }
     .form-group textarea { min-height: 60px; resize: vertical; }
     .form-group input:disabled, .form-group textarea:disabled, .form-group select:disabled { background: #edf2f7; color: #a0aec0; }
@@ -95,9 +99,9 @@
     <div id="content"></div>
   </div>
 
-  <script src="serverstatus.js?v=20261024i"></script>
+  <script src="serverstatus.js?v=20261024j"></script>
   <script>
-    const APP_VERSION = '1.0.14';
+    const APP_VERSION = '1.0.15';
     console.log('Admin version:', APP_VERSION);
     const SUPABASE_URL = 'https://lpfdryvukqmjlgenuzpb.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_7LwIOZ5ygRvJqJKFxl4cNQ_LvrzrHrP';
@@ -245,7 +249,8 @@
       password_too_short: 'Lösenordet måste vara minst 6 tecken.',
       not_pending: 'Föraren har redan valt lösenord. Avaktivera och aktivera igen för en ny länk.',
       bad_id: 'Ogiltigt förar-ID.',
-      invalid_car: 'Kontrollera fälten (bilnummer, bilmodell, minst en kategori, bränslekostnad 0–1000 kr/mil).',
+      invalid_car: 'Kontrollera fälten (bilnummer, bilmodell, minst en kategori, drivmedel och förbrukning eller kr/mil 0–1000).',
+      invalid_price: 'Kontrollera priserna (tal större än 0, påslag 0–20 kr/kWh, laddning 0–100 %).',
       duplicate_car: 'Det finns redan en bil med det bilnumret.',
       not_found: 'Bilen finns inte längre.'
     };
@@ -417,7 +422,7 @@
         location.href = 'akeridata.html';
         return;
       } else if (path[0].id === 'bilar') {
-        title.textContent = editingCar ? (editingCar === 'new' ? 'Ny bil' : 'Ändra bil') : 'Bilar';
+        title.textContent = editingCar ? (editingCar === 'fuel' ? 'Drivmedelspriser' : editingCar === 'new' ? 'Ny bil' : 'Ändra bil') : 'Bilar';
         if (!canSeeAkeridata()) content.innerHTML = '<div class="section"><p style="padding:16px;">Ingen behörighet</p></div>';
         else if (editingCar) renderEditCar(content);
         else renderCars(content);
@@ -730,7 +735,15 @@
     // ---- Bilar ----
     // bilnummer = taxinumret i resdatan (t.ex. A446) så att bilen kan kopplas till körpassen.
     // Antalet bilar här styr åkeriets mål (mål per bil × antal bilar).
+    // Kostnad per mil räknas ut på servern vid varje visning: förbrukning × dagens pris (eller bilens/åkeriets manuella pris).
     const CAR_CATS = ['Kombi', 'Sedan', 'Miljö', 'Storbil'];
+    const FUELS = { bensin: ['Bensin', 'l'], diesel: ['Diesel', 'l'], hvo100: ['HVO100', 'l'], e85: ['E85', 'l'], el: ['El', 'kWh'],
+      laddhybrid: ['Laddhybrid', 'l'], vatgas: ['Vätgas', 'kg'], fordonsgas: ['Fordonsgas', 'kg'] };
+    const PRICE_KEYS = { bensin: 'Bensin 95', diesel: 'Diesel', hvo100: 'HVO100', e85: 'E85', el_hem: 'El hemma/depå',
+      el_snabb: 'El snabbladdning', vatgas: 'Vätgas', fordonsgas: 'Fordonsgas (biogas)' };
+    let carMakes = null;          // märken från modelldatabasen
+    const carVariants = {};       // märke -> varianter
+    let carForm = null;           // formulärets aktuella värden
 
     async function loadCars() {
       carList = null;
@@ -740,9 +753,50 @@
       render();
     }
 
-    function fmtCost(c) {
-      if (c.cost_per_mil_kr == null) return '';
-      return Number(c.cost_per_mil_kr).toFixed(2).replace('.', ',') + ' kr/mil';
+    function num(n, d = 2) { return n == null || n === '' || isNaN(n) ? '' : Number(n).toFixed(d).replace('.', ','); }
+    function numTrim(n) { return n == null || n === '' ? '' : String(Number(Number(n).toFixed(3))).replace('.', ','); }
+    function parseNum(v) { v = String(v == null ? '' : v).trim().replace(/\s/g, '').replace(',', '.'); return v === '' ? null : Number(v); }
+    function sd(x) { return x ? String(x).slice(0, 10) : ''; }
+    function fuelPrices() { return (carList && carList.fuel && carList.fuel.prices) || {}; }
+    function fuelCfg() { return (carList && carList.fuel && carList.fuel.config) || { el_surcharge: 0, el_home_share: 100 }; }
+
+    function priceText(p) {
+      if (!p || p.price == null) return 'inget pris';
+      const kind = p.kind === 'company' ? 'åkeriets pris' : p.kind === 'manual' ? 'manuellt' : (p.source || '');
+      return num(p.price) + ' kr/' + p.unit + ' (' + kind + (p.date ? ', ' + sd(p.date) : '') + ')';
+    }
+
+    function carCostLine(c) {
+      const k = c.calc || {};
+      if (k.mode === 'manual') return c.cost_per_mil_kr != null ? 'Bränsle ' + num(c.cost_per_mil_kr) + ' kr/mil (eget värde)' : '';
+      const f = FUELS[c.fuel] || ['', ''];
+      let s = f[0] + ': ';
+      if (c.fuel === 'laddhybrid') {
+        s += (c.cons != null ? numTrim(c.cons) + ' l/mil' : '') + (c.cons_el != null ? ' + ' + numTrim(c.cons_el) + ' kWh/mil' : '') + ', ' + (c.el_share || 0) + ' % el';
+      } else s += numTrim(c.cons) + ' ' + f[1] + '/mil';
+      const modeTxt = c.price_mode === 'manual' ? 'Manuellt pris' + (c.manual_price_set_at ? ' satt ' + sd(c.manual_price_set_at) : '') : 'Automatiskt pris';
+      const pr = k.price && k.price.price != null ? num(k.price.price) + ' kr/' + k.price.unit : '';
+      const pe = k.el_price && k.el_price.price != null ? num(k.el_price.price) + ' kr/kWh' : '';
+      return s + ' · ' + modeTxt + (pr || pe ? ' ' + [pr, pe].filter(Boolean).join(' + ') : '') +
+        ' · <b>' + (k.kr_per_mil != null ? '≈ ' + num(k.kr_per_mil) + ' kr/mil' : 'pris saknas') + '</b>';
+    }
+
+    function renderFuelBox() {
+      const P = fuelPrices();
+      const rows = Object.keys(PRICE_KEYS).map(k => {
+        const p = P[k] || {};
+        const val = p.price != null ? num(p.price) + ' kr/' + p.unit : (k === 'vatgas' ? 'inget pris – ange eget' : 'saknas');
+        const src = p.kind === 'company' ? '<span class="fuel-own">Eget pris</span> satt ' + sd(p.company && p.company.set_at)
+          : p.price != null ? esc(p.source || '') + (p.date ? ' · ' + sd(p.date) : '') : '';
+        return `<div style="display:flex; justify-content:space-between; gap:8px; padding:4px 0; border-bottom:1px solid #edf2f7;">
+          <span>${PRICE_KEYS[k]}</span><span style="text-align:right;"><b>${val}</b><br><span style="font-size:11px; color:#718096;">${src}</span></span></div>`;
+      }).join('');
+      return `<details id="fuel-box" class="section" style="padding:10px 16px; font-size:13px;">
+        <summary style="cursor:pointer; font-weight:600; color:#1a365d;">⛽ Drivmedelspriser idag</summary>
+        <div style="margin-top:6px;">${rows}</div>
+        <p style="font-size:11px; color:#718096; margin:6px 0;">Ungefärligt, företagslistpris inkl. moms. El hemma = elpris SE3 (elprisetjustnu.se) × 1,25 + påslag ${num(fuelCfg().el_surcharge)} kr/kWh. Hämtas varje dag efter kl. 14. Källor: OKQ8, Circle K (reserv), elprisetjustnu.se. Bilmodeller: Källa: EEA.</p>
+        ${carList.can_edit ? '<button id="fuel-edit" onclick="editCar(\'fuel\')" style="width:100%;">Ändra åkeriets priser</button>' : ''}
+      </details>`;
     }
 
     function renderCars(content) {
@@ -752,67 +806,291 @@
       let html = `<div style="display:flex; align-items:center; justify-content:space-between; padding:4px 16px 0;">
         <span style="font-size:13px; color:#4a5568;">${cars.length} ${cars.length === 1 ? 'bil' : 'bilar'} – styr åkeriets mål</span>
         ${carList.can_edit ? '<button id="car-add" onclick="editCar(\'new\')" style="font-size:22px; padding:2px 14px;" aria-label="Lägg till bil">+</button>' : ''}
-      </div><div class="section">`;
+      </div>` + renderFuelBox() + '<div class="section">';
       if (!cars.length) html += `<p style="padding:16px;">Inga bilar inlagda ännu.${carList.can_edit ? ' Tryck på + för att lägga till en bil.' : ''}</p>`;
       cars.forEach(c => {
+        const cost = carCostLine(c);
         html += `<div class="row car-row" ${carList.can_edit ? `onclick="editCar(${c.id})"` : ''} style="flex-direction:column; align-items:flex-start; gap:2px;${carList.can_edit ? '' : ' cursor:default;'}">
           <span class="label">${esc(c.bilnummer)} · ${esc(c.modell)}${c.regnr ? ' <span style="font-weight:400; color:#718096;">(' + esc(c.regnr) + ')</span>' : ''}</span>
-          <span style="font-size:12px; color:#718096;">${esc((c.kategorier || []).join(', '))}${c.cost_per_mil_kr != null ? ' · Bränsle ' + esc(fmtCost(c)) : ''}</span>
+          <span style="font-size:12px; color:#718096;">${esc((c.kategorier || []).join(', '))}</span>
+          ${cost ? `<span class="car-cost" style="font-size:12px; color:#2d3748;">${cost}</span>` : ''}
         </div>`;
       });
       html += '</div>';
-      if (!carList.can_edit) html += '<p style="padding:0 16px; font-size:12px; color:#718096;">Bara ägaren kan ändra bilarna.</p>';
+      if (!carList.can_edit) html += '<p style="padding:0 16px; font-size:12px; color:#718096;">Du kan se bilarna men inte ändra dem.</p>';
       content.innerHTML = html;
     }
 
     function editCar(id) {
       if (!carList || !carList.can_edit) return;
       editingCar = id;
+      carForm = null;
       render();
     }
 
+    // --- Åkeriets priser ---
+    function renderFuelSettings(content) {
+      const P = fuelPrices(), cfg = fuelCfg();
+      content.innerHTML = `<div class="section" style="padding:16px;">
+        <p style="font-size:13px; color:#4a5568; margin-top:0;">Lämna tomt = <b>automatiskt pris</b> (hämtas varje dag). Fyll i ett eget pris för att använda det för alla bilar med "Automatiskt pris". En bil med "Manuellt pris" använder alltid sitt eget pris.</p>
+        ${Object.keys(PRICE_KEYS).map(k => {
+          const p = P[k] || {}, a = p.auto || {};
+          const unit = p.unit || (k.startsWith('el') ? 'kWh' : (k === 'vatgas' || k === 'fordonsgas') ? 'kg' : 'l');
+          const autoTxt = k === 'el_hem' ? (a.spot != null ? 'Auto: spot ' + num(a.spot, 3) + ' × 1,25 + påslag (' + sd(a.date) + ')' : 'Auto: saknas')
+            : a.price != null ? 'Auto: ' + num(a.price) + ' kr/' + unit + ' (' + esc(a.source || '') + ', ' + sd(a.date) + ')' : 'Auto: inget hämtat pris';
+          return `<div class="form-group"><label>${PRICE_KEYS[k]} – eget pris (kr/${unit})</label>
+            <input class="fp-in" data-k="${k}" type="text" inputmode="decimal" value="${p.company ? num(p.company.price) : ''}" placeholder="Automatiskt">
+            <span style="font-size:11px; color:#718096;">${autoTxt}${p.company ? ' · eget pris satt ' + sd(p.company.set_at) : ''}</span></div>`;
+        }).join('')}
+        <div class="form-row">
+          <div class="form-group"><label>El: påslag (kr/kWh)</label><input id="fp-sur" type="text" inputmode="decimal" value="${num(cfg.el_surcharge)}"><span style="font-size:11px; color:#718096;">Nätavgift, energiskatt, elhandel</span></div>
+          <div class="form-group"><label>Laddning hemma/depå (%)</label><input id="fp-home" type="text" inputmode="numeric" value="${cfg.el_home_share}"><span style="font-size:11px; color:#718096;">Resten = snabbladdning</span></div>
+        </div>
+        <div class="modal-buttons">
+          <button onclick="editingCar = null; render();">Avbryt</button>
+          <button id="fp-save" onclick="saveFuelSettings()" style="background:#1a365d; color:white;">Spara</button>
+        </div></div>`;
+    }
+
+    async function saveFuelSettings() {
+      const prices = {};
+      for (const el of document.querySelectorAll('.fp-in')) {
+        const v = parseNum(el.value);
+        if (v != null && !(v > 0 && v < 1000)) { alert('Priset för ' + PRICE_KEYS[el.dataset.k] + ' ska vara ett tal, t.ex. 95,50.'); return; }
+        prices[el.dataset.k] = v;
+      }
+      const sur = parseNum(document.getElementById('fp-sur').value) ?? 0;
+      const home = parseNum(document.getElementById('fp-home').value);
+      if (!(sur >= 0 && sur < 20)) { alert('Påslaget ska vara 0–20 kr/kWh.'); return; }
+      if (!(home >= 0 && home <= 100 && Number.isInteger(home))) { alert('Laddning hemma ska vara 0–100 %.'); return; }
+      try {
+        await rpc('save_fuel_settings', { p_prices: prices, p_el_surcharge: sur, p_el_home_share: home });
+        editingCar = null;
+        await loadCars();
+      } catch (e) { alert(errText(e)); }
+    }
+
+    // --- Ny/ändra bil ---
+    function consOf(v, fuel) {
+      if (!v) return null;
+      if (fuel === 'el') return v.kwh;
+      if (fuel === 'vatgas' || fuel === 'fordonsgas') return v.kg;
+      return v.l;
+    }
+
     function renderEditCar(content) {
-      const c = editingCar === 'new' ? { kategorier: [] } : (carList.cars || []).find(x => x.id === editingCar);
+      if (editingCar === 'fuel') { renderFuelSettings(content); return; }
+      const c = editingCar === 'new' ? { kategorier: [], cost_mode: 'calc', price_mode: 'auto' } : (carList.cars || []).find(x => x.id === editingCar);
       if (!c) { editingCar = null; render(); return; }
+      if (!carForm) carForm = { make: c.make || '', model: '', model_id: c.model_id || null, own: !c.model_id && !!c.make };
+      const isNew = editingCar === 'new';
       content.innerHTML = `<div class="section" style="padding:16px;">
         <div class="form-row">
           <div class="form-group"><label>Bilnummer (taxinr)</label><input id="c-nr" value="${esc(c.bilnummer || '')}" placeholder="t.ex. A446" autocapitalize="characters"></div>
           <div class="form-group"><label>Reg.nr (valfritt)</label><input id="c-reg" value="${esc(c.regnr || '')}" placeholder="t.ex. ABC123" autocapitalize="characters"></div>
         </div>
-        <div class="form-group"><label>Bilmodell</label><input id="c-modell" value="${esc(c.modell || '')}" placeholder="t.ex. Toyota Corolla" maxlength="60"></div>
+        <div class="form-group"><label>Märke</label><select id="c-make" onchange="carMakeChanged()"><option value="">Laddar...</option></select>
+          <input id="c-make-own" value="${esc(carForm.own ? c.make || '' : '')}" placeholder="Märke" maxlength="40" style="margin-top:6px; ${carForm.own ? '' : 'display:none;'}"></div>
+        <div class="form-group" id="c-model-g"><label>Modell</label><select id="c-model" onchange="carModelChanged()"></select></div>
+        <div class="form-group" id="c-var-g"><label>Variant / bränsle</label><select id="c-var" onchange="carVariantChanged()"></select>
+          <span id="c-var-note" style="font-size:11px; color:#718096;"></span></div>
+        <div class="form-group"><label>Bilmodell (visas i listan)</label><input id="c-modell" value="${esc(c.modell || '')}" placeholder="t.ex. Toyota Corolla" maxlength="60"></div>
         <div class="form-group"><label>Kategori (minst en)</label>
           <div style="display:flex; flex-wrap:wrap; gap:8px 16px;">
             ${CAR_CATS.map(k => `<label style="display:flex; align-items:center; gap:6px; font-size:14px; color:#1a365d;"><input type="checkbox" class="c-cat" value="${k}" ${(c.kategorier || []).includes(k) ? 'checked' : ''} style="width:20px; height:20px;">${k}</label>`).join('')}
           </div>
         </div>
-        <div class="form-group"><label>Bränslekostnad (kr/mil)</label><input id="c-cost" type="text" inputmode="decimal" value="${c.cost_per_mil_kr != null ? String(c.cost_per_mil_kr).replace('.', ',') : ''}" placeholder="t.ex. 12,50"></div>
+        <div class="form-group"><label>Bränslekostnad</label>
+          <label class="radio-l"><input type="radio" name="c-cm" value="calc" ${c.cost_mode !== 'manual' ? 'checked' : ''} onchange="carCalcUpdate()"> Räkna ut (förbrukning × pris)</label>
+          <label class="radio-l"><input type="radio" name="c-cm" value="manual" ${c.cost_mode === 'manual' ? 'checked' : ''} onchange="carCalcUpdate()"> Ange kr/mil själv</label>
+        </div>
+        <div id="c-manual-g" class="form-group"><label>Bränslekostnad (kr/mil)</label><input id="c-cost" type="text" inputmode="decimal" value="${c.cost_per_mil_kr != null ? num(c.cost_per_mil_kr) : ''}" placeholder="t.ex. 12,50"></div>
+        <div id="c-calc-g">
+          <div class="form-group"><label>Drivmedel</label><select id="c-fuel" onchange="carCalcUpdate(true)">
+            <option value="">Välj...</option>${Object.keys(FUELS).map(k => `<option value="${k}" ${c.fuel === k ? 'selected' : ''}>${FUELS[k][0]}</option>`).join('')}</select></div>
+          <div class="form-group" id="c-pf-g"><label>Laddhybridens bränsle</label><select id="c-pf" onchange="carCalcUpdate()">
+            <option value="bensin" ${c.phev_fuel !== 'diesel' ? 'selected' : ''}>Bensin</option><option value="diesel" ${c.phev_fuel === 'diesel' ? 'selected' : ''}>Diesel</option></select></div>
+          <div class="form-row">
+            <div class="form-group"><label id="c-cons-l">Förbrukning</label><input id="c-cons" type="text" inputmode="decimal" value="${numTrim(c.cons)}" oninput="carCalcUpdate()"></div>
+            <div class="form-group" id="c-ce-g"><label>El (kWh/mil)</label><input id="c-ce" type="text" inputmode="decimal" value="${numTrim(c.cons_el)}" oninput="carCalcUpdate()"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" id="c-es-g"><label>Körning på el (%)</label><input id="c-es" type="text" inputmode="numeric" value="${c.el_share ?? ''}" placeholder="0" oninput="carCalcUpdate()"></div>
+            <div class="form-group" id="c-hs-g"><label>Laddning hemma/depå (%)</label><input id="c-hs" type="text" inputmode="numeric" value="${c.el_home_share ?? ''}" placeholder="${fuelCfg().el_home_share} (åkeriets)" oninput="carCalcUpdate()"></div>
+          </div>
+          <div class="form-group"><label>Pris</label>
+            <label class="radio-l"><input type="radio" name="c-pm" value="auto" ${c.price_mode !== 'manual' ? 'checked' : ''} onchange="carCalcUpdate()"> Automatiskt pris</label>
+            <label class="radio-l"><input type="radio" name="c-pm" value="manual" ${c.price_mode === 'manual' ? 'checked' : ''} onchange="carCalcUpdate()"> Manuellt pris</label>
+            <div id="c-auto-info" style="font-size:12px; color:#4a5568;"></div>
+          </div>
+          <div class="form-row" id="c-mp-g">
+            <div class="form-group"><label id="c-mp-l">Eget pris</label><input id="c-mp" type="text" inputmode="decimal" value="${c.manual_price != null ? num(c.manual_price) : ''}" oninput="carCalcUpdate()"></div>
+            <div class="form-group" id="c-mep-g"><label>Eget elpris (kr/kWh)</label><input id="c-mep" type="text" inputmode="decimal" value="${c.manual_el_price != null ? num(c.manual_el_price) : ''}" oninput="carCalcUpdate()"></div>
+          </div>
+          <div id="c-mp-date" style="font-size:11px; color:#718096; margin:-6px 0 8px;">${c.price_mode === 'manual' && c.manual_price_set_at ? 'Manuellt pris satt ' + sd(c.manual_price_set_at) : ''}</div>
+          <div id="c-result" style="font-size:15px; font-weight:600; color:#1a365d; margin-bottom:8px;"></div>
+        </div>
         <div class="modal-buttons">
           <button onclick="editingCar = null; render();">Avbryt</button>
           <button id="c-save" onclick="saveCar()" style="background:#1a365d; color:white;">Spara</button>
         </div>
-        ${editingCar !== 'new' ? `<button id="c-delete" onclick="deleteCar()" style="width:100%; margin-top:16px; color:#c53030; border-color:#c53030;">Ta bort bil</button>` : ''}
+        ${!isNew ? `<button id="c-delete" onclick="deleteCar()" style="width:100%; margin-top:16px; color:#c53030; border-color:#c53030;">Ta bort bil</button>` : ''}
       </div>`;
+      carCalcUpdate();
+      fillCarMakes();
+    }
+
+    async function fillCarMakes() {
+      const sel = document.getElementById('c-make');
+      try { if (!carMakes) carMakes = await rpc('car_model_makes'); } catch (e) { carMakes = []; }
+      if (!document.getElementById('c-make')) return;
+      sel.innerHTML = '<option value="">Välj märke...</option>' + carMakes.map(m => `<option ${m === carForm.make && !carForm.own ? 'selected' : ''}>${esc(m)}</option>`).join('') +
+        `<option value="__own" ${carForm.own ? 'selected' : ''}>Annan / skriv själv</option>`;
+      if (carForm.make && !carForm.own && !carMakes.includes(carForm.make)) { carForm.own = true; sel.value = '__own'; document.getElementById('c-make-own').value = carForm.make; }
+      await fillCarModels();
+    }
+
+    async function carMakeChanged() {
+      const v = document.getElementById('c-make').value;
+      carForm.own = v === '__own'; carForm.make = carForm.own ? '' : v; carForm.model_id = null; carForm.model = '';
+      document.getElementById('c-make-own').style.display = carForm.own ? '' : 'none';
+      await fillCarModels();
+    }
+
+    async function fillCarModels() {
+      const mg = document.getElementById('c-model-g'), vg = document.getElementById('c-var-g');
+      if (carForm.own || !carForm.make) { mg.style.display = 'none'; vg.style.display = 'none'; return; }
+      mg.style.display = ''; vg.style.display = '';
+      const sel = document.getElementById('c-model');
+      sel.innerHTML = '<option>Laddar...</option>';
+      try { if (!carVariants[carForm.make]) carVariants[carForm.make] = await rpc('car_model_variants', { p_make: carForm.make }); }
+      catch (e) { carVariants[carForm.make] = []; }
+      const vs = carVariants[carForm.make];
+      if (carForm.model_id && !carForm.model) { const v = vs.find(x => x.id === carForm.model_id); if (v) carForm.model = v.model; }
+      const models = [...new Set(vs.map(v => v.model))];
+      sel.innerHTML = '<option value="">Välj modell...</option>' + models.map(m => `<option ${m === carForm.model ? 'selected' : ''}>${esc(m)}</option>`).join('') + '<option value="__own">Annan / skriv själv</option>';
+      fillCarVariants();
+    }
+
+    function carModelChanged() {
+      const v = document.getElementById('c-model').value;
+      carForm.model = v === '__own' ? '' : v; carForm.model_id = null;
+      if (v === '__own') { document.getElementById('c-var-g').style.display = 'none'; return; }
+      document.getElementById('c-var-g').style.display = '';
+      fillCarVariants();
+      const mi = document.getElementById('c-modell');
+      if (v && (!mi.value || mi.dataset.auto === '1')) { mi.value = carForm.make + ' ' + v; mi.dataset.auto = '1'; }
+    }
+
+    function variantLabel(v) {
+      const f = FUELS[v.fuel][0] + (v.hybrid ? ' hybrid' : '') + (v.fuel === 'laddhybrid' && v.phev_fuel === 'diesel' ? ' (diesel)' : '');
+      const cons = v.fuel === 'laddhybrid' ? [v.l != null ? numTrim(v.l) + ' l' : '', v.kwh != null ? numTrim(v.kwh) + ' kWh' : ''].filter(Boolean).join(' + ') + '/mil'
+        : consOf(v, v.fuel) != null ? numTrim(consOf(v, v.fuel)) + ' ' + FUELS[v.fuel][1] + '/mil' : 'förbrukning saknas';
+      return v.variant + ' · ' + f + (v.kw ? ' · ' + v.kw + ' kW' : '') + ' · ' + cons + ' · ' + v.years;
+    }
+
+    function fillCarVariants() {
+      const sel = document.getElementById('c-var');
+      const vs = (carVariants[carForm.make] || []).filter(v => v.model === carForm.model);
+      sel.innerHTML = '<option value="">' + (vs.length ? 'Välj variant...' : '–') + '</option>' + vs.map(v => `<option value="${v.id}" ${v.id === carForm.model_id ? 'selected' : ''}>${esc(variantLabel(v))}</option>`).join('') + '<option value="__own">Annan / skriv själv</option>';
+      showVariantNote();
+    }
+
+    function showVariantNote() {
+      const v = (carVariants[carForm.make] || []).find(x => x.id === carForm.model_id);
+      document.getElementById('c-var-note').textContent = v ? 'Förbrukning enligt EEA (WLTP), ' + v.n + ' registrerade i Sverige ' + v.years + (v.note ? '. ' + v.note : '') + '. Källa: EEA.' : '';
+    }
+
+    function carVariantChanged() {
+      const val = document.getElementById('c-var').value;
+      carForm.model_id = val && val !== '__own' ? Number(val) : null;
+      const v = (carVariants[carForm.make] || []).find(x => x.id === carForm.model_id);
+      showVariantNote();
+      if (!v) return;
+      const fs = document.getElementById('c-fuel');
+      const keepHvo = v.fuel === 'diesel' && fs.value === 'hvo100';
+      if (!keepHvo) fs.value = v.fuel;
+      if (v.fuel === 'laddhybrid') { document.getElementById('c-pf').value = v.phev_fuel || 'bensin'; document.getElementById('c-ce').value = numTrim(v.kwh); }
+      document.getElementById('c-cons').value = numTrim(consOf(v, v.fuel === 'laddhybrid' ? 'bensin' : v.fuel));
+      const mi = document.getElementById('c-modell');
+      if (!mi.value || mi.dataset.auto === '1') { mi.value = (carForm.make + ' ' + v.model).slice(0, 60); mi.dataset.auto = '1'; }
+      document.querySelector('input[name="c-cm"][value="calc"]').checked = true;
+      carCalcUpdate();
+    }
+
+    function radioVal(n) { const r = document.querySelector('input[name="' + n + '"]:checked'); return r ? r.value : null; }
+
+    function elPrice(home) {
+      const P = fuelPrices(), h = P.el_hem && P.el_hem.price, s = P.el_snabb && P.el_snabb.price;
+      const sh = home ?? fuelCfg().el_home_share;
+      const p = sh === 100 ? h : sh === 0 ? s : (h != null && s != null ? h * sh / 100 + s * (100 - sh) / 100 : null);
+      return { price: p, txt: sh + ' % hemma ' + (h != null ? num(h) : '–') + ' / ' + (100 - sh) + ' % snabb ' + (s != null ? num(s) : '–') + ' kr/kWh' };
+    }
+
+    function carCalcUpdate(fuelChanged) {
+      const cm = radioVal('c-cm'), fuel = document.getElementById('c-fuel').value, pm = radioVal('c-pm');
+      const show = (id, on) => { const e = document.getElementById(id); if (e) e.style.display = on ? '' : 'none'; };
+      show('c-manual-g', cm === 'manual'); show('c-calc-g', cm !== 'manual');
+      const phev = fuel === 'laddhybrid';
+      show('c-pf-g', phev); show('c-ce-g', phev); show('c-es-g', phev); show('c-hs-g', phev || fuel === 'el');
+      show('c-mp-g', pm === 'manual'); show('c-mep-g', phev);
+      const unit = fuel ? (phev ? 'l' : FUELS[fuel][1]) : '';
+      document.getElementById('c-cons-l').textContent = phev ? 'Bränsle (l/mil)' : 'Förbrukning' + (unit ? ' (' + unit + '/mil)' : '');
+      document.getElementById('c-mp-l').textContent = 'Eget pris' + (unit ? ' (kr/' + unit + ')' : '');
+      if (cm === 'manual' || !fuel) { document.getElementById('c-result').textContent = ''; document.getElementById('c-auto-info').textContent = ''; return; }
+      const P = fuelPrices(), home = parseNum(document.getElementById('c-hs').value);
+      const mainKey = phev ? document.getElementById('c-pf').value : fuel;
+      const autoMain = fuel === 'el' ? elPrice(home) : { price: P[mainKey] && P[mainKey].price, txt: priceText(P[mainKey]) };
+      const autoEl = phev ? elPrice(home) : null;
+      document.getElementById('c-auto-info').textContent = pm === 'manual' ? '' : 'Används nu: ' + (fuel === 'el' ? autoMain.txt : autoMain.txt + (autoEl ? ' · el: ' + autoEl.txt : '')) +
+        (fuel === 'vatgas' && autoMain.price == null ? ' – ange eget pris här eller under "Ändra åkeriets priser".' : '');
+      const mp = parseNum(document.getElementById('c-mp').value), mep = parseNum(document.getElementById('c-mep').value);
+      const pMain = pm === 'manual' && mp != null ? mp : autoMain.price;
+      const pEl = phev ? (pm === 'manual' && mep != null ? mep : autoEl.price) : null;
+      const cons = parseNum(document.getElementById('c-cons').value), ce = parseNum(document.getElementById('c-ce').value);
+      let kr = null;
+      if (phev) {
+        const s = (parseNum(document.getElementById('c-es').value) || 0) / 100;
+        const a = s < 1 ? (cons != null && pMain != null ? (1 - s) * cons * pMain : null) : 0;
+        const b = s > 0 ? (ce != null && pEl != null ? s * ce * pEl : null) : 0;
+        kr = a == null || b == null ? null : a + b;
+      } else if (cons != null && pMain != null) kr = cons * pMain;
+      document.getElementById('c-result').textContent = kr != null ? '≈ ' + num(Math.round(kr * 100 + 1e-6) / 100) + ' kr/mil (ungefärligt)' : 'Kostnad: fyll i förbrukning och pris';
     }
 
     async function saveCar() {
       const cats = [...document.querySelectorAll('.c-cat:checked')].map(x => x.value);
-      const costRaw = document.getElementById('c-cost').value.trim().replace(/\s/g, '').replace(',', '.');
-      const cost = costRaw === '' ? null : Number(costRaw);
-      const args = {
-        p_id: editingCar === 'new' ? null : editingCar,
-        p_bilnummer: document.getElementById('c-nr').value.trim(),
-        p_regnr: document.getElementById('c-reg').value.trim() || null,
-        p_modell: document.getElementById('c-modell').value.trim(),
-        p_kategorier: cats,
-        p_cost_per_mil_kr: cost
+      const cm = radioVal('c-cm'), pm = radioVal('c-pm'), fuel = document.getElementById('c-fuel').value || null;
+      const make = carForm.own ? document.getElementById('c-make-own').value.trim() : carForm.make;
+      const car = {
+        bilnummer: document.getElementById('c-nr').value.trim(),
+        regnr: document.getElementById('c-reg').value.trim() || null,
+        modell: document.getElementById('c-modell').value.trim(),
+        kategorier: cats, make: make || null, model_id: carForm.own ? null : carForm.model_id,
+        cost_mode: cm, price_mode: pm, fuel,
+        cost_per_mil_kr: parseNum(document.getElementById('c-cost').value),
+        cons: parseNum(document.getElementById('c-cons').value), cons_el: parseNum(document.getElementById('c-ce').value),
+        phev_fuel: document.getElementById('c-pf').value, el_share: parseNum(document.getElementById('c-es').value),
+        el_home_share: parseNum(document.getElementById('c-hs').value),
+        manual_price: parseNum(document.getElementById('c-mp').value), manual_el_price: parseNum(document.getElementById('c-mep').value)
       };
-      if (!args.p_bilnummer) { alert('Fyll i bilnummer.'); return; }
-      if (!args.p_modell) { alert('Fyll i bilmodell.'); return; }
+      if (!car.bilnummer) { alert('Fyll i bilnummer.'); return; }
+      if (!car.modell) { alert('Fyll i bilmodell.'); return; }
       if (!cats.length) { alert('Välj minst en kategori.'); return; }
-      if (cost != null && !(cost > 0 && cost <= 1000)) { alert('Bränslekostnaden ska vara ett tal mellan 0 och 1000 kr/mil, t.ex. 12,50.'); return; }
+      const bad = (v, lo, hi) => v != null && !(v > lo && v < hi);
+      if (cm === 'manual') {
+        if (car.cost_per_mil_kr == null || bad(car.cost_per_mil_kr, 0, 1000.01)) { alert('Bränslekostnaden ska vara ett tal mellan 0 och 1000 kr/mil, t.ex. 12,50.'); return; }
+      } else {
+        if (!fuel) { alert('Välj drivmedel.'); return; }
+        if (fuel === 'laddhybrid' ? (car.cons == null && car.cons_el == null) : car.cons == null) { alert('Fyll i förbrukning.'); return; }
+        if (bad(car.cons, 0, 100) || bad(car.cons_el, 0, 100)) { alert('Förbrukningen ska vara ett tal, t.ex. 0,65.'); return; }
+        if ([car.el_share, car.el_home_share].some(v => v != null && !(Number.isInteger(v) && v >= 0 && v <= 100))) { alert('Procent ska vara 0–100.'); return; }
+        if (pm === 'manual' && car.manual_price == null && car.manual_el_price == null) { alert('Fyll i ett eget pris eller välj Automatiskt pris.'); return; }
+        if (bad(car.manual_price, 0, 1000) || bad(car.manual_el_price, 0, 1000)) { alert('Priset ska vara ett tal, t.ex. 2,50.'); return; }
+      }
       try {
-        await rpc('save_car', args);
-        editingCar = null;
+        await rpc('save_car', { p_id: editingCar === 'new' ? null : editingCar, p_car: car });
+        editingCar = null; carForm = null;
         await loadCars();
       } catch (e) { alert(errText(e)); }
     }
@@ -852,6 +1130,7 @@
         case 'goals_change': return who + ' ändrade åkeriets mål' + (d.to ? ' (per bil: ' + d.to.month + ' kr/mån, ' + d.to.week + ' kr/v, ' + d.to.day + ' kr/dag' + (d.to.cars ? ', ' + d.to.cars + ' bilar' : '') + ')' : '');
         case 'car_add': return who + ' lade till bil ' + (e.target_id || '') + (d.modell ? ' (' + d.modell + ')' : '');
         case 'car_edit': return who + ' ändrade bil ' + (e.target_id || '');
+        case 'fuel_settings': return who + ' ändrade åkeriets drivmedelspriser';
         case 'car_delete': return who + ' tog bort bil ' + (e.target_id || '') + (d.modell ? ' (' + d.modell + ')' : '');
         case 'category_change': return who + ' ändrade kategori på ' + e.target_id + ' till ' + catName(d.to);
         default: return who + ': ' + e.action + ' ' + (e.target_id || '');
