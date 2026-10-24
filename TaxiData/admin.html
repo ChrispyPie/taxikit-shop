@@ -93,9 +93,9 @@
     <div id="content"></div>
   </div>
 
-  <script src="serverstatus.js?v=20261024f"></script>
+  <script src="serverstatus.js?v=20261024g"></script>
   <script>
-    const APP_VERSION = '1.0.10';
+    const APP_VERSION = '1.0.11';
     console.log('Admin version:', APP_VERSION);
     const SUPABASE_URL = 'https://lpfdryvukqmjlgenuzpb.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_7LwIOZ5ygRvJqJKFxl4cNQ_LvrzrHrP';
@@ -118,6 +118,7 @@
     let data = { trips: [], shifts: [] };
     let loadedMonths = {};
     let drivers = {};
+    let extraIds = new Set();
     let path = [];
     localStorage.removeItem('admin_path');
     let category = localStorage.getItem('admin_category') || 'inkort';
@@ -146,6 +147,14 @@
 
     function isOwner() {
       return getMyCategory() === 'agare';
+    }
+
+    // Åkeridata (hela åkeriets data) är för ägaren.
+    // TILLFÄLLIGT under utvecklingen får även S admin se den (utan förar-id). Ta bort 'superadmin' här
+    // och i private.company_view_roles() på servern för att stänga. Admin har aldrig åtkomst.
+    const AKERI_EXTRA_ROLES = ['superadmin'];
+    function canSeeAkeridata() {
+      return isOwner() || AKERI_EXTRA_ROLES.includes(getMyCategory());
     }
 
     function isSuperAdmin() {
@@ -195,22 +204,8 @@
       return months;
     }
 
-    async function loadMonth(ym) {
-      if (loadedMonths[ym]) return;
-      try {
-        // Månadsdata hämtas från servern (kräver inloggning med adminbehörighet för alla förare)
-        const monthData = await rpc('get_trip_data', { p_dataset: ym });
-        if (monthData) loadedMonths[ym] = monthData;
-      } catch (e) {}
-    }
-
-    function mergeLoadedData() {
-      data = { trips: [], shifts: [] };
-      Object.values(loadedMonths).forEach(m => {
-        if (m.trips) data.trips.push(...m.trips);
-        if (m.shifts) data.shifts.push(...m.shifts);
-      });
-    }
+    // Admin-sidan hämtar ingen resdata längre: förarlistan kommer från servern (admin_list_drivers),
+    // och resdata per förare visas bara för ägaren (i Körpassdata/Åkeridata).
 
     // Alla läsningar/ändringar av förare går via server-funktioner (RPC)
     // som kontrollerar inloggningen och behörigheten på servern.
@@ -247,7 +242,9 @@
     async function reloadDrivers() {
       const rows = await rpc('admin_list_drivers');
       drivers = {};
-      if (Array.isArray(rows)) rows.forEach(r => { drivers[r.id] = r; });
+      extraIds = new Set();
+      // registered === false: förar-id som bara finns i resdatan (inte upplagd ännu)
+      if (Array.isArray(rows)) rows.forEach(r => { if (r.registered === false) extraIds.add(r.id); else drivers[r.id] = r; });
     }
 
     async function loadData() {
@@ -255,10 +252,6 @@
         location.href = 'index.html';
         return;
       }
-      const monthsToLoad = getMonthsInPeriod();
-      await Promise.all(monthsToLoad.map(loadMonth));
-      mergeLoadedData();
-
       if (!getToken()) {
         location.href = 'index.html';
         return;
@@ -318,9 +311,7 @@
     }
 
     function getAllDriverIds() {
-      const ids = new Set();
-      (data.shifts || []).forEach(s => { if (s.forar) ids.add(s.forar); });
-      (data.trips || []).forEach(t => { if (t.forar) ids.add(t.forar); });
+      const ids = new Set(extraIds);
       Object.keys(drivers).forEach(id => ids.add(id));
       return Array.from(ids);
     }
@@ -393,7 +384,7 @@
 
       if (path.length === 0) {
         title.textContent = 'Admin';
-        content.innerHTML = `<div class="grid">${menu.map(m => `
+        content.innerHTML = `<div class="grid">${menu.filter(m => m.id !== 'akeridata' || canSeeAkeridata()).map(m => `
           <div class="icon" onclick="${m.id === 'forarapp' ? "location.href='index.html'" : "openMenu('" + m.id + "')"}">
             <div class="emoji">${m.icon}</div>
             <div class="label">${m.label}</div>
@@ -673,6 +664,7 @@
         case 'login_failed': return 'Misslyckad inloggning för ' + (e.target_id || '?') + (failReasons[d.reason] ? ' (' + failReasons[d.reason] + ')' : '');
         case 'activate': return who + ' aktiverade ' + e.target_id + (d.category ? ' som ' + catName(d.category) : '');
         case 'deactivate': return who + ' avaktiverade ' + e.target_id;
+        case 'goals_change': return who + ' ändrade åkeriets mål' + (d.to ? ' (per bil: ' + d.to.month + ' kr/mån, ' + d.to.week + ' kr/v, ' + d.to.day + ' kr/dag, ' + d.to.cars + ' bilar)' : '');
         case 'category_change': return who + ' ändrade kategori på ' + e.target_id + ' till ' + catName(d.to);
         default: return who + ': ' + e.action + ' ' + (e.target_id || '');
       }

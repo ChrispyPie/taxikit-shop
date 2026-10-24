@@ -4,10 +4,13 @@ const TRIP_API_KEY = 'sb_publishable_7LwIOZ5ygRvJqJKFxl4cNQ_LvrzrHrP';
 // Åkeridata-sidan sätter window.TAXI_MODE = 'company' innan den här filen laddas.
 const TAXI_MODE = window.TAXI_MODE || 'driver';
 const COMPANY = TAXI_MODE === 'company';
-// Roller som får välja vilken förare de tittar på i Körpassdata.
-// Servern (get_trip_data) skickar bara andra förares data till admin/ägare/superadmin,
-// så en vanlig förare får aldrig någon annans resor även om han skulle försöka.
-const DRIVER_PICKER_ROLES = ['agare', 'superadmin'];
+// Bara ägaren får välja vilken förare han tittar på i Körpassdata (data per förare är personlig).
+// Servern (get_trip_data) skickar bara andra förares data med förar-id till ägaren,
+// så ingen annan kan se någon annans resor även om de skulle försöka.
+const DRIVER_PICKER_ROLES = ['agare'];
+let myRole = '';                   // inloggad roll (från servern)
+let companyGoals = null;           // åkeriets mål per bil + antal bilar (från servern)
+function isOwnerRole() { return myRole === 'agare'; }
 let data = {};
 let currentView = 'day';
 let currentDate = new Date();
@@ -68,8 +71,15 @@ async function loadData() {
     data = {};
   }
   tripsByDriver = null;
-  if (COMPANY) await loadDriverNames();
-  else await setupDriverPicker();
+  if (!myRole) {
+    myRole = (window.driverData && window.driverData.category) || '';
+    if (!myRole) { try { const me = await tripRpc('get_me'); myRole = (me && me.category) || ''; } catch (e) {} }
+  }
+  if (COMPANY) {
+    // Förarnamn bara för ägaren; övriga får inga förar-id från servern.
+    if (isOwnerRole()) await loadDriverNames();
+    try { companyGoals = await tripRpc('get_company_goals'); } catch (e) { companyGoals = null; }
+  } else await setupDriverPicker();
 }
 
 // Hämtar förarnamn (servern ger bara namn till roller som får se dem)
@@ -93,11 +103,7 @@ function driverLabel(id) {
 async function setupDriverPicker() {
   const label = document.getElementById('driver-label');
   if (!label) return;
-  let role = (window.driverData && window.driverData.category) || '';
-  if (!role) {
-    try { const me = await tripRpc('get_me'); role = (me && me.category) || ''; } catch (e) {}
-  }
-  if (!DRIVER_PICKER_ROLES.includes(role)) {
+  if (!DRIVER_PICKER_ROLES.includes(myRole)) {
     viewDriver = currentDriver;
     return;
   }
@@ -381,23 +387,28 @@ function render() {
   const krPerMil = totalKm ? Math.round(inkort / (totalKm / 10)) : 0;
   const krPerTimme = totalMinutes ? Math.round(inkort / (totalMinutes / 60)) : 0;
   const goalTab = isPeriod ? 'dag' : currentTab;
-  const goal = goals[goalTab] || 4000;
+  // Åkeriet: mål per bil × antal bilar. Egen period: dagsmålet × antal dagar.
+  const periodDays = isPeriod ? daysBetween(customRange.from, customRange.to) : 1;
+  const perCar = companyGoals ? (goalTab === 'manad' ? companyGoals.per_car_month : goalTab === 'vecka' ? companyGoals.per_car_week : companyGoals.per_car_day) : 0;
+  const goal = COMPANY ? perCar * (companyGoals ? companyGoals.cars : 0) * periodDays : (goals[goalTab] || 4000);
   const diff = inkort - goal;
   const inkortPerSkift = antalSkift ? Math.round(inkort / antalSkift) : 0;
   const remaining = Math.max(0, goal - inkort);
   const remainingShifts = getRemainingShifts(currentDate, currentTab);
   const behovPerSkift = remainingShifts > 0 ? Math.round(remaining / remainingShifts) : 0;
   const diffColor = diff >= 0 ? '#38a169' : '#e53e3e';
-  // Mål/Diff gäller en förares mål per dag/vecka/månad. De visas inte för hela åkeriet
-  // eller för en egen period (där finns inget mål att jämföra mot).
-  const showGoal = !COMPANY && !isPeriod;
+  // Förare: Mål/Diff per dag/vecka/månad (inte för egen period).
+  // Åkeriet: Mål/Diff alltid när målen kunde hämtas (egen period = dagsmål × dagar).
+  const showGoal = COMPANY ? !!companyGoals : !isPeriod;
+  const remainingDays = COMPANY && !isPeriod && currentTab !== 'dag' && isCurrent ? getRemainingShifts(currentDate, currentTab) : 0;
 
   let timmarSubs = '';
   if (COMPANY || isPeriod || currentTab !== 'dag' || shifts.length > 1) {
     timmarSubs = `
       <div class="sub"><span>Antal skift</span><span>${antalSkift} st</span></div>`;
+    if (COMPANY && isOwnerRole()) timmarSubs += `
+      <div class="sub"><span>Antal förare</span><span>${antalForare} st</span></div>`;
     if (COMPANY) timmarSubs += `
-      <div class="sub"><span>Antal förare</span><span>${antalForare} st</span></div>
       <div class="sub"><span>Antal bilar</span><span>${antalBilar} st</span></div>`;
     timmarSubs += `
       <div class="sub"><span>Kr/timme</span><span>${formatSEK(krPerTimme)}</span></div>`;
@@ -414,7 +425,12 @@ function render() {
   }
 
   let diffSubs = '';
-  if (currentTab !== 'dag' && isCurrent && remainingShifts > 0) {
+  if (COMPANY) {
+    if (isPeriod || currentTab !== 'dag') diffSubs = `
+      <div class="sub"><span>Inkört/skift</span><span>${formatSEK(inkortPerSkift)}</span></div>`;
+    if (remainingDays > 0) diffSubs += `
+      <div class="sub"><span>Behov/dag</span><span>${formatSEK(Math.round(remaining / remainingDays))}</span></div>`;
+  } else if (currentTab !== 'dag' && isCurrent && remainingShifts > 0) {
     diffSubs = `
       <div class="sub"><span>Inkört/skift</span><span>${formatSEK(inkortPerSkift)}</span></div>
       <div class="sub"><span>Behov/skift</span><span>${formatSEK(behovPerSkift)}</span></div>`;
@@ -445,9 +461,19 @@ function render() {
     <div class="sub"><span>Kr/körning</span><span>${formatSEK(krPerKorning)}</span></div>
     <div class="stat-row" data-key="inkort" onclick="toggle(this)"><span class="toggle">+</span><span class="label">Inkört</span><span class="value">${formatSEK(inkort)}</span></div>
     ${paymentSubs}`;
+  if (showGoal && COMPANY) {
+    // Ägaren trycker på Mål för att ändra; övriga kan fälla ut och se hur målet räknas.
+    const canEdit = isOwnerRole() && companyGoals.can_edit;
+    const how = isPeriod ? `${formatSEK(companyGoals.per_car_day)} × ${companyGoals.cars} bilar × ${periodDays} dagar` : `${formatSEK(perCar)} × ${companyGoals.cars} bilar`;
+    html += canEdit
+      ? `<div class="stat-row" id="goal-row" onclick="openGoalModal()"><span class="toggle">✎</span><span class="label">Mål</span><span class="value" style="border-bottom: 1px solid #cbd5e0; padding-bottom: 2px;">− ${formatSEK(goal)}</span></div>
+    <div class="sub visible"><span>Per bil</span><span>${how}</span></div>`
+      : `<div class="stat-row" id="goal-row" data-key="mal" onclick="toggle(this)"><span class="toggle">+</span><span class="label">Mål</span><span class="value" style="border-bottom: 1px solid #cbd5e0; padding-bottom: 2px;">− ${formatSEK(goal)}</span></div>
+    <div class="sub"><span>Per bil</span><span>${how}</span></div>`;
+  } else if (showGoal) html += `
+    <div class="stat-row" onclick="editGoal()"><span class="toggle"></span><span class="label">Mål</span><span class="value" style="border-bottom: 1px solid #cbd5e0; padding-bottom: 2px;">− ${formatSEK(goal)}</span></div>`;
   if (showGoal) html += `
-    <div class="stat-row" onclick="editGoal()"><span class="toggle"></span><span class="label">Mål</span><span class="value" style="border-bottom: 1px solid #cbd5e0; padding-bottom: 2px;">− ${formatSEK(goal)}</span></div>
-    <div class="stat-row" data-key="diff" onclick="toggle(this)"><span class="toggle">${currentTab !== 'dag' ? '+' : ''}</span><span class="label">Diff</span><span class="value" style="color:${diffColor}; font-weight:700;">${formatSEK(diff)}</span></div>
+    <div class="stat-row" data-key="diff" onclick="toggle(this)"><span class="toggle">${diffSubs ? '+' : ''}</span><span class="label">Diff</span><span class="value" style="color:${diffColor}; font-weight:700;">${formatSEK(diff)}</span></div>
     ${diffSubs}`;
   html += `</div>`;
 
@@ -468,7 +494,8 @@ function render() {
       const shiftOther = shiftTrips.filter(t => t.kredittyp !== '999' && t.kredittyp !== '164').reduce((sum, t) => sum + parseAmount(t.belopp), 0);
       const shiftInkort = shiftOther + shiftUber * (1 - UBER_FEE);
       const dateLabel = (COMPANY && currentTab === 'dag') ? '' : formatShiftDate(s.start) + ' ';
-      const who = COMPANY ? `<span class="shift-who">${escHtml(s.taxi || '?')} · ${escHtml(driverLabel(s.forar || '710022'))}</span>` : '';
+      // Förare visas bara för ägaren; övriga ser bara bilen
+      const who = COMPANY ? `<span class="shift-who">${escHtml(s.taxi || '?')}${isOwnerRole() ? ' · ' + escHtml(driverLabel(s.forar || '710022')) : ''}</span>` : '';
       const tripsHtml = shiftTrips.map(t => {
         const isBom = t.kredittyp === '999';
         return `<div class="sub shift-trip" data-key="st:${escHtml(t.kvittonr)}|${escHtml(t.forar || '710022')}" onclick="toggleTrip(this, event)" style="${isBom ? 'opacity:0.6;' : ''}"><span class="toggle">+</span><span>${escHtml(t.kvittonr)}${isBom ? ' (BOM)' : ''}</span><span>${formatSEK(parseAmount(t.belopp))}</span></div>
@@ -697,3 +724,56 @@ function confirmPeriod() {
 
 const periodBtnEl = document.getElementById('period-btn');
 if (periodBtnEl) periodBtnEl.onclick = openPeriodModal;
+
+
+// ---- Åkeriets mål (bara ägaren kan ändra; servern kontrollerar behörigheten) ----
+function openGoalModal() {
+  if (!companyGoals || !isOwnerRole()) return;
+  let m = document.getElementById('goal-modal');
+  if (!m) {
+    m = document.createElement('div');
+    m.id = 'goal-modal';
+    m.className = 'pm-overlay';
+    m.innerHTML = `<div class="pm-box" role="dialog" aria-label="Åkeriets mål">
+      <div class="pm-title" style="text-align:center;font-weight:700;margin-bottom:0.6rem;">Åkeriets mål</div>
+      <div class="pm-hint">Mål per bil. Totalen blir målet × antal bilar.</div>
+      <label class="gm-row"><span>Per bil / dag</span><input id="gm-day" type="number" inputmode="numeric" min="0" step="100"></label>
+      <label class="gm-row"><span>Per bil / vecka</span><input id="gm-week" type="number" inputmode="numeric" min="0" step="500"></label>
+      <label class="gm-row"><span>Per bil / månad</span><input id="gm-month" type="number" inputmode="numeric" min="0" step="1000"></label>
+      <label class="gm-row"><span>Antal bilar</span><input id="gm-cars" type="number" inputmode="numeric" min="1" max="200" step="1"></label>
+      <div id="gm-err" class="gm-err"></div>
+      <div class="pm-btns"><button type="button" id="gm-cancel">Avbryt</button><button type="button" id="gm-save" class="primary">Spara</button></div>
+    </div>`;
+    document.body.appendChild(m);
+    m.addEventListener('click', e => { if (e.target === m) m.style.display = 'none'; });
+    document.getElementById('gm-cancel').onclick = () => { m.style.display = 'none'; };
+    document.getElementById('gm-save').onclick = saveGoals;
+  }
+  document.getElementById('gm-day').value = companyGoals.per_car_day;
+  document.getElementById('gm-week').value = companyGoals.per_car_week;
+  document.getElementById('gm-month').value = companyGoals.per_car_month;
+  document.getElementById('gm-cars').value = companyGoals.cars;
+  document.getElementById('gm-err').textContent = '';
+  m.style.display = 'flex';
+}
+
+async function saveGoals() {
+  const v = id => Number(document.getElementById(id).value);
+  const day = v('gm-day'), week = v('gm-week'), month = v('gm-month'), cars = v('gm-cars');
+  const err = document.getElementById('gm-err');
+  if (![day, week, month].every(x => Number.isFinite(x) && x >= 0) || !Number.isInteger(cars) || cars < 1 || cars > 200) {
+    err.textContent = 'Kontrollera värdena (antal bilar 1–200).';
+    return;
+  }
+  const btn = document.getElementById('gm-save');
+  btn.disabled = true;
+  try {
+    companyGoals = await tripRpc('set_company_goals', { p_month: month, p_week: week, p_day: day, p_cars: cars });
+    document.getElementById('goal-modal').style.display = 'none';
+    render();
+  } catch (e) {
+    err.textContent = 'Kunde inte spara målen.';
+  } finally {
+    btn.disabled = false;
+  }
+}
