@@ -99,9 +99,9 @@
     <div id="content"></div>
   </div>
 
-  <script src="serverstatus.js?v=20261024r"></script>
+  <script src="serverstatus.js?v=20261024s"></script>
   <script>
-    const APP_VERSION = '1.0.19';
+    const APP_VERSION = '1.0.20';
     console.log('Admin version:', APP_VERSION);
     const SUPABASE_URL = 'https://lpfdryvukqmjlgenuzpb.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_7LwIOZ5ygRvJqJKFxl4cNQ_LvrzrHrP';
@@ -1143,6 +1143,7 @@
         case 'login_failed': return 'Misslyckad inloggning för ' + (e.target_id || '?') + (failReasons[d.reason] ? ' (' + failReasons[d.reason] + ')' : '');
         case 'activate': return who + ' aktiverade ' + e.target_id + (d.category ? ' som ' + catName(d.category) : '');
         case 'deactivate': return who + ' avaktiverade ' + e.target_id;
+        case 'deactivate_cleanup': return 'Systemet städade avaktiverade ' + e.target_id + ' (gammalt lösenord och nollställning borttagna)';
         case 'auto_deactivate': return 'Systemet avaktiverade ' + e.target_id + ' (' + (d.days || 30) + ' dagar utan inloggning)';
         case 'activation_link': return who + ' skapade ny aktiveringslänk för ' + e.target_id;
         case 'activation_complete': return (e.target_id || '?') + ' aktiverade sitt konto och valde lösenord';

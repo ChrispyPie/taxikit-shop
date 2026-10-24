@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaxiData</title>
-  <link rel="stylesheet" href="style.css?v=20261024r">
+  <link rel="stylesheet" href="style.css?v=20261024s">
   <style>
     #content { padding: 16px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 16px; }
@@ -109,9 +109,9 @@
     <main id="dashboard"></main>
   </div>
 
-  <script src="serverstatus.js?v=20261024r"></script>
-  <script src="badges.js?v=20261024r"></script>
-  <script src="script.js?v=20261024r"></script>
+  <script src="serverstatus.js?v=20261024s"></script>
+  <script src="badges.js?v=20261024s"></script>
+  <script src="script.js?v=20261024s"></script>
   <script>
     var menu = [
       { id: 'kordata', icon: '🚗', label: 'Körpassdata', roles: ['standard', 'admin', 'agare', 'superadmin'] },
@@ -167,7 +167,7 @@
 
     var loginErrors = {
       wrong: 'Fel förar-ID eller lösenord',
-      inactive: 'Kontot är inte aktiverat. Kontakta din åkare.',
+      inactive: 'Kontot är inaktiverat. Kontakta din åkare.',
       ended: 'Kontot är avslutat. Kontakta din åkare.',
       locked: 'För många felaktiga försök. Vänta 15 minuter och försök igen.',
       pending: 'Kontot är inte klart. Öppna aktiveringslänken du fick och välj ett lösenord.',
@@ -619,4 +619,4 @@
     }
   </script>
 </body>
-</html><!-- cache-bust 1792443100 -->
+</html><!-- cache-bust 1792443200 -->
