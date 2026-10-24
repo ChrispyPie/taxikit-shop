@@ -52,6 +52,8 @@
       <h1>Körpassdata</h1>
       <span id="driver-label"></span>
     </header>
+    <!-- Serverstatus-lampan visas bara i vyer vars data kommer från servern (här Körpassdata).
+         Planerat: en kommande vy 'Topplistor' ska också visa den – lägg då en egen div där och anropa initServerStatus('<id>'). -->
     <div id="server-status" class="server-status" style="display:none"></div>
     <div class="controls">
       <div class="tabs">
@@ -70,7 +72,7 @@
     <main id="dashboard"></main>
   </div>
 
-  <script src="serverstatus.js?v=20261024c"></script>
+  <script src="serverstatus.js?v=20261024d"></script>
   <script src="script.js?v=20261024c"></script>
   <script>
     var menu = [

@@ -87,7 +87,7 @@
       <div onclick="location.href='index.html'" style="padding:8px; cursor:pointer;">Förarapp</div>
       <div onclick="logout()" style="padding:8px; cursor:pointer; color:#dc2626;">Logga ut</div>
     </div>
-    <div id="server-status" class="server-status" style="display:none"></div>
+    <div id="server-status" class="server-status" data-show="0" style="display:none"></div>
     <div class="breadcrumb" id="breadcrumb"></div>
     <div class="controls hidden" id="controls">
       <select id="category" onchange="changeCategory()">
@@ -117,15 +117,17 @@
     </div>
   </div>
 
-  <script src="serverstatus.js?v=20261024c"></script>
+  <script src="serverstatus.js?v=20261024d"></script>
   <script>
-    const APP_VERSION = '1.0.7';
+    const APP_VERSION = '1.0.8';
     console.log('Admin version:', APP_VERSION);
     const SUPABASE_URL = 'https://lpfdryvukqmjlgenuzpb.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_7LwIOZ5ygRvJqJKFxl4cNQ_LvrzrHrP';
 
+    // serverStatus: true = vyn visar serverstatus-lampan (vyer vars data hämtas från servern).
+    // Planerat: en kommande vy 'Topplistor' beror också på serverdatan – lägg då till serverStatus: true på den.
     const menu = [
-      { id: 'akeridata', icon: '📊', label: 'Åkeridata' },
+      { id: 'akeridata', icon: '📊', label: 'Åkeridata', serverStatus: true },
       { id: 'chaufforer', icon: '👥', label: 'Chaufförer' },
       { id: 'statistik', icon: '📈', label: 'Statistik' },
       
@@ -480,6 +482,8 @@
     function render() {
       saveState();
       renderBreadcrumb();
+      const view = path.length ? menu.find(m => m.id === path[0].id) : null;
+      if (window.setServerStatusVisible) setServerStatusVisible('server-status', !!(view && view.serverStatus));
       const content = document.getElementById('content');
       const title = document.getElementById('title');
 
@@ -1025,7 +1029,6 @@
       render();
     }
 
-    if (window.initServerStatus) initServerStatus('server-status');
     loadData();
   </script>
 </body>

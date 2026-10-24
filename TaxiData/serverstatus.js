@@ -34,7 +34,7 @@
   async function refresh(el) {
     var token = localStorage.getItem('taxi_session') || '';
     if (!token) { el.style.display = 'none'; return; }
-    el.style.display = '';
+    el.style.display = el.dataset.show === '0' ? 'none' : '';
     try {
       var res = await fetch(API + '/rest/v1/rpc/get_server_status', {
         method: 'POST',
@@ -60,9 +60,19 @@
     }
   }
 
+  // Visa/dölj lampan för den vy som visas. Lampan ska bara synas där datan kommer från servern.
+  window.setServerStatusVisible = function (id, on) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.dataset.show = on ? '1' : '0';
+    if (!on) { el.style.display = 'none'; return; }
+    if (el._timer) refresh(el); else initServerStatus(id);
+  };
+
   window.initServerStatus = function (id) {
     var el = document.getElementById(id);
     if (!el) return;
+    if (el.dataset.show === '0') { el.style.display = 'none'; return; }
     if (!document.getElementById('server-status-css')) {
       var st = document.createElement('style'); st.id = 'server-status-css';
       st.textContent = '.server-status{display:flex;align-items:center;justify-content:center;gap:8px;font-size:0.82rem;padding:6px 10px;margin:8px auto 0;width:calc(100% - 24px);box-sizing:border-box;border-radius:999px;max-width:520px;background:#f7fafc;color:#2d3748}' +
