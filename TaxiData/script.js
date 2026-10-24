@@ -9,7 +9,7 @@ const COMPANY = TAXI_MODE === 'company';
 // så ingen annan kan se någon annans resor även om de skulle försöka.
 const DRIVER_PICKER_ROLES = ['agare'];
 let myRole = '';                   // inloggad roll (från servern)
-let companyGoals = null;           // åkeriets mål per bil + antal bilar (från servern)
+let companyGoals = null;           // åkeriets mål per bil + antal registrerade bilar (från servern, sidan Bilar)
 function isOwnerRole() { return myRole === 'agare'; }
 let data = {};
 let currentView = 'day';
@@ -399,7 +399,9 @@ function render() {
   const diffColor = diff >= 0 ? '#38a169' : '#e53e3e';
   // Förare: Mål/Diff per dag/vecka/månad (inte för egen period).
   // Åkeriet: Mål/Diff alltid när målen kunde hämtas (egen period = dagsmål × dagar).
-  const showGoal = COMPANY ? !!companyGoals : !isPeriod;
+  // Antal bilar = bilar registrerade under Bilar (admin). 0 bilar => tips i stället för mål 0.
+  const noCars = COMPANY && !!companyGoals && !(companyGoals.cars > 0);
+  const showGoal = COMPANY ? !!companyGoals && !noCars : !isPeriod;
   const remainingDays = COMPANY && !isPeriod && currentTab !== 'dag' && isCurrent ? getRemainingShifts(currentDate, currentTab) : 0;
 
   let timmarSubs = '';
@@ -461,6 +463,10 @@ function render() {
     <div class="sub"><span>Kr/körning</span><span>${formatSEK(krPerKorning)}</span></div>
     <div class="stat-row" data-key="inkort" onclick="toggle(this)"><span class="toggle">+</span><span class="label">Inkört</span><span class="value">${formatSEK(inkort)}</span></div>
     ${paymentSubs}`;
+  if (noCars) html += `
+    <div class="stat-row" id="goal-row" onclick="location.href='admin.html#bilar'"><span class="toggle"></span><span class="label">Mål</span><span class="value goal-hint">Lägg in bilar under Bilar</span></div>`
+    + (isOwnerRole() && companyGoals.can_edit ? `
+    <div class="sub visible" onclick="openGoalModal()" style="cursor:pointer;"><span>Mål per bil ✎</span><span>${formatSEK(perCar)}</span></div>` : '');
   if (showGoal && COMPANY) {
     // Ägaren trycker på Mål för att ändra; övriga kan fälla ut och se hur målet räknas.
     const canEdit = isOwnerRole() && companyGoals.can_edit;
@@ -736,11 +742,10 @@ function openGoalModal() {
     m.className = 'pm-overlay';
     m.innerHTML = `<div class="pm-box" role="dialog" aria-label="Åkeriets mål">
       <div class="pm-title" style="text-align:center;font-weight:700;margin-bottom:0.6rem;">Åkeriets mål</div>
-      <div class="pm-hint">Mål per bil. Totalen blir målet × antal bilar.</div>
+      <div class="pm-hint">Mål per bil. Totalen blir målet × antal bilar under Bilar.</div>
       <label class="gm-row"><span>Per bil / dag</span><input id="gm-day" type="number" inputmode="numeric" min="0" step="100"></label>
       <label class="gm-row"><span>Per bil / vecka</span><input id="gm-week" type="number" inputmode="numeric" min="0" step="500"></label>
       <label class="gm-row"><span>Per bil / månad</span><input id="gm-month" type="number" inputmode="numeric" min="0" step="1000"></label>
-      <label class="gm-row"><span>Antal bilar</span><input id="gm-cars" type="number" inputmode="numeric" min="1" max="200" step="1"></label>
       <div id="gm-err" class="gm-err"></div>
       <div class="pm-btns"><button type="button" id="gm-cancel">Avbryt</button><button type="button" id="gm-save" class="primary">Spara</button></div>
     </div>`;
@@ -752,23 +757,22 @@ function openGoalModal() {
   document.getElementById('gm-day').value = companyGoals.per_car_day;
   document.getElementById('gm-week').value = companyGoals.per_car_week;
   document.getElementById('gm-month').value = companyGoals.per_car_month;
-  document.getElementById('gm-cars').value = companyGoals.cars;
   document.getElementById('gm-err').textContent = '';
   m.style.display = 'flex';
 }
 
 async function saveGoals() {
   const v = id => Number(document.getElementById(id).value);
-  const day = v('gm-day'), week = v('gm-week'), month = v('gm-month'), cars = v('gm-cars');
+  const day = v('gm-day'), week = v('gm-week'), month = v('gm-month');
   const err = document.getElementById('gm-err');
-  if (![day, week, month].every(x => Number.isFinite(x) && x >= 0) || !Number.isInteger(cars) || cars < 1 || cars > 200) {
-    err.textContent = 'Kontrollera värdena (antal bilar 1–200).';
+  if (![day, week, month].every(x => Number.isFinite(x) && x >= 0 && x <= 10000000)) {
+    err.textContent = 'Kontrollera värdena.';
     return;
   }
   const btn = document.getElementById('gm-save');
   btn.disabled = true;
   try {
-    companyGoals = await tripRpc('set_company_goals', { p_month: month, p_week: week, p_day: day, p_cars: cars });
+    companyGoals = await tripRpc('set_company_goals', { p_month: month, p_week: week, p_day: day });
     document.getElementById('goal-modal').style.display = 'none';
     render();
   } catch (e) {
