@@ -16,7 +16,7 @@ STATIONS = {
     "G": "Göteborg C", "Cst": "Stockholm C", "Arnc": "Arlanda C", "Sci": "Stockholm City",
     "M": "Malmö C", "Mc": "Malmö C", "Lu": "Lund C", "Kh": "Köpenhamn H",
     "Hel": "Helsingborg C", "Hb": "Helsingborg C", "Hd": "Halmstad C", "Vå": "Varberg",
-    "Kb": "Kungsbacka", "A": "Alvesta", "Av": "Alvesta", "N": "Nässjö C",
+    "Kb": "Kungsbacka", "A": "Alingsås", "Av": "Alvesta", "N": "Nässjö C",
     "Lp": "Linköping C", "Nr": "Norrköping C", "K": "Katrineholm", "Fle": "Floda",
     "Hr": "Herrljunga", "F": "Falköping C", "Sk": "Skövde C", "Hpbg": "Hallsberg",
     "Ör": "Örebro C", "Tnd": "Trollhättan", "Thn": "Trollhättan", "J": "Jönköping C",

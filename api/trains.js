@@ -26,7 +26,7 @@ const STATIONS = {
   G: "Göteborg C", Cst: "Stockholm C", Arnc: "Arlanda C", Sci: "Stockholm City",
   M: "Malmö C", Mc: "Malmö C", Lu: "Lund C", Kh: "Köpenhamn H",
   Hel: "Helsingborg C", Hb: "Helsingborg C", Hd: "Halmstad C", "Vå": "Varberg",
-  Kb: "Kungsbacka", A: "Alvesta", Av: "Alvesta", N: "Nässjö C",
+  Kb: "Kungsbacka", A: "Alingsås", Av: "Alvesta", N: "Nässjö C",
   Lp: "Linköping C", Nr: "Norrköping C", K: "Katrineholm", Fle: "Floda",
   Hr: "Herrljunga", F: "Falköping C", Sk: "Skövde C", Hpbg: "Hallsberg",
   "Ör": "Örebro C", Tnd: "Trollhättan", Thn: "Trollhättan", J: "Jönköping C",
@@ -35,6 +35,11 @@ const STATIONS = {
   Vg: "Vänersborg C", "Vgå": "Vårgårda", Gro: "Gubbero", Gbm: "Göteborg Marieholm",
   Or: "Olskroken", Alh: "Alingsås", "Äh": "Älvängen", Sts: "Stenungsund",
   Kac: "Kalmar C", Bsc: "Borås C", Sfl: "Säffle",
+  // samma namn som den gamla flödesappen (skiftlogg/js/app-2.js) använder
+  "Än": "Älvängen", Ldo: "Lindome", Uv: "Uddevalla", Snu: "Stenungsund",
+  Vbc: "Varberg C", Smd: "Strömstad", Mst: "Mellerud", Ksc: "Karlstad C",
+  "Dk.kh": "Köpenhamn H", "No.osl": "Oslo S", Khn: "Kristinehamn", T: "Töreboda",
+  Hie: "Helsingör", Arb: "Arboga", Lkp: "Lidköping", Ed: "Ed",
 };
 
 // Senaste lyckade svar i den här (varma) instansen. Används om Trafikverket

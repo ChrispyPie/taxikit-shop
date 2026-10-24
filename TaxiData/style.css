@@ -180,3 +180,37 @@ main { max-width: 900px; margin: 1rem auto; padding: 0 1rem; }
   box-sizing: content-box; pointer-events: none;
 }
 .badge-host.has-badge[data-badge-text]:not([data-badge-text=""])::after { min-width: 10px; padding: 0 3px; height: 16px; line-height: 16px; top: -6px; right: -6px; }
+
+/* Ankomster (tåg/flyg) */
+.ank-tabs { margin-bottom: 0.6rem; }
+.ank-tabs .tab { padding: 0.45rem 1.1rem; font-size: 0.95rem; }
+.ank-head { display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; color: var(--text-soft); margin: 0 2px 0.5rem; }
+.ank-refresh { background: var(--surface); border: 1px solid var(--border); color: var(--primary); border-radius: 6px; width: 34px; height: 30px; font-size: 1rem; cursor: pointer; }
+.ank-warn { background: var(--danger-bg); color: var(--danger-text); border: 1px solid var(--danger); border-radius: 8px; padding: 6px 10px; font-size: 0.85rem; margin-bottom: 0.5rem; }
+.ank-chips { display: flex; gap: 6px; margin-bottom: 0.5rem; }
+.ank-chip { border: 1px solid var(--primary); background: var(--surface); color: var(--primary); border-radius: 14px; padding: 4px 12px; font-size: 0.85rem; cursor: pointer; }
+.ank-chip.on { background: var(--primary); color: var(--on-primary); }
+.ank-more { display: block; width: 100%; background: none; border: 1px dashed var(--border); color: var(--text-soft); border-radius: 8px; padding: 6px; font-size: 0.85rem; margin-bottom: 0.5rem; cursor: pointer; }
+.ank-day { font-weight: 700; font-size: 0.85rem; color: var(--text-soft); margin: 0.7rem 2px 0.3rem; }
+.ank-row { display: flex; gap: 10px; align-items: flex-start; background: var(--surface); border: 1px solid var(--border-soft); border-radius: 10px; padding: 9px 10px; margin-bottom: 6px; }
+.ank-row.arrived { opacity: 0.6; }
+.ank-row.canceled { background: var(--danger-bg); border-color: var(--danger); }
+.ank-row.canceled .ank-new, .ank-row.canceled .ank-from { text-decoration: line-through; }
+.ank-time { width: 3.4rem; flex-shrink: 0; text-align: center; }
+.ank-new { font-size: 1.15rem; font-weight: 700; color: var(--text); }
+.ank-new.changed { color: #c05621; }
+.ank-old { font-size: 0.8rem; color: var(--muted); text-decoration: line-through; }
+.ank-main { flex: 1; min-width: 0; }
+.ank-from { font-weight: 600; font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ank-meta { font-size: 0.8rem; color: var(--text-soft); margin-top: 1px; }
+.ank-note { font-size: 0.78rem; color: var(--muted); margin-top: 1px; }
+.ank-status { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; max-width: 6rem; text-align: right; }
+.ank-badge { font-size: 0.75rem; font-weight: 700; border-radius: 10px; padding: 2px 8px; white-space: nowrap; }
+.ank-badge.ok { background: #e6f4ea; color: var(--ok); }
+.ank-badge.warn { background: #fff4e5; color: #c05621; }
+.ank-badge.bad { background: var(--danger); color: white; }
+.ank-badge.early { background: #e6f0fa; color: var(--accent); }
+.ank-badge.done { background: var(--surface-soft); color: var(--muted); }
+.ank-delay { font-size: 0.75rem; font-weight: 600; }
+.ank-delay.warn { color: #c05621; } .ank-delay.bad { color: var(--danger-text); } .ank-delay.early { color: var(--accent); }
+.ank-empty { text-align: center; color: var(--muted); padding: 1.5rem 0; }

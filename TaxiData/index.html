@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaxiData</title>
-  <link rel="stylesheet" href="style.css?v=20261024s">
+  <link rel="stylesheet" href="style.css?v=20261024t">
   <style>
     #content { padding: 16px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 16px; }
@@ -109,12 +109,15 @@
     <main id="dashboard"></main>
   </div>
 
-  <script src="serverstatus.js?v=20261024s"></script>
-  <script src="badges.js?v=20261024s"></script>
-  <script src="script.js?v=20261024s"></script>
+  <script src="serverstatus.js?v=20261024t"></script>
+  <script src="badges.js?v=20261024t"></script>
+  <script src="script.js?v=20261024t"></script>
+  <script src="ankomster.js?v=20261024t"></script>
   <script>
     var menu = [
       { id: 'kordata', icon: '🚗', label: 'Körpassdata', roles: ['standard', 'admin', 'agare', 'superadmin'] },
+      // Namn och ikon för Ankomster ändras i ankomster.js (ANKOMSTER.title / icon)
+      { id: ANKOMSTER.id, icon: ANKOMSTER.icon, label: ANKOMSTER.title, roles: ['standard', 'admin', 'agare', 'superadmin'] },
       { id: 'statistik', icon: '📈', label: 'Statistik', roles: ['standard', 'admin', 'agare', 'superadmin'] },
       { id: 'toplistor', icon: '🏆', label: 'Toplistor', roles: ['standard', 'admin', 'agare', 'superadmin'] },
       { id: 'kommunikation', icon: '💬', label: 'Kommunikation', roles: ['standard', 'admin', 'agare', 'superadmin'] },
@@ -263,6 +266,10 @@
         document.getElementById('driver-label').textContent = driverId;
         if (typeof loadData === 'function') loadData().then(render);
       } else {
+        if (savedView === ANKOMSTER.id) {
+          current = savedView;
+          try { history.pushState({ view: current }, ''); } catch (e) {}
+        }
         document.getElementById('app').style.display = 'block';
         setFullName();
         renderMenu();
@@ -542,7 +549,7 @@
       } else if (profileLock) {
         try { history.pushState({ view: 'profil' }, ''); } catch (e) {}
         lockBlocked();
-      } else if (current === 'profil') {
+      } else if (current === 'profil' || current === ANKOMSTER.id) {
         goHome();
       }
     });
@@ -551,9 +558,13 @@
       var content = document.getElementById('content');
       var title = document.getElementById('title');
 
+      if (current !== ANKOMSTER.id) ANKOMSTER.stop();
       if (current === 'profil') {
         title.textContent = 'Profil';
         renderProfile();
+      } else if (current === ANKOMSTER.id) {
+        title.textContent = ANKOMSTER.title;
+        ANKOMSTER.render(content);
       } else if (current) {
         title.textContent = current;
         content.innerHTML = '<div class="section"><p>Kommer snart: ' + current + '</p></div>';
@@ -588,6 +599,11 @@
         if (window.initServerStatus) initServerStatus('server-status');
         document.getElementById('driver-label').textContent = driverId;
         if (typeof loadData === 'function') loadData().then(render);
+      } else if (id === ANKOMSTER.id) {
+        localStorage.setItem('taxi_view', id);
+        current = id;
+        try { history.pushState({ view: id }, ''); } catch (e) {}
+        renderMenu();
       } else {
         localStorage.removeItem('taxi_view');
         current = id;
@@ -619,4 +635,4 @@
     }
   </script>
 </body>
-</html><!-- cache-bust 1792443200 -->
+</html><!-- cache-bust 1792443300 -->
