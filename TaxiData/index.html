@@ -52,6 +52,7 @@
       <h1>Körpassdata</h1>
       <span id="driver-label"></span>
     </header>
+    <div id="server-status" class="server-status" style="display:none"></div>
     <div class="controls">
       <div class="tabs">
         <button class="tab active" data-tab="dag">Dag</button>
@@ -69,7 +70,8 @@
     <main id="dashboard"></main>
   </div>
 
-  <script src="script.js?v=20261024b"></script>
+  <script src="serverstatus.js?v=20261024c"></script>
+  <script src="script.js?v=20261024c"></script>
   <script>
     var menu = [
       { id: 'kordata', icon: '🚗', label: 'Körpassdata', roles: ['standard', 'admin', 'agare', 'superadmin'] },
@@ -160,6 +162,7 @@
       var savedView = localStorage.getItem('taxi_view');
       if (savedView === 'kordata') {
         document.getElementById('dashboard-view').classList.remove('hidden');
+        if (window.initServerStatus) initServerStatus('server-status');
         document.getElementById('driver-label').textContent = driverId;
         if (typeof loadData === 'function') loadData().then(render);
       } else {
@@ -215,6 +218,7 @@
         localStorage.setItem('taxi_view', 'kordata');
         document.getElementById('app').style.display = 'none';
         document.getElementById('dashboard-view').classList.remove('hidden');
+        if (window.initServerStatus) initServerStatus('server-status');
         document.getElementById('driver-label').textContent = driverId;
         if (typeof loadData === 'function') loadData().then(render);
       } else {

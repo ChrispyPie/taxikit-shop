@@ -235,8 +235,10 @@ function render() {
   document.getElementById('next').style.opacity = isCurrent ? '0.3' : '1';
 
   if (data.last_updated) {
-    const d = new Date(data.last_updated);
-    document.getElementById('last-updated').textContent = 'Senast uppdaterad ' + d.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+    // Tidpunkt då servern senast hämtades utan fel, i svensk tid
+    const when = window.fmtSthlmTime ? fmtSthlmTime(data.last_updated)
+      : new Date(data.last_updated).toLocaleTimeString('sv-SE', { timeZone: 'Europe/Stockholm', hour: '2-digit', minute: '2-digit' });
+    document.getElementById('last-updated').textContent = 'Senast hämtad från servern ' + when;
   }
 
   let shifts = [];
