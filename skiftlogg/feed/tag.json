@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-10-24T02:34:16+02:00",
+  "updated": "2026-10-24T02:35:25+02:00",
   "error": null,
   "trains": [
     {
@@ -110019,9 +110019,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Sue",
-      "lastSeenSig": "Sue",
-      "lastSeenTs": "2026-10-24T02:32:00.000+02:00",
+      "lastSeen": "Bhs",
+      "lastSeenSig": "Bhs",
+      "lastSeenTs": "2026-10-24T02:35:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -110137,7 +110137,7 @@
       ],
       "sched": "2026-10-24T02:35:00.000+02:00",
       "est": "2026-10-24T02:36:00.000+02:00",
-      "act": "",
+      "act": "2026-10-24T02:36:00.000+02:00",
       "track": "10",
       "canceled": false,
       "product": "Västtågen",
@@ -110148,9 +110148,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Olskroken",
-      "lastSeenSig": "Or",
-      "lastSeenTs": "2026-10-24T02:32:00.000+02:00",
+      "lastSeen": "Göteborg C",
+      "lastSeenSig": "G",
+      "lastSeenTs": "2026-10-24T02:36:00.000+02:00",
       "stops": [
         {
           "sig": "Vg",
@@ -110246,7 +110246,7 @@
           "sig": "G",
           "name": "Göteborg C",
           "t": "2026-10-24T02:36:00.000+02:00",
-          "act": "",
+          "act": "2026-10-24T02:36:00.000+02:00",
           "est": "2026-10-24T02:36:00.000+02:00",
           "sched": "2026-10-24T02:35:00.000+02:00",
           "track": "10"
@@ -123860,7 +123860,63 @@
           "Description": "Tåg"
         }
       ],
-      "snabb": false
+      "snabb": false,
+      "stops": [
+        {
+          "sig": "G",
+          "name": "Göteborg C",
+          "t": "2026-10-24T11:10:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-10-24T11:10:00.000+02:00",
+          "track": "6"
+        },
+        {
+          "sig": "Gas",
+          "name": "Gas",
+          "t": "2026-10-24T11:14:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-10-24T11:14:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Thn",
+          "name": "Trollhättan",
+          "t": "2026-10-24T11:42:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-10-24T11:42:00.000+02:00",
+          "track": "1"
+        },
+        {
+          "sig": "Uv",
+          "name": "Uv",
+          "t": "2026-10-24T12:09:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-10-24T12:09:00.000+02:00",
+          "track": "2b"
+        },
+        {
+          "sig": "Mkl",
+          "name": "Mkl",
+          "t": "2026-10-24T12:27:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-10-24T12:27:00.000+02:00",
+          "track": "2"
+        },
+        {
+          "sig": "Dl",
+          "name": "Dl",
+          "t": "2026-10-24T12:36:00.000+02:00",
+          "act": "",
+          "est": "",
+          "sched": "2026-10-24T12:36:00.000+02:00",
+          "track": "2"
+        }
+      ]
     },
     {
       "id": "432",
@@ -127811,6 +127867,31 @@
         }
       ],
       "snabb": false
+    },
+    {
+      "id": "392",
+      "dir": "AVG",
+      "other": "No.osl",
+      "otherSig": "No.osl",
+      "from": [
+        "Göteborg C"
+      ],
+      "to": [
+        "No.osl"
+      ],
+      "sched": "2026-10-24T16:10:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "8",
+      "canceled": false,
+      "product": "Vy Snabbtåg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": true
     }
   ]
 }
