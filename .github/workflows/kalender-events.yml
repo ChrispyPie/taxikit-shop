@@ -1,15 +1,15 @@
 name: Kalender evenemang
 # Hämtar evenemang (goteborg.com, Got Event, Svenska Mässan) och skickar dem till Supabase
 # via RPC events_ingest. Ingen commit, ingen push. 2 s mellan anrop, tydlig User-Agent.
-# Schemat är AV tills secrets finns (SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, EVENTS_INGEST_KEY).
+# Körs 06:17 och 18:17 svensk sommartid (04:17/16:17 UTC). Secrets: SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, EVENTS_INGEST_KEY.
 on:
   workflow_dispatch:
     inputs:
       city:
         description: "Stad (nyckel i scripts/kalender_cities.json)"
         default: "goteborg"
-  # schedule:
-  #   - cron: "17 4,16 * * *"   # två gånger per dygn (UTC)
+  schedule:
+    - cron: "17 4,16 * * *"   # två gånger per dygn (UTC)
 
 concurrency:
   group: kalender-events
