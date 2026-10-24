@@ -100,8 +100,9 @@
   </div>
 
   <script src="serverstatus.js?v=20261024v"></script>
+  <script src="verkstad-admin.js?v=20261024z"></script>
   <script>
-    const APP_VERSION = '1.0.21';
+    const APP_VERSION = '1.0.22';
     console.log('Admin version:', APP_VERSION);
     const SUPABASE_URL = 'https://lpfdryvukqmjlgenuzpb.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_7LwIOZ5ygRvJqJKFxl4cNQ_LvrzrHrP';
@@ -111,6 +112,7 @@
     const menu = [
       { id: 'akeridata', icon: '📊', label: 'Åkeridata', serverStatus: true },
       { id: 'bilar', icon: '🚕', label: 'Bilar' },
+      { id: 'verkstad', icon: '🔧', label: 'Verkstadstimmar' },
       { id: 'chaufforer', icon: '👥', label: 'Chaufförer' },
       { id: 'statistik', icon: '📈', label: 'Statistik' },
       
@@ -167,7 +169,7 @@
       return isOwner() || AKERI_EXTRA_ROLES.includes(getMyCategory());
     }
 
-    const COMPANY_VIEWS = ['akeridata', 'bilar'];
+    const COMPANY_VIEWS = ['akeridata', 'bilar', 'verkstad'];
 
     function isSuperAdmin() {
       return getMyCategory() === 'superadmin';
@@ -253,7 +255,8 @@
       invalid_car: 'Kontrollera fälten (bilnummer, bilmodell, minst en kategori, drivmedel och förbrukning eller kr/mil 0–1000).',
       invalid_price: 'Kontrollera priserna (tal större än 0, påslag 0–20 kr/kWh, laddning 0–100 %).',
       duplicate_car: 'Det finns redan en bil med det bilnumret.',
-      not_found: 'Bilen finns inte längre.'
+      not_found: 'Bilen finns inte längre.',
+      bad_status: 'Ogiltigt beslut.'
     };
     function errText(e) { return errorTexts[e.message] || ('Fel: ' + e.message); }
 
@@ -288,7 +291,11 @@
       }
       // admin.html#bilar öppnar Bilar direkt (länk från Åkeridata)
       if (location.hash === '#bilar' && canSeeAkeridata()) { history.replaceState(null, '', location.pathname); openMenu('bilar'); return; }
+      // admin.html#verkstad öppnar Verkstadstimmar direkt (länk från förarappen)
+      if (location.hash === '#verkstad' && canSeeAkeridata()) { history.replaceState(null, '', location.pathname); openMenu('verkstad'); return; }
       render();
+      // Antal verkstadstider som väntar på beslut visas på rutan
+      if (canSeeAkeridata()) VERKSTAD_ADMIN.count().then(() => { if (!path.length) render(); });
     }
 
     function saveState() {
@@ -417,7 +424,7 @@
         content.innerHTML = `<div class="grid">${menu.filter(m => !COMPANY_VIEWS.includes(m.id) || canSeeAkeridata()).map(m => `
           <div class="icon" onclick="${m.id === 'forarapp' ? "location.href='index.html'" : "openMenu('" + m.id + "')"}">
             <div class="emoji">${m.icon}</div>
-            <div class="label">${m.label}</div>
+            <div class="label">${m.label}</div>${m.id === 'verkstad' ? VERKSTAD_ADMIN.badge() : ''}
           </div>
         `).join('')}</div>`;
       } else if (path[0].id === 'akeridata') {
@@ -429,6 +436,10 @@
         if (!canSeeAkeridata()) content.innerHTML = '<div class="section"><p style="padding:16px;">Ingen behörighet</p></div>';
         else if (editingCar) renderEditCar(content);
         else renderCars(content);
+      } else if (path[0].id === 'verkstad') {
+        title.textContent = 'Verkstadstimmar';
+        if (!canSeeAkeridata()) content.innerHTML = '<div class="section"><p style="padding:16px;">Ingen behörighet</p></div>';
+        else VERKSTAD_ADMIN.render(content);
       } else if (path[0].id === 'chaufforer') {
         if (showLog) {
           title.textContent = 'Logg';
@@ -1160,9 +1171,27 @@
         case 'password_reset_request': return 'Glömt lösenord för ' + (e.target_id || '?') + ': ' + (resetResults[String(d.result || '').split(':')[0]] || d.result || '?');
         case 'password_reset': return who + ' valde nytt lösenord via e-postlänken' + (d.sessions_ended ? ' (' + d.sessions_ended + ' inloggningar avslutades)' : '');
         case 'password_forced_change': return who + ' valde nytt lösenord efter nollställning';
+        case 'workshop_add': return who + ' registrerade verkstadstid ' + wsSpan(d);
+        case 'workshop_edit': return who + ' ändrade sin verkstadstid till ' + wsSpan(d);
+        case 'workshop_delete': return who + ' tog bort sin verkstadstid ' + wsSpan(d);
+        case 'workshop_approve': return who + ' godkände verkstadstid för ' + (e.target_id || '?') + ' ' + wsSpan(d) + (d.kr != null ? ' = ' + formatSEK(d.kr) : '') + (d.from === 'rejected' ? ' (var nekad)' : '') + (d.comment ? ' – "' + d.comment + '"' : '');
+        case 'workshop_reject': return who + ' nekade verkstadstid för ' + (e.target_id || '?') + ' ' + wsSpan(d) + (d.from === 'approved' ? ' (var godkänd)' : '') + (d.comment ? ' – "' + d.comment + '"' : '');
+        case 'workshop_rate': return who + ' ändrade timpriset för verkstadstid från ' + d.from + ' till ' + d.to + ' kr/h';
         case 'category_change': return who + ' ändrade kategori på ' + e.target_id + ' till ' + catName(d.to);
         default: return who + ': ' + e.action + ' ' + (e.target_id || '');
       }
+    }
+
+    // Verkstadstid i loggen: "tor 22/10 08:00–11:30 (3 h 30 min, TEST-VK1)"
+    function wsSpan(d) {
+      if (!d || !d.start) return '';
+      const p = n => String(n).padStart(2, '0');
+      const a = new Date(d.start), b = new Date(d.end);
+      const dl = x => days[x.getDay()] + ' ' + x.getDate() + '/' + (x.getMonth() + 1);
+      const hm = x => p(x.getHours()) + ':' + p(x.getMinutes());
+      const m = Math.round(d.minutes || 0);
+      return dl(a) + ' ' + hm(a) + '–' + (a.toDateString() === b.toDateString() ? '' : dl(b) + ' ') + hm(b) +
+        ' (' + Math.floor(m / 60) + ' h' + (m % 60 ? ' ' + (m % 60) + ' min' : '') + (d.car ? ', ' + d.car : '') + ')';
     }
 
     function formatLogTime(t) {
@@ -1206,6 +1235,7 @@
       showLog = false;
       selectedDay = null;
       selectedCar = null;
+      if (id === 'verkstad') { VERKSTAD_ADMIN.load(); return; }
       render();
     }
 

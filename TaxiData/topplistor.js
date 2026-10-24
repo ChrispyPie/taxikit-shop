@@ -20,7 +20,9 @@
     { k: 'timmar', t: 'Flest jobbade timmar', f: 'tid' },
     { k: 'antal', t: 'Flest körningar', f: 'st' },
     { k: 'snitt', t: 'Högst snitt per körning', f: 'kr' },
-    { k: 'perskift', t: 'Högst snitt per pass', f: 'kr' }
+    { k: 'perskift', t: 'Högst snitt per pass', f: 'kr' },
+    // Godkända verkstadstimmar (Verkstadstimmar), räknas per startdag
+    { k: 'verkstad', t: 'Flest verkstadstimmar', f: 'tid' }
   ];
   T.lists = LISTS;
 
@@ -150,9 +152,9 @@
     var body = document.getElementById('tl-body'), d = st.data, h = '';
     if (st.err) h = '<div class="tl-msg err">' + esc(st.err) + '</div>';
     else if (st.loading && !d) h = '<div class="tl-msg">Laddar…</div>';
-    else if (!d || !d.drivers) h = '<div class="tl-msg">Ingen har kört ' + esc(T.periodText()) + ' än.</div>';
+    else if (!d || (!d.drivers && !d.workshop_drivers)) h = '<div class="tl-msg">Ingen har kört ' + esc(T.periodText()) + ' än.</div>';
     else {
-      h += '<div class="tl-info">' + d.drivers + ' förare med pass ' + esc(T.periodText()) + '. ' +
+      h += '<div class="tl-info">' + (d.drivers ? d.drivers + ' förare med pass ' + esc(T.periodText()) + '. ' : 'Inga pass ' + esc(T.periodText()) + ' än. ') +
         (d.named ? 'Du ser namn eftersom du är ägare.' : 'Bara din egen rad visas som "Du".') + '</div>';
       LISTS.forEach(function (L) {
         var x = d.lists && d.lists[L.k];
@@ -171,7 +173,7 @@
         if (rows.length > 5) h += '<button type="button" class="tl-more" data-k="' + L.k + '">' + (open ? 'Visa färre' : 'Visa alla ' + rows.length) + '</button>';
         h += '</div>';
       });
-      h += '<div class="tl-foot">Alla förare med pass i perioden räknas, även de utan konto i appen. Kr/mil kräver minst 1 mil, kr/timme minst 30 min. Inkört räknas som i Körpassdata.</div>';
+      h += '<div class="tl-foot">Alla förare med pass i perioden räknas, även de utan konto i appen. Kr/mil kräver minst 1 mil, kr/timme minst 30 min. Inkört räknas som i Körpassdata. Verkstadstimmar räknas när ägaren har godkänt dem.</div>';
     }
     body.innerHTML = h;
     body.querySelectorAll('.tl-more').forEach(function (b) { b.onclick = function () { st.open[b.dataset.k] = !st.open[b.dataset.k]; draw(); }; });

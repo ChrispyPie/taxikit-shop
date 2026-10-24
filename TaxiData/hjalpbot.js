@@ -141,7 +141,11 @@
       err: ['Bip… anslutningsfel. Försök igen strax.'],
       top: function (a) { return ['Bip bop! Plats 1 av ' + a.n + ' i "' + a.t + '" ' + a.p + ': ' + a.v + '. Mina kretsar jublar.', 'Beräkning klar: du leder "' + a.t + '" med ' + a.v + '. Bip!']; },
       rank: function (a) { return ['Bip! Plats ' + a.pos + ' av ' + a.n + ' i "' + a.t + '" ' + a.p + ' (' + a.v + '). Jag har räknat två gånger.', 'Rankingdata: "' + a.t + '" – plats ' + a.pos + ' av ' + a.n + '. Uppgradering möjlig!']; },
-      rankNone: function (a) { return ['Bip… inga pass för dig ' + a.p + ', så du finns inte i listan än.']; }
+      rankNone: function (a) { return ['Bip… inga pass för dig ' + a.p + ', så du finns inte i listan än.']; },
+      vkPending: function (a) { return ['Bip! ' + a.h + ' verkstadstid väntar på ägarens beslut (' + a.n + ' st). Jag håller koll.', 'Kö-status: ' + a.n + ' registrering' + (a.n === 1 ? '' : 'ar') + ' väntar, ' + a.h + '. Bip bop.']; },
+      vkApproved: function (a) { return ['Beräkning klar: ' + a.ah + ' godkänd verkstadstid i ' + a.m + ' = ' + a.akr + '. Bip!', 'Bip bop! Godkänt i ' + a.m + ': ' + a.ah + ', ' + a.akr + '. Skruvar och muttrar betalar sig.']; },
+      vkRejected: ['Bip… en verkstadstid blev nekad. Läs ägarens kommentar i listan.'],
+      vkNone: ['Bip! Inga verkstadstimmar registrerade. Tryck på knappen när bilen står på verkstan.']
     },
     chauffor: {
       hello: ['Hej! Vad undrar du?', 'Hoppa in! Vad vill du veta?', 'Taxametern är av – fråga gratis!'],
@@ -169,7 +173,11 @@
       err: ['Jag kunde inte hämta det just nu. Försök igen strax.'],
       top: function (a) { return ['Etta i "' + a.t + '" ' + a.p + ' med ' + a.v + '. Snyggt jobbat!', 'Du toppar "' + a.t + '" ' + a.p + '. Bra kört!']; },
       rank: function (a) { return ['Du ligger ' + a.o + ' av ' + a.n + ' i "' + a.t + '" ' + a.p + ' (' + a.v + '). Fint!', 'Plats ' + a.pos + ' av ' + a.n + ' i "' + a.t + '". Det rullar på.']; },
-      rankNone: function (a) { return ['Inga pass ' + a.p + ' än, så du syns inte i listan. Nästa pass kanske?']; }
+      rankNone: function (a) { return ['Inga pass ' + a.p + ' än, så du syns inte i listan. Nästa pass kanske?']; },
+      vkPending: function (a) { return [a.h + ' verkstadstid väntar på att ägaren tittar på den (' + a.n + ' st).', 'Du har ' + a.n + ' registrering' + (a.n === 1 ? '' : 'ar') + ' som väntar på beslut, ' + a.h + '.']; },
+      vkApproved: function (a) { return ['I ' + a.m + ' har du fått ' + a.ah + ' verkstadstid godkänd, det blir ' + a.akr + '.', 'Godkänt i ' + a.m + ': ' + a.ah + ' = ' + a.akr + '. Tack för att du tar hand om bilen!']; },
+      vkRejected: ['En verkstadstid blev nekad. Kolla ägarens kommentar i listan.'],
+      vkNone: ['Står bilen på verkstan? Registrera tiden här så får du betalt för den.']
     },
     cool: {
       hello: ['Yo. Vad behöver du?', 'Shoot. Jag har svar.', 'Lugnt. Fråga på.'],
@@ -195,7 +203,11 @@
       err: ['Hmm, fick inget svar. Testa igen strax.'],
       top: function (a) { return ['Etta i "' + a.t + '". ' + a.v + '. Som väntat.', 'Plats 1 ' + a.p + '. Lugnt. Du vet hur man gör.']; },
       rank: function (a) { return ['Plats ' + a.pos + ' av ' + a.n + ' i "' + a.t + '". ' + a.v + '. Chill, det finns tid kvar.', a.o + ' i "' + a.t + '". Inte illa. Inte illa alls.']; },
-      rankNone: function (a) { return ['Inga pass ' + a.p + '. Ibland är det coolt att vila.']; }
+      rankNone: function (a) { return ['Inga pass ' + a.p + '. Ibland är det coolt att vila.']; },
+      vkPending: function (a) { return [a.h + ' väntar på godkännande. Chill, det löser sig.', a.n + ' st i kön. Ägaren fixar det.']; },
+      vkApproved: function (a) { return [a.ah + ' godkänt i ' + a.m + '. ' + a.akr + '. Smooth.', a.akr + ' för verkstan i ' + a.m + '. Lugnt.']; },
+      vkRejected: ['En blev nekad. Kolla kommentaren, sen kör vi.'],
+      vkNone: ['Inga verkstadstimmar. Bilen mår bra, antar jag.']
     },
     diva: {
       hello: ['Hej stjärna! Vad vill du veta? 😉', 'Fråga på, älskling – jag svarar med stil.', 'Ratten i ena handen, svaren i andra. Shoot!'],
@@ -224,7 +236,11 @@
       err: ['Hmm, jag fick inget svar. Försök igen strax, älskling.'],
       top: function (a) { return ['Etta i "' + a.t + '" med ' + a.v + '? Du vet hur man gör intryck, älskling. 😉', 'Plats 1 av ' + a.n + '. Alla tittar på dig nu… jag också. 😉']; },
       rank: function (a) { return ['Plats ' + a.pos + ' av ' + a.n + ' i "' + a.t + '" (' + a.v + '). Lite till, stjärna, så blir du min favorit. 😉', a.o + ' i "' + a.t + '"? Charmigt. Jag gillar en som klättrar.']; },
-      rankNone: function (a) { return ['Inga pass ' + a.p + '? Spelar svårfångad, va? 😉']; }
+      rankNone: function (a) { return ['Inga pass ' + a.p + '? Spelar svårfångad, va? 😉']; },
+      vkPending: function (a) { return [a.h + ' väntar på ägarens beslut, älskling. Tålamod klär dig. 😉', a.n + ' st i kön. Jag håller tummarna för dig, stjärna.']; },
+      vkApproved: function (a) { return [a.ah + ' godkänt i ' + a.m + ' – ' + a.akr + '. Händig OCH charmig? 😉', a.akr + ' för verkstan i ' + a.m + '. Jag gillar en som tar hand om sin bil.']; },
+      vkRejected: ['En verkstadstid blev nekad, älskling. Läs kommentaren – du klarar det. 😉'],
+      vkNone: ['Inga verkstadstimmar än? Så rena händer, stjärna. 😉']
     }
   };
   function lines() { return L[charId()] || L[DEFAULT_CHAR]; }
@@ -259,6 +275,7 @@
     if (c === 'profil') return 'profil';
     if (window.ANKOMSTER && c === window.ANKOMSTER.id) return 'ankomster';
     if (window.TOPPLISTOR && c === window.TOPPLISTOR.id) return 'topplistor';
+    if (window.VERKSTAD && c === window.VERKSTAD.id) return 'verkstad';
     if (!c) return 'hem';
     return 'annat';
   }
@@ -438,6 +455,19 @@
   }
   function hideBubble() { el.bubble.classList.remove('show'); rhythm(); }
 
+  // Verkstadstimmar: förarens egna siffror från serverns svar (window.VERKSTAD_LAST)
+  var MONL = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
+  function verkstadComment(d) {
+    var V = window.VERKSTAD; if (!d || !d.summary || !V) return null;
+    var s = d.summary, opts = [];
+    if (s.pending_n) opts.push('vkPending');
+    if (s.approved_month_min) opts.push('vkApproved');
+    if (s.rejected_recent) opts.push('vkRejected');
+    if (!opts.length) return (d.entries || []).length ? null : line('vkNone');
+    var k = opts[Math.floor(Math.random() * opts.length)];
+    return line(k, { h: V.dur(s.pending_min), n: s.pending_n, ah: V.dur(s.approved_month_min), akr: V.kr(s.approved_month_kr), m: MONL[new Date().getMonth()] });
+  }
+
   function show(on) {
     document.body.classList.toggle('hb-on', on);
     [el.road, el.walker].forEach(function (x) { x.style.display = on ? '' : 'none'; });
@@ -454,6 +484,7 @@
     else if (p === 'kordata') { if (window.taxiStats && window.taxiStats('dag')) setTimeout(fireKordata, 1200); }
     else if (p === 'ankomster') setTimeout(fireAnk, 2500);
     else if (p === 'topplistor') setTimeout(fireTopp, 1500);
+    else if (p === 'verkstad') setTimeout(fireVerkstad, 1500);
     else if (p === 'profil' && window.HB_PROFILE && Date.now() - window.HB_PROFILE.at < 3000) setTimeout(fireProfil, 800);
   }
   function fireKordata() { if (state.pendingFor === 'kordata' && page() === 'kordata') { state.pendingFor = null; say(kordataComment()); } }
@@ -471,6 +502,12 @@
     state.pendingFor = null; say(topplistorComment(info));
   }
   document.addEventListener('topplistor:data', function () { if (state.pendingFor === 'topplistor') setTimeout(fireTopp, 600); });
+  function fireVerkstad() {
+    var d = window.VERKSTAD_LAST;
+    if (state.pendingFor !== 'verkstad' || page() !== 'verkstad' || !d) return;
+    state.pendingFor = null; say(verkstadComment(d));
+  }
+  document.addEventListener('verkstad:data', function () { if (state.pendingFor === 'verkstad') setTimeout(fireVerkstad, 600); });
   document.addEventListener('profil:loaded', function () { if (state.pendingFor === 'profil') setTimeout(fireProfil, 600); });
 
   function tick() {

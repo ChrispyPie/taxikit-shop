@@ -233,3 +233,37 @@ main { max-width: 900px; margin: 1rem auto; padding: 0 1rem; }
 .tl-val { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--text); }
 .tl-more { display: block; width: 100%; background: none; border: 1px dashed var(--border); color: var(--text-soft); border-radius: 8px; padding: 5px; font-size: 0.85rem; margin-top: 0.4rem; cursor: pointer; }
 .tl-foot { font-size: 0.75rem; color: var(--muted); text-align: center; margin: 0.4rem 0 1rem; }
+
+/* Verkstadstimmar (verkstad.js) */
+.vk-card { background: var(--surface); border-radius: 12px; padding: 0.7rem 0.8rem; margin-bottom: 0.7rem; }
+.vk-sumrow { display: flex; justify-content: space-between; gap: 0.5rem; padding: 0.25rem 0; font-size: 0.95rem; }
+.vk-sumrow span { color: var(--text-soft); }
+.vk-rate { font-size: 0.8rem; color: var(--muted); margin-top: 0.3rem; }
+.vk-new { width: 100%; padding: 0.85rem; border-radius: 10px; border: 2px solid var(--primary); background: var(--primary); color: var(--on-primary); font-size: 1rem; font-weight: 600; margin-bottom: 0.9rem; }
+.vk-ftitle { font-weight: 700; margin-bottom: 0.5rem; }
+.vk-field { margin-bottom: 0.6rem; }
+.vk-lbl { display: block; font-size: 0.8rem; color: var(--text-soft); margin-bottom: 0.2rem; }
+.vk-dt { display: flex; align-items: center; gap: 0.3rem; }
+.vk-date { flex: 1; min-width: 0; text-align: left; padding: 0.55rem 0.6rem; border-radius: 8px; border: 1px solid var(--border); background: var(--surface-soft); color: var(--primary); font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vk-dt select { width: 3.6rem; padding: 0.55rem 0.2rem; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--primary); font-size: 0.95rem; text-align: center; }
+.vk-colon { font-weight: 700; }
+.vk-field > select, .vk-field textarea { width: 100%; padding: 0.55rem; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; font-size: 0.95rem; box-sizing: border-box; }
+.vk-live { text-align: center; padding: 0.6rem; border-radius: 8px; background: var(--surface-soft); margin: 0.4rem 0 0.6rem; font-size: 1rem; }
+.vk-live.bad { background: var(--danger-bg); color: var(--danger-text); font-size: 0.9rem; }
+.vk-warn { font-size: 0.85rem; color: #975a16; background: #fefcbf; border-radius: 8px; padding: 0.45rem 0.6rem; margin-bottom: 0.6rem; }
+.vk-warn.bad { color: var(--danger-text); background: var(--danger-bg); }
+.vk-flash { background: #c6f6d5; color: var(--ok); border-radius: 10px; padding: 0.6rem; text-align: center; margin-bottom: 0.7rem; font-weight: 600; }
+.vk-ltitle { font-size: 0.8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; margin: 0.4rem 0 0.4rem; }
+.vk-item.editing { outline: 2px solid var(--accent); }
+.vk-ihead { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; }
+.vk-when { font-weight: 600; font-size: 0.95rem; }
+.vk-chip { font-size: 0.75rem; padding: 0.1rem 0.5rem; border-radius: 10px; white-space: nowrap; }
+.vk-chip.pending { background: #fefcbf; color: #975a16; }
+.vk-chip.approved { background: #c6f6d5; color: var(--ok); }
+.vk-chip.rejected { background: #fed7d7; color: var(--danger-text); }
+.vk-imeta { font-size: 0.85rem; color: var(--text-soft); margin-top: 0.2rem; }
+.vk-icom { font-size: 0.85rem; margin-top: 0.3rem; }
+.vk-boss { font-size: 0.85rem; margin-top: 0.35rem; background: var(--surface-soft); border-left: 3px solid var(--primary); padding: 0.35rem 0.5rem; border-radius: 4px; }
+.vk-iact { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+.vk-iact button { flex: 1; padding: 0.5rem; border-radius: 8px; border: 2px solid var(--primary); background: var(--surface); color: var(--primary); font-size: 0.9rem; }
+.vk-iact .vk-del { border-color: var(--danger); color: var(--danger-text); }
