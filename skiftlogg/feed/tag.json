@@ -1,6 +1,6 @@
 {
   "station": "Göteborg C",
-  "updated": "2026-10-24T11:28:16+02:00",
+  "updated": "2026-10-24T11:29:14+02:00",
   "error": null,
   "trains": [
     {
@@ -87665,7 +87665,7 @@
       "snabb": false,
       "lastSeen": "Laov",
       "lastSeenSig": "Laov",
-      "lastSeenTs": "2026-10-24T11:25:00.000+02:00",
+      "lastSeenTs": "2026-10-24T11:28:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -90774,9 +90774,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Få",
-      "lastSeenSig": "Få",
-      "lastSeenTs": "2026-10-24T11:25:00.000+02:00",
+      "lastSeen": "Vrö",
+      "lastSeenSig": "Vrö",
+      "lastSeenTs": "2026-10-24T11:28:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -91063,8 +91063,8 @@
         {
           "sig": "Hås",
           "name": "Hås",
-          "t": "2026-10-24T11:30:00.000+02:00",
-          "act": "",
+          "t": "2026-10-24T11:29:00.000+02:00",
+          "act": "2026-10-24T11:29:00.000+02:00",
           "est": "",
           "sched": "2026-10-24T11:30:00.000+02:00",
           "track": "2"
@@ -91106,9 +91106,9 @@
           "track": "4"
         }
       ],
-      "lastSeen": "Myk",
-      "lastSeenSig": "Myk",
-      "lastSeenTs": "2026-10-24T11:14:00.000+02:00"
+      "lastSeen": "Hås",
+      "lastSeenSig": "Hås",
+      "lastSeenTs": "2026-10-24T11:29:00.000+02:00"
     },
     {
       "id": "3244",
@@ -91662,9 +91662,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Nol",
-      "lastSeenSig": "Nol",
-      "lastSeenTs": "2026-10-24T11:26:00.000+02:00",
+      "lastSeen": "Än",
+      "lastSeenSig": "Än",
+      "lastSeenTs": "2026-10-24T11:28:00.000+02:00",
       "stops": [
         {
           "sig": "G",
@@ -91687,9 +91687,9 @@
         {
           "sig": "Thn",
           "name": "Trollhättan",
-          "t": "2026-10-24T11:44:00.000+02:00",
+          "t": "2026-10-24T11:42:00.000+02:00",
           "act": "",
-          "est": "2026-10-24T11:44:00.000+02:00",
+          "est": "",
           "sched": "2026-10-24T11:42:00.000+02:00",
           "track": "1"
         },
@@ -92278,9 +92278,9 @@
         {
           "sig": "Bhs",
           "name": "Bhs",
-          "t": "2026-10-24T11:33:00.000+02:00",
+          "t": "2026-10-24T11:34:00.000+02:00",
           "act": "",
-          "est": "",
+          "est": "2026-10-24T11:34:00.000+02:00",
           "sched": "2026-10-24T11:33:00.000+02:00",
           "track": "2"
         },
@@ -92595,7 +92595,7 @@
         "Göteborg C"
       ],
       "sched": "2026-10-24T11:30:00.000+02:00",
-      "est": "2026-10-24T11:32:00.000+02:00",
+      "est": "2026-10-24T11:31:00.000+02:00",
       "act": "",
       "track": "6",
       "canceled": false,
@@ -94461,9 +94461,9 @@
         }
       ],
       "snabb": false,
-      "lastSeen": "Haa",
-      "lastSeenSig": "Haa",
-      "lastSeenTs": "2026-10-24T11:27:00.000+02:00",
+      "lastSeen": "Vbc",
+      "lastSeenSig": "Vbc",
+      "lastSeenTs": "2026-10-24T11:29:00.000+02:00",
       "stops": [
         {
           "sig": "Hie",
@@ -94567,8 +94567,8 @@
         {
           "sig": "Vbc",
           "name": "Vbc",
-          "t": "2026-10-24T11:30:00.000+02:00",
-          "act": "",
+          "t": "2026-10-24T11:29:00.000+02:00",
+          "act": "2026-10-24T11:29:00.000+02:00",
           "est": "2026-10-24T11:30:00.000+02:00",
           "sched": "2026-10-24T11:25:00.000+02:00",
           "track": "4b"
@@ -108989,6 +108989,31 @@
       "est": "",
       "act": "",
       "track": "3",
+      "canceled": false,
+      "product": "SJ Snabbtåg",
+      "traffic": [
+        {
+          "Code": "YNA001",
+          "Description": "Tåg"
+        }
+      ],
+      "snabb": true
+    },
+    {
+      "id": "492",
+      "dir": "ANK",
+      "other": "Malmö C",
+      "otherSig": "Mc",
+      "from": [
+        "Malmö C"
+      ],
+      "to": [
+        "Göteborg C"
+      ],
+      "sched": "2026-10-24T19:50:00.000+02:00",
+      "est": "",
+      "act": "",
+      "track": "13",
       "canceled": false,
       "product": "SJ Snabbtåg",
       "traffic": [
