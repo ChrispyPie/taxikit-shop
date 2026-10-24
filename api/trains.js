@@ -56,7 +56,9 @@ function xmlAttr(v) {
 }
 
 function hh(n) {
-  return String(n).padStart(2, "0") + ":00:00";
+  // Trafikverket vill ha [d.]hh:mm:ss, timmar max 23.
+  const d = Math.floor(n / 24), h = n % 24;
+  return (d ? d + "." : "") + String(h).padStart(2, "0") + ":00:00";
 }
 
 function stationName(sig) {
