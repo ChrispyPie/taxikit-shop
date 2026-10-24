@@ -16,7 +16,7 @@ let currentView = 'day';
 let currentDate = new Date();
 const TAB_KEY = COMPANY ? 'taxi_akeri_tab' : 'taxi_tab';
 let currentTab = localStorage.getItem(TAB_KEY) || 'dag';
-if (!['dag', 'vecka', 'manad'].includes(currentTab)) currentTab = 'dag';
+if (!['dag', 'vecka', 'manad', 'ar'].includes(currentTab)) currentTab = 'dag';
 let lastTab = currentTab;          // fliken att gå tillbaka till efter egen period
 let customRange = null;            // { from: Date, to: Date } när egen period är vald
 let currentDriver = localStorage.getItem('taxi_driver') || '';
@@ -24,7 +24,7 @@ let viewDriver = currentDriver;    // föraren som visas (kan väljas av ägaren
 let driverNames = {};              // id -> namn (om servern ger namn)
 let tripsByDriver = null;
 
-const goals = { dag: 4000, vecka: 25000, manad: 100000 };
+const goals = { dag: 4000, vecka: 25000, manad: 100000, ar: 1200000 };
 const typeMap = { '160': 'Kort', '283': 'Kredit', '163': 'Swish', '1': 'Kontant', '164': 'Uber', '161': 'Faktura', '185': 'Övrigt', '999': 'BOM' };
 const weekdays = ['Sö', 'Må', 'Ti', 'On', 'To', 'Fr', 'Lö'];
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
@@ -171,6 +171,7 @@ function isCurrentPeriod() {
   if (currentTab === 'period') return !!customRange && customRange.to >= startOfDay(now);
   if (currentTab === 'dag') return isToday(currentDate);
   if (currentTab === 'vecka') return getWeekNumber(currentDate) === getWeekNumber(now) && currentDate.getFullYear() === now.getFullYear();
+  if (currentTab === 'ar') return currentDate.getFullYear() === now.getFullYear();
   return currentDate.getMonth() === now.getMonth() && currentDate.getFullYear() === now.getFullYear();
 }
 
@@ -237,6 +238,11 @@ function getRemainingShifts(date, tab) {
   if (tab === 'manad') {
     return getRemainingDays(date);
   }
+  if (tab === 'ar') {
+    const end = new Date(date.getFullYear(), 11, 31);
+    if (today > end) return 0;
+    return Math.round((end - today) / 86400000) + 1;
+  }
   return 0;
 }
 
@@ -251,6 +257,7 @@ function getRange() {
   if (currentTab === 'period' && customRange) return [startOfDay(customRange.from), endOfDay(customRange.to)];
   if (currentTab === 'vecka') return [getWeekStart(currentDate), getWeekEnd(currentDate)];
   if (currentTab === 'manad') return [getMonthStart(currentDate), getMonthEnd(currentDate)];
+  if (currentTab === 'ar') return [new Date(currentDate.getFullYear(), 0, 1), new Date(currentDate.getFullYear(), 11, 31, 23, 59, 59)];
   return [startOfDay(currentDate), endOfDay(currentDate)];
 }
 
@@ -378,6 +385,8 @@ function render() {
   } else if (currentTab === 'vecka') {
     const wn = getWeekNumber(currentDate);
     dateEl.textContent = 'V' + wn + ' -' + yy;
+  } else if (currentTab === 'ar') {
+    dateEl.textContent = 'År ' + currentDate.getFullYear();
   } else {
     dateEl.textContent = months[currentDate.getMonth()] + ' -' + yy;
   }
@@ -437,7 +446,7 @@ function render() {
   const goalTab = isPeriod ? 'dag' : currentTab;
   // Åkeriet: mål per bil × antal bilar. Egen period: dagsmålet × antal dagar.
   const periodDays = isPeriod ? daysBetween(customRange.from, customRange.to) : 1;
-  const perCar = companyGoals ? (goalTab === 'manad' ? companyGoals.per_car_month : goalTab === 'vecka' ? companyGoals.per_car_week : companyGoals.per_car_day) : 0;
+  const perCar = companyGoals ? (goalTab === 'ar' ? companyGoals.per_car_month * 12 : goalTab === 'manad' ? companyGoals.per_car_month : goalTab === 'vecka' ? companyGoals.per_car_week : companyGoals.per_car_day) : 0;
   const goal = COMPANY ? perCar * (companyGoals ? companyGoals.cars : 0) * periodDays : (goals[goalTab] || 4000);
   const diff = inkort - goal;
   const inkortPerSkift = antalSkift ? Math.round(inkort / antalSkift) : 0;
@@ -577,13 +586,14 @@ function render() {
 }
 
 // Hjälpboten läser riktiga siffror härifrån (samma beräkning som Inkört/Mål ovan, bara läsning).
-// tab: 'dag' | 'vecka' | 'manad'. Returnerar null om ingen data är hämtad ännu.
+// tab: 'dag' | 'vecka' | 'manad' | 'ar'. Returnerar null om ingen data är hämtad ännu.
 window.taxiStats = function (tab) {
   if (COMPANY || !data || !data.shifts) return null;
   tab = tab || 'dag';
   const now = new Date();
   const range = tab === 'vecka' ? [getWeekStart(now), getWeekEnd(now)]
-    : tab === 'manad' ? [getMonthStart(now), getMonthEnd(now)] : [startOfDay(now), endOfDay(now)];
+    : tab === 'manad' ? [getMonthStart(now), getMonthEnd(now)]
+    : tab === 'ar' ? [new Date(now.getFullYear(), 0, 1), new Date(now.getFullYear(), 11, 31, 23, 59, 59)] : [startOfDay(now), endOfDay(now)];
   const shifts = getShiftsInRange(range[0], range[1]);
   let trips = [];
   shifts.forEach(s => { trips = trips.concat(getTripsForShift(s)); });
@@ -701,6 +711,7 @@ document.getElementById('prev').onclick = () => {
   if (currentTab === 'period' && customRange) shiftPeriod(-1);
   else if (currentTab === 'vecka') currentDate.setDate(currentDate.getDate() - 7);
   else if (currentTab === 'manad') currentDate.setMonth(currentDate.getMonth() - 1);
+  else if (currentTab === 'ar') currentDate = new Date(currentDate.getFullYear() - 1, currentDate.getMonth(), 1);
   else currentDate.setDate(currentDate.getDate() - 1);
   render();
 };
@@ -709,6 +720,7 @@ document.getElementById('next').onclick = () => {
   if (currentTab === 'period' && customRange) shiftPeriod(1);
   else if (currentTab === 'vecka') currentDate.setDate(currentDate.getDate() + 7);
   else if (currentTab === 'manad') currentDate.setMonth(currentDate.getMonth() + 1);
+  else if (currentTab === 'ar') currentDate = new Date(currentDate.getFullYear() + 1, currentDate.getMonth(), 1);
   else currentDate.setDate(currentDate.getDate() + 1);
   render();
 };

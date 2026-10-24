@@ -4,7 +4,7 @@
  * placering och värde, och den egna raden markerad "Du". Bara ägaren får namn och förar-id.
  * Appen visar det servern skickar – inga andra förares id finns i svaret.
  * Alla förare med pass i perioden räknas, även de utan konto i appen och avslutade förare.
- * Period: Dag / Vecka / Månad och egen period i kalendern, som i Körpassdata.
+ * Period: Dag / Vecka / Månad / År och egen period i kalendern, som i Körpassdata.
  */
 (function () {
   'use strict';
@@ -30,7 +30,7 @@
   var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
   var WD = ['Sön', 'Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör'];
   var st = { tab: localStorage.getItem(TAB_KEY) || 'dag', lastTab: 'dag', date: new Date(), range: null, data: null, err: null, loading: false, seq: 0, el: null, open: {} };
-  if (['dag', 'vecka', 'manad'].indexOf(st.tab) < 0) st.tab = 'dag';
+  if (['dag', 'vecka', 'manad', 'ar'].indexOf(st.tab) < 0) st.tab = 'dag';
   st.lastTab = st.tab;
 
   // ---------- hjälp ----------
@@ -51,6 +51,7 @@
     var d = sod(st.date);
     if (st.tab === 'vecka') { var s = new Date(d); s.setDate(d.getDate() - (d.getDay() + 6) % 7); var e = new Date(s); e.setDate(s.getDate() + 6); return [s, e]; }
     if (st.tab === 'manad') return [new Date(d.getFullYear(), d.getMonth(), 1), new Date(d.getFullYear(), d.getMonth() + 1, 0)];
+    if (st.tab === 'ar') return [new Date(d.getFullYear(), 0, 1), new Date(d.getFullYear(), 11, 31)];
     return [d, d];
   }
   function isCurrent() { var r = range(); return r[1] >= sod(new Date()); }
@@ -60,12 +61,14 @@
       : ddmm(f) + (f.getFullYear() !== t.getFullYear() ? '-' + yy(f) : '') + ' – ' + ddmm(t) + '-' + yy(t);
     if (st.tab === 'vecka') return 'V' + week(f) + ' -' + yy(f);
     if (st.tab === 'manad') return MON[f.getMonth()] + ' -' + yy(f);
+    if (st.tab === 'ar') return 'År ' + f.getFullYear();
     return WD[f.getDay()] + ' ' + ddmm(f) + '-' + yy(f);
   }
   T.periodText = function () {
     if (st.tab === 'dag') return sod(st.date).getTime() === sod(new Date()).getTime() ? 'idag' : 'den dagen';
     if (st.tab === 'vecka') return isCurrent() ? 'den här veckan' : 'den veckan';
     if (st.tab === 'manad') return isCurrent() ? 'den här månaden' : 'den månaden';
+    if (st.tab === 'ar') return isCurrent() ? 'i år' : 'det året';
     return 'perioden';
   };
   function fmt(v, f) {
@@ -110,7 +113,8 @@
       '<div class="tl-controls"><div class="tabs">' +
         '<button type="button" class="tl-tab" data-tab="dag">Dag</button>' +
         '<button type="button" class="tl-tab" data-tab="vecka">Vecka</button>' +
-        '<button type="button" class="tl-tab" data-tab="manad">Månad</button></div>' +
+        '<button type="button" class="tl-tab" data-tab="manad">Månad</button>' +
+        '<button type="button" class="tl-tab" data-tab="ar">År</button></div>' +
       '<div class="date-nav"><button type="button" id="tl-prev" aria-label="Föregående">‹</button><div id="tl-date" class="tl-date"></div>' +
         '<button type="button" id="tl-next" aria-label="Nästa">›</button><button type="button" id="tl-today" aria-label="Idag">»</button>' +
         '<button type="button" id="tl-period" class="tl-period" title="Välj egen period" aria-label="Välj egen period">📅</button></div>' +
@@ -137,6 +141,7 @@
       st.range = { from: f, to: t }; st.date = new Date(t);
     } else if (st.tab === 'vecka') st.date.setDate(st.date.getDate() + 7 * dir);
     else if (st.tab === 'manad') st.date = new Date(st.date.getFullYear(), st.date.getMonth() + dir, 1);
+    else if (st.tab === 'ar') st.date = new Date(st.date.getFullYear() + dir, 0, 1);
     else st.date.setDate(st.date.getDate() + dir);
     load();
   }

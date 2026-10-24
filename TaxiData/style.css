@@ -63,6 +63,8 @@ header button:hover { background: var(--primary); color: var(--on-primary); }
   font-weight: 500;
 }
 .tab.active, .tl-tab.active { background: var(--primary); color: var(--on-primary); }
+/* Fyra flikar (Dag/Vecka/Månad/År) ska få plats på en rad i en smal mobil */
+@media (max-width: 420px) { .tabs .tab, .tabs .tl-tab { padding: 0.5rem 0.9rem; } .tabs { gap: 0.4rem; } }
 
 .date-nav { display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
 .date-nav button {
