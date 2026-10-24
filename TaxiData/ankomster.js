@@ -96,9 +96,10 @@
   // ---------- flyg ----------
   function flightItem(f) {
     var st = String(f.status || '').toUpperCase();
-    var bag = [];
+    var bag = [], arr = d(f.act) || d(f.est) || d(f.sched), fb = d(f.firstBag);
+    if (fb && arr && fb < arr - 30 * 60000) fb = null;  // gammal tid från tidigare flyg
     if (f.baggage) bag.push('Band ' + f.baggage);
-    if (f.firstBag) bag.push('Första väskan ' + hm(d(f.firstBag)));
+    if (fb) bag.push('Första väskan ' + hm(fb));
     else if (f.firstBagEst && !f.lastBag) bag.push('Väskor ca ' + hm(d(f.firstBagEst)));
     var special = { RER: 'Omdirigerad', DIV: 'Omdirigerad', FLS: 'Stoppad' }[st];
     return {
