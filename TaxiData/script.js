@@ -55,14 +55,14 @@ async function loadData() {
 
     const seenShifts = new Set();
     data.shifts = (data.shifts || []).filter(s => {
-      const key = (s.passnr || '') + '|' + (s.forar || '710022');
+      const key = (s.passnr || '') + '|' + (s.forar || '710022') + '|' + String(s.start || '').replace(/\D/g, '').slice(0, 8); // passnr återanvänds
       if (seenShifts.has(key)) return false;
       seenShifts.add(key);
       return true;
     });
     const seenTrips = new Set();
     data.trips = (data.trips || []).filter(t => {
-      const key = (t.kvittonr || '') + '|' + (t.forar || '710022');
+      const key = (t.kvittonr || '') + '|' + (t.forar || '710022') + '|' + (t.startdatum || '');
       if (seenTrips.has(key)) return false;
       seenTrips.add(key);
       return true;
@@ -348,7 +348,7 @@ function looseTripsRow(list) {
   const tripsHtml = list.map(t => {
     const isBom = t.kredittyp === '999';
     const dd = (t.startdatum || '').slice(8, 10) + '/' + (t.startdatum || '').slice(5, 7);
-    return `<div class="sub shift-trip" data-key="lt:${escHtml(t.kvittonr)}|${escHtml(t.forar || '710022')}" onclick="toggleTrip(this, event)" style="${isBom ? 'opacity:0.6;' : ''}"><span class="toggle">+</span><span>${dd} ${escHtml(t.kvittonr)}${isBom ? ' (BOM)' : ''}</span><span>${formatSEK(parseAmount(t.belopp))}</span></div>
+    return `<div class="sub shift-trip" data-key="lt:${escHtml(t.kvittonr)}|${escHtml(t.forar || '710022')}|${escHtml(t.startdatum || '')}" onclick="toggleTrip(this, event)" style="${isBom ? 'opacity:0.6;' : ''}"><span class="toggle">+</span><span>${dd} ${escHtml(t.kvittonr)}${isBom ? ' (BOM)' : ''}</span><span>${formatSEK(parseAmount(t.belopp))}</span></div>
           <div class="sub trip-detail"><span>Start</span><span>${t.starttid || '00:00'} – zon ${t.startzon || '?'}</span></div>
           <div class="sub trip-detail"><span>Slut</span><span>${t.sluttid || '00:00'} – zon ${t.slutzon || '?'}</span></div>
           <div class="sub trip-detail"><span>Typ</span><span>${typeMap[t.kredittyp] || t.kredittyp || '?'}</span></div>
@@ -536,7 +536,7 @@ function render() {
     if (allTrips.length) {
       html += `<div class="section">${allTrips.map(t => {
         const isBom = t.kredittyp === '999';
-        return `<div class="stat-row" data-key="trip:${escHtml(t.kvittonr)}|${escHtml(t.forar || '710022')}" onclick="toggle(this)" style="${isBom ? 'opacity:0.6;' : ''}"><span class="toggle">+</span><span class="label">${escHtml(t.kvittonr)}${isBom ? ' (BOM)' : ''}</span><span class="value">${formatSEK(parseAmount(t.belopp))}</span></div>
+        return `<div class="stat-row" data-key="trip:${escHtml(t.kvittonr)}|${escHtml(t.forar || '710022')}|${escHtml(t.startdatum || '')}" onclick="toggle(this)" style="${isBom ? 'opacity:0.6;' : ''}"><span class="toggle">+</span><span class="label">${escHtml(t.kvittonr)}${isBom ? ' (BOM)' : ''}</span><span class="value">${formatSEK(parseAmount(t.belopp))}</span></div>
         ${tripDetailRows(t, '')}`;
       }).join('')}</div>`;
     }
@@ -552,13 +552,13 @@ function render() {
       const who = COMPANY ? `<span class="shift-who">${escHtml(s.taxi || '?')}${isOwnerRole() ? ' · ' + escHtml(driverLabel(s.forar || '710022')) : ''}</span>` : '';
       const tripsHtml = shiftTrips.map(t => {
         const isBom = t.kredittyp === '999';
-        return `<div class="sub shift-trip" data-key="st:${escHtml(t.kvittonr)}|${escHtml(t.forar || '710022')}" onclick="toggleTrip(this, event)" style="${isBom ? 'opacity:0.6;' : ''}"><span class="toggle">+</span><span>${escHtml(t.kvittonr)}${isBom ? ' (BOM)' : ''}</span><span>${formatSEK(parseAmount(t.belopp))}</span></div>
+        return `<div class="sub shift-trip" data-key="st:${escHtml(t.kvittonr)}|${escHtml(t.forar || '710022')}|${escHtml(t.startdatum || '')}" onclick="toggleTrip(this, event)" style="${isBom ? 'opacity:0.6;' : ''}"><span class="toggle">+</span><span>${escHtml(t.kvittonr)}${isBom ? ' (BOM)' : ''}</span><span>${formatSEK(parseAmount(t.belopp))}</span></div>
           <div class="sub trip-detail"><span>Start</span><span>${t.starttid || '00:00'} – zon ${t.startzon || '?'}</span></div>
           <div class="sub trip-detail"><span>Slut</span><span>${t.sluttid || '00:00'} – zon ${t.slutzon || '?'}</span></div>
           <div class="sub trip-detail"><span>Typ</span><span>${typeMap[t.kredittyp] || t.kredittyp || '?'}</span></div>
           <div class="sub trip-detail"><span>Dricks</span><span>${formatSEK(parseAmount(t.dricks))}</span></div>`;
       }).join('');
-      return `<div class="stat-row" data-key="shift:${escHtml(s.passnr)}|${escHtml(s.forar || '710022')}" onclick="toggleShift(this)"><span class="toggle">+</span><span class="label">${dateLabel}#${escHtml(s.passnr)}${who}</span><span class="value">${formatSEK(shiftInkort)}</span></div>
+      return `<div class="stat-row" data-key="shift:${escHtml(s.passnr)}|${escHtml(s.forar || '710022')}|${escHtml(s.start || '')}" onclick="toggleShift(this)"><span class="toggle">+</span><span class="label">${dateLabel}#${escHtml(s.passnr)}${who}</span><span class="value">${formatSEK(shiftInkort)}</span></div>
       <div class="shift-content">${tripsHtml}</div>`;
     }).join('')}${looseTrips.length ? looseTripsRow(looseTrips) : ''}</div>`;
   } else if (looseTrips.length) {
