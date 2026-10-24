@@ -551,9 +551,23 @@
     });
   }
 
-  function fetchGotTrains() {
+  // Tåg: läs först den delade Vercel-funktionen (/api/trains, CDN-cachad 60 s).
+  // Historik som ligger bortom funktionens fönster fylls på från feed/tag.json
+  // (hämtas högst var 10:e minut). Om funktionen inte svarar används
+  // feed/tag.json som förut, och sist direktanrop mot Trafikverket.
+  var TRAIN_API_URLS = /(^|\.)vercel\.app$/i.test(location.hostname) ?
+    ["/api/trains"] : ["https://taxikit-shop.vercel.app/api/trains"];
+  var TRAIN_HISTORY_MS = 10 * 60 * 1000;
+  var trainHistoryRows = null;
+  var trainHistoryAt = 0;
+
+  function trainRowKey(f) {
+    return (f.id || "") + "|" + (f.dir || "") + "|" + (f.sched || "");
+  }
+
+  function fetchTrainCacheFile() {
     function tryUrl(i) {
-      if (i >= TRAIN_CACHE_URLS.length) return fetchTvTrains();
+      if (i >= TRAIN_CACHE_URLS.length) return Promise.resolve(null);
       return fetch(TRAIN_CACHE_URLS[i], { cache: "no-store" }).then(function (r) {
         if (!r.ok) return tryUrl(i + 1);
         return r.json();
@@ -562,19 +576,72 @@
         return tryUrl(i + 1);
       }).catch(function () { return tryUrl(i + 1); });
     }
-    return tryUrl(0).then(function (rows) {
-      if (!rows || !rows.length) {
-        return fetchTvTrains().then(function (live) {
-          if (live && live.length) {
-            liveTrainItems = live.map(trainToItem);
-            liveTrainMeta = { status: "ok", error: "", at: Date.now() };
-          } else {
-            liveTrainMeta = { status: "err", error: "ingen tågdata", at: Date.now() };
-          }
-        });
+    return tryUrl(0);
+  }
+
+  function fetchTrainApi() {
+    function tryUrl(i) {
+      if (i >= TRAIN_API_URLS.length) return Promise.resolve(null);
+      return fetch(TRAIN_API_URLS[i], { cache: "no-store" }).then(function (r) {
+        if (!r.ok) return tryUrl(i + 1);
+        return r.json();
+      }).then(function (json) {
+        if (json && (json.trains || []).length) return json.trains;
+        return tryUrl(i + 1);
+      }).catch(function () { return tryUrl(i + 1); });
+    }
+    return tryUrl(0);
+  }
+
+  function trainHistory() {
+    if (trainHistoryRows && Date.now() - trainHistoryAt < TRAIN_HISTORY_MS) {
+      return Promise.resolve(trainHistoryRows);
+    }
+    return fetchTrainCacheFile().then(function (rows) {
+      if (rows && rows.length) {
+        trainHistoryRows = rows;
+        trainHistoryAt = Date.now();
       }
-      liveTrainItems = rows.map(trainToItem);
-      liveTrainMeta = { status: "ok", error: "", at: Date.now() };
+      return trainHistoryRows;
+    });
+  }
+
+  function mergeTrainRows(live, history) {
+    if (!history || !history.length) return live;
+    var seen = {};
+    live.forEach(function (f) { seen[trainRowKey(f)] = true; });
+    var oldest = Infinity;
+    live.forEach(function (f) {
+      var d = parseIsoLocal(f.sched);
+      if (d && d.getTime() < oldest) oldest = d.getTime();
+    });
+    var extra = history.filter(function (f) {
+      if (seen[trainRowKey(f)]) return false;
+      var d = parseIsoLocal(f.sched);
+      // Bara rader äldre än funktionens fönster; nyare data kommer från funktionen.
+      return d && d.getTime() < oldest;
+    });
+    return extra.concat(live);
+  }
+
+  function fetchGotTrains() {
+    return fetchTrainApi().then(function (live) {
+      if (live && live.length) {
+        return trainHistory().then(function (hist) {
+          return mergeTrainRows(live, hist);
+        }, function () { return live; });
+      }
+      return fetchTrainCacheFile().then(function (rows) {
+        if (rows && rows.length) return rows;
+        return fetchTvTrains();
+      });
+    }).then(function (rows) {
+      if (rows && rows.length) {
+        liveTrainItems = rows.map(trainToItem);
+        liveTrainMeta = { status: "ok", error: "", at: Date.now() };
+      } else {
+        liveTrainMeta = { status: "err", error: "ingen tågdata", at: Date.now() };
+      }
     }).catch(function (e) {
       liveTrainMeta = { status: "err", error: (e && e.message) || "nätfel", at: Date.now() };
     });
