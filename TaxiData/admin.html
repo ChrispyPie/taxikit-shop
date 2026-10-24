@@ -95,7 +95,7 @@
 
   <script src="serverstatus.js?v=20261024h"></script>
   <script>
-    const APP_VERSION = '1.0.12';
+    const APP_VERSION = '1.0.13';
     console.log('Admin version:', APP_VERSION);
     const SUPABASE_URL = 'https://lpfdryvukqmjlgenuzpb.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_7LwIOZ5ygRvJqJKFxl4cNQ_LvrzrHrP';
@@ -242,7 +242,7 @@
       forbidden_self: 'Du kan inte ändra din egen aktivering.',
       password_too_short: 'Lösenordet måste vara minst 4 tecken.',
       bad_id: 'Ogiltigt förar-ID.',
-      invalid_car: 'Kontrollera fälten (bilnummer, bilmodell, minst en kategori, förbrukning 0–100).',
+      invalid_car: 'Kontrollera fälten (bilnummer, bilmodell, minst en kategori, bränslekostnad 0–1000 kr/mil).',
       duplicate_car: 'Det finns redan en bil med det bilnumret.',
       not_found: 'Bilen finns inte längre.'
     };
@@ -666,7 +666,6 @@
     // bilnummer = taxinumret i resdatan (t.ex. A446) så att bilen kan kopplas till körpassen.
     // Antalet bilar här styr åkeriets mål (mål per bil × antal bilar).
     const CAR_CATS = ['Kombi', 'Sedan', 'Miljö', 'Storbil'];
-    const UNITS = { 'l/100km': 'l/100 km', 'kWh/100km': 'kWh/100 km' };
 
     async function loadCars() {
       carList = null;
@@ -676,9 +675,9 @@
       render();
     }
 
-    function fmtCons(c) {
-      if (c.forbrukning == null) return '';
-      return String(c.forbrukning).replace('.', ',') + ' ' + (UNITS[c.forbrukning_enhet] || c.forbrukning_enhet);
+    function fmtCost(c) {
+      if (c.cost_per_mil_kr == null) return '';
+      return Number(c.cost_per_mil_kr).toFixed(2).replace('.', ',') + ' kr/mil';
     }
 
     function renderCars(content) {
@@ -693,7 +692,7 @@
       cars.forEach(c => {
         html += `<div class="row car-row" ${carList.can_edit ? `onclick="editCar(${c.id})"` : ''} style="flex-direction:column; align-items:flex-start; gap:2px;${carList.can_edit ? '' : ' cursor:default;'}">
           <span class="label">${esc(c.bilnummer)} · ${esc(c.modell)}${c.regnr ? ' <span style="font-weight:400; color:#718096;">(' + esc(c.regnr) + ')</span>' : ''}</span>
-          <span style="font-size:12px; color:#718096;">${esc((c.kategorier || []).join(', '))}${c.forbrukning != null ? ' · ' + esc(fmtCons(c)) : ''}</span>
+          <span style="font-size:12px; color:#718096;">${esc((c.kategorier || []).join(', '))}${c.cost_per_mil_kr != null ? ' · Bränsle ' + esc(fmtCost(c)) : ''}</span>
         </div>`;
       });
       html += '</div>';
@@ -708,7 +707,7 @@
     }
 
     function renderEditCar(content) {
-      const c = editingCar === 'new' ? { kategorier: [], forbrukning_enhet: 'l/100km' } : (carList.cars || []).find(x => x.id === editingCar);
+      const c = editingCar === 'new' ? { kategorier: [] } : (carList.cars || []).find(x => x.id === editingCar);
       if (!c) { editingCar = null; render(); return; }
       content.innerHTML = `<div class="section" style="padding:16px;">
         <div class="form-row">
@@ -721,12 +720,7 @@
             ${CAR_CATS.map(k => `<label style="display:flex; align-items:center; gap:6px; font-size:14px; color:#1a365d;"><input type="checkbox" class="c-cat" value="${k}" ${(c.kategorier || []).includes(k) ? 'checked' : ''} style="width:20px; height:20px;">${k}</label>`).join('')}
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group"><label>Bränsleförbrukning</label><input id="c-cons" type="number" inputmode="decimal" step="0.1" min="0" value="${c.forbrukning != null ? c.forbrukning : ''}" placeholder="t.ex. 5,5"></div>
-          <div class="form-group"><label>Enhet</label>
-            <select id="c-unit">${Object.entries(UNITS).map(([k, v]) => `<option value="${k}" ${c.forbrukning_enhet === k ? 'selected' : ''}>${v}</option>`).join('')}</select>
-          </div>
-        </div>
+        <div class="form-group"><label>Bränslekostnad (kr/mil)</label><input id="c-cost" type="text" inputmode="decimal" value="${c.cost_per_mil_kr != null ? String(c.cost_per_mil_kr).replace('.', ',') : ''}" placeholder="t.ex. 12,50"></div>
         <div class="modal-buttons">
           <button onclick="editingCar = null; render();">Avbryt</button>
           <button id="c-save" onclick="saveCar()" style="background:#1a365d; color:white;">Spara</button>
@@ -737,21 +731,20 @@
 
     async function saveCar() {
       const cats = [...document.querySelectorAll('.c-cat:checked')].map(x => x.value);
-      const consRaw = document.getElementById('c-cons').value.trim().replace(',', '.');
-      const cons = consRaw === '' ? null : Number(consRaw);
+      const costRaw = document.getElementById('c-cost').value.trim().replace(/\s/g, '').replace(',', '.');
+      const cost = costRaw === '' ? null : Number(costRaw);
       const args = {
         p_id: editingCar === 'new' ? null : editingCar,
         p_bilnummer: document.getElementById('c-nr').value.trim(),
         p_regnr: document.getElementById('c-reg').value.trim() || null,
         p_modell: document.getElementById('c-modell').value.trim(),
         p_kategorier: cats,
-        p_forbrukning: cons,
-        p_enhet: cons == null ? null : document.getElementById('c-unit').value
+        p_cost_per_mil_kr: cost
       };
       if (!args.p_bilnummer) { alert('Fyll i bilnummer.'); return; }
       if (!args.p_modell) { alert('Fyll i bilmodell.'); return; }
       if (!cats.length) { alert('Välj minst en kategori.'); return; }
-      if (cons != null && !(cons > 0 && cons <= 100)) { alert('Bränsleförbrukningen ska vara mellan 0 och 100.'); return; }
+      if (cost != null && !(cost > 0 && cost <= 1000)) { alert('Bränslekostnaden ska vara ett tal mellan 0 och 1000 kr/mil, t.ex. 12,50.'); return; }
       try {
         await rpc('save_car', args);
         editingCar = null;
