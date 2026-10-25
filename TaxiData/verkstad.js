@@ -1,13 +1,19 @@
 /* Bil & verkstad (förut "Verkstadstimmar"). Menyns id är fortfarande 'verkstad' så sparade vyer fungerar.
  *
- * Fyra flikar:
+ * Flikar:
  *  - Felanmälan: förare anmäler fel på en bil (valfritt foto), "Bilen står" = blockerande.
  *  - Behövs till bilen: kvittorullar, spolarvätska, rengöring eller annat.
  *  - Underhåll: planerad service, däckbyte, bromsar, besiktning … efter datum och/eller km.
  *  - Verkstadstimmar: som förut (get_my_workshop, save_my_workshop, delete_my_workshop).
+ *  - Uppgifter: ägaren skickar ett ärende vidare till en förare med instruktion + checklista.
+ *    Föraren svarar med bokad tid/plats, bockar av och markerar klart (save_car_task, reply_car_task,
+ *    check_car_task_item, done_car_task, delete_car_task). Ägaren väljer notiser i appen/mejl (save_bil_prefs).
+ *
+ * Synlighet styrs av servern: förare ser bara sina egna anmälningar och uppgifter de fått.
+ * Ägaren (agare) och S admin ser allt. Rollen admin räknas som förare här.
  *
  * Allt kontrolleras på servern: get_bil, save_car_issue, set_car_issue_status, save_car_maintenance,
- * done_car_maintenance, delete_car_maintenance, save_car_km, get_bil_notices. Admin/ägare/S admin
+ * done_car_maintenance, delete_car_maintenance, save_car_km, get_bil_notices. Ägaren/S admin
  * ändrar status och planerar underhåll; förare anmäler och föreslår. Foton går via edge-funktionen
  * bil-foto till en privat bucket (bara små, nedskalade jpeg-bilder).
  */
@@ -25,7 +31,10 @@
   var SUPPLY = [['kvitto', '🧾', 'Kvittorullar'], ['spolar', '💧', 'Spolarvätska'], ['rengoring', '🧽', 'Rengöring'], ['annat', '✏️', 'Annat']];
   var MTYPES = [['service', '🔧', 'Service'], ['dack_sommar', '☀️', 'Däck sommar'], ['dack_vinter', '❄️', 'Däck vinter'],
     ['bromsar', '🛑', 'Bromsar'], ['besiktning', '📋', 'Besiktning'], ['annat', '✏️', 'Annat']];
-  var TABS = [['fel', '🚨', 'Fel'], ['behov', '🧴', 'Behövs'], ['underhall', '🗓️', 'Underhåll'], ['timmar', '⏱️', 'Timmar']];
+  var TABS = [['fel', '🚨', 'Fel'], ['behov', '🧴', 'Behövs'], ['underhall', '🗓️', 'Underhåll'], ['uppg', '📋', 'Uppgifter'], ['timmar', '⏱️', 'Timmar']];
+  var TSTATUS = { ny: 'Ny', bokad: 'Bokad', klar: 'Klar' };
+  var NTYPES = [['bil_stop', '🛑 Bilen står'], ['bil_fault', '⚠️ Nytt fel'], ['bil_supply', '🧴 Något behövs'], ['bil_suggest', '💡 Förslag på underhåll'],
+    ['bil_maint', '🔧 Underhåll snart/försenat'], ['bil_task_reply', '📅 Förare har bokat tid/svarat'], ['bil_task_done', '✅ Uppgift klar']];
   var ERR = {
     bad_time: 'Stopptiden måste vara efter starttiden.',
     too_long: 'Högst 24 timmar per registrering. Dela upp längre tider.',
@@ -48,13 +57,16 @@
     bad_cost: 'Kontrollera kostnaden.',
     bad_issue: 'Felanmälan finns inte.',
     too_many: 'Du har skickat väldigt många idag. Försök igen i morgon.',
-    too_many_photos: 'Högst 3 foton per felanmälan.',
+    too_many_photos: 'Högst 3 foton.',
+    bad_driver: 'Välj en förare i listan.',
+    bad_items: 'Högst 15 punkter i checklistan.',
+    bad_prefs: 'Kunde inte spara valen.',
     too_big: 'Fotot är för stort.',
     bad_image: 'Fotot gick inte att läsa.',
     upload_failed: 'Fotot kunde inte sparas. Försök igen.'
   };
   var st = { el: null, data: null, bil: null, err: null, bilErr: null, form: null, busy: false,
-    tab: localStorage.getItem('bil_tab') || 'fel', car: null, showDone: false, f: null, photos: {}, mDone: null };
+    tab: localStorage.getItem('bil_tab') || 'fel', car: null, showDone: false, f: null, photos: {}, mDone: null, tf: null, tr: null, tlog: {} };
   if (!TABS.some(function (t) { return t[0] === st.tab; })) st.tab = 'fel';
 
   // ---------- hjälp ----------
@@ -78,6 +90,7 @@
   }
   function carById(id) { return ((st.bil && st.bil.cars) || []).filter(function (c) { return c.id === id; })[0] || null; }
   function admin() { return !!(st.bil && st.bil.is_admin); }
+  function tabs() { return TABS.filter(function (t) { return t[0] !== 'uppg' || admin() || (st.bil && (st.bil.tasks || []).length); }); }
   function openFaults(car, keep) {
     return ((st.bil && st.bil.issues) || []).filter(function (i) {
       return i.kind === 'fault' && (i.status !== 'klar' || i.id === keep) && (!car || i.car_id === car);
@@ -157,30 +170,33 @@
     if (!window.setBadge || !d) return;
     var n = +d.unread || 0;
     if (!n && d.is_admin) n = ((d.cars || []).filter(function (c) { return c.blocking; })).length;
+    if (!n) n = (d.tasks || []).filter(function (t) { return t.mine && t.status !== 'klar'; }).length;
     setBadge('bil', n);
   }
   V.refreshBadge = function () {
     if (!localStorage.getItem('taxi_session')) return;
     rpc('bil_badge', {}).then(function (b) {
       if (!window.setBadge || !b) return;
-      var adm = ['admin', 'agare', 'superadmin'].indexOf(String((window.driverData && driverData.category) || '')) >= 0;
-      setBadge('bil', (+b.unread || 0) || (adm ? +b.blocking || 0 : 0));
+      // servern räknar "står" bara för ägaren/S admin, och "tasks" = mina öppna uppgifter
+      setBadge('bil', (+b.unread || 0) || (+b.blocking || 0) || (+b.tasks || 0));
     }).catch(function () {});
   };
 
   V.render = function (content) {
-    st.el = content; st.form = null; st.f = null; st.mDone = null; window.VERKSTAD_LAST = null;
+    st.el = content; st.form = null; st.f = null; st.mDone = null; st.tf = null; st.tr = null; window.VERKSTAD_LAST = null;
     content.innerHTML = '<div id="bv-root"><div id="bv-top"></div><div id="vk-body"><div class="tl-msg">Laddar…</div></div></div>';
     drawTop();
     load();
   };
-  V.openTab = function (t) { st.tab = t; localStorage.setItem('bil_tab', t); st.f = null; st.mDone = null; drawTop(); draw(); window.scrollTo(0, 0); };
+  V.openTab = function (t) { st.tab = t; localStorage.setItem('bil_tab', t); st.f = null; st.mDone = null; st.tf = null; st.tr = null; drawTop(); draw(); window.scrollTo(0, 0); };
 
   function drawTop() {
     var top = document.getElementById('bv-top'); if (!top) return;
-    var unread = st.bil ? +st.bil.unread || 0 : 0;
-    top.innerHTML = '<div class="bv-tabs">' + TABS.map(function (t) {
-      return '<button type="button" class="tl-tab bv-tab' + (st.tab === t[0] ? ' active' : '') + '" data-t="' + t[0] + '"><span>' + t[1] + '</span>' + t[2] + '</button>';
+    var unread = st.bil ? +st.bil.unread || 0 : 0, tl = tabs();
+    var open = st.bil ? (st.bil.tasks || []).filter(function (t) { return t.mine && t.status !== 'klar'; }).length : 0;
+    top.innerHTML = '<div class="bv-tabs' + (tl.length > 4 ? ' five' : '') + '">' + tl.map(function (t) {
+      return '<button type="button" class="tl-tab bv-tab' + (st.tab === t[0] ? ' active' : '') + '" data-t="' + t[0] + '"><span>' + t[1] + '</span>' + t[2] +
+        (t[0] === 'uppg' && open ? '<b class="bv-tn">' + open + '</b>' : '') + '</button>';
     }).join('') + '<button type="button" class="bv-bell" id="bv-bell" aria-label="Notiser">🔔' + (unread ? '<b>' + unread + '</b>' : '') + '</button></div>';
     top.querySelectorAll('.bv-tab').forEach(function (b) { b.onclick = function () { V.openTab(b.dataset.t); }; });
     document.getElementById('bv-bell').onclick = showNotices;
@@ -190,10 +206,12 @@
     var body = st.el && document.getElementById('vk-body'); if (!body) return;
     drawTop();
     if (st.tab === 'timmar') return drawHours(body);
+    if (st.bil && st.tab === 'uppg' && !tabs().some(function (t) { return t[0] === 'uppg'; })) st.tab = 'fel';
     if (st.bilErr) { body.innerHTML = '<div class="tl-msg err">' + esc(st.bilErr) + '</div>'; return; }
     if (!st.bil) { body.innerHTML = '<div class="tl-msg">Laddar…</div>'; return; }
     if (st.tab === 'fel') drawIssues(body, 'fault');
     else if (st.tab === 'behov') drawIssues(body, 'supply');
+    else if (st.tab === 'uppg') drawTasks(body);
     else drawMaint(body);
   }
 
@@ -252,16 +270,34 @@
       h += '<div class="vk-field"><span class="vk-lbl">Går bilen att köra?</span><div class="bv-two">' +
         '<button type="button" class="bv-opt' + (!f.blocking ? ' on' : '') + '" data-b="0">✅ Bilen går att köra</button>' +
         '<button type="button" class="bv-opt stop' + (f.blocking ? ' on' : '') + '" data-b="1">🛑 Bilen står</button></div></div>';
-      if (!f.id) {
-        h += '<div class="vk-field"><span class="vk-lbl">Foto (valfritt, högst 3)</span>' +
-          '<label class="bv-photo-btn">📷 Ta eller välj foto<input type="file" id="bv-file" accept="image/*" capture="environment" hidden></label>' +
-          '<div class="bv-thumbs">' + f.files.map(function (u, n) { return '<span class="bv-thumb"><img src="' + u + '" alt=""><button type="button" data-n="' + n + '" aria-label="Ta bort foto">×</button></span>'; }).join('') + '</div></div>';
-      }
     }
+    if (!f.id) h += photoField(f);
     if (f.msg) h += '<div class="vk-warn bad">' + esc(f.msg) + '</div>';
     h += '<div class="pm-btns"><button type="button" id="bv-cancel">Avbryt</button><button type="button" id="bv-save" class="primary"' + (st.busy ? ' disabled' : '') + '>' +
       (st.busy ? 'Skickar…' : f.id ? 'Spara' : 'Skicka') + '</button></div></div>';
     return h;
+  }
+  function photoField(f) {
+    return '<div class="vk-field"><span class="vk-lbl">Foto (valfritt, högst 3)</span>' +
+      '<label class="bv-photo-btn">📷 Ta eller välj foto<input type="file" id="bv-file" accept="image/*" capture="environment" hidden></label>' +
+      '<div class="bv-thumbs">' + f.files.map(function (u, n) { return '<span class="bv-thumb"><img src="' + u + '" alt=""><button type="button" data-n="' + n + '" aria-label="Ta bort foto">×</button></span>'; }).join('') + '</div></div>';
+  }
+  function bindPhotoField(body, f, before) {
+    var fi = document.getElementById('bv-file');
+    if (fi) fi.onchange = function () {
+      var file = fi.files && fi.files[0]; if (!file) return;
+      if (before) before();
+      if (f.files.length >= 3) { f.msg = ERR.too_many_photos; draw(); return; }
+      shrink(file).then(function (u) { f.files.push(u); f.msg = ''; draw(); }).catch(function () { f.msg = ERR.bad_image; draw(); });
+    };
+    body.querySelectorAll('.bv-thumb button').forEach(function (b) { b.onclick = function () { if (before) before(); f.files.splice(+b.dataset.n, 1); draw(); }; });
+  }
+  function uploadAll(files, key, id) {
+    var chain = Promise.resolve(), bad = 0;
+    files.forEach(function (u) {
+      chain = chain.then(function () { var b = { action: 'upload', image: u.split(',')[1] }; b[key] = id; return photoApi(b).catch(function () { bad++; }); });
+    });
+    return chain.then(function () { return bad; });
   }
   function bindIssueForm(body) {
     var f = st.f;
@@ -269,13 +305,7 @@
     document.getElementById('bv-car').onchange = function (ev) { f.car = ev.target.value ? +ev.target.value : null; draw(); };
     document.getElementById('bv-text').oninput = function (ev) { f.body = ev.target.value; };
     body.querySelectorAll('.bv-opt').forEach(function (b) { b.onclick = function () { f.blocking = b.dataset.b === '1'; draw(); }; });
-    var fi = document.getElementById('bv-file');
-    if (fi) fi.onchange = function () {
-      var file = fi.files && fi.files[0]; if (!file) return;
-      if (f.files.length >= 3) { f.msg = ERR.too_many_photos; draw(); return; }
-      shrink(file).then(function (u) { f.files.push(u); f.msg = ''; draw(); }).catch(function () { f.msg = ERR.bad_image; draw(); });
-    };
-    body.querySelectorAll('.bv-thumb button').forEach(function (b) { b.onclick = function () { f.files.splice(+b.dataset.n, 1); draw(); }; });
+    bindPhotoField(body, f);
     document.getElementById('bv-cancel').onclick = function () { st.f = null; draw(); };
     document.getElementById('bv-save').onclick = saveIssue;
   }
@@ -290,15 +320,11 @@
     rpc('save_car_issue', { p_id: f.id, p_kind: f.kind, p_car_id: f.car, p_supply: f.supply, p_body: f.body || null, p_blocking: f.blocking })
       .then(function (r) {
         savedId = r.id;
-        var chain = Promise.resolve(), bad = 0;
-        f.files.forEach(function (u) {
-          chain = chain.then(function () { return photoApi({ action: 'upload', issue_id: savedId, image: u.split(',')[1] }).catch(function () { bad++; }); });
-        });
-        return chain.then(function () { return bad; });
+        return uploadAll(f.files, 'issue_id', savedId);
       })
       .then(function (bad) {
         st.busy = false; st.f = null;
-        flash(f.id ? 'Ändringen är sparad.' : (f.kind === 'fault' ? (f.blocking ? 'Skickat! Ägaren/admin har fått en notis.' : 'Felanmälan skickad. Tack!') : 'Skickat. Tack!') +
+        flash(f.id ? 'Ändringen är sparad.' : (f.kind === 'fault' ? (f.blocking ? 'Skickat! Ägaren har fått en notis.' : 'Felanmälan skickad. Tack!') : 'Skickat. Tack!') +
           (bad ? ' (' + bad + ' foto kunde inte sparas)' : ''));
         return load();
       })
@@ -316,21 +342,30 @@
     photoApi({ action: 'delete_issue', issue_id: i.id }).then(function () { flash('Borttagen.'); return load(); })
       .catch(function (e) { if (!fail(e)) alert(errText(e)); });
   }
-  function addPhoto(i) {
+  function addPhoto(i, key) {
+    key = key || 'issue_id';
     var inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.setAttribute('capture', 'environment');
     inp.onchange = function () {
       var file = inp.files && inp.files[0]; if (!file) return;
       flash('Skickar foto…'); draw();
-      shrink(file).then(function (u) { return photoApi({ action: 'upload', issue_id: i.id, image: u.split(',')[1] }); })
-        .then(function () { delete st.photos[i.id]; flash('Fotot är sparat.'); return load(); })
+      shrink(file).then(function (u) { var b = { action: 'upload', image: u.split(',')[1] }; b[key] = i.id; return photoApi(b); })
+        .then(function () { delete st.photos[pk(key, i.id)]; flash('Fotot är sparat.'); return load(); })
         .catch(function (e) { if (!fail(e)) { flashMsg = ''; alert(errText(e)); draw(); } });
     };
     inp.click();
   }
-  function showPhotos(i) {
-    st.photos[i.id] = 'loading'; draw();
-    photoApi({ action: 'list', issue_id: i.id }).then(function (r) { st.photos[i.id] = r.photos || []; draw(); })
-      .catch(function (e) { if (!fail(e)) { st.photos[i.id] = null; alert('Kunde inte visa fotona.'); draw(); } });
+  function pk(key, id) { return (key === 'maint_id' ? 'm' : '') + id; }
+  function showPhotos(i, key) {
+    key = key || 'issue_id'; var k = pk(key, i.id), b = { action: 'list' }; b[key] = i.id;
+    st.photos[k] = 'loading'; draw();
+    photoApi(b).then(function (r) { st.photos[k] = r.photos || []; draw(); })
+      .catch(function (e) { if (!fail(e)) { st.photos[k] = null; alert('Kunde inte visa fotona.'); draw(); } });
+  }
+  function photoBlock(key, id) {
+    var ph = st.photos[pk(key, id)];
+    if (ph === 'loading') return '<div class="vk-imeta">Hämtar foton…</div>';
+    if (ph && ph.length) return '<div class="bv-thumbs big">' + ph.map(function (p) { return p.url ? '<a href="' + esc(p.url) + '" target="_blank" rel="noopener"><img src="' + esc(p.url) + '" alt="Foto"></a>' : ''; }).join('') + '</div>';
+    return '';
   }
   function startHours(i) {
     st.tab = 'timmar'; localStorage.setItem('bil_tab', 'timmar');
@@ -349,8 +384,7 @@
       (i.photos ? ' · 📷 ' + i.photos : '') + (i.workshop_min ? ' · ⏱️ ' + dur(i.workshop_min) + ' verkstad' : '') + '</div>';
     if (i.status_comment) h += '<div class="vk-boss">' + esc(i.status_comment) + '</div>';
     var ph = st.photos[i.id];
-    if (ph === 'loading') h += '<div class="vk-imeta">Hämtar foton…</div>';
-    else if (ph && ph.length) h += '<div class="bv-thumbs big">' + ph.map(function (p) { return p.url ? '<a href="' + esc(p.url) + '" target="_blank" rel="noopener"><img src="' + esc(p.url) + '" alt="Foto"></a>' : ''; }).join('') + '</div>';
+    h += photoBlock('issue_id', i.id) + taskLinks(i.tasks);
     var act = [];
     if (i.photos && !ph) act.push('<button type="button" data-a="photos">📷 Visa foto</button>');
     if (i.kind === 'fault' && i.status !== 'klar') act.push('<button type="button" data-a="hours">⏱️ Verkstadstid</button>');
@@ -358,9 +392,10 @@
       if (i.status === 'ny') act.push('<button type="button" class="bv-pagar" data-a="pagar">Pågår</button>');
       if (i.status !== 'klar') act.push('<button type="button" class="kal-ok" data-a="klar">✓ Klar</button>');
       else act.push('<button type="button" data-a="ny">Öppna igen</button>');
+      if (i.status !== 'klar') act.push('<button type="button" class="bv-send" data-a="task">📋 Skicka som uppgift</button>');
     }
     var mayEdit = admin() || (i.mine && i.status === 'ny');
-    if (mayEdit && i.kind === 'fault' && i.photos < 3 && i.status !== 'klar') act.push('<button type="button" data-a="addphoto">📷 +</button>');
+    if (mayEdit && i.photos < 3 && i.status !== 'klar') act.push('<button type="button" data-a="addphoto">📷 +</button>');
     if (mayEdit && i.status !== 'klar') act.push('<button type="button" data-a="edit">Ändra</button>');
     if (mayEdit) act.push('<button type="button" class="vk-del" data-a="del">Ta bort</button>');
     if (act.length) h += '<div class="vk-iact bv-act" data-id="' + i.id + '">' + act.join('') + '</div>';
@@ -384,8 +419,8 @@
       if (st.showDone) done.forEach(function (i) { h += issueCard(i); });
     }
     h += '<div class="tl-foot">' + (admin()
-      ? 'Du ser alla anmälningar och kan ändra status. "Bilen står" hamnar alltid överst.'
-      : 'Ägaren/admin ser din anmälan och ändrar status (Ny → Pågår → Klar). Du kan ändra eller ta bort så länge den är Ny.') + '</div>';
+      ? 'Du ser alla förares anmälningar och kan ändra status eller skicka dem vidare som uppgift. "Bilen står" hamnar alltid överst.'
+      : 'Bara du och ägaren ser dina anmälningar. Ägaren ändrar status (Ny → Pågår → Klar). Du kan ändra eller ta bort så länge den är Ny.') + '</div>';
     body.innerHTML = h;
     bindCars(body);
     var nb = document.getElementById('bv-new'); if (nb) nb.onclick = function () { st.f = newIssue(kind, null); draw(); };
@@ -401,6 +436,7 @@
         else if (a === 'photos') showPhotos(i);
         else if (a === 'addphoto') addPhoto(i);
         else if (a === 'hours') startHours(i);
+        else if (a === 'task') startTask({ issue: i });
       };
     });
     if (st.f && st.f.kind === kind) bindIssueForm(body);
@@ -411,7 +447,7 @@
   function newMaint(m, suggest) {
     return { id: m ? m.id : null, suggest: !!suggest, car: m ? m.car_id : (st.car || null), type: m ? m.type : 'service', title: m ? (m.title || '') : '',
       due_date: m ? (m.due_date || '') : '', due_km: m && m.due_km != null ? String(m.due_km) : '', im: m && m.interval_months ? String(m.interval_months) : '',
-      ikm: m && m.interval_km ? String(m.interval_km) : '', note: m ? (m.note || '') : '', msg: '' };
+      ikm: m && m.interval_km ? String(m.interval_km) : '', note: m ? (m.note || '') : '', files: [], msg: '' };
   }
   function num(s) { s = String(s || '').replace(/\s/g, ''); return s === '' ? null : (/^\d+$/.test(s) ? +s : NaN); }
   function maintForm(f) {
@@ -430,7 +466,8 @@
         '<input id="bm-ikm" class="kal-input" inputmode="numeric" placeholder="var … km" value="' + esc(f.ikm) + '"></div></div>';
     }
     h += '<div class="vk-field"><span class="vk-lbl">' + (f.suggest ? 'Varför? (valfritt)' : 'Anteckning (valfri)') + '</span><textarea id="bm-note" maxlength="500" rows="2" placeholder="' +
-      (f.suggest ? 'T.ex. servicelampan lyser' : 'T.ex. bokat hos verkstaden') + '">' + esc(f.note) + '</textarea></div>';
+      (f.suggest ? 'T.ex. däckmönstret är slitet' : 'T.ex. bokat hos verkstaden') + '">' + esc(f.note) + '</textarea></div>';
+    if (f.suggest && !f.id) h += photoField(f);
     if (f.msg) h += '<div class="vk-warn bad">' + esc(f.msg) + '</div>';
     h += '<div class="pm-btns"><button type="button" id="bm-cancel">Avbryt</button><button type="button" id="bm-save" class="primary"' + (st.busy ? ' disabled' : '') + '>' +
       (f.suggest ? 'Skicka förslag' : 'Spara') + '</button></div></div>';
@@ -445,6 +482,7 @@
     }
     g('bm-car').onchange = function (ev) { sync(); f.car = ev.target.value ? +ev.target.value : null; };
     body.querySelectorAll('.bm-type').forEach(function (b) { b.onclick = function () { sync(); f.type = b.dataset.t; draw(); }; });
+    bindPhotoField(body, f, sync);
     g('bm-cancel').onclick = function () { st.f = null; draw(); };
     g('bm-save').onclick = function () {
       sync();
@@ -457,7 +495,8 @@
       rpc('save_car_maintenance', { p_id: f.id, p_car_id: f.car, p_type: f.type, p_title: f.type === 'annat' ? f.title : null,
         p_due_date: f.suggest ? null : (f.due_date || null), p_due_km: f.suggest ? null : dk, p_interval_months: f.suggest ? null : im,
         p_interval_km: f.suggest ? null : ikm, p_note: f.note || null })
-        .then(function () { st.busy = false; st.f = null; flash(f.suggest ? 'Förslaget är skickat till ägaren/admin.' : 'Sparat.'); return load(); })
+        .then(function (r) { return f.suggest && f.files.length && r && r.id ? uploadAll(f.files, 'maint_id', r.id) : 0; })
+        .then(function (bad) { st.busy = false; st.f = null; flash((f.suggest ? 'Förslaget är skickat till ägaren.' : 'Sparat.') + (bad ? ' (' + bad + ' foto kunde inte sparas)' : '')); return load(); })
         .catch(function (e) { st.busy = false; if (fail(e)) return; f.msg = errText(e); draw(); });
     };
   }
@@ -505,8 +544,13 @@
       if (m.interval_months || m.interval_km) h += '<div class="vk-imeta">Upprepas ' + [m.interval_months ? 'var ' + m.interval_months + ' mån' : '', m.interval_km ? 'var ' + km(m.interval_km) : ''].filter(Boolean).join(' eller ') + '</div>';
     }
     if (m.note) h += '<div class="vk-icom">📝 ' + esc(m.note) + '</div>';
+    if (m.suggested_name && m.status === 'forslag') h += '<div class="vk-imeta">Förslag från ' + esc(m.suggested_name) + '</div>';
+    h += photoBlock('maint_id', m.id) + taskLinks(m.tasks);
     if (st.mDone && st.mDone.id === m.id) return h + doneForm(m) + '</div>';
-    var act = [];
+    var act = [], ph = st.photos['m' + m.id];
+    if (m.photos && !ph) act.push('<button type="button" data-a="photos">📷 Visa foto (' + m.photos + ')</button>');
+    if (m.status === 'forslag' && m.mine && m.photos < 3) act.push('<button type="button" data-a="addphoto">📷 +</button>');
+    if (admin() && m.status !== 'klar') act.push('<button type="button" class="bv-send" data-a="task">📋 Skicka som uppgift</button>');
     if (admin() && m.status === 'plan') act.push('<button type="button" class="kal-ok" data-a="done">✓ Klar</button>');
     if (admin() && m.status === 'forslag') act.push('<button type="button" class="kal-ok" data-a="edit">Planera</button>');
     if (admin() && m.status === 'plan') act.push('<button type="button" data-a="edit">Ändra</button>');
@@ -547,7 +591,7 @@
       if (st.showDone) done.forEach(function (m) { h += maintCard(m); });
     }
     h += '<div class="tl-foot">"Snart" = inom 14 dagar eller 1 000 km. "Försenad" = datum eller km har passerats. ' +
-      (admin() ? 'Du får en notis när något blir snart eller försenat.' : 'Ange gärna mätarställningen så att km-påminnelserna stämmer.') + '</div>';
+      (admin() ? 'Du får en notis när något blir snart eller försenat.' : 'Här ser du bara dina egna förslag. Ange gärna mätarställningen så att km-påminnelserna stämmer.') + '</div>';
     body.innerHTML = h;
     bindCars(body);
     var g = function (id) { return document.getElementById(id); };
@@ -560,12 +604,15 @@
       b.onclick = function () {
         var id = +b.parentNode.dataset.id, m = all.filter(function (x) { return x.id === id; })[0]; if (!m) return;
         if (b.dataset.a === 'edit') { st.f = newMaint(m, false); st.f.kind = 'maint'; draw(); window.scrollTo(0, 0); }
+        else if (b.dataset.a === 'photos') showPhotos(m, 'maint_id');
+        else if (b.dataset.a === 'addphoto') addPhoto(m, 'maint_id');
+        else if (b.dataset.a === 'task') startTask({ maint: m });
         else if (b.dataset.a === 'done') {
           var cc = carById(m.car_id);
           st.mDone = { id: m.id, date: ymd(new Date()), km: cc && cc.km != null ? String(cc.km) : '', cost: '', com: '', next: !!(m.interval_months || m.interval_km), msg: '' }; draw();
         } else if (b.dataset.a === 'del') {
           if (!confirm('Ta bort?')) return;
-          rpc('delete_car_maintenance', { p_id: m.id }).then(function () { flash('Borttaget.'); return load(); })
+          (m.photos ? photoApi({ action: 'delete_maint', maint_id: m.id }) : rpc('delete_car_maintenance', { p_id: m.id })).then(function () { flash('Borttaget.'); return load(); })
             .catch(function (e) { if (!fail(e)) alert(errText(e)); });
         }
       };
@@ -576,6 +623,238 @@
       g('bd-save').onclick = function () { saveDone(dm); };
     }
     if (st.f && st.f.kind === 'maint') bindMaintForm(body);
+  }
+
+  // ---------- uppgifter (ägaren → förare) ----------
+  function taskLinks(list) {
+    if (!list || !list.length) return '';
+    return list.map(function (t) {
+      return '<div class="bv-tlink">📋 Uppgift till ' + esc(t.name) + ' <span class="bv-st ' + tcls(t.status) + '">' + TSTATUS[t.status] + '</span></div>';
+    }).join('');
+  }
+  function tcls(s) { return s === 'bokad' ? 'pagar' : s; }
+  function supLabel(k) { var x = SUPPLY.filter(function (s) { return s[0] === k; })[0]; return x ? x[2] : 'Behövs'; }
+  function startTask(o) {
+    var i = o.issue, m = o.maint, t = o.task;
+    var f = { id: null, issue: null, maint: null, car: st.car || null, to: '', title: '', ins: '', items: [{ text: '' }], msg: '', link: '' };
+    if (t) {
+      f = { id: t.id, issue: t.issue ? t.issue.id : null, maint: t.maint ? t.maint.id : null, car: t.car_id, to: t.assigned_to, title: t.title,
+        ins: t.instruction || '', items: (t.items || []).map(function (x) { return { id: x.id, text: x.text }; }), msg: '', link: linkText(t.issue, t.maint) };
+      if (!f.items.length) f.items.push({ text: '' });
+    } else if (i) {
+      f.issue = i.id; f.car = i.car_id;
+      f.title = i.kind === 'fault' ? 'Åtgärda fel' + (i.car ? ' på bil ' + i.car : '') : supLabel(i.supply) + (i.car ? ' till bil ' + i.car : '');
+      f.items = i.kind === 'fault' ? [{ text: 'Boka tid på verkstad' }, { text: 'Lämna bilen' }, { text: 'Felet är åtgärdat' }] : [{ text: 'Fixat' }];
+      f.link = linkText(i, null);
+    } else if (m) {
+      f.maint = m.id; f.car = m.car_id;
+      f.title = (m.type === 'annat' ? m.label : mLabel(m.type).replace(/^\S+\s/, '')) + ' – bil ' + ((carById(m.car_id) || {}).bilnummer || '');
+      f.items = [{ text: 'Boka tid' }, { text: 'Utfört' }];
+      f.link = linkText(null, m);
+    }
+    st.tf = f; st.tr = null; st.tab = 'uppg'; localStorage.setItem('bil_tab', 'uppg'); draw(); window.scrollTo(0, 0);
+  }
+  function linkText(i, m) {
+    if (i) return (i.kind === 'fault' ? (i.blocking ? '🛑 ' : '⚠️ ') + 'Felanmälan: ' : '🧴 ' + supLabel(i.supply) + ': ') + cut(i.body || '', 80);
+    if (m) return '🔧 Underhåll: ' + (m.label || m.type) + (m.note ? ' – ' + cut(m.note, 60) : '');
+    return '';
+  }
+  function driverOptions(sel) {
+    return '<option value="">Välj förare…</option>' + ((st.bil && st.bil.drivers) || []).map(function (d) {
+      return '<option value="' + esc(d.id) + '"' + (d.id === sel ? ' selected' : '') + '>' + esc(d.name) + ' (' + esc(d.id) + ')</option>';
+    }).join('');
+  }
+  function taskForm(f) {
+    var h = '<div class="vk-card vk-form"><div class="vk-ftitle">' + (f.id ? 'Ändra uppgift' : 'Skicka uppgift till en förare') + '</div>';
+    if (f.link) h += '<div class="bv-tlink big">🔗 ' + esc(f.link) + '</div>';
+    h += '<div class="vk-field"><span class="vk-lbl">Till förare</span><select id="bt-to">' + driverOptions(f.to) + '</select></div>';
+    if (!f.issue && !f.maint) h += '<div class="vk-field"><span class="vk-lbl">Bil (valfritt)</span><select id="bt-car">' + carOptions(f.car, true, 'Ingen särskild bil') + '</select></div>';
+    h += '<div class="vk-field"><span class="vk-lbl">Rubrik</span><input id="bt-title" class="kal-input" maxlength="120" placeholder="T.ex. Byt till vinterdäck" value="' + esc(f.title) + '"></div>';
+    h += '<div class="vk-field"><span class="vk-lbl">Instruktion (valfri)</span><textarea id="bt-ins" maxlength="1000" rows="3" placeholder="T.ex. Boka tid hos däckfirman och skriv in tiden här.">' + esc(f.ins) + '</textarea></div>';
+    h += '<div class="vk-field"><span class="vk-lbl">Checklista (valfri, högst 15)</span><div id="bt-items">' + f.items.map(function (x, n) {
+      return '<div class="bt-irow"><input class="kal-input bt-itext" data-n="' + n + '" maxlength="200" placeholder="Punkt ' + (n + 1) + '" value="' + esc(x.text) + '">' +
+        '<button type="button" class="bt-idel" data-n="' + n + '" aria-label="Ta bort punkt">×</button></div>';
+    }).join('') + '</div>' + (f.items.length < 15 ? '<button type="button" id="bt-iadd" class="bt-iadd">＋ Lägg till punkt</button>' : '') + '</div>';
+    if (f.msg) h += '<div class="vk-warn bad">' + esc(f.msg) + '</div>';
+    h += '<div class="vk-foot2">Föraren får en notis i appen och ser ' + (f.issue || f.maint ? 'anmälan, fotona och ' : '') + 'instruktionen.</div>';
+    h += '<div class="pm-btns"><button type="button" id="bt-cancel">Avbryt</button><button type="button" id="bt-save" class="primary"' + (st.busy ? ' disabled' : '') + '>' +
+      (st.busy ? 'Skickar…' : f.id ? 'Spara' : 'Skicka uppgift') + '</button></div></div>';
+    return h;
+  }
+  function bindTaskForm(body) {
+    var f = st.tf, g = function (id) { return document.getElementById(id); };
+    function sync() {
+      f.to = g('bt-to').value; if (g('bt-car')) f.car = g('bt-car').value ? +g('bt-car').value : null;
+      f.title = g('bt-title').value; f.ins = g('bt-ins').value;
+      body.querySelectorAll('.bt-itext').forEach(function (x) { f.items[+x.dataset.n].text = x.value; });
+    }
+    body.querySelectorAll('.bt-idel').forEach(function (b) { b.onclick = function () { sync(); f.items.splice(+b.dataset.n, 1); if (!f.items.length) f.items.push({ text: '' }); draw(); }; });
+    if (g('bt-iadd')) g('bt-iadd').onclick = function () { sync(); f.items.push({ text: '' }); draw(); var l = body.querySelectorAll('.bt-itext'); if (l.length) l[l.length - 1].focus(); };
+    g('bt-cancel').onclick = function () { st.tf = null; draw(); };
+    g('bt-save').onclick = function () {
+      sync();
+      if (!f.to) { f.msg = ERR.bad_driver; draw(); return; }
+      if (!f.title.trim()) { f.msg = 'Skriv en rubrik.'; draw(); return; }
+      var items = f.items.filter(function (x) { return x.text.trim(); }).map(function (x) { return x.id ? { id: x.id, text: x.text.trim() } : { text: x.text.trim() }; });
+      st.busy = true; f.msg = ''; draw();
+      rpc('save_car_task', { p_id: f.id, p_issue_id: f.issue, p_maint_id: f.maint, p_car_id: f.car, p_assigned_to: f.to, p_title: f.title.trim(),
+        p_instruction: f.ins.trim() || null, p_items: items })
+        .then(function (r) { st.busy = false; st.tf = null; flash(f.id ? 'Uppgiften är sparad.' : 'Uppgiften är skickad till ' + (r && r.assigned_name || 'föraren') + '.'); return load(); })
+        .catch(function (e) { st.busy = false; if (fail(e)) return; f.msg = errText(e); draw(); });
+    };
+  }
+  var LOGTXT = { skapad: 'Skapad', flyttad: 'Flyttad', andrad: 'Ändrad', bokad: 'Bokad tid', svar: 'Svar', bockad: 'Bockade av', obockad: 'Tog bort bock', klar: 'Klar' };
+  function replyForm(t) {
+    var f = st.tr;
+    return '<div class="bv-done"><div class="vk-ftitle">Svara ägaren</div>' +
+      '<div class="bv-two"><div class="vk-field"><span class="vk-lbl">Bokad dag</span><input id="br-date" type="date" class="kal-input" value="' + esc(f.date) + '"></div>' +
+      '<div class="vk-field"><span class="vk-lbl">Tid</span><input id="br-time" type="time" class="kal-input" value="' + esc(f.time) + '"></div></div>' +
+      '<div class="vk-field"><span class="vk-lbl">Var? (valfritt)</span><input id="br-place" class="kal-input" maxlength="200" placeholder="T.ex. Däckmästarn, Industrigatan 4" value="' + esc(f.place) + '"></div>' +
+      '<div class="vk-field"><span class="vk-lbl">Meddelande (valfritt)</span><textarea id="br-reply" maxlength="500" rows="2" placeholder="T.ex. Lämnar bilen kl 7">' + esc(f.reply) + '</textarea></div>' +
+      (f.msg ? '<div class="vk-warn bad">' + esc(f.msg) + '</div>' : '') +
+      '<div class="pm-btns"><button type="button" id="br-cancel">Avbryt</button><button type="button" id="br-save" class="primary">Skicka svar</button></div></div>';
+  }
+  function taskCard(t) {
+    var me = t.mine, own = admin(), open = t.status !== 'klar', items = t.items || [];
+    var nd = items.filter(function (x) { return x.done; }).length;
+    var h = '<div class="vk-card bv-task' + (open ? '' : ' done') + (me && open ? ' mine' : '') + '" id="bt-' + t.id + '">' +
+      '<div class="vk-ihead"><span class="vk-when">📋 ' + esc(t.title) + (t.car ? ' <small>· Bil ' + esc(t.car) + '</small>' : '') + '</span>' +
+      '<span class="bv-st ' + tcls(t.status) + '">' + TSTATUS[t.status] + '</span></div>';
+    h += '<div class="vk-imeta">' + (own ? 'Till ' + esc(me ? 'dig' : t.assigned_name) + ' · ' : 'Från ägaren · ') + esc(when(t.created_at)) + '</div>';
+    if (t.instruction) h += '<div class="bv-text">' + esc(t.instruction) + '</div>';
+    if (t.issue || t.maint) {
+      var lk = t.issue ? 'issue_id' : 'maint_id', lo = t.issue || t.maint;
+      h += '<div class="bv-tlink big">🔗 ' + esc(linkText(t.issue, t.maint)) + (lo.photos ? ' · 📷 ' + lo.photos : '') + '</div>';
+      h += photoBlock(lk, lo.id);
+    }
+    if (t.booked_at || t.booked_place || t.reply) {
+      h += '<div class="bv-booked">' + (t.booked_at ? '📅 <b>Bokad ' + esc(when(t.booked_at)) + '</b>' : '💬 Svar') +
+        (t.booked_place ? '<div>📍 ' + esc(t.booked_place) + '</div>' : '') + (t.reply ? '<div>💬 ' + esc(t.reply) + '</div>' : '') + '</div>';
+    }
+    if (items.length) {
+      var can = open && (me || own);
+      h += '<div class="bt-list"><div class="vk-imeta">Checklista: ' + nd + ' av ' + items.length + ' klara</div>' + items.map(function (x) {
+        return '<label class="bv-check bt-check' + (x.done ? ' on' : '') + '"><input type="checkbox" class="bt-item" data-id="' + x.id + '"' + (x.done ? ' checked' : '') + (can ? '' : ' disabled') + '> ' + esc(x.text) + '</label>';
+      }).join('') + '</div>';
+    }
+    if (!open) h += '<div class="vk-boss">✅ Klar ' + esc(when(t.done_at)) + (t.done_name ? ' av ' + esc(t.done_name) : '') + '</div>';
+    if (st.tr && st.tr.id === t.id) h += replyForm(t);
+    else {
+      var act = [], lo2 = t.issue || t.maint;
+      if (lo2 && lo2.photos && !st.photos[pk(t.issue ? 'issue_id' : 'maint_id', lo2.id)]) act.push('<button type="button" data-a="photos">📷 Visa foto</button>');
+      if (open && me) act.push('<button type="button" class="bv-pagar" data-a="reply">📅 ' + (t.booked_at ? 'Ändra tid' : 'Svara / boka tid') + '</button>');
+      if (open && (me || own)) act.push('<button type="button" class="kal-ok" data-a="done">✓ Klar</button>');
+      if (open && own) act.push('<button type="button" data-a="edit">Ändra</button>');
+      if (own) act.push('<button type="button" class="vk-del" data-a="del">Ta bort</button>');
+      act.push('<button type="button" data-a="log">' + (st.tlog[t.id] ? 'Dölj historik' : '🕑 Historik') + '</button>');
+      h += '<div class="vk-iact bt-act" data-id="' + t.id + '">' + act.join('') + '</div>';
+    }
+    if (st.tlog[t.id]) {
+      h += '<div class="bt-log">' + (t.log || []).map(function (l) {
+        return '<div><span>' + esc(when(l.at)) + '</span> ' + esc(l.by_name || '') + ': ' + esc(LOGTXT[l.action] || l.action) + (l.detail ? ' – ' + esc(l.detail) : '') + '</div>';
+      }).join('') + '</div>';
+    }
+    return h + '</div>';
+  }
+  function drawTasks(body) {
+    var all = st.bil.tasks || [], own = admin(), h = '';
+    if (flashMsg) h += '<div id="vk-flash" class="vk-flash">' + esc(flashMsg) + '</div>';
+    h += '<div class="vk-ltitle">Uppgifter</div>';
+    if (own) h += st.tf ? taskForm(st.tf) : '<button type="button" id="bt-new" class="vk-new">＋ Ny uppgift till en förare</button>';
+    var open = all.filter(function (t) { return t.status !== 'klar'; }), done = all.filter(function (t) { return t.status === 'klar'; });
+    var mine = open.filter(function (t) { return t.mine; }), sent = open.filter(function (t) { return !t.mine; });
+    if (mine.length || !own) {
+      h += '<div class="vk-ltitle">Till dig (' + mine.length + ')</div>';
+      if (!mine.length) h += '<div class="tl-msg">Inga uppgifter just nu.</div>';
+      mine.forEach(function (t) { h += taskCard(t); });
+    }
+    if (own) {
+      h += '<div class="vk-ltitle">Skickade, inte klara (' + sent.length + ')</div>';
+      if (!sent.length) h += '<div class="tl-msg">Inga öppna uppgifter. Tryck "📋 Skicka som uppgift" på en anmälan eller ett underhåll.</div>';
+      sent.forEach(function (t) { h += taskCard(t); });
+    }
+    if (done.length) {
+      h += '<button type="button" class="ank-more" id="bv-done">' + (st.showDone ? 'Dölj klara' : 'Visa klara (' + done.length + ')') + '</button>';
+      if (st.showDone) done.forEach(function (t) { h += taskCard(t); });
+    }
+    h += '<div class="tl-foot">' + (own
+      ? 'Föraren ser bara uppgifter som skickats till hen. Du får en notis när föraren bokat tid och när det är klart.'
+      : 'Skriv in tiden du bokat, bocka av punkterna och tryck Klar när det är gjort. Ägaren får en notis.') + '</div>';
+    body.innerHTML = h;
+    var g = function (id) { return document.getElementById(id); };
+    if (g('bt-new')) g('bt-new').onclick = function () { startTask({}); };
+    if (g('bv-done')) g('bv-done').onclick = function () { st.showDone = !st.showDone; draw(); };
+    body.querySelectorAll('.bt-item').forEach(function (c) {
+      c.onchange = function () {
+        c.disabled = true;
+        rpc('check_car_task_item', { p_item_id: +c.dataset.id, p_done: c.checked }).then(function () { return load(); })
+          .catch(function (e) { if (!fail(e)) { alert(errText(e)); load(); } });
+      };
+    });
+    body.querySelectorAll('.bt-act button').forEach(function (b) {
+      b.onclick = function () {
+        var id = +b.parentNode.dataset.id, t = all.filter(function (x) { return x.id === id; })[0]; if (!t) return;
+        var a = b.dataset.a;
+        if (a === 'log') { st.tlog[id] = !st.tlog[id]; draw(); }
+        else if (a === 'photos') showPhotos(t.issue || t.maint, t.issue ? 'issue_id' : 'maint_id');
+        else if (a === 'edit') startTask({ task: t });
+        else if (a === 'reply') {
+          var d = t.booked_at ? new Date(t.booked_at) : null;
+          st.tr = { id: id, date: d ? ymd(d) : '', time: d ? hm(d) : '', place: t.booked_place || '', reply: t.reply || '', msg: '' }; draw();
+        } else if (a === 'done') {
+          var left = (t.items || []).filter(function (x) { return !x.done; }).length;
+          if (left && !confirm(left + ' punkt' + (left > 1 ? 'er' : '') + ' är inte avbockad' + (left > 1 ? 'e' : '') + '. Markera klar ändå?')) return;
+          var c = prompt('Klart! Kommentar till ägaren (valfri):', ''); if (c === null) return;
+          rpc('done_car_task', { p_id: id, p_comment: c || null }).then(function () { flash(own ? 'Uppgiften är klar.' : 'Bra! Ägaren har fått en notis.'); return load(); })
+            .catch(function (e) { if (!fail(e)) alert(errText(e)); });
+        } else if (a === 'del') {
+          if (!confirm('Ta bort uppgiften? ' + (t.status !== 'klar' ? 'Föraren får en notis.' : ''))) return;
+          rpc('delete_car_task', { p_id: id }).then(function () { flash('Uppgiften är borttagen.'); return load(); })
+            .catch(function (e) { if (!fail(e)) alert(errText(e)); });
+        }
+      };
+    });
+    if (st.tr && g('br-save')) {
+      var f = st.tr;
+      g('br-cancel').onclick = function () { st.tr = null; draw(); };
+      g('br-save').onclick = function () {
+        f.date = g('br-date').value; f.time = g('br-time').value; f.place = g('br-place').value; f.reply = g('br-reply').value;
+        if (f.time && !f.date) { f.msg = 'Välj dag också.'; draw(); return; }
+        if (!f.date && !f.place.trim() && !f.reply.trim()) { f.msg = 'Fyll i bokad dag eller skriv ett meddelande.'; draw(); return; }
+        var at = f.date ? new Date(f.date + 'T' + (f.time || '00:00')) : null;
+        if (at && isNaN(at.getTime())) { f.msg = ERR.bad_date; draw(); return; }
+        rpc('reply_car_task', { p_id: f.id, p_booked_at: at ? at.toISOString() : null, p_place: f.place.trim() || null, p_reply: f.reply.trim() || null })
+          .then(function () { st.tr = null; flash('Svaret är skickat till ägaren.'); return load(); })
+          .catch(function (e) { if (fail(e)) return; f.msg = errText(e); draw(); });
+      };
+    }
+    if (st.tf && own) bindTaskForm(body);
+  }
+
+  // ---------- ägarens notisval ----------
+  function showPrefs(m) {
+    var p = {}, src = (st.bil && st.bil.prefs) || {};
+    NTYPES.forEach(function (t) { p[t[0]] = src[t[0]] === 'mail' ? 'mail' : 'app'; });
+    function paint(msg) {
+      m.querySelector('.pm-box').innerHTML = '<div class="pm-head" style="justify-content:center">⚙️ Notiser för Bil & verkstad</div>' +
+        '<div class="vk-foot2">Välj för varje typ. Mejl skickas inom några minuter.</div>' +
+        (st.bil && st.bil.has_email === false ? '<div class="vk-warn">Du har ingen mejladress sparad, så mejl kan inte skickas än. Be S admin lägga in din mejladress.</div>' : '') +
+        NTYPES.map(function (t) {
+          return '<div class="bp-row"><div class="bp-lbl">' + t[1] + '</div><div class="bv-two">' +
+            '<button type="button" class="bv-opt' + (p[t[0]] === 'app' ? ' on' : '') + '" data-k="' + t[0] + '" data-v="app">Endast i appen</button>' +
+            '<button type="button" class="bv-opt' + (p[t[0]] === 'mail' ? ' on' : '') + '" data-k="' + t[0] + '" data-v="mail">I appen + mejl</button></div></div>';
+        }).join('') + (msg ? '<div class="vk-warn bad">' + esc(msg) + '</div>' : '') +
+        '<div class="pm-btns" style="margin-top:.7rem"><button type="button" id="bp-cancel">Avbryt</button><button type="button" class="primary" id="bp-save">Spara</button></div>';
+      m.querySelectorAll('.bp-row .bv-opt').forEach(function (b) { b.onclick = function () { p[b.dataset.k] = b.dataset.v; paint(); }; });
+      document.getElementById('bp-cancel').onclick = function () { m.classList.remove('open'); };
+      document.getElementById('bp-save').onclick = function () {
+        rpc('save_bil_prefs', { p_prefs: p }).then(function (r) {
+          if (st.bil) st.bil.prefs = (r && r.prefs) || p;
+          m.classList.remove('open'); flash('Notisvalen är sparade.'); draw();
+        }).catch(function (e) { if (!fail(e)) paint(errText(e)); });
+      };
+    }
+    paint(''); m.classList.add('open');
   }
 
   // ---------- notiser (samma mekanism som kalenderns påminnelser) ----------
@@ -593,9 +872,11 @@
         ((list || []).length ? list.map(function (n) {
           return '<div class="kal-com' + (n.read ? '' : ' unread') + '"><div class="kal-cwho">' + esc(when(n.created_at)) + '</div><div>' + esc(n.body) + '</div></div>';
         }).join('') : '<div class="kal-none">Inga notiser än.</div>') +
-        '<div class="pm-btns" style="margin-top:.7rem"><button type="button" class="primary" id="bv-nclose">Stäng</button></div>';
+        '<div class="pm-btns" style="margin-top:.7rem">' + (admin() ? '<button type="button" id="bv-nprefs">⚙️ Inställningar</button>' : '') +
+        '<button type="button" class="primary" id="bv-nclose">Stäng</button></div>';
       m.classList.add('open');
       document.getElementById('bv-nclose').onclick = function () { m.classList.remove('open'); };
+      var np = document.getElementById('bv-nprefs'); if (np) np.onclick = function () { showPrefs(m); };
     }).catch(function (e) { if (!fail(e)) alert('Kunde inte hämta notiserna.'); });
   }
 

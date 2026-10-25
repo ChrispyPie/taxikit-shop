@@ -100,7 +100,7 @@
   </div>
 
   <script src="serverstatus.js?v=20261024v"></script>
-  <script src="verkstad-admin.js?v=20261025bv1"></script>
+  <script src="verkstad-admin.js?v=20261025bv2"></script>
   <script>
     const APP_VERSION = '1.0.26';
     console.log('Admin version:', APP_VERSION);
@@ -1199,6 +1199,12 @@
         case 'bil_maint_done': return who + ' markerade underhåll klart (' + (d.type || '') + ')' + (d.km != null ? ' vid ' + d.km + ' km' : '') + (d.cost != null ? ' = ' + formatSEK(d.cost) : '');
         case 'bil_maint_delete': return who + ' tog bort underhåll (' + (d.type || '') + ')';
         case 'bil_km': return who + ' angav mätarställning ' + d.to + ' km för bil ' + (d.car || '?');
+        case 'bil_task_add': return who + ' skickade uppgiften "' + (d.title || '') + '" till ' + (e.target_id || '?') + (d.car ? ' (bil ' + d.car + ')' : '');
+        case 'bil_task_edit': return who + ' ändrade uppgiften "' + (d.title || '') + '" (' + (e.target_id || '?') + ')';
+        case 'bil_task_delete': return who + ' tog bort uppgiften "' + (d.title || '') + '" (' + (e.target_id || '?') + ')';
+        case 'bil_task_reply': return who + ' svarade på uppgiften "' + (d.title || '') + '"' + (d.booked_at ? ' – bokad ' + new Date(d.booked_at).toLocaleString('sv-SE', { dateStyle: 'short', timeStyle: 'short' }) : '') + (d.place ? ', ' + d.place : '');
+        case 'bil_task_done': return who + ' markerade uppgiften "' + (d.title || '') + '" klar' + (d.car ? ' (bil ' + d.car + ')' : '') + (d.comment ? ' – "' + d.comment + '"' : '');
+        case 'bil_prefs': return who + ' ändrade sina notisval för Bil & verkstad';
         case 'category_change': return who + ' ändrade kategori på ' + e.target_id + ' till ' + catName(d.to);
         default: return who + ': ' + e.action + ' ' + (e.target_id || '');
       }
