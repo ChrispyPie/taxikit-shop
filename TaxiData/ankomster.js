@@ -84,8 +84,8 @@
   // kontrolleras, eftersom reservfilen tag.json ibland bara har signaturen (t.ex. "Dk.kh").
   // Verifierat mot riktig data 2026-10-25: Stockholm C = Cst, Köpenhamn H = Dk.kh, Oslo S = No.osl.
   var TRAIN_GROUPS = [
-    { id: 'sthlm', label: 'Stockholm', sig: /^(Cst|Sci|Arnc)$/, name: /^(Stockholm|Arlanda)/i },
-    { id: 'kbh', label: 'Köpenhamn', sig: /^(Dk\.|Kh$)/, name: /^(Köpenhamn|København|Kastrup)/i },
+    { id: 'sthlm', label: 'Stockholm', short: 'Sthlm', sig: /^(Cst|Sci|Arnc)$/, name: /^(Stockholm|Arlanda)/i },
+    { id: 'kbh', label: 'Köpenhamn', short: 'Kbh', sig: /^(Dk\.|Kh$)/, name: /^(Köpenhamn|København|Kastrup)/i },
     { id: 'oslo', label: 'Oslo', sig: /^(No\.|Öslo$|Xoslo$)/, name: /^Oslo/i }
   ];
   function trainGroup(t) {
@@ -198,7 +198,7 @@
         var act = activeGroup(s);
         html += '<div class="ank-chips tf">' + s.groups().map(function (g) {
           var n = g.id ? list.filter(function (it) { return it.group === g.id; }).length : list.length;
-          return '<button class="ank-chip' + (g.id === act ? ' on' : '') + '" data-ank-filter="' + g.id + '">' + esc(g.label) +
+          return '<button class="ank-chip' + (g.id === act ? ' on' : '') + '" data-ank-filter="' + g.id + '" title="' + esc(g.label) + '">' + esc(g.short || g.label) +
             ' <span class="ank-chip-n">' + n + '</span></button>';
         }).join('') + '</div>';
         if (act) list = list.filter(function (it) { return it.group === act; });
