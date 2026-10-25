@@ -119,6 +119,7 @@
   <script src="kalender.js?v=20261025k2"></script>
   <script src="hjalpbot.js?v=20261024z"></script>
   <script src="profilbild.js?v=20261025pb1"></script>
+  <script src="forum.js?v=20261025fo1"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -134,6 +135,7 @@
       { id: TOPPLISTOR.id, icon: TOPPLISTOR.icon, label: TOPPLISTOR.title, roles: ALLA },
       { id: VERKSTAD.id, icon: VERKSTAD.icon, label: VERKSTAD.title, roles: ALLA },
       { id: 'kommunikation', icon: '💬', label: 'Kommunikation', roles: ALLA },
+      { id: FORUM.id, icon: FORUM.icon, label: FORUM.title, roles: ALLA },
       { id: KALENDER.id, icon: KALENDER.icon, label: KALENDER.title, roles: ALLA },
       { id: 'installningar', icon: '⚙️', label: 'Inställningar', roles: ALLA },
       { id: 'admin', icon: '🔐', label: 'Admin', roles: ADMIN_ROLLER, submenu: [
@@ -284,7 +286,7 @@
         document.getElementById('driver-label').textContent = driverId;
         if (typeof loadData === 'function') loadData().then(render);
       } else {
-        if (savedView === ANKOMSTER.id || savedView === TOPPLISTOR.id || savedView === VERKSTAD.id || savedView === KALENDER.id) {
+        if (savedView === ANKOMSTER.id || savedView === TOPPLISTOR.id || savedView === VERKSTAD.id || savedView === KALENDER.id || savedView === FORUM.id) {
           current = savedView;
           try { history.pushState({ view: current }, ''); } catch (e) {}
         }
@@ -570,7 +572,9 @@
       } else if (profileLock) {
         try { history.pushState({ view: 'profil' }, ''); } catch (e) {}
         lockBlocked();
-      } else if (current === 'profil' || current === ANKOMSTER.id || current === TOPPLISTOR.id || current === VERKSTAD.id || current === KALENDER.id) {
+      } else if (current === FORUM.id && FORUM.back && FORUM.back()) {
+        // forumet gick tillbaka från ett inlägg till listan
+      } else if (current === 'profil' || current === ANKOMSTER.id || current === TOPPLISTOR.id || current === VERKSTAD.id || current === KALENDER.id || current === FORUM.id) {
         goHome();
       }
     });
@@ -607,6 +611,9 @@
       } else if (current === KALENDER.id) {
         title.textContent = KALENDER.title;
         KALENDER.render(content);
+      } else if (current === FORUM.id) {
+        title.textContent = FORUM.title;
+        FORUM.render(content);
       } else if (current === 'installningar' && window.HJALPBOT) {
         title.textContent = 'Inställningar';
         window.HJALPBOT.renderSettings(content);
@@ -624,7 +631,7 @@
           if (!canSee(menu[i])) continue;
           // Admin-rutan får en siffra när verkstadstid väntar på ägarens beslut.
           // Bil & verkstad får en siffra för olästa bil-notiser (admin: annars antal bilar som står).
-          html += '<div class="icon" onclick="openItem(\'' + menu[i].id + '\')"' + (menu[i].id === 'admin' ? ' data-badge="workshop"' : menu[i].id === VERKSTAD.id ? ' data-badge="bil"' : '') + '>';
+          html += '<div class="icon" onclick="openItem(\'' + menu[i].id + '\')"' + (menu[i].id === 'admin' ? ' data-badge="workshop"' : menu[i].id === VERKSTAD.id ? ' data-badge="bil"' : menu[i].id === FORUM.id ? ' data-badge="forum"' : '') + '>';
           html += '<div class="emoji">' + menu[i].icon + '</div>';
           html += '<div class="label">' + menu[i].label + '</div></div>';
         }
@@ -632,6 +639,7 @@
         content.innerHTML = html;
         refreshWorkshopBadge();
         refreshBilBadge();
+        refreshForumBadge();
       }
       if (window.refreshBadges) refreshBadges();
     }
@@ -658,6 +666,13 @@
       VERKSTAD.refreshBadge();
     }
 
+    var forumBadgeAt = 0;
+    function refreshForumBadge() {
+      if (!FORUM.refreshBadge || Date.now() - forumBadgeAt < 30000) return;
+      forumBadgeAt = Date.now();
+      FORUM.refreshBadge();
+    }
+
     function openItem(id) {
       if (lockBlocked()) return;
       var item = findItem(id);
@@ -673,7 +688,7 @@
         if (window.initServerStatus) initServerStatus('server-status');
         document.getElementById('driver-label').textContent = driverId;
         if (typeof loadData === 'function') loadData().then(render);
-      } else if (id === ANKOMSTER.id || id === TOPPLISTOR.id || id === VERKSTAD.id || id === KALENDER.id) {
+      } else if (id === ANKOMSTER.id || id === TOPPLISTOR.id || id === VERKSTAD.id || id === KALENDER.id || id === FORUM.id) {
         localStorage.setItem('taxi_view', id);
         current = id;
         try { history.pushState({ view: id }, ''); } catch (e) {}
