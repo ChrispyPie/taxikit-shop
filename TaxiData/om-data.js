@@ -29,7 +29,7 @@ window.OM_DATA = {
     { q: 'Vem ser mina felanmälningar i Bil & verkstad?',
       a: 'Du ser dina egna anmälningar. Ägaren och S admin ser alla, så att felet kan åtgärdas. Andra förare ser inte dina anmälningar.' },
     { q: 'Vem ser det jag skriver i Forum?',
-      a: 'Alla förare i företaget. Ditt namn visas som förnamn och första bokstaven i efternamnet, t.ex. "Anna S.". Du kan ändra eller ta bort det du har skrivit.' },
+      a: 'Allmänt, Hjälp, Förslag och Buggar är gemensamma: där ser förare från alla anslutna åkerier det du skriver, med ditt åkeris namn bredvid ditt namn. Sektionen som heter som ditt åkeri (🔒) ser bara förarna i ditt eget åkeri. Ditt namn visas som förnamn och första bokstaven i efternamnet, t.ex. "Anna S.". Du kan ändra eller ta bort det du har skrivit.' },
     { q: 'Hur byter jag profilbild?',
       a: 'Tryck på den runda knappen uppe till höger och välj "Lägg till profilbild" eller "Byt profilbild". Där kan du också ta bort bilden.' },
     { q: 'Hur loggar jag in första gången?',

@@ -1,7 +1,10 @@
 /* Forum i förarappen: inlägg (Allmänt, Hjälp, Förslag, Buggar), kommentarer, 👍 och upp till 3 foton per inlägg.
  * Förslag och buggar har status (Ny, Pågår, Klar, Avvisad) som bara ägaren och S admin kan ändra.
  * Allt kontrolleras i databasen (forum_*-funktionerna). Foton och profilbilder går via edge-funktionen "forum"
- * (privata buckets, länkarna gäller en kort stund). Forumet är bara för förarna i samma företag.
+ * (privata buckets, länkarna gäller en kort stund).
+ * Allmänt, Hjälp, Förslag och Buggar är gemensamma för alla anslutna åkerier (författaren visas med en liten åkerietikett).
+ * Sektionen med åkeriets namn (kategori 'akeri') syns bara för förarna i det egna åkeriet; S admin ser alla för moderering.
+ * Ägaren modererar innehåll från sitt eget åkeri, S admin allt.
  */
 (function () {
   'use strict';
@@ -14,11 +17,17 @@
     need_title: 'Skriv en rubrik.', need_text: 'Skriv något först.', title_too_long: 'Rubriken är för lång (högst 120 tecken).',
     text_too_long: 'Texten är för lång.', too_many: 'Du har skrivit väldigt mycket idag. Försök igen i morgon.',
     too_many_photos: 'Högst 3 foton per inlägg.', too_big: 'Fotot är för stort.', bad_image: 'Det gick inte att läsa fotot. Försök med ett annat.',
-    forbidden: 'Det får du inte göra.', need_first_name: 'Fyll i ditt förnamn först.', name_too_long: 'Namnet är för långt.', has_name: 'Du har redan ett namn. Ändra det under Profil.', not_found: 'Inlägget finns inte längre.', comment_too_long: 'Kommentaren till statusen är för lång.'
+    forbidden: 'Det får du inte göra.', need_first_name: 'Fyll i ditt förnamn först.', name_too_long: 'Namnet är för långt.', has_name: 'Du har redan ett namn. Ändra det under Profil.', not_found: 'Inlägget finns inte längre.', comment_too_long: 'Kommentaren till statusen är för lång.',
+    need_company_name: 'Skriv ett namn (minst 2 tecken).', company_name_too_long: 'Namnet är för långt (högst 40 tecken).'
   };
   var CSS = '/* Forum (forum.js) */\n' +
     '.fo-top { display: flex; align-items: center; gap: 8px; margin-bottom: .6rem; }\n' +
-    '.fo-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: .7rem; }\n' +
+    '.fo-chips { display: flex; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: none; overscroll-behavior-x: contain; gap: 6px; margin-bottom: .7rem; padding: 2px 1px; }\n' +
+    '.fo-chips::-webkit-scrollbar { display: none; } .fo-chips > * { flex-shrink: 0; white-space: nowrap; }\n' +
+    '.fo-co { font-size: .68rem; padding: .05rem .4rem; border-radius: 8px; background: #edf2f7; color: #4a5568; white-space: nowrap; font-weight: 500; }\n' +
+    '.fo-sec { background: #e9d8fd; color: #44337a; }\n' +
+    '.fo-secinfo { font-size: .85rem; color: var(--text-soft); margin: -.3rem 0 .6rem; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }\n' +
+    '.fo-secinfo button { background: none; border: none; color: var(--primary); padding: 0; font-size: .85rem; cursor: pointer; }\n' +
     '.fo-card { cursor: pointer; }\n' +
     '.fo-head { display: flex; align-items: center; gap: 8px; font-size: .82rem; color: var(--text-soft); }\n' +
     '.fo-av { width: 30px; height: 30px; border-radius: 50%; flex: 0 0 30px; background: #1a365d center/cover no-repeat; color: #fff; font-size: .8rem; font-weight: 600; display: flex; align-items: center; justify-content: center; }\n' +
@@ -80,6 +89,18 @@
   function errText(e) { return ERR[e && e.message] || 'Det gick inte. Försök igen.'; }
   function fail(e) { if (e && e.code === '28000') { location.reload(); return true; } return false; }
   function catName(c) { for (var i = 0; i < CATS.length; i++) if (CATS[i][0] === c) return CATS[i][1]; return c; }
+  function myCo() { return (st.list && st.list.company) || (st.co) || { id: '', name: 'Åkeriet' }; }
+  // Åkerietikett efter namnet (bara i gemensamma sektioner)
+  function coTag(co) { return co ? ' <span class="fo-co">' + esc(co) + '</span>' : ''; }
+  // Svepbar knapprad: håll vald knapp synlig
+  function keepChip() {
+    if (!root) return;
+    root.querySelectorAll('.fo-chips').forEach(function (row) {
+      var b = row.querySelector('.on'); if (!b || row.scrollWidth <= row.clientWidth + 1) return;
+      var l = b.offsetLeft - row.offsetLeft, w = b.offsetWidth;
+      if (l < row.scrollLeft + 8 || l + w > row.scrollLeft + row.clientWidth - 8) row.scrollLeft = l - (row.clientWidth - w) / 2;
+    });
+  }
   function stName(s) { for (var i = 0; i < STATUS.length; i++) if (STATUS[i][0] === s) return STATUS[i][1]; return s; }
   function when(iso) {
     var d = new Date(iso), s = (Date.now() - d.getTime()) / 1000;
@@ -110,7 +131,7 @@
     }).catch(function () {});
   }
   function tags(p) {
-    var h = '<span class="fo-tag">' + esc(catName(p.cat)) + '</span>';
+    var h = p.cat === 'akeri' ? '<span class="fo-tag fo-sec">🔒 ' + esc(p.sec || myCo().name) + '</span>' : '<span class="fo-tag">' + esc(catName(p.cat)) + '</span>';
     if (p.status) h += ' <span class="fo-tag fo-st-' + esc(p.status) + '">' + esc(stName(p.status)) + '</span>';
     if (p.hidden) h += ' <span class="fo-tag fo-hid">Dold</span>';
     return h;
@@ -131,7 +152,7 @@
   function loadList() {
     st.err = null;
     return Promise.all([rpc('forum_list', { p_category: st.cat }), rpc('forum_notices', { p_mark_read: false })]).then(function (r) {
-      st.list = r[0]; st.notices = (r[1] || []).filter(function (n) { return !n.read; });
+      st.list = r[0]; st.co = r[0].company; st.notices = (r[1] || []).filter(function (n) { return !n.read; });
       setUnread(st.list.unread);
     }).catch(function (e) { if (!fail(e)) st.err = errText(e); });
   }
@@ -144,15 +165,30 @@
       st.notices.forEach(function (n) { h += '<button class="fo-notice" data-a="open" data-id="' + n.post_id + '">' + esc(n.body) + ' <span style="color:#718096">· ' + esc(when(n.created_at)) + '</span></button>'; });
       h += '<button class="fo-back" data-a="readall">Markera alla som lästa</button></div>';
     }
+    var co = myCo();
     h += '<div class="fo-chips" role="group" aria-label="Kategori"><button class="ank-chip' + (!st.cat ? ' on' : '') + '" data-a="cat" data-c="">Alla</button>';
     CATS.forEach(function (c) { h += '<button class="ank-chip' + (st.cat === c[0] ? ' on' : '') + '" data-a="cat" data-c="' + c[0] + '">' + c[1] + '</button>'; });
+    h += '<button class="ank-chip' + (st.cat === 'akeri' ? ' on' : '') + '" data-a="cat" data-c="akeri">🔒 ' + esc(co.name) + '</button>';
+    ((st.list && st.list.companies) || []).forEach(function (c) {
+      var k = 'akeri:' + c.id; h += '<button class="ank-chip' + (st.cat === k ? ' on' : '') + '" data-a="cat" data-c="' + esc(k) + '">🔒 ' + esc(c.name) + '</button>';
+    });
     h += '</div>';
+    if (st.cat === 'akeri') {
+      h += '<div class="fo-secinfo"><span>Bara förarna i ' + esc(co.name) + ' ser det som skrivs här.</span>' +
+        (co.can_rename ? '<button data-a="rename" data-co="">✏️ Byt namn på åkeriet</button>' : '') + '</div>';
+    } else if (st.cat && st.cat.indexOf('akeri:') === 0) {
+      var oc = ((st.list && st.list.companies) || []).filter(function (c) { return 'akeri:' + c.id === st.cat; })[0];
+      h += '<div class="fo-secinfo"><span>Ett annat åkeris sektion. Du ser den som S admin för moderering.</span>' +
+        (oc ? '<button data-a="rename" data-co="' + esc(oc.id) + '">✏️ Byt namn</button>' : '') + '</div>';
+    } else if (!st.cat) {
+      h += '<div class="fo-secinfo"><span>Gemensamt för förare i alla anslutna åkerier. 🔒 ' + esc(co.name) + ' syns bara för ert åkeri.</span></div>';
+    }
     if (st.err) h += '<div class="tl-msg err">' + esc(st.err) + '</div>';
     else if (!st.list) h += '<div class="tl-msg">Laddar...</div>';
     else if (!st.list.posts.length) h += '<div class="tl-msg">Inga inlägg här ännu. Skriv det första!</div>';
     else st.list.posts.forEach(function (p) {
       h += '<div class="vk-card fo-card" data-a="open" data-id="' + p.id + '">' +
-        '<div class="fo-head">' + av(p.author, p.ak, true) + '<span class="fo-name">' + esc(p.author) + '</span><span>· ' + esc(when(p.created_at)) + '</span></div>' +
+        '<div class="fo-head">' + av(p.author, p.ak, true) + '<span class="fo-name">' + esc(p.author) + '</span>' + coTag(p.co) + '<span>· ' + esc(when(p.created_at)) + '</span></div>' +
         '<div class="fo-title">' + esc(p.title) + '</div>' +
         '<div>' + tags(p) + '</div>' +
         '<div class="fo-ex">' + esc(p.body) + (p.body.length >= 160 ? '…' : '') + '</div>' +
@@ -160,6 +196,7 @@
         '<span style="margin-left:auto">Senast ' + esc(when(p.last_activity_at)) + '</span></div></div>';
     });
     root.innerHTML = h;
+    keepChip();
     paintAvatars();
   }
 
@@ -177,7 +214,7 @@
     if (st.flash) { h += '<div class="vk-flash">' + esc(st.flash) + '</div>'; st.flash = null; }
     if (st.err && !p) { root.innerHTML = h + '<div class="tl-msg err">' + esc(st.err) + '</div>'; return; }
     if (!p) { root.innerHTML = h + '<div class="tl-msg">Laddar...</div>'; return; }
-    h += '<div class="vk-card"><div class="fo-head">' + av(p.author, p.ak) + '<div><div class="fo-name">' + esc(p.author) + '</div><div>' + esc(when(p.created_at)) + (p.edited ? ' · ändrad' : '') + '</div></div></div>' +
+    h += '<div class="vk-card"><div class="fo-head">' + av(p.author, p.ak) + '<div><div class="fo-name">' + esc(p.author) + coTag(p.co) + '</div><div>' + esc(when(p.created_at)) + (p.edited ? ' · ändrad' : '') + '</div></div></div>' +
       '<div class="fo-title" style="font-size:1.15rem">' + esc(p.title) + '</div><div style="margin-bottom:.4rem">' + tags(p) + '</div>' +
       '<div class="fo-body">' + esc(p.body) + '</div>';
     var ph = st.photos[p.id];
@@ -194,12 +231,12 @@
     h += '<div class="fo-meta"><button class="fo-like' + (p.liked ? ' on' : '') + '" data-a="like"' + (p.can_write ? '' : ' disabled') + ' aria-pressed="' + (p.liked ? 'true' : 'false') + '">👍 ' + p.likes + '</button><span>💬 ' + p.comment_list.length + '</span></div>';
     var act = '';
     if (p.mine && p.can_write && p.has_name) act += '<button data-a="edit">Ändra</button>';
-    if (p.is_admin && p.can_write) act += '<button data-a="hide">' + (p.hidden ? 'Visa igen' : 'Dölj') + '</button>';
-    if ((p.mine || p.is_admin) && p.can_write) act += '<button class="vk-del" data-a="delpost">Ta bort</button>';
+    if (p.can_mod && p.mod_ok) act += '<button data-a="hide">' + (p.hidden ? 'Visa igen' : 'Dölj') + '</button>';
+    if ((p.mine || p.can_mod) && p.mod_ok) act += '<button class="vk-del" data-a="delpost">Ta bort</button>';
     if (act) h += '<div class="vk-iact">' + act + '</div>';
     h += '</div>';
-    if (p.is_admin && p.can_write && p.has_name && (p.cat === 'forslag' || p.cat === 'buggar')) {
-      h += '<div class="vk-card"><div class="vk-lbl">Ändra status (bara ägare och S admin)</div><div class="fo-chips">';
+    if (p.can_mod && p.mod_ok && p.has_name && (p.cat === 'forslag' || p.cat === 'buggar')) {
+      h += '<div class="vk-card"><div class="vk-lbl">Ändra status (ägaren för sitt åkeri, S admin för alla)</div><div class="fo-chips">';
       STATUS.forEach(function (s) { h += '<button class="ank-chip' + (p.status === s[0] ? ' on' : '') + '" data-a="pick" data-s="' + s[0] + '">' + s[1] + '</button>'; });
       h += '</div><div class="vk-field"><textarea id="fo-stc" rows="2" maxlength="500" placeholder="Kommentar (valfritt)">' + esc(p.status_comment || '') + '</textarea></div>' +
         '<div class="vk-iact"><button data-a="status">Spara status</button></div></div>';
@@ -207,19 +244,20 @@
     h += '<div class="vk-card"><div class="vk-lbl">Kommentarer</div>';
     if (!p.comment_list.length) h += '<div class="fo-ex">Inga kommentarer ännu.</div>';
     p.comment_list.forEach(function (c) {
-      h += '<div class="fo-com' + (c.hidden ? ' hid' : '') + '"><div class="fo-head">' + av(c.author, c.ak, true) + '<span class="fo-name">' + esc(c.author) + '</span><span>· ' + esc(when(c.created_at)) + (c.edited ? ' · ändrad' : '') + '</span>' + (c.hidden ? ' <span class="fo-tag fo-hid">Dold</span>' : '') + '</div>';
+      h += '<div class="fo-com' + (c.hidden ? ' hid' : '') + '"><div class="fo-head">' + av(c.author, c.ak, true) + '<span class="fo-name">' + esc(c.author) + '</span>' + coTag(c.co) + '<span>· ' + esc(when(c.created_at)) + (c.edited ? ' · ändrad' : '') + '</span>' + (c.hidden ? ' <span class="fo-tag fo-hid">Dold</span>' : '') + '</div>';
       if (st.editCom === c.id) {
         h += '<div class="vk-field" style="margin-top:.3rem"><textarea id="fo-ec" rows="3" maxlength="2000">' + esc(c.body) + '</textarea></div><div class="vk-iact"><button data-a="comcancel">Avbryt</button><button data-a="comsave" data-id="' + c.id + '">Spara</button></div>';
       } else {
         h += '<div class="fo-body" style="margin-top:.2rem">' + esc(c.body) + '</div>';
         var s = '';
         if (c.mine && p.can_write && p.has_name) s += '<button data-a="comedit" data-id="' + c.id + '">Ändra</button>';
-        if (p.is_admin && p.can_write) s += '<button data-a="comhide" data-id="' + c.id + '" data-h="' + (c.hidden ? '0' : '1') + '">' + (c.hidden ? 'Visa igen' : 'Dölj') + '</button>';
-        if ((c.mine || p.is_admin) && p.can_write) s += '<button class="fo-danger" data-a="comdel" data-id="' + c.id + '">Ta bort</button>';
+        if (c.can_mod && p.mod_ok) s += '<button data-a="comhide" data-id="' + c.id + '" data-h="' + (c.hidden ? '0' : '1') + '">' + (c.hidden ? 'Visa igen' : 'Dölj') + '</button>';
+        if ((c.mine || c.can_mod) && p.mod_ok) s += '<button class="fo-danger" data-a="comdel" data-id="' + c.id + '">Ta bort</button>';
         if (s) h += '<div class="fo-small">' + s + '</div>';
       }
       h += '</div>';
     });
+    if (!p.can_write && p.mod_ok && p.cat === 'akeri') h += '<div class="fo-ex" style="margin-top:.5rem">Det här är ett annat åkeris sektion. Du kan läsa och moderera, men inte skriva här.</div>';
     if (p.can_write && !p.has_name) { h += '</div>' + nameBox(); h += '<div>'; }
     else if (p.can_write) {
       h += '<div class="vk-field" style="margin-top:.6rem"><textarea id="fo-com" rows="3" maxlength="2000" placeholder="Skriv en kommentar"></textarea></div>' +
@@ -253,7 +291,7 @@
   function openEditor(p) {
     st.view = 'edit';
     st.edit = p ? { id: p.id, cat: p.cat, title: p.title, body: p.body, old: (st.photos[p.id] || []).slice(), files: [], msg: '' }
-                : { id: null, cat: st.cat || 'allmant', title: '', body: '', old: [], files: [], msg: '' };
+                : { id: null, cat: (st.cat && st.cat.indexOf('akeri:') < 0) ? st.cat : 'allmant', title: '', body: '', old: [], files: [], msg: '' };
     push('edit');
     drawEditor();
   }
@@ -265,7 +303,8 @@
     var e = st.edit, n = e.old.length + e.files.length;
     var h = '<button class="fo-back" data-a="cancel">‹ Avbryt</button><div class="vk-card"><div class="fo-title">' + (e.id ? 'Ändra inlägg' : 'Nytt inlägg') + '</div>' +
       '<div class="vk-field"><label class="vk-lbl" for="fo-c">Kategori</label><select id="fo-c">';
-    CATS.forEach(function (c) { h += '<option value="' + c[0] + '"' + (e.cat === c[0] ? ' selected' : '') + '>' + c[1] + '</option>'; });
+    CATS.forEach(function (c) { h += '<option value="' + c[0] + '"' + (e.cat === c[0] ? ' selected' : '') + '>' + c[1] + ' (alla åkerier)</option>'; });
+    h += '<option value="akeri"' + (e.cat === 'akeri' ? ' selected' : '') + '>🔒 ' + esc(myCo().name) + ' (bara ert åkeri)</option>';
     h += '</select></div><div class="vk-field"><label class="vk-lbl" for="fo-t">Rubrik</label><input class="fo-in" id="fo-t" maxlength="120" value="' + esc(e.title) + '"></div>' +
       '<div class="vk-field"><label class="vk-lbl" for="fo-b">Text</label><textarea id="fo-b" rows="6" maxlength="5000">' + esc(e.body) + '</textarea></div>' +
       '<div class="vk-lbl">Foton (valfritt, högst 3)</div><div class="fo-photos">';
@@ -376,6 +415,13 @@
         if (st.view === 'post' && p) return loadPost(p.id).then(drawPost);
         return loadList().then(drawList);
       }).catch(function (e) { el.disabled = false; if (!fail(e)) { st.nameErr = errText(e); st.view === 'post' ? drawPost() : drawList(); } });
+    }
+    else if (a === 'rename') {
+      var cid = el.getAttribute('data-co') || null, cur = cid ? (((st.list && st.list.companies) || []).filter(function (c) { return c.id === cid; })[0] || {}).name : myCo().name;
+      var nn = prompt('Åkeriets namn (visas för förarna)', cur || '');
+      if (nn == null || nn.trim() === (cur || '')) return;
+      rpc('forum_set_company_name', { p_name: nn, p_company: cid }).then(function () { st.flash = 'Namnet är sparat.'; return loadList(); }).then(drawList)
+        .catch(function (e) { if (!fail(e)) alert(errText(e)); });
     }
     else if (a === 'pick') { st.pick = el.getAttribute('data-s'); root.querySelectorAll('[data-a="pick"]').forEach(function (b) { b.classList.toggle('on', b === el); }); }
     else if (a === 'status') {
