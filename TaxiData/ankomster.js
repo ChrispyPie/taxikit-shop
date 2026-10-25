@@ -233,15 +233,18 @@
 
   function rowHtml(it) {
     var shown = when(it), changed = it.sched && shown && Math.abs(shown - it.sched) >= 60000;
-    var cls = 'ank-row' + (it.canceled ? ' canceled' : '') + (it.act ? ' arrived' : '');
-    return '<div class="' + cls + (it.tid ? ' ank-tap' : '') + '"' + (it.tid ? ' data-ank-route="' + esc(it.key) + '"' : '') + '>' +
+    var bev = window.BEVAKNING, watched = !!(bev && bev.isWatched(it.key));  // bevakning.js
+    var cls = 'ank-row' + (it.canceled ? ' canceled' : '') + (it.act ? ' arrived' : '') + (watched ? ' watched' : '');
+    var star = bev && (watched || it.key[0] === 'f')
+      ? '<button class="ank-star' + (watched ? ' on' : '') + '" data-bev-star aria-label="' + (watched ? 'Sluta bevaka' : 'Bevaka') + '">' + (watched ? '⭐' : '☆') + '</button>' : '';
+    return '<div class="' + cls + (it.tid ? ' ank-tap' : '') + '"' + (it.tid ? ' data-ank-route="' + esc(it.key) + '"' : '') + ' data-ank-key="' + esc(it.key) + '">' +
       '<div class="ank-time"><div class="ank-new' + (changed && !it.act ? ' changed' : '') + '">' + hm(it.canceled ? it.sched : shown) + '</div>' +
         (changed && !it.canceled ? '<div class="ank-old">' + hm(it.sched) + '</div>' : '') + '</div>' +
       '<div class="ank-main"><div class="ank-from">' + esc(it.from) + '</div>' +
         '<div class="ank-meta"><b>' + esc(it.no) + '</b>' + (it.sub ? ' · ' + esc(it.sub) : '') + '</div>' +
         (it.info ? '<div class="ank-meta">' + esc(it.info) + '</div>' : '') +
         (it.note ? '<div class="ank-note">' + esc(it.note) + '</div>' : '') + '</div>' +
-      '<div class="ank-status">' + badge(it) + '</div></div>';
+      '<div class="ank-status">' + badge(it) + star + '</div></div>';
   }
 
   function src() {
@@ -308,6 +311,7 @@
     }
     el.innerHTML = html;
     keepActiveInView(el);
+    if (window.BEVAKNING) BEVAKNING.decorate(el);  // bevakning: notisknapp + långtryck
   }
 
   function load(id, quiet) {
@@ -378,4 +382,13 @@
   };
   A.when = when;
   A.hm = hm;
+  // För bevakning.js: hämta en rad via nyckel och rita om.
+  A.item = function (key) {
+    for (var id in state.data) {
+      var l = state.data[id] || [];
+      for (var i = 0; i < l.length; i++) if (l[i].key === key) return l[i];
+    }
+    return null;
+  };
+  A.repaint = function () { if (state.el && state.el.isConnected) paint(); };
 })();
