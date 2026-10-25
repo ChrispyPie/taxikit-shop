@@ -567,7 +567,7 @@
         if (!s) { answer(esc(line('err'))); return; }
         if (!s.next) { answer(esc(line('none', { kind: q === 'flyg' ? 'flyg' : 'tåg', place: s.source.place }))); return; }
         answer(esc(line('next', arrCtx(s.source, s.next))) + '<br><small>' + esc(arrivalFacts(s)) +
-          (q === 'tag' && localStorage.getItem('ank_fjarr') !== '0' ? ' (fjärrtåg till ' + esc(s.source.place) + ')' : '') + '</small>');
+          (q === 'tag' ? ' (tåg från Stockholm, Köpenhamn och Oslo till ' + esc(s.source.place) + ')' : '') + '</small>');
       });
       return;
     }

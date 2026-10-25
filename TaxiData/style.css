@@ -192,6 +192,12 @@ main { max-width: 900px; margin: 1rem auto; padding: 0 1rem; }
 .ank-chips { display: flex; gap: 6px; margin-bottom: 0.5rem; }
 .ank-chip { border: 1px solid var(--primary); background: var(--surface); color: var(--primary); border-radius: 14px; padding: 4px 12px; font-size: 0.85rem; cursor: pointer; }
 .ank-chip.on { background: var(--primary); color: var(--on-primary); }
+.ank-grp { display: flex; align-items: center; gap: 8px; width: 100%; background: none; border: none; border-bottom: 2px solid var(--border); color: var(--text); font-weight: 700; font-size: 0.95rem; padding: 6px 2px; margin: 0.6rem 0 0.4rem; cursor: pointer; text-align: left; }
+.ank-grp.prio { border-bottom-color: var(--primary); color: var(--primary); }
+.ank-grp-n { background: var(--primary); color: var(--on-primary); border-radius: 10px; padding: 0 8px; font-size: 0.8rem; font-weight: 700; }
+.ank-grp:not(.prio) .ank-grp-n { background: var(--border); color: var(--text); }
+.ank-grp-arrow { margin-left: auto; color: var(--text-soft); }
+.ank-empty.small { font-size: 0.85rem; padding: 4px 2px; }
 .ank-more { display: block; width: 100%; background: none; border: 1px dashed var(--border); color: var(--text-soft); border-radius: 8px; padding: 6px; font-size: 0.85rem; margin-bottom: 0.5rem; cursor: pointer; }
 .ank-day { font-weight: 700; font-size: 0.85rem; color: var(--text-soft); margin: 0.7rem 2px 0.3rem; }
 .ank-row { display: flex; gap: 10px; align-items: flex-start; background: var(--surface); border: 1px solid var(--border-soft); border-radius: 10px; padding: 9px 10px; margin-bottom: 6px; }

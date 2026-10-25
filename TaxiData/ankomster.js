@@ -24,7 +24,8 @@
     pastMoreMin: 180,            // "Visa tidigare" visar så här långt bakåt
     aheadHours: 16,
     sources: [
-      { id: 'tag', label: 'Tåg', icon: '🚆', place: 'Göteborg C', load: loadTrains, filter: trainFilter },
+      { id: 'tag', label: 'Tåg', icon: '🚆', place: 'Göteborg C', load: loadTrains, groups: trainGroups,
+        summaryFilter: function (it) { return !!it.group; } },
       { id: 'flyg', label: 'Flyg', icon: '✈️', place: 'Landvetter', load: loadFlights }
       // { id: 'bat', label: 'Båt', icon: '⛴️', place: '…', load: loadBoats }
     ]
@@ -76,22 +77,35 @@
       canceled: !!t.canceled,
       info: t.track ? 'Spår ' + t.track : '',
       note: (!t.act && t.lastSeen && t.lastSeenTs && t.lastSeen !== t.lastSeenSig) ? 'Senast ' + t.lastSeen + ' ' + hm(d(t.lastSeenTs)) : '',
-      local: /västtåg|pendel/i.test(product)
+      group: trainGroup(t)
     };
+  }
+  // Grupp efter avgångsstation (FromLocation från Trafikverket). Både namn och signatur
+  // kontrolleras, eftersom reservfilen tag.json ibland bara har signaturen (t.ex. "Dk.kh").
+  // Verifierat mot riktig data 2026-10-25: Stockholm C = Cst, Köpenhamn H = Dk.kh, Oslo S = No.osl.
+  var TRAIN_GROUPS = [
+    { id: 'sthlm', label: 'Stockholm', sig: /^(Cst|Sci|Arnc)$/, name: /^(Stockholm|Arlanda)/i },
+    { id: 'kbh', label: 'Köpenhamn', sig: /^(Dk\.|Kh$)/, name: /^(Köpenhamn|København|Kastrup)/i },
+    { id: 'oslo', label: 'Oslo', sig: /^(No\.|Öslo$|Xoslo$)/, name: /^Oslo/i }
+  ];
+  function trainGroup(t) {
+    var sig = String(t.otherSig || ''), name = String(t.other || (t.from && t.from[0]) || '');
+    for (var i = 0; i < TRAIN_GROUPS.length; i++) {
+      var g = TRAIN_GROUPS[i];
+      if (g.sig.test(sig) || g.sig.test(name) || g.name.test(name)) return g.id;
+    }
+    return '';
   }
   function loadTrains() {
     return getJson(TRAIN_URLS, false).then(function (j) {
       return { updated: j.updated, items: (j.trains || []).filter(function (t) { return t.dir === 'ANK'; }).map(trainItem) };
     });
   }
-  function trainFilter() {
-    var on = localStorage.getItem('ank_fjarr') !== '0';
-    return {
-      html: '<div class="ank-chips"><button class="ank-chip' + (on ? ' on' : '') + '" data-fjarr="1">Fjärrtåg</button>' +
-            '<button class="ank-chip' + (on ? '' : ' on') + '" data-fjarr="0">Alla tåg</button></div>',
-      test: function (it) { return !on || !it.local; }
-    };
+  // Tåg visas i grupper: Stockholm, Köpenhamn, Oslo och sist Övriga tåg. Tryck på en rubrik för att fälla ihop.
+  function trainGroups() {
+    return TRAIN_GROUPS.concat([{ id: '', label: 'Övriga tåg' }]);
   }
+  function groupClosed(id) { return localStorage.getItem('ank_grp_' + (id || 'ovr')) === '0'; }
 
   // ---------- flyg ----------
   function flightItem(f) {
@@ -158,7 +172,6 @@
   function paint() {
     var el = state.el; if (!el || !el.isConnected) return stop();
     var s = src(), data = state.data[s.id], now = Date.now();
-    var filt = s.filter ? s.filter() : null;
     var html = '<div class="tabs ank-tabs">' + A.sources.map(function (x) {
       return '<button class="tab' + (x.id === s.id ? ' active' : '') + '" data-ank-tab="' + x.id + '">' + x.icon + ' ' + esc(x.label) + '</button>';
     }).join('') + '</div>';
@@ -168,7 +181,6 @@
             '<button class="ank-refresh" data-ank-refresh aria-label="Uppdatera">' + (state.loading[s.id] ? '…' : '↻') + '</button></div>';
     if (stale) html += '<div class="ank-warn">Datan är äldre än 15 minuter.</div>';
     if (state.err[s.id]) html += '<div class="ank-warn">Kunde inte hämta nya tider' + (data ? ', visar senaste.' : '. Försöker igen strax.') + '</div>';
-    if (filt) html += filt.html;
 
     if (!data) {
       html += '<div class="ank-empty">' + (state.err[s.id] ? '' : 'Hämtar…') + '</div>';
@@ -177,16 +189,30 @@
       var list = data.filter(function (it) {
         var w = when(it); if (!w) return false;
         var ref = it.act ? it.act : (it.canceled ? it.sched : w);
-        return ref >= from && w <= to && (!filt || filt.test(it));
+        return ref >= from && w <= to;
       }).sort(function (a, b) { return when(a) - when(b); });
       html += '<button class="ank-more" data-ank-past>' + (state.showPast ? 'Dölj tidigare' : 'Visa tidigare ankomster') + '</button>';
       if (!list.length) html += '<div class="ank-empty">Inga ankomster just nu.</div>';
-      var lastDay = dayKey(new Date());
-      list.forEach(function (it) {
-        var k = dayKey(when(it));
-        if (k !== lastDay) { html += '<div class="ank-day">' + dayLabel(when(it)) + '</div>'; lastDay = k; }
-        html += rowHtml(it);
-      });
+      var rows = function (items) {
+        var out = '', lastDay = dayKey(new Date());
+        items.forEach(function (it) {
+          var k = dayKey(when(it));
+          if (k !== lastDay) { out += '<div class="ank-day">' + dayLabel(when(it)) + '</div>'; lastDay = k; }
+          out += rowHtml(it);
+        });
+        return out;
+      };
+      if (list.length && s.groups) {
+        s.groups().forEach(function (g) {
+          var items = list.filter(function (it) { return (it.group || '') === g.id; });
+          var closed = groupClosed(g.id);
+          html += '<button class="ank-grp' + (closed ? ' closed' : '') + (g.id ? ' prio' : '') + '" data-ank-grp="' + (g.id || 'ovr') + '">' +
+            '<span>' + esc(g.label) + '</span><span class="ank-grp-n">' + items.length + '</span><span class="ank-grp-arrow">' + (closed ? '▸' : '▾') + '</span></button>';
+          if (!closed) html += items.length ? rows(items) : '<div class="ank-empty small">Inga tåg just nu.</div>';
+        });
+      } else {
+        html += rows(list);
+      }
     }
     el.innerHTML = html;
   }
@@ -207,8 +233,8 @@
     if (t) { state.tab = t.getAttribute('data-ank-tab'); localStorage.setItem('ank_tab', state.tab); state.showPast = false; paint(); load(state.tab, true); return; }
     if (e.target.closest('[data-ank-refresh]')) { load(state.tab); return; }
     if (e.target.closest('[data-ank-past]')) { state.showPast = !state.showPast; paint(); return; }
-    var f = e.target.closest('[data-fjarr]');
-    if (f) { localStorage.setItem('ank_fjarr', f.getAttribute('data-fjarr')); paint(); }
+    var g = e.target.closest('[data-ank-grp]');
+    if (g) { var gk = 'ank_grp_' + g.getAttribute('data-ank-grp'); localStorage.setItem(gk, localStorage.getItem(gk) === '0' ? '1' : '0'); paint(); }
   }
   function onVisible() { if (!document.hidden && state.el) load(state.tab, true); }
 
@@ -243,9 +269,9 @@
     var p = state.data[id] ? Promise.resolve(state.data[id])
       : s.load().then(function (r) { state.data[id] = r.items; state.updated[id] = r.updated; return r.items; });
     return p.then(function (items) {
-      var now = Date.now(), filt = s.filter ? s.filter() : null;
+      var now = Date.now(), filt = s.summaryFilter || null;
       var up = items.filter(function (it) {
-        var w = when(it); return w && !it.act && w >= now - 60000 && w <= now + 6 * 3600000 && (!filt || filt.test(it));
+        var w = when(it); return w && !it.act && w >= now - 60000 && w <= now + 6 * 3600000 && (!filt || filt(it));
       }).sort(function (a, b) { return when(a) - when(b); });
       var live = up.filter(function (it) { return !it.canceled && !it.special; });
       var delayed = live.filter(function (it) { return it.est && it.sched && it.est - it.sched >= 5 * 60000; });
