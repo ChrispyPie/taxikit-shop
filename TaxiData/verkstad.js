@@ -40,7 +40,8 @@
     too_long: 'Högst 24 timmar per registrering. Dela upp längre tider.',
     future: 'Du kan inte registrera tid som inte har hänt än.',
     too_old: 'Det datumet är för långt bak i tiden.',
-    bad_car: 'Välj en bil i listan.',
+    bad_car: 'Välj en bil, eller välj "Annan bil" och skriv bilnummer.',
+    bad_car_label: 'Skriv ett giltigt bilnummer (bara bokstäver och siffror, t.ex. A123).',
     overlap: 'Tiden krockar med en annan registrering du har gjort.',
     not_editable: 'Det går inte att ändra längre.',
     not_found: 'Det finns inte längre.',
@@ -237,17 +238,29 @@
       b.onclick = function () { var id = +b.dataset.c; st.car = st.car === id ? null : id; draw(); };
     });
   }
-  function carOptions(sel, allowNone, noneText) {
+  // bilen föraren kör nu (servern läser senaste resekvitto/pass från STIG)
+  function curCar() { return (st.bil && st.bil.current_car_id) || null; }
+  function curLabel() { return (st.bil && st.bil.current_car_label) || ''; }
+  function curHint(f) {
+    var lbl = curLabel(); if (!lbl || f.id) return '';
+    var on = f.other ? f.label === lbl : f.car && carById(f.car) && carById(f.car).bilnummer.toUpperCase() === lbl;
+    if (!on) return '';
+    var at = st.bil.current_car_at ? ' (' + (st.bil.current_car_source === 'kvitto' ? 'senaste resa ' : 'senaste pass ') + when(st.bil.current_car_at) + ')' : '';
+    return '<div class="vk-foot2">Förvald: bilen du körde senast' + esc(at) + '. Du kan välja en annan.</div>';
+  }
+  function carOptions(sel, allowNone, noneText, other) {
     return (allowNone ? '<option value="">' + esc(noneText || 'Välj bil…') + '</option>' : '<option value="">Välj bil…</option>') +
       (st.bil.cars || []).map(function (c) {
         var extra = c.blocking ? ' – 🛑 står' : c.open_faults ? ' – ⚠️ ' + c.open_faults + ' öppet fel' : '';
         return '<option value="' + c.id + '"' + (c.id === sel ? ' selected' : '') + '>' + esc(c.bilnummer) + (c.modell ? ' – ' + esc(c.modell) : '') + extra + '</option>';
-      }).join('');
+      }).join('') + (other ? '<option value="other"' + (other === 'on' ? ' selected' : '') + '>Annan bil (skriv bilnummer)</option>' : '');
   }
 
   // ---------- felanmälan / behövs till bilen ----------
   function newIssue(kind, i) {
-    return { kind: kind, id: i ? i.id : null, car: i ? i.car_id : (st.car || null), supply: i ? i.supply : null,
+    var cc = st.car || curCar(), lbl = !st.car && !cc ? curLabel() : '';
+    return { kind: kind, id: i ? i.id : null, car: i ? i.car_id : cc, supply: i ? i.supply : null,
+      other: i ? (!i.car_id && !!i.car) : !!lbl, label: i ? (i.car_id ? '' : (i.car || '')) : lbl,
       body: i ? (i.body || '') : '', blocking: i ? !!i.blocking : false, files: [], msg: '' };
   }
   function issueForm(f) {
@@ -257,8 +270,10 @@
         return '<button type="button" class="ank-chip bv-sup' + (f.supply === s[0] ? ' on' : '') + '" data-s="' + s[0] + '">' + s[1] + ' ' + s[2] + '</button>';
       }).join('') + '</div></div>';
     }
-    h += '<div class="vk-field"><span class="vk-lbl">Bil</span><select id="bv-car">' + carOptions(f.car, f.kind === 'supply', 'Allmänt / alla bilar') + '</select></div>';
-    var already = f.car ? openFaults(f.car).filter(function (i) { return i.id !== f.id; }) : [];
+    h += '<div class="vk-field"><span class="vk-lbl">Bil</span><select id="bv-car">' + carOptions(f.other ? null : f.car, f.kind === 'supply', 'Allmänt / alla bilar', f.other ? 'on' : 'off') + '</select>' +
+      (f.other ? '<input id="bv-carlbl" class="kal-input" style="margin-top:6px" maxlength="20" autocapitalize="characters" placeholder="Bilnummer, t.ex. A123" value="' + esc(f.label) + '">' +
+        '<div class="vk-foot2">För bilar som inte finns i listan, t.ex. när du kör åt ett annat bolag.</div>' : '') + curHint(f) + '</div>';
+    var already = !f.other && f.car ? openFaults(f.car).filter(function (i) { return i.id !== f.id; }) : [];
     if (f.kind === 'fault' && already.length) {
       h += '<div class="vk-warn"><b>Redan anmält på bil ' + esc(carById(f.car) ? carById(f.car).bilnummer : '') + ':</b>' + already.map(function (i) {
         return '<div>• ' + (i.blocking ? '🛑 ' : '') + esc(cut(i.body, 70)) + ' <i>(' + ISTATUS[i.status].toLowerCase() + ')</i></div>';
@@ -302,7 +317,11 @@
   function bindIssueForm(body) {
     var f = st.f;
     body.querySelectorAll('.bv-sup').forEach(function (b) { b.onclick = function () { f.supply = b.dataset.s; draw(); }; });
-    document.getElementById('bv-car').onchange = function (ev) { f.car = ev.target.value ? +ev.target.value : null; draw(); };
+    document.getElementById('bv-car').onchange = function (ev) {
+      var v = ev.target.value; f.other = v === 'other'; f.car = v && v !== 'other' ? +v : null; draw();
+      if (f.other) document.getElementById('bv-carlbl').focus();
+    };
+    var cl = document.getElementById('bv-carlbl'); if (cl) cl.oninput = function () { f.label = cl.value; };
     document.getElementById('bv-text').oninput = function (ev) { f.body = ev.target.value; };
     body.querySelectorAll('.bv-opt').forEach(function (b) { b.onclick = function () { f.blocking = b.dataset.b === '1'; draw(); }; });
     bindPhotoField(body, f);
@@ -311,13 +330,15 @@
   }
   function saveIssue() {
     var f = st.f;
-    if (f.kind === 'fault' && !f.car) { f.msg = ERR.bad_car; draw(); return; }
+    var lbl = f.other ? f.label.trim().toUpperCase().replace(/\s+/g, ' ') : '';
+    if (f.kind === 'fault' && !f.car && !lbl) { f.msg = ERR.bad_car; draw(); return; }
+    if (lbl && !/^[A-ZÅÄÖ0-9][A-ZÅÄÖ0-9 -]{0,19}$/.test(lbl)) { f.msg = ERR.bad_car_label; draw(); return; }
     if (f.kind === 'fault' && !f.body.trim()) { f.msg = 'Skriv vad som är fel.'; draw(); return; }
     if (f.kind === 'supply' && !f.supply) { f.msg = ERR.bad_supply; draw(); return; }
     if (f.kind === 'supply' && f.supply === 'annat' && !f.body.trim()) { f.msg = ERR.need_text; draw(); return; }
     st.busy = true; f.msg = ''; draw();
     var savedId = null;
-    rpc('save_car_issue', { p_id: f.id, p_kind: f.kind, p_car_id: f.car, p_supply: f.supply, p_body: f.body || null, p_blocking: f.blocking })
+    rpc('save_car_issue', { p_id: f.id, p_kind: f.kind, p_car_id: f.other ? null : f.car, p_car_label: lbl || null, p_supply: f.supply, p_body: f.body || null, p_blocking: f.blocking })
       .then(function (r) {
         savedId = r.id;
         return uploadAll(f.files, 'issue_id', savedId);
@@ -419,7 +440,7 @@
       if (st.showDone) done.forEach(function (i) { h += issueCard(i); });
     }
     h += '<div class="tl-foot">' + (admin()
-      ? 'Du ser alla förares anmälningar och kan ändra status eller skicka dem vidare som uppgift. "Bilen står" hamnar alltid överst.'
+      ? 'Du som ägare (och S admin) ser alla förares anmälningar. Varje förare ser bara sina egna. Du kan ändra status eller skicka en anmälan vidare som uppgift till en förare. "Bilen står" hamnar alltid överst.'
       : 'Bara du och ägaren ser dina anmälningar. Ägaren ändrar status (Ny → Pågår → Klar). Du kan ändra eller ta bort så länge den är Ny.') + '</div>';
     body.innerHTML = h;
     bindCars(body);
@@ -445,7 +466,7 @@
   // ---------- underhåll ----------
   function mLabel(t) { var m = MTYPES.filter(function (x) { return x[0] === t; })[0]; return m ? m[1] + ' ' + m[2] : t; }
   function newMaint(m, suggest) {
-    return { id: m ? m.id : null, suggest: !!suggest, car: m ? m.car_id : (st.car || null), type: m ? m.type : 'service', title: m ? (m.title || '') : '',
+    return { id: m ? m.id : null, suggest: !!suggest, car: m ? m.car_id : (st.car || (suggest ? curCar() : null)), type: m ? m.type : 'service', title: m ? (m.title || '') : '',
       due_date: m ? (m.due_date || '') : '', due_km: m && m.due_km != null ? String(m.due_km) : '', im: m && m.interval_months ? String(m.interval_months) : '',
       ikm: m && m.interval_km ? String(m.interval_km) : '', note: m ? (m.note || '') : '', files: [], msg: '' };
   }
@@ -889,7 +910,8 @@
       s = new Date(e); s.setHours(s.getHours() - 1);
     }
     var cars = (st.data && st.data.cars) || [];
-    return { id: entry ? entry.id : null, s: s, e: e, car: entry ? entry.car_id : (cars.length === 1 ? cars[0].id : null),
+    var cc = curCar() && cars.some(function (c) { return c.id === curCar(); }) ? curCar() : null;
+    return { id: entry ? entry.id : null, s: s, e: e, car: entry ? entry.car_id : (cc || (cars.length === 1 ? cars[0].id : null)),
       comment: entry ? (entry.comment || '') : '', issue: entry ? (entry.issue_id || null) : null, msg: '' };
   }
   function minutes(f) { return Math.round((f.e - f.s) / 60000); }
