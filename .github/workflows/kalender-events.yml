@@ -9,7 +9,7 @@ on:
         description: "Stad (nyckel i scripts/kalender_cities.json)"
         default: "goteborg"
   schedule:
-    - cron: "17 4,16 * * *"   # två gånger per dygn (UTC)
+    - cron: "30 4,16 * * *"   # 05:30 och 17:30 svensk vintertid (06:30/18:30 sommartid), UTC
 
 concurrency:
   group: kalender-events
