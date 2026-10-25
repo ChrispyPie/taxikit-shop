@@ -66,8 +66,26 @@ function hh(n) {
   return (d ? d + "." : "") + String(h).padStart(2, "0") + ":00:00";
 }
 
+// Stationsnamn från Trafikverket TrainStation (signatur -> namn). Hämtas högst en gång per dygn
+// per varm instans; STATIONS ovan går före. Misslyckas hämtningen används STATIONS/signaturen.
+let TS_NAMES = null;
+let TS_AT = 0;
+async function loadStationNames(key) {
+  if (TS_NAMES && Date.now() - TS_AT < 24 * 3600 * 1000) return;
+  const q = '<QUERY objecttype="TrainStation" schemaversion="1.4">' +
+    "<INCLUDE>LocationSignature</INCLUDE><INCLUDE>AdvertisedLocationName</INCLUDE></QUERY>";
+  const json = await tvPost(key, q);
+  const map = {};
+  for (const block of ((json || {}).RESPONSE || {}).RESULT || []) {
+    for (const r of block.TrainStation || []) {
+      if (r && r.LocationSignature && r.AdvertisedLocationName) map[r.LocationSignature] = r.AdvertisedLocationName;
+    }
+  }
+  if (Object.keys(map).length > 100) { TS_NAMES = map; TS_AT = Date.now(); }
+}
+
 function stationName(sig) {
-  return STATIONS[sig] || sig || "";
+  return STATIONS[sig] || (TS_NAMES && TS_NAMES[sig]) || sig || "";
 }
 
 async function tvPost(key, queryXml) {
@@ -193,24 +211,41 @@ async function stationQuery(key) {
   return rowsOf(await tvPost(key, q)).map(slimTrain);
 }
 
+// Senast sedd: tågets senaste faktiska händelse (TimeAtLocation) på någon driftplats,
+// även tekniska platser som inte annonseras. EN fråga per uppdatering, bara för ankommande tåg
+// som inte har ankommit ännu och väntas inom POS_AHEAD_H timmar. Sorterad nyast först, så den
+// första raden per tåg är den senaste.
+const POS_AHEAD_H = 5;
+function positionIdents(trains) {
+  const now = Date.now();
+  const ids = new Set();
+  for (const f of trains) {
+    if (f.dir !== "ANK" || f.act || f.canceled || !f.id) continue;
+    const t = Date.parse(f.est || f.sched);
+    if (!Number.isFinite(t) || t < now - 3 * 3600 * 1000 || t > now + POS_AHEAD_H * 3600 * 1000) continue;
+    ids.add(f.id);
+  }
+  return Array.from(ids).slice(0, 120);
+}
+
 async function lastSeenMap(key, trains) {
-  const idents = uniqueIdents(trains, 160);
-  if (!idents.length) return {};
+  const idents = positionIdents(trains);
+  if (!idents.length) return { best: {}, idents };
   const q =
-    '<QUERY objecttype="TrainAnnouncement" schemaversion="1.9" limit="800">' +
-    '<FILTER><AND><GT name="TimeAtLocation" value="$dateadd(-03:00:00)" />' +
+    '<QUERY objecttype="TrainAnnouncement" schemaversion="1.9" orderby="TimeAtLocation desc" limit="10000">' +
+    '<FILTER><AND><GT name="TimeAtLocation" value="$dateadd(-06:00:00)" />' +
     "<OR>" + orIdents(idents) + "</OR></AND></FILTER>" +
     "<INCLUDE>AdvertisedTrainIdent</INCLUDE><INCLUDE>LocationSignature</INCLUDE>" +
-    "<INCLUDE>TimeAtLocation</INCLUDE></QUERY>";
+    "<INCLUDE>ActivityType</INCLUDE><INCLUDE>TimeAtLocation</INCLUDE></QUERY>";
   const best = {};
   for (const row of rowsOf(await tvPost(key, q))) {
     const tid = row.AdvertisedTrainIdent;
     const ts = row.TimeAtLocation;
     if (!tid || !ts) continue;
     const prev = best[tid];
-    if (!prev || String(ts) > String(prev.ts)) best[tid] = { ts, sig: row.LocationSignature || "" };
+    if (!prev || Date.parse(ts) > Date.parse(prev.ts)) best[tid] = { ts, sig: row.LocationSignature || "", act: row.ActivityType || "" };
   }
-  return best;
+  return { best, idents };
 }
 
 async function routesMap(key, trains) {
@@ -257,17 +292,25 @@ async function routesMap(key, trains) {
 }
 
 async function buildTrains(key) {
+  await loadStationNames(key).catch(() => {});
   const trains = await stationQuery(key);
-  const [seen, routes] = await Promise.all([
-    lastSeenMap(key, trains).catch(() => ({})),
+  const [pos, routes] = await Promise.all([
+    lastSeenMap(key, trains).catch(() => ({ best: {}, idents: [] })),
     routesMap(key, trains).catch(() => ({})),
   ]);
+  const seen = pos.best;
+  const checked = new Set(pos.idents);
   for (const f of trains) {
     const hit = seen[f.id];
-    if (hit && hit.sig) {
+    // Bara positioner från den här körningen av tåget (inte gårdagens med samma nummer).
+    const tArr = Date.parse(f.est || f.sched);
+    const okHit = hit && hit.sig && (!Number.isFinite(tArr) || Date.parse(hit.ts) > tArr - 8 * 3600 * 1000);
+    if (f.dir === "ANK" && checked.has(f.id)) f.posChecked = true;
+    if (okHit) {
       f.lastSeen = stationName(hit.sig) || hit.sig;
       f.lastSeenSig = hit.sig;
       f.lastSeenTs = hit.ts;
+      f.lastSeenAct = hit.act;
     }
     const locs = routes[f.id];
     if (locs) {
@@ -295,6 +338,64 @@ async function buildTrains(key) {
   return Array.from(uniq.values());
 }
 
+// Stationslista för ETT tåg (på begäran när man trycker på raden): ?route=<tågnr>&sched=<ankomst G>.
+// En Trafikverket-fråga per tåg, cachad 45 s i CDN och 30 s i instansen.
+const ROUTE_CACHE = new Map();
+const CACHE_ROUTE = "public, s-maxage=45, stale-while-revalidate=30";
+async function routeFor(key, ident, schedIso) {
+  const sched = Date.parse(schedIso);
+  const ck = ident + "|" + schedIso;
+  const hit = ROUTE_CACHE.get(ck);
+  if (hit && Date.now() - hit.at < 30000) return hit.body;
+  const now = Date.now();
+  const back = Math.min(36, Math.max(1, Math.ceil((now - sched) / 3600000 + 12)));
+  const ahead = Math.min(24, Math.max(1, Math.ceil((sched - now) / 3600000 + 2)));
+  const q =
+    '<QUERY objecttype="TrainAnnouncement" schemaversion="1.9" orderby="AdvertisedTimeAtLocation" limit="1500">' +
+    '<FILTER><AND><EQ name="AdvertisedTrainIdent" value="' + xmlAttr(ident) + '" />' +
+    '<GT name="AdvertisedTimeAtLocation" value="$dateadd(-' + hh(back) + ')" />' +
+    '<LT name="AdvertisedTimeAtLocation" value="$dateadd(' + hh(ahead) + ')" />' +
+    "</AND></FILTER>" +
+    "<INCLUDE>LocationSignature</INCLUDE><INCLUDE>ActivityType</INCLUDE><INCLUDE>Advertised</INCLUDE>" +
+    "<INCLUDE>AdvertisedTimeAtLocation</INCLUDE><INCLUDE>EstimatedTimeAtLocation</INCLUDE>" +
+    "<INCLUDE>TimeAtLocation</INCLUDE><INCLUDE>TrackAtLocation</INCLUDE><INCLUDE>Canceled</INCLUDE></QUERY>";
+  const rows = rowsOf(await tvPost(key, q));
+  // Bara den körning som ankommer G vid sched (±3 h) – inte gårdagens/morgondagens med samma nummer.
+  const lo = sched - 14 * 3600000, hi = sched + 3 * 3600000;
+  const stops = new Map();
+  let seen = null;
+  for (const r of rows) {
+    const t = Date.parse(r.AdvertisedTimeAtLocation);
+    if (!Number.isFinite(t) || t < lo || t > hi) continue;
+    const sig = r.LocationSignature || "";
+    if (!sig) continue;
+    if (r.TimeAtLocation && (!seen || Date.parse(r.TimeAtLocation) > Date.parse(seen.ts))) {
+      seen = { sig, name: stationName(sig), ts: r.TimeAtLocation, type: r.ActivityType || "" };
+    }
+    if (!r.Advertised) continue;
+    const s = stops.get(sig) || { sig, name: stationName(sig), t, track: "", canceled: false };
+    const arr = String(r.ActivityType || "").toLowerCase().startsWith("ank");
+    const pre = arr ? "arr" : "dep";
+    if (!s[pre + "Sched"] || t < Date.parse(s[pre + "Sched"])) {
+      s[pre + "Sched"] = r.AdvertisedTimeAtLocation || "";
+      s[pre + "Est"] = r.EstimatedTimeAtLocation || "";
+      s[pre + "Act"] = r.TimeAtLocation || "";
+    }
+    if (r.TrackAtLocation) s.track = r.TrackAtLocation;
+    if (r.Canceled) s.canceled = true;
+    s.t = Math.min(s.t, t);
+    stops.set(sig, s);
+  }
+  let list = Array.from(stops.values()).sort((a, b) => a.t - b.t);
+  const gi = list.findIndex((s) => s.sig === STATION && s.arrSched);
+  if (gi >= 0) list = list.slice(0, gi + 1);
+  list = list.map((s) => { const o = Object.assign({}, s); delete o.t; return o; });
+  const body = { id: ident, sched: schedIso, updated: new Date().toISOString(), error: null, stops: list, lastSeen: seen };
+  ROUTE_CACHE.set(ck, { at: Date.now(), body });
+  if (ROUTE_CACHE.size > 300) ROUTE_CACHE.delete(ROUTE_CACHE.keys().next().value);
+  return body;
+}
+
 function send(res, status, cacheControl, body) {
   res.statusCode = status;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -316,6 +417,21 @@ async function handler(req, res) {
   const key = getKey();
   if (!key) {
     return send(res, 503, CACHE_ERR, { station: "Göteborg C", updated: null, error: "TRAFIKVERKET_API_KEY saknas", trains: [] });
+  }
+  const url = new URL(req.url || "/", "http://x");
+  const routeId = url.searchParams.get("route");
+  if (routeId !== null) {
+    const sched = url.searchParams.get("sched") || "";
+    if (!/^\d{1,6}$/.test(routeId) || !Number.isFinite(Date.parse(sched))) {
+      return send(res, 400, "no-store", { error: "route/sched saknas eller fel", stops: [] });
+    }
+    try {
+      await loadStationNames(key).catch(() => {});
+      return send(res, 200, CACHE_ROUTE, await routeFor(key, routeId, sched));
+    } catch (e) {
+      const msg = (e && e.name === "AbortError") ? "Trafikverket timeout" : String((e && e.message) || e);
+      return send(res, 502, CACHE_ERR, { error: msg, stops: [] });
+    }
   }
   try {
     const trains = await buildTrains(key);
