@@ -1,11 +1,12 @@
 /* Bevakning: markera ett flyg eller tåg i Ankomster och få en notis med ljud när det händer något
- * (flyg: landat, bagaget rullar, ny tid, inställt; tåg: ankommit, ny tid, inställt).
+ * (flyg: landat, bagaget rullar, sista väskan ute, ny tid, inställt; tåg: ankommit, ny tid, inställt).
  *
  * - Flyg: tryck på ☆ (eller håll fingret på raden). Tåg: håll fingret på raden ca en halv sekund.
  * - Notiserna skickas från servern (Supabase edge-funktionen "bevakning") som webbnotiser (push),
  *   så de kommer även när telefonen ligger i fickan med skärmen släckt.
  * - När appen är öppen spelas dessutom ett ljud och telefonen vibrerar.
- * - Bevakningen tas bort automatiskt 30 min efter sista händelsen (inställt i edge-funktionen: AFTER_MIN).
+ * - Bevakningen tas bort automatiskt 30 min efter sista händelsen (flyg: sista väskan, tåg: ankomst; AFTER_MIN i edge-funktionen).
+ * - Utloggning: B.logout() stänger av notiserna på telefonen och tar bort den hos servern.
  */
 (function () {
   'use strict';
@@ -180,7 +181,7 @@
     var on = !watchOf(key);
     var state = {};
     if (item && on) {
-      if (k.kind === 'flyg') { state.landed = !!item.act; state.firstBag = /Första väskan/.test(item.info || ''); }
+      if (k.kind === 'flyg') { state.landed = !!item.act; state.firstBag = /Första väskan/.test(item.info || ''); state.lastBag = !!(item.lastBag && item.act && item.lastBag >= item.act - 30 * 60000); }
       else state.arrived = !!item.act;
       state.canceled = !!item.canceled;
       if (item.est && item.sched && Math.abs(item.est - item.sched) >= 60000) state.est = new Date(item.est).toISOString();
@@ -189,7 +190,7 @@
       p_label: item ? item.from : null, p_sub: item ? item.sub : null, p_state: state })
       .then(function (l) {
         st.list = l || []; st.loadedAt = Date.now();
-        var what = k.kind === 'flyg' ? 'flyget landar och när bagaget rullar' : 'tåget ankommer';
+        var what = k.kind === 'flyg' ? 'flyget landar, när bagaget rullar och när sista väskan är ute' : 'tåget ankommer';
         toast(on ? '⭐ Bevakas – du får en notis när ' + what + '.' + (st.push === 'on' ? '' : ' Slå på notiser ovanför listan.')
                  : 'Bevakningen är borttagen.');
         repaint();
@@ -239,9 +240,10 @@
       ' för att bevaka det. <button class="bev-link" data-bev-help>' + (st.help ? 'Dölj hjälp' : 'Hjälp') + '</button></div>';
     if (st.help) {
       h += '<div class="bev-help">' +
-        '<p><b>Så fungerar det:</b> du får en notis med ljud när ett bevakat flyg landar, när bagaget börjar rulla, ' +
+        '<p><b>Så fungerar det:</b> du får en notis med ljud när ett bevakat flyg landar, när bagaget börjar rulla, när sista väskan är ute, ' +
         'när tiden ändras eller om det ställs in. För tåg: när tåget ankommer. Det fungerar även när telefonen ligger i fickan. ' +
-        'Bevakningen tas bort av sig själv en halvtimme efter sista händelsen.</p>' +
+        'Bevakningen tas bort av sig själv en halvtimme efter sista händelsen (för flyg: sista väskan). ' +
+        'När du loggar ut stängs notiserna av på telefonen.</p>' +
         '<p><b>Android:</b> tryck "Aktivera ljudsignal/notiser" och välj Tillåt. Kolla att notiser för Chrome inte är avstängda och att telefonen inte står på ljudlöst.</p>' +
         '<p><b>iPhone:</b> öppna taxikit.shop/TaxiData i Safari, tryck Dela ⬆️ → "Lägg till på hemskärmen". Öppna appen från hemskärmen, ' +
         'logga in och tryck "Aktivera ljudsignal/notiser". Kräver iOS 16.4 eller senare.</p>' +
@@ -303,5 +305,26 @@
   if (supported) navigator.serviceWorker.addEventListener('message', function (e) {
     if (e.data && e.data.type === 'bev-open' && typeof window.openItem === 'function' && window.ANKOMSTER) window.openItem(ANKOMSTER.id);
   });
+  // ---------- utloggning: inga notiser till en utloggad telefon ----------
+  // Avregistrerar push i webbläsaren och tar bort telefonen (och, om ingen annan telefon har notiser, bevakningarna) hos servern.
+  // Väntar högst 4 s så att utloggningen aldrig fastnar.
+  B.logout = function () {
+    var tok = token();
+    var work = (supported ? navigator.serviceWorker.getRegistration('./').then(function (r) { return r && r.pushManager.getSubscription(); })
+      : Promise.resolve(null)).catch(function () { return null; }).then(function (s) {
+        var ep = s ? s.endpoint : null;
+        var srv = tok ? rpc('push_logout', { p_endpoint: ep }).catch(function () {}) : Promise.resolve();
+        var loc = s ? s.unsubscribe().catch(function () {}) : Promise.resolve();
+        return Promise.all([srv, loc]);
+      });
+    st.list = []; st.push = 'unknown'; savedOnce = false;
+    return Promise.race([work, new Promise(function (r) { setTimeout(r, 4000); })]);
+  };
+  // Sessionen har gått ut (servern loggade ut oss): avregistrera lokalt. Push-tjänsten svarar då 410 och servern tar bort raden.
+  B.localOff = function () {
+    if (!supported) return Promise.resolve();
+    return Promise.race([new Promise(function (r) { setTimeout(r, 3000); }), navigator.serviceWorker.getRegistration('./').then(function (r) { return r && r.pushManager.getSubscription(); })
+      .then(function (s) { return s && s.unsubscribe(); }).catch(function () {})]);
+  };
   B._state = st;
 })();

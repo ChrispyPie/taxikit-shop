@@ -120,8 +120,8 @@
   <script src="serverstatus.js?v=20261024x"></script>
   <script src="badges.js?v=20261024x"></script>
   <script src="script.js?v=20261024ar1"></script>
-  <script src="ankomster.js?v=20261025bev2"></script>
-  <script src="bevakning.js?v=20261025bev2"></script>
+  <script src="ankomster.js?v=20261025sb1"></script>
+  <script src="bevakning.js?v=20261025sb1"></script>
   <script src="topplistor.js?v=20261024ar1"></script>
   <script src="verkstad.js?v=20261025bv3"></script>
   <script src="kalender.js?v=20261025k2"></script>
@@ -256,7 +256,8 @@
         if (me) driverData = me;
         return true;
       } catch (e) {
-        if (e.code === '28000') { clearSession(); location.reload(); return false; }
+        if (e.code === '28000') { clearSession(); var go = function () { location.reload(); };
+          if (window.BEVAKNING && BEVAKNING.localOff) BEVAKNING.localOff().then(go, go); else go(); return false; }
         return true;
       }
     }
@@ -312,6 +313,8 @@
       profileLock = false;
       forcePwLock = false;
       sessionStorage.removeItem('taxi_profile_lock');
+      // Bevakning: stäng av notiser på den här telefonen innan sessionen tas bort
+      try { if (window.BEVAKNING && BEVAKNING.logout) await BEVAKNING.logout(); } catch (e) {}
       try { await rpc('logout', { p_token: localStorage.getItem('taxi_session') || '' }); } catch (e) {}
       clearSession();
       location.reload();

@@ -141,6 +141,7 @@
       sub: f.airline || '',
       from: f.other || f.iata || '',
       sched: d(f.sched), est: d(f.est), act: d(f.act) || (st === 'LAN' ? d(f.est) || d(f.sched) : null),
+      lastBag: d(f.lastBag),
       canceled: st === 'CAN',
       removed: st === 'DEL',
       special: special || '',
