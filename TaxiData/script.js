@@ -30,12 +30,19 @@ const weekdays = ['Sö', 'Må', 'Ti', 'On', 'To', 'Fr', 'Lö'];
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
 const UBER_FEE = 0.26;
 
-async function tripRpc(name, args) {
-  const res = await fetch(TRIP_API_URL + '/rest/v1/rpc/' + name, {
-    method: 'POST',
-    headers: { 'apikey': TRIP_API_KEY, 'Authorization': 'Bearer ' + TRIP_API_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify(Object.assign({ p_token: localStorage.getItem('taxi_session') || '' }, args || {}))
-  });
+async function tripRpc(name, args, timeoutMs) {
+  // timeoutMs: avbryt anropet om servern inte svarat i tid (räknas som fel)
+  const ctrl = timeoutMs && window.AbortController ? new AbortController() : null;
+  const timer = ctrl ? setTimeout(() => ctrl.abort(), timeoutMs) : null;
+  let res;
+  try {
+    res = await fetch(TRIP_API_URL + '/rest/v1/rpc/' + name, {
+      method: 'POST',
+      headers: { 'apikey': TRIP_API_KEY, 'Authorization': 'Bearer ' + TRIP_API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.assign({ p_token: localStorage.getItem('taxi_session') || '' }, args || {})),
+      signal: ctrl ? ctrl.signal : undefined
+    });
+  } finally { if (timer) clearTimeout(timer); }
   if (!res.ok) throw new Error('HTTP ' + res.status);
   const text = await res.text();
   return text ? JSON.parse(text) : null;
@@ -45,13 +52,30 @@ function escHtml(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
+let loadFailed = false;            // true när hämtningen misslyckats två gånger i rad
+// "Försök igen"-knappen i felmeddelandet
+async function retryLoadData(btn) {
+  if (btn) { btn.disabled = true; btn.textContent = 'Hämtar...'; }
+  await loadData();
+  render();
+}
+
 async function loadData() {
   currentDriver = localStorage.getItem('taxi_driver') || '';
   viewDriver = currentDriver;
   try {
     // Resedata hämtas från servern (Supabase) och kräver inloggning.
     // Förare får bara sina egna resor; inga publika datafiler används.
-    data = (await tripRpc('get_trip_data', { p_dataset: 'current' })) || {};
+    // Ett automatiskt nytt försök om anropet misslyckas (HTTP-fel, timeout eller nätverksfel).
+    // Misslyckas även det visas ett felmeddelande med "Försök igen" i stället för nollor.
+    let res;
+    try { res = await tripRpc('get_trip_data', { p_dataset: 'current' }, 20000); }
+    catch (e1) {
+      await new Promise(r => setTimeout(r, 1500));
+      res = await tripRpc('get_trip_data', { p_dataset: 'current' }, 20000);
+    }
+    data = res || {};
+    loadFailed = false;
 
     const seenShifts = new Set();
     data.shifts = (data.shifts || []).filter(s => {
@@ -69,6 +93,7 @@ async function loadData() {
     });
   } catch (e) {
     data = {};
+    loadFailed = true;   // tom månad (inga resor) är INTE ett fel – då visas 0 som vanligt
   }
   tripsByDriver = null;
   orphanTrips = null;
@@ -404,6 +429,16 @@ function render() {
     const when = window.fmtSthlmTime ? fmtSthlmTime(data.last_updated)
       : new Date(data.last_updated).toLocaleTimeString('sv-SE', { timeZone: 'Europe/Stockholm', hour: '2-digit', minute: '2-digit' });
     document.getElementById('last-updated').textContent = 'Senast hämtad från servern ' + when;
+  }
+
+  if (loadFailed) {
+    document.getElementById('dashboard').innerHTML =
+      '<div class="section load-error" role="alert" style="text-align:center;padding:24px 16px;">' +
+      '<div style="font-weight:600;margin-bottom:6px;">Kunde inte hämta data – försök igen</div>' +
+      '<div style="opacity:.75;font-size:.9em;margin-bottom:14px;">Servern svarade inte. Dina körningar finns kvar.</div>' +
+      '<button type="button" class="retry-btn" onclick="retryLoadData(this)" style="padding:10px 22px;border-radius:999px;border:2px solid var(--primary);background:var(--primary);color:var(--on-primary,#fff);font-weight:600;font-size:1em;">Försök igen</button>' +
+      '</div>';
+    return;
   }
 
   const [rangeStart, rangeEnd] = getRange();
