@@ -22,6 +22,15 @@
     "svenskamassan": {
      "url": "https://svenskamassan.se/wp-json/api/v2/getCalendarList",
      "venue": "svenska-massan"
+    },
+    "abytravet": {
+     "base": "https://abytravet.se",
+     "venue": "aby",
+     "months_ahead": 3
+    },
+    "abymassan": {
+     "url": "https://abymassan.se/",
+     "venue": "aby"
     }
    },
    "venues": {
@@ -32,7 +41,9 @@
      "lon": 11.9878,
      "aliases": [
       "scandinavium"
-     ]
+     ],
+     "zone": 9,
+     "pickup_note": "Zon 9. Samma kvarter som Svenska Mässan och Gothia Towers (där Taxi Göteborg har förtur), fast på andra sidan."
     },
     "ullevi": {
      "name": "Ullevi",
@@ -62,7 +73,9 @@
       "svenska massan",
       "massan",
       "gothia towers"
-     ]
+     ],
+     "zone": 9,
+     "pickup_note": "Zon 9. Taxi Göteborg har förtur vid avtalshotellet Gothia Towers (Mässans gata 24)."
     },
     "liseberg": {
      "name": "Liseberg",
@@ -71,7 +84,9 @@
      "lon": 11.9925,
      "aliases": [
       "liseberg"
-     ]
+     ],
+     "zone": 9,
+     "pickup_note": "Zon 9. Stora entrén ligger bredvid Rondo, nära Gothia Towers där Taxi Göteborg har förtur."
     },
     "lisebergsteatern": {
      "name": "Lisebergsteatern",
@@ -175,7 +190,9 @@
      "lon": 11.9915,
      "aliases": [
       "rondo"
-     ]
+     ],
+     "zone": 9,
+     "pickup_note": "Zon 9. Mitt emot Gothia Towers, där Taxi Göteborg har förtur."
     },
     "valhalla-ip": {
      "name": "Valhalla IP",
@@ -195,8 +212,27 @@
      "aliases": [
       "frolundaborg"
      ]
+    },
+    "aby": {
+     "name": "Åby (Åbytravet / Åby Arena)",
+     "address": "Åby Arenaväg 10, Mölndal",
+     "lat": 57.6522,
+     "lon": 12.0046,
+     "aliases": [
+      "abytravet",
+      "aby travet",
+      "aby travbana",
+      "aby arena",
+      "abymassan",
+      "aby massan",
+      "aby arenavag",
+      "abyvagen"
+     ],
+     "zone": 156,
+     "pickup_note": "Zon 156. Taxi Göteborg har egna platser vid Best Western Plus Åby Hotel utanför Åbytravet (där även mässorna på Åby Arena hålls). Andra bolag måste stå längre bort."
     }
-   }
+   },
+   "_venue_info": "zone/pickup_note speglas i public.venues (SQL-migrationer); hamtaren anvander bara namn/adress/alias."
   }
  }
 }

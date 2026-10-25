@@ -269,7 +269,7 @@
     else if (st.view === 'vecka') h += weekHtml();
     else h += dayListHtml(st.cur, false);
     h += '<button type="button" id="kal-new" class="vk-new kal-new">＋ Föreslå evenemang</button>';
-    h += '<div class="tl-foot">Sluttid med "ca" är uppskattad. Källor: goteborg.com, Got Event, Svenska Mässan och förarnas förslag.</div>';
+    h += '<div class="tl-foot">Sluttid med "ca" är uppskattad. Källor: goteborg.com, Got Event, Svenska Mässan, Åbytravet, Åbymässan och förarnas förslag.</div>';
     body.innerHTML = h;
     bindMain(body);
   }
@@ -363,7 +363,7 @@
     var ed = document.getElementById('kal-edit'); if (ed) ed.onclick = function () { st.form = newForm(e); st.open = null; draw(); };
     var dl = document.getElementById('kal-del'); if (dl) dl.onclick = function () { delSuggestion(e); };
   }
-  function srcName(s) { return { goteborg_com: 'goteborg.com', gotevent: 'Got Event', svenskamassan: 'Svenska Mässan', ticketmaster: 'Ticketmaster' }[s] || 'källa'; }
+  function srcName(s) { return { goteborg_com: 'goteborg.com', gotevent: 'Got Event', svenskamassan: 'Svenska Mässan', abytravet: 'Åbytravet', abymassan: 'Åbymässan', ticketmaster: 'Ticketmaster' }[s] || 'källa'; }
   function relTime(iso) {
     var m = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
     if (m < 1) return 'nyss'; if (m < 60) return m + ' min sedan'; if (m < 1440) return Math.round(m / 60) + ' h sedan';

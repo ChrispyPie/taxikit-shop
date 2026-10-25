@@ -7,6 +7,9 @@ Kallor (publika, odokumenterade JSON-API:er - var snall):
   2. Got Event      POST https://gotevent.se/api/v2/event/GetEventsTeasers
                     + datum per evenemang (node-id fran evenemangssidan)
   3. Svenska Massan POST https://svenskamassan.se/wp-json/api/v2/getCalendarList
+  4. Abytravet      GET  https://abytravet.se/kalender/AAAA-MM (manadssida, HTML)
+                    + evenemangssidan for "Halltider" (forsta/sista loppet)
+  5. Abymassan      GET  https://abymassan.se/ (EventON-lista med schema.org-JSON-LD)
 
 Standard ar TORRKORNING: skriver bara en lokal JSON-fil (--out).
 Med --upload skickas listan till RPC public.events_ingest (kraver
@@ -263,8 +266,116 @@ def fetch_massan(years, log=print):
                 n += 1
     return out
 
+# ---------- 4. Abytravet (travdagar) ----------
+ABY_DAY_RX = re.compile(r'Calendar-day--withEvent[^"]*"><a class="Calendar-dayContent" href="([^"]+)">.*?'
+                        r'Calendar-dayNumber">(\d+)</span>(.*?)</div></a>', re.S)
+ABY_FIRST_RX = re.compile(r'(\d{1,2})[.:](\d{2})\s*F[öo]rsta (?:loppet|start)', re.I)
+ABY_LAST_RX = re.compile(r'(\d{1,2})[.:](\d{2})\s*Sista (?:loppet|start)', re.I)
+# Kvallstrav utan halltider: Abys vanliga kvallsprogram (forsta 18.20, sista ca 21.30)
+ABY_EVENING = ((18, 20), 205)   # start, minuter till slut (sista loppet + ca 15 min)
+ABY_LEN = 205                   # uppskattad langd nar bara forsta start finns
+
+def _text(h):
+    h = re.sub(r"<script.*?</script>|<style.*?</style>", " ", h, flags=re.S)
+    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", h)))
+
+def fetch_abytravet(today, horizon, log=print):
+    sc = CITY_CFG["sources"]["abytravet"]
+    base, home = sc["base"].rstrip("/"), sc.get("venue")
+    n_months = int(sc.get("months_ahead", 3))
+    out, seen = [], set()
+    y, m = today.year, today.month
+    for _ in range(n_months + 1):
+        page = http(f"{base}/kalender/{y:04d}-{m:02d}", as_json=False)
+        hits = ABY_DAY_RX.findall(page)
+        log(f"  Abytravet {y:04d}-{m:02d}: {len(hits)} dagar")
+        for url, dnum, inner in hits:
+            day = date(y, m, int(dnum))
+            title = _text(inner).strip()
+            if not title or url in seen or not (today.date() <= day < horizon.date()):
+                continue
+            seen.add(url)
+            st = datetime(day.year, day.month, day.day, 0, 0, tzinfo=TZ)
+            en, tu = None, True
+            try:
+                t = _text(http(url, as_json=False))
+                f1, f2 = ABY_FIRST_RX.search(t), ABY_LAST_RX.search(t)
+                if f1:
+                    st = st.replace(hour=int(f1.group(1)), minute=int(f1.group(2)))
+                    tu = False
+                    if f2:
+                        en = st.replace(hour=int(f2.group(1)), minute=int(f2.group(2))) + timedelta(minutes=15)
+                        if en <= st:
+                            en = None
+            except (urllib.error.URLError, ValueError) as err:
+                log(f"    ! {title}: {err}")
+            if tu and "kvall" in norm(title):
+                (hh, mm), mins = ABY_EVENING
+                st, tu = st.replace(hour=hh, minute=mm), False
+                en = st + timedelta(minutes=mins)
+            elif not tu and en is None:
+                en = st + timedelta(minutes=ABY_LEN)
+            if "trav" not in norm(title):
+                title = "Trav: " + title
+            sid = url.rstrip("/").split("/")[-1]
+            e = ev("abytravet", sid, title, "sport", st, en if not tu else None, home, url=url, time_unknown=tu)
+            if en:
+                e["ends_estimated"] = True       # sista loppet + 15 min / uppskattat
+            out.append(e)
+        m += 1
+        if m > 12:
+            y, m = y + 1, 1
+    return out
+
+# ---------- 5. Abymassan (massor och evenemang i Aby Arena) ----------
+AM_MASSA_RX = re.compile(r"(massa|massan|nordbygg|seniorfestival)")
+AM_KONSERT_RX = re.compile(r"(konsert|kvall i juni|dansband|live)")
+
+def _iso_loose(s):
+    # EventON skriver t.ex. "2026-11-6T09:15+0:00" (lokal tid, felaktig zon) - anvand bara datumet
+    m = re.match(r"(\d{4})-(\d{1,2})-(\d{1,2})", s or "")
+    return date(int(m.group(1)), int(m.group(2)), int(m.group(3))) if m else None
+
+def fetch_abymassan(log=print):
+    sc = CITY_CFG["sources"]["abymassan"]
+    home = sc.get("venue")
+    page = http(sc["url"], as_json=False)
+    lds = re.findall(r'<script type="application/ld\+json"[^>]*>(.*?)</script>', page, re.S)
+    out, n = [], 0
+    for raw in lds:
+        try:
+            d = json.loads(raw)
+        except ValueError:
+            continue
+        if not isinstance(d, dict) or d.get("@type") != "Event":
+            continue
+        n += 1
+        title = html.unescape(html.unescape(d.get("name") or "")).strip()
+        d0, d1 = _iso_loose(d.get("startDate")), _iso_loose(d.get("endDate"))
+        if not title or not d0:
+            continue
+        d1 = d1 if d1 and d1 >= d0 else d0
+        # slutar efter midnatt (t.ex. 01:00 dagen efter) -> inte en egen dag
+        me = re.search(r"T(\d{1,2}):", d.get("endDate") or "")
+        if d1 > d0 and me and int(me.group(1)) < 6:
+            d1 -= timedelta(days=1)
+        nt = norm(title)
+        cat = "massa" if AM_MASSA_RX.search(nt) else ("konsert" if AM_KONSERT_RX.search(nt) else "ovrigt")
+        sid = (d.get("@id") or d.get("url") or title).replace("event_", "")
+        day, k = d0, 0
+        while day <= d1 and k < 5:
+            if cat == "massa":
+                st, tu = datetime(day.year, day.month, day.day, 9, 0, tzinfo=TZ), False
+            else:   # klockslagen i listan ar platshallare -> tid ej angiven
+                st, tu = datetime(day.year, day.month, day.day, 0, 0, tzinfo=TZ), True
+            out.append(ev("abymassan", sid, title, cat, st, None, home, url=d.get("url"), time_unknown=tu))
+            day += timedelta(days=1)
+            k += 1
+    log(f"  Abymassan: {n} evenemang")
+    return out
+
 # ---------- sammanslagning ----------
-PRIO = {"gotevent": 0, "goteborg_com": 1, "svenskamassan": 2}
+PRIO = {"gotevent": 0, "goteborg_com": 1, "svenskamassan": 2, "abytravet": 3, "abymassan": 4}
 
 def similar(a, b):
     a, b = norm(a), norm(b)
@@ -329,7 +440,9 @@ def main():
     horizon = today + timedelta(days=DAYS_AHEAD)
     registry = {"goteborg_com": lambda: fetch_goteborg(a.max_pages),
                 "gotevent": fetch_gotevent,
-                "svenskamassan": lambda: fetch_massan(sorted({today.year, horizon.year}))}
+                "svenskamassan": lambda: fetch_massan(sorted({today.year, horizon.year})),
+                "abytravet": lambda: fetch_abytravet(today, horizon),
+                "abymassan": fetch_abymassan}
     src = a.sources.split(",") if a.sources else list(CITY_CFG.get("sources", {}))
     allev, errors = [], []
     for name in src:
