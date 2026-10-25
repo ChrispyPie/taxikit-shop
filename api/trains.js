@@ -85,7 +85,7 @@ async function loadStationNames(key) {
 }
 
 function stationName(sig) {
-  return STATIONS[sig] || (TS_NAMES && TS_NAMES[sig]) || sig || "";
+  return (TS_NAMES && TS_NAMES[sig]) || STATIONS[sig] || sig || "";
 }
 
 async function tvPost(key, queryXml) {
