@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaxiData</title>
-  <link rel="stylesheet" href="style.css?v=20261025k1">
+  <link rel="stylesheet" href="style.css?v=20261025bv1">
   <style>
     #content { padding: 16px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 16px; }
@@ -115,7 +115,7 @@
   <script src="script.js?v=20261024ar1"></script>
   <script src="ankomster.js?v=20261024x"></script>
   <script src="topplistor.js?v=20261024ar1"></script>
-  <script src="verkstad.js?v=20261024z"></script>
+  <script src="verkstad.js?v=20261025bv1"></script>
   <script src="kalender.js?v=20261025k2"></script>
   <script src="hjalpbot.js?v=20261024z"></script>
   <script>
@@ -616,14 +616,16 @@
         html += '<div class="grid">';
         for (var i = 0; i < menu.length; i++) {
           if (!canSee(menu[i])) continue;
-          // Admin-rutan får en siffra när verkstadstid väntar på ägarens beslut
-          html += '<div class="icon" onclick="openItem(\'' + menu[i].id + '\')"' + (menu[i].id === 'admin' ? ' data-badge="workshop"' : '') + '>';
+          // Admin-rutan får en siffra när verkstadstid väntar på ägarens beslut.
+          // Bil & verkstad får en siffra för olästa bil-notiser (admin: annars antal bilar som står).
+          html += '<div class="icon" onclick="openItem(\'' + menu[i].id + '\')"' + (menu[i].id === 'admin' ? ' data-badge="workshop"' : menu[i].id === VERKSTAD.id ? ' data-badge="bil"' : '') + '>';
           html += '<div class="emoji">' + menu[i].icon + '</div>';
           html += '<div class="label">' + menu[i].label + '</div></div>';
         }
         html += '</div>';
         content.innerHTML = html;
         refreshWorkshopBadge();
+        refreshBilBadge();
       }
       if (window.refreshBadges) refreshBadges();
     }
@@ -641,6 +643,13 @@
       }).then(function (r) { return r.ok ? r.json() : 0; })
         .then(function (n) { setBadge('workshop', +n || 0); })
         .catch(function () {});
+    }
+
+    var bilBadgeAt = 0;
+    function refreshBilBadge() {
+      if (!VERKSTAD.refreshBadge || Date.now() - bilBadgeAt < 30000) return;
+      bilBadgeAt = Date.now();
+      VERKSTAD.refreshBadge();
     }
 
     function openItem(id) {

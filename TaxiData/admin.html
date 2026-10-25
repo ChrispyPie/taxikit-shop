@@ -100,7 +100,7 @@
   </div>
 
   <script src="serverstatus.js?v=20261024v"></script>
-  <script src="verkstad-admin.js?v=20261024z"></script>
+  <script src="verkstad-admin.js?v=20261025bv1"></script>
   <script>
     const APP_VERSION = '1.0.26';
     console.log('Admin version:', APP_VERSION);
@@ -112,7 +112,7 @@
     const menu = [
       { id: 'akeridata', icon: '📊', label: 'Åkeridata', serverStatus: true },
       { id: 'bilar', icon: '🚕', label: 'Bilar' },
-      { id: 'verkstad', icon: '🔧', label: 'Verkstadstimmar' },
+      { id: 'verkstad', icon: '🛠️', label: 'Bil & verkstad' },
       { id: 'chaufforer', icon: '👥', label: 'Chaufförer' },
       // Statistik borttagen 2026-10-25 (tom platshållare): { id: 'statistik', icon: '📈', label: 'Statistik' },
       
@@ -300,7 +300,7 @@
       }
       // admin.html#bilar öppnar Bilar direkt (länk från Åkeridata)
       if (location.hash === '#bilar' && canSeeAkeridata()) { history.replaceState(null, '', location.pathname); openMenu('bilar'); return; }
-      // admin.html#verkstad öppnar Verkstadstimmar direkt (länk från förarappen)
+      // admin.html#verkstad öppnar Bil & verkstad (verkstadstimmar) direkt (länk från förarappen)
       if (location.hash === '#verkstad' && canSeeAkeridata()) { history.replaceState(null, '', location.pathname); openMenu('verkstad'); return; }
       render();
       // Antal verkstadstider som väntar på beslut visas på rutan
@@ -446,7 +446,7 @@
         else if (editingCar) renderEditCar(content);
         else renderCars(content);
       } else if (path[0].id === 'verkstad') {
-        title.textContent = 'Verkstadstimmar';
+        title.textContent = 'Bil & verkstad';
         if (!canSeeAkeridata()) content.innerHTML = '<div class="section"><p style="padding:16px;">Ingen behörighet</p></div>';
         else VERKSTAD_ADMIN.render(content);
       } else if (path[0].id === 'chaufforer') {
@@ -1190,11 +1190,21 @@
         case 'workshop_approve': return who + ' godkände verkstadstid för ' + (e.target_id || '?') + ' ' + wsSpan(d) + (d.kr != null ? ' = ' + formatSEK(d.kr) : '') + (d.from === 'rejected' ? ' (var nekad)' : '') + (d.comment ? ' – "' + d.comment + '"' : '');
         case 'workshop_reject': return who + ' nekade verkstadstid för ' + (e.target_id || '?') + ' ' + wsSpan(d) + (d.from === 'approved' ? ' (var godkänd)' : '') + (d.comment ? ' – "' + d.comment + '"' : '');
         case 'workshop_rate': return who + ' ändrade timpriset för verkstadstid från ' + d.from + ' till ' + d.to + ' kr/h';
+        case 'bil_issue_add': return who + (d.kind === 'supply' ? ' skrev att något behövs' : ' anmälde fel') + (d.car ? ' på bil ' + d.car : '') + (d.blocking ? ' (bilen står)' : '');
+        case 'bil_issue_edit': return who + ' ändrade en ' + (d.kind === 'supply' ? 'behovsanmälan' : 'felanmälan') + (d.car ? ' på bil ' + d.car : '');
+        case 'bil_issue_status': return who + ' ändrade status ' + (bilSt[d.from] || d.from) + ' → ' + (bilSt[d.to] || d.to) + (d.car ? ' (bil ' + d.car + ')' : '') + (d.comment ? ' – "' + d.comment + '"' : '');
+        case 'bil_issue_delete': return who + ' tog bort en ' + (d.kind === 'supply' ? 'behovsanmälan' : 'felanmälan') + (d.car ? ' på bil ' + d.car : '');
+        case 'bil_maint_add': return who + (d.status === 'forslag' ? ' föreslog underhåll' : ' planerade underhåll') + ' (' + (d.type || '') + ')' + (d.car ? ' på bil ' + d.car : '');
+        case 'bil_maint_edit': return who + ' ändrade underhåll (' + (d.type || '') + ')' + (d.car ? ' på bil ' + d.car : '');
+        case 'bil_maint_done': return who + ' markerade underhåll klart (' + (d.type || '') + ')' + (d.km != null ? ' vid ' + d.km + ' km' : '') + (d.cost != null ? ' = ' + formatSEK(d.cost) : '');
+        case 'bil_maint_delete': return who + ' tog bort underhåll (' + (d.type || '') + ')';
+        case 'bil_km': return who + ' angav mätarställning ' + d.to + ' km för bil ' + (d.car || '?');
         case 'category_change': return who + ' ändrade kategori på ' + e.target_id + ' till ' + catName(d.to);
         default: return who + ': ' + e.action + ' ' + (e.target_id || '');
       }
     }
 
+    const bilSt = { ny: 'Ny', pagar: 'Pågår', klar: 'Klar' };
     // Verkstadstid i loggen: "tor 22/10 08:00–11:30 (3 h 30 min, TEST-VK1)"
     function wsSpan(d) {
       if (!d || !d.start) return '';

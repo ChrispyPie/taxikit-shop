@@ -318,3 +318,48 @@ main { max-width: 900px; margin: 1rem auto; padding: 0 1rem; }
 .kal-input { width: 100%; padding: 0.55rem; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; font-size: 0.95rem; box-sizing: border-box; }
 .kal-unk { font-size: 0.8rem; margin-left: 0.5rem; } .kal-same { flex: 1; font-size: 0.85rem; color: var(--text-soft); }
 .vk-iact .kal-ok { border-color: var(--ok); color: var(--ok); }
+
+/* Bil & verkstad (verkstad.js) – återanvänder .vk-*, .ank-*, .kal-*, .pm-* */
+.bv-tabs { display: flex; gap: 5px; align-items: stretch; margin: 0.5rem 0 0.7rem; }
+.bv-tab { flex: 1; min-width: 0; padding: 0.35rem 0.1rem; border-radius: 12px; font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; gap: 1px; line-height: 1.15; }
+.bv-tab span { font-size: 1.1rem; }
+.bv-bell { position: relative; flex: 0 0 44px; border: 2px solid var(--primary); border-radius: 12px; background: var(--surface); font-size: 1.15rem; }
+.bv-bell b { position: absolute; top: -6px; right: -6px; background: var(--danger); color: white; border-radius: 10px; font-size: 0.7rem; padding: 1px 6px; }
+.bv-cars { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 0.6rem; }
+.bv-car { flex: 0 0 auto; min-width: 92px; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 0.45rem 0.6rem; border-radius: 10px; border: 2px solid var(--border-soft); background: var(--surface); color: var(--primary); font: inherit; text-align: left; cursor: pointer; }
+.bv-car small { font-size: 0.72rem; color: var(--text-soft); }
+.bv-car.on { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+.bv-car.stop { border-color: var(--danger); }
+.bv-b { display: inline-block; font-size: 0.72rem; padding: 0.05rem 0.45rem; border-radius: 10px; white-space: nowrap; }
+.bv-b.stop { background: var(--danger); color: white; }
+.bv-b.warn { background: #feebc8; color: #9c4221; }
+.bv-b.soon { background: #fefcbf; color: #975a16; }
+.bv-st { font-size: 0.75rem; padding: 0.1rem 0.5rem; border-radius: 10px; white-space: nowrap; }
+.bv-st.ny { background: #bee3f8; color: #2a4365; }
+.bv-st.pagar { background: #fefcbf; color: #975a16; }
+.bv-st.klar { background: #c6f6d5; color: var(--ok); }
+.bv-issue.stop, .bv-m.late { border-left: 5px solid var(--danger); }
+.bv-m.soon { border-left: 5px solid #d69e2e; }
+.bv-issue.done, .bv-m.done { opacity: 0.75; }
+.bv-stopline { color: var(--danger-text); font-weight: 700; font-size: 0.9rem; margin-top: 0.2rem; }
+.bv-text { margin-top: 0.3rem; white-space: pre-wrap; word-break: break-word; }
+.vk-when small { font-weight: 400; color: var(--text-soft); font-size: 0.8rem; }
+.bv-act { flex-wrap: wrap; } .bv-act button, .bm-act button { flex: 1 1 30%; min-width: 0; padding: 0.45rem 0.3rem; font-size: 0.85rem; }
+.vk-iact .bv-pagar { border-color: #d69e2e; color: #975a16; }
+.bv-two { display: flex; gap: 6px; } .bv-two > * { flex: 1; min-width: 0; }
+.bv-opt { padding: 0.6rem 0.3rem; border-radius: 10px; border: 2px solid var(--border); background: var(--surface); color: var(--primary); font: inherit; font-size: 0.9rem; }
+.bv-opt.on { border-color: var(--ok); background: #f0fff4; font-weight: 700; }
+.bv-opt.stop.on { border-color: var(--danger); background: var(--danger-bg); color: var(--danger-text); }
+.bv-photo-btn { display: inline-block; padding: 0.55rem 0.8rem; border-radius: 10px; border: 2px dashed var(--primary); color: var(--primary); cursor: pointer; font-size: 0.95rem; }
+.bv-thumbs { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 0.4rem; }
+.bv-thumb { position: relative; } .bv-thumb img { width: 72px; height: 72px; object-fit: cover; border-radius: 8px; display: block; }
+.bv-thumb button { position: absolute; top: -6px; right: -6px; width: 24px; height: 24px; border-radius: 50%; border: none; background: var(--danger); color: white; font-size: 0.9rem; line-height: 1; }
+.bv-thumbs.big img { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; display: block; }
+.bv-filter { font-size: 0.85rem; color: var(--text-soft); margin: -0.2rem 0 0.6rem; }
+.bv-filter button { background: none; border: none; color: var(--accent); text-decoration: underline; font-size: 0.85rem; cursor: pointer; }
+.bv-km { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; font-size: 0.95rem; }
+.bv-km small { color: var(--muted); font-size: 0.75rem; }
+.bv-km button { flex: 0 0 auto; padding: 0.45rem 0.7rem; border-radius: 8px; border: 2px solid var(--primary); background: var(--surface); color: var(--primary); font-size: 0.9rem; }
+.bv-done { border-top: 1px solid var(--border-soft); margin-top: 0.5rem; padding-top: 0.5rem; }
+.bv-check { display: flex; gap: 0.4rem; align-items: center; font-size: 0.9rem; margin: 0.2rem 0 0.5rem; }
+.bv-chips { justify-content: flex-start; }

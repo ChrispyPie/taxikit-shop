@@ -1,4 +1,6 @@
-/* Admin › Verkstadstimmar: ägaren (och S admin) godkänner eller nekar förarnas verkstadstid,
+/* Admin › Bil & verkstad (verkstadstimmar). Felanmälan, behov och underhåll hanteras i appen (verkstad.js);
+ * här visas en sammanfattning med länk dit.
+ * Verkstadstimmar: ägaren (och S admin) godkänner eller nekar förarnas verkstadstid,
  * ser summor per förare för en period och ändrar timpriset.
  * Använder admin.html:s rpc(), esc() och errText(). Behörigheten kontrolleras på servern
  * (admin_workshop_list, admin_workshop_decide, set_workshop_rate). Namn skickas bara till ägaren.
@@ -59,7 +61,11 @@
     var from = A.month, to = new Date(A.month.getFullYear(), A.month.getMonth() + 1, 0);
     A.data = null; if (typeof render === 'function') render();
     return rpc('admin_workshop_list', { p_from: ymd(from), p_to: ymd(to) })
-      .then(function (d) { A.data = d; A.pending = d.pending_count || 0; render(); })
+      .then(function (d) {
+        A.data = d; A.pending = d.pending_count || 0; render();
+        // Sammanfattning av bilarna (samma data som appen visar)
+        return rpc('get_bil', {}).then(function (b) { A.bil = b; render(); }).catch(function () {});
+      })
       .catch(function (e) { A.data = { error: err(e) }; render(); });
   };
   A.count = function () {
@@ -90,6 +96,10 @@
       '<div class="vka-meta">' + esc(span(x.start, x.end)) + '<br>' + esc(x.car) + ' · ' + dur(x.minutes) + ' · ' + kr(x.kr) + '</div></div>' +
       '<span class="vka-chip ' + x.status + '">' + STATUS[x.status] + '</span></div>';
     if (x.comment) h += '<div class="vka-com">💬 ' + esc(x.comment) + '</div>';
+    if (x.issue_id) {
+      var iss = ((A.bil && A.bil.issues) || []).filter(function (i) { return i.id === x.issue_id; })[0];
+      h += '<div class="vka-meta">🔗 Felanmälan' + (iss ? ': ' + esc(String(iss.body || '').slice(0, 80)) : '') + '</div>';
+    }
     if (x.decision_comment) h += '<div class="vka-meta">Din kommentar: ' + esc(x.decision_comment) + '</div>';
     if (!decided || A.open[x.id]) {
       h += '<textarea id="vka-c-' + x.id + '" maxlength="500" placeholder="Kommentar till föraren (valfri)">' + esc(decided ? (x.decision_comment || '') : '') + '</textarea>' +
@@ -103,6 +113,25 @@
     return h + '</div>';
   }
 
+  function bilSummary() {
+    var b = A.bil; if (!b) return '';
+    var cars = b.cars || [], iss = b.issues || [], m = b.maint || [];
+    var stop = cars.filter(function (c) { return c.blocking; }).length;
+    var faults = iss.filter(function (i) { return i.kind === 'fault' && i.status !== 'klar'; }).length;
+    var sup = iss.filter(function (i) { return i.kind === 'supply' && i.status !== 'klar'; }).length;
+    var late = m.filter(function (x) { return x.status === 'plan' && x.level === 2; }).length;
+    var soon = m.filter(function (x) { return x.status === 'plan' && x.level === 1; }).length;
+    var sug = m.filter(function (x) { return x.status === 'forslag'; }).length;
+    var rows = [];
+    if (stop) rows.push('<b style="color:#c53030">🛑 ' + stop + ' bil' + (stop === 1 ? '' : 'ar') + ' står</b>');
+    rows.push('⚠️ ' + faults + (faults === 1 ? ' öppet fel' : ' öppna fel'));
+    rows.push('🧴 ' + sup + (sup === 1 ? ' sak behövs' : ' saker behövs'));
+    rows.push('🗓️ Underhåll: ' + (late ? late + ' försenat, ' : '') + soon + ' snart' + (sug ? ', ' + sug + ' förslag' : ''));
+    return '<div class="vka-card"><div class="vka-who">Bilarna just nu</div><div class="vka-meta">' + rows.join('<br>') + '</div>' +
+      '<button style="margin-top:10px;width:100%;padding:10px;border-radius:8px" onclick="VERKSTAD_ADMIN.openApp()">Hantera i appen › Bil & verkstad</button></div>';
+  }
+  A.openApp = function () { localStorage.setItem('taxi_view', 'verkstad'); localStorage.setItem('bil_tab', 'fel'); location.href = 'index.html'; };
+
   A.render = function (content) {
     var d = A.data;
     if (!d) { content.innerHTML = '<div class="section"><p style="padding:16px;">Laddar...</p></div>'; return; }
@@ -110,7 +139,9 @@
     var now = new Date(), isNow = A.month.getFullYear() === now.getFullYear() && A.month.getMonth() === now.getMonth();
     var pend = (d.entries || []).filter(function (x) { return x.status === 'pending'; });
     var done = (d.entries || []).filter(function (x) { return x.status !== 'pending'; });
-    var h = '<div class="vka-card vka-rate"><span>Timpris: <b>' + kr(d.rate) + '/h</b></span><button onclick="VERKSTAD_ADMIN.setRate()">Ändra</button></div>';
+    var h = bilSummary();
+    h += '<div class="vka-h" style="margin-top:0">Verkstadstimmar</div>';
+    h += '<div class="vka-card vka-rate"><span>Timpris: <b>' + kr(d.rate) + '/h</b></span><button onclick="VERKSTAD_ADMIN.setRate()">Ändra</button></div>';
     h += '<div class="vka-h">Väntar på beslut (' + pend.length + ')</div>';
     h += pend.length ? pend.map(function (x) { return card(x, false); }).join('') : '<div class="vka-card" style="color:#718096">Inget väntar just nu.</div>';
     h += '<div class="vka-bar"><button onclick="VERKSTAD_ADMIN.shift(-1)" aria-label="Föregående månad">‹</button><b>' +
