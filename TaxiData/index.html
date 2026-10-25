@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaxiData</title>
-  <link rel="stylesheet" href="style.css?v=20261025bv3">
+  <link rel="stylesheet" href="style.css?v=20261025pb1">
   <style>
     #content { padding: 16px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 16px; }
@@ -118,6 +118,7 @@
   <script src="verkstad.js?v=20261025bv3"></script>
   <script src="kalender.js?v=20261025k2"></script>
   <script src="hjalpbot.js?v=20261024z"></script>
+  <script src="profilbild.js?v=20261025pb1"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -168,6 +169,7 @@
     }
 
     function clearSession() {
+      if (window.PROFILBILD) PROFILBILD.reset();
       localStorage.removeItem('taxi_session');
       localStorage.removeItem('taxi_logged_in');
       localStorage.removeItem('taxi_driver');
@@ -253,6 +255,10 @@
     function setFullName() {
       var fullName = ((driverData.first_name || '') + ' ' + (driverData.last_name || '')).trim();
       document.getElementById('full-name').textContent = fullName || driverId;
+      if (window.PROFILBILD) {
+        var pm = document.getElementById('profile-menu');
+        PROFILBILD.init({ button: document.getElementById('profile-btn'), menu: pm, before: pm.lastElementChild });
+      }
     }
 
     async function showMenu() {
