@@ -65,6 +65,11 @@ header button:hover { background: var(--primary); color: var(--on-primary); }
 .tab.active, .tl-tab.active { background: var(--primary); color: var(--on-primary); }
 /* Fyra flikar (Dag/Vecka/Månad/År) ska få plats på en rad i en smal mobil */
 @media (max-width: 420px) { .tabs .tab, .tabs .tl-tab { padding: 0.5rem 0.9rem; } .tabs { gap: 0.4rem; } }
+/* Knapprader bryts aldrig: får de inte plats sveper man sidledes (centrerat när de får plats) */
+.tabs, .ank-chips.tf { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: none; overscroll-behavior-x: contain; justify-content: flex-start; padding: 2px 1px; }
+.tabs::-webkit-scrollbar, .ank-chips.tf::-webkit-scrollbar { display: none; }
+.tabs > *, .ank-chips.tf > * { flex-shrink: 0; white-space: nowrap; }
+.tabs > :first-child { margin-left: auto; } .tabs > :last-child { margin-right: auto; }
 
 .date-nav { display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
 .date-nav button {
@@ -192,8 +197,8 @@ main { max-width: 900px; margin: 1rem auto; padding: 0 1rem; }
 .ank-chips { display: flex; gap: 6px; margin-bottom: 0.5rem; }
 .ank-chip { border: 1px solid var(--primary); background: var(--surface); color: var(--primary); border-radius: 14px; padding: 4px 12px; font-size: 0.85rem; cursor: pointer; }
 .ank-chip.on { background: var(--primary); color: var(--on-primary); }
-.ank-chips.tf { flex-wrap: nowrap; gap: 5px; }
-.ank-chips.tf .ank-chip { flex: 1 1 auto; min-width: 0; padding: 4px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+.ank-chips.tf { gap: 6px; }
+.ank-chips.tf .ank-chip { padding: 4px 11px; white-space: nowrap; }
 .ank-chip-n { font-size: 0.75rem; opacity: 0.75; margin-left: 2px; }
 .ank-empty.small { font-size: 0.85rem; padding: 4px 2px; }
 .ank-more { display: block; width: 100%; background: none; border: 1px dashed var(--border); color: var(--text-soft); border-radius: 8px; padding: 6px; font-size: 0.85rem; margin-bottom: 0.5rem; cursor: pointer; }

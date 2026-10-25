@@ -172,6 +172,23 @@
     return A.sources[0];
   }
 
+  // Svepbara knapprader (.tabs, filterknappar): håll den valda knappen synlig.
+  function scrollRowTo(row, btn) {
+    if (!row || !btn || row.scrollWidth <= row.clientWidth + 1) return;
+    var l = btn.offsetLeft - row.offsetLeft, w = btn.offsetWidth;
+    if (l < row.scrollLeft + 8 || l + w > row.scrollLeft + row.clientWidth - 8) row.scrollLeft = l - (row.clientWidth - w) / 2;
+  }
+  function keepActiveInView(root) {
+    (root || document).querySelectorAll('.tabs, .ank-chips.tf').forEach(function (row) {
+      scrollRowTo(row, row.querySelector('.active, .on'));
+    });
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('.tabs > *, .ank-chips.tf > *');
+    if (b) setTimeout(function () { var r = b.parentNode; if (r && r.isConnected) scrollRowTo(r, b); }, 0);
+  });
+  window.addEventListener('load', function () { keepActiveInView(document); });
+
   function paint() {
     var el = state.el; if (!el || !el.isConnected) return stop();
     var s = src(), data = state.data[s.id], now = Date.now();
@@ -213,6 +230,7 @@
       });
     }
     el.innerHTML = html;
+    keepActiveInView(el);
   }
 
   function load(id, quiet) {
