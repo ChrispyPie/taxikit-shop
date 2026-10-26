@@ -97,3 +97,19 @@ delete from vault.secrets where name in ('PROGNOS_PIN', 'PROGNOS_TICK_KEY');
 - v6: använder `prognos_svc_watch_drivers_active`, push-tid i svensk tid (Europe/Stockholm; v5 visade UTC = 1 h fel).
 - **Rulla tillbaka till v5:** Supabase MCP `deploy_edge_function`, projekt `lpfdryvukqmjlgenuzpb`, namn `prognos-sync`, entrypoint `index.ts`, verify_jwt=false,
   files=[index.ts = innehållet i `/workspace/backups/prognos-sync-v5-index.ts`] (= `main:supabase/functions/prognos-sync/index.ts` vid 2f965dd).
+
+### t335 LIVE 2026-10-26 ca 15:12 (CET)
+- PR #6 mergad → merge-commit `0d585af3663c6d39a5a5f8a47000fcaa5084d269`
+- PR #7 mergad → merge-commit `6b276690643e6c2813618c54d131940ed93a6124`
+- Edge `prognos-sync` v6 deployad 15:12 CET (verify_jwt=false). Deployad v5 kontrollerad identisk med `/workspace/backups/prognos-sync-v5-index.ts` före deploy.
+
+**Ångra frontend (ingen force push), i ordning:**
+```
+git checkout main && git pull
+git revert -m 1 6b276690643e6c2813618c54d131940ed93a6124   # globala notiser/linjer/zonantal (#7)
+git revert -m 1 0d585af3663c6d39a5a5f8a47000fcaa5084d269   # hotfix nyckel + rit-skydd (#6) – OBS: då försvinner datan igen (401)
+git push origin main
+```
+(Helst via en revert-branch + PR.) Endast #7 bör normalt återställas; #6 är en ren buggfix.
+
+**Ångra edge till v5:** `deploy_edge_function` projekt `lpfdryvukqmjlgenuzpb`, namn `prognos-sync`, entrypoint `index.ts`, verify_jwt=false, files=[index.ts = `/workspace/backups/prognos-sync-v5-index.ts`]. Därefter kan `drop function if exists public.prognos_svc_watch_drivers_active(text, text);` köras.
