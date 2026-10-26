@@ -569,3 +569,37 @@ html[data-theme="dark"] .pg-badge.pg-c-saker { border-color: #bee3f8; }
 .pg-empty-card { text-align: center; color: var(--text-soft); padding: 22px 12px; margin-top: 4px; }
 .pg-push-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 6px 0 8px; font-size: 0.9rem; }
 .pg-btn-sm { width: auto; padding: 4px 10px; font-size: 0.85rem; }
+
+/* t336u: Morgon-fliken (morgonprognos) */
+.pg-morgon { margin-top: 10px; }
+.pg-mo-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.pg-mo-head h3 { margin: 0 0 2px; }
+.pg-mo-chip { flex-shrink: 0; font-size: 0.75rem; border: 1px solid var(--border-soft); border-radius: 10px; padding: 2px 8px; color: var(--text-soft); white-space: nowrap; }
+.pg-mo-total { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 10px 0 6px; padding-bottom: 8px; border-bottom: 1px solid var(--border-soft); }
+.pg-mo-tlab { font-size: 0.85rem; color: var(--text-soft); width: 100%; }
+.pg-mo-tnum { font-size: 1.9rem; font-weight: 700; color: var(--text); line-height: 1; }
+.pg-mo-rows { display: flex; flex-direction: column; }
+.pg-mo-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border-soft); }
+.pg-mo-row:last-child { border-bottom: none; }
+.pg-mo-lab { flex: 0 0 auto; min-width: 6.6em; font-size: 0.85rem; color: var(--text-soft); font-variant-numeric: tabular-nums; }
+.pg-mo-row.pk .pg-mo-lab, .pg-mo-row.pk .pg-mo-n { color: var(--text); font-weight: 700; }
+.pg-mo-row .pg-bar-track { height: 18px; border-radius: 6px; }
+.pg-mo-row .pg-bar-fill { border-radius: 6px; opacity: 0.6; }
+.pg-mo-row .pg-bar-fill.pk { opacity: 1; }
+.pg-mo-n { flex: 0 0 auto; min-width: 2em; text-align: right; font-weight: 600; font-size: 0.95rem; color: var(--text); font-variant-numeric: tabular-nums; }
+.pg-mo-note { margin: 10px 0 4px; font-size: 0.8rem; }
+.pg-mo-upd { margin: 0; font-size: 0.8rem; }
+.pg-morgon-teaser { display: block; width: 100%; margin-top: 10px; text-align: left; background: var(--surface); border: 1px solid var(--border-soft); border-radius: 12px; padding: 10px 12px; color: var(--text); font: inherit; font-size: 0.9rem; cursor: pointer; }
+.pg-morgon-teaser span { float: right; color: var(--text-soft); }
+.pg-mo-date { font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.pg-mo-date::first-letter { text-transform: uppercase; }
+/* fyra flikar ska synas på 360px; vid stor text radbryts de i stället för att gömmas */
+.pg-tabs { flex-wrap: wrap; }
+.pg-tab { padding: 6px 12px; }
+/* t337u: pågående timme / klara timmar i Morgon */
+.pg-mo-tag { display: block; font-size: 0.72rem; font-weight: 600; margin-top: 1px; }
+.pg-mo-row.nu { background: var(--surface-soft); border-radius: 8px; padding-left: 6px; padding-right: 6px; box-shadow: inset 3px 0 0 var(--accent); }
+.pg-mo-row.nu .pg-mo-tag { color: var(--accent); }
+.pg-mo-row.nu .pg-mo-lab, .pg-mo-row.nu .pg-mo-n { color: var(--text); font-weight: 700; }
+.pg-mo-row.klar { opacity: 0.45; }
+.pg-mo-row.klar .pg-mo-tag { color: var(--text-soft); font-weight: 500; }

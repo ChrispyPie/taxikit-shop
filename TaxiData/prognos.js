@@ -462,21 +462,86 @@
     return renderCarTimeline(zid);
   }
 
-  function renderMorgon() {
+  var WD = ['söndag', 'måndag', 'tisdag', 'onsdag', 'torsdag', 'fredag', 'lördag'];
+  // Relativ dag räknas på kalenderdatum (lokal tid): samma datum = "i dag"
+  // (även 00:00–04:00, då morgonen ligger framför en samma natt), nästa datum = "i morgon".
+  function morgonDiff(m) {
+    var d = m && m.dateIso ? new Date(m.dateIso + 'T12:00:00') : null;
+    if (!d || isNaN(d.getTime())) return null;
+    var today = new Date(); today.setHours(12, 0, 0, 0);
+    return Math.round((d - today) / 86400000);
+  }
+  function morgonDay(m) {
+    var d = m && m.dateIso ? new Date(m.dateIso + 'T12:00:00') : null;
+    if (!d || isNaN(d.getTime())) return esc((m && m.dateDisplay) || '');
+    var diff = morgonDiff(m);
+    var rel = diff === 0 ? 'i dag, ' : diff === 1 ? 'i morgon, ' : '';
+    return rel + WD[d.getDay()] + ' ' + esc(m.dateDisplay || (d.getDate() + '/' + (d.getMonth() + 1)));
+  }
+  // Pågående morgon: samma datum och klockan 04:00–08:59 → aktuell timme, annars -1
+  function morgonActiveHour(m) {
+    if (morgonDiff(m) !== 0) return -1;
+    var h = new Date().getHours();
+    return h >= 4 && h < 9 ? h : -1;
+  }
+  function hhmm(iso, sec) {
+    var d = iso ? new Date(iso) : null;
+    if (!d || isNaN(d.getTime())) return '–';
+    return p2(d.getHours()) + ':' + p2(d.getMinutes()) + (sec ? ':' + p2(d.getSeconds()) : '');
+  }
+  function morgonPeak(m, fromHour) {
+    var bs = (m && m.buckets) || [], pi = -1;
+    bs.forEach(function (b, i) { if ((fromHour == null || fromHour < 0 || b.hourTo > fromHour) && (b.total || 0) > 0 && (pi < 0 || b.total > bs[pi].total)) pi = i; });
+    return pi;
+  }
+
+  // Liten rad i Schema som leder till Morgon-fliken (folk tittar ofta på den)
+  function renderMorgonTeaser() {
     var m = st.morgon;
     if (!m || !m.buckets) return '';
+    var ah = morgonActiveHour(m), cur = null;
+    if (ah >= 0) m.buckets.forEach(function (b) { if (b.hourFrom === ah) cur = b; });
+    return '<button type="button" class="pg-morgon-teaser" data-panel="morgon">☀️ Morgonprognos ' +
+      morgonDay(m) + ': <strong>' + (m.total || 0) + '</strong> bokningar till Landvetter' +
+      (cur ? ' · pågår ' + p2(cur.hourFrom) + '–' + p2(cur.hourTo) + ': <strong>' + (cur.total || 0) + '</strong> kvar' : '') +
+      ' <span aria-hidden="true">›</span></button>';
+  }
+
+  // Morgon-fliken. Samma innehåll som prognossajtens "Morgonprognos":
+  // bokningar till Landvetter (lämnazon 292) 04:00–09:00, antal per timme.
+  function renderMorgon() {
+    var m = st.morgon;
+    if (!m || !m.buckets) {
+      return '<div class="pg-card pg-empty-card">' + (st.loadedOnce ? 'Ingen morgonprognos ännu.' : 'Laddar morgonprognos…') + '</div>';
+    }
     var max = 1;
     m.buckets.forEach(function (b) { if ((b.total || 0) > max) max = b.total; });
-    var html = '<div class="pg-card pg-morgon"><h3>Morgonprognos · zon 292</h3>' +
-      '<p class="pg-muted">' + esc(m.dateDisplay || '') + ' · totalt ' + (m.total || 0) +
-      ' (inga kategorier i källan)</p><div class="pg-bars">';
-    m.buckets.forEach(function (b) {
+    var ah = morgonActiveHour(m);
+    var pi = morgonPeak(m, ah); // under pågående morgon: topp bland timmar som inte är klara
+    var peak = pi >= 0 ? p2(m.buckets[pi].hourFrom) + '–' + p2(m.buckets[pi].hourTo) : '';
+    var html = '<div class="pg-card pg-morgon">' +
+      '<div class="pg-mo-head"><div><h3>Morgonprognos</h3>' +
+      '<div class="pg-mo-date">' + morgonDay(m) + '</div>' +
+      '<div class="pg-muted">Bokningar till Landvetter, 04:00–09:00</div></div>' +
+      '<span class="pg-mo-chip">Lämnazon ' + esc(m.zone || '292') + '</span></div>' +
+      '<div class="pg-mo-total"><span class="pg-mo-tlab">Bokningar totalt</span><span class="pg-mo-tnum">' + (m.total || 0) + '</span>' +
+      '<span class="pg-muted">' + (ah >= 0 ? 'Morgonen pågår – kvarvarande bokningar' + (m.total > 0 ? ' · flest ' + peak : '') : (m.total > 0 ? 'Flest bokningar ' + peak : 'Ingen data ännu för morgonen')) + '</span></div>' +
+      '<div class="pg-mo-rows">';
+    m.buckets.forEach(function (b, i) {
       var pct = Math.round(100 * (b.total || 0) / max);
-      html += '<div class="pg-bar-row"><span class="pg-bar-lab">' + p2(b.hourFrom) +
-        '&ndash;' + p2(b.hourTo) + '</span><div class="pg-bar-track"><div class="pg-bar-fill" style="width:' +
-        pct + '%"></div></div><span class="pg-bar-n">' + (b.total || 0) + '</span></div>';
+      var pk = i === pi ? ' pk' : '';
+      var state = '', tag = '';
+      if (ah >= 0 && b.hourTo <= ah) { state = ' klar'; tag = '<span class="pg-mo-tag">klar</span>'; }
+      else if (ah >= 0 && b.hourFrom === ah) { state = ' nu'; tag = '<span class="pg-mo-tag">pågår · ' + (b.total || 0) + ' kvar</span>'; }
+      html += '<div class="pg-mo-row' + pk + state + '"><span class="pg-mo-lab">' + p2(b.hourFrom) + ':00–' + p2(b.hourTo) + ':00' + tag + '</span>' +
+        '<div class="pg-bar-track"><div class="pg-bar-fill' + pk + '" style="width:' + pct + '%"></div></div>' +
+        '<span class="pg-mo-n">' + (b.total || 0) + '</span></div>';
     });
-    html += '</div></div>';
+    html += '</div>' +
+      '<p class="pg-muted pg-mo-note">Antal bokningar per timme, inte exakta tider. Källan delar inte upp på bilkategori (t.ex. storbil). ' +
+      'Under pågående morgon räknas bara bokningar som är kvar; efter 09:00 visas nästa morgon.</p>' +
+      '<p class="pg-muted pg-mo-upd">Uppdaterad ' + esc(hhmm(m.generated_at, true)) + ' · uppdateras automatiskt varje minut</p>' +
+      '</div>';
     return html;
   }
 
@@ -502,6 +567,7 @@
     if (!onPage()) return;
     var tabs = '<div class="pg-tabs">' +
       '<button type="button" class="pg-tab' + (st.panel === 'schema' ? ' on' : '') + '" data-panel="schema">Schema</button>' +
+      '<button type="button" class="pg-tab' + (st.panel === 'morgon' ? ' on' : '') + '" data-panel="morgon">Morgon</button>' +
       '<button type="button" class="pg-tab' + (st.panel === 'filter' ? ' on' : '') + '" data-panel="filter">Filter</button>' +
       '<button type="button" class="pg-tab' + (st.panel === 'notis' ? ' on' : '') + '" data-panel="notis">Notiser</button>' +
       (st.status && st.status.code_needed
@@ -517,6 +583,8 @@
       body += renderFilter();
     } else if (st.panel === 'notis') {
       body += renderNotis();
+    } else if (st.panel === 'morgon') {
+      body += renderMorgon();
     } else {
       body += statusLine();
       body += '<div class="pg-legend"><span class="pg-n pg-c-saker">2</span> säker ' +
@@ -524,7 +592,7 @@
         '<span class="pg-n pg-c-osaker">2?</span> osäker/blandat</div>';
       body += renderZoneTabs();
       body += renderTimeline();
-      body += renderMorgon();
+      body += renderMorgonTeaser();
     }
 
     st.el.innerHTML = '<div class="pg">' + tabs + body + '</div>';

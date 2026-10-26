@@ -97,3 +97,20 @@ delete from vault.secrets where name in ('PROGNOS_PIN', 'PROGNOS_TICK_KEY');
 - v6: använder `prognos_svc_watch_drivers_active`, push-tid i svensk tid (Europe/Stockholm; v5 visade UTC = 1 h fel).
 - **Rulla tillbaka till v5:** Supabase MCP `deploy_edge_function`, projekt `lpfdryvukqmjlgenuzpb`, namn `prognos-sync`, entrypoint `index.ts`, verify_jwt=false,
   files=[index.ts = innehållet i `/workspace/backups/prognos-sync-v5-index.ts`] (= `main:supabase/functions/prognos-sync/index.ts` vid 2f965dd).
+
+## t336 (2026-10-26) – Morgonprognos i appen
+
+- **Backup-branch:** `backup/pre-morgon-2026-10-26` = `6b27669` (pushad).
+- **Feature PR** (`feature/prognos-morgon`, EJ mergad): ny flik "Morgon" i Prognos + teaser under Schema.
+  Filer: `TaxiData/prognos.js`, `TaxiData/style.css`, `TaxiData/index.html` (cache `?v=20261026pg8`; t337: markering av pågående timme "pågår · N kvar", klara timmar "klar", "I dag" under pågående morgon), skärmdumpar `docs/prognos/v6_morgon-*.png`.
+  - **Ångra före merge:** stäng PR:n. **Efter merge:** `git revert -m 1 <merge-sha>` + push (ingen force push).
+- **SQL (REDAN APPLICERAD live, additiv):** `supabase/migrations/20261026c_prognos_morgon_log.sql`
+  - Tabell `public.prognos_morgon_log` (historik per datum när morgonprognosen ändras; RLS på, ingen anon/authenticated-åtkomst).
+  - Funktion `private.prognos_morgon_log_capture()` + trigger `prognos_morgon_log_trg` AFTER INSERT på `public.prognos_snapshots` (felhantering: blockerar aldrig sync).
+  - **Ångra (i ordning):**
+    ```sql
+    drop trigger if exists prognos_morgon_log_trg on public.prognos_snapshots;
+    drop function if exists private.prognos_morgon_log_capture();
+    drop table if exists public.prognos_morgon_log;
+    ```
+- Edge `prognos-sync` oförändrad (v6). Appen läser `prognos_morgon(p_token)` som redan fanns.
