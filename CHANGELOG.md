@@ -6,6 +6,7 @@ Samma innehåll som visas under **Om appen → Nyheter** i appen. Källan är `T
 
 ## 26 oktober 2026
 
+- **Förbättrat:** Topplistor: listan för arbetstimmar är borttagen.
 - **Nytt:** Forum: regler för god ton. Du godkänner dem första gången du öppnar forumet.
 - **Nytt:** Prognos: se kommande bokningar per zon, i tider var 5:e minut och per bilkategori. Uppdateras varje minut.
 - **Nytt:** Prognos: fliken Morgon visar morgonprognosen till Landvetter kl. 04–09, och hur många som är kvar under timmen som pågår.
