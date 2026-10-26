@@ -7,7 +7,8 @@
  * Äldre historik (före 24 okt 2026) är återskapad i efterhand och ungefärlig.
  */
 window.CHANGELOG = [
-  { datum: '2026-10-26', rader: [
+  { datum: '2026-10-26', id: '2026-10-26b', rader: [
+    ['Nytt', 'Forum: regler för god ton. Du godkänner dem första gången du öppnar forumet.'],
     ['Nytt', 'Prognos: se kommande bokningar per zon, i tider var 5:e minut och per bilkategori. Uppdateras varje minut.'],
     ['Nytt', 'Prognos: fliken Morgon visar morgonprognosen till Landvetter kl. 04–09, och hur många som är kvar under timmen som pågår.'],
     ['Nytt', 'Prognos: fliken Original visar prognosen som på Taxi Göteborgs egen sida, utan att du behöver logga in där.'],
