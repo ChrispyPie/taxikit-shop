@@ -8,9 +8,10 @@
  */
 window.CHANGELOG = [
   { datum: '2026-10-26', id: '2026-10-26i', rader: [
-    ['Nytt', 'Körpassdata: äldre år (2025) finns nu i ett arkiv. Tryck på Visa äldre år under År, eller bläddra bakåt och tryck Hämta 2025. De hämtas bara när du vill och sparas inte i telefonen.'],
+    ['Nytt', 'Körpassdata, Åkeridata och Topplistor: äldre år (2025) hämtas nu automatiskt när du bläddrar dit, till exempel från januari i år bakåt till december. Första gången tar det en kort stund. När du tittar på i år hämtas inget extra, och inget sparas i telefonen.'],
   ] },
-  { datum: '2026-10-26', id: '2026-10-26g', rader: [
+  { datum: '2026-10-26', id: '2026-10-26h', rader: [
+    ['Förbättrat', 'Chaufförer: varje förare visar när den senast körde, och listan sorteras med den som kört senast överst. Förare som inte kört på 60 dagar visas gråare.'],
     ['Nytt', 'Demokonto: ägaren kan bjuda in någon att titta på appen i 3 dagar. Personen skriver sitt namn och väljer eget lösenord, och kan bara titta.'],
     ['Nytt', 'Demokonto: välj Förare eller Ägare. Ägar-demot visar adminpanelen med påhittade exempeluppgifter, aldrig åkeriets riktiga.'],
     ['Nytt', 'Chaufförer: demokonton visas i en egen grupp Demo, där du kan skapa nya, se när de går ut och avsluta dem i förtid.'],

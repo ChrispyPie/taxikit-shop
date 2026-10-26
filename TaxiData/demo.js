@@ -96,6 +96,11 @@
             pending: !!f[4], registered: true, address: 'Exempelgatan ' + (i + 1), postal_code: '000 00', city: 'Exempelstad',
             email: 'exempel' + (i + 1) + '@exempel.se', phone: '070-000 00 0' + i, last_login_at: iso(i, 8) };
         });
+      case 'admin_driver_last_drive': {
+        var ago = [0, 1, 3, 9, 2, 75, null, 200], m = {};
+        FAKE.forEach(function (f, i) { if (ago[i] !== null) m[i === 0 ? me : f[0]] = iso(ago[i], 12).slice(0, 10); });
+        return { from: iso(300, 12).slice(0, 10), drivers: m };
+      }
       case 'admin_list_demos': {
         var d = D.get() || {};
         return [{ id: d.id || 'DEMO1', role: 'agare', first_name: d.first || 'Du', last_name: d.last || '', status: 'active', expires_at: d.expires, created_at: iso(0, 8) },

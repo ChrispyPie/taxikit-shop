@@ -52,6 +52,9 @@
     .status { font-size: calc(11px * var(--font-scale, 1)); padding: 2px 6px; border-radius: 10px; margin-left: 8px; }
     .status-active { background: var(--c-c6f6d5); color: var(--c-276749); }
     .status-inactive { background: var(--c-fed7d7); color: var(--c-c53030); }
+    .row .drv-name { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .row .drv-last { font-size: calc(12px * var(--font-scale, 1)); font-weight: 400; color: var(--c-718096); margin-top: 2px; }
+    .row.drv-old .drv-name { opacity: 0.6; }
     .status-pending { background: var(--c-fefcbf); color: var(--c-975a16); }
     .acct-info { font-size: calc(13px * var(--font-scale, 1)); color: var(--c-4a5568); margin-top: 12px; line-height: 1.5; }
     .form-group { margin-bottom: 12px; }
@@ -98,7 +101,7 @@
   </div>
 
   <script src="serverstatus.js?v=20261026tm1"></script>
-  <script src="demo.js?v=zdm1"></script>
+  <script src="demo.js?v=20261026zzsk1"></script>
   <script src="verkstad-admin.js?v=20261026vd1"></script>
   <script src="profilbild.js?v=zdm1"></script>
   <script>
@@ -276,6 +279,54 @@
       bad_role: 'Välj Förare eller Ägare.'
     };
     function errText(e) { return errorTexts[e.message] || ('Fel: ' + e.message); }
+
+    // Senaste kördatum per förare (admin_driver_last_drive): { from: 'YYYY-MM-DD', drivers: { id: 'YYYY-MM-DD' } }.
+    // Saknas funktionen på servern visas inga datum och listan sorteras på id som förut.
+    let lastDrive = null;
+    async function loadLastDrive() {
+      try { const r = await rpc('admin_driver_last_drive'); lastDrive = (r && r.drivers) ? r : null; } catch (e) { lastDrive = null; }
+      if (path[0] && path[0].id === 'chaufforer' && !editingDriver && !showLog) render();
+    }
+    const INACTIVE_DAYS = 60;   // grå rad om föraren inte kört på så här många dagar
+    function ymdDate(ymd) { const [y, m, d] = ymd.split('-').map(Number); return new Date(y, m - 1, d); }
+    function lastDriveText(id) {
+      if (!lastDrive) return '';
+      const ymd = lastDrive.drivers[id];
+      if (!ymd) {
+        if (!lastDrive.from) return 'Aldrig kört';
+        const f = ymdDate(lastDrive.from);
+        return 'Inte kört sedan ' + months[f.getMonth()] + ' ' + f.getFullYear();
+      }
+      const d = ymdDate(ymd);
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const diff = Math.round((today - d) / 86400000);
+      if (diff === 0) return 'Senast kört i dag';
+      if (diff === 1) return 'Senast kört i går';
+      return 'Senast kört ' + d.getDate() + ' ' + months[d.getMonth()] + (d.getFullYear() !== today.getFullYear() ? ' ' + d.getFullYear() : '');
+    }
+    function isInactiveDriver(id) {
+      if (!lastDrive) return false;
+      const ymd = lastDrive.drivers[id];
+      if (!ymd) return true;
+      return (Date.now() - ymdDate(ymd).getTime()) / 86400000 > INACTIVE_DAYS;
+    }
+    // Senast körd först, sedan de som inte kört (på id). Utan datum: på id som förut.
+    function sortByLastDrive(ids) {
+      const ld = (lastDrive && lastDrive.drivers) || {};
+      return ids.sort((a, b) => {
+        const da = ld[a] || '', db = ld[b] || '';
+        if (da !== db) return da < db ? 1 : -1;
+        return a < b ? -1 : a > b ? 1 : 0;
+      });
+    }
+    function driverRow(id) {
+      const status = getDriverStatus(id);
+      const last = lastDriveText(id);
+      return `<div class="row${isInactiveDriver(id) ? ' drv-old' : ''}" onclick="editDriver('${id}')">
+            <span class="label drv-name"><span>${getDisplayName(id)}</span>${last ? `<span class="drv-last">${last}</span>` : ''}</span>
+            <span class="status status-${status}">${statusLabels[status]}</span>
+          </div>`;
+    }
 
     async function reloadDrivers() {
       const rows = await rpc('admin_list_drivers');
@@ -484,6 +535,7 @@
     }
 
     function renderChaufforer(content) {
+      if (lastDrive === null && !renderChaufforer.asked) { renderChaufforer.asked = true; loadLastDrive(); }
       const ids = getAllDriverIds();
       const grouped = {};
       const unknown = [];
@@ -503,27 +555,11 @@
       catOrder.forEach(cat => {
         if (!grouped[cat] || grouped[cat].length === 0) return;
         html += `<div class="section-header">${userCategories[cat]}</div>`;
-        grouped[cat].sort().forEach(id => {
-          const status = getDriverStatus(id);
-          const statusLabel = statusLabels[status];
-          const displayName = getDisplayName(id);
-          html += `<div class="row" onclick="editDriver('${id}')">
-            <span class="label">${displayName}</span>
-            <span class="status status-${status}">${statusLabel}</span>
-          </div>`;
-        });
+        sortByLastDrive(grouped[cat]).forEach(id => { html += driverRow(id); });
       });
       if (unknown.length > 0) {
         html += `<div class="section-header">Övriga</div>`;
-        unknown.sort().forEach(id => {
-          const status = getDriverStatus(id);
-          const statusLabel = statusLabels[status];
-          const displayName = getDisplayName(id);
-          html += `<div class="row" onclick="editDriver('${id}')">
-            <span class="label">${displayName}</span>
-            <span class="status status-${status}">${statusLabel}</span>
-          </div>`;
-        });
+        sortByLastDrive(unknown).forEach(id => { html += driverRow(id); });
       }
       html += '</div>';
       content.innerHTML = html;
