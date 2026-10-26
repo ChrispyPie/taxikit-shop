@@ -141,3 +141,10 @@ delete from vault.secrets where name in ('PROGNOS_PIN', 'PROGNOS_TICK_KEY');
 - **Ångra kod:** stäng PR:n. Efter ev. merge: `git revert -m 1 <merge-sha>` + push (ingen force push).
 - **t349u (pg13):** De snedställda kategorinamnen ankras nu i nedre vänstra hörnet, mitt i spalten, 5 px ovanför första raden. Alla börjar på samma ställe oavsett längd. `fitDiagHead()` sätter radhöjden efter det längsta namnet och `--pg-spacer-w` (reserv till höger, max 48 px) så att Babyskydd inte klipps. Cache-bust `?v=20261026pg13`. Skärmdumpar: `docs/prognos/v11_schema-*.png`. Ångra: `git revert <commit>` på grenen eller stäng PR #13.
 - **t350u (pg14):** Statusraden visar bara "Senaste uppdatering: HH:MM:SS". Extra text (`.pg-stale`) läggs till bara när något är fel: "Kod behövs", "Kunde inte hämta ny data" (status ≠ ok) eller "Data är N min gammal" (≥ 5 min). Morgon visar "Senaste uppdatering: HH:MM:SS" i stället för "Uppdaterad … · uppdateras automatiskt varje minut". Original har kvar deras "Live · Senast uppdaterad HH:MM:SS" (står bara en gång). Cache-bust `?v=20261026pg14`. Skärmdump: `docs/prognos/v12_schema-dark-393.png`. Ångra: `git revert <commit>` på grenen.
+
+## t351 – PR #13 merged to main (live pg14)
+- Merge commit: 7f576c17ed81b8d42bce56f396277ffe80cd7611 (normal merge, no force push)
+- Verified live https://taxikit.shop/TaxiData/ (pg14 assets 200; zone tabs one row at 360px; header gap equal; no 290; single "Senaste uppdatering"; Original + Morgon render; Rapportera fel + filter OK; other pages OK)
+- Undo (code): git checkout main && git pull && git revert -m 1 7f576c17ed81b8d42bce56f396277ffe80cd7611 && push via PR (main protected, no force)
+- Undo (DB, optional): drop function if exists public.prognos_original(text);
+- Backup branch: backup/pre-zonnummer-2026-10-26
