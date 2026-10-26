@@ -912,10 +912,53 @@
     });
   }
 
+  // ---------- Aktivitetsprick på hemrutan (t364u) ----------
+  // Antal nya bokningar (först sedda efter förarens senaste besök i Prognos), alla zoner utom
+  // Magasinet (290), bara bilkategorier (inte barnstol/babyskydd) och enligt förarens Filter.
+  // Senaste besök sparas per förare på servern (prognos_seen_set); siffran cachas i localStorage.
+  var CAR_CATS = SCHEDULE_CATS.filter(function (c) { return !c.child; }).map(function (c) { return c.k; });
+  var BADGE_EVERY = 60000;
+  var badge = { at: 0, seenP: null, viewing: false };
+  function badgeKey() { return 'prognos_new_' + (localStorage.getItem('taxi_driver') || ''); }
+  function showBadge(n) {
+    n = Math.max(0, +n || 0);
+    try { localStorage.setItem(badgeKey(), String(n)); } catch (e) {}
+    if (window.setBadge) window.setBadge('prognos', n);
+  }
+  function markSeen() {
+    showBadge(0);
+    if (!token()) return;
+    badge.seenP = rpc('prognos_seen_set', {}).catch(function () {});
+  }
+  P.refreshBadge = function (force) {
+    if (!token() || onPage()) return;
+    if (!force && Date.now() - badge.at < 30000) return;
+    badge.at = Date.now();
+    var cats = loadCats().filter(function (k) { return CAR_CATS.indexOf(k) >= 0; });
+    Promise.resolve(badge.seenP).then(function () {
+      return rpc('prognos_new_count', { p_cats: cats });
+    }).then(function (r) {
+      if (!onPage()) showBadge(r && r.count);
+    }).catch(function () {});
+  };
+  function homeTileVisible() {
+    var el = document.querySelector('.icon[data-badge="prognos"]');
+    return !!(el && el.offsetParent !== null && document.visibilityState !== 'hidden');
+  }
+  // Visa cachad siffra direkt (ingen fördröjning vid start), uppdatera sedan varje minut när hemskärmen syns.
+  (function () {
+    var c = +(localStorage.getItem(badgeKey()) || 0);
+    if (c > 0 && window.setBadge) window.setBadge('prognos', c);
+    setInterval(function () { if (homeTileVisible()) P.refreshBadge(true); }, BADGE_EVERY);
+    document.addEventListener('visibilitychange', function () { if (homeTileVisible()) P.refreshBadge(); });
+  })();
+
   P.render = function (el) {
     st.el = el;
     st.panel = 'schema';
     st.zoneTab = loadTab();
+    badge.viewing = true;
+    markSeen();
     paint();
     refresh();
     if (st.poll) clearInterval(st.poll);
@@ -923,6 +966,7 @@
       if (!onPage()) { clearInterval(st.poll); st.poll = null; return; }
       if (document.visibilityState === 'hidden') return;
       refresh();
+      markSeen();  // allt som syns medan sidan är öppen räknas som sett
     }, 60000);
   };
 
@@ -931,5 +975,6 @@
 
   P.stop = function () {
     if (st.poll) { clearInterval(st.poll); st.poll = null; }
+    if (badge.viewing) { badge.viewing = false; markSeen(); }  // lämnar Prognos → nollställ
   };
 })();
