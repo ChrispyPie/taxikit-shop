@@ -119,7 +119,21 @@
       case 'car_model_makes': return [];
       case 'car_model_variants': return [];
       case 'workshop_pending_count': return 1;
-      case 'get_bil': return { issues: [], maint: [], tasks: [] };
+      case 'bil_open_count': return { supply: 2, fault: 1 };
+      case 'get_bil': {
+        var ex = function (id, kind, car, sup, body, status, d, h, by, name, extra) {
+          return Object.assign({ id: id, kind: kind, car: car, car_id: car ? id : null, supply: sup, body: body, status: status, blocking: false,
+            created_at: iso(d, h), reporter: by, reporter_name: name, mine: false, photos: 0, history: [] }, extra || {});
+        };
+        return { is_admin: true, cars: [], maint: [], tasks: [], issues: [
+          ex(901, 'supply', '9001', 'kvitto', 'Sista rullen i bilen (exempel)', 'ny', 0, 19, '900103', 'Bengt P'),
+          ex(902, 'supply', '9002', 'annat', 'Ny laddkabel behövs, den gamla glappar (exempel)', 'ny', 1, 22, '900104', 'Cecilia T'),
+          ex(903, 'supply', null, 'spolar', '', 'pagar', 2, 7, '900105', 'David D',
+            { history: [{ status: 'pagar', comment: 'Köper en dunk i morgon (exempel)', at: iso(1, 10) }] }),
+          ex(904, 'fault', '9003', null, 'Varningslampa för däcktryck lyser (exempel)', 'ny', 0, 3, '900103', 'Bengt P'),
+          ex(905, 'supply', '9001', 'rengoring', 'Spillt kaffe i baksätet (exempel)', 'klar', 4, 18, '900105', 'David D',
+            { closed_at: iso(3, 9), history: [{ status: 'klar', comment: 'Tvättad (exempel)', at: iso(3, 9) }] })] };
+      }
       case 'admin_workshop_list':
         return { rate: 250, entries: [
           { id: 1, driver_id: '900103', namn: 'Bengt P', start: iso(1, 9), end: iso(1, 11), car: '9001', minutes: 120, kr: 500, status: 'pending', comment: 'Byte av torkarblad (exempel)', msgs: [] },

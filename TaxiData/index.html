@@ -132,7 +132,7 @@
 
   <script src="serverstatus.js?v=20261026tm1"></script>
   <script src="badges.js?v=20261024x"></script>
-  <script src="demo.js?v=20261026zzsk1"></script>
+  <script src="demo.js?v=20261026zzzb1"></script>
   <script src="script.js?v=20261026zzsl1"></script>
   <script src="ankomster.js?v=20261025sb1"></script>
   <script src="bevakning.js?v=zdm1"></script>
@@ -143,7 +143,7 @@
   <script src="profilbild.js?v=zdm1"></script>
   <script src="forum.js?v=20261026zzdm1"></script>
   <script src="om-data.js?v=20261026nh3"></script>
-  <script src="changelog.js?v=20261026zzsl1"></script>
+  <script src="changelog.js?v=zzgm1"></script>
   <script src="om.js?v=20261026nh3"></script>
   <script src="lonekoll.js?v=20261026tm1"></script>
   <script src="prognos.js?v=zdm1"></script>
@@ -189,13 +189,19 @@
     var SB_KEY = 'sb_publishable_7LwIOZ5ygRvJqJKFxl4cNQ_LvrzrHrP';
 
     // Anropar en server-funktion (RPC) i Supabase. Lösenord kontrolleras på servern.
-    async function rpc(name, args) {
-      var res = await fetch(SB_URL + '/rest/v1/rpc/' + name, {
-        method: 'POST',
-        headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify(args || {})
-      });
-      var text = await res.text();
+    // timeoutMs (valfri): avbryt anropet om servern inte svarar, så att appen inte fastnar på inloggningssidan.
+    async function rpc(name, args, timeoutMs) {
+      var ctrl = (timeoutMs && window.AbortController) ? new AbortController() : null;
+      var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, timeoutMs) : null;
+      try {
+        var res = await fetch(SB_URL + '/rest/v1/rpc/' + name, {
+          method: 'POST',
+          headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify(args || {}),
+          signal: ctrl ? ctrl.signal : undefined
+        });
+        var text = await res.text();
+      } finally { if (timer) clearTimeout(timer); }
       var body = text ? JSON.parse(text) : null;
       if (!res.ok) { var err = new Error((body && body.message) || ('HTTP ' + res.status)); err.code = body && body.code; throw err; }
       return body;
@@ -274,7 +280,7 @@
 
     async function loadDriverData() {
       try {
-        var me = await rpc('get_me', { p_token: localStorage.getItem('taxi_session') || '' });
+        var me = await rpc('get_me', { p_token: localStorage.getItem('taxi_session') || '' }, 10000);
         if (me) driverData = me;
         // Demokonto: appen visar Christians data (servern bestämmer vems). Sparas så att alla sidor visar bannern.
         if (window.DEMO) {
@@ -785,12 +791,16 @@
       if (AKERI_ROLLER.indexOf(menuRole()) < 0 || !window.setBadge) return;
       if (Date.now() - wsBadgeAt < 30000) return;
       wsBadgeAt = Date.now();
-      fetch(TRIP_API_URL + '/rest/v1/rpc/workshop_pending_count', {
-        method: 'POST',
-        headers: { 'apikey': TRIP_API_KEY, 'Authorization': 'Bearer ' + TRIP_API_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ p_token: localStorage.getItem('taxi_session') || '' })
-      }).then(function (r) { return r.ok ? r.json() : 0; })
-        .then(function (n) { setBadge('workshop', +n || 0); })
+      // + nya anmälningar under Bil & verkstad (bil_open_count, migrationen 20261026n; saknas den räknas 0)
+      function call(name) {
+        return fetch(TRIP_API_URL + '/rest/v1/rpc/' + name, {
+          method: 'POST',
+          headers: { 'apikey': TRIP_API_KEY, 'Authorization': 'Bearer ' + TRIP_API_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p_token: localStorage.getItem('taxi_session') || '' })
+        }).then(function (r) { return r.ok ? r.json() : 0; }).catch(function () { return 0; });
+      }
+      Promise.all([call('workshop_pending_count'), call('bil_open_count')])
+        .then(function (r) { var o = r[1] || {}; setBadge('workshop', (+r[0] || 0) + (+o.supply || 0) + (+o.fault || 0)); })
         .catch(function () {});
     }
 

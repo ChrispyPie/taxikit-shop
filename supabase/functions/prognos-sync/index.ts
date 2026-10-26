@@ -21,6 +21,27 @@ const CAT_SV: Record<string, string> = {
 
 type Conf = "saker" | "trolig" | "osaker";
 
+// Tidsgräns mot prognos.taxigoteborg.nu: om deras server hänger avbryts anropet,
+// körningen hoppas över och senaste bra data ligger kvar.
+const FETCH_TIMEOUT_MS = 10_000;
+
+// Hämtar och läser hela svaret inom tidsgränsen. Kastar vid timeout eller nätverksfel.
+async function fetchTimed(url: string, init: RequestInit): Promise<{ res: Response; text: string }> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
+  try {
+    const res = await fetch(url, { ...init, signal: ctrl.signal });
+    const text = await res.text();
+    return { res, text };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function isAbort(e: unknown): boolean {
+  return (e as { name?: string })?.name === "AbortError";
+}
+
 const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
@@ -271,15 +292,18 @@ async function tick(): Promise<Response> {
   }
 
   let loginRes: Response;
+  let loginText = "";
   try {
-    loginRes = await fetch(LOGIN_URL, {
+    ({ res: loginRes, text: loginText } = await fetchTimed(LOGIN_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ pin }),
-    });
-  } catch {
-    await sb.rpc("prognos_svc_set_status", { p_status: "error", p_err: "login_network" });
-    return new Response(JSON.stringify({ ok: false, reason: "login_network" }), { status: 200 });
+    }));
+  } catch (e) {
+    const reason = isAbort(e) ? "login_timeout" : "login_network";
+    console.warn("prognos-sync: hoppar över körningen,", reason);
+    await sb.rpc("prognos_svc_set_status", { p_status: "error", p_err: reason });
+    return new Response(JSON.stringify({ ok: false, reason }), { status: 200 });
   }
   if (loginRes.status === 401 || loginRes.status === 403) {
     await sb.rpc("prognos_svc_set_status", { p_status: "code_needed", p_err: "http_" + loginRes.status });
@@ -295,7 +319,8 @@ async function tick(): Promise<Response> {
     await sb.rpc("prognos_svc_set_status", { p_status: "error", p_err: "login_" + loginRes.status });
     return new Response(JSON.stringify({ ok: false, reason: "login_fail" }), { status: 200 });
   }
-  const loginJson = await loginRes.json().catch(() => ({})) as { ok?: boolean; token?: string };
+  let loginJson: { ok?: boolean; token?: string } = {};
+  try { loginJson = JSON.parse(loginText); } catch { loginJson = {}; }
   const token = loginJson.token;
   if (!loginJson.ok || !token) {
     await sb.rpc("prognos_svc_set_status", { p_status: "error", p_err: "no_token" });
@@ -303,14 +328,17 @@ async function tick(): Promise<Response> {
   }
 
   let dataRes: Response;
+  let dataText = "";
   try {
-    dataRes = await fetch(
+    ({ res: dataRes, text: dataText } = await fetchTimed(
       DATA_URL + "?token=" + encodeURIComponent(token) + "&t=" + Date.now(),
       { headers: { Accept: "application/json" }, cache: "no-store" as RequestCache },
-    );
-  } catch {
-    await sb.rpc("prognos_svc_set_status", { p_status: "error", p_err: "data_network" });
-    return new Response(JSON.stringify({ ok: false, reason: "data_network" }), { status: 200 });
+    ));
+  } catch (e) {
+    const reason = isAbort(e) ? "data_timeout" : "data_network";
+    console.warn("prognos-sync: hoppar över körningen,", reason);
+    await sb.rpc("prognos_svc_set_status", { p_status: "error", p_err: reason });
+    return new Response(JSON.stringify({ ok: false, reason }), { status: 200 });
   }
   if (dataRes.status === 401 || dataRes.status === 403) {
     await sb.rpc("prognos_svc_set_status", { p_status: "code_needed", p_err: "data_" + dataRes.status });
@@ -326,7 +354,14 @@ async function tick(): Promise<Response> {
     await sb.rpc("prognos_svc_set_status", { p_status: "error", p_err: "data_" + dataRes.status });
     return new Response(JSON.stringify({ ok: false, reason: "data_fail" }), { status: 200 });
   }
-  const payload = await dataRes.json() as Payload;
+  let payload: Payload;
+  try {
+    payload = JSON.parse(dataText) as Payload;
+  } catch {
+    console.warn("prognos-sync: hoppar över körningen, data_bad_json");
+    await sb.rpc("prognos_svc_set_status", { p_status: "error", p_err: "data_bad_json" });
+    return new Response(JSON.stringify({ ok: false, reason: "data_bad_json" }), { status: 200 });
+  }
   const observed = new Date();
 
   const { data: prevRaw } = await sb.rpc("prognos_svc_latest_payload");
