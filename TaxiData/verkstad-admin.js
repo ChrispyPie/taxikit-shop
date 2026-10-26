@@ -59,7 +59,7 @@
       '.vka-big{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:10px 0 4px;font-size:calc(17px * var(--font-scale, 1))}' +
       '.vka-ej{font-size:calc(13px * var(--font-scale, 1));color:var(--c-975a16);background:var(--c-fefcbf);border-radius:6px;padding:6px 8px;margin-top:8px}' +
       '.vka-exp{display:flex;gap:8px;margin-top:10px}.vka-exp button{flex:1;padding:9px;font-size:calc(14px * var(--font-scale, 1))}' +
-      '.vka-chip.ny{background:var(--c-fefcbf);color:var(--c-975a16)}.vka-chip.pagar{background:var(--c-bee3f8,#bee3f8);color:var(--c-2c5282,#2c5282)}.vka-chip.klar{background:var(--c-c6f6d5);color:var(--c-276749)}' +
+      '.vka-chip.ny{background:var(--c-fefcbf);color:var(--c-975a16)}.vka-chip.pagar{background:var(--c-bee3f8,#bee3f8);color:var(--c-3182ce,#2c5282)}.vka-chip.klar{background:var(--c-c6f6d5);color:var(--c-276749)}' +
       '.vka-card.new{box-shadow:inset 3px 0 0 #d69e2e}.vka-card.stop{box-shadow:inset 3px 0 0 #e53e3e}.vka-card.done{opacity:.75}' +
       '.vka-car{display:flex;justify-content:space-between;align-items:baseline;font-weight:600;font-size:calc(14px * var(--font-scale, 1));margin:10px 2px 6px}' +
       '.vka-car small{font-weight:400;color:var(--c-718096)}' +
