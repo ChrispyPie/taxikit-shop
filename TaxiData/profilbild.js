@@ -13,21 +13,21 @@
   var btn, menu, items = {};
 
   var CSS = '/* Profilbild (profilbild.js) */\n' +
-    '.pfp-has { width: 36px; height: 36px; border-radius: 50% !important; border: none; padding: 0; background-size: cover !important; background-position: center !important; background-color: #1a365d; color: transparent !important; overflow: hidden; }\n' +
+    '.pfp-has { width: 36px; height: 36px; border-radius: 50% !important; border: none; padding: 0; background-size: cover !important; background-position: center !important; background-color: var(--primary-bg); color: transparent !important; overflow: hidden; }\n' +
     '.pfp-overlay { position: fixed; inset: 0; background: rgba(15,23,42,.6); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 16px; }\n' +
-    '.pfp-box { background: #fff; border-radius: 12px; padding: 16px; width: 100%; max-width: 320px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,.25); }\n' +
-    '.pfp-box h3 { margin: 0 0 4px; font-size: 1.1rem; color: #1a365d; }\n' +
-    '.pfp-hint { margin: 0 0 12px; font-size: .85rem; color: #4a5568; }\n' +
+    '.pfp-box { background: var(--surface); border-radius: 12px; padding: 16px; width: 100%; max-width: 320px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,.25); }\n' +
+    '.pfp-box h3 { margin: 0 0 4px; font-size: 1.1rem; color: var(--primary); }\n' +
+    '.pfp-hint { margin: 0 0 12px; font-size: .85rem; color: var(--c-4a5568); }\n' +
     '.pfp-view { position: relative; width: 260px; height: 260px; margin: 0 auto; border-radius: 8px; overflow: hidden; touch-action: none; }\n' +
     '.pfp-view canvas { display: block; width: 260px; height: 260px; cursor: grab; }\n' +
-    '.pfp-ring { position: absolute; inset: 0; pointer-events: none; border-radius: 50%; box-shadow: 0 0 0 200px rgba(255,255,255,.65); outline: 2px solid #1a365d; outline-offset: -2px; }\n' +
-    '.pfp-zoom { display: flex; align-items: center; gap: 8px; margin: 12px 0 4px; font-size: .9rem; color: #2d3748; }\n' +
+    '.pfp-ring { position: absolute; inset: 0; pointer-events: none; border-radius: 50%; box-shadow: 0 0 0 200px rgba(255,255,255,.65); outline: 2px solid var(--primary); outline-offset: -2px; }\n' +
+    '.pfp-zoom { display: flex; align-items: center; gap: 8px; margin: 12px 0 4px; font-size: .9rem; color: var(--c-2d3748); }\n' +
     '.pfp-zoom input { flex: 1; }\n' +
     '.pfp-btns { display: flex; gap: 8px; margin-top: 12px; }\n' +
-    '.pfp-btns button { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e0; background: #fff; font-size: 1rem; cursor: pointer; }\n' +
-    '.pfp-btns .pfp-save { background: #1a365d; color: #fff; border-color: #1a365d; }\n' +
+    '.pfp-btns button { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--c-cbd5e0); background: var(--surface); font-size: 1rem; cursor: pointer; }\n' +
+    '.pfp-btns .pfp-save { background: var(--primary-bg); color: #fff; border-color: var(--primary); }\n' +
     '.pfp-btns button:disabled { opacity: .6; }\n' +
-    '.pfp-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #1a365d; color: #fff; padding: 10px 16px; border-radius: 8px; z-index: 2100; display: none; max-width: 90vw; }';
+    '.pfp-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--primary-bg); color: #fff; padding: 10px 16px; border-radius: 8px; z-index: 2100; display: none; max-width: 90vw; }';
   (function () { var st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st); })();
 
   function token() { return localStorage.getItem('taxi_session') || ''; }

@@ -1,0 +1,169 @@
+/* Tema och textstorlek – delas av alla sidor (index, admin, akeridata, aktivera, aterstall).
+   Ljust tema = exakt samma färger som tidigare. Mörkt tema slås på av tema.js via html[data-theme="dark"].
+   --c-xxxxxx = tidigare hårdkodad färg #xxxxxx (namnet visar ljusa värdet). */
+:root {
+  /* Grundfärger (samma som style.css :root) – behövs på admin.html som inte laddar style.css */
+  --bg: #e8f1f8; --surface: white; --surface-soft: #f0f5fa; --text: #1a365d; --text-soft: #4a5568; --muted: #718096;
+  --primary: #1a365d; --on-primary: white; --border: #cbd5e0; --border-soft: #d0e0ea; --accent: #3182ce;
+  --danger: #e53e3e; --danger-text: #c53030; --danger-bg: #fff5f5; --ok: #276749; --badge: #e53e3e;
+  --c-22543d: #22543d;
+  --c-22c55e: #22c55e;
+  --c-276749: #276749;
+  --c-2a4365: #2a4365;
+  --c-2d3748: #2d3748;
+  --c-2f855a: #2f855a;
+  --c-3182ce: #3182ce;
+  --c-38a169: #38a169;
+  --c-44337a: #44337a;
+  --c-4a5568: #4a5568;
+  --c-718096: #718096;
+  --c-744210: #744210;
+  --c-92400e: #92400e;
+  --c-975a16: #975a16;
+  --c-991b1b: #991b1b;
+  --c-9b2c2c: #9b2c2c;
+  --c-9c4221: #9c4221;
+  --c-a0aec0: #a0aec0;
+  --c-b5650a: #b5650a;
+  --c-bcd3ea: #bcd3ea;
+  --c-bee3f8: #bee3f8;
+  --c-c05621: #c05621;
+  --c-c53030: #c53030;
+  --c-c6f6d5: #c6f6d5;
+  --c-cbd5e0: #cbd5e0;
+  --c-cccccc: #cccccc;
+  --c-d0e0ea: #d0e0ea;
+  --c-d69e2e: #d69e2e;
+  --c-dc2626: #dc2626;
+  --c-e2e8f0: #e2e8f0;
+  --c-e53e3e: #e53e3e;
+  --c-e6f0fa: #e6f0fa;
+  --c-e6f4ea: #e6f4ea;
+  --c-e8890c: #e8890c;
+  --c-e8f1f8: #e8f1f8;
+  --c-e9d8fd: #e9d8fd;
+  --c-edf2f7: #edf2f7;
+  --c-ef4444: #ef4444;
+  --c-f0fff4: #f0fff4;
+  --c-f59e0b: #f59e0b;
+  --c-f6e05e: #f6e05e;
+  --c-f7fafc: #f7fafc;
+  --c-fed7d7: #fed7d7;
+  --c-feebc8: #feebc8;
+  --c-fef2f2: #fef2f2;
+  --c-fef3c7: #fef3c7;
+  --c-fefcbf: #fefcbf;
+  --c-fff4e5: #fff4e5;
+  --c-fffbea: #fffbea;
+  --c-fffbeb: #fffbeb;
+  --primary-bg: #1a365d;     /* mörkblå knappar/ytor med vit text */
+  --login-bg: var(--primary, #1a365d);
+  --toast-bad: var(--danger-text, #c53030);
+  --font-scale: 1;
+}
+html { background: var(--bg, #e8f1f8); }
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0f1720;
+  --surface: #1a2430;
+  --surface-soft: #222e3b;
+  --text: #e2e8f0;
+  --text-soft: #b8c4d2;
+  --muted: #94a3b8;
+  --primary: #63b3ed;
+  --on-primary: #0f1720;
+  --border: #3a4a5c;
+  --border-soft: #2a3644;
+  --accent: #63b3ed;
+  --danger: #e53e3e;
+  --danger-text: #fc8181;
+  --danger-bg: #3a1c1c;
+  --ok: #68d391;
+  --badge: #e53e3e;
+  --c-22543d: #9ae6b4;
+  --c-22c55e: #22c55e;
+  --c-276749: #68d391;
+  --c-2a4365: #bee3f8;
+  --c-2d3748: #d5dde6;
+  --c-2f855a: #68d391;
+  --c-3182ce: #63b3ed;
+  --c-38a169: #68d391;
+  --c-44337a: #d6bcfa;
+  --c-4a5568: #b8c4d2;
+  --c-718096: #94a3b8;
+  --c-744210: #f6e05e;
+  --c-92400e: #fbd38d;
+  --c-975a16: #f6d38a;
+  --c-991b1b: #feb2b2;
+  --c-9b2c2c: #feb2b2;
+  --c-9c4221: #fbb36b;
+  --c-a0aec0: #7b8a9c;
+  --c-b5650a: #fbb36b;
+  --c-bcd3ea: #2c4a6b;
+  --c-bee3f8: #1e3a5f;
+  --c-c05621: #fbb36b;
+  --c-c53030: #fc8181;
+  --c-c6f6d5: #1c3d2b;
+  --c-cbd5e0: #3a4a5c;
+  --c-cccccc: #3a4a5c;
+  --c-d0e0ea: #2a3644;
+  --c-d69e2e: #ecc94b;
+  --c-dc2626: #fc8181;
+  --c-e2e8f0: #2a3644;
+  --c-e53e3e: #fc8181;
+  --c-e6f0fa: #1c2f45;
+  --c-e6f4ea: #1c3a2a;
+  --c-e8890c: #e8890c;
+  --c-e8f1f8: #0f1720;
+  --c-e9d8fd: #3b2a5c;
+  --c-edf2f7: #222e3b;
+  --c-ef4444: #ef4444;
+  --c-f0fff4: #18301f;
+  --c-f59e0b: #f59e0b;
+  --c-f6e05e: #f6e05e;
+  --c-f7fafc: #1f2a36;
+  --c-fed7d7: #4a2020;
+  --c-feebc8: #43301a;
+  --c-fef2f2: #3a1c1c;
+  --c-fef3c7: #3d3416;
+  --c-fefcbf: #3d3714;
+  --c-fff4e5: #3d2a14;
+  --c-fffbea: #332d14;
+  --c-fffbeb: #332d14;
+  --primary-bg: #2b6cb0;
+  --login-bg: #0b1220;
+  --toast-bad: #c53030;
+}
+html[data-theme="dark"] body { background: var(--bg); color: var(--text); }
+html[data-theme="dark"] input, html[data-theme="dark"] select, html[data-theme="dark"] textarea { background-color: var(--surface-soft); color: var(--text); border-color: var(--border); }
+html[data-theme="dark"] input::placeholder, html[data-theme="dark"] textarea::placeholder { color: var(--muted); }
+html[data-theme="dark"] a { color: var(--primary); }
+html[data-theme="dark"] img.pfp-avatar, html[data-theme="dark"] .emoji { filter: none; }
+
+/* Rutmenyn (startsidan och adminmenyn). Startskärm-valet under Inställningar sätter html[data-home] = 2 | 3 | lista
+   och gäller båda menyerna. Utan val: 3 i bredd på telefon, annars automatiskt. */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 16px; }
+.icon { background: var(--surface); border: 1px solid var(--c-cbd5e0); border-radius: 8px; padding: 16px; text-align: center; cursor: pointer; color: var(--text); }
+.icon .emoji { font-size: 32px; margin-bottom: 8px; }
+.icon .label { font-size: calc(13px * var(--font-scale, 1)); }
+@media (max-width: 600px) {
+  .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .icon { min-height: 92px; padding: 12px 4px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; }
+  .icon .emoji { font-size: 30px; line-height: 1; margin-bottom: 7px; }
+  /* 3 i bredd: texten växer högst 15 % så att långa ord (Inställningar) får plats i rutan */
+  .icon .label { font-size: calc(13px * min(var(--font-scale, 1), 1.15)); line-height: 1.2; overflow-wrap: break-word; hyphens: manual; }
+}
+html[data-home] .grid { max-width: 760px; }
+html[data-home="2"] .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+html[data-home="2"] .icon { min-height: 0; padding: 16px; display: block; }
+html[data-home="2"] .icon .emoji { font-size: 32px; line-height: normal; margin-bottom: 8px; }
+html[data-home="2"] .icon .label { font-size: calc(13px * var(--font-scale, 1)); }
+html[data-home="3"] .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+html[data-home="3"] .icon { min-height: 92px; padding: 12px 4px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; }
+html[data-home="3"] .icon .emoji { font-size: 30px; line-height: 1; margin-bottom: 7px; }
+html[data-home="3"] .icon .label { font-size: calc(13px * min(var(--font-scale, 1), 1.15)); line-height: 1.2; overflow-wrap: break-word; }
+html[data-home="lista"] .grid { grid-template-columns: 1fr; gap: 8px; }
+html[data-home="lista"] .icon { min-height: 52px; padding: 0 14px; display: flex; flex-direction: row; align-items: center; text-align: left; box-sizing: border-box; }
+html[data-home="lista"] .icon .emoji { font-size: 24px; line-height: 1; margin: 0 12px 0 0; width: 30px; text-align: center; flex-shrink: 0; }
+html[data-home="lista"] .icon .label { font-size: calc(15px * var(--font-scale, 1)); flex: 1; }
+html[data-home="lista"] .icon::after { content: '›'; color: var(--c-a0aec0); font-size: 22px; margin-left: 8px; }

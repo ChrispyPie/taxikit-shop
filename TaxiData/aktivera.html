@@ -5,12 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="referrer" content="no-referrer">
   <title>Aktivera konto – TaxiData</title>
-  <link rel="stylesheet" href="style.css?v=20261024ar1">
+  <script src="tema.js?v=20261026tm1"></script>
+  <link rel="stylesheet" href="style.css?v=20261026tm1">
+  <link rel="stylesheet" href="tema.css?v=20261026tm1">
   <style>
-    .login-box p.hint { font-size: 13px; color: #4a5568; margin: 0 0 12px; text-align: left; }
+    .login-box p.hint { font-size: calc(13px * var(--font-scale, 1)); color: var(--c-4a5568); margin: 0 0 12px; text-align: left; }
     #msg { margin-top: 8px; display: none; }
-    #msg.err { color: #c53030; }
-    #msg.ok { color: #276749; }
+    #msg.err { color: var(--c-c53030); }
+    #msg.ok { color: var(--c-276749); }
   </style>
 </head>
 <body>

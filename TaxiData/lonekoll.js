@@ -115,7 +115,7 @@
     '.lk-step{display:flex;justify-content:space-between;gap:8px;padding:6px 4px;border-top:1px solid var(--border-soft,#e2e8f0);font-size:.92rem}' +
     '.lk-step .lk-t{flex:1}.lk-step .lk-h{display:block;font-size:.75rem;color:var(--muted)}.lk-step .lk-v{white-space:nowrap;text-align:right}' +
     '.lk-step.sum{font-weight:700;color:var(--primary);background:var(--surface-soft,#edf2f7);border-radius:8px;border-top-color:transparent}' +
-    '.lk-step.minus .lk-v{color:var(--danger,#e53e3e)}.lk-step.plus .lk-v{color:#2f855a}' +
+    '.lk-step.minus .lk-v{color:var(--danger,#e53e3e)}.lk-step.plus .lk-v{color:var(--c-2f855a)}' +
     '.lk-note{font-size:.8rem;color:var(--muted);margin:.4rem 2px}' +
     '.lk-btn{display:block;width:100%;padding:.65rem;border-radius:8px;border:2px solid var(--primary);background:var(--surface);color:var(--primary);font-size:1rem;margin-top:.5rem}' +
     '.lk-btn.primary{background:var(--primary);color:var(--on-primary,#fff)}' +

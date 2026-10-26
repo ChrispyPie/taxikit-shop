@@ -4,13 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Åkeridata – TaxiData</title>
-  <link rel="stylesheet" href="style.css?v=20261025ss1">
+  <script src="tema.js?v=20261026tm1"></script>
+  <link rel="stylesheet" href="style.css?v=20261026tm1">
+  <link rel="stylesheet" href="tema.css?v=20261026tm1">
   <style>
     header { display: flex; align-items: center; justify-content: space-between; }
     header h1 { position: absolute; left: 50%; transform: translateX(-50%); }
     .hidden { display: none !important; }
     #denied { text-align: center; padding: 48px 16px; }
-    #denied button { margin-top: 16px; padding: 0.6rem 1.2rem; border-radius: 8px; border: 2px solid #1a365d; background: white; color: #1a365d; }
+    #denied button { margin-top: 16px; padding: 0.6rem 1.2rem; border-radius: 8px; border: 2px solid var(--primary); background: var(--surface); color: var(--primary); }
   </style>
 </head>
 <body>
@@ -41,14 +43,14 @@
         <button id="period-btn" title="Välj egen period" aria-label="Välj egen period">📅</button>
       </div>
       <div id="server-status" class="server-status" style="display:none"></div>
-      <div id="last-updated" style="text-align:center; font-size:0.8rem; color:#718096; margin-top:0.3rem;"></div>
+      <div id="last-updated" style="text-align:center; font-size:0.8rem; color:var(--c-718096); margin-top:0.3rem;"></div>
     </div>
     <main id="dashboard"><div class="section"><div class="stat-row">Laddar...</div></div></main>
   </div>
 
   <script>window.TAXI_MODE = 'company';</script>
-  <script src="serverstatus.js?v=20261024x"></script>
-  <script src="script.js?v=20261025kr1"></script>
+  <script src="serverstatus.js?v=20261026tm1"></script>
+  <script src="script.js?v=20261026tm1"></script>
   <script>
     // Åkeridata är för ägaren. TILLFÄLLIGT får även S admin se åkeriets nivå (utan förar-id)
     // under utvecklingen – samma lista som private.company_view_roles() på servern.

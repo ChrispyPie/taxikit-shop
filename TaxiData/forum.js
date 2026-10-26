@@ -24,34 +24,34 @@
     '.fo-top { display: flex; align-items: center; gap: 8px; margin-bottom: .6rem; }\n' +
     '.fo-chips { display: flex; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: none; overscroll-behavior-x: contain; gap: 6px; margin-bottom: .7rem; padding: 2px 1px; }\n' +
     '.fo-chips::-webkit-scrollbar { display: none; } .fo-chips > * { flex-shrink: 0; white-space: nowrap; }\n' +
-    '.fo-co { font-size: .68rem; padding: .05rem .4rem; border-radius: 8px; background: #edf2f7; color: #4a5568; white-space: nowrap; font-weight: 500; }\n' +
-    '.fo-sec { background: #e9d8fd; color: #44337a; }\n' +
+    '.fo-co { font-size: .68rem; padding: .05rem .4rem; border-radius: 8px; background: var(--c-edf2f7); color: var(--c-4a5568); white-space: nowrap; font-weight: 500; }\n' +
+    '.fo-sec { background: var(--c-e9d8fd); color: var(--c-44337a); }\n' +
     '.fo-secinfo { font-size: .85rem; color: var(--text-soft); margin: -.3rem 0 .6rem; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }\n' +
     '.fo-secinfo button { background: none; border: none; color: var(--primary); padding: 0; font-size: .85rem; cursor: pointer; }\n' +
     '.fo-card { cursor: pointer; }\n' +
     '.fo-head { display: flex; align-items: center; gap: 8px; font-size: .82rem; color: var(--text-soft); }\n' +
-    '.fo-av { width: 30px; height: 30px; border-radius: 50%; flex: 0 0 30px; background: #1a365d center/cover no-repeat; color: #fff; font-size: .8rem; font-weight: 600; display: flex; align-items: center; justify-content: center; }\n' +
+    '.fo-av { width: 30px; height: 30px; border-radius: 50%; flex: 0 0 30px; background: var(--primary-bg) center/cover no-repeat; color: #fff; font-size: .8rem; font-weight: 600; display: flex; align-items: center; justify-content: center; }\n' +
     '.fo-av.sm { width: 24px; height: 24px; flex-basis: 24px; font-size: .7rem; }\n' +
     '.fo-name { color: var(--text); font-weight: 600; }\n' +
     '.fo-title { font-weight: 700; color: var(--primary); margin: .35rem 0 .2rem; font-size: 1.02rem; word-break: break-word; }\n' +
     '.fo-body { white-space: pre-wrap; word-break: break-word; color: var(--text); font-size: .95rem; }\n' +
     '.fo-ex { color: var(--text-soft); font-size: .9rem; word-break: break-word; }\n' +
     '.fo-meta { display: flex; gap: 12px; margin-top: .4rem; font-size: .85rem; color: var(--text-soft); align-items: center; flex-wrap: wrap; }\n' +
-    '.fo-tag { font-size: .72rem; padding: .1rem .5rem; border-radius: 10px; background: #e2e8f0; color: #2d3748; white-space: nowrap; }\n' +
-    '.fo-st-ny { background: #bee3f8; color: #2a4365; } .fo-st-pagar { background: #fefcbf; color: #975a16; }\n' +
-    '.fo-st-klar { background: #c6f6d5; color: #22543d; } .fo-st-avvisad { background: #fed7d7; color: #9b2c2c; }\n' +
+    '.fo-tag { font-size: .72rem; padding: .1rem .5rem; border-radius: 10px; background: var(--c-e2e8f0); color: var(--c-2d3748); white-space: nowrap; }\n' +
+    '.fo-st-ny { background: var(--c-bee3f8); color: var(--c-2a4365); } .fo-st-pagar { background: var(--c-fefcbf); color: var(--c-975a16); }\n' +
+    '.fo-st-klar { background: var(--c-c6f6d5); color: var(--c-22543d); } .fo-st-avvisad { background: var(--c-fed7d7); color: var(--c-9b2c2c); }\n' +
     '.fo-hid { background: #4a5568; color: #fff; }\n' +
     '.fo-back { background: none; border: none; color: var(--primary); font-size: 1rem; padding: .3rem 0; margin-bottom: .4rem; cursor: pointer; }\n' +
     '.fo-like { border: 2px solid var(--primary); background: var(--surface); color: var(--primary); border-radius: 18px; padding: .3rem .8rem; font-size: .95rem; cursor: pointer; }\n' +
     '.fo-like.on { background: var(--primary); color: var(--on-primary); }\n' +
     '.fo-photos { display: flex; gap: 6px; margin-top: .6rem; flex-wrap: wrap; }\n' +
-    '.fo-photos img { width: 96px; height: 96px; object-fit: cover; border-radius: 8px; cursor: pointer; background: #e2e8f0; }\n' +
+    '.fo-photos img { width: 96px; height: 96px; object-fit: cover; border-radius: 8px; cursor: pointer; background: var(--c-e2e8f0); }\n' +
     '.fo-pw { position: relative; } .fo-pw button { position: absolute; top: 2px; right: 2px; border: none; border-radius: 50%; width: 26px; height: 26px; background: rgba(0,0,0,.65); color: #fff; cursor: pointer; }\n' +
     '.fo-status { border-left: 4px solid var(--primary); background: var(--bg, #f7fafc); padding: .5rem .6rem; border-radius: 6px; margin-top: .6rem; font-size: .9rem; }\n' +
     '.fo-com { border-top: 1px solid var(--border-soft, #e2e8f0); padding: .55rem 0; }\n' +
     '.fo-com.hid { opacity: .65; }\n' +
     '.fo-small { display: flex; gap: 12px; margin-top: .25rem; } .fo-small button { background: none; border: none; padding: 0; color: var(--primary); font-size: .82rem; cursor: pointer; } .fo-small .fo-danger { color: var(--danger-text, #c53030); }\n' +
-    '.fo-notice { display: block; width: 100%; text-align: left; background: #fefcbf; border: none; border-radius: 8px; padding: .5rem .6rem; margin-bottom: .4rem; font-size: .88rem; color: #2d3748; cursor: pointer; }\n' +
+    '.fo-notice { display: block; width: 100%; text-align: left; background: var(--c-fefcbf); border: none; border-radius: 8px; padding: .5rem .6rem; margin-bottom: .4rem; font-size: .88rem; color: var(--c-2d3748); cursor: pointer; }\n' +
     '.fo-zoom { position: fixed; inset: 0; background: rgba(0,0,0,.88); z-index: 2000; display: flex; align-items: center; justify-content: center; } .fo-zoom img { max-width: 96vw; max-height: 90vh; }\n' +
     '.fo-err { color: var(--danger-text, #c53030); font-size: .9rem; margin: .3rem 0; }\n' +
     '.vk-field input.fo-in { width: 100%; padding: .55rem; border-radius: 8px; border: 1px solid var(--border); font: inherit; box-sizing: border-box; }';
@@ -162,7 +162,7 @@
     if (st.list && st.list.can_write) h += st.list.has_name ? '<button class="vk-new" data-a="new">+ Nytt inlägg</button>' : nameBox();
     if (st.notices && st.notices.length) {
       h += '<div class="vk-card"><div class="vk-lbl">Nytt för dig</div>';
-      st.notices.forEach(function (n) { h += '<button class="fo-notice" data-a="open" data-id="' + n.post_id + '">' + esc(n.body) + ' <span style="color:#718096">· ' + esc(when(n.created_at)) + '</span></button>'; });
+      st.notices.forEach(function (n) { h += '<button class="fo-notice" data-a="open" data-id="' + n.post_id + '">' + esc(n.body) + ' <span style="color:var(--c-718096)">· ' + esc(when(n.created_at)) + '</span></button>'; });
       h += '<button class="fo-back" data-a="readall">Markera alla som lästa</button></div>';
     }
     var co = myCo();
@@ -225,7 +225,7 @@
       h += '</div>';
     }
     if (p.status) {
-      h += '<div class="fo-status"><b>Status: ' + esc(stName(p.status)) + '</b>' + (p.status_by ? ' <span style="color:#718096">(' + esc(p.status_by) + ', ' + esc(when(p.status_at)) + ')</span>' : '') +
+      h += '<div class="fo-status"><b>Status: ' + esc(stName(p.status)) + '</b>' + (p.status_by ? ' <span style="color:var(--c-718096)">(' + esc(p.status_by) + ', ' + esc(when(p.status_at)) + ')</span>' : '') +
         (p.status_comment ? '<div class="fo-body" style="margin-top:.2rem">' + esc(p.status_comment) + '</div>' : '') + '</div>';
     }
     h += '<div class="fo-meta"><button class="fo-like' + (p.liked ? ' on' : '') + '" data-a="like"' + (p.can_write ? '' : ' disabled') + ' aria-pressed="' + (p.liked ? 'true' : 'false') + '">👍 ' + p.likes + '</button><span>💬 ' + p.comment_list.length + '</span></div>';

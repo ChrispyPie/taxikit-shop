@@ -3,72 +3,70 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="tema.js?v=20261026tm1"></script>
+  <link rel="stylesheet" href="tema.css?v=20261026tm1">
   <title>Admin – TaxiData</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; background: #e8f1f8; color: #1a365d; }
-    header { background: #e8f1f8; padding: 12px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #d0e0ea; }
-    header h1 { font-size: 18px; flex: 1; text-align: center; }
-    button { background: white; border: 2px solid #1a365d; color: #1a365d; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
+    header { background: var(--bg); padding: 12px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--c-d0e0ea); }
+    header h1 { font-size: calc(18px * var(--font-scale, 1)); flex: 1; text-align: center; }
+    button { background: var(--surface); border: 2px solid var(--primary); color: var(--primary); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: calc(14px * var(--font-scale, 1)); }
     #content { padding: 16px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 16px; }
-    .icon { background: white; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px; text-align: center; cursor: pointer; }
-    .icon .emoji { font-size: 32px; margin-bottom: 8px; }
-    .icon .label { font-size: 13px; }
-    .breadcrumb { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: white; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
-    .breadcrumb span { cursor: pointer; color: #3182ce; }
-    .breadcrumb .sep { color: #a0aec0; }
-    .category-header { font-size: 20px; font-weight: 600; padding: 16px 16px 4px; }
-    .period-display { font-size: 14px; color: #4a5568; padding: 0 16px 8px; }
-    .controls { padding: 8px 16px; background: #f7fafc; border-bottom: 1px solid #e2e8f0; display: flex; gap: 8px; align-items: center; }
-    .controls select { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e0; }
+    .breadcrumb { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--surface); border-bottom: 1px solid var(--c-e2e8f0); font-size: calc(14px * var(--font-scale, 1)); }
+    .breadcrumb span { cursor: pointer; color: var(--c-3182ce); }
+    .breadcrumb .sep { color: var(--c-a0aec0); }
+    .category-header { font-size: calc(20px * var(--font-scale, 1)); font-weight: 600; padding: 16px 16px 4px; }
+    .period-display { font-size: calc(14px * var(--font-scale, 1)); color: var(--c-4a5568); padding: 0 16px 8px; }
+    .controls { padding: 8px 16px; background: var(--c-f7fafc); border-bottom: 1px solid var(--c-e2e8f0); display: flex; gap: 8px; align-items: center; }
+    .controls select { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid var(--c-cbd5e0); }
     .controls button { padding: 8px 12px; }
-    .section { background: white; border-radius: 12px; margin: 16px; }
-    .section-header { font-size: 12px; font-weight: 600; color: #718096; padding: 8px 16px; background: #f7fafc; }
-    .row { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid #edf2f7; cursor: pointer; }
-    .row:hover { background: #f7fafc; }
+    .section { background: var(--surface); border-radius: 12px; margin: 16px; }
+    .section-header { font-size: calc(12px * var(--font-scale, 1)); font-weight: 600; color: var(--c-718096); padding: 8px 16px; background: var(--c-f7fafc); }
+    .row { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--c-edf2f7); cursor: pointer; }
+    .row:hover { background: var(--c-f7fafc); }
     .row:last-child { border-bottom: none; }
     .row.expandable { cursor: pointer; }
-    .row .expand-icon { margin-right: 8px; font-size: 12px; color: #718096; }
-    .sub-row { padding-left: 32px; background: #f7fafc; }
-    .sub-sub-row { padding-left: 48px; background: #edf2f7; }
-    .driver-detail { padding-left: 64px; background: #e2e8f0; font-size: 13px; }
+    .row .expand-icon { margin-right: 8px; font-size: calc(12px * var(--font-scale, 1)); color: var(--c-718096); }
+    .sub-row { padding-left: 32px; background: var(--c-f7fafc); }
+    .sub-sub-row { padding-left: 48px; background: var(--c-edf2f7); }
+    .driver-detail { padding-left: 64px; background: var(--c-e2e8f0); font-size: calc(13px * var(--font-scale, 1)); }
     .driver-detail .label { font-weight: 400; }
-    .trip-row { padding-left: 64px; background: #f7fafc; font-size: 12px; }
-    .detail-row { padding-left: 80px; background: #edf2f7; font-size: 12px; }
-    .trip-detail { padding-left: 80px; background: #e2e8f0; font-size: 11px; }
+    .trip-row { padding-left: 64px; background: var(--c-f7fafc); font-size: calc(12px * var(--font-scale, 1)); }
+    .detail-row { padding-left: 80px; background: var(--c-edf2f7); font-size: calc(12px * var(--font-scale, 1)); }
+    .trip-detail { padding-left: 80px; background: var(--c-e2e8f0); font-size: calc(11px * var(--font-scale, 1)); }
     .row .label { flex: 1; font-weight: 500; }
     .row .value { font-weight: 600; }
-    .row.total { background: #f7fafc; font-weight: 600; }
+    .row.total { background: var(--c-f7fafc); font-weight: 600; }
     .hidden { display: none !important; }
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
-    .modal-box { background: white; border-radius: 12px; padding: 16px; width: 90%; max-width: 320px; }
+    .modal-box { background: var(--surface); border-radius: 12px; padding: 16px; width: 90%; max-width: 320px; }
     .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
     .calendar .day { padding: 8px 4px; border-radius: 4px; cursor: pointer; }
-    .calendar .day:hover { background: #e2e8f0; }
-    .calendar .day.selected { background: #1a365d; color: white; }
-    .calendar .day.in-range { background: #bee3f8; }
-    .calendar .header { font-weight: 600; font-size: 12px; padding: 4px; }
+    .calendar .day:hover { background: var(--c-e2e8f0); }
+    .calendar .day.selected { background: var(--primary-bg); color: white; }
+    .calendar .day.in-range { background: var(--c-bee3f8); }
+    .calendar .header { font-weight: 600; font-size: calc(12px * var(--font-scale, 1)); padding: 4px; }
     .modal-buttons { display: flex; gap: 8px; margin-top: 16px; }
     .modal-buttons button { flex: 1; }
-    .status { font-size: 11px; padding: 2px 6px; border-radius: 10px; margin-left: 8px; }
-    .status-active { background: #c6f6d5; color: #276749; }
-    .status-inactive { background: #fed7d7; color: #c53030; }
-    .status-pending { background: #fefcbf; color: #975a16; }
-    .acct-info { font-size: 13px; color: #4a5568; margin-top: 12px; line-height: 1.5; }
+    .status { font-size: calc(11px * var(--font-scale, 1)); padding: 2px 6px; border-radius: 10px; margin-left: 8px; }
+    .status-active { background: var(--c-c6f6d5); color: var(--c-276749); }
+    .status-inactive { background: var(--c-fed7d7); color: var(--c-c53030); }
+    .status-pending { background: var(--c-fefcbf); color: var(--c-975a16); }
+    .acct-info { font-size: calc(13px * var(--font-scale, 1)); color: var(--c-4a5568); margin-top: 12px; line-height: 1.5; }
     .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; font-size: 13px; margin-bottom: 4px; color: #4a5568; }
-    .form-group label.radio-l { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #1a365d; margin: 6px 0; }
+    .form-group label { display: block; font-size: calc(13px * var(--font-scale, 1)); margin-bottom: 4px; color: var(--c-4a5568); }
+    .form-group label.radio-l { display: flex; align-items: center; gap: 8px; font-size: calc(14px * var(--font-scale, 1)); color: var(--primary); margin: 6px 0; }
     .form-group label.radio-l input { width: 20px; height: 20px; margin: 0; }
-    .form-group select { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; background: white; box-sizing: border-box; }
-    .fuel-own { background: #fefcbf; color: #744210; padding: 0 4px; border-radius: 4px; }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; }
+    .form-group select { width: 100%; padding: 10px; border: 1px solid var(--c-cbd5e0); border-radius: 6px; font-size: calc(14px * var(--font-scale, 1)); background: var(--surface); box-sizing: border-box; }
+    .fuel-own { background: var(--c-fefcbf); color: var(--c-744210); padding: 0 4px; border-radius: 4px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px; border: 1px solid var(--c-cbd5e0); border-radius: 6px; font-size: calc(14px * var(--font-scale, 1)); }
     .form-group textarea { min-height: 60px; resize: vertical; }
-    .form-group input:disabled, .form-group textarea:disabled, .form-group select:disabled { background: #edf2f7; color: #a0aec0; }
+    .form-group input:disabled, .form-group textarea:disabled, .form-group select:disabled { background: var(--c-edf2f7); color: var(--c-a0aec0); }
     .form-row { display: flex; gap: 8px; }
     .form-row .form-group { flex: 1; }
-    .form-section { font-size: 14px; font-weight: 600; margin: 16px 0 8px; padding-top: 12px; border-top: 1px solid #e2e8f0; }
-    .info-box { background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-top: 12px; font-size: 12px; }
+    .form-section { font-size: calc(14px * var(--font-scale, 1)); font-weight: 600; margin: 16px 0 8px; padding-top: 12px; border-top: 1px solid var(--c-e2e8f0); }
+    .info-box { background: var(--c-f7fafc); border: 1px solid var(--c-e2e8f0); border-radius: 8px; padding: 12px; margin-top: 12px; font-size: calc(12px * var(--font-scale, 1)); }
     .info-box h4 { margin-bottom: 8px; }
     .info-box ul { margin-left: 16px; }
     .info-box li { margin-bottom: 4px; }
@@ -85,23 +83,23 @@
 
   <div id="admin-app">
     <header>
-      <button onclick="goHome()" style="font-size:20px;">🏠</button>
+      <button onclick="goHome()" style="font-size:calc(20px * var(--font-scale, 1));">🏠</button>
       <h1 id="title">Admin</h1>
-      <button id="profile-btn" onclick="toggleProfile()" style="font-size:20px;" aria-label="Profil">👤</button>
+      <button id="profile-btn" onclick="toggleProfile()" style="font-size:calc(20px * var(--font-scale, 1));" aria-label="Profil">👤</button>
     </header>
-    <div class="profile-menu" id="profile-menu" style="display:none; position:absolute; top:60px; right:16px; background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:12px; z-index:100;">
+    <div class="profile-menu" id="profile-menu" style="display:none; position:absolute; top:60px; right:16px; background:var(--surface); border:1px solid var(--c-e2e8f0); border-radius:8px; padding:12px; z-index:100;">
       <div onclick="location.href='index.html'" style="padding:8px; cursor:pointer;">Förarapp</div>
-      <div onclick="logout()" style="padding:8px; cursor:pointer; color:#dc2626;">Logga ut</div>
+      <div onclick="logout()" style="padding:8px; cursor:pointer; color:var(--c-dc2626);">Logga ut</div>
     </div>
     <div class="breadcrumb" id="breadcrumb"></div>
     <div id="server-status" class="server-status" data-show="0" data-updated="server-updated" style="display:none"></div>
-    <div id="server-updated" style="display:none; text-align:center; font-size:0.8rem; color:#718096; margin-top:0.3rem;"></div>
+    <div id="server-updated" style="display:none; text-align:center; font-size:0.8rem; color:var(--c-718096); margin-top:0.3rem;"></div>
     <div id="content"></div>
   </div>
 
-  <script src="serverstatus.js?v=20261024v"></script>
-  <script src="verkstad-admin.js?v=20261025bv3"></script>
-  <script src="profilbild.js?v=20261025pb1"></script>
+  <script src="serverstatus.js?v=20261026tm1"></script>
+  <script src="verkstad-admin.js?v=20261026tm1"></script>
+  <script src="profilbild.js?v=20261026tm1"></script>
   <script>
     const APP_VERSION = '1.0.26';
     console.log('Admin version:', APP_VERSION);
@@ -485,7 +483,7 @@
         }
       });
 
-      let html = '<div style="text-align:right; padding:4px 16px 8px;"><a href="#" onclick="openLog();return false;" style="font-size:13px; color:#3182ce;">Logg</a></div>';
+      let html = '<div style="text-align:right; padding:4px 16px 8px;"><a href="#" onclick="openLog();return false;" style="font-size:calc(13px * var(--font-scale, 1)); color:var(--c-3182ce);">Logg</a></div>';
       html += '<div class="section">';
       catOrder.forEach(cat => {
         if (!grouped[cat] || grouped[cat].length === 0) return;
@@ -584,7 +582,7 @@
           <button onclick="shareDriver('${editingDriver}')" style="flex:1;">${status === 'pending' && canToggle ? 'Aktiveringslänk' : 'Dela'}</button>
         </div>
         ${canToggle && status === 'active' ? `<button id="req-pw-btn" onclick="requirePasswordChange('${editingDriver}')" style="width:100%; margin-top:8px;">Nollställ lösenord</button>` : ''}
-        ${status === 'active' && d.must_change_password ? `<div class="acct-info" style="color:#c53030;">Måste välja nytt lösenord vid nästa inloggning.</div>` : ''}
+        ${status === 'active' && d.must_change_password ? `<div class="acct-info" style="color:var(--c-c53030);">Måste välja nytt lösenord vid nästa inloggning.</div>` : ''}
         <div class="acct-info">${status === 'pending'
           ? 'Väntar på att föraren öppnar aktiveringslänken och väljer lösenord.' + (d.link_expires_at ? ' Länken går ut ' + fmtWhen(d.link_expires_at) + '.' : ' Länken har gått ut – skapa en ny.')
           : status === 'active'
@@ -716,16 +714,16 @@
       const m = document.createElement('div');
       m.className = 'modal'; m.id = 'link-modal';
       m.innerHTML = `<div class="modal-box">
-        <h3 style="margin:0 0 8px; color:#1a365d;">Aktiveringslänk för ${esc(id)}</h3>
-        <p style="font-size:13px; color:#4a5568; margin:0 0 8px;">Skicka länken till föraren. Den fungerar en gång och går ut ${esc(fmtWhen(l.expires))}. Länken visas bara nu – annars kan du skapa en ny.<br>Förar-ID står inte i länken eller meddelandet – föraren behöver kunna sitt förar-ID för att aktivera.</p>
-        <input id="link-url" readonly value="${esc(l.url)}" style="width:100%; font-size:12px; box-sizing:border-box;" onclick="this.select()">
+        <h3 style="margin:0 0 8px; color:var(--primary);">Aktiveringslänk för ${esc(id)}</h3>
+        <p style="font-size:calc(13px * var(--font-scale, 1)); color:var(--c-4a5568); margin:0 0 8px;">Skicka länken till föraren. Den fungerar en gång och går ut ${esc(fmtWhen(l.expires))}. Länken visas bara nu – annars kan du skapa en ny.<br>Förar-ID står inte i länken eller meddelandet – föraren behöver kunna sitt förar-ID för att aktivera.</p>
+        <input id="link-url" readonly value="${esc(l.url)}" style="width:100%; font-size:calc(12px * var(--font-scale, 1)); box-sizing:border-box;" onclick="this.select()">
         <div class="modal-buttons">
           <button id="link-copy" onclick="copyLink('${esc(id)}')">Kopiera</button>
           ${navigator.share ? `<button onclick="navigator.share({ title: 'TaxiData', text: linkMessage('${esc(id)}') }).catch(() => {})">Dela</button>` : ''}
         </div>
         <div class="modal-buttons" style="margin-top:8px;">
           <button onclick="closeLinkModal(); newActivationLink('${esc(id)}')">Ny länk</button>
-          <button onclick="closeLinkModal()" style="background:#1a365d; color:white;">Stäng</button>
+          <button onclick="closeLinkModal()" style="background: var(--primary-bg); color:white;">Stäng</button>
         </div>
       </div>`;
       document.body.appendChild(m);
@@ -836,13 +834,13 @@
         const val = p.price != null ? num(p.price) + ' kr/' + p.unit : (k === 'vatgas' ? 'inget pris – ange eget' : 'saknas');
         const src = p.kind === 'company' ? '<span class="fuel-own">Eget pris</span> satt ' + sd(p.company && p.company.set_at)
           : p.price != null ? esc(p.source || '') + (p.date ? ' · ' + sd(p.date) : '') : '';
-        return `<div style="display:flex; justify-content:space-between; gap:8px; padding:4px 0; border-bottom:1px solid #edf2f7;">
-          <span>${PRICE_KEYS[k]}</span><span style="text-align:right;"><b>${val}</b><br><span style="font-size:11px; color:#718096;">${src}</span></span></div>`;
+        return `<div style="display:flex; justify-content:space-between; gap:8px; padding:4px 0; border-bottom:1px solid var(--c-edf2f7);">
+          <span>${PRICE_KEYS[k]}</span><span style="text-align:right;"><b>${val}</b><br><span style="font-size:calc(11px * var(--font-scale, 1)); color:var(--c-718096);">${src}</span></span></div>`;
       }).join('');
-      return `<details id="fuel-box" class="section" style="padding:10px 16px; font-size:13px;">
-        <summary style="cursor:pointer; font-weight:600; color:#1a365d;">⛽ Drivmedelspriser idag</summary>
+      return `<details id="fuel-box" class="section" style="padding:10px 16px; font-size:calc(13px * var(--font-scale, 1));">
+        <summary style="cursor:pointer; font-weight:600; color:var(--primary);">⛽ Drivmedelspriser idag</summary>
         <div style="margin-top:6px;">${rows}</div>
-        <p style="font-size:11px; color:#718096; margin:6px 0;">Ungefärligt, företagslistpris inkl. moms. El hemma = elpris SE3 (elprisetjustnu.se) × 1,25 + påslag ${num(fuelCfg().el_surcharge)} kr/kWh. Hämtas varje dag efter kl. 14. Källor: OKQ8, Circle K (reserv), elprisetjustnu.se. Bilmodeller: Källa: EEA.</p>
+        <p style="font-size:calc(11px * var(--font-scale, 1)); color:var(--c-718096); margin:6px 0;">Ungefärligt, företagslistpris inkl. moms. El hemma = elpris SE3 (elprisetjustnu.se) × 1,25 + påslag ${num(fuelCfg().el_surcharge)} kr/kWh. Hämtas varje dag efter kl. 14. Källor: OKQ8, Circle K (reserv), elprisetjustnu.se. Bilmodeller: Källa: EEA.</p>
         ${carList.can_edit ? '<button id="fuel-edit" onclick="editCar(\'fuel\')" style="width:100%;">Ändra åkeriets priser</button>' : ''}
       </details>`;
     }
@@ -852,20 +850,20 @@
       if (carList.error) { content.innerHTML = '<div class="section"><p style="padding:16px;">Kunde inte hämta bilarna.</p></div>'; return; }
       const cars = carList.cars || [];
       let html = `<div style="display:flex; align-items:center; justify-content:space-between; padding:4px 16px 0;">
-        <span style="font-size:13px; color:#4a5568;">${cars.length} ${cars.length === 1 ? 'bil' : 'bilar'} – styr åkeriets mål</span>
-        ${carList.can_edit ? '<button id="car-add" onclick="editCar(\'new\')" style="font-size:22px; padding:2px 14px;" aria-label="Lägg till bil">+</button>' : ''}
+        <span style="font-size:calc(13px * var(--font-scale, 1)); color:var(--c-4a5568);">${cars.length} ${cars.length === 1 ? 'bil' : 'bilar'} – styr åkeriets mål</span>
+        ${carList.can_edit ? '<button id="car-add" onclick="editCar(\'new\')" style="font-size:calc(22px * var(--font-scale, 1)); padding:2px 14px;" aria-label="Lägg till bil">+</button>' : ''}
       </div>` + renderFuelBox() + '<div class="section">';
       if (!cars.length) html += `<p style="padding:16px;">Inga bilar inlagda ännu.${carList.can_edit ? ' Tryck på + för att lägga till en bil.' : ''}</p>`;
       cars.forEach(c => {
         const cost = carCostLine(c);
         html += `<div class="row car-row" ${carList.can_edit ? `onclick="editCar(${c.id})"` : ''} style="flex-direction:column; align-items:flex-start; gap:2px;${carList.can_edit ? '' : ' cursor:default;'}">
-          <span class="label">${esc(c.bilnummer)} · ${esc(c.modell)}${c.regnr ? ' <span style="font-weight:400; color:#718096;">(' + esc(c.regnr) + ')</span>' : ''}</span>
-          <span style="font-size:12px; color:#718096;">${esc((c.kategorier || []).join(', '))}</span>
-          ${cost ? `<span class="car-cost" style="font-size:12px; color:#2d3748;">${cost}</span>` : ''}
+          <span class="label">${esc(c.bilnummer)} · ${esc(c.modell)}${c.regnr ? ' <span style="font-weight:400; color:var(--c-718096);">(' + esc(c.regnr) + ')</span>' : ''}</span>
+          <span style="font-size:calc(12px * var(--font-scale, 1)); color:var(--c-718096);">${esc((c.kategorier || []).join(', '))}</span>
+          ${cost ? `<span class="car-cost" style="font-size:calc(12px * var(--font-scale, 1)); color:var(--c-2d3748);">${cost}</span>` : ''}
         </div>`;
       });
       html += '</div>';
-      if (!carList.can_edit) html += '<p style="padding:0 16px; font-size:12px; color:#718096;">Du kan se bilarna men inte ändra dem.</p>';
+      if (!carList.can_edit) html += '<p style="padding:0 16px; font-size:calc(12px * var(--font-scale, 1)); color:var(--c-718096);">Du kan se bilarna men inte ändra dem.</p>';
       content.innerHTML = html;
     }
 
@@ -880,7 +878,7 @@
     function renderFuelSettings(content) {
       const P = fuelPrices(), cfg = fuelCfg();
       content.innerHTML = `<div class="section" style="padding:16px;">
-        <p style="font-size:13px; color:#4a5568; margin-top:0;">Lämna tomt = <b>automatiskt pris</b> (hämtas varje dag). Fyll i ett eget pris för att använda det för alla bilar med "Automatiskt pris". En bil med "Manuellt pris" använder alltid sitt eget pris.</p>
+        <p style="font-size:calc(13px * var(--font-scale, 1)); color:var(--c-4a5568); margin-top:0;">Lämna tomt = <b>automatiskt pris</b> (hämtas varje dag). Fyll i ett eget pris för att använda det för alla bilar med "Automatiskt pris". En bil med "Manuellt pris" använder alltid sitt eget pris.</p>
         ${Object.keys(PRICE_KEYS).map(k => {
           const p = P[k] || {}, a = p.auto || {};
           const unit = p.unit || (k.startsWith('el') ? 'kWh' : (k === 'vatgas' || k === 'fordonsgas') ? 'kg' : 'l');
@@ -888,15 +886,15 @@
             : a.price != null ? 'Auto: ' + num(a.price) + ' kr/' + unit + ' (' + esc(a.source || '') + ', ' + sd(a.date) + ')' : 'Auto: inget hämtat pris';
           return `<div class="form-group"><label>${PRICE_KEYS[k]} – eget pris (kr/${unit})</label>
             <input class="fp-in" data-k="${k}" type="text" inputmode="decimal" value="${p.company ? num(p.company.price) : ''}" placeholder="Automatiskt">
-            <span style="font-size:11px; color:#718096;">${autoTxt}${p.company ? ' · eget pris satt ' + sd(p.company.set_at) : ''}</span></div>`;
+            <span style="font-size:calc(11px * var(--font-scale, 1)); color:var(--c-718096);">${autoTxt}${p.company ? ' · eget pris satt ' + sd(p.company.set_at) : ''}</span></div>`;
         }).join('')}
         <div class="form-row">
-          <div class="form-group"><label>El: påslag (kr/kWh)</label><input id="fp-sur" type="text" inputmode="decimal" value="${num(cfg.el_surcharge)}"><span style="font-size:11px; color:#718096;">Nätavgift, energiskatt, elhandel</span></div>
-          <div class="form-group"><label>Laddning hemma/depå (%)</label><input id="fp-home" type="text" inputmode="numeric" value="${cfg.el_home_share}"><span style="font-size:11px; color:#718096;">Resten = snabbladdning</span></div>
+          <div class="form-group"><label>El: påslag (kr/kWh)</label><input id="fp-sur" type="text" inputmode="decimal" value="${num(cfg.el_surcharge)}"><span style="font-size:calc(11px * var(--font-scale, 1)); color:var(--c-718096);">Nätavgift, energiskatt, elhandel</span></div>
+          <div class="form-group"><label>Laddning hemma/depå (%)</label><input id="fp-home" type="text" inputmode="numeric" value="${cfg.el_home_share}"><span style="font-size:calc(11px * var(--font-scale, 1)); color:var(--c-718096);">Resten = snabbladdning</span></div>
         </div>
         <div class="modal-buttons">
           <button onclick="editingCar = null; render();">Avbryt</button>
-          <button id="fp-save" onclick="saveFuelSettings()" style="background:#1a365d; color:white;">Spara</button>
+          <button id="fp-save" onclick="saveFuelSettings()" style="background: var(--primary-bg); color:white;">Spara</button>
         </div></div>`;
     }
 
@@ -941,11 +939,11 @@
           <input id="c-make-own" value="${esc(carForm.own ? c.make || '' : '')}" placeholder="Märke" maxlength="40" style="margin-top:6px; ${carForm.own ? '' : 'display:none;'}"></div>
         <div class="form-group" id="c-model-g"><label>Modell</label><select id="c-model" onchange="carModelChanged()"></select></div>
         <div class="form-group" id="c-var-g"><label>Variant / bränsle</label><select id="c-var" onchange="carVariantChanged()"></select>
-          <span id="c-var-note" style="font-size:11px; color:#718096;"></span></div>
+          <span id="c-var-note" style="font-size:calc(11px * var(--font-scale, 1)); color:var(--c-718096);"></span></div>
         <div class="form-group"><label>Bilmodell (visas i listan)</label><input id="c-modell" value="${esc(c.modell || '')}" placeholder="t.ex. Toyota Corolla" maxlength="60"></div>
         <div class="form-group"><label>Kategori (minst en)</label>
           <div style="display:flex; flex-wrap:wrap; gap:8px 16px;">
-            ${CAR_CATS.map(k => `<label style="display:flex; align-items:center; gap:6px; font-size:14px; color:#1a365d;"><input type="checkbox" class="c-cat" value="${k}" ${(c.kategorier || []).includes(k) ? 'checked' : ''} style="width:20px; height:20px;">${k}</label>`).join('')}
+            ${CAR_CATS.map(k => `<label style="display:flex; align-items:center; gap:6px; font-size:calc(14px * var(--font-scale, 1)); color:var(--primary);"><input type="checkbox" class="c-cat" value="${k}" ${(c.kategorier || []).includes(k) ? 'checked' : ''} style="width:20px; height:20px;">${k}</label>`).join('')}
           </div>
         </div>
         <div class="form-group"><label>Bränslekostnad</label>
@@ -969,20 +967,20 @@
           <div class="form-group"><label>Pris</label>
             <label class="radio-l"><input type="radio" name="c-pm" value="auto" ${c.price_mode !== 'manual' ? 'checked' : ''} onchange="carCalcUpdate()"> Automatiskt pris</label>
             <label class="radio-l"><input type="radio" name="c-pm" value="manual" ${c.price_mode === 'manual' ? 'checked' : ''} onchange="carCalcUpdate()"> Manuellt pris</label>
-            <div id="c-auto-info" style="font-size:12px; color:#4a5568;"></div>
+            <div id="c-auto-info" style="font-size:calc(12px * var(--font-scale, 1)); color:var(--c-4a5568);"></div>
           </div>
           <div class="form-row" id="c-mp-g">
             <div class="form-group"><label id="c-mp-l">Eget pris</label><input id="c-mp" type="text" inputmode="decimal" value="${c.manual_price != null ? num(c.manual_price) : ''}" oninput="carCalcUpdate()"></div>
             <div class="form-group" id="c-mep-g"><label>Eget elpris (kr/kWh)</label><input id="c-mep" type="text" inputmode="decimal" value="${c.manual_el_price != null ? num(c.manual_el_price) : ''}" oninput="carCalcUpdate()"></div>
           </div>
-          <div id="c-mp-date" style="font-size:11px; color:#718096; margin:-6px 0 8px;">${c.price_mode === 'manual' && c.manual_price_set_at ? 'Manuellt pris satt ' + sd(c.manual_price_set_at) : ''}</div>
-          <div id="c-result" style="font-size:15px; font-weight:600; color:#1a365d; margin-bottom:8px;"></div>
+          <div id="c-mp-date" style="font-size:calc(11px * var(--font-scale, 1)); color:var(--c-718096); margin:-6px 0 8px;">${c.price_mode === 'manual' && c.manual_price_set_at ? 'Manuellt pris satt ' + sd(c.manual_price_set_at) : ''}</div>
+          <div id="c-result" style="font-size:calc(15px * var(--font-scale, 1)); font-weight:600; color:var(--primary); margin-bottom:8px;"></div>
         </div>
         <div class="modal-buttons">
           <button onclick="editingCar = null; render();">Avbryt</button>
-          <button id="c-save" onclick="saveCar()" style="background:#1a365d; color:white;">Spara</button>
+          <button id="c-save" onclick="saveCar()" style="background: var(--primary-bg); color:white;">Spara</button>
         </div>
-        ${!isNew ? `<button id="c-delete" onclick="deleteCar()" style="width:100%; margin-top:16px; color:#c53030; border-color:#c53030;">Ta bort bil</button>` : ''}
+        ${!isNew ? `<button id="c-delete" onclick="deleteCar()" style="width:100%; margin-top:16px; color:var(--c-c53030); border-color:var(--c-c53030);">Ta bort bil</button>` : ''}
       </div>`;
       carCalcUpdate();
       fillCarMakes();
@@ -1251,7 +1249,7 @@
       if (!logEntries.length) html += '<p style="padding:16px;">Ingen aktivitet ännu.</p>';
       logEntries.forEach(e => {
         html += `<div class="row" style="flex-direction:column; align-items:flex-start; gap:2px;">
-          <span style="font-size:12px; color:#718096;">${esc(formatLogTime(e.time))}</span>
+          <span style="font-size:calc(12px * var(--font-scale, 1)); color:var(--c-718096);">${esc(formatLogTime(e.time))}</span>
           <span class="label">${esc(describeLog(e))}</span>
         </div>`;
       });
