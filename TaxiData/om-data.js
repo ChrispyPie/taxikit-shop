@@ -38,7 +38,7 @@ window.OM_DATA = {
     { q: 'Hur loggar jag in första gången?',
       a: 'Du får en aktiveringslänk av din åkare. Öppna den, skriv ditt förar-ID och välj ett lösenord (minst 6 tecken). Sedan loggar du in med förar-ID och lösenord.' },
     { q: 'Jag har glömt mitt lösenord. Vad gör jag?',
-      a: 'Tryck på "Glömt lösenord?" på inloggningssidan och skriv ditt förar-ID. Finns en e-postadress i din profil får du en länk där du väljer ett nytt lösenord. Ingen e-post? Ring din åkare, så kan hen nollställa lösenordet.' },
+      a: 'Tryck på "Glömt lösenord?" på inloggningssidan och skriv ditt förar-ID. Finns en e-postadress i din profil får du en länk där du väljer ett nytt lösenord. Ingen e-post? Ring din åkare, så kan åkaren nollställa lösenordet.' },
     { q: 'Hur ändrar jag mina uppgifter?',
       a: 'Tryck på den runda knappen uppe till höger och välj "Profil".' }
   ]

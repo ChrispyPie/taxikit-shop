@@ -17,6 +17,13 @@
     .icon { background: white; border: 1px solid #cbd5e0; border-radius: 8px; padding: 16px; text-align: center; cursor: pointer; }
     .icon .emoji { font-size: 32px; margin-bottom: 8px; }
     .icon .label { font-size: 13px; }
+    /* Telefon: alltid 3 rutor i bredd, lite mindre rutor (tryckytan är ändå minst ~92px hög) */
+    @media (max-width: 600px) {
+      .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+      .icon { min-height: 92px; padding: 12px 4px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; }
+      .icon .emoji { font-size: 30px; line-height: 1; margin-bottom: 7px; }
+      .icon .label { font-size: 13px; line-height: 1.2; overflow-wrap: break-word; hyphens: manual; }
+    }
     header { display: flex; align-items: center; justify-content: space-between; }
     header h1 { position: absolute; left: 50%; transform: translateX(-50%); }
     .profile-btn { background: #1a365d; color: white; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -69,7 +76,7 @@
       <input type="text" id="forgot-id" placeholder="Förar-ID" inputmode="numeric" autocomplete="username" autocapitalize="off" autocorrect="off">
       <button id="forgot-send" onclick="sendForgot()">Skicka länk</button>
       <p id="forgot-msg" style="display:none; margin-top:10px; font-weight:600;"></p>
-      <p class="p-note" style="margin-top:12px;">Ingen e-post? Ring din åkare så kan hen nollställa ditt lösenord.</p>
+      <p class="p-note" style="margin-top:12px;">Ingen e-post? Ring din åkare, som kan nollställa ditt lösenord.</p>
       <p style="margin-top:10px; text-align:center;"><a href="#" onclick="showForgot(false); return false;" style="color:var(--primary);">Tillbaka till inloggning</a></p>
     </div>
   </div>
@@ -123,12 +130,12 @@
   <script src="ankomster.js?v=20261025sb1"></script>
   <script src="bevakning.js?v=20261025sb1"></script>
   <script src="topplistor.js?v=20261024ar1"></script>
-  <script src="verkstad.js?v=20261025bv3"></script>
+  <script src="verkstad.js?v=20261026lk2"></script>
   <script src="kalender.js?v=20261025k2"></script>
   <script src="hjalpbot.js?v=20261025tg1"></script>
   <script src="profilbild.js?v=20261025pb1"></script>
   <script src="forum.js?v=20261025fg1"></script>
-  <script src="om-data.js?v=20261026lk1"></script>
+  <script src="om-data.js?v=20261026lk2"></script>
   <script src="om.js?v=20261025om1"></script>
   <script src="lonekoll.js?v=20261026lk1"></script>
   <script>
@@ -143,12 +150,12 @@
       { id: LONEKOLL.id, icon: LONEKOLL.icon, label: LONEKOLL.title, roles: ALLA },
       // Namn och ikon för Ankomster ändras i ankomster.js (ANKOMSTER.title / icon)
       { id: ANKOMSTER.id, icon: ANKOMSTER.icon, label: ANKOMSTER.title, roles: ALLA },
+      { id: KALENDER.id, icon: KALENDER.icon, label: KALENDER.title, roles: ALLA },
       // Statistik borttagen 2026-10-25 (tom platshållare): { id: 'statistik', icon: '📈', label: 'Statistik', roles: ALLA },
       { id: TOPPLISTOR.id, icon: TOPPLISTOR.icon, label: TOPPLISTOR.title, roles: ALLA },
-      { id: VERKSTAD.id, icon: VERKSTAD.icon, label: VERKSTAD.title, roles: ALLA },
       // Kommunikation borttagen 2026-10-25 (tom platshållare): { id: 'kommunikation', icon: '💬', label: 'Kommunikation', roles: ALLA },
       { id: FORUM.id, icon: FORUM.icon, label: FORUM.title, roles: ALLA },
-      { id: KALENDER.id, icon: KALENDER.icon, label: KALENDER.title, roles: ALLA },
+      { id: VERKSTAD.id, icon: VERKSTAD.icon, label: VERKSTAD.title, roles: ALLA },
       { id: OM.id, icon: OM.icon, label: OM.title, roles: ALLA },
       { id: 'installningar', icon: '⚙️', label: 'Inställningar', roles: ALLA },
       { id: 'admin', icon: '🔐', label: 'Admin', roles: ADMIN_ROLLER, submenu: [

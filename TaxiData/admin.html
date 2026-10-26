@@ -757,7 +757,7 @@
 
     // Nollställ lösenord: föraren måste välja nytt lösenord vid nästa inloggning, alla förarens inloggningar avslutas direkt
     async function requirePasswordChange(id) {
-      if (!confirm('Nollställ lösenordet för ' + id + '?\n\nFöraren loggas ut direkt och måste välja ett nytt lösenord nästa gång hen loggar in med sitt nuvarande lösenord.')) return;
+      if (!confirm('Nollställ lösenordet för ' + id + '?\n\nFöraren loggas ut direkt och måste välja ett nytt lösenord vid nästa inloggning med sitt nuvarande lösenord.')) return;
       try {
         const r = await rpc('admin_require_password_change', { p_id: id });
         if (r && r.ok === false) { alert(errorTexts[r.error] || 'Det gick inte.'); return; }
