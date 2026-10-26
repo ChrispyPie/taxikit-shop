@@ -2,7 +2,7 @@
  * Svaren är vanlig text (ingen HTML). Ny rad i ett svar: skriv \n.
  */
 window.OM_DATA = {
-  version: '2026.10.25',
+  version: '2026.10.26',
   intro: 'TaxiData är förarappen för oss som kör för Taxi Göteborg. Här ser du dina pass och resor och annat som hjälper dig i jobbet.',
   features: [
     ['🚗', 'Körpassdata', 'dina pass, resor och belopp'],
@@ -12,6 +12,7 @@ window.OM_DATA = {
     ['🛠️', 'Bil & verkstad', 'felanmälan, sånt som behövs till bilen och verkstadstimmar'],
     ['📅', 'Kalender', 'konserter, matcher, mässor och andra evenemang'],
     ['💬', 'Forum', 'frågor, tips, förslag och buggar'],
+    ['🔮', 'Prognos', 'kommande bokningar per zon och morgonprognos'],
     ['🤖', 'Hjälpbot', 'liten hjälpare längst ner på skärmen']
   ],
   builder: 'Appen byggs av Christian (S admin) och är under utveckling. Saker kan ändras, och ibland blir något fel.',
