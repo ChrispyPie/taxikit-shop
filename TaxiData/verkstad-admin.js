@@ -23,22 +23,22 @@
     var s = document.createElement('style');
     s.textContent =
       '.vka-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 12px}' +
-      '.vka-bar button{width:44px;height:40px;font-size:18px}.vka-bar b{font-size:16px}' +
-      '.vka-card{background:#fff;border-radius:12px;padding:12px;margin-bottom:10px}' +
-      '.vka-h{font-size:12px;font-weight:600;color:#718096;margin:16px 0 6px;text-transform:uppercase}' +
+      '.vka-bar button{width:44px;height:40px;font-size:calc(18px * var(--font-scale, 1))}.vka-bar b{font-size:calc(16px * var(--font-scale, 1))}' +
+      '.vka-card{background:var(--surface);border-radius:12px;padding:12px;margin-bottom:10px}' +
+      '.vka-h{font-size:calc(12px * var(--font-scale, 1));font-weight:600;color:var(--c-718096);margin:16px 0 6px;text-transform:uppercase}' +
       '.vka-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}' +
-      '.vka-who{font-weight:600}.vka-meta{font-size:13px;color:#4a5568;margin-top:4px}' +
-      '.vka-com{font-size:13px;margin-top:6px;background:#f7fafc;border-radius:6px;padding:6px 8px}' +
-      '.vka-chip{font-size:11px;padding:2px 8px;border-radius:10px;white-space:nowrap}' +
-      '.vka-chip.pending{background:#fefcbf;color:#975a16}.vka-chip.approved{background:#c6f6d5;color:#276749}.vka-chip.rejected{background:#fed7d7;color:#c53030}' +
-      '.vka-card textarea{width:100%;margin-top:8px;padding:8px;border:1px solid #cbd5e0;border-radius:6px;font:inherit;font-size:14px;min-height:40px}' +
-      '.vka-btns{display:flex;gap:8px;margin-top:8px}.vka-btns button{flex:1;padding:10px;font-size:15px}' +
-      '.vka-ok{background:#276749!important;border-color:#276749!important;color:#fff!important}.vka-no{border-color:#c53030!important;color:#c53030!important}' +
-      '.vka-tot{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #edf2f7;font-size:14px;gap:8px}.vka-tot:last-child{border-bottom:none}' +
-      '.vka-tot .r{text-align:right}.vka-tot small{display:block;color:#718096;font-size:12px}' +
+      '.vka-who{font-weight:600}.vka-meta{font-size:calc(13px * var(--font-scale, 1));color:var(--c-4a5568);margin-top:4px}' +
+      '.vka-com{font-size:calc(13px * var(--font-scale, 1));margin-top:6px;background:var(--c-f7fafc);border-radius:6px;padding:6px 8px}' +
+      '.vka-chip{font-size:calc(11px * var(--font-scale, 1));padding:2px 8px;border-radius:10px;white-space:nowrap}' +
+      '.vka-chip.pending{background:var(--c-fefcbf);color:var(--c-975a16)}.vka-chip.approved{background:var(--c-c6f6d5);color:var(--c-276749)}.vka-chip.rejected{background:var(--c-fed7d7);color:var(--c-c53030)}' +
+      '.vka-card textarea{width:100%;margin-top:8px;padding:8px;border:1px solid var(--c-cbd5e0);border-radius:6px;font:inherit;font-size:calc(14px * var(--font-scale, 1));min-height:40px}' +
+      '.vka-btns{display:flex;gap:8px;margin-top:8px}.vka-btns button{flex:1;padding:10px;font-size:calc(15px * var(--font-scale, 1))}' +
+      '.vka-ok{background:#276749!important;border-color:var(--c-276749)!important;color:#fff!important}.vka-no{border-color:var(--c-c53030)!important;color:var(--c-c53030)!important}' +
+      '.vka-tot{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--c-edf2f7);font-size:calc(14px * var(--font-scale, 1));gap:8px}.vka-tot:last-child{border-bottom:none}' +
+      '.vka-tot .r{text-align:right}.vka-tot small{display:block;color:var(--c-718096);font-size:calc(12px * var(--font-scale, 1))}' +
       '.vka-rate{display:flex;justify-content:space-between;align-items:center;gap:8px}' +
-      '.vka-note{font-size:12px;color:#718096;text-align:center;margin:8px 0 16px}' +
-      '.vka-badge{display:inline-block;min-width:20px;height:20px;line-height:20px;border-radius:10px;background:#e53e3e;color:#fff;font-size:12px;font-weight:700;padding:0 6px;margin-left:4px}' +
+      '.vka-note{font-size:calc(12px * var(--font-scale, 1));color:var(--c-718096);text-align:center;margin:8px 0 16px}' +
+      '.vka-badge{display:inline-block;min-width:20px;height:20px;line-height:20px;border-radius:10px;background:#e53e3e;color:#fff;font-size:calc(12px * var(--font-scale, 1));font-weight:700;padding:0 6px;margin-left:4px}' +
       '.icon{position:relative}.icon .vka-badge{position:absolute;top:6px;right:6px;margin:0}';
     document.head.appendChild(s);
   })();
@@ -53,7 +53,7 @@
     var a = new Date(s), b = new Date(e), same = a.toDateString() === b.toDateString();
     return dl(a) + ' ' + hm(a) + '–' + (same ? '' : dl(b) + ' ') + hm(b);
   }
-  function who(x) { return x.namn ? esc(x.namn) + ' <span style="color:#718096;font-weight:400">(' + esc(x.driver_id) + ')</span>' : esc(x.driver_id); }
+  function who(x) { return x.namn ? esc(x.namn) + ' <span style="color:var(--c-718096);font-weight:400">(' + esc(x.driver_id) + ')</span>' : esc(x.driver_id); }
   function err(e) { return ERR[e && e.message] || errText(e); }
 
   A.load = function () {
@@ -123,7 +123,7 @@
     var soon = m.filter(function (x) { return x.status === 'plan' && x.level === 1; }).length;
     var sug = m.filter(function (x) { return x.status === 'forslag'; }).length;
     var rows = [];
-    if (stop) rows.push('<b style="color:#c53030">🛑 ' + stop + ' bil' + (stop === 1 ? '' : 'ar') + ' står</b>');
+    if (stop) rows.push('<b style="color:var(--c-c53030)">🛑 ' + stop + ' bil' + (stop === 1 ? '' : 'ar') + ' står</b>');
     rows.push('⚠️ ' + faults + (faults === 1 ? ' öppet fel' : ' öppna fel'));
     rows.push('🧴 ' + sup + (sup === 1 ? ' sak behövs' : ' saker behövs'));
     rows.push('🗓️ Underhåll: ' + (late ? late + ' försenat, ' : '') + soon + ' snart' + (sug ? ', ' + sug + ' förslag' : ''));
@@ -143,13 +143,13 @@
     h += '<div class="vka-h" style="margin-top:0">Verkstadstimmar</div>';
     h += '<div class="vka-card vka-rate"><span>Timpris: <b>' + kr(d.rate) + '/h</b></span><button onclick="VERKSTAD_ADMIN.setRate()">Ändra</button></div>';
     h += '<div class="vka-h">Väntar på beslut (' + pend.length + ')</div>';
-    h += pend.length ? pend.map(function (x) { return card(x, false); }).join('') : '<div class="vka-card" style="color:#718096">Inget väntar just nu.</div>';
+    h += pend.length ? pend.map(function (x) { return card(x, false); }).join('') : '<div class="vka-card" style="color:var(--c-718096)">Inget väntar just nu.</div>';
     h += '<div class="vka-bar"><button onclick="VERKSTAD_ADMIN.shift(-1)" aria-label="Föregående månad">‹</button><b>' +
       MONL[A.month.getMonth()].replace(/^./, function (c) { return c.toUpperCase(); }) + ' ' + A.month.getFullYear() + '</b>' +
       '<button onclick="VERKSTAD_ADMIN.shift(1)" aria-label="Nästa månad"' + (isNow ? ' disabled style="opacity:.4"' : '') + '>›</button></div>';
     var tot = (d.totals || []).slice().sort(function (a, b) { return b.approved_min - a.approved_min || b.pending_min - a.pending_min; });
     h += '<div class="vka-h" style="margin-top:0">Summa per förare</div><div class="vka-card">';
-    if (!tot.length) h += '<div style="color:#718096">Ingen verkstadstid den här månaden.</div>';
+    if (!tot.length) h += '<div style="color:var(--c-718096)">Ingen verkstadstid den här månaden.</div>';
     var sumMin = 0, sumKr = 0;
     tot.forEach(function (t) {
       sumMin += t.approved_min; sumKr += t.approved_kr;
@@ -159,7 +159,7 @@
     if (tot.length > 1) h += '<div class="vka-tot"><b>Totalt</b><span class="r"><b>' + kr(sumKr) + '</b><small>' + dur(sumMin) + '</small></span></div>';
     h += '</div>';
     h += '<div class="vka-h">Beslutade i månaden (' + done.length + ')</div>';
-    h += done.length ? done.map(function (x) { return card(x, true); }).join('') : '<div class="vka-card" style="color:#718096">Inga beslut den här månaden.</div>';
+    h += done.length ? done.map(function (x) { return card(x, true); }).join('') : '<div class="vka-card" style="color:var(--c-718096)">Inga beslut den här månaden.</div>';
     h += '<div class="vka-note">Godkänd tid betalas med timpriset som gällde när den godkändes. Alla beslut sparas i Chaufförer › Logg.' +
       (d.named ? '' : ' Du ser förar-ID, inte namn.') + '</div>';
     content.innerHTML = h;

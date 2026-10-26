@@ -84,11 +84,11 @@
     if (el.dataset.show === '0') { setDisp(el, false); return; }
     if (!document.getElementById('server-status-css')) {
       var st = document.createElement('style'); st.id = 'server-status-css';
-      st.textContent = '.server-status{display:flex;align-items:center;justify-content:center;gap:8px;font-size:0.82rem;padding:5px 10px;margin:10px auto 0;width:calc(100% - 24px);box-sizing:border-box;border-radius:999px;max-width:520px;background:#f7fafc;color:#2d3748}' +
-        '.server-status-lamp{width:10px;height:10px;border-radius:50%;flex:0 0 10px;background:#a0aec0}' +
-        '.server-status-green .server-status-lamp{background:#22c55e;box-shadow:0 0 6px #22c55e}' +
-        '.server-status-red{background:#fef2f2;color:#991b1b}.server-status-red .server-status-lamp{background:#ef4444;box-shadow:0 0 6px #ef4444}' +
-        '.server-status-yellow{background:#fffbeb;color:#92400e}.server-status-yellow .server-status-lamp{background:#f59e0b;box-shadow:0 0 6px #f59e0b}';
+      st.textContent = '.server-status{display:flex;align-items:center;justify-content:center;gap:8px;font-size:0.82rem;padding:5px 10px;margin:10px auto 0;width:calc(100% - 24px);box-sizing:border-box;border-radius:999px;max-width:520px;background:var(--c-f7fafc);color:var(--c-2d3748)}' +
+        '.server-status-lamp{width:10px;height:10px;border-radius:50%;flex:0 0 10px;background:var(--c-a0aec0)}' +
+        '.server-status-green .server-status-lamp{background:var(--c-22c55e);box-shadow:0 0 6px var(--c-22c55e)}' +
+        '.server-status-red{background:var(--c-fef2f2);color:var(--c-991b1b)}.server-status-red .server-status-lamp{background:#ef4444;box-shadow:0 0 6px var(--c-ef4444)}' +
+        '.server-status-yellow{background:var(--c-fffbeb);color:var(--c-92400e)}.server-status-yellow .server-status-lamp{background:var(--c-f59e0b);box-shadow:0 0 6px var(--c-f59e0b)}';
       document.head.appendChild(st);
     }
     refresh(el);

@@ -488,7 +488,7 @@ function render() {
   const remaining = Math.max(0, goal - inkort);
   const remainingShifts = getRemainingShifts(currentDate, currentTab);
   const behovPerSkift = remainingShifts > 0 ? Math.round(remaining / remainingShifts) : 0;
-  const diffColor = diff >= 0 ? '#38a169' : '#e53e3e';
+  const diffColor = diff >= 0 ? 'var(--c-38a169)' : 'var(--c-e53e3e)';
   // Förare: Mål/Diff per dag/vecka/månad (inte för egen period).
   // Åkeriet: Mål/Diff alltid när målen kunde hämtas (egen period = dagsmål × dagar).
   // Antal bilar = bilar registrerade under Bilar (admin). 0 bilar => tips i stället för mål 0.
@@ -564,12 +564,12 @@ function render() {
     const canEdit = isOwnerRole() && companyGoals.can_edit;
     const how = isPeriod ? `${formatSEK(companyGoals.per_car_day)} × ${companyGoals.cars} bilar × ${periodDays} dagar` : `${formatSEK(perCar)} × ${companyGoals.cars} bilar`;
     html += canEdit
-      ? `<div class="stat-row" id="goal-row" onclick="openGoalModal()"><span class="toggle">✎</span><span class="label">Mål</span><span class="value" style="border-bottom: 1px solid #cbd5e0; padding-bottom: 2px;">− ${formatSEK(goal)}</span></div>
+      ? `<div class="stat-row" id="goal-row" onclick="openGoalModal()"><span class="toggle">✎</span><span class="label">Mål</span><span class="value" style="border-bottom: 1px solid var(--c-cbd5e0); padding-bottom: 2px;">− ${formatSEK(goal)}</span></div>
     <div class="sub visible"><span>Per bil</span><span>${how}</span></div>`
-      : `<div class="stat-row" id="goal-row" data-key="mal" onclick="toggle(this)"><span class="toggle">+</span><span class="label">Mål</span><span class="value" style="border-bottom: 1px solid #cbd5e0; padding-bottom: 2px;">− ${formatSEK(goal)}</span></div>
+      : `<div class="stat-row" id="goal-row" data-key="mal" onclick="toggle(this)"><span class="toggle">+</span><span class="label">Mål</span><span class="value" style="border-bottom: 1px solid var(--c-cbd5e0); padding-bottom: 2px;">− ${formatSEK(goal)}</span></div>
     <div class="sub"><span>Per bil</span><span>${how}</span></div>`;
   } else if (showGoal) html += `
-    <div class="stat-row" onclick="editGoal()"><span class="toggle"></span><span class="label">Mål</span><span class="value" style="border-bottom: 1px solid #cbd5e0; padding-bottom: 2px;">− ${formatSEK(goal)}</span></div>`;
+    <div class="stat-row" onclick="editGoal()"><span class="toggle"></span><span class="label">Mål</span><span class="value" style="border-bottom: 1px solid var(--c-cbd5e0); padding-bottom: 2px;">− ${formatSEK(goal)}</span></div>`;
   if (showGoal) html += `
     <div class="stat-row" data-key="diff" onclick="toggle(this)"><span class="toggle">${diffSubs ? '+' : ''}</span><span class="label">Diff</span><span class="value" style="color:${diffColor}; font-weight:700;">${formatSEK(diff)}</span></div>
     ${diffSubs}`;
