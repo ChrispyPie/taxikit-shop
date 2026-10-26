@@ -1,0 +1,61 @@
+/* Nyheter i appen (visas på sidan "Om appen").
+ * Lätt att ändra: lägg en ny rad överst i listan för varje dag.
+ *   typ: 'Nytt', 'Förbättrat' eller 'Fixat'
+ * Texten är vanlig text (ingen HTML). Nyast först.
+ * Ny omgång samma dag som redan finns? Lägg en ny dag överst med id: '2026-10-26b' (så får förarna 'Ny' igen).
+ * Det förarna senast sett sparas per förare på servern (tabell changelog_seen).
+ * Äldre historik (före 24 okt 2026) är återskapad i efterhand och ungefärlig.
+ */
+window.CHANGELOG = [
+  { datum: '2026-10-26', rader: [
+    ['Nytt', 'Prognos: se kommande bokningar per zon, i tider var 5:e minut och per bilkategori. Uppdateras varje minut.'],
+    ['Nytt', 'Prognos: fliken Morgon visar morgonprognosen till Landvetter kl. 04–09, och hur många som är kvar under timmen som pågår.'],
+    ['Nytt', 'Prognos: fliken Original visar prognosen som på Taxi Göteborgs egen sida, utan att du behöver logga in där.'],
+    ['Nytt', 'Prognos: notiser med ljud för de zoner och bilkategorier du väljer, även när telefonen är låst.'],
+    ['Nytt', 'Prognos: knappen Rapportera fel skapar ett ifyllt inlägg i Forum under Buggar.'],
+    ['Förbättrat', 'Prognos: zonnummer på flikarna så att allt får plats, summa efter varje kategori, kortare rubriker (Barnst., Babysk.) och Magasinet borttaget.'],
+    ['Nytt', 'Inställningar: välj Ljust, Mörkt eller Följ telefonen, och större eller mindre text.'],
+    ['Nytt', 'Inställningar: välj hur startskärmen ser ut (2 eller 3 i bredd, eller lista).'],
+    ['Nytt', 'Lönekoll: ungefär vad du får i lön för det du kört in.'],
+    ['Förbättrat', 'Startskärmen har ny ordning med 3 rutor i bredd på telefonen.'],
+    ['Fixat', 'Prognos visade ingen data för inloggade förare. Startsidan kunde skrivas över av Prognos.']
+  ]},
+  { datum: '2026-10-25', rader: [
+    ['Nytt', 'Forum: inlägg, kommentarer, gilla och foton. Gemensamt för alla åkerier, plus en egen del för ditt åkeri.'],
+    ['Nytt', 'Om appen: beskrivning av appen och vanliga frågor.'],
+    ['Nytt', 'Profilbild: lägg till, byt eller ta bort din bild.'],
+    ['Nytt', 'Bil & verkstad: felanmälan, sånt som behövs till bilen, underhåll och verkstadstimmar.'],
+    ['Nytt', 'Ankomster: bevaka flyg och tåg och få notis när de kommer och när sista väskan är ute.'],
+    ['Förbättrat', 'Ankomster: tåg sorterade efter varifrån de kommer (Stockholm, Köpenhamn, Oslo) och lista över stationer.'],
+    ['Nytt', 'Kalender: Åbytravet och Åbymässan finns med.'],
+    ['Förbättrat', 'Knappar på rad går att svepa åt sidan när de inte får plats.'],
+    ['Fixat', 'Körpassdata försöker igen själv om hämtningen misslyckas, i stället för att visa nollor.'],
+    ['Förbättrat', 'Tomma sidor (Statistik, Kommunikation) borttagna ur menyn.']
+  ]},
+  { datum: '2026-10-24', rader: [
+    ['Nytt', 'Appen flyttade till taxikit.shop/TaxiData.'],
+    ['Nytt', 'Ankomster: tåg till Göteborg C och flyg till Landvetter.'],
+    ['Nytt', 'Kalender: konserter, matcher, mässor och andra evenemang, med påminnelser.'],
+    ['Nytt', 'Topplistor: se hur du ligger till jämfört med andra, anonymt.'],
+    ['Nytt', 'Hjälpbot: en liten figur som hjälper dig. Välj figur under Inställningar.'],
+    ['Nytt', 'Verkstadstimmar: registrera tid på verkstaden, ägaren godkänner.'],
+    ['Nytt', 'Profil: fyll i och ändra dina uppgifter och byt lösenord.'],
+    ['Nytt', 'Aktiveringslänk: nya förare väljer sitt eget lösenord. Glömt lösenord via e-post.'],
+    ['Nytt', 'Fliken År i Körpassdata och Topplistor.'],
+    ['Förbättrat', 'Lampa som visar om servern fungerar, och när datan senast hämtades.'],
+    ['Fixat', 'Resor och pass räknas rätt även när samma nummer används igen.']
+  ]},
+  { datum: '2026-10-19', ungefar: true, rader: [
+    ['Förbättrat', 'Förarappen och adminsidan blev en app, med meny som beror på din roll.'],
+    ['Förbättrat', 'Körda kilometer tas från passet. Pass som går över midnatt blir rätt.']
+  ]},
+  { datum: '2026-10-18', ungefar: true, rader: [
+    ['Nytt', 'Startskärm med ikoner, profilmeny och inloggning mot servern.'],
+    ['Nytt', 'Admin: lista över förare, uppdelad på kategori.'],
+    ['Nytt', 'Välj egen period med kalender.']
+  ]},
+  { datum: '2026-10-16', ungefar: true, rader: [
+    ['Nytt', 'Första versionen: dina pass och resor per dag, vecka och månad, med betalsätt och mål.'],
+    ['Nytt', 'Logga in med ditt förar-ID.']
+  ]}
+];
