@@ -114,3 +114,8 @@ delete from vault.secrets where name in ('PROGNOS_PIN', 'PROGNOS_TICK_KEY');
     drop table if exists public.prognos_morgon_log;
     ```
 - Edge `prognos-sync` oförändrad (v6). Appen läser `prognos_morgon(p_token)` som redan fanns.
+
+### t336/t337 LIVE (2026-10-26 ~15:30 CET)
+- PR #9 mergad till main: merge-commit `221ee9047235490ba5f107a0ff4cb1ac6604f229` (live med `?v=20261026pg8`).
+- **Ångra frontend:** `git checkout main && git pull && git revert -m 1 221ee90 && git push` (ingen force push). Alternativt återställ till `backup/pre-morgon-2026-10-26`-innehållet via revert.
+- SQL-historiken (`prognos_morgon_log` + trigger) ligger kvar oberoende av revert; drop-satser ovan.
