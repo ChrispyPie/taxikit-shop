@@ -11,12 +11,12 @@ const CATS = ["app", "barnstol", "ovrigt", "storbil", "elbil", "babyskydd"] as c
 // Blockgränser: 0 = 0–40, 1 = 40–80, 2 = 80–120 minuter framåt
 const BOUNDARY_MIN = [40, 80, 120]; // när en bokning korsar in i block i från i+1
 const CAT_SV: Record<string, string> = {
-  app: "Kombi (A)",
-  barnstol: "Barnstol (F)",
+  app: "Kombi",
+  barnstol: "Barnstol",
   ovrigt: "Övriga",
-  storbil: "Storbil (8+)",
-  elbil: "Elbil (H)",
-  babyskydd: "Babyskydd (3)",
+  storbil: "Storbil",
+  elbil: "Miljöbil",
+  babyskydd: "Babyskydd",
 };
 
 type Conf = "saker" | "trolig" | "osaker";

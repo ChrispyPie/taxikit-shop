@@ -1,6 +1,6 @@
 /* Prognos: tidsschema över uppskattade förbokningar från Taxi Göteborgs prognosverktyg.
  * Koden sparas aldrig i appen – bara på servern. Vid 401 visas en prompt.
- * Kategorikoder: A=Kombi, F=Barnstol, Övriga, Storbil 8+, H=Elbil, 3=Babyskydd.
+ * Kategorikoder (endast kommentar): A=Kombi, H=Miljöbil, Storbil, Övriga, F=Barnstol, 3=Babyskydd.
  * Bilbarnstol/babyskydd är tillägg till bilkategori – egna spalter sist i schemat.
  */
 (function () {
@@ -24,12 +24,13 @@
   // Alla kategorier i schemat; barnstol/babyskydd sist (paras alltid med bil men eget spalt –
   // vi vet inte vilken bil de hör till när flera kommer samtidigt).
   var SCHEDULE_CATS = [
-    { k: 'app', head: 'A Kombi', label: 'Kombi (A)', child: false },
+    // Koder (endast referens): A=Kombi, H=Miljöbil, F=Barnstol, 3=Babyskydd
+    { k: 'app', head: 'Kombi', label: 'Kombi', child: false },
+    { k: 'elbil', head: 'Miljöbil', label: 'Miljöbil', child: false },
+    { k: 'storbil', head: 'Storbil', label: 'Storbil', child: false },
     { k: 'ovrigt', head: 'Övriga', label: 'Övriga', child: false },
-    { k: 'storbil', head: 'Storbil 8+', label: 'Storbil (8+)', child: false },
-    { k: 'elbil', head: 'H Elbil', label: 'Elbil (H)', child: false },
-    { k: 'barnstol', head: 'F Barnstol', label: 'Barnstol (F)', child: true },
-    { k: 'babyskydd', head: '3 Babyskydd', label: 'Babyskydd (3)', child: true }
+    { k: 'barnstol', head: 'Barnstol', label: 'Barnstol', child: true },
+    { k: 'babyskydd', head: 'Babyskydd', label: 'Babyskydd', child: true }
   ];
   var ALL_CATS = SCHEDULE_CATS;
   var CAT_LABEL = {};
@@ -388,6 +389,8 @@
       var cls = 'pg-th-cat' + (meta.child ? ' pg-th-child' : '');
       html += '<th class="' + cls + '"><span class="pg-th-rot">' + esc(meta.head) + '</span></th>';
     });
+    // Tom reservkolumn så sista diagonala rubriken inte klipps i högerkant
+    html += '<th class="pg-th-spacer" aria-hidden="true"></th>';
     html += '</tr></thead><tbody>';
     rows.forEach(function (d) {
       html += '<tr><td class="pg-td-time">' + p2(d.getHours()) + ':' + p2(d.getMinutes()) + '</td>';
@@ -397,6 +400,7 @@
         var tdCls = 'pg-td-cell' + (meta.child ? ' pg-td-child' : '');
         html += '<td class="' + tdCls + '">' + countCell(sum) + '</td>';
       });
+      html += '<td class="pg-td-spacer" aria-hidden="true"></td>';
       html += '</tr>';
     });
     html += '</tbody></table></div>';

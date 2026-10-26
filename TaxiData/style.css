@@ -472,11 +472,19 @@ main { max-width: 900px; margin: 1rem auto; padding: 0 1rem; }
 .pg-watch-zone { margin-bottom: 10px; }
 .pg-watch-title { font-weight: 600; margin-bottom: 4px; color: var(--text); font-size: 0.92rem; }
 .pg-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border-soft); border-radius: 10px; background: var(--surface); }
-.pg-scroll-fit { overflow-x: hidden; }
-/* Vid Stor/Extra stor text: tillåt sidscroll hellre än att klämma sönder cellerna */
-/* Stor / Extra stor (tema.js sätter --font-scale > 1) */
+/* Normal: ingen sidscroll (reservkolumn fångar diagonala rubriker).
+   Stor/Extra stor: tillåt sidscroll. */
+.pg-scroll-fit {
+  /* Synlig overflow i x så diagonala rubriker inte klipps; body-celler ryms ändå */
+  overflow-x: visible;
+  overflow-y: visible;
+  box-sizing: border-box;
+}
 html[style*="--font-scale: 1."] .pg-scroll-fit,
-html[style*="--font-scale:1."] .pg-scroll-fit { overflow-x: auto; }
+html[style*="--font-scale:1."] .pg-scroll-fit {
+  overflow-x: auto;
+  overflow-y: visible;
+}
 .pg-table { border-collapse: collapse; width: 100%; font-size: 0.78rem; }
 .pg-table-fit { min-width: 0; table-layout: fixed; }
 .pg-table th, .pg-table td { border-bottom: 1px solid var(--border-soft); padding: 2px 1px; vertical-align: middle; text-align: center; }
@@ -491,17 +499,32 @@ html[data-theme="dark"] .pg-badge { background: #2a4365; color: #bee3f8; }
 .pg-ztabs::-webkit-scrollbar { display: none; }
 .pg-ztab { border: 1px solid var(--border); background: var(--surface); color: var(--primary); border-radius: 12px; padding: 5px 10px; font-size: 0.78rem; cursor: pointer; flex-shrink: 0; }
 .pg-ztab.on { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
-/* Diagonala kolumnrubriker – får plats med 6 spalter på 360px */
+/* Diagonala rubriker (45°) – ryms innanför 360px, se .pg-th-rot */
+.pg-table-diag { overflow: visible; }
+.pg-table-diag thead { overflow: visible; }
+.pg-table-diag thead tr { overflow: visible; }
 .pg-table-diag thead th.pg-th-cat {
-  height: 72px; vertical-align: bottom; padding: 0 0 4px; position: relative;
-  overflow: visible; background: var(--surface-soft);
+  height: 88px; vertical-align: bottom; padding: 0 2px 0 0; position: relative;
+  overflow: visible; background: transparent; /* bakgrund på raden, annars målar nästa th över textslutet */
 }
+.pg-table-diag thead tr { background: var(--surface-soft); }
 .pg-th-rot {
-  display: inline-block; max-width: 88px; white-space: nowrap;
-  transform: translate(10px, -4px) rotate(-45deg); transform-origin: bottom left;
-  font-size: 0.68rem; font-weight: 600; color: var(--text); line-height: 1;
+  /* Ankrad i övre högra hörnet: texten går nedåt-vänster och slutar i spaltens topp-höger,
+     så den aldrig går utanför högerkanten eller ner i raderna */
+  position: absolute; right: 8px; top: 8px;
+  display: block; width: max-content; white-space: nowrap;
+  transform: rotate(-45deg); transform-origin: top right;
+  font-size: 0.64rem; font-weight: 600; color: var(--text); line-height: 1;
+  pointer-events: none;
 }
-.pg-th-child { background: var(--surface-soft); }
+/* Liten reserv så sista spalten inte trycks mot kanten */
+.pg-th-spacer, .pg-td-spacer {
+  width: 12px; min-width: 12px; max-width: 16px;
+  padding: 0 !important; border: none !important;
+  background: transparent !important;
+}
+.pg-table-diag thead th.pg-th-spacer { height: 88px; }
+.pg-th-child { background: transparent; }
 .pg-th-child .pg-th-rot { color: var(--accent, #dd6b20); }
 .pg-td-child {
   background: color-mix(in srgb, var(--accent, #dd6b20) 8%, transparent);
