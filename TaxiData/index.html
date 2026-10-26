@@ -119,7 +119,7 @@
 
   <script src="serverstatus.js?v=20261024x"></script>
   <script src="badges.js?v=20261024x"></script>
-  <script src="script.js?v=20261025kr1"></script>
+  <script src="script.js?v=20261026lk1"></script>
   <script src="ankomster.js?v=20261025sb1"></script>
   <script src="bevakning.js?v=20261025sb1"></script>
   <script src="topplistor.js?v=20261024ar1"></script>
@@ -128,8 +128,9 @@
   <script src="hjalpbot.js?v=20261025tg1"></script>
   <script src="profilbild.js?v=20261025pb1"></script>
   <script src="forum.js?v=20261025fg1"></script>
-  <script src="om-data.js?v=20261025fg1"></script>
+  <script src="om-data.js?v=20261026lk1"></script>
   <script src="om.js?v=20261025om1"></script>
+  <script src="lonekoll.js?v=20261026lk1"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -139,6 +140,7 @@
     var AKERI_ROLLER = ['agare', 'superadmin'];
     var menu = [
       { id: 'kordata', icon: '🚗', label: 'Körpassdata', roles: ALLA },
+      { id: LONEKOLL.id, icon: LONEKOLL.icon, label: LONEKOLL.title, roles: ALLA },
       // Namn och ikon för Ankomster ändras i ankomster.js (ANKOMSTER.title / icon)
       { id: ANKOMSTER.id, icon: ANKOMSTER.icon, label: ANKOMSTER.title, roles: ALLA },
       // Statistik borttagen 2026-10-25 (tom platshållare): { id: 'statistik', icon: '📈', label: 'Statistik', roles: ALLA },
@@ -298,7 +300,7 @@
         document.getElementById('driver-label').textContent = driverId;
         if (typeof loadData === 'function') loadData().then(render);
       } else {
-        if (savedView === ANKOMSTER.id || savedView === TOPPLISTOR.id || savedView === VERKSTAD.id || savedView === KALENDER.id || savedView === FORUM.id || savedView === OM.id) {
+        if (savedView === ANKOMSTER.id || savedView === TOPPLISTOR.id || savedView === VERKSTAD.id || savedView === KALENDER.id || savedView === FORUM.id || savedView === OM.id || savedView === LONEKOLL.id) {
           current = savedView;
           try { history.pushState({ view: current }, ''); } catch (e) {}
         }
@@ -588,7 +590,7 @@
         lockBlocked();
       } else if (current === FORUM.id && FORUM.back && FORUM.back()) {
         // forumet gick tillbaka från ett inlägg till listan
-      } else if (current === 'profil' || current === ANKOMSTER.id || current === TOPPLISTOR.id || current === VERKSTAD.id || current === KALENDER.id || current === FORUM.id || current === OM.id) {
+      } else if (current === 'profil' || current === ANKOMSTER.id || current === TOPPLISTOR.id || current === VERKSTAD.id || current === KALENDER.id || current === FORUM.id || current === OM.id || current === LONEKOLL.id) {
         goHome();
       }
     });
@@ -631,6 +633,9 @@
       } else if (current === OM.id) {
         title.textContent = OM.title;
         OM.render(content);
+      } else if (current === LONEKOLL.id) {
+        title.textContent = LONEKOLL.title;
+        LONEKOLL.render(content);
       } else if (current === 'installningar' && window.HJALPBOT) {
         title.textContent = 'Inställningar';
         window.HJALPBOT.renderSettings(content);
@@ -705,7 +710,7 @@
         if (window.initServerStatus) initServerStatus('server-status');
         document.getElementById('driver-label').textContent = driverId;
         if (typeof loadData === 'function') loadData().then(render);
-      } else if (id === ANKOMSTER.id || id === TOPPLISTOR.id || id === VERKSTAD.id || id === KALENDER.id || id === FORUM.id || id === OM.id) {
+      } else if (id === ANKOMSTER.id || id === TOPPLISTOR.id || id === VERKSTAD.id || id === KALENDER.id || id === FORUM.id || id === OM.id || id === LONEKOLL.id) {
         localStorage.setItem('taxi_view', id);
         current = id;
         try { history.pushState({ view: id }, ''); } catch (e) {}

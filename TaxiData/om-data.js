@@ -6,6 +6,7 @@ window.OM_DATA = {
   intro: 'TaxiData är förarappen för oss som kör för Taxi Göteborg. Här ser du dina pass och resor och annat som hjälper dig i jobbet.',
   features: [
     ['🚗', 'Körpassdata', 'dina pass, resor och belopp'],
+    ['💰', 'Lönekoll', 'ungefär vad du får i lön för det du kört in'],
     ['✈️', 'Ankomster', 'tåg till Göteborg C och flyg till Landvetter'],
     ['🏆', 'Topplistor', 'hur du ligger till jämfört med andra (anonymt)'],
     ['🛠️', 'Bil & verkstad', 'felanmälan, sånt som behövs till bilen och verkstadstimmar'],
@@ -16,6 +17,8 @@ window.OM_DATA = {
   builder: 'Appen byggs av Christian (S admin) och är under utveckling. Saker kan ändras, och ibland blir något fel.',
   report: 'Hittar du ett fel eller har en idé? Skriv i Forum under Buggar eller Förslag. Där ser du också när det händer något med ditt inlägg.',
   faq: [
+    { q: 'Hur räknar Lönekoll ut min lön?',
+      a: 'Lönekoll tar det du kört in i månaden, drar bort BOM, moms och avgifter och räknar sedan provision, semesterersättning och skatt, på samma sätt som lönebeskedet. Procent och avdrag kan du ändra själv. Det är en uppskattning, lönebeskedet gäller.' },
     { q: 'Var kommer mina pass och resor ifrån?',
       a: 'De hämtas automatiskt från servern, samma system som taxametern skickar till. Du behöver inte skriva in något själv.' },
     { q: 'Hur ofta uppdateras siffrorna?',
