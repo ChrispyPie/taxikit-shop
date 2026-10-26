@@ -10,6 +10,7 @@ Samma innehåll som visas under **Om appen → Nyheter** i appen. Källan är `T
 - **Nytt:** Demokonto: välj Förare eller Ägare. Ägar-demot visar adminpanelen med påhittade exempeluppgifter, aldrig åkeriets riktiga.
 - **Nytt:** Chaufförer: demokonton visas i en egen grupp Demo, där du kan skapa nya, se när de går ut och avsluta dem i förtid.
 - **Förbättrat:** Demokonton syns inte bland förarna och ser inga andra förares namn eller bilder.
+- **Fixat:** Forum: rättat stavfel i forumreglerna (Roxx och uthängningar).
 - **Nytt:** Prognos: en röd siffra på Prognos-rutan visar hur många nya bokningar som kommit sedan du tittade sist.
 - **Nytt:** Verkstadstimmar: ägaren kan ställa frågor och föraren svara innan beslut.
 - **Nytt:** Verkstadstimmar: ägaren ser godkända timmar per månad och kan ladda ner dem.
