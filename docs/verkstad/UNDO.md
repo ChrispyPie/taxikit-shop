@@ -18,3 +18,15 @@ och tar bort tabellen/kolumnen. Obs: då försvinner alla dialog-meddelanden. K�
 får appen fel när den anropar `workshop_ask`/`workshop_reply`. Gammal kod fungerar med den nya databasen (bara nya fält).
 
 Testat: rollback-skriptet kördes i en transaktion som rullades tillbaka – fungerade.
+
+## LIVE (2026-10-26 ca 18:50 svensk tid)
+- PR #19 mergad: merge-commit **1ced44b** (`1ced44b` = "Merge pull request #19 …").
+- Efter den mergades PR #18 (e3c4014), som behöll Nyheter-raderna för verkstad (id nu `2026-10-26e`, changelog.js `zpb1`).
+- Ångra koden via PR (ingen force push):
+  ```
+  git checkout -b revert-verkstad-dialog origin/main
+  git revert -m 1 1ced44b
+  git push -u origin revert-verkstad-dialog   # öppna PR och merga
+  ```
+  Konflikt kan uppstå i `TaxiData/index.html`/`changelog.js` (PR #18 rörde samma rader) – behåll högsta versionen för andra filer.
+- Därefter ev. databasen: `docs/verkstad/ROLLBACK-verkstad-dialog.sql`.
