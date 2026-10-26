@@ -141,3 +141,9 @@ delete from vault.secrets where name in ('PROGNOS_PIN', 'PROGNOS_TICK_KEY');
 - **Ångra kod:** stäng PR:n. Efter ev. merge: `git revert -m 1 <merge-sha>` + push (ingen force push).
 - **t349u (pg13):** De snedställda kategorinamnen ankras nu i nedre vänstra hörnet, mitt i spalten, 5 px ovanför första raden. Alla börjar på samma ställe oavsett längd. `fitDiagHead()` sätter radhöjden efter det längsta namnet och `--pg-spacer-w` (reserv till höger, max 48 px) så att Babyskydd inte klipps. Cache-bust `?v=20261026pg13`. Skärmdumpar: `docs/prognos/v11_schema-*.png`. Ångra: `git revert <commit>` på grenen eller stäng PR #13.
 - **t350u (pg14):** Statusraden visar bara "Senaste uppdatering: HH:MM:SS". Extra text (`.pg-stale`) läggs till bara när något är fel: "Kod behövs", "Kunde inte hämta ny data" (status ≠ ok) eller "Data är N min gammal" (≥ 5 min). Morgon visar "Senaste uppdatering: HH:MM:SS" i stället för "Uppdaterad … · uppdateras automatiskt varje minut". Original har kvar deras "Live · Senast uppdaterad HH:MM:SS" (står bara en gång). Cache-bust `?v=20261026pg14`. Skärmdump: `docs/prognos/v12_schema-dark-393.png`. Ångra: `git revert <commit>` på grenen.
+
+## t352 – Summa efter kategorinamn + kortare rubriker (PR feature/prognos-kategori-summa, pg15)
+- Ändrat: TaxiData/prognos.js (SCHEDULE_CATS head 'Barnst.'/'Babysk.', summa-pill i renderCarTimeline), TaxiData/style.css (.pg-th-sum, .pg-th-sum0), TaxiData/index.html (?v=20261026pg15).
+- Ingen Supabase-ändring.
+- Backup-gren: backup/pre-kategorisumma-2026-10-26 (= main 689d699 före ändringen).
+- Undo före merge: stäng PR:en. Efter merge: git revert -m 1 <merge-sha> via PR (ingen force push).

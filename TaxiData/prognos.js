@@ -31,8 +31,8 @@
     { k: 'elbil', head: 'Miljöbil', label: 'Miljöbil', child: false },
     { k: 'storbil', head: 'Storbil', label: 'Storbil', child: false },
     { k: 'ovrigt', head: 'Övriga', label: 'Övriga', child: false },
-    { k: 'barnstol', head: 'Barnstol', label: 'Barnstol', child: true },
-    { k: 'babyskydd', head: 'Babyskydd', label: 'Babyskydd', child: true }
+    { k: 'barnstol', head: 'Barnst.', label: 'Barnstol', child: true },
+    { k: 'babyskydd', head: 'Babysk.', label: 'Babyskydd', child: true }
   ];
   var ALL_CATS = SCHEDULE_CATS;
   var CAT_LABEL = {};
@@ -524,10 +524,19 @@
 
     var html = '<div class="pg-scroll pg-scroll-fit"><table class="pg-table pg-table-fit pg-table-diag"><thead><tr>' +
       '<th class="pg-th-time">Tid</th>';
+    // t352u: summa per spalt = antal visade bokningar i spalten (samma räkning som cellerna)
+    var tot = {};
+    Object.keys(bySlot).forEach(function (key) {
+      var k = key.split('|')[1];
+      tot[k] = (tot[k] || 0) + bySlot[key].length;
+    });
     cats.forEach(function (k) {
-      var meta = CAT_META[k] || { head: k, child: false };
+      var meta = CAT_META[k] || { head: k, label: k, child: false };
+      var n = tot[k] || 0;
+      var full = (meta.label || meta.head) + ': ' + n + ' bokning' + (n === 1 ? '' : 'ar') + ' närmaste 2 h';
       var cls = 'pg-th-cat' + (meta.child ? ' pg-th-child' : '');
-      html += '<th class="' + cls + '"><span class="pg-th-rot">' + esc(meta.head) + '</span></th>';
+      html += '<th class="' + cls + '" title="' + esc(full) + '" aria-label="' + esc(full) + '"><span class="pg-th-rot" aria-hidden="true">' +
+        esc(meta.head) + ' <span class="pg-th-sum' + (n ? '' : ' pg-th-sum0') + '">' + n + '</span></span></th>';
     });
     // Tom reservkolumn så sista diagonala rubriken inte klipps i högerkant
     html += '<th class="pg-th-spacer" aria-hidden="true"></th>';
