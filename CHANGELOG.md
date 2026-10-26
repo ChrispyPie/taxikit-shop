@@ -7,6 +7,8 @@ Samma innehåll som visas under **Om appen → Nyheter** i appen. Källan är `T
 ## 26 oktober 2026
 
 - **Nytt:** Prognos: en röd siffra på Prognos-rutan visar hur många nya bokningar som kommit sedan du tittade sist.
+- **Nytt:** Verkstadstimmar: ägaren kan ställa frågor och föraren svara innan beslut.
+- **Nytt:** Verkstadstimmar: ägaren ser godkända timmar per månad och kan ladda ner dem.
 - **Förbättrat:** Topplistor: listan för arbetstimmar är borttagen.
 - **Nytt:** Forum: regler för god ton. Du godkänner dem första gången du öppnar forumet.
 - **Nytt:** Prognos: se kommande bokningar per zon, i tider var 5:e minut och per bilkategori. Uppdateras varje minut.

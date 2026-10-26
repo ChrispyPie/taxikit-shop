@@ -48,6 +48,7 @@
     comment_too_long: 'Kommentaren får vara högst 500 tecken.',
     forbidden: 'Du har inte behörighet att göra det.',
     need_text: 'Skriv vad det gäller.',
+    reply_closed: 'Ägaren har redan bestämt sig. Svaret skickades inte.',
     bad_supply: 'Välj vad som behövs.',
     bad_type: 'Välj typ av underhåll.',
     need_due: 'Fyll i datum eller km (eller båda).',
@@ -66,8 +67,26 @@
     bad_image: 'Fotot gick inte att läsa.',
     upload_failed: 'Fotot kunde inte sparas. Försök igen.'
   };
+  // Verkstadstid: ägaren kan fråga, föraren svarar (tråd) tills ägaren godkänner eller nekar
+  (function css() {
+    var x = document.createElement('style');
+    x.textContent =
+      '.vk-chip.q{background:var(--c-fed7d7);color:var(--danger-text);font-weight:600}' +
+      '.vk-item.q{border:2px solid var(--danger)}' +
+      '.vk-qbar{background:var(--c-fed7d7);color:var(--danger-text);border-radius:10px;padding:.6rem .7rem;margin-bottom:.7rem;font-weight:600}' +
+      '.vk-thr{margin-top:.45rem;border-top:1px dashed var(--border-soft);padding-top:.2rem}' +
+      '.vk-msg{font-size:.88rem;padding:.4rem .55rem;border-radius:8px;margin-top:.35rem;background:var(--surface-soft);overflow-wrap:anywhere}' +
+      '.vk-msg.own{background:var(--c-c6f6d5);color:var(--text);margin-left:1.5rem}.vk-msg.boss{margin-right:1.5rem;border-left:3px solid var(--primary)}' +
+      '.vk-msg.sys{background:none;color:var(--muted);text-align:center;padding:.15rem .5rem}' +
+      '.vk-msg .w{display:block;font-size:.72rem;color:var(--muted);margin-bottom:.1rem}' +
+      '.vk-reply{margin-top:.5rem}.vk-reply textarea{width:100%;box-sizing:border-box;padding:.5rem;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:.95rem;background:var(--surface);color:var(--text)}' +
+      '.vk-reply .pm-btns{margin-top:.4rem}' +
+      '.vk-owner{display:block;width:100%;margin-bottom:.7rem;padding:.6rem;border-radius:10px;border:2px solid var(--primary);background:var(--surface);color:var(--primary);font-size:.95rem;font-weight:600}';
+    document.head.appendChild(x);
+  })();
+  function whQ(d) { return ((d && d.entries) || []).filter(function (x) { return x.status === 'pending' && x.waiting_on === 'driver'; }).length; }
   var st = { el: null, data: null, bil: null, err: null, bilErr: null, form: null, busy: false,
-    tab: localStorage.getItem('bil_tab') || 'fel', car: null, showDone: false, f: null, photos: {}, mDone: null, tf: null, tr: null, tlog: {} };
+    tab: localStorage.getItem('bil_tab') || 'fel', car: null, showDone: false, f: null, photos: {}, mDone: null, tf: null, tr: null, tlog: {}, drafts: {} };
   if (!TABS.some(function (t) { return t[0] === st.tab; })) st.tab = 'fel';
 
   // ---------- hjälp ----------
@@ -157,6 +176,7 @@
     var a = rpc('get_my_workshop', {}).then(function (d) {
       st.data = d;
       window.VERKSTAD_LAST = d;
+      if (st.bil) badge(st.bil);
       document.dispatchEvent(new CustomEvent('verkstad:data', { detail: d }));
     }).catch(function (e) {
       if (fail(e)) return;
@@ -172,14 +192,15 @@
     var n = +d.unread || 0;
     if (!n && d.is_admin) n = ((d.cars || []).filter(function (c) { return c.blocking; })).length;
     if (!n) n = (d.tasks || []).filter(function (t) { return t.mine && t.status !== 'klar'; }).length;
+    if (!n) n = whQ(st.data);
     setBadge('bil', n);
   }
   V.refreshBadge = function () {
     if (!localStorage.getItem('taxi_session')) return;
     rpc('bil_badge', {}).then(function (b) {
       if (!window.setBadge || !b) return;
-      // servern räknar "står" bara för ägaren/S admin, och "tasks" = mina öppna uppgifter
-      setBadge('bil', (+b.unread || 0) || (+b.blocking || 0) || (+b.tasks || 0));
+      // servern räknar "står" bara för ägaren/S admin, "tasks" = mina öppna uppgifter, "wh_q" = frågor om min verkstadstid
+      setBadge('bil', (+b.unread || 0) || (+b.blocking || 0) || (+b.tasks || 0) || (+b.wh_q || 0));
     }).catch(function () {});
   };
 
@@ -195,9 +216,10 @@
     var top = document.getElementById('bv-top'); if (!top) return;
     var unread = st.bil ? +st.bil.unread || 0 : 0, tl = tabs();
     var open = st.bil ? (st.bil.tasks || []).filter(function (t) { return t.mine && t.status !== 'klar'; }).length : 0;
+    var q = whQ(st.data);
     top.innerHTML = '<div class="bv-tabs' + (tl.length > 4 ? ' five' : '') + '">' + tl.map(function (t) {
       return '<button type="button" class="tl-tab bv-tab' + (st.tab === t[0] ? ' active' : '') + '" data-t="' + t[0] + '"><span>' + t[1] + '</span>' + t[2] +
-        (t[0] === 'uppg' && open ? '<b class="bv-tn">' + open + '</b>' : '') + '</button>';
+        (t[0] === 'uppg' && open ? '<b class="bv-tn">' + open + '</b>' : '') + (t[0] === 'timmar' && q ? '<b class="bv-tn">' + q + '</b>' : '') + '</button>';
     }).join('') + '<button type="button" class="bv-bell" id="bv-bell" aria-label="Notiser">🔔' + (unread ? '<b>' + unread + '</b>' : '') + '</button></div>';
     top.querySelectorAll('.bv-tab').forEach(function (b) { b.onclick = function () { V.openTab(b.dataset.t); }; });
     document.getElementById('bv-bell').onclick = showNotices;
@@ -891,13 +913,15 @@
       }
       m.querySelector('.pm-box').innerHTML = '<div class="pm-head" style="justify-content:center">🔔 Bil & verkstad</div>' +
         ((list || []).length ? list.map(function (n) {
-          return '<div class="kal-com' + (n.read ? '' : ' unread') + '"><div class="kal-cwho">' + esc(when(n.created_at)) + '</div><div>' + esc(n.body) + '</div></div>';
+          var wh = /^bil_wh/.test(n.kind || '');
+          return '<div class="kal-com' + (n.read ? '' : ' unread') + '"' + (wh ? ' data-wh="1" role="button" style="cursor:pointer"' : '') + '><div class="kal-cwho">' + esc(when(n.created_at)) + '</div><div>' + esc(n.body) + (wh ? ' <b>›</b>' : '') + '</div></div>';
         }).join('') : '<div class="kal-none">Inga notiser än.</div>') +
         '<div class="pm-btns" style="margin-top:.7rem">' + (admin() ? '<button type="button" id="bv-nprefs">⚙️ Inställningar</button>' : '') +
         '<button type="button" class="primary" id="bv-nclose">Stäng</button></div>';
       m.classList.add('open');
       document.getElementById('bv-nclose').onclick = function () { m.classList.remove('open'); };
       var np = document.getElementById('bv-nprefs'); if (np) np.onclick = function () { showPrefs(m); };
+      m.querySelectorAll('[data-wh]').forEach(function (el) { el.onclick = function () { m.classList.remove('open'); V.openTab('timmar'); }; });
     }).catch(function (e) { if (!fail(e)) alert('Kunde inte hämta notiserna.'); });
   }
 
@@ -989,6 +1013,26 @@
     rpc('delete_my_workshop', { p_id: id }).then(function () { flash('Borttagen.'); return load(); })
       .catch(function (e) { alert(errText(e)); load(); });
   }
+  function reply(id) {
+    var t = document.getElementById('vk-r-' + id), txt = t ? t.value.trim() : '';
+    if (!txt) { alert('Skriv ditt svar först.'); if (t) t.focus(); return; }
+    if (st.busy) return;
+    st.busy = true;
+    rpc('workshop_reply', { p_id: id, p_body: txt })
+      .then(function () { st.busy = false; delete st.drafts[id]; flash('Svaret är skickat till ägaren.'); return load(); })
+      .catch(function (e) { st.busy = false; if (fail(e)) return; alert(e.message === 'not_editable' ? ERR.reply_closed : errText(e)); load(); });
+  }
+  function threadHtml(x) {
+    var ms = x.msgs || [];
+    if (!ms.length) return '';
+    return '<div class="vk-thr">' + ms.map(function (m) {
+      var t = esc(when(m.at));
+      if (m.kind === 'reopen') return '<div class="vk-msg sys">↩️ Ägaren öppnade beslutet igen · ' + t + '</div>';
+      if (m.kind === 'approved' || m.kind === 'rejected') return '<div class="vk-msg sys">' + (m.kind === 'approved' ? '✅ Godkänd' : '❌ Nekad') + ' · ' + t + (m.body ? '<br>Ägaren: "' + esc(m.body) + '"' : '') + '</div>';
+      var own = m.role === 'driver';
+      return '<div class="vk-msg ' + (own ? 'own' : 'boss') + '"><span class="w">' + (own ? 'Du' : 'Ägaren') + ' · ' + t + '</span>' + esc(m.body) + '</div>';
+    }).join('') + '</div>';
+  }
   var flashMsg = '';
   function flash(t) { flashMsg = t; setTimeout(function () { flashMsg = ''; var x = document.getElementById('vk-flash'); if (x) x.remove(); }, 4000); }
 
@@ -998,6 +1042,9 @@
     var d = st.data; if (!d) { body.innerHTML = '<div class="tl-msg">Laddar…</div>'; return; }
     var s = d.summary || {}, now = new Date(), h = '';
     if (flashMsg) h += '<div id="vk-flash" class="vk-flash">' + esc(flashMsg) + '</div>';
+    var nq = whQ(d);
+    if (nq) h += '<div class="vk-qbar">❓ Ägaren har ' + (nq === 1 ? 'en fråga' : nq + ' frågor') + ' om din verkstadstid. Svara längre ner.</div>';
+    if (d.can_approve) h += '<button type="button" class="vk-owner" id="vk-owner">👔 Förarnas tider: godkänn, fråga och se månadens summa ›</button>';
     h += '<div class="vk-card vk-sum">' +
       '<div class="vk-sumrow"><span>Väntar på beslut</span><b>' + (s.pending_n ? dur(s.pending_min) + ' (' + s.pending_n + ' st)' : 'Inget') + '</b></div>' +
       '<div class="vk-sumrow"><span>Godkänt i ' + MONL[now.getMonth()] + '</span><b>' + dur(s.approved_month_min || 0) + ' = ' + kr(s.approved_month_kr) + '</b></div>' +
@@ -1008,23 +1055,29 @@
     h += '<div class="vk-ltitle">Mina registreringar</div>';
     if (!list.length) h += '<div class="tl-msg">Inga verkstadstimmar registrerade än.</div>';
     list.forEach(function (x) {
-      var editing = st.form && st.form.id === x.id;
-      h += '<div class="vk-card vk-item' + (editing ? ' editing' : '') + '"><div class="vk-ihead"><span class="vk-when">' + esc(span(x.start, x.end)) + '</span>' +
-        '<span class="vk-chip ' + x.status + '">' + STATUS[x.status] + '</span></div>' +
+      var editing = st.form && st.form.id === x.id, q = x.status === 'pending' && x.waiting_on === 'driver', ms = x.msgs || [];
+      h += '<div class="vk-card vk-item' + (editing ? ' editing' : '') + (q ? ' q' : '') + '"><div class="vk-ihead"><span class="vk-when">' + esc(span(x.start, x.end)) + '</span>' +
+        (q ? '<span class="vk-chip q">Fråga till dig</span>' : '<span class="vk-chip ' + x.status + '">' + (x.status === 'pending' && x.waiting_on === 'owner' ? 'Svar skickat' : STATUS[x.status]) + '</span>') + '</div>' +
         '<div class="vk-imeta">' + esc(x.car) + ' · ' + dur(x.minutes) + ' · ' + kr(x.kr) + (x.status === 'pending' ? ' (preliminärt)' : '') + '</div>' +
         (x.comment ? '<div class="vk-icom">💬 ' + esc(x.comment) + '</div>' : '') +
         (x.issue_id ? '<div class="vk-icom">🔗 ' + esc(issueLabel(x.issue_id)) + '</div>' : '') +
-        (x.decision_comment ? '<div class="vk-boss">Ägaren: ' + esc(x.decision_comment) + '</div>' : '') +
+        (x.decision_comment && !ms.some(function (m) { return m.kind === x.status; }) ? '<div class="vk-boss">Ägaren: ' + esc(x.decision_comment) + '</div>' : '') +
+        threadHtml(x) +
+        (x.status === 'pending' && ms.length && !st.form ? '<div class="vk-reply"><textarea id="vk-r-' + x.id + '" class="vk-rtext" data-id="' + x.id + '" maxlength="1000" rows="2" placeholder="' + (q ? 'Skriv ditt svar till ägaren' : 'Vill du lägga till något? (valfritt)') + '">' + esc(st.drafts[x.id] || '') + '</textarea>' +
+          '<div class="pm-btns"><button type="button" class="primary vk-rsend" data-id="' + x.id + '"' + (st.busy ? ' disabled' : '') + '>Skicka svar</button></div></div>' : '') +
         (x.status === 'pending' && !st.form ? '<div class="vk-iact"><button type="button" class="vk-edit" data-id="' + x.id + '">Ändra</button><button type="button" class="vk-del" data-id="' + x.id + '">Ta bort</button></div>' : '') +
         '</div>';
     });
-    h += '<div class="tl-foot">Du kan ändra eller ta bort en registrering så länge den väntar. Ersättningen räknas med timpriset när ägaren godkänner.</div>';
+    h += '<div class="tl-foot">Du kan ändra eller ta bort en registrering så länge den väntar – även när ägaren har frågat något. Ersättningen räknas med timpriset när ägaren godkänner.</div>';
     body.innerHTML = h;
     var nb = document.getElementById('vk-new'); if (nb) nb.onclick = function () { st.form = newForm(null); draw(); };
     body.querySelectorAll('.vk-edit').forEach(function (b) {
       b.onclick = function () { var x = list.filter(function (y) { return y.id === +b.dataset.id; })[0]; if (x) { st.form = newForm(x); draw(); window.scrollTo(0, 0); } };
     });
     body.querySelectorAll('.vk-del').forEach(function (b) { b.onclick = function () { remove(+b.dataset.id); }; });
+    body.querySelectorAll('.vk-rtext').forEach(function (t) { t.oninput = function () { st.drafts[+t.dataset.id] = t.value; }; });
+    body.querySelectorAll('.vk-rsend').forEach(function (b) { b.onclick = function () { reply(+b.dataset.id); }; });
+    var ow = document.getElementById('vk-owner'); if (ow) ow.onclick = function () { location.href = 'admin.html#verkstad'; };
     if (st.form) bindForm();
   }
 
