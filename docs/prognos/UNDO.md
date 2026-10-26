@@ -114,3 +114,20 @@ delete from vault.secrets where name in ('PROGNOS_PIN', 'PROGNOS_TICK_KEY');
     drop table if exists public.prognos_morgon_log;
     ```
 - Edge `prognos-sync` oförändrad (v6). Appen läser `prognos_morgon(p_token)` som redan fanns.
+
+## t338–t340 (2026-10-26) – "babyskydd utan bil" + filternotis
+- Orsak: inget spårningsfel. Zon 293 hade 3 öppna Kombi-bokningar 16:35 (id 38–40) + babyskydd 16:35 (id 42), samma block. Kombi var bortvald i användarens Filter. Ingen data rensad, ingen edge-ändring.
+- **Backup-branch:** `backup/pre-filternotis-2026-10-26` = origin/main före ändringen.
+- **Feature PR** (`feature/prognos-filter-notis`, EJ mergad): notis "Filter aktivt: Kombi dold" överst i Schema (tryck → Filter), cache `?v=20261026pg9`.
+  - **Ångra:** stäng PR:n; efter ev. merge `git revert -m 1 <merge-sha>` + push.
+
+## t342/t343 – Varning "Tiderna är uppskattade och ungefärliga" + Rapportera fel (PR #11, ej mergad)
+- prognos.js: `renderWarn()` (Schema under statusraden + under Morgon-kortet), `reportBug()`, `appVersion()`, tryckbara celler (`data-pg-slot`, `st.repSlot`).
+- forum.js: `openEditor(p, pre)` + `F.compose(pre)` (öppnar Forum → Nytt inlägg, kategori Buggar, rubrik/text förifyllda; inget skickas förrän Publicera). Ingen ny backend.
+- style.css: `.pg-warn*`, `.pg-rep-*`, `.pg-n-sel`. index.html: style/prognos/forum.js `?v=20261026pg10`.
+- Ångra: `git revert <commit>` på grenen, eller stäng PR #11. Ingen Supabase-ändring.
+
+## t344 – Allmän "Rapportera fel" + bokningshistorik (ersätter tryck-på-siffra)
+- prognos.js: `renderWarn()` (allmän knapp), `reportBug()` hämtar `prognos_report_history` (zon, 60 min) → `historyLines()`; cellval borttaget. Cache-bust pg11 (style/prognos/forum).
+- SQL (applicerad live 2026-10-26 ~15:48, additiv): `supabase/migrations/20261026d_prognos_report_history.sql` – tabell `public.prognos_bookings_gone`, trigger `prognos_bookings_gone_trg` (after update of status på prognos_bookings), `private.prognos_bookings_gone_capture()`, RPC `public.prognos_report_history(text,text,int)`.
+- Ångra SQL: se slutet av migrationsfilen (drop function/trigger/function/table i den ordningen).

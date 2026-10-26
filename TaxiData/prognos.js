@@ -399,6 +399,7 @@
     return html;
   }
 
+  var CONF_TXT = { saker: 'säker', trolig: 'trolig', osaker: 'osäker' };
   function countCell(sum) {
     if (!sum) return '';
     var tip = sum.tip + (sum.mixed ? ' · blandat → svagaste markering' : '');
@@ -452,14 +453,29 @@
     return html;
   }
 
+  // Kort notis när en bilkategori är dold av Filter (barnstol/babyskydd kan då
+  // höra till en bil som inte syns). Tryck → Filter-fliken.
+  function renderFilterNotice() {
+    var cats = loadCats();
+    var hiddenCars = ALL_CATS.filter(function (c) { return !c.child && cats.indexOf(c.k) < 0; });
+    if (!hiddenCars.length) return '';
+    var names = hiddenCars.map(function (c) { return c.label; }).join(', ');
+    var childOn = ALL_CATS.some(function (c) { return c.child && cats.indexOf(c.k) >= 0; });
+    return '<button type="button" class="pg-filter-notice" data-panel="filter">' +
+      '<strong>Filter aktivt:</strong> ' + esc(names) + ' dold' + (hiddenCars.length > 1 ? 'a' : '') +
+      (childOn ? '<span class="pg-filter-notice-sub">Barnstol/babyskydd kan höra till en dold bil.</span>' : '') +
+      '<span class="pg-filter-notice-go" aria-hidden="true">Ändra ›</span></button>';
+  }
+
   function renderTimeline() {
     var zid = st.zoneTab;
     if (!ZONE_BY_ID[zid]) zid = '293';
+    var notice = renderFilterNotice();
     if (!st.err && st.loadedOnce && !(zoneCounts()[zid])) {
-      return '<div class="pg-card pg-empty-card">Inga förbokningar i ' + esc(ZONE_BY_ID[zid].name) +
+      return notice + '<div class="pg-card pg-empty-card">Inga förbokningar i ' + esc(ZONE_BY_ID[zid].name) +
         ' de närmaste 2 timmarna.</div>';
     }
-    return renderCarTimeline(zid);
+    return notice + renderCarTimeline(zid);
   }
 
   var WD = ['söndag', 'måndag', 'tisdag', 'onsdag', 'torsdag', 'fredag', 'lördag'];
@@ -541,7 +557,7 @@
       '<p class="pg-muted pg-mo-note">Antal bokningar per timme, inte exakta tider. Källan delar inte upp på bilkategori (t.ex. storbil). ' +
       'Under pågående morgon räknas bara bokningar som är kvar; efter 09:00 visas nästa morgon.</p>' +
       '<p class="pg-muted pg-mo-upd">Uppdaterad ' + esc(hhmm(m.generated_at, true)) + ' · uppdateras automatiskt varje minut</p>' +
-      '</div>';
+      '</div>' + renderWarn();
     return html;
   }
 
@@ -554,7 +570,92 @@
     var stTxt = s.code_needed ? 'Kod behövs' : (s.status === 'ok' ? 'Uppdaterad' : (s.status || '–'));
     return '<div class="pg-status">Senaste uppdatering: <strong>' + esc(lastTxt) +
       '</strong> · ' + esc(stTxt) +
-      '<br><span class="pg-muted">Tiderna är uppskattningar. Heldraget = säker, streckat = trolig, svagt = osäker. Blandat antal markeras med ?.</span></div>';
+      '<br><span class="pg-muted">Heldraget = säker, streckat = trolig, svagt = osäker. Blandat antal markeras med ?.</span></div>' +
+      renderWarn();
+  }
+
+  // Kort, lugn varning + en allmän knapp till felrapport (Forum → Buggar, förifyllt).
+  function renderWarn() {
+    return '<div class="pg-warn"><strong>Tiderna är uppskattade och ungefärliga.</strong> ' +
+      '<span class="pg-warn-sub">De räknas ut från Taxi Göteborgs prognos, inte bokningssystemet. Ser något fel ut? Rapportera gärna.</span>' +
+      '<span class="pg-warn-act"><button type="button" class="pg-rep-btn" data-pg-report="1">🐞 Rapportera fel</button></span></div>';
+  }
+
+  function appVersion() {
+    var v = (window.OM_DATA && window.OM_DATA.version) || '';
+    var sc = document.querySelector('script[src*="prognos.js"]');
+    var m = sc && /v=([^&]+)/.exec(sc.getAttribute('src'));
+    return (v ? v + ' · ' : '') + 'prognos ' + (m ? m[1] : '?');
+  }
+
+  function dm(d) { return p2(d.getDate()) + '/' + p2(d.getMonth() + 1); }
+  function hm(d) { return p2(d.getHours()) + ':' + p2(d.getMinutes()); }
+
+  // Kompakt lista: bokningar som visats i zonen senaste ~60 min, även försvunna.
+  function historyLines(rows) {
+    var now = Date.now(), groups = {}, order = [];
+    (rows || []).forEach(function (r) {
+      var est = new Date(r.estimated_at);
+      if (isNaN(est.getTime()) || est.getTime() > now + 150 * 60000) return;
+      var state;
+      if (r.status !== 'open') state = r.gone_at ? 'försvann ' + hm(new Date(r.gone_at)) : 'försvann (tid okänd)';
+      else state = est.getTime() < now - 15 * 60000 ? 'passerad' : 'visas nu';
+      var key = r.estimated_at + '|' + r.category + '|' + (r.confidence || '') + '|' + state;
+      var g = groups[key];
+      if (!g) { g = groups[key] = { est: est, cat: r.category, conf: r.confidence, state: state, n: 0, first: null }; order.push(key); }
+      g.n++;
+      var fs = r.first_seen ? new Date(r.first_seen) : null;
+      if (fs && !isNaN(fs.getTime()) && (!g.first || fs < g.first)) g.first = fs;
+    });
+    order.sort(function (x, y) { return groups[x].est - groups[y].est; });
+    var out = order.slice(0, 25).map(function (k) {
+      var g = groups[k];
+      return '• ' + hm(g.est) + ' ' + (CAT_LABEL[g.cat] || g.cat) + ' ×' + g.n + ' ' + (CONF_TXT[g.conf] || g.conf || '') +
+        ' · sedd ' + (g.first ? hm(g.first) : '–') + ' · ' + g.state;
+    });
+    if (order.length > 25) out.push('… +' + (order.length - 25) + ' till');
+    return out;
+  }
+
+  // Bygger förifylld felrapport. Prognoskoden tas ALDRIG med. Inget skickas förrän föraren trycker Publicera.
+  function reportBug() {
+    if (st.reporting) return;
+    st.reporting = true;
+    var tabName = { schema: 'Schema', morgon: 'Morgon', filter: 'Filter', notis: 'Notiser', kod: 'Kod' }[st.panel] || st.panel;
+    var z = ZONE_BY_ID[st.zoneTab] || ZONE_BY_ID['293'];
+    var cats = loadCats();
+    var hidden = ALL_CATS.filter(function (c) { return cats.indexOf(c.k) < 0; }).map(function (c) { return c.label; });
+    var zones = loadZones();
+    var s = st.status || {};
+    var last = s.last_ok_at ? new Date(s.last_ok_at) : null;
+    var lastTxt = last && !isNaN(last.getTime()) ? dm(last) + ' ' + hhmm(s.last_ok_at, true) : '–';
+    var hist = rpc('prognos_report_history', { p_zone: z.id, p_minutes: 60 }).catch(function () { return null; });
+    var timeout = new Promise(function (res) { setTimeout(function () { res(null); }, 4000); });
+    Promise.race([hist, timeout]).then(function (rows) {
+      st.reporting = false;
+      var now = new Date();
+      var lines = ['Beskriv vad som hände, t.ex. "bokningen kom aldrig fast jag var först i kö":', '', '', '— Info från appen (fylls i automatiskt) —',
+        'Sida: Prognos · ' + tabName,
+        'Zon: ' + z.name + ' (' + z.id + ')'];
+      if (st.panel === 'morgon') {
+        var m = st.morgon || {};
+        lines.push('Morgonprognos: ' + (m.dateDisplay || '–') + ', ' + (m.total != null ? m.total : '–') + ' bokningar till Landvetter');
+      }
+      lines.push('Filter: ' + (hidden.length ? hidden.join(', ') + ' dold' + (hidden.length > 1 ? 'a' : '') : 'alla kategorier') +
+        (zones ? ' · zoner: ' + zones.join(', ') : ''));
+      lines.push('Senaste data: ' + lastTxt);
+      lines.push('Skickad: ' + dm(now) + ' ' + hm(now));
+      lines.push('Version: ' + appVersion());
+      lines.push('', 'Bokningar i ' + z.name + ' senaste ~60 min (tid, kategori, antal, säkerhet, först sedd, läge):');
+      if (rows == null) lines.push('(kunde inte hämtas)');
+      else {
+        var h = historyLines(rows);
+        if (!h.length) lines.push('(inga)');
+        lines = lines.concat(h);
+      }
+      var pre = { cat: 'buggar', title: ('Prognos: fel i ' + z.name).slice(0, 120), body: lines.join('\n').slice(0, 4900) };
+      if (window.FORUM && typeof window.FORUM.compose === 'function') window.FORUM.compose(pre);
+    });
   }
 
   // Ritar bara när Prognos är den öppna sidan – annars skulle en sen
@@ -603,6 +704,7 @@
     root.querySelectorAll('[data-panel]').forEach(function (btn) {
       btn.onclick = function () { st.panel = btn.getAttribute('data-panel'); paint(); };
     });
+    root.querySelectorAll('[data-pg-report]').forEach(function (btn) { btn.onclick = reportBug; });
     root.querySelectorAll('[data-ztab]').forEach(function (btn) {
       btn.onclick = function () {
         saveTab(btn.getAttribute('data-ztab'));

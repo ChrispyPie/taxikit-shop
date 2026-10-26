@@ -603,3 +603,13 @@ html[data-theme="dark"] .pg-badge.pg-c-saker { border-color: #bee3f8; }
 .pg-mo-row.nu .pg-mo-lab, .pg-mo-row.nu .pg-mo-n { color: var(--text); font-weight: 700; }
 .pg-mo-row.klar { opacity: 0.45; }
 .pg-mo-row.klar .pg-mo-tag { color: var(--text-soft); font-weight: 500; }
+/* t339: notis när bilkategori är dold av Filter */
+.pg-filter-notice { display: block; width: 100%; margin: 0 0 8px; text-align: left; font: inherit; font-size: 0.85rem; color: var(--text); background: var(--surface-soft); border: 1px solid var(--border-soft); border-left: 3px solid var(--accent); border-radius: 10px; padding: 7px 10px; cursor: pointer; }
+.pg-filter-notice-sub { display: block; font-size: 0.78rem; color: var(--text-soft); margin-top: 2px; }
+.pg-filter-notice-go { float: right; color: var(--accent); font-weight: 600; margin-left: 8px; }
+/* t342: varning + Rapportera fel */
+.pg-warn { margin: 6px 0 10px; padding: 7px 10px; font-size: 0.82rem; line-height: 1.35; color: var(--text); background: var(--surface-soft); border: 1px solid var(--border-soft); border-radius: 10px; }
+.pg-warn-sub { color: var(--text-soft); }
+.pg-warn-act { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
+.pg-rep-btn { font: inherit; font-size: 0.82rem; font-weight: 600; color: var(--accent); background: transparent; border: 1px solid var(--accent); border-radius: 14px; padding: 3px 10px; cursor: pointer; }
+.pg-morgon + .pg-warn { margin-top: 10px; }
