@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaxiData</title>
   <script src="tema.js?v=20261026tm1"></script>
-  <link rel="stylesheet" href="style.css?v=20261026tm1">
+  <link rel="stylesheet" href="style.css?v=20261026pg4">
   <link rel="stylesheet" href="tema.css?v=20261026tm1">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -144,6 +144,7 @@
   <script src="om-data.js?v=20261026lk2"></script>
   <script src="om.js?v=20261025om1"></script>
   <script src="lonekoll.js?v=20261026tm1"></script>
+  <script src="prognos.js?v=20261026pg4"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -156,6 +157,7 @@
       { id: LONEKOLL.id, icon: LONEKOLL.icon, label: LONEKOLL.title, roles: ALLA },
       // Namn och ikon för Ankomster ändras i ankomster.js (ANKOMSTER.title / icon)
       { id: ANKOMSTER.id, icon: ANKOMSTER.icon, label: ANKOMSTER.title, roles: ALLA },
+      { id: PROGNOS.id, icon: PROGNOS.icon, label: PROGNOS.title, roles: ALLA },
       { id: KALENDER.id, icon: KALENDER.icon, label: KALENDER.title, roles: ALLA },
       // Statistik borttagen 2026-10-25 (tom platshållare): { id: 'statistik', icon: '📈', label: 'Statistik', roles: ALLA },
       { id: TOPPLISTOR.id, icon: TOPPLISTOR.icon, label: TOPPLISTOR.title, roles: ALLA },
@@ -313,7 +315,7 @@
         document.getElementById('driver-label').textContent = driverId;
         if (typeof loadData === 'function') loadData().then(render);
       } else {
-        if (savedView === ANKOMSTER.id || savedView === TOPPLISTOR.id || savedView === VERKSTAD.id || savedView === KALENDER.id || savedView === FORUM.id || savedView === OM.id || savedView === LONEKOLL.id) {
+        if (savedView === ANKOMSTER.id || savedView === PROGNOS.id || savedView === TOPPLISTOR.id || savedView === VERKSTAD.id || savedView === KALENDER.id || savedView === FORUM.id || savedView === OM.id || savedView === LONEKOLL.id) {
           current = savedView;
           try { history.pushState({ view: current }, ''); } catch (e) {}
         }
@@ -670,7 +672,7 @@
         lockBlocked();
       } else if (current === FORUM.id && FORUM.back && FORUM.back()) {
         // forumet gick tillbaka från ett inlägg till listan
-      } else if (current === 'profil' || current === ANKOMSTER.id || current === TOPPLISTOR.id || current === VERKSTAD.id || current === KALENDER.id || current === FORUM.id || current === OM.id || current === LONEKOLL.id) {
+      } else if (current === 'profil' || current === ANKOMSTER.id || current === PROGNOS.id || current === TOPPLISTOR.id || current === VERKSTAD.id || current === KALENDER.id || current === FORUM.id || current === OM.id || current === LONEKOLL.id) {
         goHome();
       }
     });
@@ -692,12 +694,16 @@
       var title = document.getElementById('title');
 
       if (current !== ANKOMSTER.id) ANKOMSTER.stop();
+      if (current !== PROGNOS.id && PROGNOS.stop) PROGNOS.stop();
       if (current === 'profil') {
         title.textContent = 'Profil';
         renderProfile();
       } else if (current === ANKOMSTER.id) {
         title.textContent = ANKOMSTER.title;
         ANKOMSTER.render(content);
+      } else if (current === PROGNOS.id) {
+        title.textContent = PROGNOS.title;
+        PROGNOS.render(content);
       } else if (current === TOPPLISTOR.id) {
         title.textContent = TOPPLISTOR.title;
         TOPPLISTOR.render(content);
@@ -795,7 +801,7 @@
         if (window.initServerStatus) initServerStatus('server-status');
         document.getElementById('driver-label').textContent = driverId;
         if (typeof loadData === 'function') loadData().then(render);
-      } else if (id === ANKOMSTER.id || id === TOPPLISTOR.id || id === VERKSTAD.id || id === KALENDER.id || id === FORUM.id || id === OM.id || id === LONEKOLL.id) {
+      } else if (id === ANKOMSTER.id || id === PROGNOS.id || id === TOPPLISTOR.id || id === VERKSTAD.id || id === KALENDER.id || id === FORUM.id || id === OM.id || id === LONEKOLL.id) {
         localStorage.setItem('taxi_view', id);
         current = id;
         try { history.pushState({ view: id }, ''); } catch (e) {}

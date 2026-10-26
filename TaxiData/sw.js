@@ -1,4 +1,4 @@
-/* TaxiData service worker: bara webbnotiser (push) för bevakade flyg och tåg.
+/* TaxiData service worker: webbnotiser (push) för bevakade flyg/tåg och prognos.
  * Ingen cache av sidor eller data här (appen hämtar alltid färsk data).
  * Ångra: ta bort filen och avregistrera i bevakning.js (se UNDO-flygbevakning-2026-10-25.md). */
 self.addEventListener('install', function () { self.skipWaiting(); });
