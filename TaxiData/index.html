@@ -11,6 +11,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="TaxiData">
   <meta name="theme-color" content="#ffffff">
+  <script>
+    // Startskärmens utseende (Inställningar → Startskärm). Sätts tidigt så att rutorna inte hoppar.
+    (function () { try { var v = localStorage.getItem('taxi_home_layout'); if (v === '2' || v === '3' || v === 'lista') document.documentElement.setAttribute('data-home', v); } catch (e) {} })();
+  </script>
   <style>
     #content { padding: 16px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 16px; }
@@ -24,6 +28,31 @@
       .icon .emoji { font-size: 30px; line-height: 1; margin-bottom: 7px; }
       .icon .label { font-size: 13px; line-height: 1.2; overflow-wrap: break-word; hyphens: manual; }
     }
+    /* Startskärm vald under Inställningar (html[data-home] = 2 | 3 | lista). Utan val gäller reglerna ovan. */
+    html[data-home] .grid { max-width: 760px; }
+    html[data-home="2"] .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    html[data-home="2"] .icon { min-height: 0; padding: 16px; display: block; }
+    html[data-home="2"] .icon .emoji { font-size: 32px; line-height: normal; margin-bottom: 8px; }
+    html[data-home="2"] .icon .label { font-size: 13px; }
+    html[data-home="3"] .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    html[data-home="3"] .icon { min-height: 92px; padding: 12px 4px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; }
+    html[data-home="3"] .icon .emoji { font-size: 30px; line-height: 1; margin-bottom: 7px; }
+    html[data-home="3"] .icon .label { font-size: 13px; line-height: 1.2; overflow-wrap: break-word; }
+    html[data-home="lista"] .grid { grid-template-columns: 1fr; gap: 8px; }
+    html[data-home="lista"] .icon { min-height: 52px; padding: 0 14px; display: flex; flex-direction: row; align-items: center; text-align: left; box-sizing: border-box; }
+    html[data-home="lista"] .icon .emoji { font-size: 24px; line-height: 1; margin: 0 12px 0 0; width: 30px; text-align: center; flex-shrink: 0; }
+    html[data-home="lista"] .icon .label { font-size: 15px; flex: 1; }
+    html[data-home="lista"] .icon::after { content: '›'; color: #a0aec0; font-size: 22px; margin-left: 8px; }
+    /* Valet på Inställningar-sidan */
+    .hl-opts { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+    .hl-opt { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 8px 12px; border: 1px solid #cbd5e0; border-radius: 8px; background: white; cursor: pointer; font-size: 15px; }
+    .hl-opt.on { border-color: #1a365d; box-shadow: 0 0 0 1px #1a365d; font-weight: 600; }
+    .hl-opt input { width: 20px; height: 20px; margin: 0; accent-color: #1a365d; flex-shrink: 0; }
+    .hl-prev { margin-left: auto; display: grid; gap: 2px; width: 34px; flex-shrink: 0; }
+    .hl-prev i { display: block; background: #a0aec0; border-radius: 2px; height: 8px; }
+    .hl-prev.c2 { grid-template-columns: repeat(2, 1fr); } .hl-prev.c2 i { height: 12px; }
+    .hl-prev.c3 { grid-template-columns: repeat(3, 1fr); }
+    .hl-prev.cl { grid-template-columns: 1fr; } .hl-prev.cl i { height: 5px; }
     header { display: flex; align-items: center; justify-content: space-between; }
     header h1 { position: absolute; left: 50%; transform: translateX(-50%); }
     .profile-btn { background: #1a365d; color: white; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -347,6 +376,36 @@
     }
 
     var toastTimer = null;
+    // Startskärm: 2 i bredd, 3 i bredd eller lista. Sparas i telefonen och gäller direkt.
+    var HOME_LAYOUTS = [
+      { v: '2', label: 'Stora rutor (2 i bredd)', prev: 'c2', n: 4 },
+      { v: '3', label: 'Mellan (3 i bredd)', prev: 'c3', n: 6 },
+      { v: 'lista', label: 'Lista', prev: 'cl', n: 4 }
+    ];
+    function getHomeLayout() {
+      var v = null; try { v = localStorage.getItem('taxi_home_layout'); } catch (e) {}
+      if (v === '2' || v === '3' || v === 'lista') return v;
+      return window.matchMedia('(max-width: 600px)').matches ? '3' : '';   // inget val: telefon = 3 i bredd
+    }
+    function setHomeLayout(v) {
+      try { localStorage.setItem('taxi_home_layout', v); } catch (e) {}
+      document.documentElement.setAttribute('data-home', v);
+    }
+    function renderHomeLayoutSetting(box) {
+      var cur = getHomeLayout(), h = '<div class="section"><h3 style="margin-top:0">Startskärm</h3>' +
+        '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">Välj hur knapparna på startsidan ska visas.</p><div class="hl-opts" role="radiogroup">';
+      HOME_LAYOUTS.forEach(function (o) {
+        h += '<label class="hl-opt' + (o.v === cur ? ' on' : '') + '"><input type="radio" name="home-layout" value="' + o.v + '"' + (o.v === cur ? ' checked' : '') + '>' +
+          '<span>' + o.label + '</span><span class="hl-prev ' + o.prev + '" aria-hidden="true">' + new Array(o.n + 1).join('<i></i>') + '</span></label>';
+      });
+      box.innerHTML = h + '</div></div>';
+      box.onchange = function (e) {
+        if (!e.target || e.target.name !== 'home-layout') return;
+        setHomeLayout(e.target.value);
+        renderHomeLayoutSetting(box);
+      };
+    }
+
     function showToast(msg) {
       var t = document.getElementById('app-toast');
       if (!t) { t = document.createElement('div'); t.id = 'app-toast'; t.className = 'app-toast'; t.setAttribute('role', 'alert'); document.body.appendChild(t); }
@@ -643,9 +702,12 @@
       } else if (current === LONEKOLL.id) {
         title.textContent = LONEKOLL.title;
         LONEKOLL.render(content);
-      } else if (current === 'installningar' && window.HJALPBOT) {
+      } else if (current === 'installningar') {
         title.textContent = 'Inställningar';
-        window.HJALPBOT.renderSettings(content);
+        content.onclick = null;
+        content.innerHTML = '<div id="home-layout-set"></div><div id="hb-set"></div>';
+        renderHomeLayoutSetting(document.getElementById('home-layout-set'));
+        if (window.HJALPBOT) window.HJALPBOT.renderSettings(document.getElementById('hb-set'));
       } else if (current) {
         title.textContent = current;
         content.innerHTML = '<div class="section"><p>Kommer snart: ' + current + '</p></div>';
