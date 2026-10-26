@@ -426,6 +426,7 @@ function render() {
   }
 
   if (loadFailed) {
+    document.getElementById('dashboard').style.opacity = ''; document.getElementById('dashboard').setAttribute('aria-busy', 'false');
     document.getElementById('dashboard').innerHTML =
       '<div class="section load-error" role="alert" style="text-align:center;padding:24px 16px;">' +
       '<div style="font-weight:600;margin-bottom:6px;">Kunde inte hämta data – försök igen</div>' +
@@ -447,9 +448,10 @@ function render() {
       dashEl.setAttribute('aria-busy', cp.html ? 'false' : 'true');
       return;
     }
-    dashEl.style.opacity = ''; dashEl.setAttribute('aria-busy', 'false');
     P = cp.res;
   }
+  // Data visas nu (från servern eller reservvägen get_trip_data): ta alltid bort nedtoningen.
+  { const d = document.getElementById('dashboard'); d.style.opacity = ''; d.setAttribute('aria-busy', 'false'); }
   let shifts = getShiftsInRange(rangeStart, rangeEnd);
   if (P) shifts = P.shifts.slice();
   shifts.sort((a, b) => (b.start || '').localeCompare(a.start || ''));
