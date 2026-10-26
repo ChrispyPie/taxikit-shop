@@ -504,14 +504,14 @@ html[data-theme="dark"] .pg-badge { background: #2a4365; color: #bee3f8; }
 .pg-table-diag thead { overflow: visible; }
 .pg-table-diag thead tr { overflow: visible; }
 .pg-table-diag thead th.pg-th-cat {
-  height: 88px; vertical-align: bottom; padding: 0 2px 0 0; position: relative;
+  height: var(--pg-head-h, 4.6em); vertical-align: bottom; padding: 0 2px 0 0; position: relative;
   overflow: visible; background: transparent; /* bakgrund på raden, annars målar nästa th över textslutet */
 }
 .pg-table-diag thead tr { background: var(--surface-soft); }
 .pg-th-rot {
   /* Ankrad i övre högra hörnet: texten går nedåt-vänster och slutar i spaltens topp-höger,
      så den aldrig går utanför högerkanten eller ner i raderna */
-  position: absolute; right: 8px; top: 8px;
+  position: absolute; right: 8px; top: 4px;
   display: block; width: max-content; white-space: nowrap;
   transform: rotate(-45deg); transform-origin: top right;
   font-size: 0.64rem; font-weight: 600; color: var(--text); line-height: 1;
@@ -523,7 +523,8 @@ html[data-theme="dark"] .pg-badge { background: #2a4365; color: #bee3f8; }
   padding: 0 !important; border: none !important;
   background: transparent !important;
 }
-.pg-table-diag thead th.pg-th-spacer { height: 88px; }
+.pg-table-diag thead th.pg-th-spacer { height: var(--pg-head-h, 4.6em); }
+.pg-table-diag thead th.pg-th-time { height: var(--pg-head-h, 4.6em); vertical-align: bottom; padding-bottom: 3px; }
 .pg-th-child { background: transparent; }
 .pg-th-child .pg-th-rot { color: var(--accent, #dd6b20); }
 .pg-td-child {
@@ -613,3 +614,53 @@ html[data-theme="dark"] .pg-badge.pg-c-saker { border-color: #bee3f8; }
 .pg-warn-act { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
 .pg-rep-btn { font: inherit; font-size: 0.82rem; font-weight: 600; color: var(--accent); background: transparent; border: 1px solid var(--accent); border-radius: 14px; padding: 3px 10px; cursor: pointer; }
 .pg-morgon + .pg-warn { margin-top: 10px; }
+/* t346: zonflikar som siffror – alla ryms på 360px utan sidoskroll */
+.pg-ztabs { flex-wrap: nowrap; overflow-x: auto; gap: 3px; }
+.pg-ztab { flex: 1 1 auto; min-width: 0; padding: 5px 2px; text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.pg-ztab .pg-ztab-n { margin-left: 2px; padding: 0 3px; min-width: 0.9em; }
+.pg-zline { font-size: 0.8rem; color: var(--text-soft); margin: -2px 0 6px; }
+.pg-zline strong { color: var(--text); font-weight: 600; }
+/* t348u: flikrad Schema · Morgon · Original · Filter · Notiser på en rad vid 360px (radbryts jämnt vid stor text) */
+.pg-tabs { flex-wrap: wrap; gap: 4px; }
+.pg-tab { flex: 1 1 auto; min-width: 0; padding: 6px 6px; font-size: 0.88rem; text-align: center; white-space: nowrap; }
+/* t348u: "Original" – samma upplägg som prognos.taxigoteborg.nu, i appens stil */
+.pg { --og-a: #D99A00; --og-f: #2F9E6B; --og-o: #8A8578; --og-s: #3B7DD8; --og-h: #7C5CD6; --og-b3: #E8712A; --og-track: #F1EEE6; }
+html[data-theme="dark"] .pg { --og-a: #F2B636; --og-f: #4CC08A; --og-o: #A8A396; --og-s: #6EA2EE; --og-h: #A08AF0; --og-b3: #F59A5C; --og-track: rgba(255,255,255,0.10); }
+.pg-og-tabs { margin-top: 10px; }
+.pg-og { margin-top: 10px; }
+.pg-og-head { margin-bottom: 8px; }
+.pg-og-title { font-weight: 700; font-size: 1rem; color: var(--text); }
+.pg-og-sub { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 4px; font-size: 0.8rem; color: var(--text-soft); }
+.pg-og-chip { background: var(--surface-soft); border: 1px solid var(--border-soft); border-radius: 6px; padding: 1px 7px; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+.pg-og-live { color: #2F9E6B; font-weight: 600; }
+.pg-og-live::before { content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: currentColor; margin-right: 4px; vertical-align: 1px; }
+.pg-og-live.err { color: #c53030; }
+.pg-og-upd b { color: var(--text); margin-left: 2px; font-variant-numeric: tabular-nums; }
+.pg-og-info { font-size: 0.8rem; color: var(--text-soft); margin: 6px 0 10px; line-height: 1.4; }
+.pg-og-total { background: var(--surface-soft); border: 1px solid var(--border-soft); border-radius: 12px; padding: 10px 14px; margin-bottom: 10px; }
+.pg-og-tlabel { font-size: 0.8rem; color: var(--text-soft); font-weight: 600; }
+.pg-og-tnum { font-size: 2.4rem; font-weight: 700; line-height: 1.05; color: var(--text); font-variant-numeric: tabular-nums; }
+.pg-og-tsub { font-size: 0.8rem; color: var(--text-soft); }
+.pg-og-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.pg-og-card { background: var(--surface); border: 1px solid var(--border-soft); border-radius: 12px; padding: 10px 12px; min-width: 0; }
+.pg-og-clabel { font-size: 0.88rem; font-weight: 600; color: var(--text); }
+.pg-og-cdesc { font-size: 0.72rem; color: var(--text-soft); margin: 1px 0 6px; }
+.pg-og-cval { font-size: 1.7rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.pg-og-cpct { font-size: 0.72rem; color: var(--text-soft); margin-top: 3px; }
+.pg-og-card.og-a .pg-og-cval { color: var(--og-a); } .pg-og-card.og-f .pg-og-cval { color: var(--og-f); }
+.pg-og-card.og-o .pg-og-cval { color: var(--og-o); } .pg-og-card.og-s .pg-og-cval { color: var(--og-s); }
+.pg-og-card.og-h .pg-og-cval { color: var(--og-h); } .pg-og-card.og-b3 .pg-og-cval { color: var(--og-b3); }
+.pg-og-sec { background: var(--surface); border: 1px solid var(--border-soft); border-radius: 12px; padding: 10px 10px 8px; }
+.pg-og-stitle { font-weight: 600; font-size: 0.9rem; color: var(--text); margin-bottom: 6px; }
+.pg-og-bhead, .pg-og-bcounts { display: flex; margin-left: 6.4rem; }
+.pg-og-bhead span, .pg-og-bcounts span { flex: 1 1 0; min-width: 0; text-align: center; font-size: 0.7rem; color: var(--text-soft); font-weight: 600; font-variant-numeric: tabular-nums; }
+.pg-og-bcounts span { min-height: 1.2em; margin-top: 2px; color: var(--text); }
+.pg-og-brow { display: flex; align-items: center; margin-top: 8px; }
+.pg-og-bname { width: 6.4rem; flex-shrink: 0; font-size: 0.75rem; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pg-og-track { flex: 1 1 0; height: 8px; background: var(--og-track); border-radius: 99px; overflow: hidden; margin: 0 3px; }
+.pg-og-fill { display: block; height: 100%; border-radius: 99px; }
+.pg-og-fill.og-a { background: var(--og-a); } .pg-og-fill.og-f { background: var(--og-f); } .pg-og-fill.og-o { background: var(--og-o); }
+.pg-og-fill.og-s { background: var(--og-s); } .pg-og-fill.og-h { background: var(--og-h); } .pg-og-fill.og-b3 { background: var(--og-b3); }
+.pg-og-src { font-size: 0.72rem; margin-top: 8px; }
+/* t348u: om flikarna inte ryms på en rad (stor text) → jämn 3+2-uppdelning i stället för en ensam flik */
+.pg-tabs.pg-tabs-wrap .pg-tab { flex: 1 1 30%; }

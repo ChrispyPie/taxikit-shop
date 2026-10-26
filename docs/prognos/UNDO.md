@@ -131,3 +131,11 @@ delete from vault.secrets where name in ('PROGNOS_PIN', 'PROGNOS_TICK_KEY');
 - prognos.js: `renderWarn()` (allmän knapp), `reportBug()` hämtar `prognos_report_history` (zon, 60 min) → `historyLines()`; cellval borttaget. Cache-bust pg11 (style/prognos/forum).
 - SQL (applicerad live 2026-10-26 ~15:48, additiv): `supabase/migrations/20261026d_prognos_report_history.sql` – tabell `public.prognos_bookings_gone`, trigger `prognos_bookings_gone_trg` (after update of status på prognos_bookings), `private.prognos_bookings_gone_capture()`, RPC `public.prognos_report_history(text,text,int)`.
 - Ångra SQL: se slutet av migrationsfilen (drop function/trigger/function/table i den ordningen).
+
+## t346/t348 – Zonnummer i flikar, Magasinet bort, tätare rubrik + fliken "Original" (PR, EJ mergad)
+- **Backup-branch:** `backup/pre-zonnummer-2026-10-26` = origin/main före ändringen. **Feature:** `feature/prognos-zon-nummer`. Cache-bust `?v=20261026pg12` (style/prognos/forum).
+- prognos.js: `ZONE_ORDER` utan 290 + `HIDDEN_ZONES=['290']` (bara UI; synk/data orörd). Gamla bevakningar på 290 stängs av via `prognos_watch_set(p_on:false)`. Zonflikar visar nummer + antal, rad "Zon 293 · Landvetter flygplats" under. `fitDiagHead()` (rubrikhöjd efter de roterade namnen), `fitTabs()` (3+2 vid stor text), ny flik **Original** (`renderOriginal()`, data från `prognos_original`).
+- style.css: `--pg-head-h`, `.pg-ztab*`, `.pg-zline`, `.pg-tabs-wrap`, `.pg-og-*`.
+- **SQL (REDAN APPLICERAD live 2026-10-26 ~16:00, additiv):** `supabase/migrations/20261026e_prognos_original.sql` – ny läsfunktion `public.prognos_original(text)` (vitlistade aggregat från senaste snapshot, kräver session). Om PR:n stängs påverkar den inget.
+  - **Ångra:** `drop function if exists public.prognos_original(text);`
+- **Ångra kod:** stäng PR:n. Efter ev. merge: `git revert -m 1 <merge-sha>` + push (ingen force push).

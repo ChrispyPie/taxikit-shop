@@ -15,9 +15,11 @@
     { id: '163', name: 'Astra', short: 'Astra' },
     { id: '406', name: 'Volvo', short: 'Volvo' },
     { id: '432', name: 'Volvo Cars Torslanda', short: 'Torslanda' },
-    { id: '15', name: 'Hotell Draken', short: 'Draken' },
-    { id: '290', name: 'Magasinet', short: 'Magasinet' }
+    { id: '15', name: 'Hotell Draken', short: 'Draken' }
   ];
+  // Magasinet (290) visas inte i appen (t346u): får aldrig bokningar, knuten till Landvetter.
+  // Synken i backend är oförändrad; 290 filtreras bara bort i UI.
+  var HIDDEN_ZONES = ['290'];
   var ZONE_BY_ID = {};
   ZONE_ORDER.forEach(function (z) { ZONE_BY_ID[z.id] = z; });
 
@@ -48,6 +50,7 @@
     status: null,
     bookings: [],
     morgon: null,
+    orig: null,
     zones: [],
     watches: [],
     loading: false,
@@ -111,7 +114,9 @@
       var raw = localStorage.getItem(LS_ZONES);
       if (!raw) return null;
       var arr = JSON.parse(raw);
-      return Array.isArray(arr) ? arr.map(String) : null;
+      if (!Array.isArray(arr)) return null;
+      arr = arr.map(String).filter(function (z) { return !!ZONE_BY_ID[z]; });
+      return arr.length ? arr : null;
     } catch (e) { return null; }
   }
   function saveZones(arr) {
@@ -241,13 +246,20 @@
       rpc('prognos_list_bookings', {}),
       rpc('prognos_morgon', {}),
       rpc('prognos_zones', {}),
-      rpc('prognos_watch_list', {})
+      rpc('prognos_watch_list', {}),
+      rpc('prognos_original', {}).catch(function () { return null; })
     ]).then(function (xs) {
       st.status = xs[0] || {};
       st.bookings = xs[1] || [];
       st.morgon = xs[2];
       st.zones = xs[3] || [];
-      st.watches = xs[4] || [];
+      st.orig = xs[5] || null;
+      st.watches = (xs[4] || []).filter(function (w) {
+        if (HIDDEN_ZONES.indexOf(String(w.zone_id)) < 0) return true;
+        // Gammal bevakning på dold zon → stäng av i tysthet (ofarligt, påverkar inte synken)
+        rpc('prognos_watch_set', { p_zone: String(w.zone_id), p_category: w.category, p_on: false }).catch(function () {});
+        return false;
+      });
       st.err = null;
       st.loadedOnce = true;
       if (st.status.code_needed) st.panel = 'kod';
@@ -349,7 +361,7 @@
       html += '<button type="button" class="pg-chip' + (on ? ' on' : '') + '" data-zone="' + z.id + '">' +
         esc(z.name) + '</button>';
     });
-    html += '</div><p class="pg-muted">Magasinet (290) finns med även om prognossajten inte har flik för den. Astra (163) enligt sajtens namn (JSON stavas ibland Aztra).</p></div>';
+    html += '</div><p class="pg-muted">Astra (163) enligt sajtens namn (JSON stavas ibland Aztra).</p></div>';
     return html;
   }
 
@@ -368,6 +380,86 @@
       html += '</div></div>';
     });
     html += '</div>';
+    return html;
+  }
+
+  // ---- Fliken "Original" (t348u): trogen kopia av prognos.taxigoteborg.nu:s egen vy ----
+  // Byggd från senaste serverhämtade ögonblicksbild (prognos_original). Ingen iframe, ingen kod hos föraren.
+  // Samma ordning/texter som deras sida: zon → total → 6 fordonstyper → 3 block (0–40, 40–80, 80–120 min).
+  // Magasinet (290) visas inte – deras sida visar den inte heller (den slås inte ihop med Landvetter).
+  var OG_CATS = [
+    ['a', 'Kombi (A)', 'Bokade via app', 'app'],
+    ['f', 'Barnstol (F)', 'Med barnstol', 'barnstol'],
+    ['o', 'Övriga', 'Övriga kategorier', 'ovrigt'],
+    ['s', 'Storbil', 'Kapacitet 8+', 'storbil'],
+    ['h', 'Elbil (H)', 'Elektrisk fordonskat.', 'elbil'],
+    ['b3', 'Babyskydd (3)', 'Babyskydd fordonskat.', 'babyskydd']
+  ];
+  function ogWindowLabel(mins) {
+    if (!mins) return 'nästa timme';
+    if (mins % 60 === 0) { var h = mins / 60; return h === 1 ? 'nästa timme' : 'nästa ' + h + ' timmar'; }
+    return 'nästa ' + mins + ' min';
+  }
+  function ogPct(v, t) { return t ? Math.round(v / t * 100) + '%' : '0%'; }
+  function renderOriginal() {
+    var o = st.orig;
+    if (!o || !o.zones) {
+      return '<div class="pg-empty-card">' + (st.loadedOnce ? 'Originalvyn kunde inte hämtas just nu.' : 'Laddar prognos…') + '</div>';
+    }
+    var zs = ZONE_ORDER.filter(function (z) { return o.zones[z.id]; });
+    if (!zs.some(function (z) { return z.id === st.zoneTab; }) && zs.length) saveTab(zs[0].id);
+    var html = '<div class="pg-ztabs pg-og-tabs" role="tablist">';
+    zs.forEach(function (z) {
+      var on = st.zoneTab === z.id, n = o.zones[z.id].total || 0;
+      html += '<button type="button" class="pg-ztab' + (on ? ' on' : '') + (n ? '' : ' pg-ztab-zero') + '" data-ztab="' + z.id +
+        '" aria-label="' + esc(z.name) + ', zon ' + z.id + ', ' + n + ' resor">' + esc(z.id) +
+        ' <span class="pg-ztab-n">' + n + '</span></button>';
+    });
+    html += '</div>';
+    var d = o.zones[st.zoneTab];
+    if (!d) return html + '<div class="pg-empty-card">Okänd zon</div>';
+    var name = (ZONE_BY_ID[st.zoneTab] || {}).name || d.name || '';
+    var tot = d.total || 0;
+    var win = d.windowMinutes || 120, bm = win / 3;
+    var blocks = (d.blocks && d.blocks.length === 3) ? d.blocks : [{}, {}, {}];
+    var maxBlock = Math.max(blocks[0].total || 0, blocks[1].total || 0, blocks[2].total || 0, 1);
+    var labels = ['0–' + bm + ' min', bm + '–' + (2 * bm) + ' min', (2 * bm) + '–' + win + ' min'];
+    if (d.timeFrom && d.timeFrom !== '--:--' && d.timeTo) {
+      var p = d.timeFrom.split(':').map(Number);
+      var add = function (m) { var t = p[0] * 60 + p[1] + m; return p2(Math.floor(t / 60) % 24) + ':' + p2(t % 60); };
+      labels = [d.timeFrom + '–' + add(bm), add(bm) + '–' + add(2 * bm), add(2 * bm) + '–' + d.timeTo];
+    }
+    var ok = d.status === 'OK';
+    html += '<div class="pg-og">' +
+      '<div class="pg-og-head"><div class="pg-og-title">Zon ' + esc(st.zoneTab) + ' · ' + esc(name) + '</div>' +
+      '<div class="pg-og-sub"><span class="pg-og-chip">' + esc(d.timeFrom || '--:--') + ' – ' + esc(d.timeTo || '--:--') + '</span>' +
+      '<span class="pg-og-live' + (ok ? '' : ' err') + '">' + (ok ? 'Live' : esc(d.status || '–')) + '</span>' +
+      '<span class="pg-og-upd">Senast uppdaterad <b>' + esc(d.last_updated || '–') + '</b></span></div></div>' +
+      '<div class="pg-og-info">Ögonblicksbild av planerade resor de närmaste ' + win + ' minuterna. Kunder kan boka på och av, så se det som ett estimat, inte en absolut sanning.</div>' +
+      '<div class="pg-og-total"><div class="pg-og-tlabel">Resor ' + ogWindowLabel(win) + '</div>' +
+      '<div class="pg-og-tnum">' + tot + '</div>' +
+      '<div class="pg-og-tsub">' + (tot === 1 ? '1 resa planerad' : tot + ' resor planerade') + '</div></div>' +
+      '<div class="pg-og-cards">';
+    OG_CATS.forEach(function (c) {
+      var v = d[c[3]] || 0;
+      html += '<div class="pg-og-card og-' + c[0] + '"><div class="pg-og-clabel">' + c[1] + '</div>' +
+        '<div class="pg-og-cdesc">' + c[2] + '</div><div class="pg-og-cval">' + v + '</div>' +
+        '<div class="pg-og-cpct">' + ogPct(v, tot) + ' av totalt</div></div>';
+    });
+    html += '</div><div class="pg-og-sec"><div class="pg-og-stitle">Fördelning per ' + Math.round(bm) + ' minuter</div>' +
+      '<div class="pg-og-bhead"><span>' + labels[0] + '</span><span>' + labels[1] + '</span><span>' + labels[2] + '</span></div>';
+    OG_CATS.forEach(function (c) {
+      html += '<div class="pg-og-brow"><span class="pg-og-bname">' + c[1] + '</span>';
+      blocks.forEach(function (b) {
+        var v = b[c[3]] || 0;
+        html += '<span class="pg-og-track"><span class="pg-og-fill og-' + c[0] + '" style="width:' + (v / maxBlock * 100) + '%"></span></span>';
+      });
+      html += '</div><div class="pg-og-bcounts">';
+      blocks.forEach(function (b) { var v = b[c[3]] || 0; html += '<span>' + (v > 0 ? v : '') + '</span>'; });
+      html += '</div>';
+    });
+    html += '</div><div class="pg-og-src pg-muted">Källa: prognos.taxigoteborg.nu, hämtad av servern' +
+      (o.fetched_at ? ' ' + esc(hhmm(o.fetched_at, true)) : '') + '. Magasinet visas inte (finns inte heller på deras sida).</div></div>';
     return html;
   }
 
@@ -392,10 +484,12 @@
       var on = st.zoneTab === z.id;
       var n = cnt[z.id] || 0;
       html += '<button type="button" class="pg-ztab' + (on ? ' on' : '') + (n ? '' : ' pg-ztab-zero') + '" data-ztab="' + z.id +
-        '" title="' + esc(z.name) + ' (' + z.id + ') · ' + n + ' förbokningar närmaste 2 h">' + esc(z.short) +
+        '" title="' + esc(z.name) + ' (' + z.id + ') · ' + n + ' förbokningar närmaste 2 h" aria-label="' + esc(z.name) + ', zon ' + z.id + ', ' + n + ' förbokningar">' + esc(z.id) +
         ' <span class="pg-ztab-n">' + n + '</span></button>';
     });
     html += '</div>';
+    var cur = ZONE_BY_ID[st.zoneTab];
+    if (cur) html += '<div class="pg-zline">Zon ' + esc(cur.id) + ' · <strong>' + esc(cur.name) + '</strong></div>';
     return html;
   }
 
@@ -621,7 +715,7 @@
   function reportBug() {
     if (st.reporting) return;
     st.reporting = true;
-    var tabName = { schema: 'Schema', morgon: 'Morgon', filter: 'Filter', notis: 'Notiser', kod: 'Kod' }[st.panel] || st.panel;
+    var tabName = { schema: 'Schema', morgon: 'Morgon', original: 'Original', filter: 'Filter', notis: 'Notiser', kod: 'Kod' }[st.panel] || st.panel;
     var z = ZONE_BY_ID[st.zoneTab] || ZONE_BY_ID['293'];
     var cats = loadCats();
     var hidden = ALL_CATS.filter(function (c) { return cats.indexOf(c.k) < 0; }).map(function (c) { return c.label; });
@@ -669,6 +763,7 @@
     var tabs = '<div class="pg-tabs">' +
       '<button type="button" class="pg-tab' + (st.panel === 'schema' ? ' on' : '') + '" data-panel="schema">Schema</button>' +
       '<button type="button" class="pg-tab' + (st.panel === 'morgon' ? ' on' : '') + '" data-panel="morgon">Morgon</button>' +
+      '<button type="button" class="pg-tab' + (st.panel === 'original' ? ' on' : '') + '" data-panel="original" title="Samma vy som prognos.taxigoteborg.nu">Original</button>' +
       '<button type="button" class="pg-tab' + (st.panel === 'filter' ? ' on' : '') + '" data-panel="filter">Filter</button>' +
       '<button type="button" class="pg-tab' + (st.panel === 'notis' ? ' on' : '') + '" data-panel="notis">Notiser</button>' +
       (st.status && st.status.code_needed
@@ -686,6 +781,8 @@
       body += renderNotis();
     } else if (st.panel === 'morgon') {
       body += renderMorgon();
+    } else if (st.panel === 'original') {
+      body += renderOriginal();
     } else {
       body += statusLine();
       body += '<div class="pg-legend"><span class="pg-n pg-c-saker">2</span> säker ' +
@@ -698,6 +795,38 @@
 
     st.el.innerHTML = '<div class="pg">' + tabs + body + '</div>';
     bind(st.el);
+    fitDiagHead(st.el);
+    fitTabs(st.el);
+  }
+
+  // Flikraden: får den inte plats på en rad → dela jämnt (3+2) i stället för en ensam flik på rad två.
+  function fitTabs(root) {
+    var fit = function () {
+      var row = root.querySelector('.pg-tabs');
+      if (!row) return;
+      row.classList.remove('pg-tabs-wrap');
+      var t = row.querySelectorAll('.pg-tab');
+      if (t.length && t[t.length - 1].offsetTop > t[0].offsetTop) row.classList.add('pg-tabs-wrap');
+    };
+    fit();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+  }
+
+  // Rubrikraden blir exakt så hög som de 45°-roterade kategorinamnen kräver (t346u).
+  function fitDiagHead(root) {
+    var fit = function () {
+      var tr = root.querySelector('.pg-table-diag thead tr');
+      if (!tr) return;
+      var top = tr.getBoundingClientRect().top, need = 0;
+      tr.querySelectorAll('.pg-th-rot').forEach(function (el) {
+        var r = el.getBoundingClientRect();
+        if (r.bottom - top > need) need = r.bottom - top;
+      });
+      if (need > 0) tr.style.setProperty('--pg-head-h', Math.ceil(need + 4) + 'px');
+    };
+    fit();
+    if (window.requestAnimationFrame) requestAnimationFrame(fit);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
   }
 
   function bind(root) {
