@@ -32,6 +32,7 @@
   var STATUS = [['ny', 'Ny'], ['pagar', 'Pågår'], ['klar', 'Klar'], ['avvisad', 'Avvisad']];
   var ERR = {
     via_master: 'Du är inloggad med huvudlösenordet. Bara föraren själv kan skriva i forumet.',
+    demo_read_only: 'Det här är ett demokonto. Du kan titta runt men inte ändra något.',
     need_title: 'Skriv en rubrik.', need_text: 'Skriv något först.', title_too_long: 'Rubriken är för lång (högst 120 tecken).',
     text_too_long: 'Texten är för lång.', too_many: 'Du har skrivit väldigt mycket idag. Försök igen i morgon.',
     too_many_photos: 'Högst 3 foton per inlägg.', too_big: 'Fotot är för stort.', bad_image: 'Det gick inte att läsa fotot. Försök med ett annat.',
@@ -188,6 +189,7 @@
     var h = '';
     if (st.flash) { h += '<div class="vk-flash">' + esc(st.flash) + '</div>'; st.flash = null; }
     h += ruleBox(false);
+    if (window.DEMO && DEMO.on()) h += '<div class="vk-card" style="font-size:13px;color:var(--c-718096)">🧪 Demokonto: du kan läsa forumet men inte skriva. Namn visas som "Förare 1", "Förare 2" …</div>';
     if (st.list && st.list.can_write) h += st.list.has_name ? '<button class="vk-new" data-a="new">+ Nytt inlägg</button>' : nameBox();
     if (st.notices && st.notices.length) {
       h += '<div class="vk-card"><div class="vk-lbl">Nytt för dig</div>';
@@ -483,6 +485,9 @@
   }
   function rulesAccept() {
     var content = root;
+    if (window.DEMO && DEMO.on()) {  // demokonto: godkännandet sparas bara i webbläsaren (servern tar inte emot ändringar)
+      setRulesOk(true); var dp = st.gatePre; st.gatePre = null; enterForum(content, dp); return;
+    }
     st.gateBusy = true; st.gateErr = null; drawGate();
     rpc('forum_rules_accept', { p_version: RULES_VERSION }).then(function (r) {
       st.gateBusy = false;
@@ -519,7 +524,7 @@
     enterForum(content, pre);
     // Cachen säger godkänt – bekräfta tyst mot servern (t.ex. ny regelversion eller rensad databas).
     rpc('forum_rules_status', { p_version: RULES_VERSION }).then(function (r) {
-      if (r && r.accepted === false) {
+      if (r && r.accepted === false && !(window.DEMO && DEMO.on())) {
         setRulesOk(false);
         if (root === content && st.view !== 'gate') {
           st.gatePre = st.view === 'edit' && st.edit && !st.edit.id ? (keepFields(), { cat: st.edit.cat, title: st.edit.title, body: st.edit.body }) : null;

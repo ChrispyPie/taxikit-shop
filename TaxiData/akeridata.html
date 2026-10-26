@@ -51,6 +51,7 @@
   <script>window.TAXI_MODE = 'company';</script>
   <script src="serverstatus.js?v=20261026tm1"></script>
   <script src="script.js?v=20261026tm1"></script>
+  <script src="demo.js?v=zdm1"></script>
   <script>
     // Åkeridata är för ägaren. TILLFÄLLIGT får även S admin se åkeriets nivå (utan förar-id)
     // under utvecklingen – samma lista som private.company_view_roles() på servern.
@@ -61,6 +62,16 @@
       let me = null;
       try { me = await tripRpc('get_me'); } catch (e) { location.href = 'index.html'; return; }
       if (me && me.must_change_password) { location.href = 'index.html'; return; }
+      // Ägar-demo: servern lämnar aldrig ut åkeriets siffror till en demosession. Visa en förklaring i stället.
+      if (me && me.demo && window.DEMO) {
+        DEMO.set(me); DEMO.banner();
+        const d = document.getElementById('denied');
+        d.innerHTML = '<div class="section" style="padding:16px; line-height:1.45;"><b>Åkeridata i demon</b><br>Här ser ägaren hela åkeriets intäkter, ' +
+          'körpass och mål per dag, vecka, månad och år, uppdelat per förare och bil. I demon visas inga av åkeriets riktiga siffror.' +
+          '<br><br><a href="admin.html" style="color:var(--c-3182ce);">Tillbaka till admin</a></div>';
+        d.classList.remove('hidden');
+        return;
+      }
       if (!me || !AKERI_ROLES.includes(me.category)) {
         document.getElementById('denied').classList.remove('hidden');
         return;

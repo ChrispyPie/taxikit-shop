@@ -96,13 +96,14 @@
   }
   var savedOnce = false;
   function save(sub) {
-    if (savedOnce || !token()) return Promise.resolve();
+    if (savedOnce || !token() || (window.DEMO && DEMO.on())) return Promise.resolve();
     var j = sub.toJSON();
     return rpc('push_save', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth, p_ua: navigator.userAgent.slice(0, 200) })
       .then(function () { savedOnce = true; });
   }
   function enable() {
     if (!supported) return Promise.resolve();
+    if (window.DEMO && DEMO.on()) { toast(DEMO.MSG); return Promise.resolve(); }  // demokonton får inga notiser
     unlockAudio();
     st.busy = true; repaint();
     return Notification.requestPermission().then(function (p) {

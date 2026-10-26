@@ -7,7 +7,11 @@
  * Äldre historik (före 24 okt 2026) är återskapad i efterhand och ungefärlig.
  */
 window.CHANGELOG = [
-  { datum: '2026-10-26', id: '2026-10-26f', rader: [
+  { datum: '2026-10-26', id: '2026-10-26g', rader: [
+    ['Nytt', 'Demokonto: ägaren kan bjuda in någon att titta på appen i 3 dagar. Personen skriver sitt namn och väljer eget lösenord, och kan bara titta.'],
+    ['Nytt', 'Demokonto: välj Förare eller Ägare. Ägar-demot visar adminpanelen med påhittade exempeluppgifter, aldrig åkeriets riktiga.'],
+    ['Nytt', 'Chaufförer: demokonton visas i en egen grupp Demo, där du kan skapa nya, se när de går ut och avsluta dem i förtid.'],
+    ['Förbättrat', 'Demokonton syns inte bland förarna och ser inga andra förares namn eller bilder.'],
     ['Fixat', 'Forum: rättat stavfel i forumreglerna (Roxx och uthängningar).'],
     ['Nytt', 'Prognos: en röd siffra på Prognos-rutan visar hur många nya bokningar som kommit sedan du tittade sist.'],
     ['Nytt', 'Verkstadstimmar: ägaren kan ställa frågor och föraren svara innan beslut.'],

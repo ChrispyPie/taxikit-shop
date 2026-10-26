@@ -47,6 +47,7 @@
     not_found: 'Det finns inte längre.',
     comment_too_long: 'Kommentaren får vara högst 500 tecken.',
     forbidden: 'Du har inte behörighet att göra det.',
+    demo_read_only: 'Det här är ett demokonto. Du kan titta runt men inte ändra något.',
     need_text: 'Skriv vad det gäller.',
     reply_closed: 'Ägaren har redan bestämt sig. Svaret skickades inte.',
     bad_supply: 'Välj vad som behövs.',

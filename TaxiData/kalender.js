@@ -46,6 +46,7 @@
     rate_limited: 'Du har skrivit många kommentarer. Vänta en stund.',
     not_found: 'Evenemanget finns inte längre.',
     forbidden: 'Du har inte behörighet att göra det.',
+    demo_read_only: 'Det här är ett demokonto. Du kan titta runt men inte ändra något.',
     unknown_city: 'Okänd stad.',
     invalid_range: 'Ogiltigt datumintervall.'
   };

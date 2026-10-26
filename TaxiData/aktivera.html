@@ -8,17 +8,31 @@
   <script src="tema.js?v=20261026tm1"></script>
   <link rel="stylesheet" href="style.css?v=20261026tm1">
   <link rel="stylesheet" href="tema.css?v=20261026tm1">
+  <script src="demo.js?v=zdm1"></script>
   <style>
     .login-box p.hint { font-size: calc(13px * var(--font-scale, 1)); color: var(--c-4a5568); margin: 0 0 12px; text-align: left; }
     #msg { margin-top: 8px; display: none; }
     #msg.err { color: var(--c-c53030); }
     #msg.ok { color: var(--c-276749); }
+    #demo-intro { font-size: calc(14px * var(--font-scale, 1)); line-height: 1.45; text-align: left; white-space: pre-line; margin: 0 0 12px; }
+    .demo-id { text-align: left; background: var(--c-f7fafc); border-radius: 8px; padding: 8px 10px; font-size: calc(13px * var(--font-scale, 1)); margin: 0 0 12px; }
+    .demo-id b { font-size: calc(16px * var(--font-scale, 1)); letter-spacing: 0.5px; }
   </style>
 </head>
 <body>
   <div id="login-screen">
     <div class="login-box">
-      <h2>Aktivera konto</h2>
+      <h2 id="heading">Aktivera konto</h2>
+      <div id="demo-form" style="display:none;">
+        <p id="demo-intro"></p>
+        <p class="demo-id">Ditt demo-ID: <b id="demo-id"></b><br>Det och lösenordet använder du när du loggar in igen.</p>
+        <p class="hint">Skriv ditt namn och välj ett eget lösenord (minst 6 tecken). Lösenordet sparas krypterat och ingen annan kan se det.</p>
+        <input type="text" id="demo-first" placeholder="Förnamn" autocomplete="given-name" maxlength="40">
+        <input type="text" id="demo-last" placeholder="Efternamn" autocomplete="family-name" maxlength="40">
+        <input type="password" id="dpw1" placeholder="Välj lösenord (minst 6 tecken)" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <input type="password" id="dpw2" placeholder="Upprepa lösenordet" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button id="dgo" onclick="activateDemo()">Starta demon</button>
+      </div>
       <div id="form" style="display:none;">
         <p class="hint">Skriv ditt förar-ID och välj ett lösenord (minst 6 tecken). Lösenordet sparas krypterat och ingen annan kan se det.</p>
         <input type="text" id="driver-id" placeholder="Förar-ID" inputmode="numeric" autocomplete="username" autocapitalize="off" autocorrect="off">
@@ -50,8 +64,11 @@
       invalid_link: 'Länken fungerar inte längre (redan använd eller ogiltig). Be din åkare om en ny länk.',
       expired_link: 'Länken har gått ut. Be din åkare om en ny länk.',
       wrong_id: 'Förar-ID:t stämmer inte med länken.',
-      password_too_short: 'Lösenordet måste vara minst 6 tecken.'
+      password_too_short: 'Lösenordet måste vara minst 6 tecken.',
+      need_name: 'Skriv både förnamn och efternamn.',
+      name_too_long: 'Namnet är för långt (högst 40 tecken).'
     };
+    var DEMO_INFO = null;
     function show(text, ok) {
       var el = document.getElementById('msg');
       el.textContent = text; el.className = ok ? 'ok' : 'err'; el.style.display = 'block';
@@ -61,6 +78,17 @@
       try {
         var r = await rpc('check_activation_link', { p_link: LINK });
         if (!r.ok) { show(errors[r.error] || errors.invalid_link); return; }
+        if (r.demo && window.DEMO) {
+          // Demoinbjudan: egen förklaring, namn i stället för förar-ID
+          DEMO_INFO = r;
+          document.title = 'Demo av TaxiData';
+          document.getElementById('heading').textContent = 'Välkommen till demon';
+          document.getElementById('demo-intro').textContent = DEMO.intro(r.demo_role, r.demo_expires_at);
+          document.getElementById('demo-id').textContent = r.demo_id;
+          document.getElementById('demo-form').style.display = 'block';
+          document.getElementById('demo-first').focus();
+          return;
+        }
         document.getElementById('form').style.display = 'block';
         document.getElementById('driver-id').focus();
       } catch (e) { show('Kunde inte kontakta servern. Försök igen om en stund.'); }
@@ -89,6 +117,30 @@
         show('Kontot är aktiverat! Du loggas in...', true);
         history.replaceState(null, '', location.pathname);
         setTimeout(function () { location.href = 'index.html'; }, 1200);
+      } catch (e) { show('Kunde inte kontakta servern. Försök igen.'); btn.disabled = false; }
+    }
+    async function activateDemo() {
+      var f = document.getElementById('demo-first').value.trim(), l = document.getElementById('demo-last').value.trim();
+      var p1 = document.getElementById('dpw1').value, p2 = document.getElementById('dpw2').value;
+      if (!f || !l) { show(errors.need_name); return; }
+      if (p1.trim().length < 6) { show(errors.password_too_short); return; }
+      if (p1 !== p2) { show('Lösenorden är inte lika.'); return; }
+      var btn = document.getElementById('dgo'); btn.disabled = true;
+      try {
+        var r = await rpc('demo_activate', { p_link: LINK, p_first_name: f, p_last_name: l, p_password: p1 });
+        if (!r.ok) {
+          show(errors[r.error] || 'Det gick inte att starta demon.');
+          if (r.error !== 'need_name' && r.error !== 'name_too_long' && r.error !== 'password_too_short') document.getElementById('demo-form').style.display = 'none';
+          btn.disabled = false;
+          return;
+        }
+        localStorage.setItem('taxi_session', r.token);
+        localStorage.setItem('taxi_logged_in', '1');
+        localStorage.setItem('taxi_driver', r.driver.id);
+        document.getElementById('demo-form').style.display = 'none';
+        show('Klart! Kom ihåg ditt demo-ID ' + DEMO_INFO.demo_id + '. Demon öppnas...', true);
+        history.replaceState(null, '', location.pathname);
+        setTimeout(function () { location.href = 'index.html'; }, 2500);
       } catch (e) { show('Kunde inte kontakta servern. Försök igen.'); btn.disabled = false; }
     }
     init();
