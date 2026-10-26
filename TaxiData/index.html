@@ -132,7 +132,7 @@
 
   <script src="serverstatus.js?v=20261026tm1"></script>
   <script src="badges.js?v=20261024x"></script>
-  <script src="demo.js?v=20261026zzsk1"></script>
+  <script src="demo.js?v=20261026zzzb1"></script>
   <script src="script.js?v=20261026zzsl1"></script>
   <script src="ankomster.js?v=20261025sb1"></script>
   <script src="bevakning.js?v=zdm1"></script>
@@ -143,7 +143,7 @@
   <script src="profilbild.js?v=zdm1"></script>
   <script src="forum.js?v=20261026zzdm1"></script>
   <script src="om-data.js?v=20261026nh3"></script>
-  <script src="changelog.js?v=20261026zzsl1"></script>
+  <script src="changelog.js?v=20261026zzzb1"></script>
   <script src="om.js?v=20261026nh3"></script>
   <script src="lonekoll.js?v=20261026tm1"></script>
   <script src="prognos.js?v=zdm1"></script>
@@ -785,12 +785,16 @@
       if (AKERI_ROLLER.indexOf(menuRole()) < 0 || !window.setBadge) return;
       if (Date.now() - wsBadgeAt < 30000) return;
       wsBadgeAt = Date.now();
-      fetch(TRIP_API_URL + '/rest/v1/rpc/workshop_pending_count', {
-        method: 'POST',
-        headers: { 'apikey': TRIP_API_KEY, 'Authorization': 'Bearer ' + TRIP_API_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ p_token: localStorage.getItem('taxi_session') || '' })
-      }).then(function (r) { return r.ok ? r.json() : 0; })
-        .then(function (n) { setBadge('workshop', +n || 0); })
+      // + nya anmälningar under Bil & verkstad (bil_open_count, migrationen 20261026n; saknas den räknas 0)
+      function call(name) {
+        return fetch(TRIP_API_URL + '/rest/v1/rpc/' + name, {
+          method: 'POST',
+          headers: { 'apikey': TRIP_API_KEY, 'Authorization': 'Bearer ' + TRIP_API_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p_token: localStorage.getItem('taxi_session') || '' })
+        }).then(function (r) { return r.ok ? r.json() : 0; }).catch(function () { return 0; });
+      }
+      Promise.all([call('workshop_pending_count'), call('bil_open_count')])
+        .then(function (r) { var o = r[1] || {}; setBadge('workshop', (+r[0] || 0) + (+o.supply || 0) + (+o.fault || 0)); })
         .catch(function () {});
     }
 
