@@ -11,6 +11,24 @@
   var FN = 'https://lpfdryvukqmjlgenuzpb.supabase.co/functions/v1/forum';
   var F = window.FORUM = { id: 'forum', title: 'Forum', icon: '💬' };
   var CATS = [['allmant', 'Allmänt'], ['hjalp', 'Hjälp'], ['forslag', 'Förslag'], ['buggar', 'Buggar']];
+  // t353u: system för klagomål på enskilda personer (del av intranätet, kan integreras senare). Byt namn här.
+  var COMPLAINT_SYSTEM = 'Rox';
+  var RULE_KEY = 'forum_rule_hidden';
+  // t354u: höj RULES_VERSION när reglerna ändras → alla förare måste godkänna på nytt.
+  var RULES_VERSION = 1;
+  function rulesKey() { return 'forum_rules_ok_' + (localStorage.getItem('taxi_driver') || 'x'); }
+  function rulesOk() { try { return localStorage.getItem(rulesKey()) === String(RULES_VERSION); } catch (e) { return false; } }
+  function setRulesOk(on) { try { if (on) localStorage.setItem(rulesKey(), String(RULES_VERSION)); else localStorage.removeItem(rulesKey()); } catch (e) {} }
+  function ruleText() {
+    return 'Håll god ton. Inga personangrepp eller hängningar av enskilda personer. Klagomål på en person tar du privat med din chef eller som ett ärende i ' + COMPLAINT_SYSTEM + '.';
+  }
+  function ruleHidden() { try { return localStorage.getItem(RULE_KEY) === '1'; } catch (e) { return false; } }
+  // I listan: kan fällas ihop per enhet. I formulär: visas alltid (fixed = true).
+  function ruleBox(fixed) {
+    if (!fixed && ruleHidden()) return '<button class="fo-rule-mini" data-a="ruleshow" aria-expanded="false">ℹ️ Forumregler</button>';
+    return '<div class="fo-rule' + (fixed ? ' fo-rule-form' : '') + '" role="note"><span class="fo-rule-i" aria-hidden="true">ℹ️</span><span class="fo-rule-t">' + esc(ruleText()) + '</span>' +
+      (fixed ? '' : '<button class="fo-rule-x" data-a="rulehide" aria-label="Fäll ihop forumreglerna" title="Fäll ihop">✕</button>') + '</div>';
+  }
   var STATUS = [['ny', 'Ny'], ['pagar', 'Pågår'], ['klar', 'Klar'], ['avvisad', 'Avvisad']];
   var ERR = {
     via_master: 'Du är inloggad med huvudlösenordet. Bara föraren själv kan skriva i forumet.',
@@ -53,6 +71,16 @@
     '.fo-small { display: flex; gap: 12px; margin-top: .25rem; } .fo-small button { background: none; border: none; padding: 0; color: var(--primary); font-size: .82rem; cursor: pointer; } .fo-small .fo-danger { color: var(--danger-text, #c53030); }\n' +
     '.fo-notice { display: block; width: 100%; text-align: left; background: var(--c-fefcbf); border: none; border-radius: 8px; padding: .5rem .6rem; margin-bottom: .4rem; font-size: .88rem; color: var(--c-2d3748); cursor: pointer; }\n' +
     '.fo-zoom { position: fixed; inset: 0; background: rgba(0,0,0,.88); z-index: 2000; display: flex; align-items: center; justify-content: center; } .fo-zoom img { max-width: 96vw; max-height: 90vh; }\n' +
+    '.fo-rule { display: flex; gap: .45rem; align-items: flex-start; background: var(--surface-soft, #f7fafc); border: 1px solid var(--border-soft, var(--border, #e2e8f0)); border-left: 3px solid var(--primary); border-radius: 8px; padding: .45rem .5rem .45rem .6rem; margin-bottom: .6rem; font-size: .84rem; line-height: 1.35; color: var(--text-soft, var(--text)); }\n' +
+    '.fo-rule-i { flex: 0 0 auto; font-size: .9em; line-height: 1.5; } .fo-rule-t { flex: 1 1 auto; min-width: 0; word-break: break-word; }\n' +
+    '.fo-rule-x { flex: 0 0 auto; background: none; border: none; color: var(--text-soft, var(--text)); font-size: .85rem; line-height: 1; padding: .15rem .25rem; margin: -.1rem -.1rem 0 0; cursor: pointer; border-radius: 6px; }\n' +
+    '.fo-rule-form { margin: .2rem 0 .45rem; }\n' +
+    '.fo-rule-mini { display: inline-block; background: none; border: none; padding: 0; margin: 0 0 .5rem; color: var(--primary); font-size: .82rem; cursor: pointer; }\n' +
+    '.fo-gate { max-width: 34rem; margin: .4rem auto 0; } .fo-gate h3 { margin: 0 0 .5rem; color: var(--primary); font-size: 1.15rem; }\n' +
+    '.fo-gate p { margin: 0 0 .6rem; color: var(--text); font-size: .95rem; line-height: 1.45; } .fo-gate .fo-gate-sub { color: var(--text-soft, var(--text)); font-size: .85rem; }\n' +
+    '.fo-gate-act { display: flex; gap: .5rem; justify-content: flex-end; flex-wrap: wrap; margin-top: .8rem; }\n' +
+    '.fo-gate-act button { border-radius: 10px; padding: .55rem 1rem; font: inherit; font-size: .95rem; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text); }\n' +
+    '.fo-gate-act .fo-gate-ok { background: var(--primary); color: var(--on-primary); border-color: var(--primary); font-weight: 600; }\n' +
     '.fo-err { color: var(--danger-text, #c53030); font-size: .9rem; margin: .3rem 0; }\n' +
     '.vk-field input.fo-in { width: 100%; padding: .55rem; border-radius: 8px; border: 1px solid var(--border); font: inherit; box-sizing: border-box; }';
   (function () { var s = document.createElement('style'); s.textContent = CSS; document.head.appendChild(s); })();
@@ -159,6 +187,7 @@
   function drawList() {
     var h = '';
     if (st.flash) { h += '<div class="vk-flash">' + esc(st.flash) + '</div>'; st.flash = null; }
+    h += ruleBox(false);
     if (st.list && st.list.can_write) h += st.list.has_name ? '<button class="vk-new" data-a="new">+ Nytt inlägg</button>' : nameBox();
     if (st.notices && st.notices.length) {
       h += '<div class="vk-card"><div class="vk-lbl">Nytt för dig</div>';
@@ -260,7 +289,7 @@
     if (!p.can_write && p.mod_ok && p.cat === 'akeri') h += '<div class="fo-ex" style="margin-top:.5rem">Det här är ett annat åkeris sektion. Du kan läsa och moderera, men inte skriva här.</div>';
     if (p.can_write && !p.has_name) { h += '</div>' + nameBox(); h += '<div>'; }
     else if (p.can_write) {
-      h += '<div class="vk-field" style="margin-top:.6rem"><textarea id="fo-com" rows="3" maxlength="2000" placeholder="Skriv en kommentar"></textarea></div>' +
+      h += '<div style="margin-top:.6rem">' + ruleBox(true) + '</div><div class="vk-field"><textarea id="fo-com" rows="3" maxlength="2000" placeholder="Skriv en kommentar"></textarea></div>' +
         (st.err ? '<div class="fo-err">' + esc(st.err) + '</div>' : '') + '<div class="vk-iact"><button data-a="comment">Skicka</button></div>';
     }
     h += '</div>';
@@ -306,7 +335,7 @@
     CATS.forEach(function (c) { h += '<option value="' + c[0] + '"' + (e.cat === c[0] ? ' selected' : '') + '>' + c[1] + ' (alla åkerier)</option>'; });
     h += '<option value="akeri"' + (e.cat === 'akeri' ? ' selected' : '') + '>🔒 ' + esc(myCo().name) + ' (bara ert åkeri)</option>';
     h += '</select></div><div class="vk-field"><label class="vk-lbl" for="fo-t">Rubrik</label><input class="fo-in" id="fo-t" maxlength="120" value="' + esc(e.title) + '"></div>' +
-      '<div class="vk-field"><label class="vk-lbl" for="fo-b">Text</label><textarea id="fo-b" rows="6" maxlength="5000">' + esc(e.body) + '</textarea></div>' +
+      '<div class="vk-field"><label class="vk-lbl" for="fo-b">Text</label>' + ruleBox(true) + '<textarea id="fo-b" rows="6" maxlength="5000">' + esc(e.body) + '</textarea></div>' +
       '<div class="vk-lbl">Foton (valfritt, högst 3)</div><div class="fo-photos">';
     e.old.forEach(function (x, i) { h += '<div class="fo-pw"><img src="' + esc(x.url || '') + '" alt="Foto"><button data-a="rmold" data-i="' + i + '" aria-label="Ta bort foto">✕</button></div>'; });
     e.files.forEach(function (u, i) { h += '<div class="fo-pw"><img src="' + u + '" alt="Nytt foto"><button data-a="rmnew" data-i="' + i + '" aria-label="Ta bort foto">✕</button></div>'; });
@@ -350,6 +379,9 @@
     if (a === 'cat') { st.cat = el.getAttribute('data-c') || null; st.list = null; drawList(); loadList().then(drawList); }
     else if (a === 'open') { st.view = 'post'; st.post = null; push('post'); drawPost(); loadPost(id).then(drawPost); }
     else if (a === 'list') { history.back(); }
+    else if (a === 'rulesok') { rulesAccept(); }
+    else if (a === 'rulesback') { st.gatePre = null; if (typeof window.goHome === 'function') window.goHome(); else history.back(); }
+    else if (a === 'rulehide' || a === 'ruleshow') { try { if (a === 'rulehide') localStorage.setItem(RULE_KEY, '1'); else localStorage.removeItem(RULE_KEY); } catch (x) {} drawList(); }
     else if (a === 'readall') { rpc('forum_notices', { p_mark_read: true }).then(function () { setUnread(0); st.notices = []; drawList(); }).catch(function (e) { fail(e); }); }
     else if (a === 'new') { openEditor(null); }
     else if (a === 'edit') { openEditor(p); }
@@ -432,16 +464,69 @@
     }
   }
 
-  F.render = function (content) {
-    root = content;
-    if (!root._foClick) { root._foClick = true; }
-    content.onclick = onClick;
+  // ---------- forumregler: godkänn innan forumet visas (t354u) ----------
+  function drawGate() {
+    if (!root) return;
+    root.innerHTML = '<div class="vk-card fo-gate" role="dialog" aria-modal="true" aria-labelledby="fo-gate-h">' +
+      '<h3 id="fo-gate-h">Forumregler</h3><p>' + esc(ruleText()) + '</p>' +
+      '<p class="fo-gate-sub">Du behöver godkänna reglerna innan du kan läsa och skriva i forumet.</p>' +
+      (st.gateErr ? '<div class="fo-err">' + esc(st.gateErr) + '</div>' : '') +
+      '<div class="fo-gate-act"><button type="button" data-a="rulesback">Tillbaka</button>' +
+      '<button type="button" class="fo-gate-ok" data-a="rulesok"' + (st.gateBusy ? ' disabled' : '') + '>' + (st.gateBusy ? 'Sparar...' : 'Jag godkänner') + '</button></div></div>';
+  }
+  function enterForum(content, pre) {
     st.view = 'list'; st.post = null; st.edit = null; st.editCom = null;
     drawList();
     loadList().then(function () { if (st.view === 'list' && root === content) drawList(); });
     // Förifyllt nytt inlägg från en annan sida (t.ex. Prognos → "Rapportera fel")
-    var pre = F._pre; F._pre = null;
     if (pre) openEditor(null, pre);
+  }
+  function rulesAccept() {
+    var content = root;
+    st.gateBusy = true; st.gateErr = null; drawGate();
+    rpc('forum_rules_accept', { p_version: RULES_VERSION }).then(function (r) {
+      st.gateBusy = false;
+      if (!r || !r.accepted) throw new Error('x');
+      setRulesOk(true);
+      var pre = st.gatePre; st.gatePre = null;
+      if (root === content && st.view === 'gate') enterForum(content, pre);
+    }).catch(function (e) {
+      st.gateBusy = false;
+      if (fail(e)) return;
+      st.gateErr = 'Det gick inte att spara. Kontrollera nätet och försök igen.';
+      if (st.view === 'gate') drawGate();
+    });
+  }
+
+  F.render = function (content) {
+    root = content;
+    if (!root._foClick) { root._foClick = true; }
+    content.onclick = onClick;
+    var pre = F._pre; F._pre = null;
+    if (!rulesOk()) {
+      // Visa reglerna direkt (inget forum-innehåll), kolla servern i bakgrunden – har föraren redan godkänt (annan enhet) släpper vi in.
+      st.view = 'gate'; st.post = null; st.edit = null; st.editCom = null; st.gatePre = pre || st.gatePre || null; st.gateErr = null; st.gateBusy = false;
+      drawGate();
+      rpc('forum_rules_status', { p_version: RULES_VERSION }).then(function (r) {
+        if (r && r.accepted) {
+          setRulesOk(true);
+          var p2 = st.gatePre; st.gatePre = null;
+          if (root === content && st.view === 'gate' && !st.gateBusy) enterForum(content, p2);
+        }
+      }).catch(function (e) { fail(e); });
+      return;
+    }
+    enterForum(content, pre);
+    // Cachen säger godkänt – bekräfta tyst mot servern (t.ex. ny regelversion eller rensad databas).
+    rpc('forum_rules_status', { p_version: RULES_VERSION }).then(function (r) {
+      if (r && r.accepted === false) {
+        setRulesOk(false);
+        if (root === content && st.view !== 'gate') {
+          st.gatePre = st.view === 'edit' && st.edit && !st.edit.id ? (keepFields(), { cat: st.edit.cat, title: st.edit.title, body: st.edit.body }) : null;
+          st.view = 'gate'; st.edit = null; st.post = null; drawGate();
+        }
+      }
+    }).catch(function () {});
   };
   // Öppna Forum direkt i "Nytt inlägg" med kategori/rubrik/text ifyllda. Inget skickas förrän föraren trycker Publicera.
   F.compose = function (pre) {
@@ -450,7 +535,7 @@
   };
   // Bakåtknappen: inne i ett inlägg eller i skrivläget går vi tillbaka till listan i stället för att lämna forumet
   F.back = function () {
-    if (st.view === 'list' || !root) return false;
+    if (st.view === 'list' || st.view === 'gate' || !root) return false;
     st.view = 'list'; st.post = null; st.edit = null; st.editCom = null; st.busy = false;
     drawList(); loadList().then(function () { if (st.view === 'list') drawList(); });
     return true;
