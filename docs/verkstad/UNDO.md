@@ -7,7 +7,7 @@
 - Cache-bust: `verkstad.js?v=20261026vd1` (index.html), `verkstad-admin.js?v=20261026vd1` (admin.html). Före: `20261026lk2` / `20261026tm1`.
 
 ## Databas (Supabase, redan körd – bara tillägg)
-Körda migreringar: `supabase/migrations/20261026g_verkstad_dialog.sql`, `20261026h_verkstad_dialog_ask_reopen.sql`.
+Körda migreringar: `supabase/migrations/20261026g_verkstad_dialog.sql`, `20261026g2_verkstad_dialog_ask_reopen.sql`.
 - Ny kolumn `workshop_hours.waiting_on` (null = ingen dialog).
 - Ny tabell `workshop_messages` (RLS på, inga policies – bara via RPC).
 - Nya RPC:er `workshop_ask`, `workshop_reply`.
