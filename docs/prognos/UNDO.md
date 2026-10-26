@@ -147,3 +147,15 @@ delete from vault.secrets where name in ('PROGNOS_PIN', 'PROGNOS_TICK_KEY');
 - Ingen Supabase-ändring.
 - Backup-gren: backup/pre-kategorisumma-2026-10-26 (= main 689d699 före ändringen).
 - Undo före merge: stäng PR:en. Efter merge: git revert -m 1 <merge-sha> via PR (ingen force push).
+
+## t364 – Aktivitetsprick på Prognos-rutan (PR feature/prognos-badge, pb1)
+- Ändrat: TaxiData/prognos.js (P.refreshBadge, markSeen, minutuppdatering när hemskärmen syns, nollställning vid besök), TaxiData/index.html (data-badge="prognos" på rutan, PROGNOS.refreshBadge() i renderMenu, prognos.js?v=20261026pb1). Ingen ändring i forum.js/om.js/changelog.js/style.css.
+- localStorage: prognos_new_<förar-id> (cachad siffra).
+- Supabase (additivt, redan live): supabase/migrations/20261026h_prognos_seen.sql – tabell public.prognos_seen (RLS på, ingen direkt åtkomst) + RPC prognos_new_count(p_token, p_cats text[]) och prognos_seen_set(p_token). Master-session sparar inget och får 0.
+  Undo (backa frontend först):
+    drop function if exists public.prognos_seen_set(text);
+    drop function if exists public.prognos_new_count(text, text[]);
+    drop table if exists public.prognos_seen;
+- Backup-gren: backup/pre-prognos-badge-2026-10-26 (= main 34e30b6 före ändringen).
+- Undo före merge: stäng PR:en. Efter merge: git revert -m 1 <merge-sha> via PR (ingen force push) + ny cache-bust.
+- Changelog-post (TaxiData/changelog.js) läggs till först när det går live.

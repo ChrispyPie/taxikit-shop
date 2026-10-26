@@ -142,10 +142,10 @@
   <script src="profilbild.js?v=20261026tm1"></script>
   <script src="forum.js?v=20261026pg16"></script>
   <script src="om-data.js?v=20261026nh3"></script>
-  <script src="changelog.js?v=20261026vd1"></script>
+  <script src="changelog.js?v=20261026zpb1"></script>
   <script src="om.js?v=20261026nh3"></script>
   <script src="lonekoll.js?v=20261026tm1"></script>
-  <script src="prognos.js?v=20261026pg15"></script>
+  <script src="prognos.js?v=20261026pb1"></script>
   <script src="prognos-notis.js?v=20261026pg6"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
@@ -746,7 +746,7 @@
           if (!canSee(menu[i])) continue;
           // Admin-rutan får en siffra när verkstadstid väntar på ägarens beslut.
           // Bil & verkstad får en siffra för olästa bil-notiser (admin: annars antal bilar som står).
-          html += '<div class="icon" onclick="openItem(\'' + menu[i].id + '\')"' + (menu[i].id === 'admin' ? ' data-badge="workshop"' : menu[i].id === VERKSTAD.id ? ' data-badge="bil"' : menu[i].id === FORUM.id ? ' data-badge="forum"' : menu[i].id === OM.id ? ' data-badge="nyheter"' : '') + '>';
+          html += '<div class="icon" onclick="openItem(\'' + menu[i].id + '\')"' + (menu[i].id === 'admin' ? ' data-badge="workshop"' : menu[i].id === VERKSTAD.id ? ' data-badge="bil"' : menu[i].id === FORUM.id ? ' data-badge="forum"' : menu[i].id === OM.id ? ' data-badge="nyheter"' : menu[i].id === PROGNOS.id ? ' data-badge="prognos"' : '') + '>';
           html += '<div class="emoji">' + menu[i].icon + '</div>';
           html += '<div class="label">' + menu[i].label + '</div></div>';
         }
@@ -755,7 +755,8 @@
         refreshWorkshopBadge();
         refreshBilBadge();
         refreshForumBadge();
-        if (OM.refreshBadge) OM.refreshBadge();  // prick på Om appen när det finns nyheter föraren inte sett
+        if (OM.refreshBadge) OM.refreshBadge();
+        if (PROGNOS.refreshBadge) PROGNOS.refreshBadge();  // antal nya prognosbokningar sedan senaste besök (t364u)  // prick på Om appen när det finns nyheter föraren inte sett
       }
       if (window.refreshBadges) refreshBadges();
     }
