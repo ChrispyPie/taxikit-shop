@@ -11,15 +11,18 @@
     '.om-faq summary { cursor: pointer; font-weight: 600; color: var(--primary); }\n' +
     '.om-faq p { margin: .35rem 0 0; white-space: pre-wrap; font-size: .93rem; color: var(--text); }\n' +
     '.om-ver { text-align: center; color: var(--text-soft); font-size: .85rem; margin: .4rem 0 1rem; }\n' +
-    '.om-nyh-dag { border-top: 1px solid var(--border-soft, #e2e8f0); padding: .5rem 0 .3rem; }\n' +
-    '.om-nyh-dag:first-of-type { border-top: none; padding-top: .2rem; }\n' +
-    '.om-nyh-datum { font-weight: 700; color: var(--primary); font-size: .95rem; margin-bottom: .25rem; }\n' +
-    '.om-nyh-ny { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 8px; background: var(--accent, #3182ce); color: #fff; font-size: .72rem; font-weight: 700; vertical-align: middle; }\n' +
-    '.om-nyh-rad { display: flex; gap: 6px; font-size: .9rem; line-height: 1.35; padding: .12rem 0; overflow-wrap: anywhere; }\n' +
-    '.om-nyh-typ { flex: 0 0 auto; font-size: .72rem; font-weight: 700; padding: 1px 6px; border-radius: 6px; margin-top: 1px; height: fit-content; border: 1px solid var(--border, #cbd5e0); color: var(--text-soft); min-width: 6.6em; text-align: center; box-sizing: border-box; }\n' +
-    '.om-nyh-typ.t-nytt { color: var(--ok, #2f855a); border-color: var(--ok, #2f855a); }\n' +
-    '.om-nyh-typ.t-fixat { color: var(--danger-text, #c53030); border-color: var(--danger, #c53030); }\n' +
-    '.om-nyh-not { color: var(--text-soft); font-size: .8rem; margin: .4rem 0 0; }';
+    '#om-nyheter { margin-bottom: .7rem; }\n' +
+    '.om-nyh-rubrik { font-weight: 700; color: var(--primary); font-size: 1.05rem; margin: .6rem .1rem .5rem; }\n' +
+    '.om-nyh-dag { background: var(--surface); border: 1px solid var(--border, #cbd5e0); border-radius: 12px; padding: .55rem .75rem .6rem; margin-bottom: .7rem; }\n' +
+    '.om-nyh-datum { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--primary); font-size: .98rem; padding-bottom: .4rem; margin-bottom: .45rem; border-bottom: 1px solid var(--border-soft, #e2e8f0); }\n' +
+    '.om-nyh-ny { padding: 1px 8px; border-radius: 999px; background: var(--badge, #e53e3e); color: #fff; font-size: .72rem; font-weight: 700; }\n' +
+    '.om-nyh-rad { display: flex; align-items: flex-start; gap: 8px; font-size: .92rem; line-height: 1.4; margin: 0 0 .55rem; overflow-wrap: anywhere; }\n' +
+    '.om-nyh-rad:last-child { margin-bottom: .1rem; }\n' +
+    '.om-nyh-rad b { color: var(--text); }\n' +
+    '.om-nyh-typ { flex: 0 0 auto; min-width: 6.4em; box-sizing: border-box; text-align: center; font-size: .7rem; font-weight: 700; letter-spacing: .02em; padding: 2px 6px; border-radius: 999px; margin-top: .15em; color: #fff; background: #3182ce; }\n' +
+    '.om-nyh-typ.t-nytt { background: #2f855a; }\n' +
+    '.om-nyh-typ.t-fixat { background: #c53030; }\n' +
+    '.om-nyh-not { color: var(--text-soft); font-size: .8rem; margin: 0 .1rem .5rem; }';
   var NYH_VISA = 3;            // antal datum som visas innan "Visa alla"
   var NYH_KEY = 'taxi_nyheter_sett';
   var MAN = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
@@ -83,18 +86,23 @@
     }, 4000);
   }
 
+  // "Prognos: text" -> område i fetstil, så att raderna går lätt att skumma
+  function radText(t) {
+    t = String(t || ''); var i = t.indexOf(': ');
+    return (i > 0 && i <= 24) ? '<b>' + esc(t.slice(0, i + 1)) + '</b> ' + esc(t.slice(i + 2)) : esc(t);
+  }
   function nyheter(alla, mark) {
     var L = window.CHANGELOG || [];
     if (!L.length) return '';
     var sett = seenMark(mark);
-    var h = '<div class="vk-card" id="om-nyheter"><div class="vk-lbl"><span class="badge-host' + (hasUnseen(mark) ? ' has-badge' : '') + '" data-badge="nyheter" style="padding-right:12px">Nyheter</span></div>';
+    var h = '<div id="om-nyheter"><div class="om-nyh-rubrik"><span class="badge-host' + (hasUnseen(mark) ? ' has-badge' : '') + '" data-badge="nyheter" style="padding-right:12px">Nyheter</span></div>';
     var ungefar = false;
     L.forEach(function (dag, i) {
       if (!alla && i >= NYH_VISA) return;
       if (dag.ungefar) ungefar = true;
       var ny = nyhId(dag) > sett;
       h += '<div class="om-nyh-dag"><div class="om-nyh-datum">' + esc(datumText(dag.datum)) + (ny ? '<span class="om-nyh-ny">Ny</span>' : '') + '</div>';
-      (dag.rader || []).forEach(function (r) { h += '<div class="om-nyh-rad"><span class="om-nyh-typ ' + typKlass(r[0]) + '">' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span></div>'; });
+      (dag.rader || []).forEach(function (r) { h += '<div class="om-nyh-rad"><span class="om-nyh-typ ' + typKlass(r[0]) + '">' + esc(r[0]) + '</span><span>' + radText(r[1]) + '</span></div>'; });
       h += '</div>';
     });
     if (alla && ungefar) h += '<p class="om-nyh-not">Äldre historik är ungefärlig.</p>';

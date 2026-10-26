@@ -17,8 +17,8 @@ window.CHANGELOG = [
     ['Nytt', 'Inställningar: välj Ljust, Mörkt eller Följ telefonen, och större eller mindre text.'],
     ['Nytt', 'Inställningar: välj hur startskärmen ser ut (2 eller 3 i bredd, eller lista).'],
     ['Nytt', 'Lönekoll: ungefär vad du får i lön för det du kört in.'],
-    ['Förbättrat', 'Startskärmen har ny ordning med 3 rutor i bredd på telefonen.'],
-    ['Fixat', 'Prognos visade ingen data för inloggade förare. Startsidan kunde skrivas över av Prognos.']
+    ['Förbättrat', 'Startskärmen: ny ordning med 3 rutor i bredd på telefonen.'],
+    ['Fixat', 'Prognos: visade ingen data för inloggade förare, och kunde skriva över startsidan.']
   ]},
   { datum: '2026-10-25', rader: [
     ['Nytt', 'Forum: inlägg, kommentarer, gilla och foton. Gemensamt för alla åkerier, plus en egen del för ditt åkeri.'],
@@ -28,12 +28,12 @@ window.CHANGELOG = [
     ['Nytt', 'Ankomster: bevaka flyg och tåg och få notis när de kommer och när sista väskan är ute.'],
     ['Förbättrat', 'Ankomster: tåg sorterade efter varifrån de kommer (Stockholm, Köpenhamn, Oslo) och lista över stationer.'],
     ['Nytt', 'Kalender: Åbytravet och Åbymässan finns med.'],
-    ['Förbättrat', 'Knappar på rad går att svepa åt sidan när de inte får plats.'],
-    ['Fixat', 'Körpassdata försöker igen själv om hämtningen misslyckas, i stället för att visa nollor.'],
-    ['Förbättrat', 'Tomma sidor (Statistik, Kommunikation) borttagna ur menyn.']
+    ['Förbättrat', 'Knapprader: går att svepa åt sidan när de inte får plats.'],
+    ['Fixat', 'Körpassdata: försöker igen själv om hämtningen misslyckas, i stället för att visa nollor.'],
+    ['Förbättrat', 'Menyn: tomma sidor (Statistik, Kommunikation) borttagna.']
   ]},
   { datum: '2026-10-24', rader: [
-    ['Nytt', 'Appen flyttade till taxikit.shop/TaxiData.'],
+    ['Nytt', 'Appen: flyttade till taxikit.shop/TaxiData.'],
     ['Nytt', 'Ankomster: tåg till Göteborg C och flyg till Landvetter.'],
     ['Nytt', 'Kalender: konserter, matcher, mässor och andra evenemang, med påminnelser.'],
     ['Nytt', 'Topplistor: se hur du ligger till jämfört med andra, anonymt.'],
@@ -41,21 +41,21 @@ window.CHANGELOG = [
     ['Nytt', 'Verkstadstimmar: registrera tid på verkstaden, ägaren godkänner.'],
     ['Nytt', 'Profil: fyll i och ändra dina uppgifter och byt lösenord.'],
     ['Nytt', 'Aktiveringslänk: nya förare väljer sitt eget lösenord. Glömt lösenord via e-post.'],
-    ['Nytt', 'Fliken År i Körpassdata och Topplistor.'],
-    ['Förbättrat', 'Lampa som visar om servern fungerar, och när datan senast hämtades.'],
-    ['Fixat', 'Resor och pass räknas rätt även när samma nummer används igen.']
+    ['Nytt', 'Körpassdata och Topplistor: ny flik År.'],
+    ['Förbättrat', 'Körpassdata: lampa som visar om servern fungerar, och när datan senast hämtades.'],
+    ['Fixat', 'Körpassdata: resor och pass räknas rätt även när samma nummer används igen.']
   ]},
   { datum: '2026-10-19', ungefar: true, rader: [
-    ['Förbättrat', 'Förarappen och adminsidan blev en app, med meny som beror på din roll.'],
-    ['Förbättrat', 'Körda kilometer tas från passet. Pass som går över midnatt blir rätt.']
+    ['Förbättrat', 'Appen: förarappen och adminsidan blev en app, med meny som beror på din roll.'],
+    ['Förbättrat', 'Körpassdata: körda kilometer tas från passet. Pass som går över midnatt blir rätt.']
   ]},
   { datum: '2026-10-18', ungefar: true, rader: [
-    ['Nytt', 'Startskärm med ikoner, profilmeny och inloggning mot servern.'],
+    ['Nytt', 'Appen: startskärm med ikoner, profilmeny och inloggning mot servern.'],
     ['Nytt', 'Admin: lista över förare, uppdelad på kategori.'],
-    ['Nytt', 'Välj egen period med kalender.']
+    ['Nytt', 'Körpassdata: välj egen period med kalender.']
   ]},
   { datum: '2026-10-16', ungefar: true, rader: [
-    ['Nytt', 'Första versionen: dina pass och resor per dag, vecka och månad, med betalsätt och mål.'],
-    ['Nytt', 'Logga in med ditt förar-ID.']
+    ['Nytt', 'Körpassdata: första versionen med dina pass och resor per dag, vecka och månad, med betalsätt och mål.'],
+    ['Nytt', 'Inloggning: logga in med ditt förar-ID.']
   ]}
 ];
