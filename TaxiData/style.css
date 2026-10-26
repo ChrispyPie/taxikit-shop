@@ -612,7 +612,4 @@ html[data-theme="dark"] .pg-badge.pg-c-saker { border-color: #bee3f8; }
 .pg-warn-sub { color: var(--text-soft); }
 .pg-warn-act { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
 .pg-rep-btn { font: inherit; font-size: 0.82rem; font-weight: 600; color: var(--accent); background: transparent; border: 1px solid var(--accent); border-radius: 14px; padding: 3px 10px; cursor: pointer; }
-.pg-rep-clear { font: inherit; font-size: 0.8rem; color: var(--text-soft); background: transparent; border: none; padding: 3px 6px; cursor: pointer; }
 .pg-morgon + .pg-warn { margin-top: 10px; }
-.pg-n[data-pg-slot] { cursor: pointer; }
-.pg-n.pg-n-sel { outline: 2px solid var(--accent); outline-offset: 2px; }

@@ -400,13 +400,11 @@
   }
 
   var CONF_TXT = { saker: 'säker', trolig: 'trolig', osaker: 'osäker' };
-  function countCell(sum, d, k) {
+  function countCell(sum) {
     if (!sum) return '';
     var tip = sum.tip + (sum.mixed ? ' · blandat → svagaste markering' : '');
-    var time = d ? p2(d.getHours()) + ':' + p2(d.getMinutes()) : '';
-    var sel = st.repSlot && st.repSlot.key === time + '|' + k ? ' pg-n-sel' : '';
-    return '<span class="pg-n pg-c-' + sum.conf + sel + '" title="' + esc(tip) + '" role="button" tabindex="0" data-pg-slot="' +
-      esc(time + '|' + k + '|' + sum.text + '|' + (CONF_TXT[sum.conf] || sum.conf)) + '">' + esc(sum.text) + '</span>';
+    return '<span class="pg-n pg-c-' + sum.conf + '" title="' + esc(tip) + '">' +
+      esc(sum.text) + '</span>';
   }
 
   function renderCarTimeline(zoneId) {
@@ -446,7 +444,7 @@
         var meta = CAT_META[k] || {};
         var sum = cellSummary(bySlot[d.getTime() + '|' + k]);
         var tdCls = 'pg-td-cell' + (meta.child ? ' pg-td-child' : '');
-        html += '<td class="' + tdCls + '">' + countCell(sum, d, k) + '</td>';
+        html += '<td class="' + tdCls + '">' + countCell(sum) + '</td>';
       });
       html += '<td class="pg-td-spacer" aria-hidden="true"></td>';
       html += '</tr>';
@@ -576,16 +574,11 @@
       renderWarn();
   }
 
-  // Kort, lugn varning + knapp till felrapport (Forum → Buggar, förifyllt).
+  // Kort, lugn varning + en allmän knapp till felrapport (Forum → Buggar, förifyllt).
   function renderWarn() {
-    var sel = st.panel === 'schema' ? st.repSlot : null;
     return '<div class="pg-warn"><strong>Tiderna är uppskattade och ungefärliga.</strong> ' +
-      '<span class="pg-warn-sub">De räknas ut från Taxi Göteborgs prognos, inte bokningssystemet. Ser något fel ut? ' +
-      (st.panel === 'schema' ? 'Tryck på en siffra för att rapportera just den tiden.' : '') + '</span>' +
-      '<span class="pg-warn-act"><button type="button" class="pg-rep-btn" data-pg-report="1">🐞 Rapportera fel' +
-      (sel ? ' för ' + esc(sel.time + ' ' + sel.cat) : '') + '</button>' +
-      (sel ? '<button type="button" class="pg-rep-clear" data-pg-repclear="1" aria-label="Ta bort vald tid">✕</button>' : '') +
-      '</span></div>';
+      '<span class="pg-warn-sub">De räknas ut från Taxi Göteborgs prognos, inte bokningssystemet. Ser något fel ut? Rapportera gärna.</span>' +
+      '<span class="pg-warn-act"><button type="button" class="pg-rep-btn" data-pg-report="1">🐞 Rapportera fel</button></span></div>';
   }
 
   function appVersion() {
@@ -595,8 +588,39 @@
     return (v ? v + ' · ' : '') + 'prognos ' + (m ? m[1] : '?');
   }
 
-  // Bygger förifylld felrapport. Prognoskoden tas ALDRIG med.
+  function dm(d) { return p2(d.getDate()) + '/' + p2(d.getMonth() + 1); }
+  function hm(d) { return p2(d.getHours()) + ':' + p2(d.getMinutes()); }
+
+  // Kompakt lista: bokningar som visats i zonen senaste ~60 min, även försvunna.
+  function historyLines(rows) {
+    var now = Date.now(), groups = {}, order = [];
+    (rows || []).forEach(function (r) {
+      var est = new Date(r.estimated_at);
+      if (isNaN(est.getTime()) || est.getTime() > now + 150 * 60000) return;
+      var state;
+      if (r.status !== 'open') state = r.gone_at ? 'försvann ' + hm(new Date(r.gone_at)) : 'försvann (tid okänd)';
+      else state = est.getTime() < now - 15 * 60000 ? 'passerad' : 'visas nu';
+      var key = r.estimated_at + '|' + r.category + '|' + (r.confidence || '') + '|' + state;
+      var g = groups[key];
+      if (!g) { g = groups[key] = { est: est, cat: r.category, conf: r.confidence, state: state, n: 0, first: null }; order.push(key); }
+      g.n++;
+      var fs = r.first_seen ? new Date(r.first_seen) : null;
+      if (fs && !isNaN(fs.getTime()) && (!g.first || fs < g.first)) g.first = fs;
+    });
+    order.sort(function (x, y) { return groups[x].est - groups[y].est; });
+    var out = order.slice(0, 25).map(function (k) {
+      var g = groups[k];
+      return '• ' + hm(g.est) + ' ' + (CAT_LABEL[g.cat] || g.cat) + ' ×' + g.n + ' ' + (CONF_TXT[g.conf] || g.conf || '') +
+        ' · sedd ' + (g.first ? hm(g.first) : '–') + ' · ' + g.state;
+    });
+    if (order.length > 25) out.push('… +' + (order.length - 25) + ' till');
+    return out;
+  }
+
+  // Bygger förifylld felrapport. Prognoskoden tas ALDRIG med. Inget skickas förrän föraren trycker Publicera.
   function reportBug() {
+    if (st.reporting) return;
+    st.reporting = true;
     var tabName = { schema: 'Schema', morgon: 'Morgon', filter: 'Filter', notis: 'Notiser', kod: 'Kod' }[st.panel] || st.panel;
     var z = ZONE_BY_ID[st.zoneTab] || ZONE_BY_ID['293'];
     var cats = loadCats();
@@ -604,25 +628,34 @@
     var zones = loadZones();
     var s = st.status || {};
     var last = s.last_ok_at ? new Date(s.last_ok_at) : null;
-    var lastTxt = last && !isNaN(last.getTime()) ? p2(last.getDate()) + '/' + p2(last.getMonth() + 1) + ' ' + hhmm(s.last_ok_at, true) : '–';
-    var sel = st.panel === 'schema' ? st.repSlot : null;
-    var lines = ['Beskriv vad som ser fel ut (t.ex. vad du såg och vad som faktiskt hände):', '', '', '— Info från appen (fylls i automatiskt) —',
-      'Sida: Prognos · ' + tabName];
-    if (st.panel === 'morgon') {
-      var m = st.morgon || {};
-      lines.push('Morgonprognos: ' + (m.dateDisplay || '–') + ', ' + (m.total != null ? m.total : '–') + ' bokningar till Landvetter');
-    } else {
-      lines.push('Zon: ' + z.name + ' (' + z.id + ')');
-    }
-    if (sel) lines.push('Vald tid: ' + sel.time + ' · ' + sel.cat + ' · ' + sel.text + ' (' + sel.conf + ')');
-    lines.push('Filter: ' + (hidden.length ? hidden.join(', ') + ' dold' + (hidden.length > 1 ? 'a' : '') : 'alla kategorier') +
-      (zones ? ' · zoner: ' + zones.join(', ') : ''));
-    lines.push('Senaste data: ' + lastTxt);
-    lines.push('Skickad: ' + p2(new Date().getDate()) + '/' + p2(new Date().getMonth() + 1) + ' ' + hhmm(new Date().toISOString(), false));
-    lines.push('Version: ' + appVersion());
-    var title = 'Prognos: fel i ' + (st.panel === 'morgon' ? 'Morgonprognosen' : z.name + (sel ? ' ' + sel.time + ' ' + sel.cat : ''));
-    var pre = { cat: 'buggar', title: title.slice(0, 120), body: lines.join('\n') };
-    if (window.FORUM && typeof window.FORUM.compose === 'function') window.FORUM.compose(pre);
+    var lastTxt = last && !isNaN(last.getTime()) ? dm(last) + ' ' + hhmm(s.last_ok_at, true) : '–';
+    var hist = rpc('prognos_report_history', { p_zone: z.id, p_minutes: 60 }).catch(function () { return null; });
+    var timeout = new Promise(function (res) { setTimeout(function () { res(null); }, 4000); });
+    Promise.race([hist, timeout]).then(function (rows) {
+      st.reporting = false;
+      var now = new Date();
+      var lines = ['Beskriv vad som hände, t.ex. "bokningen kom aldrig fast jag var först i kö":', '', '', '— Info från appen (fylls i automatiskt) —',
+        'Sida: Prognos · ' + tabName,
+        'Zon: ' + z.name + ' (' + z.id + ')'];
+      if (st.panel === 'morgon') {
+        var m = st.morgon || {};
+        lines.push('Morgonprognos: ' + (m.dateDisplay || '–') + ', ' + (m.total != null ? m.total : '–') + ' bokningar till Landvetter');
+      }
+      lines.push('Filter: ' + (hidden.length ? hidden.join(', ') + ' dold' + (hidden.length > 1 ? 'a' : '') : 'alla kategorier') +
+        (zones ? ' · zoner: ' + zones.join(', ') : ''));
+      lines.push('Senaste data: ' + lastTxt);
+      lines.push('Skickad: ' + dm(now) + ' ' + hm(now));
+      lines.push('Version: ' + appVersion());
+      lines.push('', 'Bokningar i ' + z.name + ' senaste ~60 min (tid, kategori, antal, säkerhet, först sedd, läge):');
+      if (rows == null) lines.push('(kunde inte hämtas)');
+      else {
+        var h = historyLines(rows);
+        if (!h.length) lines.push('(inga)');
+        lines = lines.concat(h);
+      }
+      var pre = { cat: 'buggar', title: ('Prognos: fel i ' + z.name).slice(0, 120), body: lines.join('\n').slice(0, 4900) };
+      if (window.FORUM && typeof window.FORUM.compose === 'function') window.FORUM.compose(pre);
+    });
   }
 
   // Ritar bara när Prognos är den öppna sidan – annars skulle en sen
@@ -672,20 +705,9 @@
       btn.onclick = function () { st.panel = btn.getAttribute('data-panel'); paint(); };
     });
     root.querySelectorAll('[data-pg-report]').forEach(function (btn) { btn.onclick = reportBug; });
-    root.querySelectorAll('[data-pg-repclear]').forEach(function (btn) { btn.onclick = function () { st.repSlot = null; paint(); }; });
-    root.querySelectorAll('[data-pg-slot]').forEach(function (el) {
-      el.onclick = function () {
-        var a = el.getAttribute('data-pg-slot').split('|');
-        var key = a[0] + '|' + a[1];
-        st.repSlot = st.repSlot && st.repSlot.key === key ? null
-          : { key: key, time: a[0], cat: CAT_LABEL[a[1]] || a[1], text: a[2], conf: a[3] };
-        paint();
-      };
-    });
     root.querySelectorAll('[data-ztab]').forEach(function (btn) {
       btn.onclick = function () {
         saveTab(btn.getAttribute('data-ztab'));
-        st.repSlot = null;
         paint();
       };
     });
