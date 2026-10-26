@@ -596,3 +596,10 @@ html[data-theme="dark"] .pg-badge.pg-c-saker { border-color: #bee3f8; }
 /* fyra flikar ska synas på 360px; vid stor text radbryts de i stället för att gömmas */
 .pg-tabs { flex-wrap: wrap; }
 .pg-tab { padding: 6px 12px; }
+/* t337u: pågående timme / klara timmar i Morgon */
+.pg-mo-tag { display: block; font-size: 0.72rem; font-weight: 600; margin-top: 1px; }
+.pg-mo-row.nu { background: var(--surface-soft); border-radius: 8px; padding-left: 6px; padding-right: 6px; box-shadow: inset 3px 0 0 var(--accent); }
+.pg-mo-row.nu .pg-mo-tag { color: var(--accent); }
+.pg-mo-row.nu .pg-mo-lab, .pg-mo-row.nu .pg-mo-n { color: var(--text); font-weight: 700; }
+.pg-mo-row.klar { opacity: 0.45; }
+.pg-mo-row.klar .pg-mo-tag { color: var(--text-soft); font-weight: 500; }
