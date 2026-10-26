@@ -69,14 +69,23 @@
   }
   function token() { return localStorage.getItem('taxi_session') || ''; }
   function p2(n) { return String(n).padStart(2, '0'); }
+  // script.js deklarerar TRIP_API_URL/TRIP_API_KEY med `const` → de hamnar INTE på window.
+  // Läs dem som globala bindningar först (window.* används bara av testharnessen).
+  function apiUrl() {
+    return (typeof TRIP_API_URL !== 'undefined' && TRIP_API_URL) || window.TRIP_API_URL || 'https://lpfdryvukqmjlgenuzpb.supabase.co';
+  }
+  function apiKey() {
+    return (typeof TRIP_API_KEY !== 'undefined' && TRIP_API_KEY) || window.TRIP_API_KEY || '';
+  }
   function rpc(name, args) {
     args = args || {};
     args.p_token = token();
-    return fetch((window.TRIP_API_URL || 'https://lpfdryvukqmjlgenuzpb.supabase.co') + '/rest/v1/rpc/' + name, {
+    var key = apiKey();
+    return fetch(apiUrl() + '/rest/v1/rpc/' + name, {
       method: 'POST',
       headers: {
-        apikey: window.TRIP_API_KEY,
-        Authorization: 'Bearer ' + window.TRIP_API_KEY,
+        apikey: key,
+        Authorization: 'Bearer ' + key,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(args)
