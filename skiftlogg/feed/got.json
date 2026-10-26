@@ -1,7 +1,7 @@
 {
   "airport": "GOT",
-  "updated": "2026-10-26T11:26:43+01:00",
-  "arrivalsUpdated": "2026-10-26T11:26:44+01:00",
+  "updated": "2026-10-26T11:30:46+01:00",
+  "arrivalsUpdated": "2026-10-26T11:30:47+01:00",
   "departuresUpdated": "2026-10-26T11:26:45+01:00",
   "yesterdayUpdated": "2026-10-26T05:45:31+01:00",
   "tomorrowUpdated": "2026-10-25T23:55:24+01:00",
@@ -63,25 +63,6 @@
       "firstBagEst": "2026-10-25T02:01:00Z",
       "lastBag": "2026-10-25T00:57:06Z",
       "rawStatus": "Landat 02:37 · Sista bagage"
-    },
-    {
-      "id": "LH2432",
-      "dir": "ANK",
-      "other": "München",
-      "iata": "",
-      "airline": "Lufthansa",
-      "status": "LAN",
-      "statusSv": "Landat 23:30",
-      "sched": "2026-10-24T21:05:00Z",
-      "est": "2026-10-24T21:30:00Z",
-      "act": "2026-10-24T21:30:00Z",
-      "terminal": "T1",
-      "gate": "12",
-      "baggage": "3",
-      "firstBag": "2026-10-24T21:47:31Z",
-      "firstBagEst": "2026-10-24T21:57:31Z",
-      "lastBag": "2026-10-24T21:56:32Z",
-      "rawStatus": "Landat 23:30 · Sista bagage"
     },
     {
       "id": "FR5738",
@@ -2084,11 +2065,11 @@
       "other": "München",
       "iata": "",
       "airline": "Lufthansa",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 11:30",
       "sched": "2026-10-26T10:40:00Z",
       "est": "2026-10-26T10:33:00Z",
-      "act": "",
+      "act": "2026-10-26T10:30:00Z",
       "terminal": "T1",
       "gate": "12",
       "baggage": "3",
@@ -2397,7 +2378,7 @@
       "gate": "20A",
       "baggage": "2",
       "firstBag": "",
-      "firstBagEst": "",
+      "firstBagEst": "2026-10-26T10:47:17Z",
       "lastBag": "",
       "rawStatus": "Landat 11:23"
     },
@@ -2494,7 +2475,7 @@
       "firstBag": "2026-10-26T10:23:54Z",
       "firstBagEst": "2026-10-26T10:26:45Z",
       "lastBag": "2026-10-26T10:25:41Z",
-      "rawStatus": "Första bagage · Landat 11:02"
+      "rawStatus": "Landat 11:02 · Sista bagage"
     },
     {
       "id": "BLX718",
