@@ -16,6 +16,7 @@ window.OM_DATA = {
     ['🤖', 'Hjälpbot', 'liten hjälpare längst ner på skärmen']
   ],
   builder: 'Appen byggs av Christian (S admin) och är under utveckling. Saker kan ändras, och ibland blir något fel.',
+  builder_demo: 'Appen är under utveckling. Saker kan ändras, och ibland blir något fel.',   // demokonton: inget namn
   report: 'Hittar du ett fel eller har en idé? Skriv i Forum under Buggar eller Förslag. Där ser du också när det händer något med ditt inlägg.',
   faq: [
     { q: 'Hur räknar Lönekoll ut min lön?',

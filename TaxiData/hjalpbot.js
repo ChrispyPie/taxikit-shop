@@ -260,7 +260,7 @@
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function driverKey() { return 'hb_char_' + (localStorage.getItem('taxi_driver') || 'x'); }
   function charId() { var c = localStorage.getItem(driverKey()); return c === 'off' ? 'off' : (CHARS[c] ? c : DEFAULT_CHAR); }
-  function firstName() { var d = window.driverData; return d && d.first_name ? String(d.first_name).split(' ')[0] : ''; }
+  function firstName() { var d = window.driverData; if (!d || d.demo) return ''; return d.first_name ? String(d.first_name).split(' ')[0] : ''; }   // demo: inget namn
 
   // ---------- sida ----------
   function page() {

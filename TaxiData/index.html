@@ -132,19 +132,19 @@
 
   <script src="serverstatus.js?v=20261026tm1"></script>
   <script src="badges.js?v=20261024x"></script>
-  <script src="demo.js?v=20261026zzzb1"></script>
-  <script src="script.js?v=20261027a1"></script>
+  <script src="demo.js?v=zzzda1"></script>
+  <script src="script.js?v=zzzda1"></script>
   <script src="ankomster.js?v=20261025sb1"></script>
   <script src="bevakning.js?v=zdm1"></script>
   <script src="topplistor.js?v=20261026zzsl1"></script>
   <script src="verkstad.js?v=zdm1"></script>
   <script src="kalender.js?v=zdm1"></script>
-  <script src="hjalpbot.js?v=20261025tg1"></script>
+  <script src="hjalpbot.js?v=zzzda1"></script>
   <script src="profilbild.js?v=zdm1"></script>
   <script src="forum.js?v=20261026zzdm1"></script>
-  <script src="om-data.js?v=20261026nh3"></script>
-  <script src="changelog.js?v=zzgn1"></script>
-  <script src="om.js?v=20261026nh3"></script>
+  <script src="om-data.js?v=zzzda1"></script>
+  <script src="changelog.js?v=zzzda1"></script>
+  <script src="om.js?v=zzzda1"></script>
   <script src="lonekoll.js?v=20261026tm1"></script>
   <script src="prognos.js?v=zdm1"></script>
   <script src="prognos-notis.js?v=20261026pg6"></script>
@@ -282,7 +282,7 @@
       try {
         var me = await rpc('get_me', { p_token: localStorage.getItem('taxi_session') || '' }, 10000);
         if (me) driverData = me;
-        // Demokonto: appen visar Christians data (servern bestämmer vems). Sparas så att alla sidor visar bannern.
+        // Demokonto: servern bestämmer vems data som visas och skickar då "Demoförare" som id och namn. Sparas så att alla sidor visar bannern.
         if (window.DEMO) {
           DEMO.set(me);
           if (me && me.demo) { localStorage.setItem('taxi_driver', me.id); driverId = me.id; }
