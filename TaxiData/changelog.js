@@ -7,6 +7,9 @@
  * Äldre historik (före 24 okt 2026) är återskapad i efterhand och ungefärlig.
  */
 window.CHANGELOG = [
+  { datum: '2026-10-26', id: '2026-10-26i', rader: [
+    ['Nytt', 'Körpassdata: äldre år (2025) finns nu i ett arkiv. Tryck på Visa äldre år under År, eller bläddra bakåt och tryck Hämta 2025. De hämtas bara när du vill och sparas inte i telefonen.'],
+  ] },
   { datum: '2026-10-26', id: '2026-10-26g', rader: [
     ['Nytt', 'Demokonto: ägaren kan bjuda in någon att titta på appen i 3 dagar. Personen skriver sitt namn och väljer eget lösenord, och kan bara titta.'],
     ['Nytt', 'Demokonto: välj Förare eller Ägare. Ägar-demot visar adminpanelen med påhittade exempeluppgifter, aldrig åkeriets riktiga.'],

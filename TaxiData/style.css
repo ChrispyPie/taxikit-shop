@@ -675,3 +675,19 @@ html[data-theme="dark"] .pg { --og-a: #F2B636; --og-f: #4CC08A; --og-o: #A8A396;
 .pg-tabs.pg-tabs-wrap .pg-tab { flex: 1 1 30%; }
 .pg-stale { color: #c05621; font-weight: 600; }
 html[data-theme="dark"] .pg-stale { color: #f6ad55; }
+
+/* Arkiv: äldre år hämtas bara när föraren trycker (t379u) */
+.arkiv-panel { text-align: center; padding: 16px; }
+.arkiv-title { font-weight: 600; margin-bottom: 6px; }
+.arkiv-note { opacity: .75; font-size: .88em; margin: 6px 0 10px; }
+.arkiv-btn { padding: 10px 22px; border-radius: 999px; border: 2px solid var(--primary); background: transparent; color: var(--primary); font-weight: 600; font-size: 1em; cursor: pointer; }
+.arkiv-btn:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+.arkiv-years { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 8px 0; }
+.arkiv-chip { padding: 8px 16px; border-radius: 999px; border: 2px solid var(--primary); background: var(--primary); color: var(--on-primary, #fff); font-weight: 600; font-size: .95em; }
+.arkiv-chip.done { background: transparent; color: var(--primary); }
+span.arkiv-chip { display: inline-block; }
+.arkiv-loading { display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600; }
+.arkiv-spin { width: 18px; height: 18px; border: 3px solid var(--primary); border-right-color: transparent; border-radius: 50%; animation: arkiv-spin .8s linear infinite; }
+@keyframes arkiv-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .arkiv-spin { animation-duration: 2.4s; } }
+.arkiv-error { color: #c53030; margin-top: 8px; font-size: .9em; }

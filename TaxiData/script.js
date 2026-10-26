@@ -76,6 +76,7 @@ async function loadData() {
     }
     data = res || {};
     loadFailed = false;
+    archiveMergeInto(data);   // äldre år som föraren själv hämtat i den här sessionen (bara i minnet)
 
     const seenShifts = new Set();
     data.shifts = (data.shifts || []).filter(s => {
@@ -609,6 +610,9 @@ function render() {
     html += `<div class="section">${looseTripsRow(looseTrips)}</div>`;
   }
 
+  const arkivHtml = archivePanelHtml(rangeStart, rangeEnd);
+  html = arkivHtml + html;   // överst, så att knappen syns direkt
+
   const dash = document.getElementById('dashboard');
   dash.innerHTML = html;
   restoreOpen(dash);
@@ -655,6 +659,96 @@ window.taxiEnsureData = async function () {
   if (COMPANY) return;
   if (!data || !data.shifts) await loadData();
 };
+
+// ---- Arkiv: äldre år (före appens data) ----
+// Äldre år ligger i ett separat arkiv på servern och hämtas ALDRIG automatiskt. Föraren trycker
+// själv på "Visa äldre år" / "Hämta 2025". Året läggs då till i minnet för den här sessionen
+// (sparas inte i telefonen) så att Dag/Vecka/Månad/År fungerar som vanligt för det året.
+const archive = { years: null, listState: 'idle', loaded: {}, loading: null, error: null, open: false };
+function archiveMergeInto(d) {
+  Object.keys(archive.loaded).forEach(y => {
+    const a = archive.loaded[y];
+    d.trips = (d.trips || []).concat(a.trips || []);
+    d.shifts = (d.shifts || []).concat(a.shifts || []);
+  });
+}
+// Första dagen som finns i appens vanliga data (current). Äldre än så = arkivet.
+function dataStartDate() {
+  let min = '';
+  (data.trips || []).forEach(t => { if (!t._arkiv && t.startdatum && (!min || t.startdatum < min)) min = t.startdatum; });
+  return min ? new Date(min + 'T00:00:00') : new Date(2026, 0, 1);
+}
+function archivePanelHtml(rangeStart, rangeEnd) {
+  if (!data || loadFailed) return '';
+  const start = dataStartDate();
+  const oldView = rangeStart < start;
+  const y = rangeStart.getFullYear();
+  if (!oldView && currentTab !== 'ar') return '';
+  const btn = 'class="arkiv-btn" type="button"';
+  let inner = '';
+  if (archive.loading) {
+    inner = `<div class="arkiv-loading" role="status" aria-live="polite"><span class="arkiv-spin" aria-hidden="true"></span>Hämtar ${archive.loading} från arkivet…</div>
+      <div class="arkiv-note">Det kan ta några sekunder.</div>`;
+  } else if (oldView && !archive.loaded[y]) {
+    inner = `<div class="arkiv-title">${y} ligger i arkivet</div>
+      <div class="arkiv-note">Appen visar data från ${months[start.getMonth()].toLowerCase()} ${start.getFullYear()}. Äldre år hämtas bara när du vill.</div>
+      <button ${btn} onclick="archiveLoadYear(${y}, false)">Hämta ${y}</button>`;
+  } else {
+    const loadedYears = Object.keys(archive.loaded).sort().reverse();
+    const chips = loadedYears.map(ly => `<span class="arkiv-chip done">✓ ${ly}</span>`).join('');
+    if (archive.open) {
+      if (archive.listState === 'loading') inner = `<div class="arkiv-loading" role="status"><span class="arkiv-spin" aria-hidden="true"></span>Hämtar lista över äldre år…</div>`;
+      else if (archive.years && archive.years.length) {
+        inner = `<div class="arkiv-title">Äldre år i arkivet</div><div class="arkiv-years">` +
+          archive.years.map(r => archive.loaded[r.year]
+            ? `<button type="button" class="arkiv-chip done" onclick="archiveGoYear(${r.year})">✓ ${r.year}</button>`
+            : `<button type="button" class="arkiv-chip" onclick="archiveLoadYear(${r.year}, true)">${r.year}</button>`).join('') + `</div>
+          <div class="arkiv-note">Hämtas bara för den här gången och sparas inte i telefonen.</div>`;
+      } else if (archive.years) inner = `<div class="arkiv-note">Det finns inga äldre år i arkivet ännu.</div>`;
+    } else {
+      inner = `<button ${btn} onclick="archiveOpenList()">Visa äldre år</button>` +
+        (chips ? `<div class="arkiv-years">${chips}</div><div class="arkiv-note">Inläst från arkivet för den här gången.</div>` : '');
+    }
+  }
+  if (archive.error) inner += `<div class="arkiv-error" role="alert">${escHtml(archive.error)}</div>`;
+  return `<div class="section arkiv-panel">${inner}</div>`;
+}
+async function archiveOpenList() {
+  archive.open = true; archive.error = null;
+  if (!archive.years) {
+    archive.listState = 'loading'; render();
+    try { const r = await tripRpc('get_trip_archive_years', {}, 15000); archive.years = Array.isArray(r) ? r : []; }
+    catch (e) { archive.years = null; archive.open = false; archive.error = 'Kunde inte hämta listan. Försök igen.'; }
+    archive.listState = 'idle';
+  }
+  render();
+}
+function archiveGoYear(y) {
+  currentTab = 'ar'; lastTab = 'ar'; customRange = null;
+  currentDate = new Date(y, 0, 1);
+  localStorage.setItem(TAB_KEY, currentTab);
+  archive.open = false;
+  render();
+}
+async function archiveLoadYear(y, jump) {
+  if (archive.loading) return;
+  if (archive.loaded[y]) { if (jump) archiveGoYear(y); return; }
+  archive.loading = y; archive.error = null; render();
+  try {
+    const r = await tripRpc('get_trip_archive', { p_year: y }, 30000);
+    const mark = x => Object.assign({}, x, { _arkiv: y });
+    const a = { trips: ((r && r.trips) || []).map(mark), shifts: ((r && r.shifts) || []).map(mark) };
+    archive.loaded[y] = a;
+    data.trips = (data.trips || []).concat(a.trips);
+    data.shifts = (data.shifts || []).concat(a.shifts);
+    tripsByDriver = null; orphanTrips = null;
+    if (!COMPANY && DRIVER_PICKER_ROLES.includes(myRole)) await setupDriverPicker();
+  } catch (e) {
+    archive.error = 'Kunde inte hämta ' + y + '. Försök igen.';
+  }
+  archive.loading = null;
+  if (jump && archive.loaded[y]) archiveGoYear(y); else render();
+}
 
 // Vilka rader som är utfällda sparas så att de förblir utfällda när man byter
 // datum, flik, egen period eller förare. Bara »-knappen (idag) fäller ihop allt.

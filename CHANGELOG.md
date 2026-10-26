@@ -6,6 +6,7 @@ Samma innehåll som visas under **Om appen → Nyheter** i appen. Källan är `T
 
 ## 26 oktober 2026
 
+- **Nytt:** Körpassdata: äldre år (2025) finns nu i ett arkiv. Tryck på Visa äldre år under År, eller bläddra bakåt och tryck Hämta 2025. De hämtas bara när du vill och sparas inte i telefonen.
 - **Nytt:** Demokonto: ägaren kan bjuda in någon att titta på appen i 3 dagar. Personen skriver sitt namn och väljer eget lösenord, och kan bara titta.
 - **Nytt:** Demokonto: välj Förare eller Ägare. Ägar-demot visar adminpanelen med påhittade exempeluppgifter, aldrig åkeriets riktiga.
 - **Nytt:** Chaufförer: demokonton visas i en egen grupp Demo, där du kan skapa nya, se när de går ut och avsluta dem i förtid.
