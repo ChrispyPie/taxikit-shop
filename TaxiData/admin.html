@@ -98,8 +98,9 @@
   </div>
 
   <script src="serverstatus.js?v=20261026tm1"></script>
+  <script src="demo.js?v=zdm1"></script>
   <script src="verkstad-admin.js?v=20261026vd1"></script>
-  <script src="profilbild.js?v=20261026tm1"></script>
+  <script src="profilbild.js?v=zdm1"></script>
   <script>
     const APP_VERSION = '1.0.26';
     console.log('Admin version:', APP_VERSION);
@@ -232,6 +233,9 @@
     function getToken() { return localStorage.getItem('taxi_session') || ''; }
 
     async function rpc(name, args = {}) {
+      // Ägar-demo: adminpanelen visar bara påhittade exempeluppgifter. Inga admin-anrop skickas,
+      // och servern skulle ändå neka (demosessionen har bara förarbehörighet).
+      if (window.DEMO && DEMO.owner() && name !== 'get_me' && name !== 'logout') return DEMO.fixture(name, args, currentUserId);
       const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + name, {
         method: 'POST',
         headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
@@ -243,7 +247,7 @@
         const err = new Error((body && body.message) || ('HTTP ' + res.status));
         err.code = body && body.code;
         if (err.code === '28000') {
-          ['taxi_session', 'taxi_logged_in', 'taxi_driver', 'taxi_view'].forEach(k => localStorage.removeItem(k));
+          ['taxi_session', 'taxi_logged_in', 'taxi_driver', 'taxi_view', 'taxi_demo'].forEach(k => localStorage.removeItem(k));
           location.href = 'index.html';
         }
         throw err;
@@ -264,7 +268,12 @@
       invalid_price: 'Kontrollera priserna (tal större än 0, påslag 0–20 kr/kWh, laddning 0–100 %).',
       duplicate_car: 'Det finns redan en bil med det bilnumret.',
       not_found: 'Bilen finns inte längre.',
-      bad_status: 'Ogiltigt beslut.'
+      bad_status: 'Ogiltigt beslut.',
+      demo_read_only: 'Det här är ett demokonto. Du kan titta runt men inte ändra något.',
+      demo_ended: 'Demokontot är redan avslutat.',
+      too_many_demos: 'Det finns redan 10 aktiva demokonton. Avsluta något först.',
+      demo_source_missing: 'Kontot som demot visar finns inte eller är inte aktivt.',
+      bad_role: 'Välj Förare eller Ägare.'
     };
     function errText(e) { return errorTexts[e.message] || ('Fel: ' + e.message); }
 
@@ -286,7 +295,11 @@
         return;
       }
       // Måste föraren välja nytt lösenord? Då gäller det först (sköts i index.html)
-      try { const me = await rpc('get_me'); if (me && me.must_change_password) { location.href = 'index.html'; return; } } catch (e) {}
+      try {
+        const me = await rpc('get_me');
+        if (me && me.must_change_password) { location.href = 'index.html'; return; }
+        if (window.DEMO) { DEMO.set(me); DEMO.banner(); }
+      } catch (e) {}
       if (window.PROFILBILD) {
         const pm = document.getElementById('profile-menu');
         PROFILBILD.init({ button: document.getElementById('profile-btn'), menu: pm, before: pm.lastElementChild, itemStyle: 'padding:8px; cursor:pointer;' });
@@ -354,7 +367,8 @@
     function getAllDriverIds() {
       const ids = new Set(extraIds);
       Object.keys(drivers).forEach(id => ids.add(id));
-      return Array.from(ids);
+      // Demokonton (DEMO1, DEMO2 …) visas bara i gruppen Demo, aldrig bland förarna
+      return Array.from(ids).filter(id => !isDemoId(id));
     }
 
     // Aktiv = activated i databasen. Ingen automatisk avaktivering
@@ -484,6 +498,7 @@
       });
 
       let html = '<div style="text-align:right; padding:4px 16px 8px;"><a href="#" onclick="openLog();return false;" style="font-size:calc(13px * var(--font-scale, 1)); color:var(--c-3182ce);">Logg</a></div>';
+      html += renderDemoGroup();
       html += '<div class="section">';
       catOrder.forEach(cat => {
         if (!grouped[cat] || grouped[cat].length === 0) return;
@@ -731,6 +746,128 @@
 
     async function copyLink(id) {
       const text = linkMessage(id);
+      try { await navigator.clipboard.writeText(text); }
+      catch (e) { const i = document.getElementById('link-url'); i.select(); document.execCommand('copy'); }
+      const b = document.getElementById('link-copy');
+      if (b) b.textContent = 'Kopierad ✓';
+    }
+
+    // ---------- Demokonton (gruppen Demo) ----------
+    // Slå av hela gruppen: sätt SHOW_DEMO_GROUP = false (eller kör undo-SQL:en på servern).
+    const SHOW_DEMO_GROUP = true;
+    let demoList = null;        // från admin_list_demos (null = inte hämtad)
+    const demoLinks = {};       // demolänkar som skapats i den här sessionen (bara i minnet)
+    function isDemoId(id) { return /^DEMO\d+$/i.test(String(id || '')); }
+    function demoRole(r) { return r === 'agare' ? 'Ägare' : 'Förare'; }
+    async function loadDemos() {
+      try { demoList = await rpc('admin_list_demos'); } catch (e) { demoList = []; }
+      if (path[0] && path[0].id === 'chaufforer' && !editingDriver && !showLog) render();
+    }
+    function toggleDemoGroup() {
+      const off = localStorage.getItem('admin_demo_hidden') === '1';
+      localStorage.setItem('admin_demo_hidden', off ? '0' : '1');
+      render();
+    }
+    function renderDemoGroup() {
+      if (!SHOW_DEMO_GROUP || !canSeeAkeridata()) return '';
+      if (demoList === null) { demoList = []; loadDemos(); }
+      const hidden = localStorage.getItem('admin_demo_hidden') === '1';
+      const active = demoList.filter(d => d.status !== 'ended').length;
+      let h = `<div class="section" id="demo-group" style="margin-bottom:12px;">
+        <div class="section-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <span>🧪 Demo${demoList.length ? ' (' + active + ' aktiva)' : ''}</span>
+          <a href="#" onclick="toggleDemoGroup();return false;" style="font-weight:400; color:var(--c-3182ce); text-transform:none;">${hidden ? 'Visa' : 'Dölj'}</a>
+        </div>`;
+      if (!hidden) {
+        h += `<p style="padding:6px 16px 0; margin:0; font-size:calc(12px * var(--font-scale, 1)); color:var(--c-718096);">Demokonton ser appen med Christians data och kan bara titta. De räknas inte bland förarna. Varje konto gäller i 3 dagar från att det skapas.</p>`;
+        demoList.forEach(d => {
+          const name = ((d.first_name || '') + ' ' + (d.last_name || '')).trim();
+          const ended = d.status === 'ended';
+          const st = ended ? '<span class="status status-inactive">Avslutat</span>'
+            : d.status === 'pending' ? '<span class="status status-pending">Väntar</span>'
+            : '<span class="status status-active">Aktivt</span>';
+          h += `<div class="row demo-row" style="flex-direction:column; align-items:stretch; gap:4px; cursor:default;">
+            <div style="display:flex; justify-content:space-between; gap:8px;"><span class="label">${esc(name || 'Väntar på aktivering')} <span style="font-weight:400; color:var(--c-718096);">· ${esc(d.id)}</span></span>${st}</div>
+            <div style="font-size:calc(12px * var(--font-scale, 1)); color:var(--c-718096);">${demoRole(d.role)} · ${ended ? 'Avslutat ' + esc(fmtWhen(d.ended_at || d.expires_at)) : 'gäller till ' + esc(fmtWhen(d.expires_at))}</div>
+            ${ended ? '' : `<div style="display:flex; gap:8px; margin-top:4px;">
+              ${d.status === 'pending' ? `<button onclick="demoNewLink('${esc(d.id)}')" style="flex:1;">${demoLinks[d.id] ? 'Visa länk' : 'Ny länk'}</button>` : ''}
+              <button onclick="endDemo('${esc(d.id)}')" style="flex:1; color:var(--c-c53030);">Avsluta nu</button></div>`}
+          </div>`;
+        });
+        if (!demoList.length) h += '<p style="padding:8px 16px; margin:0; font-size:calc(13px * var(--font-scale, 1));">Inga demokonton.</p>';
+        h += `<div style="padding:8px 16px 12px;"><button id="demo-create" onclick="openCreateDemo()" style="width:100%;">＋ Skapa demokonto</button></div>`;
+      }
+      return h + '</div>';
+    }
+    function openCreateDemo() {
+      closeLinkModal();
+      const m = document.createElement('div');
+      m.className = 'modal'; m.id = 'link-modal';
+      m.innerHTML = `<div class="modal-box">
+        <h3 style="margin:0 0 8px; color:var(--primary);">Skapa demokonto</h3>
+        <p style="font-size:calc(13px * var(--font-scale, 1)); color:var(--c-4a5568); margin:0 0 10px;">Du får en inbjudningslänk att skicka. Personen skriver sitt namn och väljer ett eget lösenord. Kontot visar Christians data, kan bara titta och gäller i 3 dagar från nu.</p>
+        <div style="font-size:calc(13px * var(--font-scale, 1)); font-weight:600; margin-bottom:6px;">Vad ska demot visa?</div>
+        <label style="display:flex; gap:8px; align-items:flex-start; padding:8px; border:1px solid var(--c-cbd5e0); border-radius:8px; margin-bottom:8px;">
+          <input type="radio" name="demo-role" value="forare" checked> <span><b>Förare</b><br><span style="font-size:calc(12px * var(--font-scale, 1)); color:var(--c-718096);">Förarappen: körpass, lönekoll, prognos, topplistor, kalender, forum, bil &amp; verkstad.</span></span></label>
+        <label style="display:flex; gap:8px; align-items:flex-start; padding:8px; border:1px solid var(--c-cbd5e0); border-radius:8px;">
+          <input type="radio" name="demo-role" value="agare"> <span><b>Ägare</b><br><span style="font-size:calc(12px * var(--font-scale, 1)); color:var(--c-718096);">Förarappen plus adminpanelen, med påhittade exempeluppgifter i stället för åkeriets riktiga.</span></span></label>
+        <div class="modal-buttons">
+          <button onclick="closeLinkModal()">Avbryt</button>
+          <button id="demo-create-go" onclick="createDemo()" style="background: var(--primary-bg); color:white;">Skapa länk</button>
+        </div>
+      </div>`;
+      document.body.appendChild(m);
+    }
+    async function createDemo() {
+      const sel = document.querySelector('input[name="demo-role"]:checked');
+      const role = sel ? sel.value : 'forare';
+      const b = document.getElementById('demo-create-go'); if (b) b.disabled = true;
+      try {
+        const r = await rpc('admin_create_demo', { p_role: role });
+        if (!r || !r.ok || !r.link_token) { alert('Demokontot skapades inte. Försök igen.'); return; }
+        demoLinks[r.id] = { url: activationUrl(r.link_token), expires: r.expires_at, role: r.role };
+        await loadDemos();
+        showDemoLinkModal(r.id);
+      } catch (e) { closeLinkModal(); alert(errText(e)); }
+    }
+    async function demoNewLink(id) {
+      if (demoLinks[id]) { showDemoLinkModal(id); return; }
+      if (!confirm('Skapa en ny inbjudningslänk för ' + id + '? En äldre länk slutar fungera.')) return;
+      try {
+        const r = await rpc('admin_demo_link', { p_id: id });
+        const d = (demoList || []).find(x => x.id === id) || {};
+        demoLinks[id] = { url: activationUrl(r.link_token), expires: r.expires_at || d.expires_at, role: r.role || d.role };
+        showDemoLinkModal(id);
+      } catch (e) { alert(errText(e)); }
+    }
+    async function endDemo(id) {
+      if (!confirm('Avsluta demokontot ' + id + ' nu? Det loggas ut direkt och kan inte användas igen.')) return;
+      try { await rpc('admin_end_demo', { p_id: id }); delete demoLinks[id]; await loadDemos(); }
+      catch (e) { alert(errText(e)); }
+    }
+    function demoMessage(id) { const l = demoLinks[id]; return DEMO.inviteText(l.role, l.url, l.expires); }
+    function showDemoLinkModal(id) {
+      closeLinkModal();
+      const l = demoLinks[id];
+      if (!l) return;
+      const m = document.createElement('div');
+      m.className = 'modal'; m.id = 'link-modal';
+      m.innerHTML = `<div class="modal-box">
+        <h3 style="margin:0 0 8px; color:var(--primary);">Demoinbjudan (${demoRole(l.role).toLowerCase()})</h3>
+        <p style="font-size:calc(13px * var(--font-scale, 1)); color:var(--c-4a5568); margin:0 0 8px;">Skicka texten till den du bjuder in. Länken fungerar en gång och visas bara nu – annars kan du skapa en ny.</p>
+        <textarea id="link-url" readonly style="width:100%; height:180px; font-size:calc(12px * var(--font-scale, 1)); box-sizing:border-box;" onclick="this.select()">${esc(demoMessage(id))}</textarea>
+        <div class="modal-buttons">
+          <button id="link-copy" onclick="copyDemo('${esc(id)}')">Kopiera</button>
+          ${navigator.share ? `<button onclick="navigator.share({ title: 'TaxiData – demo', text: demoMessage('${esc(id)}') }).catch(() => {})">Dela</button>` : ''}
+        </div>
+        <div class="modal-buttons" style="margin-top:8px;">
+          <button onclick="closeLinkModal()" style="background: var(--primary-bg); color:white;">Stäng</button>
+        </div>
+      </div>`;
+      document.body.appendChild(m);
+    }
+    async function copyDemo(id) {
+      const text = demoMessage(id);
       try { await navigator.clipboard.writeText(text); }
       catch (e) { const i = document.getElementById('link-url'); i.select(); document.execCommand('copy'); }
       const b = document.getElementById('link-copy');

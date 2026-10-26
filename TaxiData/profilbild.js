@@ -51,6 +51,7 @@
   function errText(e) {
     var m = e && e.message;
     if (m === 'via_master') return 'Du är inloggad med huvudlösenordet. Profilbilden kan bara bytas av personen själv.';
+    if (m === 'demo_read_only') return 'Det här är ett demokonto. Du kan titta runt men inte ändra något.';
     if (m === 'too_big') return 'Bilden är för stor. Försök med en annan bild.';
     if (m === 'bad_image') return 'Det gick inte att läsa bilden. Försök med en annan bild.';
     return 'Det gick inte att spara bilden. Försök igen.';

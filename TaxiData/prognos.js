@@ -287,8 +287,8 @@
       st.codeMsg = 'Koden sparad. Scannern försöker igen inom en minut.';
       st.panel = 'schema';
       return refresh();
-    }).catch(function () {
-      st.codeMsg = 'Kunde inte spara koden. Försök igen.';
+    }).catch(function (e) {
+      st.codeMsg = e && e.message === 'demo_read_only' ? 'Det här är ett demokonto. Du kan titta runt men inte ändra något.' : 'Kunde inte spara koden. Försök igen.';
     }).then(function () {
       st.codeBusy = false; paint();
     });
@@ -300,7 +300,7 @@
       st.watches = list || [];
       if (window.PROGNOS_NOTIS && PROGNOS_NOTIS.watchesChanged) PROGNOS_NOTIS.watchesChanged(st.watches);
       paint();
-    }).catch(function () { toast('Kunde inte spara bevakning.'); });
+    }).catch(function (e) { toast(e && e.message === 'demo_read_only' ? 'Det här är ett demokonto. Du kan titta runt men inte ändra något.' : 'Kunde inte spara bevakning.'); });
   }
 
   function ensurePushHint() {

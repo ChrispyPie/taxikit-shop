@@ -161,7 +161,7 @@
     else if (!d || (!d.drivers && !d.workshop_drivers)) h = '<div class="tl-msg">Ingen har kört ' + esc(T.periodText()) + ' än.</div>';
     else {
       h += '<div class="tl-info">' + (d.drivers ? d.drivers + ' förare med pass ' + esc(T.periodText()) + '. ' : 'Inga pass ' + esc(T.periodText()) + ' än. ') +
-        (d.named ? 'Du ser namn eftersom du är ägare.' : 'Bara din egen rad visas som "Du".') + '</div>';
+        (d.named ? 'Du ser namn eftersom du är ägare.' : window.DEMO && DEMO.on() ? 'Demokonto: andra förare visas som "Förare 1", "Förare 2" … och inga namn skickas.' : 'Bara din egen rad visas som "Du".') + '</div>';
       LISTS.forEach(function (L) {
         var x = d.lists && d.lists[L.k];
         if (!x || !x.rows || !x.rows.length) return;
@@ -169,7 +169,7 @@
         h += '<div class="tl-card"><div class="tl-head"><span class="tl-title">' + esc(L.t) + '</span>' +
           '<span class="tl-me">' + (x.me ? 'Du: plats ' + x.me.pos + ' av ' + x.n : x.n + ' förare') + '</span></div>';
         show.forEach(function (r) {
-          var who = r.du ? 'Du' : (d.named && r.id ? (r.namn && r.namn !== r.id ? esc(r.namn) + ' <span class="tl-id">' + esc(r.id) + '</span>' : esc(r.id)) : '');
+          var who = r.du ? 'Du' : (d.named && r.id ? (r.namn && r.namn !== r.id ? esc(r.namn) + ' <span class="tl-id">' + esc(r.id) + '</span>' : esc(r.id)) : (window.DEMO && DEMO.on() ? 'Förare ' + r.pos : ''));  // demokonto: servern skickar inga namn
           h += '<div class="tl-row' + (r.du ? ' du' : '') + '"><span class="tl-pos">' + (r.pos <= 3 ? ['🥇', '🥈', '🥉'][r.pos - 1] : r.pos + '.') + '</span>' +
             '<span class="tl-who">' + who + '</span><span class="tl-val">' + fmt(r.v, L.f) + '</span></div>';
         });
