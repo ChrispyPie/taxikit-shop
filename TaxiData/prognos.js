@@ -399,11 +399,14 @@
     return html;
   }
 
-  function countCell(sum) {
+  var CONF_TXT = { saker: 'säker', trolig: 'trolig', osaker: 'osäker' };
+  function countCell(sum, d, k) {
     if (!sum) return '';
     var tip = sum.tip + (sum.mixed ? ' · blandat → svagaste markering' : '');
-    return '<span class="pg-n pg-c-' + sum.conf + '" title="' + esc(tip) + '">' +
-      esc(sum.text) + '</span>';
+    var time = d ? p2(d.getHours()) + ':' + p2(d.getMinutes()) : '';
+    var sel = st.repSlot && st.repSlot.key === time + '|' + k ? ' pg-n-sel' : '';
+    return '<span class="pg-n pg-c-' + sum.conf + sel + '" title="' + esc(tip) + '" role="button" tabindex="0" data-pg-slot="' +
+      esc(time + '|' + k + '|' + sum.text + '|' + (CONF_TXT[sum.conf] || sum.conf)) + '">' + esc(sum.text) + '</span>';
   }
 
   function renderCarTimeline(zoneId) {
@@ -443,7 +446,7 @@
         var meta = CAT_META[k] || {};
         var sum = cellSummary(bySlot[d.getTime() + '|' + k]);
         var tdCls = 'pg-td-cell' + (meta.child ? ' pg-td-child' : '');
-        html += '<td class="' + tdCls + '">' + countCell(sum) + '</td>';
+        html += '<td class="' + tdCls + '">' + countCell(sum, d, k) + '</td>';
       });
       html += '<td class="pg-td-spacer" aria-hidden="true"></td>';
       html += '</tr>';
@@ -556,7 +559,7 @@
       '<p class="pg-muted pg-mo-note">Antal bokningar per timme, inte exakta tider. Källan delar inte upp på bilkategori (t.ex. storbil). ' +
       'Under pågående morgon räknas bara bokningar som är kvar; efter 09:00 visas nästa morgon.</p>' +
       '<p class="pg-muted pg-mo-upd">Uppdaterad ' + esc(hhmm(m.generated_at, true)) + ' · uppdateras automatiskt varje minut</p>' +
-      '</div>';
+      '</div>' + renderWarn();
     return html;
   }
 
@@ -569,7 +572,57 @@
     var stTxt = s.code_needed ? 'Kod behövs' : (s.status === 'ok' ? 'Uppdaterad' : (s.status || '–'));
     return '<div class="pg-status">Senaste uppdatering: <strong>' + esc(lastTxt) +
       '</strong> · ' + esc(stTxt) +
-      '<br><span class="pg-muted">Tiderna är uppskattningar. Heldraget = säker, streckat = trolig, svagt = osäker. Blandat antal markeras med ?.</span></div>';
+      '<br><span class="pg-muted">Heldraget = säker, streckat = trolig, svagt = osäker. Blandat antal markeras med ?.</span></div>' +
+      renderWarn();
+  }
+
+  // Kort, lugn varning + knapp till felrapport (Forum → Buggar, förifyllt).
+  function renderWarn() {
+    var sel = st.panel === 'schema' ? st.repSlot : null;
+    return '<div class="pg-warn"><strong>Tiderna är uppskattade och ungefärliga.</strong> ' +
+      '<span class="pg-warn-sub">De räknas ut från Taxi Göteborgs prognos, inte bokningssystemet. Ser något fel ut? ' +
+      (st.panel === 'schema' ? 'Tryck på en siffra för att rapportera just den tiden.' : '') + '</span>' +
+      '<span class="pg-warn-act"><button type="button" class="pg-rep-btn" data-pg-report="1">🐞 Rapportera fel' +
+      (sel ? ' för ' + esc(sel.time + ' ' + sel.cat) : '') + '</button>' +
+      (sel ? '<button type="button" class="pg-rep-clear" data-pg-repclear="1" aria-label="Ta bort vald tid">✕</button>' : '') +
+      '</span></div>';
+  }
+
+  function appVersion() {
+    var v = (window.OM_DATA && window.OM_DATA.version) || '';
+    var sc = document.querySelector('script[src*="prognos.js"]');
+    var m = sc && /v=([^&]+)/.exec(sc.getAttribute('src'));
+    return (v ? v + ' · ' : '') + 'prognos ' + (m ? m[1] : '?');
+  }
+
+  // Bygger förifylld felrapport. Prognoskoden tas ALDRIG med.
+  function reportBug() {
+    var tabName = { schema: 'Schema', morgon: 'Morgon', filter: 'Filter', notis: 'Notiser', kod: 'Kod' }[st.panel] || st.panel;
+    var z = ZONE_BY_ID[st.zoneTab] || ZONE_BY_ID['293'];
+    var cats = loadCats();
+    var hidden = ALL_CATS.filter(function (c) { return cats.indexOf(c.k) < 0; }).map(function (c) { return c.label; });
+    var zones = loadZones();
+    var s = st.status || {};
+    var last = s.last_ok_at ? new Date(s.last_ok_at) : null;
+    var lastTxt = last && !isNaN(last.getTime()) ? p2(last.getDate()) + '/' + p2(last.getMonth() + 1) + ' ' + hhmm(s.last_ok_at, true) : '–';
+    var sel = st.panel === 'schema' ? st.repSlot : null;
+    var lines = ['Beskriv vad som ser fel ut (t.ex. vad du såg och vad som faktiskt hände):', '', '', '— Info från appen (fylls i automatiskt) —',
+      'Sida: Prognos · ' + tabName];
+    if (st.panel === 'morgon') {
+      var m = st.morgon || {};
+      lines.push('Morgonprognos: ' + (m.dateDisplay || '–') + ', ' + (m.total != null ? m.total : '–') + ' bokningar till Landvetter');
+    } else {
+      lines.push('Zon: ' + z.name + ' (' + z.id + ')');
+    }
+    if (sel) lines.push('Vald tid: ' + sel.time + ' · ' + sel.cat + ' · ' + sel.text + ' (' + sel.conf + ')');
+    lines.push('Filter: ' + (hidden.length ? hidden.join(', ') + ' dold' + (hidden.length > 1 ? 'a' : '') : 'alla kategorier') +
+      (zones ? ' · zoner: ' + zones.join(', ') : ''));
+    lines.push('Senaste data: ' + lastTxt);
+    lines.push('Skickad: ' + p2(new Date().getDate()) + '/' + p2(new Date().getMonth() + 1) + ' ' + hhmm(new Date().toISOString(), false));
+    lines.push('Version: ' + appVersion());
+    var title = 'Prognos: fel i ' + (st.panel === 'morgon' ? 'Morgonprognosen' : z.name + (sel ? ' ' + sel.time + ' ' + sel.cat : ''));
+    var pre = { cat: 'buggar', title: title.slice(0, 120), body: lines.join('\n') };
+    if (window.FORUM && typeof window.FORUM.compose === 'function') window.FORUM.compose(pre);
   }
 
   // Ritar bara när Prognos är den öppna sidan – annars skulle en sen
@@ -618,9 +671,21 @@
     root.querySelectorAll('[data-panel]').forEach(function (btn) {
       btn.onclick = function () { st.panel = btn.getAttribute('data-panel'); paint(); };
     });
+    root.querySelectorAll('[data-pg-report]').forEach(function (btn) { btn.onclick = reportBug; });
+    root.querySelectorAll('[data-pg-repclear]').forEach(function (btn) { btn.onclick = function () { st.repSlot = null; paint(); }; });
+    root.querySelectorAll('[data-pg-slot]').forEach(function (el) {
+      el.onclick = function () {
+        var a = el.getAttribute('data-pg-slot').split('|');
+        var key = a[0] + '|' + a[1];
+        st.repSlot = st.repSlot && st.repSlot.key === key ? null
+          : { key: key, time: a[0], cat: CAT_LABEL[a[1]] || a[1], text: a[2], conf: a[3] };
+        paint();
+      };
+    });
     root.querySelectorAll('[data-ztab]').forEach(function (btn) {
       btn.onclick = function () {
         saveTab(btn.getAttribute('data-ztab'));
+        st.repSlot = null;
         paint();
       };
     });

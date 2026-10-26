@@ -120,3 +120,9 @@ delete from vault.secrets where name in ('PROGNOS_PIN', 'PROGNOS_TICK_KEY');
 - **Backup-branch:** `backup/pre-filternotis-2026-10-26` = origin/main före ändringen.
 - **Feature PR** (`feature/prognos-filter-notis`, EJ mergad): notis "Filter aktivt: Kombi dold" överst i Schema (tryck → Filter), cache `?v=20261026pg9`.
   - **Ångra:** stäng PR:n; efter ev. merge `git revert -m 1 <merge-sha>` + push.
+
+## t342/t343 – Varning "Tiderna är uppskattade och ungefärliga" + Rapportera fel (PR #11, ej mergad)
+- prognos.js: `renderWarn()` (Schema under statusraden + under Morgon-kortet), `reportBug()`, `appVersion()`, tryckbara celler (`data-pg-slot`, `st.repSlot`).
+- forum.js: `openEditor(p, pre)` + `F.compose(pre)` (öppnar Forum → Nytt inlägg, kategori Buggar, rubrik/text förifyllda; inget skickas förrän Publicera). Ingen ny backend.
+- style.css: `.pg-warn*`, `.pg-rep-*`, `.pg-n-sel`. index.html: style/prognos/forum.js `?v=20261026pg10`.
+- Ångra: `git revert <commit>` på grenen, eller stäng PR #11. Ingen Supabase-ändring.

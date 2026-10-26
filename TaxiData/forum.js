@@ -288,10 +288,10 @@
       img.src = url;
     });
   }
-  function openEditor(p) {
+  function openEditor(p, pre) {
     st.view = 'edit';
     st.edit = p ? { id: p.id, cat: p.cat, title: p.title, body: p.body, old: (st.photos[p.id] || []).slice(), files: [], msg: '' }
-                : { id: null, cat: (st.cat && st.cat.indexOf('akeri:') < 0) ? st.cat : 'allmant', title: '', body: '', old: [], files: [], msg: '' };
+                : { id: null, cat: (pre && pre.cat) || ((st.cat && st.cat.indexOf('akeri:') < 0) ? st.cat : 'allmant'), title: (pre && pre.title) || '', body: (pre && pre.body) || '', old: [], files: [], msg: '' };
     push('edit');
     drawEditor();
   }
@@ -439,6 +439,14 @@
     st.view = 'list'; st.post = null; st.edit = null; st.editCom = null;
     drawList();
     loadList().then(function () { if (st.view === 'list' && root === content) drawList(); });
+    // Förifyllt nytt inlägg från en annan sida (t.ex. Prognos → "Rapportera fel")
+    var pre = F._pre; F._pre = null;
+    if (pre) openEditor(null, pre);
+  };
+  // Öppna Forum direkt i "Nytt inlägg" med kategori/rubrik/text ifyllda. Inget skickas förrän föraren trycker Publicera.
+  F.compose = function (pre) {
+    F._pre = pre || {};
+    if (typeof window.openItem === 'function') window.openItem(F.id);
   };
   // Bakåtknappen: inne i ett inlägg eller i skrivläget går vi tillbaka till listan i stället för att lämna forumet
   F.back = function () {
