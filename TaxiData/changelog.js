@@ -7,7 +7,8 @@
  * Äldre historik (före 24 okt 2026) är återskapad i efterhand och ungefärlig.
  */
 window.CHANGELOG = [
-  { datum: '2026-10-26', id: '2026-10-26g', rader: [
+  { datum: '2026-10-26', id: '2026-10-26h', rader: [
+    ['Förbättrat', 'Chaufförer: varje förare visar när den senast körde, och listan sorteras med den som kört senast överst. Förare som inte kört på 60 dagar visas gråare.'],
     ['Nytt', 'Demokonto: ägaren kan bjuda in någon att titta på appen i 3 dagar. Personen skriver sitt namn och väljer eget lösenord, och kan bara titta.'],
     ['Nytt', 'Demokonto: välj Förare eller Ägare. Ägar-demot visar adminpanelen med påhittade exempeluppgifter, aldrig åkeriets riktiga.'],
     ['Nytt', 'Chaufförer: demokonton visas i en egen grupp Demo, där du kan skapa nya, se när de går ut och avsluta dem i förtid.'],
