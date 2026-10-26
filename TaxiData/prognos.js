@@ -1,28 +1,48 @@
 /* Prognos: tidsschema över uppskattade förbokningar från Taxi Göteborgs prognosverktyg.
  * Koden sparas aldrig i appen – bara på servern. Vid 401 visas en prompt.
- * Kategorikoder från prognos-sidan: A=Kombi, F=Barnstol, Övriga, Storbil 8+, H=Elbil, 3=Babyskydd.
+ * Kategorikoder: A=Kombi, F=Barnstol, Övriga, Storbil 8+, H=Elbil, 3=Babyskydd.
+ * Bilbarnstol/babyskydd är tillägg till bilkategori – egna fliken sist.
  */
 (function () {
   'use strict';
 
   var P = window.PROGNOS = { id: 'prognos', title: 'Prognos', icon: '🔮' };
 
-  var CATS = [
-    { k: 'app', code: 'A', name: 'Kombi' },
-    { k: 'barnstol', code: 'F', name: 'Barnstol' },
-    { k: 'ovrigt', code: '', name: 'Övriga' },
-    { k: 'storbil', code: '8+', name: 'Storbil' },
-    { k: 'elbil', code: 'H', name: 'Elbil' },
-    { k: 'babyskydd', code: '3', name: 'Babyskydd' }
+  // Officiella UI-namn från prognos.taxigoteborg.nu (163 = Astra; JSON stavas ibland Aztra)
+  var ZONE_ORDER = [
+    { id: '293', name: 'Landvetter flygplats', short: 'Landvetter' },
+    { id: '161', name: 'Essity', short: 'Essity' },
+    { id: '163', name: 'Astra', short: 'Astra' },
+    { id: '406', name: 'Volvo', short: 'Volvo' },
+    { id: '432', name: 'Volvo Cars Torslanda', short: 'Torslanda' },
+    { id: '15', name: 'Hotell Draken', short: 'Draken' },
+    { id: '290', name: 'Magasinet', short: 'Magasinet' }
   ];
+  var ZONE_BY_ID = {};
+  ZONE_ORDER.forEach(function (z) { ZONE_BY_ID[z.id] = z; });
+
+  // Bilkategorier i schemat (barnstol/babyskydd hör ihop med bil – egen flik)
+  var CAR_CATS = [
+    { k: 'app', head: 'A Kombi', label: 'Kombi (A)' },
+    { k: 'ovrigt', head: 'Övriga', label: 'Övriga' },
+    { k: 'storbil', head: 'Storbil', label: 'Storbil (8+)' },
+    { k: 'elbil', head: 'H Elbil', label: 'Elbil (H)' }
+  ];
+  var CHILD_CATS = [
+    { k: 'barnstol', head: 'F', label: 'Barnstol (F)' },
+    { k: 'babyskydd', head: '3', label: 'Babyskydd (3)' }
+  ];
+  var ALL_CATS = CAR_CATS.concat(CHILD_CATS);
   var CAT_LABEL = {};
-  CATS.forEach(function (c) {
-    CAT_LABEL[c.k] = c.code ? (c.name + ' (' + c.code + ')') : c.name;
-  });
+  ALL_CATS.forEach(function (c) { CAT_LABEL[c.k] = c.label; });
+  var ALL_CAT_KEYS = ALL_CATS.map(function (c) { return c.k; });
+  var CAR_KEYS = CAR_CATS.map(function (c) { return c.k; });
+  var CHILD_KEYS = CHILD_CATS.map(function (c) { return c.k; });
 
   var LS_CATS = 'prognos_cats';
   var LS_ZONES = 'prognos_zones';
-  var ALL_CAT_KEYS = CATS.map(function (c) { return c.k; });
+  var LS_TAB = 'prognos_zone_tab';
+  var TAB_BARN = 'barn';
 
   var st = {
     el: null,
@@ -33,7 +53,8 @@
     watches: [],
     loading: false,
     err: null,
-    panel: 'schema', // schema | filter | notis | kod
+    panel: 'schema',
+    zoneTab: loadTab(),
     codeInput: '',
     codeBusy: false,
     codeMsg: '',
@@ -80,7 +101,7 @@
   function loadZones() {
     try {
       var raw = localStorage.getItem(LS_ZONES);
-      if (!raw) return null; // null = alla
+      if (!raw) return null;
       var arr = JSON.parse(raw);
       return Array.isArray(arr) ? arr.map(String) : null;
     } catch (e) { return null; }
@@ -88,6 +109,37 @@
   function saveZones(arr) {
     if (!arr || !arr.length) localStorage.removeItem(LS_ZONES);
     else localStorage.setItem(LS_ZONES, JSON.stringify(arr));
+  }
+
+  function loadTab() {
+    try {
+      var t = localStorage.getItem(LS_TAB);
+      if (t === TAB_BARN) return TAB_BARN;
+      if (t && ZONE_BY_ID[t]) return t;
+    } catch (e) {}
+    return '293';
+  }
+  function saveTab(t) {
+    st.zoneTab = t;
+    try { localStorage.setItem(LS_TAB, t); } catch (e) {}
+  }
+
+  function zoneName(id) {
+    var z = ZONE_BY_ID[String(id)];
+    if (z) return z.name;
+    var found = (st.zones || []).find(function (x) { return String(x.id) === String(id); });
+    return (found && found.name) || String(id);
+  }
+  function zoneShort(id) {
+    var z = ZONE_BY_ID[String(id)];
+    return (z && z.short) || zoneName(id).split(' ')[0];
+  }
+
+  function visibleZones() {
+    var filt = loadZones();
+    return ZONE_ORDER.filter(function (z) {
+      return !filt || filt.indexOf(z.id) >= 0;
+    });
   }
 
   function floor5(d) {
@@ -105,9 +157,6 @@
 
   function beep() {
     try {
-      if (window.BEVAKNING && BEVAKNING.alert) return; // ljud via in-app alert nedan
-    } catch (e) {}
-    try {
       var Ctx = window.AudioContext || window.webkitAudioContext;
       if (!Ctx) return;
       var ctx = new Ctx();
@@ -115,6 +164,35 @@
       o.frequency.value = 880; g.gain.value = 0.15;
       o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime + 0.15);
     } catch (e) {}
+  }
+
+  var CONF_RANK = { saker: 0, trolig: 1, osaker: 2 };
+
+  /** Sammanfatta bokningar i en cell: antal + svagaste konfidens. Blandat → n? */
+  function cellSummary(list) {
+    if (!list || !list.length) return null;
+    var n = list.length;
+    var worst = 'saker';
+    var parts = { saker: 0, trolig: 0, osaker: 0 };
+    list.forEach(function (b) {
+      var c = b.confidence || 'trolig';
+      if (!parts[c]) parts[c] = 0;
+      parts[c]++;
+      if ((CONF_RANK[c] || 1) > (CONF_RANK[worst] || 0)) worst = c;
+    });
+    var kinds = Object.keys(parts).filter(function (k) { return parts[k] > 0; });
+    var mixed = kinds.length > 1;
+    var tipBits = [];
+    if (parts.saker) tipBits.push(parts.saker + ' säker');
+    if (parts.trolig) tipBits.push(parts.trolig + ' trolig');
+    if (parts.osaker) tipBits.push(parts.osaker + ' osäker');
+    return {
+      n: n,
+      conf: worst,
+      mixed: mixed,
+      text: String(n) + (mixed ? '?' : ''),
+      tip: tipBits.join(', ')
+    };
   }
 
   function checkNewBookings(list) {
@@ -126,7 +204,6 @@
         st.seenIds[b.id] = 1;
       }
     });
-    // Första laddningen: fyll seen utan alert
     if (!Object.keys(st.seenIds).length && list && list.length) {
       list.forEach(function (b) { st.seenIds[b.id] = 1; });
       return;
@@ -142,7 +219,7 @@
     if (!fresh.length) return;
     var b = fresh[0];
     var t = new Date(b.estimated_at);
-    var msg = (b.zone_name || b.zone_id) + ' · ' + (CAT_LABEL[b.category] || b.category) +
+    var msg = zoneName(b.zone_id) + ' · ' + (CAT_LABEL[b.category] || b.category) +
       ' · ca ' + p2(t.getHours()) + ':' + p2(t.getMinutes());
     beep();
     try { if (navigator.vibrate) navigator.vibrate([200, 80, 200]); } catch (e) {}
@@ -166,8 +243,13 @@
       st.watches = xs[4] || [];
       st.err = null;
       if (st.status.code_needed) st.panel = 'kod';
+      // Om vald flik filtrerats bort → byt till första synliga
+      var vis = visibleZones();
+      if (st.zoneTab !== TAB_BARN && !vis.some(function (z) { return z.id === st.zoneTab; })) {
+        saveTab(vis.length ? vis[0].id : '293');
+      }
       checkNewBookings(st.bookings);
-    }).catch(function (e) {
+    }).catch(function () {
       st.err = 'Kunde inte hämta prognos just nu.';
     }).then(function () {
       st.loading = false;
@@ -225,35 +307,43 @@
   function renderFilter() {
     var cats = loadCats();
     var zones = loadZones();
-    var html = '<div class="pg-card"><h3>Kategorier att visa</h3><div class="pg-chips">';
-    CATS.forEach(function (c) {
+    var html = '<div class="pg-card"><h3>Bilkategorier</h3><div class="pg-chips">';
+    CAR_CATS.forEach(function (c) {
       var on = cats.indexOf(c.k) >= 0;
       html += '<button type="button" class="pg-chip' + (on ? ' on' : '') + '" data-cat="' + c.k + '">' +
-        esc(CAT_LABEL[c.k]) + '</button>';
+        esc(c.label) + '</button>';
+    });
+    html += '</div></div>';
+    html += '<div class="pg-card"><h3>Barnstol / babyskydd</h3>' +
+      '<p class="pg-muted">Visas på egen flik i schemat. Valfritt i filter och notiser.</p><div class="pg-chips">';
+    CHILD_CATS.forEach(function (c) {
+      var on = cats.indexOf(c.k) >= 0;
+      html += '<button type="button" class="pg-chip' + (on ? ' on' : '') + '" data-cat="' + c.k + '">' +
+        esc(c.label) + '</button>';
     });
     html += '</div></div>';
     html += '<div class="pg-card"><h3>Zoner att visa</h3><div class="pg-chips">';
     html += '<button type="button" class="pg-chip' + (!zones ? ' on' : '') + '" data-zone="*">Alla</button>';
-    (st.zones || []).forEach(function (z) {
-      var on = zones && zones.indexOf(String(z.id)) >= 0;
-      html += '<button type="button" class="pg-chip' + (on ? ' on' : '') + '" data-zone="' + esc(z.id) + '">' +
-        esc(z.name || z.id) + '</button>';
+    ZONE_ORDER.forEach(function (z) {
+      var on = zones && zones.indexOf(z.id) >= 0;
+      html += '<button type="button" class="pg-chip' + (on ? ' on' : '') + '" data-zone="' + z.id + '">' +
+        esc(z.name) + '</button>';
     });
-    html += '</div><p class="pg-muted">Magasinet (290) finns med även om prognossajten inte har flik för den.</p></div>';
+    html += '</div><p class="pg-muted">Magasinet (290) finns med även om prognossajten inte har flik för den. Astra (163) enligt sajtens namn (JSON stavas ibland Aztra).</p></div>';
     return html;
   }
 
   function renderNotis() {
     var html = '<div class="pg-card"><h3>Notis vid ny bokning</h3>' +
       ensurePushHint() +
-      '<p class="pg-muted">Välj zon + kategori. Du får notis när scannern ser en ny förbokning.</p>';
-    (st.zones || []).forEach(function (z) {
-      html += '<div class="pg-watch-zone"><div class="pg-watch-title">' + esc(z.name || z.id) +
+      '<p class="pg-muted">Välj zon + kategori. Barnstol/babyskydd kan bevakas separat.</p>';
+    visibleZones().forEach(function (z) {
+      html += '<div class="pg-watch-zone"><div class="pg-watch-title">' + esc(z.name) +
         ' <span class="pg-muted">(' + esc(z.id) + ')</span></div><div class="pg-chips">';
-      CATS.forEach(function (c) {
-        var on = st.watches.some(function (w) { return w.zone_id === String(z.id) && w.category === c.k; });
-        html += '<button type="button" class="pg-chip' + (on ? ' on' : '') + '" data-wz="' + esc(z.id) +
-          '" data-wc="' + c.k + '">' + esc(CAT_LABEL[c.k]) + '</button>';
+      ALL_CATS.forEach(function (c) {
+        var on = st.watches.some(function (w) { return w.zone_id === z.id && w.category === c.k; });
+        html += '<button type="button" class="pg-chip' + (on ? ' on' : '') + '" data-wz="' + z.id +
+          '" data-wc="' + c.k + '">' + esc(c.label) + '</button>';
       });
       html += '</div></div>';
     });
@@ -261,18 +351,39 @@
     return html;
   }
 
-  function renderTimeline() {
-    var cats = loadCats();
-    var zones = loadZones();
+  function renderZoneTabs() {
+    var vis = visibleZones();
+    var html = '<div class="pg-ztabs" role="tablist">';
+    vis.forEach(function (z) {
+      var on = st.zoneTab === z.id;
+      html += '<button type="button" class="pg-ztab' + (on ? ' on' : '') + '" data-ztab="' + z.id +
+        '" title="' + esc(z.name) + ' (' + z.id + ')">' + esc(z.short) + '</button>';
+    });
+    html += '<button type="button" class="pg-ztab pg-ztab-barn' + (st.zoneTab === TAB_BARN ? ' on' : '') +
+      '" data-ztab="' + TAB_BARN + '" title="Barnstol och babyskydd (hör till bilkategori)">Barnstol</button>';
+    html += '</div>';
+    return html;
+  }
+
+  function countCell(sum) {
+    if (!sum) return '';
+    var tip = sum.tip + (sum.mixed ? ' · blandat → svagaste markering' : '');
+    return '<span class="pg-n pg-c-' + sum.conf + '" title="' + esc(tip) + '">' +
+      esc(sum.text) + '</span>';
+  }
+
+  function renderCarTimeline(zoneId) {
+    var cats = loadCats().filter(function (k) { return CAR_KEYS.indexOf(k) >= 0; });
+    if (!cats.length) cats = CAR_KEYS.slice();
     var now = floor5(new Date());
     var end = addMin(now, 120);
     var rows = [];
     for (var t = new Date(now); t < end; t = addMin(t, 5)) rows.push(new Date(t));
 
-    var bySlot = {}; // key = time|cat -> badges[]
+    var bySlot = {};
     (st.bookings || []).forEach(function (b) {
+      if (String(b.zone_id) !== String(zoneId)) return;
       if (cats.indexOf(b.category) < 0) return;
-      if (zones && zones.indexOf(String(b.zone_id)) < 0) return;
       var d = floor5(new Date(b.estimated_at));
       if (d < now || d >= end) return;
       var key = d.getTime() + '|' + b.category;
@@ -280,37 +391,18 @@
       bySlot[key].push(b);
     });
 
-    var html = '<div class="pg-scroll"><table class="pg-table"><thead><tr><th class="pg-th-time">Tid</th>';
+    var html = '<div class="pg-scroll pg-scroll-fit"><table class="pg-table pg-table-fit"><thead><tr>' +
+      '<th class="pg-th-time">Tid</th>';
     cats.forEach(function (k) {
-      html += '<th>' + esc(CAT_LABEL[k] || k) + '</th>';
+      var meta = CAR_CATS.find(function (c) { return c.k === k; });
+      html += '<th>' + esc(meta ? meta.head : k) + '</th>';
     });
     html += '</tr></thead><tbody>';
     rows.forEach(function (d) {
-      var lab = p2(d.getHours()) + ':' + p2(d.getMinutes());
-      html += '<tr><td class="pg-td-time">' + lab + '</td>';
+      html += '<tr><td class="pg-td-time">' + p2(d.getHours()) + ':' + p2(d.getMinutes()) + '</td>';
       cats.forEach(function (k) {
-        var list = bySlot[d.getTime() + '|' + k] || [];
-        html += '<td class="pg-td-cell">';
-        if (!list.length) { html += '<span class="pg-empty">·</span>'; }
-        else {
-          var counts = {};
-          list.forEach(function (b) {
-            var conf = b.confidence || 'trolig';
-            var id = String(b.zone_id) + '|' + conf;
-            if (!counts[id]) counts[id] = { n: 0, name: b.zone_name || b.zone_id, conf: conf, zid: b.zone_id };
-            counts[id].n++;
-          });
-          Object.keys(counts).forEach(function (id) {
-            var c = counts[id];
-            var short = (c.name || c.zid).split(' ')[0];
-            var cls = 'pg-badge pg-c-' + c.conf;
-            var tip = esc(c.name) + ' (' + esc(c.zid) + ') · ' +
-              (c.conf === 'saker' ? 'säker' : c.conf === 'osaker' ? 'osäker' : 'trolig');
-            html += '<span class="' + cls + '" title="' + tip + '">' +
-              esc(short) + (c.n > 1 ? ' ×' + c.n : '') + '</span>';
-          });
-        }
-        html += '</td>';
+        var sum = cellSummary(bySlot[d.getTime() + '|' + k]);
+        html += '<td class="pg-td-cell">' + countCell(sum) + '</td>';
       });
       html += '</tr>';
     });
@@ -318,7 +410,72 @@
     return html;
   }
 
-  // Fix renderMorgon - the previous had a typo with en-dash in JS string. Rewrite cleanly.
+  /** Barnstol-flik: kolumner per zon (kortnamn), cell = antal F+3 */
+  function renderBarnTimeline() {
+    var cats = loadCats().filter(function (k) { return CHILD_KEYS.indexOf(k) >= 0; });
+    if (!cats.length) cats = CHILD_KEYS.slice();
+    var zones = visibleZones();
+    var now = floor5(new Date());
+    var end = addMin(now, 120);
+    var rows = [];
+    for (var t = new Date(now); t < end; t = addMin(t, 5)) rows.push(new Date(t));
+
+    var bySlot = {};
+    (st.bookings || []).forEach(function (b) {
+      if (cats.indexOf(b.category) < 0) return;
+      if (zones.length && !zones.some(function (z) { return z.id === String(b.zone_id); })) return;
+      var d = floor5(new Date(b.estimated_at));
+      if (d < now || d >= end) return;
+      var key = d.getTime() + '|' + String(b.zone_id);
+      if (!bySlot[key]) bySlot[key] = [];
+      bySlot[key].push(b);
+    });
+
+    var html = '<p class="pg-muted pg-barn-note">Barnstol (F) och babyskydd (3) hör alltid till en bilbokning. Siffran = antal tillägg per zon.</p>';
+    html += '<div class="pg-scroll pg-scroll-fit"><table class="pg-table pg-table-fit pg-table-barn"><thead><tr>' +
+      '<th class="pg-th-time">Tid</th>';
+    zones.forEach(function (z) {
+      html += '<th title="' + esc(z.name) + '">' + esc(z.short.length > 4 ? z.short.slice(0, 4) : z.short) + '</th>';
+    });
+    html += '</tr></thead><tbody>';
+    rows.forEach(function (d) {
+      html += '<tr><td class="pg-td-time">' + p2(d.getHours()) + ':' + p2(d.getMinutes()) + '</td>';
+      zones.forEach(function (z) {
+        var list = bySlot[d.getTime() + '|' + z.id] || [];
+        var sum = cellSummary(list);
+        var tipExtra = '';
+        if (list.length) {
+          var fc = 0, bc = 0;
+          list.forEach(function (b) {
+            if (b.category === 'barnstol') fc++;
+            else if (b.category === 'babyskydd') bc++;
+          });
+          tipExtra = z.name + ': ' +
+            (fc ? fc + ' barnstol' : '') +
+            (fc && bc ? ', ' : '') +
+            (bc ? bc + ' babyskydd' : '');
+        }
+        var cell = '';
+        if (sum) {
+          var tip = tipExtra + (sum.tip ? ' · ' + sum.tip : '');
+          cell = '<span class="pg-n pg-c-' + sum.conf + '" title="' + esc(tip) + '">' +
+            esc(sum.text) + '</span>';
+        }
+        html += '<td class="pg-td-cell">' + cell + '</td>';
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+    return html;
+  }
+
+  function renderTimeline() {
+    if (st.zoneTab === TAB_BARN) return renderBarnTimeline();
+    var zid = st.zoneTab;
+    if (!ZONE_BY_ID[zid]) zid = '293';
+    return renderCarTimeline(zid);
+  }
+
   function renderMorgon() {
     var m = st.morgon;
     if (!m || !m.buckets) return '';
@@ -346,7 +503,7 @@
     var stTxt = s.code_needed ? 'Kod behövs' : (s.status === 'ok' ? 'Uppdaterad' : (s.status || '–'));
     return '<div class="pg-status">Senaste uppdatering: <strong>' + esc(lastTxt) +
       '</strong> · ' + esc(stTxt) +
-      '<br><span class="pg-muted">Tiderna är uppskattningar. Heldraget = säker (gränskorsning), svag = trolig/osäker.</span></div>';
+      '<br><span class="pg-muted">Tiderna är uppskattningar. Heldraget = säker, streckat = trolig, svagt = osäker. Blandat antal markeras med ?.</span></div>';
   }
 
   function paint() {
@@ -370,7 +527,10 @@
       body += renderNotis();
     } else {
       body += statusLine();
-      body += '<div class="pg-legend"><span class="pg-badge pg-c-saker">säker</span> <span class="pg-badge pg-c-trolig">trolig</span> <span class="pg-badge pg-c-osaker">osäker</span></div>';
+      body += '<div class="pg-legend"><span class="pg-n pg-c-saker">2</span> säker ' +
+        '<span class="pg-n pg-c-trolig">2</span> trolig ' +
+        '<span class="pg-n pg-c-osaker">2?</span> osäker/blandat</div>';
+      body += renderZoneTabs();
       body += renderTimeline();
       body += renderMorgon();
     }
@@ -382,6 +542,12 @@
   function bind(root) {
     root.querySelectorAll('[data-panel]').forEach(function (btn) {
       btn.onclick = function () { st.panel = btn.getAttribute('data-panel'); paint(); };
+    });
+    root.querySelectorAll('[data-ztab]').forEach(function (btn) {
+      btn.onclick = function () {
+        saveTab(btn.getAttribute('data-ztab'));
+        paint();
+      };
     });
     var codeEl = root.querySelector('#pg-code');
     if (codeEl) {
@@ -410,8 +576,7 @@
         var i = cur.indexOf(z);
         if (i >= 0) cur.splice(i, 1);
         else cur.push(z);
-        // Om alla zoner valda → spara som "alla"
-        if (st.zones.length && cur.length >= st.zones.length) saveZones(null);
+        if (ZONE_ORDER.length && cur.length >= ZONE_ORDER.length) saveZones(null);
         else saveZones(cur);
         paint();
       };
@@ -426,6 +591,7 @@
   P.render = function (el) {
     st.el = el;
     st.panel = 'schema';
+    st.zoneTab = loadTab();
     paint();
     refresh();
     if (st.poll) clearInterval(st.poll);
@@ -434,7 +600,6 @@
       refresh();
     }, 60000);
   };
-
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('message', function (e) {
