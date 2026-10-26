@@ -509,17 +509,18 @@ html[data-theme="dark"] .pg-badge { background: #2a4365; color: #bee3f8; }
 }
 .pg-table-diag thead tr { background: var(--surface-soft); }
 .pg-th-rot {
-  /* Ankrad i övre högra hörnet: texten går nedåt-vänster och slutar i spaltens topp-höger,
-     så den aldrig går utanför högerkanten eller ner i raderna */
-  position: absolute; right: 8px; top: 4px;
+  /* t349u: ankrad i nedre vänstra hörnet av texten, placerad mitt i spalten precis ovanför första raden.
+     Alla namn börjar alltså på samma ställe och med samma lilla mellanrum (5 px), oavsett längd;
+     texten går snett uppåt höger. Radhöjd och reserv till höger sätts av fitDiagHead(). */
+  position: absolute; left: 50%; bottom: 5px; margin-left: -0.2em;
   display: block; width: max-content; white-space: nowrap;
-  transform: rotate(-45deg); transform-origin: top right;
+  transform: rotate(-45deg); transform-origin: bottom left;
   font-size: 0.64rem; font-weight: 600; color: var(--text); line-height: 1;
   pointer-events: none;
 }
-/* Liten reserv så sista spalten inte trycks mot kanten */
+/* Reserv till höger så sista (snedställda) namnet ryms – bredden sätts av fitDiagHead() */
 .pg-th-spacer, .pg-td-spacer {
-  width: 12px; min-width: 12px; max-width: 16px;
+  width: var(--pg-spacer-w, 12px); min-width: 12px; max-width: 48px;
   padding: 0 !important; border: none !important;
   background: transparent !important;
 }

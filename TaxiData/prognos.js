@@ -812,20 +812,30 @@
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
   }
 
-  // Rubrikraden blir exakt så hög som de 45°-roterade kategorinamnen kräver (t346u).
+  // Rubrikraden blir exakt så hög som det längsta 45°-namnet kräver (t346u), och alla namn
+  // startar 5 px ovanför första raden mitt i sin spalt (t349u). Reserven till höger växer så
+  // att sista namnet inte klipps.
   function fitDiagHead(root) {
     var fit = function () {
-      var tr = root.querySelector('.pg-table-diag thead tr');
+      var table = root.querySelector('.pg-table-diag');
+      var tr = table && table.querySelector('thead tr');
       if (!tr) return;
-      var top = tr.getBoundingClientRect().top, need = 0;
-      tr.querySelectorAll('.pg-th-rot').forEach(function (el) {
+      var labs = tr.querySelectorAll('.pg-th-rot');
+      if (!labs.length) return;
+      var hNeed = 0, over = 0, scR = (table.closest('.pg-scroll') || table).getBoundingClientRect();
+      labs.forEach(function (el) {
         var r = el.getBoundingClientRect();
-        if (r.bottom - top > need) need = r.bottom - top;
+        if (r.height > hNeed) hNeed = r.height;
+        if (r.right - scR.right > over) over = r.right - scR.right;
       });
-      if (need > 0) tr.style.setProperty('--pg-head-h', Math.ceil(need + 4) + 'px');
+      if (hNeed > 0) tr.style.setProperty('--pg-head-h', Math.ceil(hNeed + 5 + 4) + 'px');
+      if (over > 0) {
+        var cur = parseFloat(getComputedStyle(table.querySelector('.pg-th-spacer') || tr).width) || 12;
+        table.style.setProperty('--pg-spacer-w', Math.min(48, Math.ceil(cur + over + 3)) + 'px');
+      }
     };
     fit();
-    if (window.requestAnimationFrame) requestAnimationFrame(fit);
+    if (window.requestAnimationFrame) requestAnimationFrame(function () { fit(); requestAnimationFrame(fit); });
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
   }
 

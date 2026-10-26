@@ -139,3 +139,4 @@ delete from vault.secrets where name in ('PROGNOS_PIN', 'PROGNOS_TICK_KEY');
 - **SQL (REDAN APPLICERAD live 2026-10-26 ~16:00, additiv):** `supabase/migrations/20261026e_prognos_original.sql` – ny läsfunktion `public.prognos_original(text)` (vitlistade aggregat från senaste snapshot, kräver session). Om PR:n stängs påverkar den inget.
   - **Ångra:** `drop function if exists public.prognos_original(text);`
 - **Ångra kod:** stäng PR:n. Efter ev. merge: `git revert -m 1 <merge-sha>` + push (ingen force push).
+- **t349u (pg13):** De snedställda kategorinamnen ankras nu i nedre vänstra hörnet, mitt i spalten, 5 px ovanför första raden. Alla börjar på samma ställe oavsett längd. `fitDiagHead()` sätter radhöjden efter det längsta namnet och `--pg-spacer-w` (reserv till höger, max 48 px) så att Babyskydd inte klipps. Cache-bust `?v=20261026pg13`. Skärmdumpar: `docs/prognos/v11_schema-*.png`. Ångra: `git revert <commit>` på grenen eller stäng PR #13.
