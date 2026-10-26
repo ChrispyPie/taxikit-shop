@@ -32,7 +32,7 @@ self.addEventListener('notificationclick', function (e) {
   e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (cs) {
     for (var i = 0; i < cs.length; i++) {
       if (cs[i].url.indexOf(self.registration.scope) === 0 && 'focus' in cs[i]) {
-        cs[i].postMessage({ type: 'bev-open' });
+        cs[i].postMessage({ type: 'bev-open', tag: e.notification.tag || '' });
         return cs[i].focus();
       }
     }

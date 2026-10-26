@@ -249,15 +249,17 @@
       st.zones = xs[3] || [];
       st.watches = xs[4] || [];
       st.err = null;
+      st.loadedOnce = true;
       if (st.status.code_needed) st.panel = 'kod';
       // Om vald flik filtrerats bort → byt till första synliga
       var vis = visibleZones();
       if (!vis.some(function (z) { return z.id === st.zoneTab; })) {
         saveTab(vis.length ? vis[0].id : '293');
       }
-      checkNewBookings(st.bookings);
-    }).catch(function () {
-      st.err = 'Kunde inte hämta prognos just nu.';
+      // Ljud/notis för nya bokningar sköts globalt av prognos-notis.js (alla sidor)
+      if (window.PROGNOS_NOTIS && PROGNOS_NOTIS.watchesChanged) PROGNOS_NOTIS.watchesChanged(st.watches);
+    }).catch(function (e) {
+      st.err = /invalid_session|28000/.test(String(e && e.message)) ? 'Du är utloggad. Logga in igen för att se prognosen.' : 'Kunde inte hämta prognos just nu.';
     }).then(function () {
       st.loading = false;
       paint();
@@ -284,12 +286,30 @@
     var on = !st.watches.some(function (w) { return w.zone_id === zone && w.category === cat; });
     rpc('prognos_watch_set', { p_zone: zone, p_category: cat, p_on: on }).then(function (list) {
       st.watches = list || [];
+      if (window.PROGNOS_NOTIS && PROGNOS_NOTIS.watchesChanged) PROGNOS_NOTIS.watchesChanged(st.watches);
       paint();
     }).catch(function () { toast('Kunde inte spara bevakning.'); });
   }
 
   function ensurePushHint() {
-    if (!('PushManager' in window)) return '';
+    var B = window.BEVAKNING;
+    var ps = B && B.pushState ? B.pushState() : 'unknown';
+    if (ps === 'unknown' && B && B.checkPush && !st.pushChecking) {
+      st.pushChecking = true;
+      B.checkPush().then(function () { st.pushChecking = false; if (st.panel === 'notis') paint(); });
+    }
+    var info = '<p class="pg-muted">Du får en notis med ljud var du än är i appen, och som push när telefonen är låst eller appen stängd ' +
+      '(samma som tåg och flyg i Ankomster). Inga notiser när du är utloggad.</p>';
+    if (ps === 'on') return info + '<div class="pg-push-row"><span>🔔 Notiser med ljud är på</span>' +
+      '<button type="button" class="pg-btn pg-btn-sm" data-pg-push="test">Testa</button></div>';
+    if (ps === 'denied') return info + '<p class="pg-hint">🔕 Notiser är blockerade. Tillåt dem i webbläsarens inställningar för taxikit.shop.</p>';
+    if ((ps === 'off' || ps === 'unknown') && 'PushManager' in window) return info +
+      '<button type="button" class="pg-btn" data-pg-push="on">🔔 Aktivera ljudsignal/notiser</button>' +
+      '<p class="pg-muted">Utan aktivering får du bara signal medan appen är öppen.</p>';
+    return info + legacyPushHint();
+  }
+  function legacyPushHint() {
+    if (!('PushManager' in window)) return '<p class="pg-hint">Den här webbläsaren kan inte ta emot push – du får signal medan appen är öppen.</p>';
     var isIos = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) ||
@@ -351,13 +371,29 @@
     return html;
   }
 
+  /** Antal öppna förbokningar per zon i schemafönstret (nu → +2 h) för valda kategorier. */
+  function zoneCounts() {
+    var cats = loadCats();
+    var now = floor5(new Date()), end = addMin(now, 120), out = {};
+    (st.bookings || []).forEach(function (b) {
+      if (cats.indexOf(b.category) < 0) return;
+      var d = floor5(new Date(b.estimated_at));
+      if (d < now || d >= end) return;
+      out[b.zone_id] = (out[b.zone_id] || 0) + 1;
+    });
+    return out;
+  }
+
   function renderZoneTabs() {
     var vis = visibleZones();
+    var cnt = zoneCounts();
     var html = '<div class="pg-ztabs" role="tablist">';
     vis.forEach(function (z) {
       var on = st.zoneTab === z.id;
-      html += '<button type="button" class="pg-ztab' + (on ? ' on' : '') + '" data-ztab="' + z.id +
-        '" title="' + esc(z.name) + ' (' + z.id + ')">' + esc(z.short) + '</button>';
+      var n = cnt[z.id] || 0;
+      html += '<button type="button" class="pg-ztab' + (on ? ' on' : '') + (n ? '' : ' pg-ztab-zero') + '" data-ztab="' + z.id +
+        '" title="' + esc(z.name) + ' (' + z.id + ') · ' + n + ' förbokningar närmaste 2 h">' + esc(z.short) +
+        ' <span class="pg-ztab-n">' + n + '</span></button>';
     });
     html += '</div>';
     return html;
@@ -419,6 +455,10 @@
   function renderTimeline() {
     var zid = st.zoneTab;
     if (!ZONE_BY_ID[zid]) zid = '293';
+    if (!st.err && st.loadedOnce && !(zoneCounts()[zid])) {
+      return '<div class="pg-card pg-empty-card">Inga förbokningar i ' + esc(ZONE_BY_ID[zid].name) +
+        ' de närmaste 2 timmarna.</div>';
+    }
     return renderCarTimeline(zid);
   }
 
@@ -533,6 +573,13 @@
         paint();
       };
     });
+    root.querySelectorAll('[data-pg-push]').forEach(function (btn) {
+      btn.onclick = function () {
+        var B = window.BEVAKNING; if (!B) return;
+        var p = btn.getAttribute('data-pg-push') === 'test' ? B.testPush() : B.enablePush();
+        Promise.resolve(p).then(function () { paint(); });
+      };
+    });
     root.querySelectorAll('[data-wz]').forEach(function (btn) {
       btn.onclick = function () {
         toggleWatch(btn.getAttribute('data-wz'), btn.getAttribute('data-wc'));
@@ -554,14 +601,8 @@
     }, 60000);
   };
 
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('message', function (e) {
-      if (e.data && e.data.type === 'bev-push' && e.data.msg && String(e.data.msg.tag || '').indexOf('prognos') === 0) {
-        toast((e.data.msg.title || 'Prognos') + (e.data.msg.body ? ' – ' + e.data.msg.body : ''), 8000);
-        refresh();
-      }
-    });
-  }
+  // Anropas av prognos-notis.js när en ny bokning ringer (uppdatera schemat om sidan är öppen)
+  P.refresh = function () { if (onPage()) return refresh(); };
 
   P.stop = function () {
     if (st.poll) { clearInterval(st.poll); st.poll = null; }

@@ -76,3 +76,24 @@ delete from vault.secrets where name in ('PROGNOS_PIN', 'PROGNOS_TICK_KEY');
 - Ingen ruta "Prognos" på startsidan.
 - `select jobname from cron.job where jobname = 'prognos-sync';` → 0 rader.
 - Edge list saknar `prognos-sync`.
+
+## t335 (2026-10-26) – hotfix "ingen data" + globala notiser + spaltlinjer
+
+### Hotfix PR #6 (`hotfix/prognos-apikey`, EJ mergad)
+- `prognos.js` läste `window.TRIP_API_KEY` (odefinierad, eftersom den är en `const` i script.js) → alla anrop fick 401 → ingen data.
+- Commit 2: Prognos ritar bara när Prognos-sidan är öppen (60 s-pollen skrev annars över startsidan efter att man lämnat Prognos).
+- **Ångra efter merge:** `git revert -m 1 <merge-sha>` (ingen force push). Före merge: stäng PR #6.
+
+### Feature PR (`feature/prognos-global-notis`, EJ mergad, bygger på #6)
+- Ny `TaxiData/prognos-notis.js` (global koll var 60 s + ljud/toast via `BEVAKNING.ring`), ändringar i `bevakning.js`, `sw.js`, `prognos.js`, `style.css`, `index.html` (cache `?v=20261026pg6`).
+- **Ångra efter merge:** `git revert -m 1 <merge-sha>`.
+
+### SQL (REDAN APPLICERAD live, additiv, oanvänd tills edge v6 deployas)
+- `public.prognos_svc_watch_drivers_active(text, text)` – som `prognos_svc_watch_drivers` men bara förare med giltig session (ingen push när utloggad). Grant: endast service_role.
+- **Ångra:** `drop function if exists public.prognos_svc_watch_drivers_active(text, text);`
+  (Gör först edge-rollback till v5 om v6 är deployad, annars får sync-funktionen fel.)
+
+### Edge `prognos-sync` v6 (EJ deployad – görs efter merge)
+- v6: använder `prognos_svc_watch_drivers_active`, push-tid i svensk tid (Europe/Stockholm; v5 visade UTC = 1 h fel).
+- **Rulla tillbaka till v5:** Supabase MCP `deploy_edge_function`, projekt `lpfdryvukqmjlgenuzpb`, namn `prognos-sync`, entrypoint `index.ts`, verify_jwt=false,
+  files=[index.ts = innehållet i `/workspace/backups/prognos-sync-v5-index.ts`] (= `main:supabase/functions/prognos-sync/index.ts` vid 2f965dd).

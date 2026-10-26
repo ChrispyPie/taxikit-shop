@@ -370,15 +370,17 @@ async function tick(): Promise<Response> {
   }
 
   for (const ev of newEvents) {
-    const { data: drivers } = await sb.rpc("prognos_svc_watch_drivers", {
+    // Bara förare som är inloggade (giltig session) – ingen push till utloggade (t335u)
+    const { data: drivers } = await sb.rpc("prognos_svc_watch_drivers_active", {
       p_zone: ev.zone_id,
       p_cat: ev.category,
     });
     const list = (drivers || []) as string[];
-    const t = new Date(ev.estimated_at);
-    const hh = String(t.getHours()).padStart(2, "0");
-    const mm = String(t.getMinutes()).padStart(2, "0");
-    const body = `${ev.zone_name} · ${CAT_SV[ev.category] || ev.category} · ca ${hh}:${mm}`;
+    // Edge-runtime går i UTC → formatera i svensk tid
+    const hm = new Date(ev.estimated_at).toLocaleTimeString("sv-SE", {
+      hour: "2-digit", minute: "2-digit", timeZone: "Europe/Stockholm",
+    });
+    const body = `${ev.zone_name} · ${CAT_SV[ev.category] || ev.category} · ca ${hm}`;
     for (const d of list) {
       await sendTo(d, { title: "Ny förbokning", body, tag: "prognos-" + ev.zone_id + "-" + ev.category });
     }
