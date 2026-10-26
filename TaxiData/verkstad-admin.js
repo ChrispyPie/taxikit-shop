@@ -1,5 +1,7 @@
-/* Admin › Bil & verkstad (verkstadstimmar). Felanmälan, behov och underhåll hanteras i appen (verkstad.js);
- * här visas en sammanfattning med länk dit.
+/* Admin › Bil & verkstad.
+ * Behövs till bilen och felanmälningar: ägaren (och S admin) ser alla öppna anmälningar per bil och
+ * markerar dem som Pågår / Åtgärdad (med valfritt meddelande till föraren) eller tar bort dem
+ * (get_bil, set_car_issue_status, edge-funktionen bil-foto). Underhåll och uppgifter hanteras i appen (verkstad.js).
  * Verkstadstimmar: ägaren (och S admin) godkänner eller nekar förarnas verkstadstid,
  * kan fråga föraren (tråd fram och tillbaka tills beslut), ser månadens summa per förare
  * (kan laddas ner som CSV/kopieras) och ändrar timpriset.
@@ -19,7 +21,12 @@
     need_text: 'Skriv frågan till föraren först.',
     bad_period: 'Ogiltig period.'
   };
-  var A = window.VERKSTAD_ADMIN = { data: null, month: null, open: {}, busy: false, el: null };
+  var ISTATUS = { ny: 'Ny', pagar: 'Pågår', klar: 'Åtgärdad' };
+  var SUPPLY = { kvitto: ['🧾', 'Kvittorullar'], spolar: ['💧', 'Spolarvätska'], rengoring: ['🧽', 'Rengöring'], annat: ['✏️', 'Annat'] };
+  ERR.forbidden = 'Du har inte behörighet att göra det.';
+  ERR.not_editable = 'Det går inte att ändra längre.';
+  ERR.demo_read_only = 'Det här är ett demokonto. Du kan titta runt men inte ändra något.';
+  var A = window.VERKSTAD_ADMIN = { data: null, month: null, open: {}, busy: false, el: null, newIss: 0, showDone: {}, photos: {} };
 
   (function css() {
     var s = document.createElement('style');
@@ -51,7 +58,15 @@
       '.vka-ask{width:100%;margin-top:8px;padding:10px;font-size:calc(15px * var(--font-scale, 1))}' +
       '.vka-big{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:10px 0 4px;font-size:calc(17px * var(--font-scale, 1))}' +
       '.vka-ej{font-size:calc(13px * var(--font-scale, 1));color:var(--c-975a16);background:var(--c-fefcbf);border-radius:6px;padding:6px 8px;margin-top:8px}' +
-      '.vka-exp{display:flex;gap:8px;margin-top:10px}.vka-exp button{flex:1;padding:9px;font-size:calc(14px * var(--font-scale, 1))}';
+      '.vka-exp{display:flex;gap:8px;margin-top:10px}.vka-exp button{flex:1;padding:9px;font-size:calc(14px * var(--font-scale, 1))}' +
+      '.vka-chip.ny{background:var(--c-fefcbf);color:var(--c-975a16)}.vka-chip.pagar{background:var(--c-bee3f8,#bee3f8);color:var(--c-2c5282,#2c5282)}.vka-chip.klar{background:var(--c-c6f6d5);color:var(--c-276749)}' +
+      '.vka-card.new{box-shadow:inset 3px 0 0 #d69e2e}.vka-card.stop{box-shadow:inset 3px 0 0 #e53e3e}.vka-card.done{opacity:.75}' +
+      '.vka-car{display:flex;justify-content:space-between;align-items:baseline;font-weight:600;font-size:calc(14px * var(--font-scale, 1));margin:10px 2px 6px}' +
+      '.vka-car small{font-weight:400;color:var(--c-718096)}' +
+      '.vka-what{font-weight:600}.vka-txt{margin-top:6px;font-size:calc(14px * var(--font-scale, 1));overflow-wrap:anywhere;white-space:pre-wrap}' +
+      '.vka-btns .vka-del{flex:0 0 auto;border-color:var(--c-c53030)!important;color:var(--c-c53030)!important}' +
+      '.vka-more{width:100%;padding:9px;margin:0 0 10px;font-size:calc(14px * var(--font-scale, 1))}' +
+      '.vka-ph{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.vka-ph img{width:84px;height:84px;object-fit:cover;border-radius:6px}';
     document.head.appendChild(s);
   })();
 
@@ -99,14 +114,22 @@
       .then(function (d) {
         A.data = d; A.pending = (d.entries || []).filter(mine).length; render();
         // Sammanfattning av bilarna (samma data som appen visar)
-        return rpc('get_bil', {}).then(function (b) { A.bil = b; render(); }).catch(function () {});
+        return A.loadBil();
       })
       .catch(function (e) { A.data = { error: err(e) }; render(); });
   };
   A.count = function () {
-    return rpc('workshop_pending_count', {}).then(function (n) { A.pending = +n || 0; return A.pending; }).catch(function () { return 0; });
+    var a = rpc('workshop_pending_count', {}).then(function (n) { A.pending = +n || 0; }).catch(function () {});
+    // bil_open_count finns från migrationen 20261026n. Saknas den blir siffran bara verkstadstiderna som förut.
+    var b = rpc('bil_open_count', {}).then(function (r) { A.newIss = ((r && +r.supply) || 0) + ((r && +r.fault) || 0); }).catch(function () {});
+    return Promise.all([a, b]).then(function () { return A.total(); });
   };
-  A.badge = function () { return A.pending > 0 ? '<span class="vka-badge" aria-label="' + A.pending + ' väntar">' + A.pending + '</span>' : ''; };
+  A.total = function () { return (A.pending || 0) + (A.newIss || 0); };
+  A.badge = function () { var n = A.total(); return n > 0 ? '<span class="vka-badge" aria-label="' + n + ' väntar">' + n + '</span>' : ''; };
+  function countNew() { A.newIss = ((A.bil && A.bil.issues) || []).filter(function (i) { return i.status === 'ny'; }).length; }
+  A.loadBil = function () {
+    return rpc('get_bil', {}).then(function (b) { A.bil = b; countNew(); render(); }).catch(function () { A.bil = { error: true }; render(); });
+  };
   A.shift = function (k) { A.month = new Date(A.month.getFullYear(), A.month.getMonth() + k, 1); A.load(); };
 
   A.decide = function (id, status) {
@@ -161,24 +184,110 @@
     return h + '</div>';
   }
 
+  // ---------- Behövs till bilen / felanmälningar ----------
+  function photoApi(body) {
+    if (window.DEMO && DEMO.owner && DEMO.owner()) { var e = new Error('demo_read_only'); return Promise.reject(e); }
+    body.token = localStorage.getItem('taxi_session') || '';
+    return fetch(SUPABASE_URL + '/functions/v1/bil-foto', {
+      method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (b) { if (!r.ok) throw new Error((b && b.error) || ('HTTP ' + r.status)); return b; });
+    });
+  }
+  function issById(id) { return ((A.bil && A.bil.issues) || []).filter(function (i) { return i.id === id; })[0]; }
+  A.iset = function (id, status) {
+    if (A.busy) return;
+    var t = document.getElementById('vka-ic-' + id), c = t ? t.value.trim() : '';
+    A.busy = true;
+    rpc('set_car_issue_status', { p_id: id, p_status: status, p_comment: c || null })
+      .then(function () { A.busy = false; return A.loadBil(); })
+      .catch(function (e) { A.busy = false; alert(err(e)); A.loadBil(); });
+  };
+  A.idel = function (id) {
+    if (A.busy) return;
+    var i = issById(id); if (!i) return;
+    if (!confirm('Ta bort anmälan helt?' + (i.body ? '\n\n"' + String(i.body).slice(0, 80) + '"' : '') + '\n\nFöraren får ingen notis. Vill du meddela föraren, välj Åtgärdad i stället.')) return;
+    A.busy = true;
+    photoApi({ action: 'delete_issue', issue_id: id })
+      .then(function () { A.busy = false; return A.loadBil(); })
+      .catch(function (e) { A.busy = false; alert(err(e)); A.loadBil(); });
+  };
+  A.iphotos = function (id) {
+    A.photos[id] = 'loading'; render();
+    photoApi({ action: 'list', issue_id: id }).then(function (r) { A.photos[id] = r.photos || []; render(); })
+      .catch(function (e) { A.photos[id] = null; alert(err(e)); render(); });
+  };
+  A.toggleDone = function (k) { A.showDone[k] = !A.showDone[k]; render(); };
+  function when(ts) { var d = new Date(ts); return dl(d) + ' ' + hm(d); }
+  function ichip(i) { return '<span class="vka-chip ' + i.status + '">' + ISTATUS[i.status] + '</span>'; }
+  function ihist(i) {
+    var hs = (i.history || []);
+    if (!hs.length) return '';
+    return '<div class="vka-thr">' + hs.map(function (u) {
+      return '<div class="vka-m sys">' + esc(ISTATUS[u.status] || u.status) + ' · ' + esc(when(u.at)) + (u.comment ? '<br>"' + esc(u.comment) + '"' : '') + '</div>';
+    }).join('') + '</div>';
+  }
+  function issueCard(i) {
+    var sup = SUPPLY[i.supply], open = i.status !== 'klar';
+    var what = i.kind === 'supply' ? (sup ? sup[0] + ' ' + sup[1] : '🧴 Behövs') : (i.blocking ? '🛑 Bilen står' : '⚠️ Fel');
+    var by = i.mine ? 'dig' : i.reporter_name ? esc(i.reporter_name) + ' <span style="color:var(--c-718096)">(' + esc(i.reporter) + ')</span>' : esc(i.reporter || 'föraren');
+    var h = '<div class="vka-card' + (i.status === 'ny' ? ' new' : '') + (open && i.blocking ? ' stop' : '') + (open ? '' : ' done') + '">' +
+      '<div class="vka-top"><div class="vka-what">' + what + '</div>' + ichip(i) + '</div>';
+    if (i.body) h += '<div class="vka-txt">' + esc(i.body) + '</div>';
+    h += '<div class="vka-meta">' + esc(when(i.created_at)) + ' · av ' + by + (i.photos ? ' · 📷 ' + i.photos : '') + '</div>';
+    h += ihist(i);
+    var ph = A.photos[i.id];
+    if (ph === 'loading') h += '<div class="vka-meta">Hämtar foton…</div>';
+    else if (ph && ph.length) h += '<div class="vka-ph">' + ph.map(function (p) { return p.url ? '<a href="' + esc(p.url) + '" target="_blank" rel="noopener"><img src="' + esc(p.url) + '" alt="Foto"></a>' : ''; }).join('') + '</div>';
+    else if (i.photos) h += '<button class="vka-ask" onclick="VERKSTAD_ADMIN.iphotos(' + i.id + ')">📷 Visa foto</button>';
+    if (open) {
+      h += '<textarea id="vka-ic-' + i.id + '" maxlength="500" placeholder="Meddelande till föraren (valfritt). Skickas när du trycker Pågår eller Åtgärdad."></textarea>' +
+        '<div class="vka-btns">' +
+        (i.status === 'ny' ? '<button onclick="VERKSTAD_ADMIN.iset(' + i.id + ',\'pagar\')">Pågår</button>' : '') +
+        '<button class="vka-ok" onclick="VERKSTAD_ADMIN.iset(' + i.id + ',\'klar\')">✓ Åtgärdad</button>' +
+        '<button class="vka-del" onclick="VERKSTAD_ADMIN.idel(' + i.id + ')" aria-label="Ta bort">Ta bort</button></div>';
+    } else {
+      h += '<div class="vka-btns"><button onclick="VERKSTAD_ADMIN.iset(' + i.id + ',\'ny\')">Öppna igen</button>' +
+        '<button class="vka-del" onclick="VERKSTAD_ADMIN.idel(' + i.id + ')">Ta bort</button></div>';
+    }
+    return h + '</div>';
+  }
+  function carKey(i) { return i.car || ''; }
+  function issueSection(kind) {
+    var all = ((A.bil && A.bil.issues) || []).filter(function (i) { return i.kind === kind; });
+    var open = all.filter(function (i) { return i.status !== 'klar'; }), done = all.filter(function (i) { return i.status === 'klar'; });
+    var nNew = open.filter(function (i) { return i.status === 'ny'; }).length;
+    var h = '<div class="vka-h"' + (kind === 'supply' ? ' style="margin-top:0"' : '') + '>' + (kind === 'supply' ? '🧴 Behövs till bilen' : '⚠️ Fel på bilarna') +
+      ' (' + open.length + (nNew ? ', ' + nNew + ' nya' : '') + ')</div>';
+    if (!open.length) h += '<div class="vka-card" style="color:var(--c-718096)">' + (kind === 'supply' ? 'Inget som behövs just nu.' : 'Inga öppna fel. 👍') + '</div>';
+    // grupperat per bil: bilar i nummerordning, "Alla bilar" sist
+    var groups = {}, keys = [];
+    open.forEach(function (i) { var k = carKey(i); if (!groups[k]) { groups[k] = []; keys.push(k); } groups[k].push(i); });
+    keys.sort(function (a, b) { return !a ? 1 : !b ? -1 : a.localeCompare(b, 'sv', { numeric: true }); });
+    keys.forEach(function (k) {
+      h += '<div class="vka-car"><span>' + (k ? '🚕 Bil ' + esc(k) : '🚕 Alla bilar') + '</span><small>' + groups[k].length + ' öppn' + (groups[k].length === 1 ? 'en' : 'a') + '</small></div>';
+      h += groups[k].map(issueCard).join('');
+    });
+    if (done.length) {
+      h += '<button class="vka-more" onclick="VERKSTAD_ADMIN.toggleDone(\'' + kind + '\')">' + (A.showDone[kind] ? 'Dölj åtgärdade' : 'Visa åtgärdade (' + done.length + ')') + '</button>';
+      if (A.showDone[kind]) h += done.map(issueCard).join('');
+    }
+    return h;
+  }
   function bilSummary() {
-    var b = A.bil; if (!b) return '';
-    var cars = b.cars || [], iss = b.issues || [], m = b.maint || [];
-    var stop = cars.filter(function (c) { return c.blocking; }).length;
-    var faults = iss.filter(function (i) { return i.kind === 'fault' && i.status !== 'klar'; }).length;
-    var sup = iss.filter(function (i) { return i.kind === 'supply' && i.status !== 'klar'; }).length;
+    var b = A.bil;
+    if (!b) return '<div class="vka-card" style="color:var(--c-718096)">Hämtar bilarna…</div>';
+    if (b.error) return '<div class="vka-card" style="color:var(--c-718096)">Kunde inte hämta bilarna. Försök igen.</div>';
+    var m = b.maint || [];
     var late = m.filter(function (x) { return x.status === 'plan' && x.level === 2; }).length;
     var soon = m.filter(function (x) { return x.status === 'plan' && x.level === 1; }).length;
     var sug = m.filter(function (x) { return x.status === 'forslag'; }).length;
-    var rows = [];
-    if (stop) rows.push('<b style="color:var(--c-c53030)">🛑 ' + stop + ' bil' + (stop === 1 ? '' : 'ar') + ' står</b>');
-    rows.push('⚠️ ' + faults + (faults === 1 ? ' öppet fel' : ' öppna fel'));
-    rows.push('🧴 ' + sup + (sup === 1 ? ' sak behövs' : ' saker behövs'));
-    rows.push('🗓️ Underhåll: ' + (late ? late + ' försenat, ' : '') + soon + ' snart' + (sug ? ', ' + sug + ' förslag' : ''));
-    return '<div class="vka-card"><div class="vka-who">Bilarna just nu</div><div class="vka-meta">' + rows.join('<br>') + '</div>' +
-      '<button style="margin-top:10px;width:100%;padding:10px;border-radius:8px" onclick="VERKSTAD_ADMIN.openApp()">Hantera i appen › Bil & verkstad</button></div>';
+    var h = issueSection('supply') + issueSection('fault');
+    h += '<div class="vka-card"><div class="vka-who">🗓️ Underhåll och uppgifter</div><div class="vka-meta">Underhåll: ' + (late ? late + ' försenat, ' : '') + soon + ' snart' + (sug ? ', ' + sug + ' förslag' : '') + '</div>' +
+      '<button style="margin-top:10px;width:100%;padding:10px;border-radius:8px" onclick="VERKSTAD_ADMIN.openApp(\'underhall\')">Hantera i appen › Bil & verkstad</button></div>';
+    return h;
   }
-  A.openApp = function () { localStorage.setItem('taxi_view', 'verkstad'); localStorage.setItem('bil_tab', 'fel'); location.href = 'index.html'; };
+  A.openApp = function (tab) { localStorage.setItem('taxi_view', 'verkstad'); localStorage.setItem('bil_tab', tab || 'fel'); location.href = 'index.html'; };
 
   // Månadens summa: bara godkänd tid räknas. Väntande/frågade visas separat som "Ej klart".
   function monthTotals() {
@@ -218,7 +327,7 @@
     var asked = (d.entries || []).filter(function (x) { return x.status === 'pending' && x.waiting_on === 'driver'; });
     var done = (d.entries || []).filter(function (x) { return x.status !== 'pending'; });
     var h = bilSummary();
-    h += '<div class="vka-h" style="margin-top:0">Verkstadstimmar</div>';
+    h += '<div class="vka-h">⏱️ Verkstadstimmar</div>';
     h += '<div class="vka-card vka-rate"><span>Timpris: <b>' + kr(d.rate) + '/h</b></span><button onclick="VERKSTAD_ADMIN.setRate()">Ändra</button></div>';
     h += '<div class="vka-h">Väntar på dig (' + pend.length + ')</div>';
     h += pend.length ? pend.map(function (x) { return card(x, false); }).join('') : '<div class="vka-card" style="color:var(--c-718096)">Inget väntar på dig just nu.</div>';
