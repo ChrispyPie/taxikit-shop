@@ -148,7 +148,7 @@ delete from vault.secrets where name in ('PROGNOS_PIN', 'PROGNOS_TICK_KEY');
 - Backup-gren: backup/pre-kategorisumma-2026-10-26 (= main 689d699 före ändringen).
 - Undo före merge: stäng PR:en. Efter merge: git revert -m 1 <merge-sha> via PR (ingen force push).
 
-## t364 – Aktivitetsprick på Prognos-rutan (PR feature/prognos-badge, pb1)
+## t364 – Aktivitetsprick på Prognos-rutan (PR #18, LIVE e3c4014, pb1)
 - Ändrat: TaxiData/prognos.js (P.refreshBadge, markSeen, minutuppdatering när hemskärmen syns, nollställning vid besök), TaxiData/index.html (data-badge="prognos" på rutan, PROGNOS.refreshBadge() i renderMenu, prognos.js?v=20261026pb1). Ingen ändring i forum.js/om.js/changelog.js/style.css.
 - localStorage: prognos_new_<förar-id> (cachad siffra).
 - Supabase (additivt, redan live): supabase/migrations/20261026h_prognos_seen.sql – tabell public.prognos_seen (RLS på, ingen direkt åtkomst) + RPC prognos_new_count(p_token, p_cats text[]) och prognos_seen_set(p_token). Master-session sparar inget och får 0.
@@ -159,3 +159,9 @@ delete from vault.secrets where name in ('PROGNOS_PIN', 'PROGNOS_TICK_KEY');
 - Backup-gren: backup/pre-prognos-badge-2026-10-26 (= main 34e30b6 före ändringen).
 - Undo före merge: stäng PR:en. Efter merge: git revert -m 1 <merge-sha> via PR (ingen force push) + ny cache-bust.
 - Changelog-post (TaxiData/changelog.js) läggs till först när det går live.
+
+### t367 – LIVE 2026-10-26 (PR #18 mergad, merge-commit e3c4014)
+- Mergad normalt efter två merges av main (PR #20 Topplistor, PR #19 Verkstad). Nyheter: 26 okt-kortet fick id `2026-10-26e`, och Prognos-raden 'Nytt' ligger överst. Rader från Verkstad, Topplistor och Forum är kvar. `changelog.js?v=20261026zpb1`, `prognos.js?v=20261026pb1`.
+- Kontrollerat live: assets ger 200, prickat visas på hemrutan (mockade RPC), Prognos nollställer pricken, Om visar alla rader, inga JS-fel.
+- Ångra koden: via PR på branch från main: `git revert -m 1 e3c4014` och sedan merge (ingen force push). Bumpa sedan cache-bust för prognos.js/changelog.js över de nuvarande värdena.
+- Ångra databasen (bara om koden redan är ångrad): kör undo-SQL:en i t364-avsnittet ovan (prognos_seen_set, prognos_new_count, prognos_seen).
