@@ -1,7 +1,7 @@
 /* Prognos: tidsschema över uppskattade förbokningar från Taxi Göteborgs prognosverktyg.
  * Koden sparas aldrig i appen – bara på servern. Vid 401 visas en prompt.
  * Kategorikoder: A=Kombi, F=Barnstol, Övriga, Storbil 8+, H=Elbil, 3=Babyskydd.
- * Bilbarnstol/babyskydd är tillägg till bilkategori – egna fliken sist.
+ * Bilbarnstol/babyskydd är tillägg till bilkategori – egna spalter sist i schemat.
  */
 (function () {
   'use strict';
@@ -21,28 +21,26 @@
   var ZONE_BY_ID = {};
   ZONE_ORDER.forEach(function (z) { ZONE_BY_ID[z.id] = z; });
 
-  // Bilkategorier i schemat (barnstol/babyskydd hör ihop med bil – egen flik)
-  var CAR_CATS = [
-    { k: 'app', head: 'A Kombi', label: 'Kombi (A)' },
-    { k: 'ovrigt', head: 'Övriga', label: 'Övriga' },
-    { k: 'storbil', head: 'Storbil', label: 'Storbil (8+)' },
-    { k: 'elbil', head: 'H Elbil', label: 'Elbil (H)' }
+  // Alla kategorier i schemat; barnstol/babyskydd sist (paras alltid med bil men eget spalt –
+  // vi vet inte vilken bil de hör till när flera kommer samtidigt).
+  var SCHEDULE_CATS = [
+    { k: 'app', head: 'A Kombi', label: 'Kombi (A)', child: false },
+    { k: 'ovrigt', head: 'Övriga', label: 'Övriga', child: false },
+    { k: 'storbil', head: 'Storbil 8+', label: 'Storbil (8+)', child: false },
+    { k: 'elbil', head: 'H Elbil', label: 'Elbil (H)', child: false },
+    { k: 'barnstol', head: 'F Barnstol', label: 'Barnstol (F)', child: true },
+    { k: 'babyskydd', head: '3 Babyskydd', label: 'Babyskydd (3)', child: true }
   ];
-  var CHILD_CATS = [
-    { k: 'barnstol', head: 'F', label: 'Barnstol (F)' },
-    { k: 'babyskydd', head: '3', label: 'Babyskydd (3)' }
-  ];
-  var ALL_CATS = CAR_CATS.concat(CHILD_CATS);
+  var ALL_CATS = SCHEDULE_CATS;
   var CAT_LABEL = {};
   ALL_CATS.forEach(function (c) { CAT_LABEL[c.k] = c.label; });
   var ALL_CAT_KEYS = ALL_CATS.map(function (c) { return c.k; });
-  var CAR_KEYS = CAR_CATS.map(function (c) { return c.k; });
-  var CHILD_KEYS = CHILD_CATS.map(function (c) { return c.k; });
+  var CAT_META = {};
+  ALL_CATS.forEach(function (c) { CAT_META[c.k] = c; });
 
   var LS_CATS = 'prognos_cats';
   var LS_ZONES = 'prognos_zones';
   var LS_TAB = 'prognos_zone_tab';
-  var TAB_BARN = 'barn';
 
   var st = {
     el: null,
@@ -114,7 +112,6 @@
   function loadTab() {
     try {
       var t = localStorage.getItem(LS_TAB);
-      if (t === TAB_BARN) return TAB_BARN;
       if (t && ZONE_BY_ID[t]) return t;
     } catch (e) {}
     return '293';
@@ -245,7 +242,7 @@
       if (st.status.code_needed) st.panel = 'kod';
       // Om vald flik filtrerats bort → byt till första synliga
       var vis = visibleZones();
-      if (st.zoneTab !== TAB_BARN && !vis.some(function (z) { return z.id === st.zoneTab; })) {
+      if (!vis.some(function (z) { return z.id === st.zoneTab; })) {
         saveTab(vis.length ? vis[0].id : '293');
       }
       checkNewBookings(st.bookings);
@@ -307,16 +304,9 @@
   function renderFilter() {
     var cats = loadCats();
     var zones = loadZones();
-    var html = '<div class="pg-card"><h3>Bilkategorier</h3><div class="pg-chips">';
-    CAR_CATS.forEach(function (c) {
-      var on = cats.indexOf(c.k) >= 0;
-      html += '<button type="button" class="pg-chip' + (on ? ' on' : '') + '" data-cat="' + c.k + '">' +
-        esc(c.label) + '</button>';
-    });
-    html += '</div></div>';
-    html += '<div class="pg-card"><h3>Barnstol / babyskydd</h3>' +
-      '<p class="pg-muted">Visas på egen flik i schemat. Valfritt i filter och notiser.</p><div class="pg-chips">';
-    CHILD_CATS.forEach(function (c) {
+    var html = '<div class="pg-card"><h3>Kategorier att visa</h3>' +
+      '<p class="pg-muted">Barnstol och babyskydd paras alltid med en bilbokning, men visas i egna spalter (vi vet inte vilken bil de hör till).</p><div class="pg-chips">';
+    ALL_CATS.forEach(function (c) {
       var on = cats.indexOf(c.k) >= 0;
       html += '<button type="button" class="pg-chip' + (on ? ' on' : '') + '" data-cat="' + c.k + '">' +
         esc(c.label) + '</button>';
@@ -336,7 +326,7 @@
   function renderNotis() {
     var html = '<div class="pg-card"><h3>Notis vid ny bokning</h3>' +
       ensurePushHint() +
-      '<p class="pg-muted">Välj zon + kategori. Barnstol/babyskydd kan bevakas separat.</p>';
+      '<p class="pg-muted">Välj zon + kategori. Barnstol/babyskydd kan bevakas som egna kategorier.</p>';
     visibleZones().forEach(function (z) {
       html += '<div class="pg-watch-zone"><div class="pg-watch-title">' + esc(z.name) +
         ' <span class="pg-muted">(' + esc(z.id) + ')</span></div><div class="pg-chips">';
@@ -359,8 +349,6 @@
       html += '<button type="button" class="pg-ztab' + (on ? ' on' : '') + '" data-ztab="' + z.id +
         '" title="' + esc(z.name) + ' (' + z.id + ')">' + esc(z.short) + '</button>';
     });
-    html += '<button type="button" class="pg-ztab pg-ztab-barn' + (st.zoneTab === TAB_BARN ? ' on' : '') +
-      '" data-ztab="' + TAB_BARN + '" title="Barnstol och babyskydd (hör till bilkategori)">Barnstol</button>';
     html += '</div>';
     return html;
   }
@@ -373,12 +361,14 @@
   }
 
   function renderCarTimeline(zoneId) {
-    var cats = loadCats().filter(function (k) { return CAR_KEYS.indexOf(k) >= 0; });
-    if (!cats.length) cats = CAR_KEYS.slice();
+    var cats = loadCats().filter(function (k) { return ALL_CAT_KEYS.indexOf(k) >= 0; });
+    // Behåll schemaordning även om filter tar bort några
+    cats = ALL_CAT_KEYS.filter(function (k) { return cats.indexOf(k) >= 0; });
+    if (!cats.length) cats = ALL_CAT_KEYS.slice();
     var now = floor5(new Date());
     var end = addMin(now, 120);
     var rows = [];
-    for (var t = new Date(now); t < end; t = addMin(t, 5)) rows.push(new Date(t));
+    for (var t0 = new Date(now); t0 < end; t0 = addMin(t0, 5)) rows.push(new Date(t0));
 
     var bySlot = {};
     (st.bookings || []).forEach(function (b) {
@@ -391,77 +381,21 @@
       bySlot[key].push(b);
     });
 
-    var html = '<div class="pg-scroll pg-scroll-fit"><table class="pg-table pg-table-fit"><thead><tr>' +
+    var html = '<div class="pg-scroll pg-scroll-fit"><table class="pg-table pg-table-fit pg-table-diag"><thead><tr>' +
       '<th class="pg-th-time">Tid</th>';
     cats.forEach(function (k) {
-      var meta = CAR_CATS.find(function (c) { return c.k === k; });
-      html += '<th>' + esc(meta ? meta.head : k) + '</th>';
+      var meta = CAT_META[k] || { head: k, child: false };
+      var cls = 'pg-th-cat' + (meta.child ? ' pg-th-child' : '');
+      html += '<th class="' + cls + '"><span class="pg-th-rot">' + esc(meta.head) + '</span></th>';
     });
     html += '</tr></thead><tbody>';
     rows.forEach(function (d) {
       html += '<tr><td class="pg-td-time">' + p2(d.getHours()) + ':' + p2(d.getMinutes()) + '</td>';
       cats.forEach(function (k) {
+        var meta = CAT_META[k] || {};
         var sum = cellSummary(bySlot[d.getTime() + '|' + k]);
-        html += '<td class="pg-td-cell">' + countCell(sum) + '</td>';
-      });
-      html += '</tr>';
-    });
-    html += '</tbody></table></div>';
-    return html;
-  }
-
-  /** Barnstol-flik: kolumner per zon (kortnamn), cell = antal F+3 */
-  function renderBarnTimeline() {
-    var cats = loadCats().filter(function (k) { return CHILD_KEYS.indexOf(k) >= 0; });
-    if (!cats.length) cats = CHILD_KEYS.slice();
-    var zones = visibleZones();
-    var now = floor5(new Date());
-    var end = addMin(now, 120);
-    var rows = [];
-    for (var t = new Date(now); t < end; t = addMin(t, 5)) rows.push(new Date(t));
-
-    var bySlot = {};
-    (st.bookings || []).forEach(function (b) {
-      if (cats.indexOf(b.category) < 0) return;
-      if (zones.length && !zones.some(function (z) { return z.id === String(b.zone_id); })) return;
-      var d = floor5(new Date(b.estimated_at));
-      if (d < now || d >= end) return;
-      var key = d.getTime() + '|' + String(b.zone_id);
-      if (!bySlot[key]) bySlot[key] = [];
-      bySlot[key].push(b);
-    });
-
-    var html = '<p class="pg-muted pg-barn-note">Barnstol (F) och babyskydd (3) hör alltid till en bilbokning. Siffran = antal tillägg per zon.</p>';
-    html += '<div class="pg-scroll pg-scroll-fit"><table class="pg-table pg-table-fit pg-table-barn"><thead><tr>' +
-      '<th class="pg-th-time">Tid</th>';
-    zones.forEach(function (z) {
-      html += '<th title="' + esc(z.name) + '">' + esc(z.short.length > 4 ? z.short.slice(0, 4) : z.short) + '</th>';
-    });
-    html += '</tr></thead><tbody>';
-    rows.forEach(function (d) {
-      html += '<tr><td class="pg-td-time">' + p2(d.getHours()) + ':' + p2(d.getMinutes()) + '</td>';
-      zones.forEach(function (z) {
-        var list = bySlot[d.getTime() + '|' + z.id] || [];
-        var sum = cellSummary(list);
-        var tipExtra = '';
-        if (list.length) {
-          var fc = 0, bc = 0;
-          list.forEach(function (b) {
-            if (b.category === 'barnstol') fc++;
-            else if (b.category === 'babyskydd') bc++;
-          });
-          tipExtra = z.name + ': ' +
-            (fc ? fc + ' barnstol' : '') +
-            (fc && bc ? ', ' : '') +
-            (bc ? bc + ' babyskydd' : '');
-        }
-        var cell = '';
-        if (sum) {
-          var tip = tipExtra + (sum.tip ? ' · ' + sum.tip : '');
-          cell = '<span class="pg-n pg-c-' + sum.conf + '" title="' + esc(tip) + '">' +
-            esc(sum.text) + '</span>';
-        }
-        html += '<td class="pg-td-cell">' + cell + '</td>';
+        var tdCls = 'pg-td-cell' + (meta.child ? ' pg-td-child' : '');
+        html += '<td class="' + tdCls + '">' + countCell(sum) + '</td>';
       });
       html += '</tr>';
     });
@@ -470,7 +404,6 @@
   }
 
   function renderTimeline() {
-    if (st.zoneTab === TAB_BARN) return renderBarnTimeline();
     var zid = st.zoneTab;
     if (!ZONE_BY_ID[zid]) zid = '293';
     return renderCarTimeline(zid);
