@@ -452,8 +452,14 @@
       '<br><span class="pg-muted">Tiderna är uppskattningar. Heldraget = säker, streckat = trolig, svagt = osäker. Blandat antal markeras med ?.</span></div>';
   }
 
+  // Ritar bara när Prognos är den öppna sidan – annars skulle en sen
+  // uppdatering skriva över startsidan/en annan sida (samma #content-ruta).
+  function onPage() {
+    return !!st.el && st.el.isConnected && localStorage.getItem('taxi_view') === P.id;
+  }
+
   function paint() {
-    if (!st.el) return;
+    if (!onPage()) return;
     var tabs = '<div class="pg-tabs">' +
       '<button type="button" class="pg-tab' + (st.panel === 'schema' ? ' on' : '') + '" data-panel="schema">Schema</button>' +
       '<button type="button" class="pg-tab' + (st.panel === 'filter' ? ' on' : '') + '" data-panel="filter">Filter</button>' +
@@ -542,6 +548,7 @@
     refresh();
     if (st.poll) clearInterval(st.poll);
     st.poll = setInterval(function () {
+      if (!onPage()) { clearInterval(st.poll); st.poll = null; return; }
       if (document.visibilityState === 'hidden') return;
       refresh();
     }, 60000);
