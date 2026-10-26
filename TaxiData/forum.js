@@ -12,7 +12,7 @@
   var F = window.FORUM = { id: 'forum', title: 'Forum', icon: '💬' };
   var CATS = [['allmant', 'Allmänt'], ['hjalp', 'Hjälp'], ['forslag', 'Förslag'], ['buggar', 'Buggar']];
   // t353u: system för klagomål på enskilda personer (del av intranätet, kan integreras senare). Byt namn här.
-  var COMPLAINT_SYSTEM = 'Rox';
+  var COMPLAINT_SYSTEM = 'Roxx';
   var RULE_KEY = 'forum_rule_hidden';
   // t354u: höj RULES_VERSION när reglerna ändras → alla förare måste godkänna på nytt.
   var RULES_VERSION = 1;
@@ -20,7 +20,7 @@
   function rulesOk() { try { return localStorage.getItem(rulesKey()) === String(RULES_VERSION); } catch (e) { return false; } }
   function setRulesOk(on) { try { if (on) localStorage.setItem(rulesKey(), String(RULES_VERSION)); else localStorage.removeItem(rulesKey()); } catch (e) {} }
   function ruleText() {
-    return 'Håll god ton. Inga personangrepp eller hängningar av enskilda personer. Klagomål på en person tar du privat med din chef eller som ett ärende i ' + COMPLAINT_SYSTEM + '.';
+    return 'Håll god ton. Inga personangrepp eller uthängningar av enskilda personer. Klagomål på en person tar du privat med din chef eller som ett ärende i ' + COMPLAINT_SYSTEM + '.';
   }
   function ruleHidden() { try { return localStorage.getItem(RULE_KEY) === '1'; } catch (e) { return false; } }
   // I listan: kan fällas ihop per enhet. I formulär: visas alltid (fixed = true).

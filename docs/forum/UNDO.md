@@ -4,7 +4,7 @@
 - Backup-branch: `backup/pre-forum-god-ton-2026-10-26` (= main före ändringen)
 - Filer: `TaxiData/forum.js`, `TaxiData/index.html` (cache-bust `forum.js?v=20261026pg16`),
   `supabase/migrations/20261026f_forum_rules_accept.sql`, `docs/forum/*`
-- Konstanter i forum.js: `COMPLAINT_SYSTEM = 'Rox'` (namnet på ärendesystemet), `RULES_VERSION = 1`
+- Konstanter i forum.js: `COMPLAINT_SYSTEM = 'Roxx'` (namnet på ärendesystemet), `RULES_VERSION = 1`
   (höj för att tvinga nytt godkännande när regeltexten ändras).
 - localStorage: `forum_rule_hidden` (infobox i listan ihopfälld), `forum_rules_ok_<förar-id>` (cache, värde = version).
 
