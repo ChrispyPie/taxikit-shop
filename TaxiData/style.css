@@ -518,6 +518,14 @@ html[data-theme="dark"] .pg-badge { background: #2a4365; color: #bee3f8; }
   font-size: 0.64rem; font-weight: 600; color: var(--text); line-height: 1;
   pointer-events: none;
 }
+/* t352u: summa efter kategorinamnet – liten pill, 0 visas dämpat */
+.pg-th-sum {
+  display: inline-block; font-weight: 800; font-size: 1.05em; line-height: 1;
+  padding: 1px 4px; border-radius: 7px; margin-left: 1px;
+  background: var(--primary); color: var(--on-primary);
+}
+.pg-th-child .pg-th-sum { background: var(--accent, #dd6b20); color: #fff; }
+.pg-th-sum.pg-th-sum0 { background: transparent; color: var(--muted, #888); font-weight: 600; box-shadow: inset 0 0 0 1px var(--border); }
 /* Reserv till höger så sista (snedställda) namnet ryms – bredden sätts av fitDiagHead() */
 .pg-th-spacer, .pg-td-spacer {
   width: var(--pg-spacer-w, 12px); min-width: 12px; max-width: 48px;
