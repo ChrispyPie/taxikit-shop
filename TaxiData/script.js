@@ -63,7 +63,12 @@ async function retryLoadData(btn) {
 async function loadData() {
   currentDriver = localStorage.getItem('taxi_driver') || '';
   viewDriver = currentDriver;
-  try {
+  if (companyUseApi()) {
+    // Åkeridata: ingen helårsnedladdning. Siffrorna hämtas per vald period (companyPeriod nedan).
+    data = {};
+    loadFailed = false;
+    companyApi.cache.clear(); companyApi.failed = {}; companyApi.trips = {}; companyApi.tripsFailed = {};
+  } else try {
     // Resedata hämtas från servern (Supabase) och kräver inloggning.
     // Förare får bara sina egna resor; inga publika datafiler används.
     // Ett automatiskt nytt försök om anropet misslyckas (HTTP-fel, timeout eller nätverksfel).
@@ -429,7 +434,22 @@ function render() {
   }
 
   const [rangeStart, rangeEnd] = getRange();
+  // Åkeridata: perioden hämtas färdigräknad från servern (get_company_period). Medan den hämtas visas
+  // förra bilden lite nedtonad (eller "Hämtar…" första gången).
+  let P = null;
+  if (companyUseApi()) {
+    const cp = companyPeriod(rangeStart, rangeEnd);
+    const dashEl = document.getElementById('dashboard');
+    if (!cp.res) {
+      if (cp.html) dashEl.innerHTML = cp.html; else dashEl.style.opacity = '0.55';
+      dashEl.setAttribute('aria-busy', cp.html ? 'false' : 'true');
+      return;
+    }
+    dashEl.style.opacity = ''; dashEl.setAttribute('aria-busy', 'false');
+    P = cp.res;
+  }
   let shifts = getShiftsInRange(rangeStart, rangeEnd);
+  if (P) shifts = P.shifts.slice();
   shifts.sort((a, b) => (b.start || '').localeCompare(a.start || ''));
 
   let allTrips = [];
@@ -438,28 +458,30 @@ function render() {
     allTrips = allTrips.concat(getTripsForShift(s));
     totalMinutes += parseTime(s.tid);
   });
-  const looseTrips = getOrphanTripsInRange(rangeStart, rangeEnd);
+  if (P) totalMinutes = Number(P.totals.minutes) || 0;
+  const looseTrips = P ? P.loose : getOrphanTripsInRange(rangeStart, rangeEnd);
   allTrips = allTrips.concat(looseTrips);
   if (currentTab === 'dag' && !COMPANY) allTrips.sort((a, b) => ((a.startdatum || '') + (a.starttid || '')).localeCompare((b.startdatum || '') + (b.starttid || '')));
 
   const trips = allTrips.filter(t => t.kredittyp !== '999');
-  const antal = trips.length;
-  const totalKm = shifts.reduce((s, sh) => s + parseFloat((sh.km || '0').replace(',', '.')), 0);
+  const S = P ? P.totals : null;   // Åkeridata: summorna kommer från servern (samma regler som nedan)
+  const antal = S ? Number(S.antal) : trips.length;
+  const totalKm = S ? Number(S.km) : shifts.reduce((s, sh) => s + parseFloat((sh.km || '0').replace(',', '.')), 0);
   const arbetad = formatTime(totalMinutes);
   const antalSkift = shifts.length;
   const antalForare = new Set(shifts.map(s => s.forar || '710022')).size;
   const antalBilar = new Set(shifts.map(s => s.taxi).filter(Boolean)).size;
 
-  const kort = sumByType(trips, '160');
-  const kredit = sumByType(trips, '283');
-  const swish = sumByType(trips, '163');
-  const kontant = sumByType(trips, '1');
-  const uberGross = sumByType(trips, '164');
+  const kort = S ? Number(S.kort) : sumByType(trips, '160');
+  const kredit = S ? Number(S.kredit) : sumByType(trips, '283');
+  const swish = S ? Number(S.swish) : sumByType(trips, '163');
+  const kontant = S ? Number(S.kontant) : sumByType(trips, '1');
+  const uberGross = S ? Number(S.uber) : sumByType(trips, '164');
   const uberNetto = uberGross * (1 - UBER_FEE);
-  const faktura = sumByType(trips, '161');
-  const ovrigt = sumByType(trips, '185');
-  const bom = sumByType(allTrips, '999');
-  const dricks = trips.reduce((s, t) => s + parseAmount(t.dricks), 0);
+  const faktura = S ? Number(S.faktura) : sumByType(trips, '161');
+  const ovrigt = S ? Number(S.ovrigt) : sumByType(trips, '185');
+  const bom = S ? Number(S.bom) : sumByType(allTrips, '999');
+  const dricks = S ? Number(S.dricks) : trips.reduce((s, t) => s + parseAmount(t.dricks), 0);
 
   const inkort = kort + kredit + swish + kontant + uberNetto + faktura + ovrigt;
   const krPerKorning = antal ? Math.round(inkort / antal) : 0;
@@ -574,10 +596,12 @@ function render() {
   } else if (shifts.length) {
     // Lista med skift (för hela åkeriet även på dagsfliken: ett skift per förare och bil)
     html += `<div class="section">${shifts.map(s => {
-      const shiftTrips = getTripsForShift(s);
+      // Åkeridata: passets resor följer med för korta perioder, annars hämtas de när passet fälls ut.
+      const lazyId = P && !s._trips ? s._id : null;
+      const shiftTrips = P ? (s._trips || companyApi.trips[s._id] || []) : getTripsForShift(s);
       const shiftUber = shiftTrips.filter(t => t.kredittyp === '164').reduce((sum, t) => sum + parseAmount(t.belopp), 0);
       const shiftOther = shiftTrips.filter(t => t.kredittyp !== '999' && t.kredittyp !== '164').reduce((sum, t) => sum + parseAmount(t.belopp), 0);
-      const shiftInkort = shiftOther + shiftUber * (1 - UBER_FEE);
+      const shiftInkort = P ? s._inkort : shiftOther + shiftUber * (1 - UBER_FEE);
       const dateLabel = (COMPANY && currentTab === 'dag') ? '' : formatShiftDate(s.start) + ' ';
       // Förare visas bara för ägaren; övriga ser bara bilen
       const who = COMPANY ? `<span class="shift-who">${escHtml(s.taxi || '?')}${isOwnerRole() ? ' · ' + escHtml(driverLabel(s.forar || '710022')) : ''}</span>` : '';
@@ -588,20 +612,24 @@ function render() {
           <div class="sub trip-detail"><span>Slut</span><span>${t.sluttid || '00:00'} – zon ${t.slutzon || '?'}</span></div>
           <div class="sub trip-detail"><span>Typ</span><span>${typeMap[t.kredittyp] || t.kredittyp || '?'}</span></div>
           <div class="sub trip-detail"><span>Dricks</span><span>${formatSEK(parseAmount(t.dricks))}</span></div>`;
-      }).join('');
-      return `<div class="stat-row" data-key="shift:${escHtml(s.passnr)}|${escHtml(s.forar || '710022')}|${escHtml(s.start || '')}" onclick="toggleShift(this)"><span class="toggle">+</span><span class="label">${dateLabel}#${escHtml(s.passnr)}${who}</span><span class="value">${formatSEK(shiftInkort)}</span></div>
+      }).join('') + (lazyId != null && !companyApi.trips[lazyId] ? companyTripsPlaceholder(lazyId) : '');
+      return `<div class="stat-row" data-key="shift:${escHtml(s.passnr)}|${escHtml(s.forar || '710022')}|${escHtml(s.start || '')}"${lazyId != null && !companyApi.trips[lazyId] ? ` data-lazy="${lazyId}"` : ''} onclick="toggleShift(this)"><span class="toggle">+</span><span class="label">${dateLabel}#${escHtml(s.passnr)}${who}</span><span class="value">${formatSEK(shiftInkort)}</span></div>
       <div class="shift-content">${tripsHtml}</div>`;
     }).join('')}${looseTrips.length ? looseTripsRow(looseTrips) : ''}</div>`;
   } else if (looseTrips.length) {
     html += `<div class="section">${looseTripsRow(looseTrips)}</div>`;
   }
 
-  const ark = archiveStatus(rangeStart, rangeEnd);   // äldre år: hämtas automatiskt, bara för perioder före i år
+  // äldre år: hämtas automatiskt, bara för perioder före i år (Åkeridata: servern har redan arkivet med)
+  const ark = P ? { hide: false, html: rangeStart.getFullYear() < new Date().getFullYear() ? `<div class="arkiv-tag">📦 Äldre data från arkivet</div>` : '' }
+    : archiveStatus(rangeStart, rangeEnd);
   html = ark.html + (ark.hide ? '' : html);
 
   const dash = document.getElementById('dashboard');
   dash.innerHTML = html;
   restoreOpen(dash);
+  if (P) companyLoadTrips(Array.from(dash.querySelectorAll('.stat-row.open[data-lazy]'))
+    .map(el => el.dataset.lazy).filter(id => !companyApi.tripsFailed[id]));
   if (!COMPANY) document.dispatchEvent(new CustomEvent('taxidata:render'));
 
   } catch (e) {
@@ -645,6 +673,108 @@ window.taxiEnsureData = async function () {
   if (COMPANY) return;
   if (!data || !data.shifts) await loadData();
 };
+
+// ---- Åkeridata: siffror per period från servern (dataplan steg 1, t393u) ----
+// I stället för att ladda ner hela årets resor för alla förare hämtas bara den period som visas,
+// färdigräknad på servern (get_company_period). Samma regler som förut: ägaren ser namn, S admin ser
+// åkeriet utan förar-id, övriga bara sin egen data. Arkivåren ingår redan på servern.
+// Svarar inte servern (två försök) första gången används det gamla sättet (get_trip_data) som reserv.
+const COMPANY_DETAIL_DAYS = 62;      // resorna följer med direkt för perioder upp till 62 dagar
+const COMPANY_CHUNK_DAYS = 366;      // längre egna perioder hämtas i bitar om högst ett år
+const COMPANY_CACHE_MS = 5 * 60 * 1000;
+const companyApi = { cache: new Map(), pending: {}, failed: {}, trips: {}, tripsPending: {}, tripsFailed: {},
+                     forar: {}, legacy: false, ok: false };
+function companyUseApi() { return COMPANY && !companyApi.legacy; }
+function isoDay(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+async function companyRpc(name, args) {
+  try { return await tripRpc(name, args, 20000); }
+  catch (e1) { await new Promise(r => setTimeout(r, 1500)); return await tripRpc(name, args, 20000); }
+}
+function companyShift(s) {
+  if (s.id != null) companyApi.forar[s.id] = s.forar;
+  return { passnr: s.passnr, forar: s.forar, start: s.start, slut: s.slut, taxi: s.taxi,
+           _id: s.id, _inkort: Number(s.inkort) || 0,
+           _trips: Array.isArray(s.trips) ? s.trips.map(t => Object.assign({ forar: s.forar }, t)) : null };
+}
+async function companyFetch(key, from, to) {
+  const days = daysBetween(from, to);
+  const parts = [];
+  for (let a = startOfDay(from); a <= to; ) {
+    const b = new Date(a); b.setDate(b.getDate() + COMPANY_CHUNK_DAYS - 1);
+    parts.push([new Date(a), b < to ? b : startOfDay(to)]);
+    a = new Date(b); a.setDate(a.getDate() + 1);
+  }
+  const rs = await Promise.all(parts.map(([a, b]) => companyRpc('get_company_period',
+    { p_from: isoDay(a), p_to: isoDay(b), p_detail: days <= COMPANY_DETAIL_DAYS })));
+  const totals = {};
+  rs.forEach(r => Object.keys(r.totals || {}).forEach(k => { totals[k] = (totals[k] || 0) + Number(r.totals[k] || 0); }));
+  const res = { totals, shifts: [].concat(...rs.map(r => (r.shifts || []).map(companyShift))),
+                loose: [].concat(...rs.map(r => r.loose || [])), last_updated: rs[rs.length - 1].last_updated,
+                fresh: rs[rs.length - 1].fresh, at: Date.now() };
+  companyApi.cache.set(key, res);
+  if (companyApi.cache.size > 40) companyApi.cache.delete(companyApi.cache.keys().next().value);
+  companyApi.ok = true;
+  if (res.last_updated) data.last_updated = res.last_updated;
+  return res;
+}
+// Ger { res } när perioden finns, annars { html } (fel) eller {} (hämtas, visa förra bilden nedtonad).
+function companyPeriod(from, to) {
+  const key = isoDay(from) + '|' + isoDay(to);
+  const hit = companyApi.cache.get(key);
+  const fresh = hit && Date.now() - hit.at < COMPANY_CACHE_MS;
+  if (!fresh && !companyApi.pending[key] && !companyApi.failed[key]) {
+    companyApi.pending[key] = true;
+    companyFetch(key, from, to).then(() => { delete companyApi.pending[key]; render(); }, () => {
+      delete companyApi.pending[key];
+      if (!companyApi.ok) {
+        // Första hämtningen gick inte: använd det gamla sättet (hela året) så att sidan ändå fungerar.
+        companyApi.legacy = true;
+        loadData().then(render);
+        return;
+      }
+      const old = companyApi.cache.get(key);
+      if (old) old.at = Date.now();   // visa det vi har, försök igen om en stund
+      else companyApi.failed[key] = true;
+      render();
+    });
+  }
+  if (hit) return { res: hit };
+  if (companyApi.failed[key]) return { html:
+    '<div class="section load-error" role="alert" style="text-align:center;padding:24px 16px;">' +
+    '<div style="font-weight:600;margin-bottom:6px;">Kunde inte hämta data – försök igen</div>' +
+    '<div style="opacity:.75;font-size:.9em;margin-bottom:14px;">Servern svarade inte. Inga körningar har försvunnit.</div>' +
+    '<button type="button" class="retry-btn" onclick="companyRetry(this)" style="padding:10px 22px;border-radius:999px;border:2px solid var(--primary);background:var(--primary);color:var(--on-primary,#fff);font-weight:600;font-size:1em;">Försök igen</button>' +
+    '</div>' };
+  const dash = document.getElementById('dashboard');
+  if (dash && dash.querySelector('.stat-row') && !dash.querySelector('.load-error') && !dash.querySelector('.company-loading')) return {};
+  return { html: '<div class="section arkiv-panel company-loading"><div class="arkiv-loading" role="status" aria-live="polite"><span class="arkiv-spin" aria-hidden="true"></span>Hämtar siffror…</div></div>' };
+}
+function companyRetry(btn) {
+  if (btn) { btn.disabled = true; btn.textContent = 'Hämtar...'; }
+  companyApi.failed = {};
+  render();
+}
+function companyTripsPlaceholder(id) {
+  return companyApi.tripsFailed[id]
+    ? '<div class="company-trips-msg" style="padding:8px 12px;opacity:.75;">Kunde inte hämta resorna. Fäll ihop och öppna igen för att försöka på nytt.</div>'
+    : '<div class="company-trips-msg" style="padding:8px 12px;opacity:.75;">Hämtar resor…</div>';
+}
+// Resor för pass i långa perioder (År, långa egna perioder) hämtas först när passet fälls ut.
+function companyLoadTrips(ids) {
+  ids = ids.map(Number).filter(id => !isNaN(id) && !companyApi.trips[id] && !companyApi.tripsPending[id]);
+  if (!ids.length) return;
+  ids.forEach(id => { companyApi.tripsPending[id] = true; delete companyApi.tripsFailed[id]; });
+  for (let i = 0; i < ids.length; i += 300) {
+    const part = ids.slice(i, i + 300);
+    companyRpc('get_company_shift_trips', { p_ids: part }).then(r => {
+      part.forEach(id => {
+        const f = companyApi.forar[id];
+        companyApi.trips[id] = ((r && r[id]) || []).map(t => Object.assign({ forar: f }, t));
+      });
+    }, () => { part.forEach(id => { companyApi.tripsFailed[id] = true; }); })
+      .finally(() => { part.forEach(id => { delete companyApi.tripsPending[id]; }); render(); });
+  }
+}
 
 // ---- Arkiv: äldre år hämtas automatiskt när man bläddrar dit (t381u) ----
 // Äldre år (före 1 januari i år) ligger i ett separat arkiv på servern. Inget hämtas när appen startar
@@ -826,6 +956,7 @@ function toggleShift(el) {
   const isOpen = !el.classList.contains('open');
   setShiftOpen(el, isOpen);
   rememberOpen(el, isOpen);
+  if (isOpen && el.dataset.lazy) companyLoadTrips([el.dataset.lazy]);   // Åkeridata: hämta passets resor
 }
 
 function toggleTrip(el, ev) {
