@@ -5,6 +5,9 @@
  * Appen visar det servern skickar – inga andra förares id finns i svaret.
  * Alla förare med pass i perioden räknas, även de utan konto i appen och avslutade förare.
  * Period: Dag / Vecka / Månad / År och egen period i kalendern, som i Körpassdata.
+ * Äldre år (t381u): går perioden in i ett år före i år hämtas listorna från public.get_leaderboard_archive,
+ * som räknar på servern över arkivet + nuvarande data (samma regler, litet svar). Bara då – aldrig i år.
+ * Svaret sparas i minnet under sessionen så att man kan bläddra fram och tillbaka utan att hämta igen.
  */
 (function () {
   'use strict';
@@ -30,7 +33,8 @@
   var TAB_KEY = 'tl_tab';
   var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
   var WD = ['Sön', 'Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör'];
-  var st = { tab: localStorage.getItem(TAB_KEY) || 'dag', lastTab: 'dag', date: new Date(), range: null, data: null, err: null, loading: false, seq: 0, el: null, open: {} };
+  var st = { tab: localStorage.getItem(TAB_KEY) || 'dag', lastTab: 'dag', date: new Date(), range: null, data: null, err: null, loading: false, arkiv: false, seq: 0, el: null, open: {} };
+  var arkivCache = {};   // 'från|till' → svar från arkivet (bara i minnet)
   if (['dag', 'vecka', 'manad', 'ar'].indexOf(st.tab) < 0) st.tab = 'dag';
   st.lastTab = st.tab;
 
@@ -90,11 +94,17 @@
   }
 
   // ---------- data ----------
+  // Perioden går in i ett äldre år (före 1 januari i år) → arkivet
+  function isArchive(r) { return r[0].getFullYear() < new Date().getFullYear(); }
   function load() {
-    var r = range(), my = ++st.seq;
+    var r = range(), my = ++st.seq, old = isArchive(r), key = iso(r[0]) + '|' + iso(r[1]);
     window.TOPPLISTOR_LAST = null;
-    st.loading = true; st.err = null; draw();
-    rpc('get_leaderboard', { p_from: iso(r[0]), p_to: iso(r[1]) }).then(function (d) {
+    st.err = null; st.arkiv = old;
+    var got = old && arkivCache[key] ? Promise.resolve(arkivCache[key])
+      : (st.loading = true, old && (st.data = null), draw(),
+         rpc(old ? 'get_leaderboard_archive' : 'get_leaderboard', { p_from: iso(r[0]), p_to: iso(r[1]) }));
+    got.then(function (d) {
+      if (old && d) arkivCache[key] = d;
       if (my !== st.seq) return;
       st.loading = false; st.data = d || null; draw();
       var info = { tab: st.tab, current: isCurrent(), period: T.periodText(), data: st.data };
@@ -157,10 +167,12 @@
 
     var body = document.getElementById('tl-body'), d = st.data, h = '';
     if (st.err) h = '<div class="tl-msg err">' + esc(st.err) + '</div>';
+    else if (st.loading && st.arkiv) h = '<div class="tl-msg arkiv-loading" role="status" aria-live="polite"><span class="arkiv-spin" aria-hidden="true"></span>Hämtar ' + esc(label()) + ' från arkivet…</div>';
     else if (st.loading && !d) h = '<div class="tl-msg">Laddar…</div>';
     else if (!d || (!d.drivers && !d.workshop_drivers)) h = '<div class="tl-msg">Ingen har kört ' + esc(T.periodText()) + ' än.</div>';
     else {
       h += '<div class="tl-info">' + (d.drivers ? d.drivers + ' förare med pass ' + esc(T.periodText()) + '. ' : 'Inga pass ' + esc(T.periodText()) + ' än. ') +
+        (st.arkiv ? '📦 Äldre data från arkivet. ' : '') +
         (d.named ? 'Du ser namn eftersom du är ägare.' : window.DEMO && DEMO.on() ? 'Demokonto: andra förare visas som "Förare 1", "Förare 2" … och inga namn skickas.' : 'Bara din egen rad visas som "Du".') + '</div>';
       LISTS.forEach(function (L) {
         var x = d.lists && d.lists[L.k];

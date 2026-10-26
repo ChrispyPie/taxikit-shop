@@ -76,21 +76,8 @@ async function loadData() {
     }
     data = res || {};
     loadFailed = false;
-
-    const seenShifts = new Set();
-    data.shifts = (data.shifts || []).filter(s => {
-      const key = (s.passnr || '') + '|' + (s.forar || '710022') + '|' + String(s.start || '').replace(/\D/g, '').slice(0, 8); // passnr återanvänds
-      if (seenShifts.has(key)) return false;
-      seenShifts.add(key);
-      return true;
-    });
-    const seenTrips = new Set();
-    data.trips = (data.trips || []).filter(t => {
-      const key = (t.kvittonr || '') + '|' + (t.forar || '710022') + '|' + (t.startdatum || '');
-      if (seenTrips.has(key)) return false;
-      seenTrips.add(key);
-      return true;
-    });
+    archiveMergeInto(data);   // äldre år som redan hämtats i den här sessionen (bara i minnet)
+    dedupData(data);
   } catch (e) {
     data = {};
     loadFailed = true;   // tom månad (inga resor) är INTE ett fel – då visas 0 som vanligt
@@ -609,6 +596,9 @@ function render() {
     html += `<div class="section">${looseTripsRow(looseTrips)}</div>`;
   }
 
+  const ark = archiveStatus(rangeStart, rangeEnd);   // äldre år: hämtas automatiskt, bara för perioder före i år
+  html = ark.html + (ark.hide ? '' : html);
+
   const dash = document.getElementById('dashboard');
   dash.innerHTML = html;
   restoreOpen(dash);
@@ -655,6 +645,132 @@ window.taxiEnsureData = async function () {
   if (COMPANY) return;
   if (!data || !data.shifts) await loadData();
 };
+
+// ---- Arkiv: äldre år hämtas automatiskt när man bläddrar dit (t381u) ----
+// Äldre år (före 1 januari i år) ligger i ett separat arkiv på servern. Inget hämtas när appen startar
+// eller när man tittar på i år. Först när den valda perioden (Dag/Vecka/Månad/År/egen period) går in i ett
+// äldre år hämtas just den biten: hela året för en förare (bara egna resor, litet), en månad i taget för
+// ägaren och Åkeridata (alla förare). Det som hämtats ligger kvar i minnet under sessionen (inte i telefonen).
+const ARKIV_MONTH_NAMES = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
+const ARKIV_PARALLEL = 3;
+const archive = { chunks: {}, pending: {}, failed: {}, queue: [], running: 0, refreshPicker: false };
+function archiveMonthly() { return COMPANY || myRole === 'agare' || myRole === 'superadmin'; }
+// Bitar (nycklar '2025' eller '2025-12') som behövs för perioden. Tom lista när perioden ligger i år.
+function archiveKeysFor(start, end) {
+  const cy = new Date().getFullYear();
+  if (!start || !end || start.getFullYear() >= cy || start.getFullYear() < 2000) return [];
+  const last = end.getFullYear() < cy ? end : new Date(cy - 1, 11, 31);
+  const keys = [];
+  if (archiveMonthly()) {
+    for (let d = new Date(start.getFullYear(), start.getMonth(), 1); d <= last; d = new Date(d.getFullYear(), d.getMonth() + 1, 1))
+      keys.push(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'));
+  } else {
+    for (let y = start.getFullYear(); y <= last.getFullYear(); y++) keys.push(String(y));
+  }
+  return keys;
+}
+function archiveKeyLabel(k) {
+  const [y, m] = k.split('-');
+  return m ? ARKIV_MONTH_NAMES[+m - 1] + ' ' + y : y;
+}
+function archiveMergeInto(d) {
+  Object.keys(archive.chunks).forEach(k => {
+    const a = archive.chunks[k];
+    d.trips = (d.trips || []).concat(a.trips);
+    d.shifts = (d.shifts || []).concat(a.shifts);
+  });
+}
+function dedupData(d) {
+  const seenShifts = new Set();
+  d.shifts = (d.shifts || []).filter(s => {
+    const key = (s.passnr || '') + '|' + (s.forar || '710022') + '|' + String(s.start || '').replace(/\D/g, '').slice(0, 8); // passnr återanvänds
+    if (seenShifts.has(key)) return false;
+    seenShifts.add(key);
+    return true;
+  });
+  const seenTrips = new Set();
+  d.trips = (d.trips || []).filter(t => {
+    const key = (t.kvittonr || '') + '|' + (t.forar || '710022') + '|' + (t.startdatum || '');
+    if (seenTrips.has(key)) return false;
+    seenTrips.add(key);
+    return true;
+  });
+}
+function archiveEnsure(keys) {
+  keys.forEach(k => {
+    if (archive.chunks[k] || archive.pending[k] || archive.failed[k]) return;
+    archive.pending[k] = true;
+    archive.queue.push(k);
+  });
+  archivePump();
+}
+function archivePump() {
+  while (archive.running < ARKIV_PARALLEL && archive.queue.length) {
+    const k = archive.queue.shift();
+    archive.running++;
+    archiveFetch(k).finally(() => {
+      archive.running--;
+      delete archive.pending[k];
+      archivePump();
+      if (!archive.running) archiveDone();
+      else render();
+    });
+  }
+}
+async function archiveFetch(k) {
+  const [y, m] = k.split('-');
+  const args = { p_year: +y };
+  if (m) args.p_month = +m;
+  try {
+    let r;
+    try { r = await tripRpc('get_trip_archive', args, 30000); }
+    catch (e1) { await new Promise(res => setTimeout(res, 1200)); r = await tripRpc('get_trip_archive', args, 30000); }
+    const mark = x => Object.assign({}, x, { _arkiv: k });
+    const a = { trips: ((r && r.trips) || []).map(mark), shifts: ((r && r.shifts) || []).map(mark) };
+    archive.chunks[k] = a;
+    if (data && !loadFailed) {
+      data.trips = (data.trips || []).concat(a.trips);
+      data.shifts = (data.shifts || []).concat(a.shifts);
+      dedupData(data);
+      tripsByDriver = null; orphanTrips = null;
+      if (a.trips.length || a.shifts.length) archive.refreshPicker = true;
+    }
+  } catch (e) {
+    archive.failed[k] = true;
+  }
+}
+async function archiveDone() {
+  if (archive.refreshPicker && !COMPANY && DRIVER_PICKER_ROLES.includes(myRole)) {
+    archive.refreshPicker = false;
+    try { await setupDriverPicker(); } catch (e) {}
+  }
+  render();
+}
+function archiveRetry() {
+  Object.keys(archive.failed).forEach(k => delete archive.failed[k]);
+  render();
+}
+// Körs i render(): startar hämtning vid behov och ger en liten statusrad.
+// hide = true medan perioden inte är färdighämtad, så att inga felaktiga nollor visas.
+function archiveStatus(rangeStart, rangeEnd) {
+  if (!data || loadFailed) return { html: '', hide: false };
+  const keys = archiveKeysFor(rangeStart, rangeEnd);
+  if (!keys.length) return { html: '', hide: false };
+  archiveEnsure(keys);
+  const missing = keys.filter(k => !archive.chunks[k]);
+  const failed = missing.filter(k => archive.failed[k]);
+  if (failed.length) {
+    return { hide: true, html: `<div class="section arkiv-panel"><div class="arkiv-error" role="alert">Kunde inte hämta ${escHtml(archiveKeyLabel(failed[0]))} från arkivet.</div>
+      <button type="button" class="arkiv-btn" onclick="archiveRetry()">Försök igen</button></div>` };
+  }
+  if (missing.length) {
+    const done = keys.length - missing.length;
+    const what = keys.length > 1 && archiveMonthly() ? rangeStart.getFullYear() + (rangeEnd.getFullYear() !== rangeStart.getFullYear() && rangeEnd.getFullYear() < new Date().getFullYear() ? '–' + rangeEnd.getFullYear() : '') : archiveKeyLabel(missing[0]);
+    return { hide: true, html: `<div class="section arkiv-panel"><div class="arkiv-loading" role="status" aria-live="polite"><span class="arkiv-spin" aria-hidden="true"></span>Hämtar ${escHtml(what)} från arkivet…</div>
+      <div class="arkiv-note">${keys.length > 1 && archiveMonthly() ? done + ' av ' + keys.length + ' månader klara' : 'Det tar bara en kort stund.'}</div></div>` };
+  }
+  return { hide: false, html: `<div class="arkiv-tag">📦 Äldre data från arkivet</div>` };
+}
 
 // Vilka rader som är utfällda sparas så att de förblir utfällda när man byter
 // datum, flik, egen period eller förare. Bara »-knappen (idag) fäller ihop allt.
