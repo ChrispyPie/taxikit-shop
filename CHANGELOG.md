@@ -6,6 +6,7 @@ Samma innehåll som visas under **Om appen → Nyheter** i appen. Källan är `T
 
 ## 26 oktober 2026
 
+- **Fixat:** Appen fastnar inte längre på inloggningssidan när mobilnätet hackar. Om servern inte svarar inom 10 sekunder går appen vidare ändå.
 - **Nytt:** Admin › Bil & verkstad: ägaren ser allt som behövs till bilarna och alla felanmälningar, sorterat per bil. Där kan ägaren markera Pågår eller Åtgärdad, skriva ett meddelande till föraren eller ta bort. Admin-rutan visar en siffra när något nytt har kommit in.
 - **Nytt:** Körpassdata, Åkeridata och Topplistor: äldre år (2025) hämtas nu automatiskt när du bläddrar dit, till exempel från januari i år bakåt till december. Första gången tar det en kort stund. När du tittar på i år hämtas inget extra, och inget sparas i telefonen.
 - **Förbättrat:** Chaufförer: varje förare visar när den senast körde, och listan sorteras med den som kört senast överst. Förare som inte kört på 60 dagar visas gråare.
