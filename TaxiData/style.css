@@ -665,3 +665,5 @@ html[data-theme="dark"] .pg { --og-a: #F2B636; --og-f: #4CC08A; --og-o: #A8A396;
 .pg-og-src { font-size: 0.72rem; margin-top: 8px; }
 /* t348u: om flikarna inte ryms på en rad (stor text) → jämn 3+2-uppdelning i stället för en ensam flik */
 .pg-tabs.pg-tabs-wrap .pg-tab { flex: 1 1 30%; }
+.pg-stale { color: #c05621; font-weight: 600; }
+html[data-theme="dark"] .pg-stale { color: #f6ad55; }

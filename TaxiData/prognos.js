@@ -650,7 +650,7 @@
     html += '</div>' +
       '<p class="pg-muted pg-mo-note">Antal bokningar per timme, inte exakta tider. Källan delar inte upp på bilkategori (t.ex. storbil). ' +
       'Under pågående morgon räknas bara bokningar som är kvar; efter 09:00 visas nästa morgon.</p>' +
-      '<p class="pg-muted pg-mo-upd">Uppdaterad ' + esc(hhmm(m.generated_at, true)) + ' · uppdateras automatiskt varje minut</p>' +
+      '<p class="pg-muted pg-mo-upd">Senaste uppdatering: ' + esc(hhmm(m.generated_at, true)) + '</p>' +
       '</div>' + renderWarn();
     return html;
   }
@@ -661,9 +661,16 @@
     var lastTxt = last && !isNaN(last.getTime())
       ? p2(last.getHours()) + ':' + p2(last.getMinutes()) + ':' + p2(last.getSeconds())
       : '–';
-    var stTxt = s.code_needed ? 'Kod behövs' : (s.status === 'ok' ? 'Uppdaterad' : (s.status || '–'));
+    // t350u: bara tiden när allt är OK – extra text endast när något är fel
+    var warn = '';
+    if (s.code_needed) warn = 'Kod behövs';
+    else if (s.status && s.status !== 'ok') warn = 'Kunde inte hämta ny data';
+    else if (last && !isNaN(last.getTime())) {
+      var age = Math.floor((Date.now() - last.getTime()) / 60000);
+      if (age >= 5) warn = 'Data är ' + age + ' min gammal';
+    }
     return '<div class="pg-status">Senaste uppdatering: <strong>' + esc(lastTxt) +
-      '</strong> · ' + esc(stTxt) +
+      '</strong>' + (warn ? ' · <span class="pg-stale">' + esc(warn) + '</span>' : '') +
       '<br><span class="pg-muted">Heldraget = säker, streckat = trolig, svagt = osäker. Blandat antal markeras med ?.</span></div>' +
       renderWarn();
   }
