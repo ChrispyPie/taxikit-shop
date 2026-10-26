@@ -2,12 +2,13 @@
  * Lätt att ändra: lägg en ny rad överst i listan för varje dag.
  *   typ: 'Nytt', 'Förbättrat' eller 'Fixat'
  * Texten är vanlig text (ingen HTML). Nyast först.
- * Ny omgång samma dag som redan finns? Lägg en ny dag överst med id: '2026-10-26b' (så får förarna 'Ny' igen).
+ * Ny omgång samma dag som redan finns? Lägg en ny dag överst med id: '2026-10-26c' (så får förarna 'Ny' igen).
  * Det förarna senast sett sparas per förare på servern (tabell changelog_seen).
  * Äldre historik (före 24 okt 2026) är återskapad i efterhand och ungefärlig.
  */
 window.CHANGELOG = [
-  { datum: '2026-10-26', id: '2026-10-26b', rader: [
+  { datum: '2026-10-26', id: '2026-10-26c', rader: [
+    ['Förbättrat', 'Topplistor: listan för arbetstimmar är borttagen.'],
     ['Nytt', 'Forum: regler för god ton. Du godkänner dem första gången du öppnar forumet.'],
     ['Nytt', 'Prognos: se kommande bokningar per zon, i tider var 5:e minut och per bilkategori. Uppdateras varje minut.'],
     ['Nytt', 'Prognos: fliken Morgon visar morgonprognosen till Landvetter kl. 04–09, och hur många som är kvar under timmen som pågår.'],

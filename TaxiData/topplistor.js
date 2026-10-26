@@ -17,7 +17,8 @@
     { k: 'dricks', t: 'Mest dricks', f: 'kr' },
     { k: 'krmil', t: 'Bäst kr/mil', f: 'kr' },
     { k: 'krtimme', t: 'Bäst kr/timme', f: 'kr' },
-    { k: 'timmar', t: 'Flest jobbade timmar', f: 'tid' },
+    // 'timmar' (Flest jobbade timmar) borttagen 2026-10-26: ägaren vill inte uppmuntra att jobba mer än tillåtet.
+    // Servern skickar fortfarande listan, men appen visar bara nycklarna här.
     { k: 'antal', t: 'Flest körningar', f: 'st' },
     { k: 'snitt', t: 'Högst snitt per körning', f: 'kr' },
     { k: 'perskift', t: 'Högst snitt per pass', f: 'kr' },
