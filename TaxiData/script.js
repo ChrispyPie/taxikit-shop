@@ -640,6 +640,16 @@ window.taxiStats = function (tab) {
   return { tab, inkort: Math.round(inkort), goal, diff: Math.round(inkort - goal), antal: trips.length,
            skift: shifts.length, own: viewDriver === currentDriver, viewing: currentTab, viewingCurrent: isCurrentPeriod() };
 };
+// Lönekoll läser förarens pass och resor (inklusive BOM) för en period härifrån, bara läsning.
+// Pass väljs på passets startdatum, resor utan pass på resans eget datum (som Inkört ovan).
+window.taxiPayData = function (from, to) {
+  if (COMPANY || !data || !data.shifts) return null;
+  const shifts = getShiftsInRange(from, to);
+  let trips = [];
+  shifts.forEach(s => { trips = trips.concat(getTripsForShift(s)); });
+  trips = trips.concat(getOrphanTripsInRange(from, to));
+  return { driver: viewDriver, own: viewDriver === currentDriver, shifts, trips, last_updated: data.last_updated || null };
+};
 // Hämtar förarens data om den inte redan finns (t.ex. när boten frågas från hemskärmen)
 window.taxiEnsureData = async function () {
   if (COMPANY) return;

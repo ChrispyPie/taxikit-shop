@@ -799,7 +799,7 @@
       if (st.showDone) done.forEach(function (t) { h += taskCard(t); });
     }
     h += '<div class="tl-foot">' + (own
-      ? 'Föraren ser bara uppgifter som skickats till hen. Du får en notis när föraren bokat tid och när det är klart.'
+      ? 'Föraren ser bara uppgifter som skickats till föraren själv. Du får en notis när föraren bokat tid och när det är klart.'
       : 'Skriv in tiden du bokat, bocka av punkterna och tryck Klar när det är gjort. Ägaren får en notis.') + '</div>';
     body.innerHTML = h;
     var g = function (id) { return document.getElementById(id); };
