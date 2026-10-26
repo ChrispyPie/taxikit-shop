@@ -452,14 +452,29 @@
     return html;
   }
 
+  // Kort notis när en bilkategori är dold av Filter (barnstol/babyskydd kan då
+  // höra till en bil som inte syns). Tryck → Filter-fliken.
+  function renderFilterNotice() {
+    var cats = loadCats();
+    var hiddenCars = ALL_CATS.filter(function (c) { return !c.child && cats.indexOf(c.k) < 0; });
+    if (!hiddenCars.length) return '';
+    var names = hiddenCars.map(function (c) { return c.label; }).join(', ');
+    var childOn = ALL_CATS.some(function (c) { return c.child && cats.indexOf(c.k) >= 0; });
+    return '<button type="button" class="pg-filter-notice" data-panel="filter">' +
+      '<strong>Filter aktivt:</strong> ' + esc(names) + ' dold' + (hiddenCars.length > 1 ? 'a' : '') +
+      (childOn ? '<span class="pg-filter-notice-sub">Barnstol/babyskydd kan höra till en dold bil.</span>' : '') +
+      '<span class="pg-filter-notice-go" aria-hidden="true">Ändra ›</span></button>';
+  }
+
   function renderTimeline() {
     var zid = st.zoneTab;
     if (!ZONE_BY_ID[zid]) zid = '293';
+    var notice = renderFilterNotice();
     if (!st.err && st.loadedOnce && !(zoneCounts()[zid])) {
-      return '<div class="pg-card pg-empty-card">Inga förbokningar i ' + esc(ZONE_BY_ID[zid].name) +
+      return notice + '<div class="pg-card pg-empty-card">Inga förbokningar i ' + esc(ZONE_BY_ID[zid].name) +
         ' de närmaste 2 timmarna.</div>';
     }
-    return renderCarTimeline(zid);
+    return notice + renderCarTimeline(zid);
   }
 
   var WD = ['söndag', 'måndag', 'tisdag', 'onsdag', 'torsdag', 'fredag', 'lördag'];

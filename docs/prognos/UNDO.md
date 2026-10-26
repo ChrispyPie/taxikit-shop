@@ -114,3 +114,9 @@ delete from vault.secrets where name in ('PROGNOS_PIN', 'PROGNOS_TICK_KEY');
     drop table if exists public.prognos_morgon_log;
     ```
 - Edge `prognos-sync` oförändrad (v6). Appen läser `prognos_morgon(p_token)` som redan fanns.
+
+## t338–t340 (2026-10-26) – "babyskydd utan bil" + filternotis
+- Orsak: inget spårningsfel. Zon 293 hade 3 öppna Kombi-bokningar 16:35 (id 38–40) + babyskydd 16:35 (id 42), samma block. Kombi var bortvald i användarens Filter. Ingen data rensad, ingen edge-ändring.
+- **Backup-branch:** `backup/pre-filternotis-2026-10-26` = origin/main före ändringen.
+- **Feature PR** (`feature/prognos-filter-notis`, EJ mergad): notis "Filter aktivt: Kombi dold" överst i Schema (tryck → Filter), cache `?v=20261026pg9`.
+  - **Ångra:** stäng PR:n; efter ev. merge `git revert -m 1 <merge-sha>` + push.
