@@ -69,14 +69,23 @@
   }
   function token() { return localStorage.getItem('taxi_session') || ''; }
   function p2(n) { return String(n).padStart(2, '0'); }
+  // script.js deklarerar TRIP_API_URL/TRIP_API_KEY med `const` → de hamnar INTE på window.
+  // Läs dem som globala bindningar först (window.* används bara av testharnessen).
+  function apiUrl() {
+    return (typeof TRIP_API_URL !== 'undefined' && TRIP_API_URL) || window.TRIP_API_URL || 'https://lpfdryvukqmjlgenuzpb.supabase.co';
+  }
+  function apiKey() {
+    return (typeof TRIP_API_KEY !== 'undefined' && TRIP_API_KEY) || window.TRIP_API_KEY || '';
+  }
   function rpc(name, args) {
     args = args || {};
     args.p_token = token();
-    return fetch((window.TRIP_API_URL || 'https://lpfdryvukqmjlgenuzpb.supabase.co') + '/rest/v1/rpc/' + name, {
+    var key = apiKey();
+    return fetch(apiUrl() + '/rest/v1/rpc/' + name, {
       method: 'POST',
       headers: {
-        apikey: window.TRIP_API_KEY,
-        Authorization: 'Bearer ' + window.TRIP_API_KEY,
+        apikey: key,
+        Authorization: 'Bearer ' + key,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(args)
@@ -443,8 +452,14 @@
       '<br><span class="pg-muted">Tiderna är uppskattningar. Heldraget = säker, streckat = trolig, svagt = osäker. Blandat antal markeras med ?.</span></div>';
   }
 
+  // Ritar bara när Prognos är den öppna sidan – annars skulle en sen
+  // uppdatering skriva över startsidan/en annan sida (samma #content-ruta).
+  function onPage() {
+    return !!st.el && st.el.isConnected && localStorage.getItem('taxi_view') === P.id;
+  }
+
   function paint() {
-    if (!st.el) return;
+    if (!onPage()) return;
     var tabs = '<div class="pg-tabs">' +
       '<button type="button" class="pg-tab' + (st.panel === 'schema' ? ' on' : '') + '" data-panel="schema">Schema</button>' +
       '<button type="button" class="pg-tab' + (st.panel === 'filter' ? ' on' : '') + '" data-panel="filter">Filter</button>' +
@@ -533,6 +548,7 @@
     refresh();
     if (st.poll) clearInterval(st.poll);
     st.poll = setInterval(function () {
+      if (!onPage()) { clearInterval(st.poll); st.poll = null; return; }
       if (document.visibilityState === 'hidden') return;
       refresh();
     }, 60000);
