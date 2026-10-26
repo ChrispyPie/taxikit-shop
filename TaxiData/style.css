@@ -557,3 +557,15 @@ html[data-theme="dark"] .pg-n.pg-c-saker { border-color: #bee3f8; }
 html[data-theme="dark"] .pg-badge.pg-c-osaker { background: #1a202c; color: #a0aec0; border-color: #718096; }
 html[data-theme="dark"] .pg-badge.pg-c-trolig { border-color: #bee3f8; }
 html[data-theme="dark"] .pg-badge.pg-c-saker { border-color: #bee3f8; }
+
+/* t335u: svaga lodräta linjer mellan alla spalter (ljust + mörkt via --border-soft) */
+.pg-table-diag td.pg-td-cell:not(.pg-td-child) { border-left: 1px solid var(--border-soft); }
+.pg-table-diag td.pg-td-time { border-right: 1px solid var(--border-soft); }
+.pg-table-diag td.pg-td-spacer { border-left: 1px solid var(--border-soft) !important; }
+/* Zonflikar med antal + tomt läge */
+.pg-ztab-n { display: inline-block; min-width: 1.1em; margin-left: 3px; padding: 0 5px; border-radius: 8px; background: var(--surface-soft); color: var(--text); font-weight: 700; font-size: 0.72rem; line-height: 1.35; }
+.pg-ztab.on .pg-ztab-n { background: rgba(255,255,255,.22); color: var(--on-primary); }
+.pg-ztab-zero .pg-ztab-n { opacity: .55; font-weight: 600; }
+.pg-empty-card { text-align: center; color: var(--text-soft); padding: 22px 12px; margin-top: 4px; }
+.pg-push-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 6px 0 8px; font-size: 0.9rem; }
+.pg-btn-sm { width: auto; padding: 4px 10px; font-size: 0.85rem; }

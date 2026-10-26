@@ -163,9 +163,19 @@
     toast((msg && msg.title ? msg.title : 'Ny händelse') + (msg && msg.body ? ' – ' + msg.body : ''), 8000);
     st.loadedAt = 0; refresh();
   };
+  // Samma ljud/vibration/toast används av Prognos-notiser (prognos-notis.js)
+  B.ring = function (text) {
+    beep();
+    try { if (navigator.vibrate) navigator.vibrate([300, 120, 300, 120, 300]); } catch (e) {}
+    toast(text, 8000);
+  };
   if (supported) {
     navigator.serviceWorker.addEventListener('message', function (e) {
-      if (e.data && e.data.type === 'bev-push') B.alert(e.data.msg);
+      if (!e.data || e.data.type !== 'bev-push') return;
+      var m = e.data.msg || {};
+      // Prognos-push hanteras globalt av prognos-notis.js (avdubblering mot appens egen koll)
+      if (String(m.tag || '').indexOf('prognos') === 0) { if (window.PROGNOS_NOTIS && PROGNOS_NOTIS.onPush) PROGNOS_NOTIS.onPush(m); return; }
+      B.alert(m);
     });
   }
 
@@ -303,7 +313,7 @@
   if (supported && token()) { register().catch(function () {}); }
   // Notisklick: öppna Ankomster
   if (supported) navigator.serviceWorker.addEventListener('message', function (e) {
-    if (e.data && e.data.type === 'bev-open' && typeof window.openItem === 'function' && window.ANKOMSTER) window.openItem(ANKOMSTER.id);
+    if (e.data && e.data.type === 'bev-open' && String(e.data.tag || '').indexOf('prognos') !== 0 && typeof window.openItem === 'function' && window.ANKOMSTER) window.openItem(ANKOMSTER.id);
   });
   // ---------- utloggning: inga notiser till en utloggad telefon ----------
   // Avregistrerar push i webbläsaren och tar bort telefonen (och, om ingen annan telefon har notiser, bevakningarna) hos servern.
@@ -318,6 +328,7 @@
         return Promise.all([srv, loc]);
       });
     st.list = []; st.push = 'unknown'; savedOnce = false;
+    try { if (window.PROGNOS_NOTIS && PROGNOS_NOTIS.logout) PROGNOS_NOTIS.logout(); } catch (e) {}
     return Promise.race([work, new Promise(function (r) { setTimeout(r, 4000); })]);
   };
   // Sessionen har gått ut (servern loggade ut oss): avregistrera lokalt. Push-tjänsten svarar då 410 och servern tar bort raden.
@@ -326,5 +337,10 @@
     return Promise.race([new Promise(function (r) { setTimeout(r, 3000); }), navigator.serviceWorker.getRegistration('./').then(function (r) { return r && r.pushManager.getSubscription(); })
       .then(function (s) { return s && s.unsubscribe(); }).catch(function () {})]);
   };
+  // För Prognos → Notiser: samma knapp/flöde som i Ankomster
+  B.pushState = function () { return st.push; };
+  B.checkPush = function () { return checkPush(); };
+  B.enablePush = function () { return enable(); };
+  B.testPush = function () { return test(); };
   B._state = st;
 })();
