@@ -131,3 +131,7 @@ delete from vault.secrets where name in ('PROGNOS_PIN', 'PROGNOS_TICK_KEY');
 - prognos.js: `renderWarn()` (allmän knapp), `reportBug()` hämtar `prognos_report_history` (zon, 60 min) → `historyLines()`; cellval borttaget. Cache-bust pg11 (style/prognos/forum).
 - SQL (applicerad live 2026-10-26 ~15:48, additiv): `supabase/migrations/20261026d_prognos_report_history.sql` – tabell `public.prognos_bookings_gone`, trigger `prognos_bookings_gone_trg` (after update of status på prognos_bookings), `private.prognos_bookings_gone_capture()`, RPC `public.prognos_report_history(text,text,int)`.
 - Ångra SQL: se slutet av migrationsfilen (drop function/trigger/function/table i den ordningen).
+
+### LIVE (t345u "kör live")
+PR #11 mergad 2026-10-26 ~15:49 (UTC+1), merge-commit `31d530880b19f7c3c857eb96df50c646b9eeb0ea`, assets `?v=20261026pg11`.
+Ångra frontend: `git revert -m 1 31d5308` på en gren + PR. Ångra SQL: se `20261026d_prognos_report_history.sql`.
