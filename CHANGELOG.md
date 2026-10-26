@@ -4,6 +4,10 @@ Samma innehåll som visas under **Om appen → Nyheter** i appen. Källan är `T
 
 > Äldre historik (före 24 oktober 2026) är återskapad i efterhand och ungefärlig.
 
+## 27 oktober 2026
+
+- **Förbättrat:** Åkeridata: sidan hämtar nu bara den period du tittar på (dag, vecka, månad eller år) i stället för hela året på en gång. Den öppnar snabbare och drar mindre mobildata. Siffrorna räknas på samma sätt som förut, och äldre år fungerar som vanligt. När du tittar på ett helt år hämtas resorna i ett körpass först när du fäller ut passet.
+
 ## 26 oktober 2026
 
 - **Fixat:** Appen fastnar inte längre på inloggningssidan när mobilnätet hackar. Om servern inte svarar inom 10 sekunder går appen vidare ändå.

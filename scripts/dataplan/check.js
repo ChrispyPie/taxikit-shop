@@ -30,7 +30,7 @@ const dedupe = src.includes('function dedupData(')
 const totalsBlock = between('let shifts = getShiftsInRange(rangeStart, rangeEnd);', 'const krPerKorning');
 
 const factory = new Function(`
-  let data = null, COMPANY = false, viewDriver = '', tripsByDriver = null, orphanTrips = null, currentTab = 'manad';
+  let data = null, COMPANY = false, viewDriver = '', tripsByDriver = null, orphanTrips = null, currentTab = 'manad', P = null;
   ${uber}
   ${fns}
   return {

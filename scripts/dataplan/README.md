@@ -34,3 +34,30 @@ TZ=Europe/Stockholm node scripts/dataplan/check.js TaxiData/script.js current.js
 
 `avvikelser: 0` betyder att servern och appen ger samma siffror. `current_vs_merged` listar månader där
 appens siffror skiljer sig beroende på om arkivet är laddat (pass som börjar 31 dec och slutar 1 jan).
+
+# Dataplan steg 1 – Åkeridata per period
+
+Migration `supabase/migrations/20261027a_dataplan_steg1.sql` (ångra-SQL längst ner i filen):
+
+- `private.dataplan_tick()` körs varje minut av pg_cron-jobbet `taxikit-dataplan-refresh`. Det bygger om
+  faktatabellerna bara när `trip_datasets` (current/arkiv) har ändrats eller var 3:e timme, i en egen
+  deltransaktion med låstidsgräns 5 s och `statement_timeout` 120 s. Timhämtningen rörs inte: misslyckas
+  ombyggnaden sparas felet i `private.dataplan_state` (`last_error`, `last_error_at`) och gamla siffror ligger kvar.
+- `private.dataplan_status()` visar om faktatabellerna är aktuella (`stale`).
+- `public.get_company_period(p_token, p_from, p_to, p_detail, p_group)` ger Åkeridata för en period
+  (högst 400 dagar; resorna följer med för högst 62 dagar). Samma roller som förut: ägaren ser namn, S admin
+  ser åkeriet med påhittade id, övriga bara sin egen data.
+- `public.get_company_shift_trips(p_token, p_ids)` ger resorna för pass när de fälls ut i långa perioder.
+- Passens id är stabila mellan ombyggnader (`private.dp_shift_key`).
+
+`check_period.js` jämför appens gamla uträkning (script.js från main före steg 1, hela året + arkivet)
+med servern för varje period. Serverns siffror tas fram med t.ex.:
+
+```sql
+select json_agg(json_build_object('label', to_char(m,'YYYY-MM'), 'from', m::date, 'to', (m + interval '1 month - 1 day')::date,
+  'totals', j->'totals',
+  'shifts', (select json_agg(json_build_array(s->>'passnr', s->>'forar', s->>'start', s->'inkort', s->'n'))
+               from jsonb_array_elements(j->'shifts') s)))
+from generate_series('2025-01-01'::date, '2026-10-01', '1 month') m,
+     lateral (select private.company_period('default', m::date, (m + interval '1 month - 1 day')::date, 'all', null, false) j) x;
+```
