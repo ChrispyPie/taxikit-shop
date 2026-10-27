@@ -7,6 +7,11 @@
  * Äldre historik (före 24 okt 2026) är återskapad i efterhand och ungefärlig.
  */
 window.CHANGELOG = [
+  { datum: '2026-10-27', id: '2026-10-27c', rader: [
+    ['Fixat', 'Admin › Chaufförer: en förare som inte har aktiverat sitt konto får inte längre texten "logga in med lösenordet du valde". Den texten skickas bara till förare som verkligen har valt lösenord. Alla andra får en aktiveringslänk.'],
+    ['Förbättrat', 'Admin › Chaufförer: bjud in med ett tryck. Tryck Dela inbjudan så aktiveras kontot och du får direkt texten med aktiveringslänken att skicka. Trycker du två gånger skapas ingen extra länk, och om något går fel visas ett fel i stället för fel text.'],
+    ['Förbättrat', 'Admin › Chaufförer: du ser hela texten innan du skickar den, och kan kopiera eller dela den.']
+  ] },
   { datum: '2026-10-27', id: '2026-10-27b', rader: [
     ['Förbättrat', 'Demokonton: den som tittar ser inte längre vems siffror det är. Förarens namn och förar-ID visas som Demoförare och bilarna som Demobil 1, 2 och så vidare. Siffrorna är fortfarande riktiga. Det döljs även i det som skickas till telefonen.'],
     ['Fixat', 'Åkeridata blir inte längre blek om servern behöver använda reservvägen. Siffrorna visas som vanligt.']
