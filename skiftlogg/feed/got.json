@@ -1,8 +1,8 @@
 {
   "airport": "GOT",
-  "updated": "2026-10-27T22:05:24+01:00",
-  "arrivalsUpdated": "2026-10-27T22:05:25+01:00",
-  "departuresUpdated": "2026-10-27T21:10:32+01:00",
+  "updated": "2026-10-27T22:10:31+01:00",
+  "arrivalsUpdated": "2026-10-27T22:10:32+01:00",
+  "departuresUpdated": "2026-10-27T22:10:34+01:00",
   "yesterdayUpdated": "2026-10-27T05:01:01+01:00",
   "tomorrowUpdated": "2026-10-27T22:01:02+01:00",
   "error": null,
@@ -1419,18 +1419,18 @@
       "other": "Malaga",
       "iata": "",
       "airline": "SAS Scandinavian Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 22:01",
       "sched": "2026-10-27T21:25:00Z",
       "est": "2026-10-27T21:02:00Z",
-      "act": "",
+      "act": "2026-10-27T21:01:00Z",
       "terminal": "T1",
       "gate": "16",
       "baggage": "3",
       "firstBag": "",
-      "firstBagEst": "",
+      "firstBagEst": "2026-10-27T21:27:00Z",
       "lastBag": "",
-      "rawStatus": "Ankommer 22:02"
+      "rawStatus": "Landat 22:01"
     },
     {
       "id": "SK1444",
@@ -1750,10 +1750,10 @@
       "terminal": "T1",
       "gate": "21B",
       "baggage": "1",
-      "firstBag": "",
+      "firstBag": "2026-10-27T21:05:22Z",
       "firstBagEst": "2026-10-27T21:14:03Z",
-      "lastBag": "",
-      "rawStatus": "Landat 21:50"
+      "lastBag": "2026-10-27T21:06:51Z",
+      "rawStatus": "Landat 21:50 · Sista bagage"
     },
     {
       "id": "BLX342",
@@ -3715,44 +3715,6 @@
       "rawStatus": ""
     },
     {
-      "id": "FR9663",
-      "dir": "AVG",
-      "other": "Rom FCO",
-      "iata": "",
-      "airline": "Ryanair Ltd",
-      "status": "DEL",
-      "statusSv": "Borttagen",
-      "sched": "2026-10-26T08:15:00Z",
-      "est": "",
-      "act": "",
-      "terminal": "T1",
-      "gate": "",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": ""
-    },
-    {
-      "id": "FR7988A",
-      "dir": "AVG",
-      "other": "Dublin",
-      "iata": "",
-      "airline": "Ryanair Ltd",
-      "status": "DEL",
-      "statusSv": "Borttagen",
-      "sched": "2026-10-26T08:45:00Z",
-      "est": "",
-      "act": "",
-      "terminal": "T1",
-      "gate": "",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": ""
-    },
-    {
       "id": "FR7333A",
       "dir": "AVG",
       "other": "London STN",
@@ -3960,25 +3922,6 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 19:10"
-    },
-    {
-      "id": "SK146",
-      "dir": "AVG",
-      "other": "Stockholm ARN",
-      "iata": "",
-      "airline": "SAS Scandinavian Airlines",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-10-26T08:50:00Z",
-      "est": "",
-      "act": "2026-10-26T08:50:29Z",
-      "terminal": "T1",
-      "gate": "16",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 09:58"
     },
     {
       "id": "FR5636",
@@ -4340,25 +4283,6 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 21:05"
-    },
-    {
-      "id": "DK844",
-      "dir": "AVG",
-      "other": "Hurghada",
-      "iata": "",
-      "airline": "Sunclass Airlines",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-10-26T08:40:00Z",
-      "est": "",
-      "act": "2026-10-26T08:42:36Z",
-      "terminal": "T1",
-      "gate": "21B",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 09:50"
     },
     {
       "id": "EW8221",
@@ -5118,7 +5042,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Boarding"
     },
     {
       "id": "FR6749",
