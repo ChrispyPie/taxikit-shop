@@ -101,7 +101,7 @@
   </div>
 
   <script src="serverstatus.js?v=20261026tm1"></script>
-  <script src="demo.js?v=20261026zzzb1"></script>
+  <script src="demo.js?v=zzzda1"></script>
   <script src="verkstad-admin.js?v=20261026zzzb1"></script>
   <script src="profilbild.js?v=zdm1"></script>
   <script>
@@ -815,7 +815,7 @@
           <a href="#" onclick="toggleDemoGroup();return false;" style="font-weight:400; color:var(--c-3182ce); text-transform:none;">${hidden ? 'Visa' : 'Dölj'}</a>
         </div>`;
       if (!hidden) {
-        h += `<p style="padding:6px 16px 0; margin:0; font-size:calc(12px * var(--font-scale, 1)); color:var(--c-718096);">Demokonton ser appen med Christians data och kan bara titta. De räknas inte bland förarna. Varje konto gäller i 3 dagar från att det skapas.</p>`;
+        h += `<p style="padding:6px 16px 0; margin:0; font-size:calc(12px * var(--font-scale, 1)); color:var(--c-718096);">Demokonton ser appen med riktiga siffror, men förarens namn, förar-ID och bilnummer är utbytta (Demoförare, Demobil). De kan bara titta. De räknas inte bland förarna. Varje konto gäller i 3 dagar från att det skapas.</p>`;
         demoList.forEach(d => {
           const name = ((d.first_name || '') + ' ' + (d.last_name || '')).trim();
           const ended = d.status === 'ended';
@@ -841,7 +841,7 @@
       m.className = 'modal'; m.id = 'link-modal';
       m.innerHTML = `<div class="modal-box">
         <h3 style="margin:0 0 8px; color:var(--primary);">Skapa demokonto</h3>
-        <p style="font-size:calc(13px * var(--font-scale, 1)); color:var(--c-4a5568); margin:0 0 10px;">Du får en inbjudningslänk att skicka. Personen skriver sitt namn och väljer ett eget lösenord. Kontot visar Christians data, kan bara titta och gäller i 3 dagar från nu.</p>
+        <p style="font-size:calc(13px * var(--font-scale, 1)); color:var(--c-4a5568); margin:0 0 10px;">Du får en inbjudningslänk att skicka. Personen skriver sitt namn och väljer ett eget lösenord. Kontot visar riktiga siffror med förarens namn och bilnummer utbytta, kan bara titta och gäller i 3 dagar från nu.</p>
         <div style="font-size:calc(13px * var(--font-scale, 1)); font-weight:600; margin-bottom:6px;">Vad ska demot visa?</div>
         <label style="display:flex; gap:8px; align-items:flex-start; padding:8px; border:1px solid var(--c-cbd5e0); border-radius:8px; margin-bottom:8px;">
           <input type="radio" name="demo-role" value="forare" checked> <span><b>Förare</b><br><span style="font-size:calc(12px * var(--font-scale, 1)); color:var(--c-718096);">Förarappen: körpass, lönekoll, prognos, topplistor, kalender, forum, bil &amp; verkstad.</span></span></label>

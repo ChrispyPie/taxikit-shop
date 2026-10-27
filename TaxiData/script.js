@@ -20,6 +20,8 @@ if (!['dag', 'vecka', 'manad', 'ar'].includes(currentTab)) currentTab = 'dag';
 let lastTab = currentTab;          // fliken att gå tillbaka till efter egen period
 let customRange = null;            // { from: Date, to: Date } när egen period är vald
 let currentDriver = localStorage.getItem('taxi_driver') || '';
+// Förare för rader utan förar-id: datasetets förare (servern skickar "forar" i svaret; demo får "Demoförare"), annars den inloggade.
+function defForar() { return (data && data.forar) || currentDriver || ''; }
 let viewDriver = currentDriver;    // föraren som visas (kan väljas av ägaren)
 let driverNames = {};              // id -> namn (om servern ger namn)
 let tripsByDriver = null;
@@ -128,8 +130,8 @@ async function setupDriverPicker() {
   const rows = await loadDriverNames();
   const ids = new Set([currentDriver]);
   rows.forEach(r => { if (r.id) ids.add(r.id); });
-  (data.shifts || []).forEach(s => ids.add(s.forar || '710022'));
-  (data.trips || []).forEach(t => ids.add(t.forar || '710022'));
+  (data.shifts || []).forEach(s => ids.add(s.forar || defForar()));
+  (data.trips || []).forEach(t => ids.add(t.forar || defForar()));
   const sorted = Array.from(ids).filter(Boolean).sort();
   const saved = sessionStorage.getItem('taxi_view_driver_' + currentDriver);
   viewDriver = saved && sorted.includes(saved) ? saved : currentDriver;
@@ -144,7 +146,7 @@ async function setupDriverPicker() {
 }
 
 function matchDriver(rec) {
-  return COMPANY || (rec.forar || '710022') === viewDriver;
+  return COMPANY || (rec.forar || defForar()) === viewDriver;
 }
 
 function goHome() {
@@ -293,10 +295,10 @@ function getTripsForShift(shift) {
   if (!shiftStart || !shiftEnd) return [];
 
   // Resorna kopplas till skiftets egen förare (fungerar både för en förare och hela åkeriet)
-  const shiftDriver = shift.forar || '710022';
+  const shiftDriver = shift.forar || defForar();
   if (!tripsByDriver) {
     tripsByDriver = {};
-    (data.trips || []).forEach(t => { const f = t.forar || '710022'; (tripsByDriver[f] = tripsByDriver[f] || []).push(t); });
+    (data.trips || []).forEach(t => { const f = t.forar || defForar(); (tripsByDriver[f] = tripsByDriver[f] || []).push(t); });
   }
   return (tripsByDriver[shiftDriver] || []).filter(t => {
     const tripDate = t.startdatum;
@@ -320,11 +322,11 @@ function getOrphanTripsInRange(start, end) {
     const byDriver = {};
     (data.shifts || []).forEach(s => {
       const a = parseShiftTime(s.start), b = parseShiftTime(s.slut);
-      if (a && b && !isNaN(a) && !isNaN(b)) (byDriver[s.forar || '710022'] = byDriver[s.forar || '710022'] || []).push([a, b]);
+      if (a && b && !isNaN(a) && !isNaN(b)) (byDriver[s.forar || defForar()] = byDriver[s.forar || defForar()] || []).push([a, b]);
     });
     orphanTrips = (data.trips || []).filter(t => {
       const ts = tripTime(t);
-      return ts && !(byDriver[t.forar || '710022'] || []).some(r => ts >= r[0] && ts <= r[1]);
+      return ts && !(byDriver[t.forar || defForar()] || []).some(r => ts >= r[0] && ts <= r[1]);
     });
   }
   return orphanTrips.filter(t => {
@@ -372,7 +374,7 @@ function looseTripsRow(list) {
   const tripsHtml = list.map(t => {
     const isBom = t.kredittyp === '999';
     const dd = (t.startdatum || '').slice(8, 10) + '/' + (t.startdatum || '').slice(5, 7);
-    return `<div class="sub shift-trip" data-key="lt:${escHtml(t.kvittonr)}|${escHtml(t.forar || '710022')}|${escHtml(t.startdatum || '')}" onclick="toggleTrip(this, event)" style="${isBom ? 'opacity:0.6;' : ''}"><span class="toggle">+</span><span>${dd} ${escHtml(t.kvittonr)}${isBom ? ' (BOM)' : ''}</span><span>${formatSEK(parseAmount(t.belopp))}</span></div>
+    return `<div class="sub shift-trip" data-key="lt:${escHtml(t.kvittonr)}|${escHtml(t.forar || defForar())}|${escHtml(t.startdatum || '')}" onclick="toggleTrip(this, event)" style="${isBom ? 'opacity:0.6;' : ''}"><span class="toggle">+</span><span>${dd} ${escHtml(t.kvittonr)}${isBom ? ' (BOM)' : ''}</span><span>${formatSEK(parseAmount(t.belopp))}</span></div>
           <div class="sub trip-detail"><span>Start</span><span>${t.starttid || '00:00'} – zon ${t.startzon || '?'}</span></div>
           <div class="sub trip-detail"><span>Slut</span><span>${t.sluttid || '00:00'} – zon ${t.slutzon || '?'}</span></div>
           <div class="sub trip-detail"><span>Typ</span><span>${typeMap[t.kredittyp] || t.kredittyp || '?'}</span></div>
@@ -424,6 +426,7 @@ function render() {
   }
 
   if (loadFailed) {
+    document.getElementById('dashboard').style.opacity = ''; document.getElementById('dashboard').setAttribute('aria-busy', 'false');
     document.getElementById('dashboard').innerHTML =
       '<div class="section load-error" role="alert" style="text-align:center;padding:24px 16px;">' +
       '<div style="font-weight:600;margin-bottom:6px;">Kunde inte hämta data – försök igen</div>' +
@@ -445,9 +448,10 @@ function render() {
       dashEl.setAttribute('aria-busy', cp.html ? 'false' : 'true');
       return;
     }
-    dashEl.style.opacity = ''; dashEl.setAttribute('aria-busy', 'false');
     P = cp.res;
   }
+  // Data visas nu (från servern eller reservvägen get_trip_data): ta alltid bort nedtoningen.
+  { const d = document.getElementById('dashboard'); d.style.opacity = ''; d.setAttribute('aria-busy', 'false'); }
   let shifts = getShiftsInRange(rangeStart, rangeEnd);
   if (P) shifts = P.shifts.slice();
   shifts.sort((a, b) => (b.start || '').localeCompare(a.start || ''));
@@ -469,7 +473,7 @@ function render() {
   const totalKm = S ? Number(S.km) : shifts.reduce((s, sh) => s + parseFloat((sh.km || '0').replace(',', '.')), 0);
   const arbetad = formatTime(totalMinutes);
   const antalSkift = shifts.length;
-  const antalForare = new Set(shifts.map(s => s.forar || '710022')).size;
+  const antalForare = new Set(shifts.map(s => s.forar || defForar())).size;
   const antalBilar = new Set(shifts.map(s => s.taxi).filter(Boolean)).size;
 
   const kort = S ? Number(S.kort) : sumByType(trips, '160');
@@ -589,7 +593,7 @@ function render() {
     if (allTrips.length) {
       html += `<div class="section">${allTrips.map(t => {
         const isBom = t.kredittyp === '999';
-        return `<div class="stat-row" data-key="trip:${escHtml(t.kvittonr)}|${escHtml(t.forar || '710022')}|${escHtml(t.startdatum || '')}" onclick="toggle(this)" style="${isBom ? 'opacity:0.6;' : ''}"><span class="toggle">+</span><span class="label">${escHtml(t.kvittonr)}${isBom ? ' (BOM)' : ''}</span><span class="value">${formatSEK(parseAmount(t.belopp))}</span></div>
+        return `<div class="stat-row" data-key="trip:${escHtml(t.kvittonr)}|${escHtml(t.forar || defForar())}|${escHtml(t.startdatum || '')}" onclick="toggle(this)" style="${isBom ? 'opacity:0.6;' : ''}"><span class="toggle">+</span><span class="label">${escHtml(t.kvittonr)}${isBom ? ' (BOM)' : ''}</span><span class="value">${formatSEK(parseAmount(t.belopp))}</span></div>
         ${tripDetailRows(t, '')}`;
       }).join('')}</div>`;
     }
@@ -604,16 +608,16 @@ function render() {
       const shiftInkort = P ? s._inkort : shiftOther + shiftUber * (1 - UBER_FEE);
       const dateLabel = (COMPANY && currentTab === 'dag') ? '' : formatShiftDate(s.start) + ' ';
       // Förare visas bara för ägaren; övriga ser bara bilen
-      const who = COMPANY ? `<span class="shift-who">${escHtml(s.taxi || '?')}${isOwnerRole() ? ' · ' + escHtml(driverLabel(s.forar || '710022')) : ''}</span>` : '';
+      const who = COMPANY ? `<span class="shift-who">${escHtml(s.taxi || '?')}${isOwnerRole() ? ' · ' + escHtml(driverLabel(s.forar || defForar())) : ''}</span>` : '';
       const tripsHtml = shiftTrips.map(t => {
         const isBom = t.kredittyp === '999';
-        return `<div class="sub shift-trip" data-key="st:${escHtml(t.kvittonr)}|${escHtml(t.forar || '710022')}|${escHtml(t.startdatum || '')}" onclick="toggleTrip(this, event)" style="${isBom ? 'opacity:0.6;' : ''}"><span class="toggle">+</span><span>${escHtml(t.kvittonr)}${isBom ? ' (BOM)' : ''}</span><span>${formatSEK(parseAmount(t.belopp))}</span></div>
+        return `<div class="sub shift-trip" data-key="st:${escHtml(t.kvittonr)}|${escHtml(t.forar || defForar())}|${escHtml(t.startdatum || '')}" onclick="toggleTrip(this, event)" style="${isBom ? 'opacity:0.6;' : ''}"><span class="toggle">+</span><span>${escHtml(t.kvittonr)}${isBom ? ' (BOM)' : ''}</span><span>${formatSEK(parseAmount(t.belopp))}</span></div>
           <div class="sub trip-detail"><span>Start</span><span>${t.starttid || '00:00'} – zon ${t.startzon || '?'}</span></div>
           <div class="sub trip-detail"><span>Slut</span><span>${t.sluttid || '00:00'} – zon ${t.slutzon || '?'}</span></div>
           <div class="sub trip-detail"><span>Typ</span><span>${typeMap[t.kredittyp] || t.kredittyp || '?'}</span></div>
           <div class="sub trip-detail"><span>Dricks</span><span>${formatSEK(parseAmount(t.dricks))}</span></div>`;
       }).join('') + (lazyId != null && !companyApi.trips[lazyId] ? companyTripsPlaceholder(lazyId) : '');
-      return `<div class="stat-row" data-key="shift:${escHtml(s.passnr)}|${escHtml(s.forar || '710022')}|${escHtml(s.start || '')}"${lazyId != null && !companyApi.trips[lazyId] ? ` data-lazy="${lazyId}"` : ''} onclick="toggleShift(this)"><span class="toggle">+</span><span class="label">${dateLabel}#${escHtml(s.passnr)}${who}</span><span class="value">${formatSEK(shiftInkort)}</span></div>
+      return `<div class="stat-row" data-key="shift:${escHtml(s.passnr)}|${escHtml(s.forar || defForar())}|${escHtml(s.start || '')}"${lazyId != null && !companyApi.trips[lazyId] ? ` data-lazy="${lazyId}"` : ''} onclick="toggleShift(this)"><span class="toggle">+</span><span class="label">${dateLabel}#${escHtml(s.passnr)}${who}</span><span class="value">${formatSEK(shiftInkort)}</span></div>
       <div class="shift-content">${tripsHtml}</div>`;
     }).join('')}${looseTrips.length ? looseTripsRow(looseTrips) : ''}</div>`;
   } else if (looseTrips.length) {
@@ -813,14 +817,14 @@ function archiveMergeInto(d) {
 function dedupData(d) {
   const seenShifts = new Set();
   d.shifts = (d.shifts || []).filter(s => {
-    const key = (s.passnr || '') + '|' + (s.forar || '710022') + '|' + String(s.start || '').replace(/\D/g, '').slice(0, 8); // passnr återanvänds
+    const key = (s.passnr || '') + '|' + (s.forar || defForar()) + '|' + String(s.start || '').replace(/\D/g, '').slice(0, 8); // passnr återanvänds
     if (seenShifts.has(key)) return false;
     seenShifts.add(key);
     return true;
   });
   const seenTrips = new Set();
   d.trips = (d.trips || []).filter(t => {
-    const key = (t.kvittonr || '') + '|' + (t.forar || '710022') + '|' + (t.startdatum || '');
+    const key = (t.kvittonr || '') + '|' + (t.forar || defForar()) + '|' + (t.startdatum || '');
     if (seenTrips.has(key)) return false;
     seenTrips.add(key);
     return true;

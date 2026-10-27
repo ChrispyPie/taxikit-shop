@@ -1,7 +1,8 @@
 /* Demokonton (t369u–t373u).
- * Ett demokonto loggar in med eget ID (DEMO1, DEMO2 …) och ser appen med Christians data, bara läsning.
- * Servern sköter allt som är viktigt: sessionen läser som förare 710022 med kategori Standard,
- * alla skrivningar stoppas (demo_read_only), andra förares namn byts mot "Förare N" och kontot
+ * Ett demokonto loggar in med eget ID (DEMO1, DEMO2 …) och ser en riktig förares siffror, bara läsning.
+ * Servern sköter allt som är viktigt: sessionen läser som en utvald förare med kategori Standard,
+ * alla skrivningar stoppas (demo_read_only), förarens namn och förar-ID blir "Demoförare", bilnummer
+ * blir "Demobil 1, 2 …" (private.demo_mask, 20261027b), andra förares namn byts mot "Förare N" och kontot
  * slutar fungera när det gått ut. Den här filen sköter bara det som syns:
  *  - bannern "Demokonto (förare/ägare) – gäller till …"
  *  - inbjudningstexterna (delas från admin och visas på aktivera.html)
@@ -41,7 +42,7 @@
   D.bannerText = function (d) {
     d = d || D.get();
     if (!d) return '';
-    return 'Demokonto (' + D.ROLE[d.role] + ') – gäller till ' + D.when(d.expires) + '. Du ser Christians data och kan bara titta.';
+    return 'Demokonto (' + D.ROLE[d.role] + ') – gäller till ' + D.when(d.expires) + '. Du ser en riktig förares siffror, men namn och bilnummer är utbytta. Du kan bara titta.';
   };
   D.banner = function () {
     var d = D.get();
@@ -62,7 +63,7 @@
   // Ordet "hen" används inte.
   D.LOOK = {
     forare: 'Du får se appen precis som en av våra förare ser den: körpass och intäkter, lönekoll, prognos för bokningar, ' +
-      'topplistor, kalender, forum och bil & verkstad. Andra förares namn visas inte.',
+      'topplistor, kalender, forum och bil & verkstad. Förarens namn och bilnummer är utbytta, och andra förares namn visas inte.',
     agare: 'Du får se appen både som förare och som ägare: förarnas vy med körpass, lönekoll, prognos och topplistor, ' +
       'och ägarens adminpanel med chaufförer, bilar, verkstad och åkeridata. I adminpanelen visas påhittade exempeluppgifter, inte våra riktiga.'
   };

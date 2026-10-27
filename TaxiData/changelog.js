@@ -7,6 +7,10 @@
  * Äldre historik (före 24 okt 2026) är återskapad i efterhand och ungefärlig.
  */
 window.CHANGELOG = [
+  { datum: '2026-10-27', id: '2026-10-27b', rader: [
+    ['Förbättrat', 'Demokonton: den som tittar ser inte längre vems siffror det är. Förarens namn och förar-ID visas som Demoförare och bilarna som Demobil 1, 2 och så vidare. Siffrorna är fortfarande riktiga. Det döljs även i det som skickas till telefonen.'],
+    ['Fixat', 'Åkeridata blir inte längre blek om servern behöver använda reservvägen. Siffrorna visas som vanligt.']
+  ] },
   { datum: '2026-10-27', id: '2026-10-27a', rader: [
     ['Förbättrat', 'Åkeridata: sidan hämtar nu bara den period du tittar på (dag, vecka, månad eller år) i stället för hela året på en gång. Den öppnar snabbare och drar mindre mobildata. Siffrorna räknas på samma sätt som förut, och äldre år fungerar som vanligt. När du tittar på ett helt år hämtas resorna i ett körpass först när du fäller ut passet.']
   ] },
