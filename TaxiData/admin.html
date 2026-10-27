@@ -629,16 +629,16 @@
         ${sadminLocked ? `<div class="info-box" style="margin-top:16px;"><h4>🔒 Skyddat konto</h4><p style="margin:4px 0 0;">S admin-kontot kan inte ändras, avaktiveras eller nollställas av någon annan. Bara S admin själv kan ändra sitt konto.</p></div>` : ''}
         ${!sadminLocked && (owner || canEdit) ? `<button onclick="saveDriver()" style="width:100%; margin-top:16px;">Spara</button>` : ''}
         <div style="margin-top:16px; display:flex; gap:8px;">
-          ${canToggle ? `<button onclick="toggleActive('${editingDriver}')" style="flex:1;">${isActive ? 'Avaktivera' : 'Aktivera'}</button>` : ''}
-          <button onclick="shareDriver('${editingDriver}')" style="flex:1;">${status === 'pending' && canToggle ? 'Aktiveringslänk' : 'Dela'}</button>
+          ${canToggle && isActive ? `<button onclick="toggleActive('${editingDriver}')" style="flex:1;">Avaktivera</button>` : ''}
+          <button id="share-btn" onclick="shareDriver('${editingDriver}')" style="flex:1;${status !== 'active' && canToggle ? ' background: var(--primary-bg); color:white;' : ''}">${status !== 'active' && canToggle ? 'Dela inbjudan' : 'Dela'}</button>
         </div>
         ${canToggle && status === 'active' ? `<button id="req-pw-btn" onclick="requirePasswordChange('${editingDriver}')" style="width:100%; margin-top:8px;">Nollställ lösenord</button>` : ''}
         ${status === 'active' && d.must_change_password ? `<div class="acct-info" style="color:var(--c-c53030);">Måste välja nytt lösenord vid nästa inloggning.</div>` : ''}
         <div class="acct-info">${status === 'pending'
-          ? 'Väntar på att föraren öppnar aktiveringslänken och väljer lösenord.' + (d.link_expires_at ? ' Länken går ut ' + fmtWhen(d.link_expires_at) + '.' : ' Länken har gått ut – skapa en ny.')
+          ? 'Väntar på att föraren öppnar aktiveringslänken och väljer lösenord.' + (d.link_expires_at ? ' Länken går ut ' + fmtWhen(d.link_expires_at) + '.' : ' Länken har gått ut – tryck Dela inbjudan för en ny.')
           : status === 'active'
             ? (d.last_login_at ? 'Senast inloggad: ' + fmtWhen(d.last_login_at) + '. ' : '') + 'Avaktiveras automatiskt efter 30 dagar utan inloggning' + (['agare', 'superadmin'].includes(targetCat) ? ' (gäller inte ägare/superadmin).' : '.')
-            : 'Inaktiv. Aktivera för att skapa en aktiveringslänk.'}</div>
+            : (canToggle ? 'Inte aktiverad. Tryck Dela inbjudan så aktiveras kontot och du får en aktiveringslänk att skicka. Föraren väljer själv sitt lösenord.' : 'Inte aktiverad.')}</div>
       </div>`;
     }
 
@@ -702,12 +702,12 @@
       if (getDriverStatus(id) !== 'inactive') {
         await deactivateDriver(id);
       } else {
-        await activateDriver(id);
+        await shareDriver(id);   // aktivering sker via Dela inbjudan
       }
     }
 
-    async function activateDriver(id) {
-      // Kategori: det som valts i listan, annars Standard
+    // Kategori vid aktivering: det som valts i formuläret, annars sparad kategori, annars Standard
+    function activationCategory(id) {
       const stored = drivers[id]?.category;
       const sel = document.getElementById('f-category');
       let cat = (sel && !sel.disabled) ? sel.value : normCategory(stored);
@@ -715,19 +715,7 @@
       // Avslutad kan inte logga in – om ingen annan kategori valts blir det Standard
       if (cat === 'avslutad' && (!sel || sel.value === normCategory(stored))) cat = 'standard';
       if (!canEditCategory(cat)) cat = 'standard';
-      if (!confirm('Aktivera ' + id + ' som ' + (userCategories[cat] || cat) + '?\n\nDu får en aktiveringslänk (gäller i 7 dagar) som du skickar till föraren. Föraren väljer själv sitt lösenord.')) return;
-
-      try {
-        // Servern skapar en engångslänk; inget lösenord skapas eller visas
-        const r = await rpc('admin_activate', { p_id: id, p_category: cat });
-        if (!r || !r.ok || !r.link_token) { alert('Fel: aktiveringen sparades inte korrekt. Försök igen.'); return; }
-        lastLinks[id] = { url: activationUrl(r.link_token), expires: r.expires_at };
-        await reloadDrivers();
-        render();
-        showLinkModal(id);
-      } catch (e) {
-        alert(errText(e));
-      }
+      return cat;
     }
 
     function activationUrl(token) {
@@ -766,8 +754,8 @@
       m.className = 'modal'; m.id = 'link-modal';
       m.innerHTML = `<div class="modal-box">
         <h3 style="margin:0 0 8px; color:var(--primary);">Aktiveringslänk för ${esc(id)}</h3>
-        <p style="font-size:calc(13px * var(--font-scale, 1)); color:var(--c-4a5568); margin:0 0 8px;">Skicka länken till föraren. Den fungerar en gång och går ut ${esc(fmtWhen(l.expires))}. Länken visas bara nu – annars kan du skapa en ny.<br>Förar-ID står inte i länken eller meddelandet – föraren behöver kunna sitt förar-ID för att aktivera.</p>
-        <input id="link-url" readonly value="${esc(l.url)}" style="width:100%; font-size:calc(12px * var(--font-scale, 1)); box-sizing:border-box;" onclick="this.select()">
+        <p style="font-size:calc(13px * var(--font-scale, 1)); color:var(--c-4a5568); margin:0 0 8px;">Kontot är aktiverat och väntar på föraren. Skicka texten nedan. Länken fungerar en gång och går ut ${esc(fmtWhen(l.expires))}.<br>Förar-ID står inte i meddelandet – föraren behöver kunna sitt förar-ID för att aktivera.</p>
+        <textarea id="link-url" readonly style="width:100%; height:150px; font-size:calc(12px * var(--font-scale, 1)); box-sizing:border-box;" onclick="this.select()">${esc(linkMessage(id))}</textarea>
         <div class="modal-buttons">
           <button id="link-copy" onclick="copyLink('${esc(id)}')">Kopiera</button>
           ${navigator.share ? `<button onclick="navigator.share({ title: 'TaxiData', text: linkMessage('${esc(id)}') }).catch(() => {})">Dela</button>` : ''}
@@ -910,20 +898,98 @@
       if (b) b.textContent = 'Kopierad ✓';
     }
 
-    function shareDriver(id) {
-      const status = getDriverStatus(id);
-      if (status === 'pending' && canToggleDriver(id)) {
-        if (lastLinks[id]) showLinkModal(id); else newActivationLink(id);
-        return;
+    // Dela = bjud in. Ett tryck:
+    //  - Aktivt konto (föraren har valt lösenord): texten "logga in med ditt lösenord".
+    //  - Väntar (aktiverad men inget lösenord): aktiveringslänk (samma länk igen om den redan skapats i den här sessionen).
+    //  - Inte aktiverad: kontot aktiveras först, sedan visas aktiveringslänken.
+    // Läget hämtas alltid färskt från servern först, så att vi aldrig visar fel text.
+    // Om något går fel visas ett fel och ingen text att dela.
+    const inviteBusy = {};
+    function linkStillValid(l) { return !!(l && l.url && l.expires && new Date(l.expires).getTime() > Date.now() + 60000); }
+    function loginMessage(id) {
+      const d = drivers[id] || {};
+      const link = new URL('./', location.href.split('#')[0]).href;
+      return 'TaxiData\n\nLänk: ' + link + '\nFörar-ID: ' + id + '\nLogga in med lösenordet du valde när du aktiverade kontot.' +
+        (d.must_change_password ? '\nDu får välja ett nytt lösenord när du loggar in.' : '') +
+        '\nGlömt lösenordet? Tryck "Glömt lösenord?" på inloggningssidan.';
+    }
+    function setShareBusy(on) {
+      const b = document.getElementById('share-btn');
+      if (b) { b.disabled = on; if (on) b.textContent = 'Förbereder…'; }
+    }
+    function tryNativeShare(text) {
+      if (!navigator.share) return;
+      navigator.share({ title: 'TaxiData', text }).catch(() => {});   // modalen finns kvar om delningen inte öppnas
+    }
+    async function shareDriver(id) {
+      if (inviteBusy[id]) return;           // dubbeltryck: gör ingenting medan första trycket pågår
+      inviteBusy[id] = true;
+      setShareBusy(true);
+      let ok = false;
+      try {
+        const catChoice = activationCategory(id);   // läs formuläret innan listan laddas om
+        try { await reloadDrivers(); }
+        catch (e) { alert('Kunde inte hämta förarens läge från servern. Ingen inbjudan skapades. Kontrollera nätet och försök igen.'); return; }
+        const status = getDriverStatus(id);
+        if (status === 'active') {
+          ok = true;
+          render();
+          showLoginModal(id);
+          tryNativeShare(loginMessage(id));
+          return;
+        }
+        if (!canToggleDriver(id)) {
+          alert('Föraren har inte aktiverat sitt konto ännu, och du har inte behörighet att skapa en aktiveringslänk.');
+          return;
+        }
+        if (status === 'inactive') {
+          const r = await rpc('admin_activate', { p_id: id, p_category: catChoice });
+          if (!r || !r.ok || !r.link_token) { alert('Aktiveringen misslyckades. Ingen inbjudan skickades. Försök igen.'); return; }
+          lastLinks[id] = { url: activationUrl(r.link_token), expires: r.expires_at };
+        } else if (!linkStillValid(lastLinks[id])) {
+          // Väntar, men länken finns inte i den här sessionen (eller har gått ut): skapa en ny
+          const d = drivers[id] || {};
+          if (d.link_expires_at && new Date(d.link_expires_at).getTime() > Date.now() &&
+              !confirm('Föraren har redan en aktiveringslänk som gäller till ' + fmtWhen(d.link_expires_at) + ', men den kan inte visas igen.\n\nSkapa en ny länk? Den gamla slutar fungera.')) return;
+          const r = await rpc('admin_new_activation_link', { p_id: id });
+          if (!r || !r.link_token) { alert('Det gick inte att skapa en ny länk. Försök igen.'); return; }
+          lastLinks[id] = { url: activationUrl(r.link_token), expires: r.expires_at };
+        }
+        try { await reloadDrivers(); } catch (e) { /* länken finns redan – visa den ändå */ }
+        ok = true;
+        render();
+        showLinkModal(id);
+        tryNativeShare(linkMessage(id));
+      } catch (e) {
+        alert(errText(e) + '\n\nIngen inbjudan skickades.');
+      } finally {
+        inviteBusy[id] = false;
+        if (!ok) render();   // återställ knappen
       }
-      // Aktivt konto: dela bara adressen och förar-ID (lösenord visas aldrig)
-      const link = new URL('./', location.href).href;
-      const msg = 'TaxiData\n\nLänk: ' + link + '\nFörar-ID: ' + id + '\nLogga in med lösenordet du valde när du aktiverade kontot.';
-      if (navigator.share) {
-        navigator.share({ title: 'TaxiData', text: msg }).catch(() => {});
-      } else {
-        alert(msg);
-      }
+    }
+    function showLoginModal(id) {
+      closeLinkModal();
+      const m = document.createElement('div');
+      m.className = 'modal'; m.id = 'link-modal';
+      m.innerHTML = `<div class="modal-box">
+        <h3 style="margin:0 0 8px; color:var(--primary);">Inloggning för ${esc(id)}</h3>
+        <p style="font-size:calc(13px * var(--font-scale, 1)); color:var(--c-4a5568); margin:0 0 8px;">Föraren har redan aktiverat kontot och valt lösenord. Lösenord visas aldrig.</p>
+        <textarea id="link-url" readonly style="width:100%; height:150px; font-size:calc(12px * var(--font-scale, 1)); box-sizing:border-box;" onclick="this.select()">${esc(loginMessage(id))}</textarea>
+        <div class="modal-buttons">
+          <button id="link-copy" onclick="copyText(loginMessage('${esc(id)}'))">Kopiera</button>
+          ${navigator.share ? `<button onclick="tryNativeShare(loginMessage('${esc(id)}'))">Dela</button>` : ''}
+        </div>
+        <div class="modal-buttons" style="margin-top:8px;">
+          <button onclick="closeLinkModal()" style="background: var(--primary-bg); color:white;">Stäng</button>
+        </div>
+      </div>`;
+      document.body.appendChild(m);
+    }
+    async function copyText(text) {
+      try { await navigator.clipboard.writeText(text); }
+      catch (e) { const i = document.getElementById('link-url'); i.select(); document.execCommand('copy'); }
+      const b = document.getElementById('link-copy');
+      if (b) b.textContent = 'Kopierad ✓';
     }
 
     // Nollställ lösenord: föraren måste välja nytt lösenord vid nästa inloggning, alla förarens inloggningar avslutas direkt
