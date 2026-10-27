@@ -84,7 +84,7 @@ returns json
 language sql
 stable security definer
 set search_path to 'public', 'pg_temp'
-as $function$ select private.demo_mask(p::jsonb)::json $function$;
+as $function$ select case when p is null or not private.is_demo() then p else private.demo_mask(p::jsonb)::json end $function$;   -- inte demo: svaret orört byte för byte
 revoke all on function private.demo_mask(json) from public, anon, authenticated;
 
 -- Demo-alias: den riktiga föraren heter alltid "Demoförare" (övriga förare fortfarande "Förare N").
