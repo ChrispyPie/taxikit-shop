@@ -57,6 +57,8 @@
 
   // ---------- hjälp ----------
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  // Kort namn för visning ("Christian P"), se namn.js
+  function sn(s) { return window.shortName ? window.shortName(s) : (s == null ? '' : String(s)); }
   function p2(n) { return String(n).padStart(2, '0'); }
   function tz() { return (st.data && st.data.city && st.data.city.timezone) || Intl.DateTimeFormat().resolvedOptions().timeZone; }
   // Delar av en tidpunkt i stadens tidszon
@@ -353,7 +355,7 @@
     if (st.comments === null) h += '<div class="kal-none sm">Laddar…</div>';
     else if (!st.comments.length) h += '<div class="kal-none sm">Inga kommentarer än. Tipsa gärna, t.ex. "kö vid Korsvägen efteråt".</div>';
     else st.comments.forEach(function (c) {
-      h += '<div class="kal-com"><div class="kal-cwho">' + esc(c.author) + ' · ' + esc(relTime(c.created_at)) +
+      h += '<div class="kal-com"><div class="kal-cwho">' + esc(sn(c.author)) + ' · ' + esc(relTime(c.created_at)) +
         (c.can_delete ? ' <button type="button" class="kal-cdel" data-c="' + c.id + '" aria-label="Ta bort">✕</button>' : '') + '</div><div>' + esc(c.body) + '</div></div>';
     });
     h += '<div class="vk-field kal-cnew"><textarea id="kal-ctext" maxlength="500" rows="2" placeholder="Skriv en kommentar (syns bara för ditt företag)"></textarea></div>' +

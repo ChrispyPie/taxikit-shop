@@ -40,6 +40,8 @@
 
   // ---------- hjälp ----------
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  // Kort namn för visning ("Christian P"), se namn.js
+  function sn(s) { return window.shortName ? window.shortName(s) : (s == null ? '' : String(s)); }
   function sod(d) { var x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
   function p2(n) { return String(n).padStart(2, '0'); }
   function iso(d) { return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate()); }
@@ -181,7 +183,7 @@
         h += '<div class="tl-card"><div class="tl-head"><span class="tl-title">' + esc(L.t) + '</span>' +
           '<span class="tl-me">' + (x.me ? 'Du: plats ' + x.me.pos + ' av ' + x.n : x.n + ' förare') + '</span></div>';
         show.forEach(function (r) {
-          var who = r.du ? 'Du' : (d.named && r.id ? (r.namn && r.namn !== r.id ? esc(r.namn) + ' <span class="tl-id">' + esc(r.id) + '</span>' : esc(r.id)) : (window.DEMO && DEMO.on() ? 'Förare ' + r.pos : ''));  // demokonto: servern skickar inga namn
+          var who = r.du ? 'Du' : (d.named && r.id ? (r.namn && r.namn !== r.id ? esc(sn(r.namn)) + ' <span class="tl-id">' + esc(r.id) + '</span>' : esc(r.id)) : (window.DEMO && DEMO.on() ? 'Förare ' + r.pos : ''));  // demokonto: servern skickar inga namn
           h += '<div class="tl-row' + (r.du ? ' du' : '') + '"><span class="tl-pos">' + (r.pos <= 3 ? ['🥇', '🥈', '🥉'][r.pos - 1] : r.pos + '.') + '</span>' +
             '<span class="tl-who">' + who + '</span><span class="tl-val">' + fmt(r.v, L.f) + '</span></div>';
         });
