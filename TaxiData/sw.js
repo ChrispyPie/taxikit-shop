@@ -10,6 +10,7 @@ self.addEventListener('activate', function (e) { e.waitUntil(self.clients.claim(
 // Samma nyckel räknas fram i notis.js (NOTIS.keyOf) så att en notis bara sparas en gång.
 function p2(n) { return (n < 10 ? '0' : '') + n; }
 function notisKey(d, now) {
+  if (d.nkey) return String(d.nkey);   // servern skickar med nyckeln den sparade notisen under
   var tag = String(d.tag || 'push'), t = new Date(now);
   var ymd = t.getFullYear() + p2(t.getMonth() + 1) + p2(t.getDate());
   if (tag.indexOf('prognos') === 0) {

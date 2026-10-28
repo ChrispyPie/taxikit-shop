@@ -3,6 +3,8 @@
  * Tryck på en notis: den markeras som läst och appen öppnar det notisen gäller.
  * Push sparas av sw.js i telefonen (IndexedDB) och skickas hit till servern (notis_add) när appen öppnas.
  * Servern: notis_feed, notis_add, notis_read (supabase/migrations/20261028r_notisflode.sql).
+ * Servern sparar även flyg/tåg/prognos-push själv när den skickas (notis_svc_add, 20261028u_notis_server.sql);
+ * samma nyckel (nkey) som här, så samma notis syns bara en gång. Fliken i högra kanten (#notis-edge) öppnar panelen.
  * Ångra: ta bort filen, skript-taggen och 🔔-knappen i index.html (se UNDO-notisflode-2026-10-28.md). */
 (function () {
   var N = window.NOTIS = {};
@@ -34,7 +36,16 @@
     '.np-when{display:block;margin-top:.2rem;font-size:.78rem;color:var(--text-soft)}' +
     '.np-dot{width:9px;height:9px;border-radius:50%;background:var(--badge,#e53e3e);flex-shrink:0;margin-top:.35rem}' +
     '.np-msg{color:var(--text-soft);text-align:center;padding:1.5rem .5rem;font-size:.95rem}' +
-    '.np-foot{color:var(--text-soft);font-size:.78rem;text-align:center;padding:.6rem .5rem 0}';
+    '.np-foot{color:var(--text-soft);font-size:.78rem;text-align:center;padding:.6rem .5rem 0}' +
+    // Liten flik i högra kanten som visar att panelen finns (t547u). Färgerna följer ljust/mörkt tema.
+    '#notis-edge{position:fixed;right:0;top:50%;transform:translateY(-50%);width:16px;height:48px;padding:0;margin:0;z-index:899;' +
+      'display:none;align-items:center;justify-content:center;background:var(--surface,#fff);color:var(--text-soft,#718096);' +
+      'border:1px solid var(--border,#cbd5e0);border-right:none;border-radius:10px 0 0 10px;opacity:.8;cursor:pointer;' +
+      'font-size:15px;line-height:1;box-shadow:-1px 0 4px rgba(0,0,0,.12);-webkit-tap-highlight-color:transparent}' +
+    '#notis-edge.show{display:flex}' +
+    '#notis-edge:active{opacity:1}' +
+    '#notis-edge.unread::after{content:"";position:absolute;top:-3px;left:-3px;width:8px;height:8px;border-radius:50%;background:var(--badge,#e53e3e)}' +
+    '@media print{#notis-edge{display:none!important}}';
   (function () { var s = document.createElement('style'); s.textContent = CSS; document.head.appendChild(s); })();
 
   var st = { items: null, unread: 0, err: false, open: false, pushed: false, skipPop: false, loading: false, at: 0, timer: null };
@@ -68,6 +79,7 @@
   }
   // Samma nyckel som sw.js räknar fram (notisKey) – så sparas en notis bara en gång.
   N.keyOf = function (d, now) {
+    if (d && d.nkey) return String(d.nkey);
     var tag = String((d && d.tag) || 'push'), t = new Date(now || Date.now());
     var ymd = t.getFullYear() + p2(t.getMonth() + 1) + p2(t.getDate());
     if (tag.indexOf('prognos') === 0) {
@@ -166,18 +178,27 @@
   function allItems() {
     var out = [];
     var ny = nyheter(); if (ny) out.push(ny);
-    pendGet().forEach(function (x) { out.push({ src: 'l', id: x.key, kind: x.kind, tag: x.tag, title: x.title, body: x.body, created_at: new Date(x.at).toISOString(), read: !!x.read }); });
+    var onServer = {}; (st.items || []).forEach(function (x) { if (x.nkey) onServer[x.nkey] = 1; });
+    pendGet().forEach(function (x) { if (onServer[x.key]) return; out.push({ src: 'l', id: x.key, kind: x.kind, tag: x.tag, title: x.title, body: x.body, created_at: new Date(x.at).toISOString(), read: !!x.read }); });
     (st.items || []).forEach(function (x) { out.push(x); });
     out.sort(function (a, b) { return (a.src === 'n' ? -1 : 0) - (b.src === 'n' ? -1 : 0) || Date.parse(b.created_at) - Date.parse(a.created_at); });
     return out;
   }
   function unreadCount() {
     var n = st.unread || 0;
-    pendGet().forEach(function (x) { if (!x.read) n++; });
+    var onServer = {}; (st.items || []).forEach(function (x) { if (x.nkey) onServer[x.nkey] = 1; });
+    pendGet().forEach(function (x) { if (!x.read && !onServer[x.key]) n++; });
     if (nyheter()) n++;
     return n;
   }
-  function paintBadge() { if (window.setBadge) setBadge('notiser', token() ? unreadCount() : 0); }
+  function paintBadge() { if (window.setBadge) setBadge('notiser', token() ? unreadCount() : 0); paintEdge(); }
+  // Fliken syns bara när man är inloggad och panelen är stängd; röd prick = olästa notiser.
+  function paintEdge() {
+    var e = document.getElementById('notis-edge'); if (!e) return;
+    var on = !st.open && canOpen();
+    e.classList.toggle('show', on);
+    e.classList.toggle('unread', on && unreadCount() > 0);
+  }
 
   function refresh(force) {
     if (!token()) return Promise.resolve();
@@ -301,6 +322,10 @@
     p.innerHTML = '<div class="np-head"><h2>Notiser</h2><button type="button" id="np-all">Markera alla som lästa</button>' +
       '<button type="button" id="np-close" aria-label="Stäng">✕</button></div><div id="np-list"></div>';
     document.body.appendChild(dim); document.body.appendChild(p);
+    var edge = document.createElement('button'); edge.id = 'notis-edge'; edge.type = 'button';
+    edge.setAttribute('aria-label', 'Öppna notiser'); edge.title = 'Notiser'; edge.textContent = '‹';
+    edge.onclick = function () { N.open(); };
+    document.body.appendChild(edge);
     dim.onclick = function () { N.close(); };
     document.getElementById('np-close').onclick = function () { N.close(); };
     document.getElementById('np-all').onclick = markAll;
@@ -323,6 +348,7 @@
     p.classList.toggle('open', on); d.classList.toggle('open', on);
     p.setAttribute('aria-hidden', on ? 'false' : 'true');
     st.open = on;
+    paintEdge();
   }
   N.isOpen = function () { return st.open; };
   N.open = function () {
@@ -413,6 +439,7 @@
     clearInterval(st.timer); st.timer = null;
     st.items = null; st.unread = 0; st.at = 0;
     if (st.open) show(false);
+    var ed = document.getElementById('notis-edge'); if (ed) ed.classList.remove('show', 'unread');
     idbClear();
     if (window.setBadge) setBadge('notiser', 0);
   };

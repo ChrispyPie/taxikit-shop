@@ -2,6 +2,7 @@
 // spårar bokningar per zon/kategori/block med tidsuppskattning + konfidens.
 import webpush from "npm:web-push@3.6.7";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { notisKey, saveNotice } from "./notis.ts";
 
 const ORIGINS = ["https://taxikit.shop", "https://www.taxikit.shop", "https://chrispypie.github.io", "http://localhost:8765"];
 const LOGIN_URL = "https://prognos.taxigoteborg.nu/api/prognos-login";
@@ -71,12 +72,16 @@ async function ensureVapid() {
   vapidReady = true;
 }
 
-async function sendTo(driver: string, msg: { title: string; body: string; tag: string }) {
+async function sendTo(driver: string, msg: { title: string; body: string; tag: string }, dayMs?: number) {
+  const ts = Date.now();
+  const nkey = notisKey(msg, ts, dayMs);
+  // Spara i notisflödet först – samma nyckel som appen, så den syns bara en gång (t547u)
+  await saveNotice(sb, driver, msg, nkey);
   await ensureVapid();
   if (!vapidReady) return;
   const { data } = await sb.rpc("bev_svc_targets", { p_driver: driver });
   const subs = (data || []) as { id: number; endpoint: string; p256dh: string; auth: string }[];
-  const payload = JSON.stringify({ ...msg, url: APP_URL, ts: Date.now() });
+  const payload = JSON.stringify({ ...msg, url: APP_URL, ts, nkey });
   for (const s of subs) {
     try {
       await webpush.sendNotification(
@@ -417,7 +422,7 @@ async function tick(): Promise<Response> {
     });
     const body = `${ev.zone_name} · ${CAT_SV[ev.category] || ev.category} · ca ${hm}`;
     for (const d of list) {
-      await sendTo(d, { title: "Ny förbokning", body, tag: "prognos-" + ev.zone_id + "-" + ev.category });
+      await sendTo(d, { title: "Ny förbokning", body, tag: "prognos-" + ev.zone_id + "-" + ev.category }, Date.parse(ev.estimated_at));
     }
   }
 

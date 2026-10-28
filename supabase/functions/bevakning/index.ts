@@ -6,6 +6,7 @@
 // Tågdata: samma Vercel-funktion som appen (/api/trains, CDN-cache 60 s) – ingen extra last på Trafikverket.
 import webpush from "npm:web-push@3.6.7";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { notisKey, saveNotice } from "./notis.ts";
 
 // Hur länge en bevakning ligger kvar efter sista händelsen (tåg ankommit / sista väskan ute). EN konstant.
 const AFTER_MIN = 30;
@@ -67,7 +68,11 @@ async function sendTo(driver: string, msg: Msg) {
   const { data } = await sb.rpc("bev_svc_targets", { p_driver: driver });
   const subs = (data || []) as { id: number; endpoint: string; p256dh: string; auth: string }[];
   let sent = 0, failed = 0;
-  const payload = JSON.stringify({ ...msg, url: APP_URL, ts: Date.now() });
+  const ts = Date.now();
+  const nkey = notisKey(msg, ts);
+  // Spara i notisflödet först (även om föraren inte har någon telefon med push påslagen)
+  const saved = await saveNotice(sb, driver, msg, nkey);
+  const payload = JSON.stringify({ ...msg, url: APP_URL, ts, nkey });
   for (const s of subs) {
     try {
       await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload,
@@ -80,7 +85,7 @@ async function sendTo(driver: string, msg: Msg) {
       await sb.rpc("bev_svc_result", { p_id: s.id, p_ok: false, p_gone: code === 404 || code === 410 });
     }
   }
-  return { sent, failed, devices: subs.length };
+  return { sent, failed, devices: subs.length, saved };
 }
 
 async function getJson(urls: string[]) {

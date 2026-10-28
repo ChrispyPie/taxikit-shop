@@ -12,6 +12,10 @@
  * En dag där ingen rad syns för föraren visas inte, och ger ingen prick eller notis.
  */
 window.CHANGELOG = [
+  { datum: '2026-10-28', id: '2026-10-28u', rader: [
+    ['Förbättrat', 'Notiser: när ett flyg eller tåg du bevakar ändrar status, eller när en ny förbokning du bevakar kommer in i Prognos, sparas notisen nu direkt under Notiser. Den finns där även om du missade den på telefonen eller har stängt av notiser i telefonen. Tryck på den för att komma till Ankomster eller Prognos.'],
+    ['Nytt', 'Notiser: en liten flik med en pil i högra kanten av skärmen visar att panelen finns. Tryck på fliken eller dra från kanten för att öppna den. En röd prick på fliken betyder att du har olästa notiser.']
+  ] },
   { datum: '2026-10-28', id: '2026-10-28s', rader: [
     ['Förbättrat', 'Lönekoll och Körpassdata öppnas snabbare. Appen hämtar nu bara dina egna körningar, och hämtningen börjar redan när startsidan visas. Byter du sida används det som redan är hämtat, så sidan syns direkt och uppdateras sedan tyst i bakgrunden.']
   ] },
