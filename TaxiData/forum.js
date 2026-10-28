@@ -115,6 +115,8 @@
       });
   }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  // Kort namn för visning ("Christian P"), se namn.js
+  function sn(s) { return window.shortName ? window.shortName(s) : (s == null ? '' : String(s)); }
   function errText(e) { return ERR[e && e.message] || 'Det gick inte. Försök igen.'; }
   function fail(e) { if (e && e.code === '28000') { location.reload(); return true; } return false; }
   function catName(c) { for (var i = 0; i < CATS.length; i++) if (CATS[i][0] === c) return CATS[i][1]; return c; }
@@ -219,7 +221,7 @@
     else if (!st.list.posts.length) h += '<div class="tl-msg">Inga inlägg här ännu. Skriv det första!</div>';
     else st.list.posts.forEach(function (p) {
       h += '<div class="vk-card fo-card" data-a="open" data-id="' + p.id + '">' +
-        '<div class="fo-head">' + av(p.author, p.ak, true) + '<span class="fo-name">' + esc(p.author) + '</span>' + coTag(p.co) + '<span>· ' + esc(when(p.created_at)) + '</span></div>' +
+        '<div class="fo-head">' + av(sn(p.author), p.ak, true) + '<span class="fo-name">' + esc(sn(p.author)) + '</span>' + coTag(p.co) + '<span>· ' + esc(when(p.created_at)) + '</span></div>' +
         '<div class="fo-title">' + esc(p.title) + '</div>' +
         '<div>' + tags(p) + '</div>' +
         '<div class="fo-ex">' + esc(p.body) + (p.body.length >= 160 ? '…' : '') + '</div>' +
@@ -245,7 +247,7 @@
     if (st.flash) { h += '<div class="vk-flash">' + esc(st.flash) + '</div>'; st.flash = null; }
     if (st.err && !p) { root.innerHTML = h + '<div class="tl-msg err">' + esc(st.err) + '</div>'; return; }
     if (!p) { root.innerHTML = h + '<div class="tl-msg">Laddar...</div>'; return; }
-    h += '<div class="vk-card"><div class="fo-head">' + av(p.author, p.ak) + '<div><div class="fo-name">' + esc(p.author) + coTag(p.co) + '</div><div>' + esc(when(p.created_at)) + (p.edited ? ' · ändrad' : '') + '</div></div></div>' +
+    h += '<div class="vk-card"><div class="fo-head">' + av(sn(p.author), p.ak) + '<div><div class="fo-name">' + esc(sn(p.author)) + coTag(p.co) + '</div><div>' + esc(when(p.created_at)) + (p.edited ? ' · ändrad' : '') + '</div></div></div>' +
       '<div class="fo-title" style="font-size:1.15rem">' + esc(p.title) + '</div><div style="margin-bottom:.4rem">' + tags(p) + '</div>' +
       '<div class="fo-body">' + esc(p.body) + '</div>';
     var ph = st.photos[p.id];
@@ -275,7 +277,7 @@
     h += '<div class="vk-card"><div class="vk-lbl">Kommentarer</div>';
     if (!p.comment_list.length) h += '<div class="fo-ex">Inga kommentarer ännu.</div>';
     p.comment_list.forEach(function (c) {
-      h += '<div class="fo-com' + (c.hidden ? ' hid' : '') + '"><div class="fo-head">' + av(c.author, c.ak, true) + '<span class="fo-name">' + esc(c.author) + '</span>' + coTag(c.co) + '<span>· ' + esc(when(c.created_at)) + (c.edited ? ' · ändrad' : '') + '</span>' + (c.hidden ? ' <span class="fo-tag fo-hid">Dold</span>' : '') + '</div>';
+      h += '<div class="fo-com' + (c.hidden ? ' hid' : '') + '"><div class="fo-head">' + av(sn(c.author), c.ak, true) + '<span class="fo-name">' + esc(sn(c.author)) + '</span>' + coTag(c.co) + '<span>· ' + esc(when(c.created_at)) + (c.edited ? ' · ändrad' : '') + '</span>' + (c.hidden ? ' <span class="fo-tag fo-hid">Dold</span>' : '') + '</div>';
       if (st.editCom === c.id) {
         h += '<div class="vk-field" style="margin-top:.3rem"><textarea id="fo-ec" rows="3" maxlength="2000">' + esc(c.body) + '</textarea></div><div class="vk-iact"><button data-a="comcancel">Avbryt</button><button data-a="comsave" data-id="' + c.id + '">Spara</button></div>';
       } else {
@@ -445,7 +447,7 @@
       if (!fnv.trim()) { st.nameErr = ERR.need_first_name; st.view === 'post' ? drawPost() : drawList(); return; }
       el.disabled = true;
       rpc('forum_set_name', { p_first: fnv, p_last: lnv }).then(function (r) {
-        st.nameErr = null; st.flash = 'Tack! Du visas som ' + r.name + ' i forumet.';
+        st.nameErr = null; st.flash = 'Tack! Du visas som ' + sn(r.name) + ' i forumet.';
         if (st.view === 'post' && p) return loadPost(p.id).then(drawPost);
         return loadList().then(drawList);
       }).catch(function (e) { el.disabled = false; if (!fail(e)) { st.nameErr = errText(e); st.view === 'post' ? drawPost() : drawList(); } });

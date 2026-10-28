@@ -12,10 +12,16 @@
  * En dag där ingen rad syns för föraren visas inte, och ger ingen prick eller notis.
  */
 window.CHANGELOG = [
-  { datum: '2026-10-28', id: '2026-10-28u', rader: [
+  { datum: '2026-10-28', id: '2026-10-28w', rader: [
     ['Förbättrat', 'Notiser: när ett flyg eller tåg du bevakar ändrar status, eller när en ny förbokning du bevakar kommer in i Prognos, sparas notisen nu direkt under Notiser. Den finns där även om du missade den på telefonen eller har stängt av notiser i telefonen. Tryck på den för att komma dit den gäller: rätt flik i Ankomster (Flyg eller Tåg), eller rätt zon i Prognos med förbokningen markerad i schemat.'],
     ['Förbättrat', 'Notiser: den lilla rutan som visas en kort stund när en notis kommer går nu att trycka på (Visa ›). Den öppnar samma ställe som notisen, t.ex. Prognos på zonen där förbokningen kom in. Samma sak när du trycker på notisen i telefonen.'],
     ['Nytt', 'Notiser: en liten flik med en pil i högra kanten av skärmen visar att panelen finns. Tryck på fliken eller dra från kanten för att öppna den. En röd prick på fliken betyder att du har olästa notiser.']
+  ] },
+  { datum: '2026-10-28', id: '2026-10-28vb', rader: [
+    ['Ändrat', 'Namn visas nu kortare i hela appen: förnamn och första bokstaven i efternamnet, till exempel Christian P eller Bernt N. Det gäller i topplistor, forumet, kalendern, Bil & verkstad, Åkeridata och admin. Väldigt långa förnamn kortas av. Hela namnet syns bara i din egen profil.']
+  ] },
+  { datum: '2026-10-28', id: '2026-10-28va', rader: [
+    ['Förbättrat', 'Bil & verkstad: i tråden på en anmälan står det nu vem som skrev eller ändrade status, med namn (eller förar-id om namn saknas) och roll under, till exempel Förare, Ägare eller S admin. Förut kunde det stå Ägaren fast någon annan hade skrivit.']
   ] },
   { datum: '2026-10-28', id: '2026-10-28s', rader: [
     ['Förbättrat', 'Lönekoll och Körpassdata öppnas snabbare. Appen hämtar nu bara dina egna körningar, och hämtningen börjar redan när startsidan visas. Byter du sida används det som redan är hämtat, så sidan syns direkt och uppdateras sedan tyst i bakgrunden.']

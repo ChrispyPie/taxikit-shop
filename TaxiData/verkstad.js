@@ -95,6 +95,8 @@
 
   // ---------- hjälp ----------
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  // Kort namn för visning ("Christian P"), se namn.js
+  function sn(s) { return window.shortName ? window.shortName(s) : (s == null ? '' : String(s)); }
   function p2(n) { return String(n).padStart(2, '0'); }
   function sod(d) { var x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
   function ddmm(d) { return p2(d.getDate()) + '/' + p2(d.getMonth() + 1); }
@@ -424,6 +426,9 @@
     st.form = newForm(null); st.form.car = i.car_id; st.form.issue = i.id;
     draw(); window.scrollTo(0, 0);
   }
+  // Avsändare i ärendetråden: namn (eller förar-id) och under det användarkategorin
+  var WHO_ROLE = { superadmin: 'S admin', agare: 'Ägare', admin: 'Admin', standard: 'Förare', semester: 'Förare', avslutad: 'Förare' };
+  function whoRole(x) { return WHO_ROLE[x.cat] ? '<small style="display:block;font-size:.78em;font-weight:400;opacity:.75">' + WHO_ROLE[x.cat] + '</small>' : ''; }
   // Tråd på ärendet: meddelanden (car_issue_message) + statusändringar med ägarens kommentar, i tidsordning
   function issueThread(i) {
     var hs = (i.history || []).filter(function (u, k) { return !(k === 0 && u.status === 'ny' && !u.comment); });
@@ -435,10 +440,11 @@
       var t = esc(when(r.at));
       if (r.u) {
         var lbl = r.u.status === 'klar' ? '✅ Klar' : r.u.status === 'pagar' ? '🔄 Pågår' : '↩️ Öppnad igen';
-        return '<div class="vk-msg sys">' + lbl + ' · ' + t + (r.u.comment ? '<br>Ägaren: "' + esc(r.u.comment) + '"' : '') + '</div>';
+        if (!r.u.who) return '<div class="vk-msg sys">' + lbl + ' · ' + t + (r.u.comment ? '<br>Ägaren: "' + esc(r.u.comment) + '"' : '') + '</div>';
+        return '<div class="vk-msg sys">' + lbl + ' · ' + t + '<br><b>' + esc(sn(r.u.who)) + '</b>' + whoRole(r.u) + (r.u.comment ? '"' + esc(r.u.comment) + '"' : '') + '</div>';
       }
-      var m = r.m, who = m.mine ? 'Du' : m.role === 'owner' ? esc(m.who || 'Ägaren') + ' (ägare)' : esc(m.who || 'Föraren');
-      return '<div class="vk-msg ' + (m.mine ? 'own' : 'boss') + '"><span class="w"><b>' + who + '</b> · ' + t + '</span>' + esc(m.body) + '</div>';
+      var m = r.m, who = m.cat ? esc(sn(m.who)) : m.mine ? 'Du' : m.role === 'owner' ? esc(sn(m.who) || 'Ägaren') + ' (ägare)' : esc(sn(m.who) || 'Föraren');
+      return '<div class="vk-msg ' + (m.mine ? 'own' : 'boss') + '"><span class="w"><b>' + who + '</b> · ' + t + whoRole(m) + '</span>' + esc(m.body) + '</div>';
     }).join('') + '</div>';
   }
   function canMsg(i) { return admin() ? !i.mine : i.mine; }
@@ -452,7 +458,7 @@
     if (isNew) h += '<div class="bv-stopline" style="color:var(--primary)">💬 Nytt svar från ' + (admin() ? 'föraren' : 'ägaren') + '</div>';
     if (i.blocking && i.status !== 'klar') h += '<div class="bv-stopline">🛑 Bilen står</div>';
     if (i.body) h += '<div class="bv-text">' + esc(i.body) + '</div>';
-    h += '<div class="vk-imeta">' + esc(when(i.created_at)) + (i.mine ? ' · av dig' : i.reporter ? ' · av ' + esc(i.reporter_name ? i.reporter_name + ' (' + i.reporter + ')' : i.reporter) : '') +
+    h += '<div class="vk-imeta">' + esc(when(i.created_at)) + (i.mine ? ' · av dig' : i.reporter ? ' · av ' + esc(i.reporter_name ? sn(i.reporter_name) + ' (' + i.reporter + ')' : i.reporter) : '') +
       (i.photos ? ' · 📷 ' + i.photos : '') + (i.workshop_min ? ' · ⏱️ ' + dur(i.workshop_min) + ' verkstad' : '') + '</div>';
     if (i.status_comment && !thr) h += '<div class="vk-boss">' + esc(i.status_comment) + '</div>';
     h += thr;
@@ -649,7 +655,7 @@
       if (m.interval_months || m.interval_km) h += '<div class="vk-imeta">Upprepas ' + [m.interval_months ? 'var ' + m.interval_months + ' mån' : '', m.interval_km ? 'var ' + km(m.interval_km) : ''].filter(Boolean).join(' eller ') + '</div>';
     }
     if (m.note) h += '<div class="vk-icom">📝 ' + esc(m.note) + '</div>';
-    if (m.suggested_name && m.status === 'forslag') h += '<div class="vk-imeta">Förslag från ' + esc(m.suggested_name) + '</div>';
+    if (m.suggested_name && m.status === 'forslag') h += '<div class="vk-imeta">Förslag från ' + esc(sn(m.suggested_name)) + '</div>';
     h += photoBlock('maint_id', m.id) + taskLinks(m.tasks);
     if (st.mDone && st.mDone.id === m.id) return h + doneForm(m) + '</div>';
     var act = [], ph = st.photos['m' + m.id];
@@ -734,7 +740,7 @@
   function taskLinks(list) {
     if (!list || !list.length) return '';
     return list.map(function (t) {
-      return '<div class="bv-tlink">📋 Uppgift till ' + esc(t.name) + ' <span class="bv-st ' + tcls(t.status) + '">' + TSTATUS[t.status] + '</span></div>';
+      return '<div class="bv-tlink">📋 Uppgift till ' + esc(sn(t.name)) + ' <span class="bv-st ' + tcls(t.status) + '">' + TSTATUS[t.status] + '</span></div>';
     }).join('');
   }
   function tcls(s) { return s === 'bokad' ? 'pagar' : s; }
@@ -766,7 +772,7 @@
   }
   function driverOptions(sel) {
     return '<option value="">Välj förare…</option>' + ((st.bil && st.bil.drivers) || []).map(function (d) {
-      return '<option value="' + esc(d.id) + '"' + (d.id === sel ? ' selected' : '') + '>' + esc(d.name) + ' (' + esc(d.id) + ')</option>';
+      return '<option value="' + esc(d.id) + '"' + (d.id === sel ? ' selected' : '') + '>' + esc(sn(d.name)) + ' (' + esc(d.id) + ')</option>';
     }).join('');
   }
   function taskForm(f) {
@@ -804,7 +810,7 @@
       st.busy = true; f.msg = ''; draw();
       rpc('save_car_task', { p_id: f.id, p_issue_id: f.issue, p_maint_id: f.maint, p_car_id: f.car, p_assigned_to: f.to, p_title: f.title.trim(),
         p_instruction: f.ins.trim() || null, p_items: items })
-        .then(function (r) { st.busy = false; st.tf = null; flash(f.id ? 'Uppgiften är sparad.' : 'Uppgiften är skickad till ' + (r && r.assigned_name || 'föraren') + '.'); return load(); })
+        .then(function (r) { st.busy = false; st.tf = null; flash(f.id ? 'Uppgiften är sparad.' : 'Uppgiften är skickad till ' + (r && sn(r.assigned_name) || 'föraren') + '.'); return load(); })
         .catch(function (e) { st.busy = false; if (fail(e)) return; f.msg = errText(e); draw(); });
     };
   }
@@ -825,7 +831,7 @@
     var h = '<div class="vk-card bv-task' + (open ? '' : ' done') + (me && open ? ' mine' : '') + '" id="bt-' + t.id + '">' +
       '<div class="vk-ihead"><span class="vk-when">📋 ' + esc(t.title) + (t.car ? ' <small>· Bil ' + esc(t.car) + '</small>' : '') + '</span>' +
       '<span class="bv-st ' + tcls(t.status) + '">' + TSTATUS[t.status] + '</span></div>';
-    h += '<div class="vk-imeta">' + (own ? 'Till ' + esc(me ? 'dig' : t.assigned_name) + ' · ' : 'Från ägaren · ') + esc(when(t.created_at)) + '</div>';
+    h += '<div class="vk-imeta">' + (own ? 'Till ' + esc(me ? 'dig' : sn(t.assigned_name)) + ' · ' : 'Från ägaren · ') + esc(when(t.created_at)) + '</div>';
     if (t.instruction) h += '<div class="bv-text">' + esc(t.instruction) + '</div>';
     if (t.issue || t.maint) {
       var lk = t.issue ? 'issue_id' : 'maint_id', lo = t.issue || t.maint;
@@ -842,7 +848,7 @@
         return '<label class="bv-check bt-check' + (x.done ? ' on' : '') + '"><input type="checkbox" class="bt-item" data-id="' + x.id + '"' + (x.done ? ' checked' : '') + (can ? '' : ' disabled') + '> ' + esc(x.text) + '</label>';
       }).join('') + '</div>';
     }
-    if (!open) h += '<div class="vk-boss">✅ Klar ' + esc(when(t.done_at)) + (t.done_name ? ' av ' + esc(t.done_name) : '') + '</div>';
+    if (!open) h += '<div class="vk-boss">✅ Klar ' + esc(when(t.done_at)) + (t.done_name ? ' av ' + esc(sn(t.done_name)) : '') + '</div>';
     if (st.tr && st.tr.id === t.id) h += replyForm(t);
     else {
       var act = [], lo2 = t.issue || t.maint;
@@ -856,7 +862,7 @@
     }
     if (st.tlog[t.id]) {
       h += '<div class="bt-log">' + (t.log || []).map(function (l) {
-        return '<div><span>' + esc(when(l.at)) + '</span> ' + esc(l.by_name || '') + ': ' + esc(LOGTXT[l.action] || l.action) + (l.detail ? ' – ' + esc(l.detail) : '') + '</div>';
+        return '<div><span>' + esc(when(l.at)) + '</span> ' + esc(sn(l.by_name)) + ': ' + esc(LOGTXT[l.action] || l.action) + (l.detail ? ' – ' + esc(l.detail) : '') + '</div>';
       }).join('') + '</div>';
     }
     return h + '</div>';

@@ -9,6 +9,8 @@
  */
 (function () {
   'use strict';
+  // Kort namn för visning ("Christian P"), se namn.js
+  function sn(s) { return window.shortName ? window.shortName(s) : (s == null ? '' : String(s)); }
   var STATUS = { ny: 'Ny', last: 'Läst', planerad: 'Planerad', klar: 'Klar', inte_nu: 'Inte nu' };
   var MAX = 2000;
   var ERR = {
@@ -89,7 +91,7 @@
     else O.list.forEach(function (w) {
       var st = STATUS[w.status] ? w.status : 'ny';
       h += '<div class="onk-card" data-id="' + w.id + '"><div class="onk-top"><span>' + esc(when(w.created_at)) +
-        (w.author && !w.mine ? ' · ' + esc(w.author) : '') + '</span><span class="onk-chip ' + st + '">' + STATUS[st] + '</span></div>' +
+        (w.author && !w.mine ? ' · ' + esc(sn(w.author)) : '') + '</span><span class="onk-chip ' + st + '">' + STATUS[st] + '</span></div>' +
         '<div class="onk-txt">' + esc(w.body) + '</div>' +
         (w.reply ? '<div class="onk-rep"><span class="w">Svar från Christian</span>' + esc(w.reply) + '</div>' : '') +
         (w.mine && st === 'ny' ? '<button class="onk-del" onclick="ONSKEMAL_ADMIN.del(' + w.id + ')">Ta bort</button>' : '') + '</div>';

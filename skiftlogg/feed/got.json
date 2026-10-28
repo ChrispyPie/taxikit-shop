@@ -1,10 +1,10 @@
 {
   "airport": "GOT",
-  "updated": "2026-10-28T15:15:34+01:00",
-  "arrivalsUpdated": "2026-10-28T15:15:35+01:00",
+  "updated": "2026-10-28T16:01:05+01:00",
+  "arrivalsUpdated": "2026-10-28T16:01:08+01:00",
   "departuresUpdated": "2026-10-28T15:10:35+01:00",
   "yesterdayUpdated": "2026-10-28T05:10:31+01:00",
-  "tomorrowUpdated": "2026-10-28T15:01:04+01:00",
+  "tomorrowUpdated": "2026-10-28T16:01:10+01:00",
   "error": null,
   "arrivals": [
     {
@@ -1536,7 +1536,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-28T15:50:00Z",
-      "est": "2026-10-28T15:46:00Z",
+      "est": "2026-10-28T15:50:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "22",
@@ -1544,7 +1544,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 16:46"
+      "rawStatus": "Ankommer 16:50"
     },
     {
       "id": "AY863",
@@ -1574,7 +1574,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-28T15:20:00Z",
-      "est": "2026-10-28T15:34:00Z",
+      "est": "2026-10-28T15:31:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "21A",
@@ -1582,7 +1582,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 16:34"
+      "rawStatus": "Ankommer 16:31"
     },
     {
       "id": "LH2430",
@@ -1593,7 +1593,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-28T16:25:00Z",
-      "est": "2026-10-28T16:09:00Z",
+      "est": "2026-10-28T16:10:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "12",
@@ -1601,7 +1601,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 17:09"
+      "rawStatus": "Ankommer 17:10"
     },
     {
       "id": "LH814",
@@ -1647,18 +1647,18 @@
       "other": "Antalya",
       "iata": "",
       "airline": "Pegasus Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 15:31",
       "sched": "2026-10-28T14:05:00Z",
       "est": "2026-10-28T14:28:00Z",
-      "act": "",
+      "act": "2026-10-28T14:31:00Z",
       "terminal": "T1",
       "gate": "23",
       "baggage": "3",
-      "firstBag": "",
-      "firstBagEst": "",
+      "firstBag": "2026-10-28T14:48:44Z",
+      "firstBagEst": "2026-10-28T14:57:06Z",
       "lastBag": "",
-      "rawStatus": "Ankommer 15:28"
+      "rawStatus": "Första bagage · Landat 15:31"
     },
     {
       "id": "SK434",
@@ -1856,18 +1856,18 @@
       "other": "Stockholm ARN",
       "iata": "",
       "airline": "SAS Scandinavian Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 15:26",
       "sched": "2026-10-28T14:35:00Z",
       "est": "2026-10-28T14:25:00Z",
-      "act": "",
+      "act": "2026-10-28T14:26:00Z",
       "terminal": "T1",
       "gate": "15",
       "baggage": "2",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Ankommer 15:20"
+      "firstBag": "2026-10-28T14:42:08Z",
+      "firstBagEst": "2026-10-28T14:52:41Z",
+      "lastBag": "2026-10-28T14:45:03Z",
+      "rawStatus": "Landat 15:26 · Sista bagage"
     },
     {
       "id": "BLX234",
@@ -1878,7 +1878,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-28T19:40:00Z",
-      "est": "",
+      "est": "2026-10-28T20:00:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "19",
@@ -1886,7 +1886,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Ankommer 21:00"
     },
     {
       "id": "KL1239",
@@ -1961,8 +1961,8 @@
       "baggage": "1",
       "firstBag": "2026-10-28T14:05:58Z",
       "firstBagEst": "2026-10-28T14:18:20Z",
-      "lastBag": "",
-      "rawStatus": "Första bagage · Landat 14:53"
+      "lastBag": "2026-10-28T14:16:27Z",
+      "rawStatus": "Landat 14:53 · Sista bagage"
     },
     {
       "id": "FR4012",
@@ -2068,15 +2068,15 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-28T17:55:00Z",
-      "est": "",
+      "est": "2026-10-28T17:46:00Z",
       "act": "",
       "terminal": "T1",
-      "gate": "20A",
+      "gate": "21A",
       "baggage": "1",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Beräknad 18:46"
     },
     {
       "id": "TK1799",
@@ -2125,7 +2125,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-28T15:35:00Z",
-      "est": "2026-10-28T15:48:00Z",
+      "est": "2026-10-28T15:49:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "19",
@@ -2133,7 +2133,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 16:48"
+      "rawStatus": "Ankommer 16:49"
     },
     {
       "id": "LH2428",
@@ -2261,7 +2261,7 @@
       "est": "2026-10-28T18:57:00Z",
       "act": "",
       "terminal": "T1",
-      "gate": "23",
+      "gate": "22",
       "baggage": "4",
       "firstBag": "",
       "firstBagEst": "",
@@ -2296,7 +2296,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-28T16:25:00Z",
-      "est": "2026-10-28T16:16:00Z",
+      "est": "2026-10-28T16:17:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "17",
@@ -2304,7 +2304,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 17:16"
+      "rawStatus": "Ankommer 17:17"
     },
     {
       "id": "SK2908",
@@ -2391,7 +2391,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-28T16:40:00Z",
-      "est": "2026-10-28T16:33:00Z",
+      "est": "2026-10-28T16:23:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "13",
@@ -2399,7 +2399,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 17:33"
+      "rawStatus": "Beräknad 17:23"
     },
     {
       "id": "SK448",
