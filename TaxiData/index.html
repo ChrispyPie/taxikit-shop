@@ -91,7 +91,10 @@
     <header>
       <button onclick="goHome()" style="font-size:calc(20px * var(--font-scale, 1));">🏠</button>
       <h1 id="title">TaxiData</h1>
-      <button class="profile-btn" id="profile-btn" data-badge="profile" onclick="toggleProfile()" aria-label="Profil">👤</button>
+      <div class="hdr-right">
+        <button class="profile-btn notis-btn" id="notis-btn" data-badge="notiser" onclick="NOTIS.toggle()" aria-label="Notiser">🔔</button>
+        <button class="profile-btn" id="profile-btn" data-badge="profile" onclick="toggleProfile()" aria-label="Profil">👤</button>
+      </div>
     </header>
     <div class="profile-menu" id="profile-menu">
       <div id="full-name" style="font-weight:600; border-bottom:1px solid var(--c-e2e8f0); cursor:default;"></div>
@@ -138,16 +141,17 @@
   <script src="bevakning.js?v=zdm1"></script>
   <script src="topplistor.js?v=20261026zzsl1"></script>
   <script src="verkstad.js?v=am1"></script>
-  <script src="kalender.js?v=zdm1"></script>
+  <script src="kalender.js?v=20261028r"></script>
   <script src="hjalpbot.js?v=zzzda1"></script>
   <script src="profilbild.js?v=zdm1"></script>
-  <script src="forum.js?v=20261026zzdm1"></script>
+  <script src="forum.js?v=20261028r"></script>
   <script src="om-data.js?v=zzzda1"></script>
-  <script src="changelog.js?v=aq1"></script>
-  <script src="om.js?v=zzzda1"></script>
+  <script src="changelog.js?v=20261028r"></script>
+  <script src="om.js?v=20261028r"></script>
   <script src="lonekoll.js?v=20261026tm1"></script>
   <script src="prognos.js?v=zdm1"></script>
-  <script src="prognos-notis.js?v=20261026pg6"></script>
+  <script src="prognos-notis.js?v=20261028r"></script>
+  <script src="notis.js?v=20261028r"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -214,6 +218,7 @@
       localStorage.removeItem('taxi_driver');
       localStorage.removeItem('taxi_view');
       if (window.DEMO) DEMO.clear();
+      if (window.NOTIS) NOTIS.logout();
     }
 
     function showLoginError(msg) {
@@ -313,6 +318,7 @@
       driverId = localStorage.getItem('taxi_driver') || 'okänd';
       if (!(await loadDriverData())) return;
       document.getElementById('login-screen').style.display = 'none';
+      if (window.NOTIS) NOTIS.start();
       updateProfileReminder();
 
       var savedView = localStorage.getItem('taxi_view');
@@ -688,6 +694,7 @@
 
     // Telefonens/webbläsarens bakåtknapp
     window.addEventListener('popstate', function () {
+      if (window.NOTIS && NOTIS.onPop && NOTIS.onPop()) return;   // bakåt stänger notispanelen
       if (forcePwLock) {
         try { history.pushState({ view: 'nytt-losenord' }, ''); } catch (e) {}
         lockBlocked();

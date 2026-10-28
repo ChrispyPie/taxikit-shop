@@ -81,6 +81,10 @@
             var t = new Date(b.estimated_at);
             var key = tagOf(b.zone_id, b.category) + '@' + p2(t.getHours()) + p2(t.getMinutes());
             if (!fresh(key)) return;
+            // Spara i notisflödet (samma nyckel som en push om samma bokning, så den bara syns en gång)
+            if (window.NOTIS && NOTIS.add) NOTIS.add({ key: 'prognos|' + key + '|' + t.getFullYear() + p2(t.getMonth() + 1) + p2(t.getDate()), kind: 'prognos',
+              tag: tagOf(b.zone_id, b.category), title: 'Ny förbokning', body: (ZONE_SV[b.zone_id] || b.zone_name || b.zone_id) + ' · ' + (CAT_SV[b.category] || b.category) +
+              ' · ca ' + p2(t.getHours()) + ':' + p2(t.getMinutes()) });
             ring('Ny förbokning', (ZONE_SV[b.zone_id] || b.zone_name || b.zone_id) + ' · ' + (CAT_SV[b.category] || b.category) +
               ' · ca ' + p2(t.getHours()) + ':' + p2(t.getMinutes()));
           });

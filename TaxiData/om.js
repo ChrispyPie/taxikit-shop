@@ -57,6 +57,21 @@
   }
   function newest() { var L = window.CHANGELOG || []; return L.length ? nyhId(L[0]) : ''; }
   function hasUnseen(v) { var n = newest(); return !!n && n > seenMark(v); }
+  // För notisflödet (notis.js): finns det nyheter föraren inte sett? Ger senaste nyhetens id, datum och första raden.
+  O.unseen = function () {
+    var L = window.CHANGELOG || [];
+    if (!L.length || !hasUnseen(serverSeen !== undefined ? serverSeen : cacheGet())) return null;
+    var r = (L[0].rader || [])[0];
+    var p = String(L[0].datum || '').split('-');
+    var at = p.length === 3 ? new Date(+p[0], +p[1] - 1, +p[2], 12).toISOString() : new Date().toISOString();
+    return { id: nyhId(L[0]), at: at, text: r ? String(r[1]) : '' };
+  };
+  // "Markera alla som lästa" i notisflödet: räkna alla nyheter som sedda
+  O.markSeen = function () {
+    var n = newest(); if (!n) return;
+    cacheSet(n); serverSeen = n; showDot(n);
+    call('changelog_seen_set', { p_seen: n }).then(function (v) { if (v) { serverSeen = v; cacheSet(v); } }).catch(function () {});
+  };
   var serverSeen;           // undefined = inte hämtat än, null = aldrig sett
   function showDot(v) { if (window.setBadge) window.setBadge('nyheter', hasUnseen(v)); }
   // Anropas från startskärmen: visar pricken direkt från cachen och frågar sedan servern.
