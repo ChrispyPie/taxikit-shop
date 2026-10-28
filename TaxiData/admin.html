@@ -104,6 +104,7 @@
   <script src="demo.js?v=am1"></script>
   <script src="verkstad-admin.js?v=am1"></script>
   <script src="profilbild.js?v=zdm1"></script>
+  <script src="onskemal-admin.js?v=onk1"></script>
   <script>
     const APP_VERSION = '1.0.26';
     console.log('Admin version:', APP_VERSION);
@@ -117,6 +118,7 @@
       { id: 'bilar', icon: '🚕', label: 'Bilar' },
       { id: 'verkstad', icon: '🛠️', label: 'Bil & verkstad' },
       { id: 'chaufforer', icon: '👥', label: 'Chaufförer' },
+      { id: 'onskemal', icon: '💡', label: 'Önskemål och idéer' },
       // Statistik borttagen 2026-10-25 (tom platshållare): { id: 'statistik', icon: '📈', label: 'Statistik' },
       
     ];
@@ -172,7 +174,7 @@
       return isOwner() || AKERI_EXTRA_ROLES.includes(getMyCategory());
     }
 
-    const COMPANY_VIEWS = ['akeridata', 'bilar', 'verkstad'];
+    const COMPANY_VIEWS = ['akeridata', 'bilar', 'verkstad', 'onskemal'];   // onskemal: ägaren skriver till Christian
 
     function isSuperAdmin() {
       return getMyCategory() === 'superadmin';
@@ -517,6 +519,10 @@
         title.textContent = 'Bil & verkstad';
         if (!canSeeAkeridata()) content.innerHTML = '<div class="section"><p style="padding:16px;">Ingen behörighet</p></div>';
         else VERKSTAD_ADMIN.render(content);
+      } else if (path[0].id === 'onskemal') {
+        title.textContent = 'Önskemål och idéer';
+        if (!canSeeAkeridata()) content.innerHTML = '<div class="section"><p style="padding:16px;">Ingen behörighet</p></div>';
+        else ONSKEMAL_ADMIN.render(content);
       } else if (path[0].id === 'chaufforer') {
         if (showLog) {
           title.textContent = 'Logg';
@@ -1450,6 +1456,8 @@
         case 'bil_task_reply': return who + ' svarade på uppgiften "' + (d.title || '') + '"' + (d.booked_at ? ' – bokad ' + new Date(d.booked_at).toLocaleString('sv-SE', { dateStyle: 'short', timeStyle: 'short' }) : '') + (d.place ? ', ' + d.place : '');
         case 'bil_task_done': return who + ' markerade uppgiften "' + (d.title || '') + '" klar' + (d.car ? ' (bil ' + d.car + ')' : '') + (d.comment ? ' – "' + d.comment + '"' : '');
         case 'bil_prefs': return who + ' ändrade sina notisval för Bil & verkstad';
+        case 'dev_wish_add': return who + ' skickade ett önskemål om appen' + (d.text ? ' – "' + d.text + '"' : '');
+        case 'dev_wish_delete': return who + ' tog bort ett önskemål om appen' + (d.text ? ' – "' + d.text + '"' : '');
         case 'category_change': return who + ' ändrade kategori på ' + e.target_id + ' till ' + catName(d.to);
         default: return who + ': ' + e.action + ' ' + (e.target_id || '');
       }
@@ -1510,6 +1518,7 @@
       selectedDay = null;
       selectedCar = null;
       if (id === 'verkstad') { VERKSTAD_ADMIN.load(); return; }
+      if (id === 'onskemal') { if (canSeeAkeridata()) { ONSKEMAL_ADMIN.load(); return; } }
       render();
     }
 
