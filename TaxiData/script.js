@@ -473,8 +473,9 @@ function render() {
   const totalKm = S ? Number(S.km) : shifts.reduce((s, sh) => s + parseFloat((sh.km || '0').replace(',', '.')), 0);
   const arbetad = formatTime(totalMinutes);
   const antalSkift = shifts.length;
-  const antalForare = new Set(shifts.map(s => s.forar || defForar())).size;
-  const antalBilar = new Set(shifts.map(s => s.taxi).filter(Boolean)).size;
+  const akS = P && P.scope ? P.scope : 'akeri';   // Åkeridata: vald väljare (akeri/bil/forare)
+  const antalForare = akS === 'bil' && P.breakdown ? P.breakdown.length : new Set(shifts.map(s => s.forar || defForar())).size;
+  const antalBilar = akS === 'forare' && P.breakdown ? P.breakdown.length : new Set(shifts.map(s => s.taxi).filter(Boolean)).size;
 
   const kort = S ? Number(S.kort) : sumByType(trips, '160');
   const kredit = S ? Number(S.kredit) : sumByType(trips, '283');
@@ -495,7 +496,9 @@ function render() {
   // Åkeriet: mål per bil × antal bilar. Egen period: dagsmålet × antal dagar.
   const periodDays = isPeriod ? daysBetween(customRange.from, customRange.to) : 1;
   const perCar = companyGoals ? (goalTab === 'ar' ? companyGoals.per_car_month * 12 : goalTab === 'manad' ? companyGoals.per_car_month : goalTab === 'vecka' ? companyGoals.per_car_week : companyGoals.per_car_day) : 0;
-  const goal = COMPANY ? perCar * (companyGoals ? companyGoals.cars : 0) * periodDays : (goals[goalTab] || 4000);
+  // Bil: målet för en bil. Chaufför: inget mål (målen gäller per bil).
+  const goalCars = akS === 'bil' ? 1 : (companyGoals ? companyGoals.cars : 0);
+  const goal = COMPANY ? perCar * goalCars * periodDays : (goals[goalTab] || 4000);
   const diff = inkort - goal;
   const inkortPerSkift = antalSkift ? Math.round(inkort / antalSkift) : 0;
   const remaining = Math.max(0, goal - inkort);
@@ -505,17 +508,17 @@ function render() {
   // Förare: Mål/Diff per dag/vecka/månad (inte för egen period).
   // Åkeriet: Mål/Diff alltid när målen kunde hämtas (egen period = dagsmål × dagar).
   // Antal bilar = bilar registrerade under Bilar (admin). 0 bilar => tips i stället för mål 0.
-  const noCars = COMPANY && !!companyGoals && !(companyGoals.cars > 0);
-  const showGoal = COMPANY ? !!companyGoals && !noCars : !isPeriod;
+  const noCars = COMPANY && akS === 'akeri' && !!companyGoals && !(companyGoals.cars > 0);
+  const showGoal = COMPANY ? !!companyGoals && !noCars && akS !== 'forare' : !isPeriod;
   const remainingDays = COMPANY && !isPeriod && currentTab !== 'dag' && isCurrent ? getRemainingShifts(currentDate, currentTab) : 0;
 
   let timmarSubs = '';
   if (COMPANY || isPeriod || currentTab !== 'dag' || shifts.length > 1) {
     timmarSubs = `
       <div class="sub"><span>Antal skift</span><span>${antalSkift} st</span></div>`;
-    if (COMPANY && isOwnerRole()) timmarSubs += `
+    if (COMPANY && (akS === 'bil' || (akS === 'akeri' && isOwnerRole()))) timmarSubs += `
       <div class="sub"><span>Antal förare</span><span>${antalForare} st</span></div>`;
-    if (COMPANY) timmarSubs += `
+    if (COMPANY && akS !== 'bil') timmarSubs += `
       <div class="sub"><span>Antal bilar</span><span>${antalBilar} st</span></div>`;
     timmarSubs += `
       <div class="sub"><span>Kr/timme</span><span>${formatSEK(krPerTimme)}</span></div>`;
@@ -575,7 +578,8 @@ function render() {
   if (showGoal && COMPANY) {
     // Ägaren trycker på Mål för att ändra; övriga kan fälla ut och se hur målet räknas.
     const canEdit = isOwnerRole() && companyGoals.can_edit;
-    const how = isPeriod ? `${formatSEK(companyGoals.per_car_day)} × ${companyGoals.cars} bilar × ${periodDays} dagar` : `${formatSEK(perCar)} × ${companyGoals.cars} bilar`;
+    const carsTxt = goalCars === 1 ? '1 bil' : goalCars + ' bilar';
+    const how = isPeriod ? `${formatSEK(companyGoals.per_car_day)} × ${carsTxt} × ${periodDays} dagar` : `${formatSEK(perCar)} × ${carsTxt}`;
     html += canEdit
       ? `<div class="stat-row" id="goal-row" onclick="openGoalModal()"><span class="toggle">✎</span><span class="label">Mål</span><span class="value" style="border-bottom: 1px solid var(--c-cbd5e0); padding-bottom: 2px;">− ${formatSEK(goal)}</span></div>
     <div class="sub visible"><span>Per bil</span><span>${how}</span></div>`
@@ -587,6 +591,7 @@ function render() {
     <div class="stat-row" data-key="diff" onclick="toggle(this)"><span class="toggle">${diffSubs ? '+' : ''}</span><span class="label">Diff</span><span class="value" style="color:${diffColor}; font-weight:700;">${formatSEK(diff)}</span></div>
     ${diffSubs}`;
   html += `</div>`;
+  html += akBreakdownHtml(P);
 
   if (currentTab === 'dag' && !COMPANY) {
     // En förares dag: lista med alla körningar
@@ -708,13 +713,33 @@ async function companyFetch(key, from, to) {
     parts.push([new Date(a), b < to ? b : startOfDay(to)]);
     a = new Date(b); a.setDate(a.getDate() + 1);
   }
-  const rs = await Promise.all(parts.map(([a, b]) => companyRpc('get_company_period',
-    { p_from: isoDay(a), p_to: isoDay(b), p_detail: days <= COMPANY_DETAIL_DAYS })));
+  const sc = akScopeNow();
+  const one = ([a, b]) => {
+    const base = { p_from: isoDay(a), p_to: isoDay(b), p_detail: days <= COMPANY_DETAIL_DAYS };
+    if (companyApi.noScoped) return companyRpc('get_company_period', base);
+    return companyRpc('get_company_period_scoped', Object.assign(base, { p_scope: sc.scope, p_id: sc.id }));
+  };
+  let rs;
+  try { rs = await Promise.all(parts.map(one)); }
+  catch (e) {
+    // Servern saknar den nya funktionen (äldre databas): visa hela åkeriet som förut, utan väljare.
+    if (!companyApi.noScoped && sc.scope === 'akeri' && /HTTP 404/.test(e.message)) {
+      companyApi.noScoped = true; akSetupPicker();
+      rs = await Promise.all(parts.map(one));
+    } else if (sc.scope !== 'akeri' && /HTTP 4/.test(e.message)) {
+      // Bilen/föraren går inte att visa (t.ex. ingen behörighet): tillbaka till hela åkeriet.
+      akSetScope('akeri', null);
+      throw e;
+    } else throw e;
+  }
   const totals = {};
   rs.forEach(r => Object.keys(r.totals || {}).forEach(k => { totals[k] = (totals[k] || 0) + Number(r.totals[k] || 0); }));
   const res = { totals, shifts: [].concat(...rs.map(r => (r.shifts || []).map(companyShift))),
                 loose: [].concat(...rs.map(r => r.loose || [])), last_updated: rs[rs.length - 1].last_updated,
-                fresh: rs[rs.length - 1].fresh, at: Date.now() };
+                fresh: rs[rs.length - 1].fresh, at: Date.now(),
+                scope: sc.scope, id: sc.id, view: rs[0].view,
+                breakdown: akMergeBreakdown(rs), idle: akMergeIdle(rs) };
+  if (rs[rs.length - 1].choices) { companyApi.choices = rs[rs.length - 1].choices; akSetupPicker(); }
   companyApi.cache.set(key, res);
   if (companyApi.cache.size > 40) companyApi.cache.delete(companyApi.cache.keys().next().value);
   companyApi.ok = true;
@@ -723,13 +748,15 @@ async function companyFetch(key, from, to) {
 }
 // Ger { res } när perioden finns, annars { html } (fel) eller {} (hämtas, visa förra bilden nedtonad).
 function companyPeriod(from, to) {
-  const key = isoDay(from) + '|' + isoDay(to);
+  const sc = akScopeNow();
+  const key = sc.scope + '|' + (sc.id || '') + '|' + isoDay(from) + '|' + isoDay(to);
   const hit = companyApi.cache.get(key);
   const fresh = hit && Date.now() - hit.at < COMPANY_CACHE_MS;
   if (!fresh && !companyApi.pending[key] && !companyApi.failed[key]) {
     companyApi.pending[key] = true;
     companyFetch(key, from, to).then(() => { delete companyApi.pending[key]; render(); }, () => {
       delete companyApi.pending[key];
+      if (key !== companyPeriodKeyNow(from, to)) { render(); return; }   // väljaren återställdes: hämta åkeriet
       if (!companyApi.ok) {
         // Första hämtningen gick inte: använd det gamla sättet (hela året) så att sidan ändå fungerar.
         companyApi.legacy = true;
@@ -753,6 +780,134 @@ function companyPeriod(from, to) {
   if (dash && dash.querySelector('.stat-row') && !dash.querySelector('.load-error') && !dash.querySelector('.company-loading')) return {};
   return { html: '<div class="section arkiv-panel company-loading"><div class="arkiv-loading" role="status" aria-live="polite"><span class="arkiv-spin" aria-hidden="true"></span>Hämtar siffror…</div></div>' };
 }
+function companyPeriodKeyNow(from, to) {
+  const sc = akScopeNow();
+  return sc.scope + '|' + (sc.id || '') + '|' + isoDay(from) + '|' + isoDay(to);
+}
+
+// ---- Åkeridata: väljare Åkeri / Bil / Chaufför (uppe till höger) ----
+// Siffrorna, målen och passlistan visas för hela åkeriet, en bil eller en förare. Valet sparas i telefonen.
+// Servern (get_company_period_scoped) kontrollerar behörigheten: ägaren ser allt med namn, S admin ser
+// bilar utan förarnas namn och bara sig själv som förare.
+const AK_SCOPE_KEY = 'taxi_akeri_scope';
+let akScope = (function () {
+  try {
+    const v = JSON.parse(localStorage.getItem(AK_SCOPE_KEY) || 'null');
+    if (v && (v.scope === 'bil' || v.scope === 'forare') && v.id) return { scope: v.scope, id: String(v.id) };
+  } catch (e) {}
+  return { scope: 'akeri', id: null };
+})();
+function akScopeNow() { return companyApi.noScoped ? { scope: 'akeri', id: null } : akScope; }
+function akSetScope(scope, id) {
+  akScope = (scope === 'bil' || scope === 'forare') && id ? { scope, id: String(id) } : { scope: 'akeri', id: null };
+  try { localStorage.setItem(AK_SCOPE_KEY, JSON.stringify(akScope)); } catch (e) {}
+  akSetupPicker();
+}
+function akCarLabel(c) { return c.taxi + (c.in_register ? '' : ' (ej i bilregistret)'); }
+function akDriverLabel(d) {
+  if (d.id === currentDriver && !d.name) return 'Jag (' + d.id + ')';
+  return d.name ? d.name + ' (' + d.id + ')' : d.id;
+}
+function akOptions(scope) {
+  const ch = companyApi.choices || {};
+  const cur = akScope.scope === scope ? akScope.id : null;
+  const opt = (v, t) => `<option value="${escHtml(v)}"${v === cur ? ' selected' : ''}>${escHtml(t)}</option>`;
+  const grp = (label, items) => items.length ? `<optgroup label="${escHtml(label)}">${items.join('')}</optgroup>` : '';
+  let html = '', ids = [];
+  if (scope === 'bil') {
+    const cars = ch.cars || [];
+    ids = cars.map(c => c.taxi);
+    html = grp('I bilregistret', cars.filter(c => c.in_register).map(c => opt(c.taxi, akCarLabel(c))))
+         + grp('Ej i bilregistret', cars.filter(c => !c.in_register).map(c => opt(c.taxi, akCarLabel(c))));
+  } else {
+    const drv = (ch.drivers || []).slice().sort((a, b) => akDriverLabel(a).localeCompare(akDriverLabel(b), 'sv'));
+    ids = drv.map(d => d.id);
+    html = grp('Aktiva förare', drv.filter(d => d.active).map(d => opt(d.id, akDriverLabel(d))))
+         + grp('Har kört i perioden', drv.filter(d => !d.active).map(d => opt(d.id, akDriverLabel(d))));
+  }
+  if (cur && !ids.includes(cur)) html = opt(cur, cur) + html;
+  return { html, first: ids[0] || null };
+}
+function akSetupPicker() {
+  const label = document.getElementById('driver-label');
+  const row = document.getElementById('ak-pick-row');
+  if (!COMPANY || !label) return;
+  if (companyApi.noScoped || companyApi.legacy) { label.innerHTML = ''; if (row) row.classList.add('hidden'); return; }
+  let sel = document.getElementById('ak-scope');
+  if (!sel) {
+    label.innerHTML = '<select id="ak-scope" aria-label="Visa statistik för">' +
+      '<option value="akeri">Åkeri</option><option value="bil">Bil</option><option value="forare">Chaufför</option></select>';
+    sel = document.getElementById('ak-scope');
+    sel.onchange = e => {
+      const scope = e.target.value;
+      if (scope === 'akeri') akSetScope('akeri', null);
+      else {
+        const o = akOptions(scope);
+        if (!o.first) { e.target.value = akScope.scope; return; }
+        akSetScope(scope, o.first);
+      }
+      render();
+    };
+  }
+  sel.value = akScope.scope;
+  if (!row) return;
+  if (akScope.scope === 'akeri') { row.classList.add('hidden'); return; }
+  row.classList.remove('hidden');
+  document.getElementById('ak-pick-label').textContent = akScope.scope === 'bil' ? 'Bil' : 'Chaufför';
+  const pick = document.getElementById('ak-pick');
+  pick.setAttribute('aria-label', akScope.scope === 'bil' ? 'Välj bil' : 'Välj chaufför');
+  pick.innerHTML = akOptions(akScope.scope).html;
+  pick.value = akScope.id;
+  pick.onchange = e => { akSetScope(akScope.scope, e.target.value); render(); };
+}
+// Långa egna perioder hämtas i bitar: lägg ihop uppdelningen per förare/bil.
+function akMergeBreakdown(rs) {
+  const out = new Map();
+  let anonSplit = false;
+  rs.forEach(r => (r.breakdown || []).forEach(b => {
+    const k = b.taxi != null ? 't' + b.taxi : b.forar != null ? 'f' + b.forar : 'a' + b.anon_nr;
+    if (b.anon_nr != null && rs.length > 1) anonSplit = true;
+    const o = out.get(k);
+    if (!o) { out.set(k, Object.assign({}, b)); return; }
+    ['shifts', 'minutes', 'km', 'antal', 'inkort'].forEach(f => { o[f] = (Number(o[f]) || 0) + (Number(b[f]) || 0); });
+  }));
+  const list = Array.from(out.values()).sort((a, b) => (Number(b.inkort) || 0) - (Number(a.inkort) || 0));
+  return anonSplit ? null : list;   // "Förare N" kan inte läggas ihop mellan år
+}
+function akMergeIdle(rs) {
+  const xs = rs.map(r => r.idle).filter(Boolean);
+  if (!xs.length) return null;
+  return { days: xs.reduce((a, x) => a + (Number(x.days) || 0), 0), active: xs.reduce((a, x) => a + (Number(x.active) || 0), 0),
+           idle: xs.reduce((a, x) => a + (Number(x.idle) || 0), 0), first_day: xs[0].first_day,
+           from: xs[0].from, to: xs[xs.length - 1].to };
+}
+function akShortDay(iso) { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || ''); return m ? m[3] + '/' + m[2] + '-' + m[1].slice(2) : ''; }
+function akBreakdownHtml(P) {
+  if (!P || P.scope === 'akeri') return '';
+  const bil = P.scope === 'bil';
+  const title = bil ? 'Förare som kört bilen' : 'Bilar föraren kört';
+  if (P.breakdown === null) return `<div class="section"><div class="stat-row ak-bd-title"><span class="toggle"></span><span class="label">${title}</span><span class="value"></span></div>
+    <div class="sub visible"><span>Visas för perioder upp till ett år</span><span></span></div></div>`;
+  const rows = (P.breakdown || []).map(b => {
+    const name = bil ? (b.name ? b.name + ' (' + b.forar + ')' : b.forar != null ? (b.forar === currentDriver ? 'Jag (' + b.forar + ')' : b.forar) : 'Förare ' + b.anon_nr)
+                     : b.taxi + (b.in_register === false ? ' (ej i bilregistret)' : '');
+    const key = 'bd:' + P.scope + ':' + (bil ? (b.forar || 'a' + b.anon_nr) : b.taxi);
+    return `<div class="stat-row" data-key="${escHtml(key)}" onclick="toggle(this)"><span class="toggle">+</span><span class="label">${escHtml(name)}</span><span class="value">${formatSEK(Number(b.inkort) || 0)}</span></div>
+      <div class="sub"><span>Timmar</span><span>${formatTime(Number(b.minutes) || 0)}</span></div>
+      <div class="sub"><span>Antal skift</span><span>${Number(b.shifts) || 0} st</span></div>
+      <div class="sub"><span>Antal körningar</span><span>${Number(b.antal) || 0} st</span></div>
+      <div class="sub"><span>Körda km</span><span>${(Number(b.km) || 0).toFixed(1)} km</span></div>`;
+  }).join('');
+  let html = `<div class="section"><div class="stat-row ak-bd-title"><span class="toggle"></span><span class="label">${title}</span><span class="value">${(P.breakdown || []).length} st</span></div>
+    ${rows || '<div class="sub visible"><span>Inga körningar i perioden</span><span></span></div>'}</div>`;
+  const I = P.idle;
+  if (bil && I && I.days > 0) html += `<div class="section">
+    <div class="stat-row" data-key="ak-idle" onclick="toggle(this)"><span class="toggle">+</span><span class="label">Dagar utan körning</span><span class="value">${I.idle} av ${I.days}</span></div>
+    <div class="sub"><span>Dagar med körning</span><span>${I.active} st</span></div>
+    <div class="sub"><span>Räknat</span><span>${escHtml(akShortDay(I.from) + ' – ' + akShortDay(I.to))}</span></div></div>`;
+  return html;
+}
+
 function companyRetry(btn) {
   if (btn) { btn.disabled = true; btn.textContent = 'Hämtar...'; }
   companyApi.failed = {};

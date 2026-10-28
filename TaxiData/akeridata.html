@@ -12,6 +12,9 @@
     header h1 { position: absolute; left: 50%; transform: translateX(-50%); }
     .hidden { display: none !important; }
     #denied { text-align: center; padding: 48px 16px; }
+    #ak-pick-row { display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; padding: 0.4rem 1rem 0; font-size: 0.85rem; }
+    #ak-pick-row select { max-width: 70%; font-size: 0.85rem; padding: 0.3rem 0.4rem; border-radius: 6px; border: 1px solid var(--c-cbd5e0); background: var(--surface); color: inherit; }
+    .ak-bd-title .label { font-weight: 600; }
     #denied button { margin-top: 16px; padding: 0.6rem 1.2rem; border-radius: 8px; border: 2px solid var(--primary); background: var(--surface); color: var(--primary); }
   </style>
 </head>
@@ -28,6 +31,7 @@
       <h1>Åkeridata</h1>
       <span id="driver-label"></span>
     </header>
+    <div id="ak-pick-row" class="hidden"><label for="ak-pick" id="ak-pick-label">Bil</label><select id="ak-pick"></select></div>
     <div class="controls">
       <div class="tabs">
         <button class="tab active" data-tab="dag">Dag</button>
@@ -50,7 +54,7 @@
 
   <script>window.TAXI_MODE = 'company';</script>
   <script src="serverstatus.js?v=20261026tm1"></script>
-  <script src="script.js?v=zzzda2"></script>
+  <script src="script.js?v=zzzav1"></script>
   <script src="demo.js?v=zzzda1"></script>
   <script>
     // Åkeridata är för ägaren. TILLFÄLLIGT får även S admin se åkeriets nivå (utan förar-id)
@@ -80,6 +84,7 @@
       document.getElementById('dashboard-view').classList.remove('hidden');
       syncTabs();
       if (window.initServerStatus) initServerStatus('server-status');
+      akSetupPicker();   // väljaren Åkeri / Bil / Chaufför uppe till höger
       await loadData();
       render();
     })();
