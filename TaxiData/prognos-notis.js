@@ -52,9 +52,10 @@
     if (st.recent[key]) return false;
     st.recent[key] = now; return true;
   }
-  function ring(title, body) {
+  // item: notisen (key, tag, target) -> rutan som ploppar upp går att trycka på och öppnar rätt zon (t551u)
+  function ring(title, body, item) {
     var text = title + (body ? ' – ' + body : '');
-    if (window.BEVAKNING && BEVAKNING.ring) BEVAKNING.ring(text);
+    if (window.BEVAKNING && BEVAKNING.ring) BEVAKNING.ring(text, item);
     else if (window.showToast) window.showToast(text);
     if (window.PROGNOS && PROGNOS.refresh) { try { PROGNOS.refresh(); } catch (e) {} }
   }
@@ -81,12 +82,15 @@
             var t = new Date(b.estimated_at);
             var key = tagOf(b.zone_id, b.category) + '@' + p2(t.getHours()) + p2(t.getMinutes());
             if (!fresh(key)) return;
-            // Spara i notisflödet (samma nyckel som en push om samma bokning, så den bara syns en gång)
-            if (window.NOTIS && NOTIS.add) NOTIS.add({ key: 'prognos|' + key + '|' + t.getFullYear() + p2(t.getMonth() + 1) + p2(t.getDate()), kind: 'prognos',
-              tag: tagOf(b.zone_id, b.category), title: 'Ny förbokning', body: (ZONE_SV[b.zone_id] || b.zone_name || b.zone_id) + ' · ' + (CAT_SV[b.category] || b.category) +
-              ' · ca ' + p2(t.getHours()) + ':' + p2(t.getMinutes()) });
-            ring('Ny förbokning', (ZONE_SV[b.zone_id] || b.zone_name || b.zone_id) + ' · ' + (CAT_SV[b.category] || b.category) +
-              ' · ca ' + p2(t.getHours()) + ':' + p2(t.getMinutes()));
+            // Spara i notisflödet (samma nyckel som en push om samma bokning, så den bara syns en gång).
+            // target = vart notisen leder: zon, kategori, tid och bokningens id (markeras i schemat).
+            var body = (ZONE_SV[b.zone_id] || b.zone_name || b.zone_id) + ' · ' + (CAT_SV[b.category] || b.category) +
+              ' · ca ' + p2(t.getHours()) + ':' + p2(t.getMinutes());
+            var item = { key: 'prognos|' + key + '|' + t.getFullYear() + p2(t.getMonth() + 1) + p2(t.getDate()), kind: 'prognos',
+              tag: tagOf(b.zone_id, b.category), title: 'Ny förbokning', body: body,
+              target: { zone: String(b.zone_id), cat: b.category, at: b.estimated_at, id: b.id != null ? String(b.id) : undefined } };
+            if (window.NOTIS && NOTIS.add) NOTIS.add(item);
+            ring('Ny förbokning', body, item);
           });
         });
       })
@@ -95,13 +99,14 @@
   }
 
   // Push som kom medan appen är öppen (sw.js → 'bev-push'). Anropas från bevakning.js för prognos-taggar.
-  N.onPush = function (msg) {
+  N.onPush = function (msg, nkey) {
     if (!loggedIn()) return;
     msg = msg || {};
     var m = /ca (\d\d):(\d\d)/.exec(msg.body || '');
     var key = String(msg.tag || 'prognos') + (m ? '@' + m[1] + m[2] : '@' + Date.now());
     if (!fresh(key)) return;
-    ring(msg.title || 'Ny förbokning', msg.body || '');
+    ring(msg.title || 'Ny förbokning', msg.body || '',
+      { key: nkey || msg.nkey || '', kind: 'prognos', tag: msg.tag || 'prognos', title: msg.title || '', body: msg.body || '', target: msg.target || null });
   };
   // Prognos-sidan anropar detta när bevakningar ändras
   N.watchesChanged = function (list) { st.watches = list || []; st.watchesAt = Date.now(); };
@@ -109,17 +114,19 @@
   N.tick = tick;
   N._state = st;
 
-  // Notisklick på en prognos-notis: öppna Prognos
+  // Notisklick på en prognos-notis: öppna Prognos – på rätt zon med förbokningen markerad
+  // (?sida=prognos&zon=161&kat=app&tid=...&bok=..., t551u)
   try {
-    if (new URLSearchParams(location.search).get('sida') === 'prognos') {
+    var q0 = new URLSearchParams(location.search);
+    if (q0.get('sida') === 'prognos') {
+      if (q0.get('zon') && window.PROGNOS && PROGNOS.focus) {
+        PROGNOS.focus({ zone: q0.get('zon'), cat: q0.get('kat') || null, at: q0.get('tid') || null, id: q0.get('bok') || null });
+      }
       localStorage.setItem('taxi_view', 'prognos');
       history.replaceState(null, '', location.pathname);
     }
   } catch (e) {}
-  if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', function (e) {
-    if (e.data && e.data.type === 'bev-open' && String(e.data.tag || '').indexOf('prognos') === 0 &&
-        typeof window.openItem === 'function' && window.PROGNOS && loggedIn()) window.openItem(PROGNOS.id);
-  });
+  // Tryck på en push medan appen är öppen ('bev-open') sköts av notis.js (NOTIS.goTo)
 
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') tick(); });
   st.timer = setInterval(tick, POLL_MS);

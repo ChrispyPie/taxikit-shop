@@ -13,7 +13,8 @@
  */
 window.CHANGELOG = [
   { datum: '2026-10-28', id: '2026-10-28u', rader: [
-    ['Förbättrat', 'Notiser: när ett flyg eller tåg du bevakar ändrar status, eller när en ny förbokning du bevakar kommer in i Prognos, sparas notisen nu direkt under Notiser. Den finns där även om du missade den på telefonen eller har stängt av notiser i telefonen. Tryck på den för att komma till Ankomster eller Prognos.'],
+    ['Förbättrat', 'Notiser: när ett flyg eller tåg du bevakar ändrar status, eller när en ny förbokning du bevakar kommer in i Prognos, sparas notisen nu direkt under Notiser. Den finns där även om du missade den på telefonen eller har stängt av notiser i telefonen. Tryck på den för att komma dit den gäller: rätt flik i Ankomster (Flyg eller Tåg), eller rätt zon i Prognos med förbokningen markerad i schemat.'],
+    ['Förbättrat', 'Notiser: den lilla rutan som visas en kort stund när en notis kommer går nu att trycka på (Visa ›). Den öppnar samma ställe som notisen, t.ex. Prognos på zonen där förbokningen kom in. Samma sak när du trycker på notisen i telefonen.'],
     ['Nytt', 'Notiser: en liten flik med en pil i högra kanten av skärmen visar att panelen finns. Tryck på fliken eller dra från kanten för att öppna den. En röd prick på fliken betyder att du har olästa notiser.']
   ] },
   { datum: '2026-10-28', id: '2026-10-28s', rader: [

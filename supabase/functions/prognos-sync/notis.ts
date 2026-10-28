@@ -5,6 +5,24 @@
 // OBS: samma fil finns i bevakning/ och prognos-sync/ – ändra båda.
 
 export type NotisMsg = { title: string; body: string; tag: string };
+// Vart notisen leder (t551u). Prognos: zon, kategori, förbokningens tid (ISO) och id.
+export type NotisTarget = { zone?: string; cat?: string; at?: string; id?: string };
+
+// Länken som pushen öppnar (sw.js notificationclick). Samma sidor som i notisflödet.
+//  flyg/tåg -> Ankomster på rätt flik, prognos -> Prognos på rätt zon (och förbokningen markerad)
+export function notisUrl(msg: NotisMsg, target?: NotisTarget | null): string {
+  const kind = notisKind(msg.tag);
+  if (kind === "flyg" || kind === "tag") return "/TaxiData/?sida=ankomster&flik=" + kind;
+  if (kind === "prognos") {
+    const q = new URLSearchParams({ sida: "prognos" });
+    if (target?.zone) q.set("zon", target.zone);
+    if (target?.cat) q.set("kat", target.cat);
+    if (target?.at) q.set("tid", target.at);
+    if (target?.id) q.set("bok", target.id);
+    return "/TaxiData/?" + q.toString();
+  }
+  return "/TaxiData/";
+}
 
 function sthlmYmd(ms: number): string {
   // sv-SE ger "2026-10-28"
@@ -35,14 +53,17 @@ type Rpc = { rpc: (fn: string, args: Record<string, unknown>) => PromiseLike<{ d
 
 // Sparar notisen (en gång per förare och nyckel). Testnotiser sparas inte.
 // Fel här får aldrig stoppa själva pushen.
-export async function saveNotice(sb: Rpc, driver: string, msg: NotisMsg, key: string): Promise<boolean> {
+// target (valfri) sparas med notisen så att appen öppnar rätt ställe (notis_svc_add med p_target, 20261028v).
+export async function saveNotice(sb: Rpc, driver: string, msg: NotisMsg, key: string, target?: NotisTarget | null): Promise<boolean> {
   const kind = notisKind(msg.tag);
   if (kind === "test") return false;
   try {
-    const { data, error } = await sb.rpc("notis_svc_add", {
+    const args: Record<string, unknown> = {
       p_driver: driver, p_key: key, p_kind: kind, p_tag: msg.tag,
       p_title: msg.title, p_body: msg.body,
-    });
+    };
+    if (target) args.p_target = target;
+    const { data, error } = await sb.rpc("notis_svc_add", args);
     if (error) { console.error("notis_svc_add", error); return false; }
     return data === true;
   } catch (e) {

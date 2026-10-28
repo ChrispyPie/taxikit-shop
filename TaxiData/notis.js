@@ -5,6 +5,8 @@
  * Servern: notis_feed, notis_add, notis_read (supabase/migrations/20261028r_notisflode.sql).
  * Servern sparar även flyg/tåg/prognos-push själv när den skickas (notis_svc_add, 20261028u_notis_server.sql);
  * samma nyckel (nkey) som här, så samma notis syns bara en gång. Fliken i högra kanten (#notis-edge) öppnar panelen.
+ * Vart en notis leder (t551u): NOTIS.goTo – samma för notisflödet, den lilla rutan som ploppar upp (BEVAKNING.toast)
+ * och tryck på en push (sw.js -> 'bev-open'). Prognos öppnas på rätt zon med förbokningen markerad (target, 20261028v).
  * Ångra: ta bort filen, skript-taggen och 🔔-knappen i index.html (se UNDO-notisflode-2026-10-28.md). */
 (function () {
   var N = window.NOTIS = {};
@@ -45,7 +47,10 @@
     '#notis-edge.show{display:flex}' +
     '#notis-edge:active{opacity:1}' +
     '#notis-edge.unread::after{content:"";position:absolute;top:-3px;left:-3px;width:8px;height:8px;border-radius:50%;background:var(--badge,#e53e3e)}' +
-    '@media print{#notis-edge{display:none!important}}';
+    '@media print{#notis-edge{display:none!important}}' +
+    // Rutan som ploppar upp (bevakning.js) går att trycka på när den leder någonstans (t551u)
+    '.bev-toast.show.bev-toast-link{pointer-events:auto;cursor:pointer}' +
+    '.bev-toast .bev-go{display:inline-block;margin-left:.45rem;font-weight:700;text-decoration:underline;white-space:nowrap}';
   (function () { var s = document.createElement('style'); s.textContent = CSS; document.head.appendChild(s); })();
 
   var st = { items: null, unread: 0, err: false, open: false, pushed: false, skipPop: false, loading: false, at: 0, timer: null };
@@ -87,6 +92,26 @@
       if (m) return 'prognos|' + tag + '@' + m[1] + m[2] + '|' + ymd;
     }
     return tag + '|' + ((d && d.ts) || now || Date.now());
+  };
+
+  // Vart en notis leder: target från servern/appen, annars zon och kategori ur taggen (prognos-161-app)
+  // och tiden ur texten ("ca 14:35") – så öppnar även äldre Prognos-notiser rätt zon.
+  N.targetOf = function (it) {
+    it = it || {};
+    var t = it.target && typeof it.target === 'object' ? it.target : null, out = {};
+    if (t) Object.keys(t).forEach(function (k) { out[k] = t[k]; });
+    if (String(it.kind || kindOf(it.tag)) !== 'prognos') return t ? out : null;
+    var m = /^prognos-(\d{1,5})-([a-z_]{1,20})$/.exec(String(it.tag || ''));
+    if (m) { if (!out.zone) out.zone = m[1]; if (!out.cat) out.cat = m[2]; }
+    if (!out.at) {
+      var h = /ca (\d\d):(\d\d)/.exec(String(it.body || '')), base = Date.parse(it.created_at || '') || it.at || Date.now();
+      if (h) {
+        var d = new Date(base); d.setHours(+h[1], +h[2], 0, 0);
+        if (d.getTime() < base - 3 * 3600000) d = new Date(d.getTime() + 864e5);   // förbokning efter midnatt
+        out.at = d.toISOString();
+      }
+    }
+    return out.zone ? out : null;
   };
 
   // "nyss", "5 min sedan", "2 tim sedan", "i går 14:05", "12/10 14:05"
@@ -140,13 +165,13 @@
     if (!token()) return Promise.resolve();
     if (syncing) return syncing;
     syncing = idbAll().then(function (q) {
-      q.forEach(function (x) { pendPut({ key: x.key, kind: kindOf(x.tag), tag: x.tag || '', title: x.title || 'TaxiData', body: x.body || '', at: x.at || Date.now() }); });
+      q.forEach(function (x) { pendPut({ key: x.key, kind: kindOf(x.tag), tag: x.tag || '', title: x.title || 'TaxiData', body: x.body || '', at: x.at || Date.now(), target: x.target || null }); });
       return idbDel(q.map(function (x) { return x.key; }));
     }).then(function () {
       if (demo()) return;
       var l = pendGet().filter(function (x) { return !x.sent; });
       if (!l.length) return;
-      return rpc('notis_add', { p_items: l.map(function (x) { return { key: x.key, kind: x.kind, tag: x.tag, title: x.title, body: x.body, at: x.at, read: !!x.read }; }) })
+      return rpc('notis_add', { p_items: l.map(function (x) { return { key: x.key, kind: x.kind, tag: x.tag, title: x.title, body: x.body, at: x.at, read: !!x.read, target: x.target || null }; }) })
         .then(function () {
           var sent = {}; l.forEach(function (x) { sent[x.key] = 1; });
           pendSet(pendGet().filter(function (x) { return !sent[x.key]; }));
@@ -159,7 +184,8 @@
   N.add = function (it) {
     if (!token() || !it || !it.title) return;
     var at = it.at || Date.now();
-    var item = { key: it.key || N.keyOf(it, at), kind: it.kind || kindOf(it.tag), tag: it.tag || '', title: String(it.title).slice(0, 200), body: String(it.body || '').slice(0, 600), at: at };
+    var item = { key: it.key || N.keyOf(it, at), kind: it.kind || kindOf(it.tag), tag: it.tag || '', title: String(it.title).slice(0, 200), body: String(it.body || '').slice(0, 600), at: at,
+      target: it.target && typeof it.target === 'object' ? it.target : null };
     if (!pendPut(item)) return;
     paintBadge(); if (st.open) paint();
     sync().then(function () { refresh(true); });
@@ -179,7 +205,7 @@
     var out = [];
     var ny = nyheter(); if (ny) out.push(ny);
     var onServer = {}; (st.items || []).forEach(function (x) { if (x.nkey) onServer[x.nkey] = 1; });
-    pendGet().forEach(function (x) { if (onServer[x.key]) return; out.push({ src: 'l', id: x.key, kind: x.kind, tag: x.tag, title: x.title, body: x.body, created_at: new Date(x.at).toISOString(), read: !!x.read }); });
+    pendGet().forEach(function (x) { if (onServer[x.key]) return; out.push({ src: 'l', id: x.key, nkey: x.key, kind: x.kind, tag: x.tag, title: x.title, body: x.body, created_at: new Date(x.at).toISOString(), read: !!x.read, target: x.target || null }); });
     (st.items || []).forEach(function (x) { out.push(x); });
     out.sort(function (a, b) { return (a.src === 'n' ? -1 : 0) - (b.src === 'n' ? -1 : 0) || Date.parse(b.created_at) - Date.parse(a.created_at); });
     return out;
@@ -296,8 +322,16 @@
     if (k === 'nyheter') {
       open('om');
       setTimeout(function () { var el = document.getElementById('om-nyheter'); if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80);
-    } else if (k === 'flyg' || k === 'tag') { if (window.ANKOMSTER) open(ANKOMSTER.id); }
-    else if (k === 'prognos') { if (window.PROGNOS) open(PROGNOS.id); }
+    } else if (k === 'flyg' || k === 'tag') {
+      if (!window.ANKOMSTER) return;
+      try { localStorage.setItem('ank_tab', k); } catch (e) {}   // rätt flik: Flyg eller Tåg
+      open(ANKOMSTER.id);
+    } else if (k === 'prognos') {
+      if (!window.PROGNOS) return;
+      var tg = N.targetOf(it);
+      if (tg && PROGNOS.focus) { try { PROGNOS.focus(tg); } catch (e) {} }   // rätt zon + markera förbokningen
+      open(PROGNOS.id);
+    }
     else if (k.indexOf('forum') === 0) {
       if (it.forum_post_id && window.FORUM && FORUM.openPost) FORUM.openPost(it.forum_post_id);
       else if (window.FORUM) open(FORUM.id);
@@ -312,6 +346,26 @@
     }
     // test-notiser och okända: bara markerade som lästa
   }
+  // Leder notisen någonstans? (testnotiser och okända gör det inte)
+  N.hasLink = function (it) {
+    var k = String((it && (it.kind || kindOf(it.tag))) || '');
+    return k !== 'test' && k !== 'push' && k !== '';
+  };
+  // Öppna det en notis gäller från den lilla rutan eller en push (samma som tryck i notisflödet).
+  // it: { key, kind, tag, title, body, target }. Notisen markeras som läst om den finns i flödet.
+  N.goTo = function (it) {
+    if (!it || !token()) return;
+    it = { key: it.key || '', kind: it.kind || kindOf(it.tag), tag: it.tag || '', title: it.title || '', body: it.body || '',
+      target: it.target || null, created_at: it.created_at || new Date().toISOString() };
+    var hit = null;
+    if (it.key) allItems().forEach(function (x) { if (!hit && (x.nkey === it.key || (x.src === 'l' && x.id === it.key))) hit = x; });
+    if (hit) { markRead(hit); if (!it.target && hit.target) it.target = hit.target; }
+    else if (it.key) {   // inte i flödet än (sw.js-kön): markera i kön så den kommer in som läst
+      var l = pendGet(), ch = false; l.forEach(function (x) { if (x.key === it.key && !x.read) { x.read = true; ch = true; } }); if (ch) pendSet(l);
+    }
+    if (st.open) closeForNav();
+    go(it);
+  };
 
   // ---------- panelen ----------
   function build() {
@@ -426,7 +480,16 @@
   if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', function (e) {
     if (!e.data || e.data.type !== 'bev-push') return;
     var m = e.data.msg || {};
-    N.add({ key: e.data.key, tag: m.tag || '', title: m.title || 'TaxiData', body: m.body || '', at: e.data.at || Date.now() });
+    N.add({ key: e.data.key, tag: m.tag || '', title: m.title || 'TaxiData', body: m.body || '', at: e.data.at || Date.now(), target: m.target || null });
+  });
+
+  // Tryck på en push medan appen är öppen (sw.js notificationclick -> 'bev-open'): öppna det notisen gäller.
+  // Ersätter de gamla lyssnarna i bevakning.js (Ankomster) och prognos-notis.js (Prognos).
+  if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', function (e) {
+    if (!e.data || e.data.type !== 'bev-open') return;
+    var tag = String(e.data.tag || '');
+    if (kindOf(tag) === 'test') return;
+    N.goTo({ key: e.data.key || '', tag: tag, title: e.data.title || '', body: e.data.body || '', target: e.data.target || null });
   });
 
   // ---------- start / stopp ----------

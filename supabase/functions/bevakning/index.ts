@@ -6,7 +6,7 @@
 // Tågdata: samma Vercel-funktion som appen (/api/trains, CDN-cache 60 s) – ingen extra last på Trafikverket.
 import webpush from "npm:web-push@3.6.7";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { notisKey, saveNotice } from "./notis.ts";
+import { notisKey, notisUrl, saveNotice } from "./notis.ts";
 
 // Hur länge en bevakning ligger kvar efter sista händelsen (tåg ankommit / sista väskan ute). EN konstant.
 const AFTER_MIN = 30;
@@ -72,7 +72,7 @@ async function sendTo(driver: string, msg: Msg) {
   const nkey = notisKey(msg, ts);
   // Spara i notisflödet först (även om föraren inte har någon telefon med push påslagen)
   const saved = await saveNotice(sb, driver, msg, nkey);
-  const payload = JSON.stringify({ ...msg, url: APP_URL, ts, nkey });
+  const payload = JSON.stringify({ ...msg, url: msg.tag === "test" ? APP_URL : notisUrl(msg), ts, nkey });
   for (const s of subs) {
     try {
       await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload,

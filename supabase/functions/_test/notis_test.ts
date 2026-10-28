@@ -10,7 +10,10 @@ function eq(a: unknown, b: unknown, m: string) { if (JSON.stringify(a) !== JSON.
 
 // sw.js notisKey (samma kod som telefonen kör)
 const swSrc = Deno.readTextFileSync(new URL("../../../TaxiData/sw.js", import.meta.url));
-const swKey = new Function("self", "indexedDB", swSrc + "\nreturn notisKey;")({ addEventListener() {} }, {}) as (d: unknown, now: number) => string;
+const swFns = new Function("self", "indexedDB", swSrc + "\nreturn { notisKey, notisTarget, notisUrl };")(
+  { addEventListener() {}, registration: { scope: "https://taxikit.shop/TaxiData/" } }, {}) as {
+  notisKey: (d: unknown, now: number) => string; notisTarget: (d: unknown) => Record<string, string> | null; notisUrl: (d: unknown, t: unknown) => string };
+const swKey = swFns.notisKey;
 
 let handler: ((r: Request) => Promise<Response>) | null = null;
 (Deno as unknown as { serve: unknown }).serve = (h: (r: Request) => Promise<Response>) => { handler = h; return {}; };
@@ -30,6 +33,19 @@ Deno.test("nyckel och typ: samma som sw.js / notis.js", () => {
   // prognos-dagen tas från förbokningens tid (svensk tid), som prognos-notis.js i appen
   eq(notisKey(p, Date.parse("2026-10-28T22:50:00Z"), Date.parse("2026-10-28T23:10:00Z")), "prognos|prognos-110-app@1540|20261029", "dag efter midnatt");
   out.keys = "OK";
+});
+
+Deno.test("sw.js: tryck på push leder rätt (även push från gammal server utan target)", () => {
+  const old = { tag: "prognos-161-app", title: "Ny förbokning", body: "Essity · Kombi · ca 14:35", url: "/TaxiData/?sida=prognos" };
+  const t = swFns.notisTarget(old)!;
+  eq(t, { zone: "161", cat: "app" }, "zon ur taggen");
+  eq(swFns.notisUrl(old, t), "https://taxikit.shop/TaxiData/?sida=prognos&zon=161&kat=app", "url med zon");
+  const nw = { ...old, url: "/TaxiData/?sida=prognos&zon=161&kat=app&tid=x&bok=7", target: { zone: "161", cat: "app", at: "x", id: "7" } };
+  eq(swFns.notisTarget(nw), nw.target, "serverns target");
+  eq(swFns.notisUrl(nw, nw.target), "https://taxikit.shop/TaxiData/?sida=prognos&zon=161&kat=app&tid=x&bok=7", "serverns url orörd");
+  eq(swFns.notisUrl({ tag: "flyg-SK1427", url: "/TaxiData/?sida=ankomster" }, null), "https://taxikit.shop/TaxiData/?sida=ankomster&flik=flyg", "flyg-fliken");
+  eq(swFns.notisUrl({ tag: "tag-3911", url: "/TaxiData/?sida=ankomster" }, null), "https://taxikit.shop/TaxiData/?sida=ankomster&flik=tag", "tåg-fliken");
+  eq(swFns.notisTarget({ tag: "flyg-SK1" }), null, "flyg har ingen target");
 });
 
 Deno.test("bevakning tick: flyg landat → notis sparas + push med samma nyckel", async () => {
@@ -62,7 +78,8 @@ Deno.test("bevakning tick: flyg landat → notis sparas + push med samma nyckel"
     eq(a.p_key, swKey(p, Date.now()), "sw.js räknar fram samma nyckel");
     eq(a.p_key, p.tag + "|" + p.ts, "även gammal sw.js (utan nkey) ger samma nyckel");
     eq(a.p_title, p.title, "titel"); eq(a.p_driver, "ZZTEST-NF-F", "förare");
-    eq(p.url, "/TaxiData/?sida=ankomster", "länk");
+    eq(p.url, "/TaxiData/?sida=ankomster&flik=" + (i === 0 ? "flyg" : "tag"), "länk till rätt flik");
+    assert(!("p_target" in a), "flyg/tåg skickar ingen p_target (6-args-versionen)");
   }
   eq(adds.map((c) => c.args.p_kind), ["flyg", "tag"], "typ → Ankomster");
   out.bevakning = adds.map((c) => c.args);
@@ -96,6 +113,7 @@ Deno.test("prognos-sync tick: ny förbokning → notis sparas + push med samma n
     if (fn === "prognos_svc_watch_drivers_active") return ["ZZTEST-NF-F"];
     if (fn === "bev_svc_targets") return SUB;
     if (fn === "notis_svc_add") return true;
+    if (fn === "prognos_svc_insert_booking") return 4242;
   });
   await import("../prognos-sync/index.ts");
   assert(handler, "Deno.serve anropades inte");
@@ -106,12 +124,16 @@ Deno.test("prognos-sync tick: ny förbokning → notis sparas + push med samma n
   const sent = (g.__sent as { payload: string }[]).map((s) => JSON.parse(s.payload));
   eq(adds.length, 1, "en sparad notis"); eq(sent.length, 1, "en push");
   const a = adds[0].args, p = sent[0];
-  eq(a.p_kind, "prognos", "typ → Prognos"); eq(p.url, "/TaxiData/?sida=prognos", "länk");
+  eq(a.p_kind, "prognos", "typ → Prognos");
   eq(a.p_key, p.nkey, "sparad nyckel = pushens nkey"); eq(a.p_key, swKey(p, Date.now()), "sw.js samma nyckel");
   // samma nyckel som prognos-notis.js i appen räknar fram från förbokningens tid
   const ins = (g.__calls as Call[]).find((c) => c.fn === "prognos_svc_insert_booking")!.args;
   const t = new Date(String(ins.p_est)), p2 = (n: number) => (n < 10 ? "0" : "") + n;
   eq(a.p_key, "prognos|prognos-110-app@" + p2(t.getHours()) + p2(t.getMinutes()) + "|" + t.getFullYear() + p2(t.getMonth() + 1) + p2(t.getDate()), "= prognos-notis.js");
+  // vart notisen leder: zon, kategori, tid och bokningens id (t551u)
+  const want = { zone: "110", cat: "app", at: String(ins.p_est), id: "4242" };
+  eq(a.p_target, want, "sparad target"); eq(p.target, want, "pushens target");
+  eq(p.url, "/TaxiData/?sida=prognos&zon=110&kat=app&tid=" + encodeURIComponent(String(ins.p_est)) + "&bok=4242", "länk till rätt zon");
   out.prognos = a;
   await Deno.writeTextFile(Deno.env.get("NOTIS_TEST_OUT") || "/tmp/notis_test_out.json", JSON.stringify(out, null, 1));
 });
