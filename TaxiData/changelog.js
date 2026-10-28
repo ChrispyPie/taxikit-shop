@@ -7,6 +7,11 @@
  * Äldre historik (före 24 okt 2026) är återskapad i efterhand och ungefärlig.
  */
 window.CHANGELOG = [
+  { datum: '2026-10-28', id: '2026-10-28p', rader: [
+    ['Nytt', 'Bil & verkstad: nu kan du och ägaren skriva till varandra på ett ärende, till exempel när något behövs till bilen eller när du har anmält ett fel. Ägaren kan svara utan att ändra status, och du kan svara tillbaka. Alla meddelanden syns i en tråd på ärendet med namn och tid.'],
+    ['Nytt', 'När den andra har svarat syns "Nytt svar" på ärendet och en siffra på fliken och på Bil & verkstad på startsidan. Markeringen försvinner när du har tittat på ärendet.'],
+    ['Förbättrat', 'Admin › Bil & verkstad: knappen "Skicka meddelande" ligger bredvid Pågår och Åtgärdad. Kommentaren du skriver när du ändrar status syns också i tråden. Det går att skriva även efter att ärendet är åtgärdat.']
+  ] },
   { datum: '2026-10-28', id: '2026-10-28o', rader: [
     ['Nytt', 'Admin › Önskemål och idéer: ägaren kan skriva vad som ska ändras eller läggas till i appen. Christian går igenom allt innan något ändras. Inget ändras automatiskt när man skickar.'],
     ['Nytt', 'Där syns också tidigare önskemål med datum, status (Ny, Läst, Planerad, Klar eller Inte nu) och svar från Christian. Ett önskemål går att ta bort så länge det har status Ny.']
