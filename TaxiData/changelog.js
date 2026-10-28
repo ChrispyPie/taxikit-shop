@@ -12,6 +12,9 @@
  * En dag där ingen rad syns för föraren visas inte, och ger ingen prick eller notis.
  */
 window.CHANGELOG = [
+  { datum: '2026-10-28', id: '2026-10-28va', rader: [
+    ['Förbättrat', 'Bil & verkstad: i tråden på en anmälan står det nu vem som skrev eller ändrade status, med namn (eller förar-id om namn saknas) och roll under, till exempel Förare, Ägare eller S admin. Förut kunde det stå Ägaren fast någon annan hade skrivit.']
+  ] },
   { datum: '2026-10-28', id: '2026-10-28s', rader: [
     ['Förbättrat', 'Lönekoll och Körpassdata öppnas snabbare. Appen hämtar nu bara dina egna körningar, och hämtningen börjar redan när startsidan visas. Byter du sida används det som redan är hämtat, så sidan syns direkt och uppdateras sedan tyst i bakgrunden.']
   ] },

@@ -424,6 +424,9 @@
     st.form = newForm(null); st.form.car = i.car_id; st.form.issue = i.id;
     draw(); window.scrollTo(0, 0);
   }
+  // Avsändare i ärendetråden: namn (eller förar-id) och under det användarkategorin
+  var WHO_ROLE = { superadmin: 'S admin', agare: 'Ägare', admin: 'Admin', standard: 'Förare', semester: 'Förare', avslutad: 'Förare' };
+  function whoRole(x) { return WHO_ROLE[x.cat] ? '<small style="display:block;font-size:.78em;font-weight:400;opacity:.75">' + WHO_ROLE[x.cat] + '</small>' : ''; }
   // Tråd på ärendet: meddelanden (car_issue_message) + statusändringar med ägarens kommentar, i tidsordning
   function issueThread(i) {
     var hs = (i.history || []).filter(function (u, k) { return !(k === 0 && u.status === 'ny' && !u.comment); });
@@ -435,10 +438,11 @@
       var t = esc(when(r.at));
       if (r.u) {
         var lbl = r.u.status === 'klar' ? '✅ Klar' : r.u.status === 'pagar' ? '🔄 Pågår' : '↩️ Öppnad igen';
-        return '<div class="vk-msg sys">' + lbl + ' · ' + t + (r.u.comment ? '<br>Ägaren: "' + esc(r.u.comment) + '"' : '') + '</div>';
+        if (!r.u.who) return '<div class="vk-msg sys">' + lbl + ' · ' + t + (r.u.comment ? '<br>Ägaren: "' + esc(r.u.comment) + '"' : '') + '</div>';
+        return '<div class="vk-msg sys">' + lbl + ' · ' + t + '<br><b>' + esc(r.u.who) + '</b>' + whoRole(r.u) + (r.u.comment ? '"' + esc(r.u.comment) + '"' : '') + '</div>';
       }
-      var m = r.m, who = m.mine ? 'Du' : m.role === 'owner' ? esc(m.who || 'Ägaren') + ' (ägare)' : esc(m.who || 'Föraren');
-      return '<div class="vk-msg ' + (m.mine ? 'own' : 'boss') + '"><span class="w"><b>' + who + '</b> · ' + t + '</span>' + esc(m.body) + '</div>';
+      var m = r.m, who = m.cat ? esc(m.who) : m.mine ? 'Du' : m.role === 'owner' ? esc(m.who || 'Ägaren') + ' (ägare)' : esc(m.who || 'Föraren');
+      return '<div class="vk-msg ' + (m.mine ? 'own' : 'boss') + '"><span class="w"><b>' + who + '</b> · ' + t + whoRole(m) + '</span>' + esc(m.body) + '</div>';
     }).join('') + '</div>';
   }
   function canMsg(i) { return admin() ? !i.mine : i.mine; }

@@ -251,6 +251,9 @@
   }
   function when(ts) { var d = new Date(ts); return dl(d) + ' ' + hm(d); }
   function ichip(i) { return '<span class="vka-chip ' + i.status + '">' + ISTATUS[i.status] + '</span>'; }
+  // Avsändare i ärendetråden: namn (eller förar-id) och under det användarkategorin
+  var WHO_ROLE = { superadmin: 'S admin', agare: 'Ägare', admin: 'Admin', standard: 'Förare', semester: 'Förare', avslutad: 'Förare' };
+  function whoRole(x) { return WHO_ROLE[x.cat] ? '<small style="display:block;font-size:.78em;font-weight:400;opacity:.75">' + WHO_ROLE[x.cat] + '</small>' : ''; }
   // Tråd: statusändringar (som förut) + meddelanden mellan ägaren och föraren, i tidsordning
   function ihist(i) {
     var rows = (i.history || []).map(function (u) { return { at: u.at, u: u }; })
@@ -259,9 +262,9 @@
     rows.sort(function (a, b) { return new Date(a.at) - new Date(b.at); });
     return '<div class="vka-thr">' + rows.map(function (r) {
       var u = r.u, m = r.m;
-      if (u) return '<div class="vka-m sys">' + esc(ISTATUS[u.status] || u.status) + ' · ' + esc(when(u.at)) + (u.comment ? '<br>"' + esc(u.comment) + '"' : '') + '</div>';
-      var own = m.mine, who = own ? 'Du' : m.role === 'owner' ? esc(m.who || 'Ägaren') + ' (ägare)' : esc(m.who || 'Föraren');
-      return '<div class="vka-m ' + (own ? 'own' : 'drv') + '"><span class="w"><b>' + who + '</b> · ' + esc(when(m.at)) + '</span>' + esc(m.body) + '</div>';
+      if (u) return '<div class="vka-m sys">' + (u.status === 'ny' && u !== (i.history || [])[0] ? '↩️ Öppnad igen' : esc(ISTATUS[u.status] || u.status)) + ' · ' + esc(when(u.at)) + (u.who ? '<br><b>' + esc(u.who) + '</b>' + whoRole(u) : '') + (u.comment ? (u.who ? '' : '<br>') + '"' + esc(u.comment) + '"' : '') + '</div>';
+      var own = m.mine, who = m.cat ? esc(m.who) : own ? 'Du' : m.role === 'owner' ? esc(m.who || 'Ägaren') + ' (ägare)' : esc(m.who || 'Föraren');
+      return '<div class="vka-m ' + (own ? 'own' : 'drv') + '"><span class="w"><b>' + who + '</b> · ' + esc(when(m.at)) + whoRole(m) + '</span>' + esc(m.body) + '</div>';
     }).join('') + '</div>';
   }
   function issueCard(i) {
