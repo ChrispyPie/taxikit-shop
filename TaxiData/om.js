@@ -76,14 +76,22 @@
   }
   function newest() { var L = lista(); return L.length ? nyhId(L[0]) : ''; }
   function hasUnseen(v) { var n = newest(); return !!n && n > seenMark(v); }
+  // När gick nyheten live? datum 'YYYY-MM-DD' + valfri tid 'HH:MM' (svensk tid). Aldrig i framtiden.
+  // Utan tid: day = true (flödet visar bara dagen) och at = dagens slut, men högst nu.
+  O.when = function (dag) {
+    var now = Date.now(), p = String((dag && dag.datum) || '').split('-');
+    if (p.length !== 3) return { at: new Date(now).toISOString(), day: true };
+    var t = /^(\d{1,2}):(\d{2})$/.exec(String((dag && dag.tid) || ''));
+    var d = t ? new Date(+p[0], +p[1] - 1, +p[2], +t[1], +t[2]) : new Date(+p[0], +p[1] - 1, +p[2], 23, 59, 59);
+    return { at: new Date(Math.min(d.getTime(), now)).toISOString(), day: !t };
+  };
   // För notisflödet (notis.js): finns det nyheter föraren inte sett? Ger senaste nyhetens id, datum och första raden.
   O.unseen = function () {
     var L = lista();
     if (!L.length || !hasUnseen(serverSeen !== undefined ? serverSeen : cacheGet())) return null;
     var r = (L[0].rader || [])[0];
-    var p = String(L[0].datum || '').split('-');
-    var at = p.length === 3 ? new Date(+p[0], +p[1] - 1, +p[2], 12).toISOString() : new Date().toISOString();
-    return { id: nyhId(L[0]), at: at, text: r ? String(r[1]) : '' };
+    var w = O.when(L[0]);
+    return { id: nyhId(L[0]), at: w.at, day: w.day, text: r ? String(r[1]) : '' };
   };
   // "Markera alla som lästa" i notisflödet: räkna alla nyheter som sedda
   O.markSeen = function () {

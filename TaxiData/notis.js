@@ -127,6 +127,16 @@
     return t.getDate() + '/' + (t.getMonth() + 1) + (t.getFullYear() !== now.getFullYear() ? '/' + t.getFullYear() : '') + ' ' + hm;
   }
 
+  // Bara dagen (nyheter utan klockslag): "i dag", "i går", "12/10"
+  function dayText(ts) {
+    var t = new Date(ts), now = new Date();
+    if (!isFinite(t)) return '';
+    var d0 = new Date(now); d0.setHours(0, 0, 0, 0);
+    if (t >= d0) return 'i dag';
+    if (t >= new Date(d0 - 864e5)) return 'i går';
+    return t.getDate() + '/' + (t.getMonth() + 1) + (t.getFullYear() !== now.getFullYear() ? '/' + t.getFullYear() : '');
+  }
+
   // ---------- notiser som väntar i telefonen ----------
   function pendGet() { try { return JSON.parse(localStorage.getItem(LS_PEND + ':' + (localStorage.getItem('taxi_driver') || '')) || '[]') || []; } catch (e) { return []; } }
   function pendSet(l) { try { localStorage.setItem(LS_PEND + ':' + (localStorage.getItem('taxi_driver') || ''), JSON.stringify(l.slice(0, 50))); } catch (e) {} }
@@ -197,7 +207,7 @@
     if (!u) return null;
     var t = String(u.text || '');
     if (t.length > 110) t = t.slice(0, 105).replace(/\s+\S*$/, '') + ' …';
-    return { src: 'n', id: u.id, kind: 'nyheter', title: 'Nyheter i appen', body: t, created_at: u.at, read: false };
+    return { src: 'n', id: u.id, kind: 'nyheter', title: 'Nyheter i appen', body: t, created_at: u.at, day_only: !!u.day, read: false };
   }
 
   // ---------- flödet ----------
@@ -273,7 +283,7 @@
         var v = view(it);
         h += '<button type="button" class="np-item' + (it.read ? '' : ' unread') + '" data-i="' + i + '">' +
           '<span class="np-ico" aria-hidden="true">' + v.ico + '</span>' +
-          '<span class="np-txt">' + v.html + '<span class="np-when">' + esc(ago(it.created_at)) + '</span></span>' +
+          '<span class="np-txt">' + v.html + '<span class="np-when">' + esc(it.day_only ? dayText(it.created_at) : ago(it.created_at)) + '</span></span>' +
           (it.read ? '' : '<span class="np-dot" aria-label="Oläst"></span>') + '</button>';
       });
       if (st.err) h += '<div class="np-foot">Kunde inte hämta alla notiser just nu.</div>';
