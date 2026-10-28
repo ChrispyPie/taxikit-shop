@@ -200,7 +200,7 @@
     var b = focusBooking(f);
     var cat = b ? b.category : f.cat, at = b ? Date.parse(b.estimated_at) : f.at;
     var info = { cat: cat, at: at, slot: null, hint: '' };
-    var now = floor5(new Date()).getTime(), end = now + 120 * 60000;
+    var now = floor5(new Date()).getTime(), end = schedEnd(new Date()).getTime();
     if (at != null && isFinite(at)) {
       var slot = floor5(new Date(at)).getTime();
       if (slot >= now && slot < end) info.slot = slot + '|' + cat;
@@ -242,6 +242,16 @@
     return x;
   }
   function addMin(d, m) { return new Date(d.getTime() + m * 60000); }
+  // Schemats slut (exklusivt): hela 2 h framåt inklusive sista 5-minutersraden.
+  // Synken avrundar nya förbokningar till närmaste 5 min (nu+120 → kan bli upp till +122,5),
+  // så med bara floor5(nu)+120 hamnade de utanför schemat i upp till ~7 min (t593u, storbil).
+  // Samma avrundning som snap5() i prognos-sync: sekunder bort, minuter till närmaste 5.
+  function schedEnd(t) {
+    var x = new Date(t.getTime() + 120 * 60000);
+    x.setSeconds(0, 0);
+    var r = new Date(x.getTime() - x.getMinutes() * 60000 + Math.round(x.getMinutes() / 5) * 5 * 60000);
+    return addMin(r, 5);
+  }
 
   function toast(msg, ms) {
     if (window.showToast) window.showToast(msg, ms);
@@ -547,7 +557,7 @@
   /** Antal öppna förbokningar per zon i schemafönstret (nu → +2 h) för valda kategorier. */
   function zoneCounts() {
     var cats = loadCats();
-    var now = floor5(new Date()), end = addMin(now, 120), out = {};
+    var now = floor5(new Date()), end = schedEnd(new Date()), out = {};
     (st.bookings || []).forEach(function (b) {
       if (cats.indexOf(b.category) < 0) return;
       var d = floor5(new Date(b.estimated_at));
@@ -588,7 +598,7 @@
     cats = ALL_CAT_KEYS.filter(function (k) { return cats.indexOf(k) >= 0; });
     if (!cats.length) cats = ALL_CAT_KEYS.slice();
     var now = floor5(new Date());
-    var end = addMin(now, 120);
+    var end = schedEnd(new Date());
     var rows = [];
     for (var t0 = new Date(now); t0 < end; t0 = addMin(t0, 5)) rows.push(new Date(t0));
 
