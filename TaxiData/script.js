@@ -62,9 +62,62 @@ async function retryLoadData(btn) {
   render();
 }
 
-async function loadData() {
+// ---- Snabbare sidbyten (t540u, 2026-10-28) ----
+// 1) Förarsidorna hämtar bara egna pass och resor (get_my_trip_data). Ägaren får samma svar som förut.
+//    Finns inte funktionen på servern används get_trip_data som förut.
+// 2) Datan som redan hämtats återanvänds när man byter sida (bara i minnet, inte sparat i telefonen):
+//    sidan visas direkt och uppdateras tyst i bakgrunden om datan är äldre än en minut.
+// 3) Hämtningen startar i bakgrunden strax efter att menyn visats, så att Lönekoll/Körpassdata är klara när man trycker.
+// 4) Samtidiga hämtningar delar på samma anrop.
+const DATA_FRESH_MS = 60 * 1000;          // yngre än så: ingen ny hämtning alls
+const DATA_REUSE_MS = 15 * 60 * 1000;     // yngre än så: visa direkt och uppdatera i bakgrunden
+let dataLoadedAt = 0;
+let dataSession = '';
+let loadPromise = null;
+let myTripApiMissing = false;
+function dataReusable() {
+  return !COMPANY && !loadFailed && data && data.shifts && dataLoadedAt &&
+    dataSession === (localStorage.getItem('taxi_session') || '') && Date.now() - dataLoadedAt < DATA_REUSE_MS;
+}
+async function fetchTripData() {
+  if (!COMPANY && !myTripApiMissing) {
+    try { return await tripRpc('get_my_trip_data', { p_dataset: 'current' }, 20000); }
+    catch (e) { if (e && e.message === 'HTTP 404') myTripApiMissing = true; else throw e; }
+  }
+  return await tripRpc('get_trip_data', { p_dataset: 'current' }, 20000);
+}
+// Hämtar på nytt i bakgrunden om datan är äldre än en minut. Svarar true när ny data har kommit.
+window.taxiRefreshData = function () {
+  if (COMPANY || !dataReusable() || Date.now() - dataLoadedAt < DATA_FRESH_MS) return Promise.resolve(false);
+  return loadData(true).then(() => !loadFailed, () => false);
+};
+function loadData(force) {
+  if (!force && dataReusable()) {
+    if (Date.now() - dataLoadedAt >= DATA_FRESH_MS && !loadPromise)
+      window.taxiRefreshData().then(ok => { if (ok && dashboardVisible()) render(); });
+    return Promise.resolve();
+  }
+  if (!loadPromise) loadPromise = loadDataNow(!!force && dataReusable()).finally(() => { loadPromise = null; });
+  return loadPromise;
+}
+function dashboardVisible() {
+  const el = document.getElementById('dashboard-view');
+  return !!el && !el.classList.contains('hidden');
+}
+// Förhämtning: när menyn visas (inloggad förare) hämtas förarens data i bakgrunden.
+// Inte för ägaren (hela åkeriets resor) och inte på Åkeridata-sidan.
+if (!COMPANY) setTimeout(function prefetch() {
+  if (!localStorage.getItem('taxi_session') || dataReusable() || loadPromise) return;
+  const cat = (window.driverData && window.driverData.category) || '';
+  if (!cat) { if (!prefetch.n) { prefetch.n = 1; setTimeout(prefetch, 1500); } return; }   // get_me har inte svarat än
+  if (cat === 'agare') return;
+  loadData().catch(() => {});
+}, 1200);
+
+async function loadDataNow(keepOld) {
+  const sessionAtStart = localStorage.getItem('taxi_session') || '';
   currentDriver = localStorage.getItem('taxi_driver') || '';
-  viewDriver = currentDriver;
+  if (!keepOld) viewDriver = currentDriver;   // bakgrundsuppdatering: behåll vald förare tills väljaren byggts om
   if (companyUseApi()) {
     // Åkeridata: ingen helårsnedladdning. Siffrorna hämtas per vald period (companyPeriod nedan).
     data = {};
@@ -76,16 +129,19 @@ async function loadData() {
     // Ett automatiskt nytt försök om anropet misslyckas (HTTP-fel, timeout eller nätverksfel).
     // Misslyckas även det visas ett felmeddelande med "Försök igen" i stället för nollor.
     let res;
-    try { res = await tripRpc('get_trip_data', { p_dataset: 'current' }, 20000); }
+    try { res = await fetchTripData(); }
     catch (e1) {
       await new Promise(r => setTimeout(r, 1500));
-      res = await tripRpc('get_trip_data', { p_dataset: 'current' }, 20000);
+      res = await fetchTripData();
     }
     data = res || {};
     loadFailed = false;
+    dataLoadedAt = Date.now();
+    dataSession = sessionAtStart;
     archiveMergeInto(data);   // äldre år som redan hämtats i den här sessionen (bara i minnet)
     dedupData(data);
   } catch (e) {
+    if (keepOld) return;   // bakgrundsuppdatering misslyckades: behåll det som redan visas
     data = {};
     loadFailed = true;   // tom månad (inga resor) är INTE ett fel – då visas 0 som vanligt
   }

@@ -135,7 +135,12 @@
     document.getElementById('lk-prev').onclick = function () { st.month = new Date(st.month.getFullYear(), st.month.getMonth() - 1, 1); draw(); };
     document.getElementById('lk-next').onclick = function () { if (!period().cur) { st.month = new Date(st.month.getFullYear(), st.month.getMonth() + 1, 1); draw(); } };
     document.getElementById('lk-today').onclick = function () { st.month = null; draw(); };
-    if (window.taxiPayData && window.taxiPayData(new Date(), new Date())) { draw(); return; }
+    if (window.taxiPayData && window.taxiPayData(new Date(), new Date())) {
+      draw();
+      // Visas direkt med datan som redan finns; är den äldre än en minut hämtas ny tyst i bakgrunden (t540u)
+      if (window.taxiRefreshData) window.taxiRefreshData().then(function (ok) { if (ok && st.el === content && document.body.contains(content) && document.getElementById('lk-body')) draw(); });
+      return;
+    }
     st.loading = true; st.err = null; draw();
     var p = window.taxiEnsureData ? window.taxiEnsureData() : Promise.resolve();
     Promise.resolve(p).then(function () {
