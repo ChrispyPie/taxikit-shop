@@ -15,9 +15,11 @@
   function KEY() { return (typeof SB_KEY !== 'undefined' && SB_KEY) || ''; }
   function FN() { return API() + '/functions/v1/bevakning'; }
 
-  // Klick på en notis öppnar /TaxiData/?sida=ankomster → visa Ankomster direkt.
+  // Klick på en notis öppnar /TaxiData/?sida=ankomster&flik=flyg|tag → visa Ankomster direkt på rätt flik.
   try {
-    if (new URLSearchParams(location.search).get('sida') === 'ankomster') {
+    var q0 = new URLSearchParams(location.search);
+    if (q0.get('sida') === 'ankomster') {
+      if (q0.get('flik') === 'flyg' || q0.get('flik') === 'tag') localStorage.setItem('ank_tab', q0.get('flik'));
       localStorage.setItem('taxi_view', 'ankomster');
       history.replaceState(null, '', location.pathname);
     }
@@ -158,25 +160,30 @@
       });
     } catch (e) {}
   }
-  B.alert = function (msg) {
+  // Push medan appen är öppen: ljud + ruta. Rutan går att trycka på och öppnar det notisen gäller (t551u).
+  B.alert = function (msg, key) {
+    msg = msg || {};
     beep();
     try { if (navigator.vibrate) navigator.vibrate([300, 120, 300, 120, 300]); } catch (e) {}
-    toast((msg && msg.title ? msg.title : 'Ny händelse') + (msg && msg.body ? ' – ' + msg.body : ''), 8000);
+    toast((msg.title ? msg.title : 'Ny händelse') + (msg.body ? ' – ' + msg.body : ''), 8000,
+      { key: key || msg.nkey || '', tag: msg.tag || '', title: msg.title || '', body: msg.body || '', target: msg.target || null });
     st.loadedAt = 0; refresh();
   };
   // Samma ljud/vibration/toast används av Prognos-notiser (prognos-notis.js)
-  B.ring = function (text) {
+  // item (valfritt): { key, tag, target } -> rutan leder dit, t.ex. Prognos på rätt zon
+  B.ring = function (text, item) {
     beep();
     try { if (navigator.vibrate) navigator.vibrate([300, 120, 300, 120, 300]); } catch (e) {}
-    toast(text, 8000);
+    toast(text, 8000, item);
   };
+  B.toast = function (text, ms, item) { toast(text, ms, item); };
   if (supported) {
     navigator.serviceWorker.addEventListener('message', function (e) {
       if (!e.data || e.data.type !== 'bev-push') return;
       var m = e.data.msg || {};
       // Prognos-push hanteras globalt av prognos-notis.js (avdubblering mot appens egen koll)
-      if (String(m.tag || '').indexOf('prognos') === 0) { if (window.PROGNOS_NOTIS && PROGNOS_NOTIS.onPush) PROGNOS_NOTIS.onPush(m); return; }
-      B.alert(m);
+      if (String(m.tag || '').indexOf('prognos') === 0) { if (window.PROGNOS_NOTIS && PROGNOS_NOTIS.onPush) PROGNOS_NOTIS.onPush(m, e.data.key); return; }
+      B.alert(m, e.data.key);
     });
   }
 
@@ -212,11 +219,24 @@
 
   // ---------- toast ----------
   var toastTimer = null;
-  function toast(text, ms) {
+  // item (valfritt): notisen rutan gäller -> tryck öppnar samma ställe som i notisflödet (NOTIS.goTo)
+  function toast(text, ms, item) {
     var t = document.getElementById('bev-toast');
     if (!t) { t = document.createElement('div'); t.id = 'bev-toast'; t.className = 'bev-toast'; document.body.appendChild(t); }
-    t.textContent = text; t.classList.add('show');
-    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.remove('show'); }, ms || 3500);
+    var link = !!(item && window.NOTIS && NOTIS.goTo && (!NOTIS.hasLink || NOTIS.hasLink(item)));
+    t.textContent = text;
+    t.classList.toggle('bev-toast-link', link);
+    if (link) {
+      var go = document.createElement('span'); go.className = 'bev-go'; go.textContent = 'Visa ›'; t.appendChild(go);
+      t.setAttribute('role', 'button'); t.setAttribute('tabindex', '0'); t.setAttribute('aria-label', text + ' – tryck för att visa');
+      var open = function () { clearTimeout(toastTimer); t.classList.remove('show', 'bev-toast-link'); t.onclick = t.onkeydown = null; NOTIS.goTo(item); };
+      t.onclick = open;
+      t.onkeydown = function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } };
+    } else {
+      t.removeAttribute('role'); t.removeAttribute('tabindex'); t.removeAttribute('aria-label'); t.onclick = t.onkeydown = null;
+    }
+    t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.remove('show', 'bev-toast-link'); t.onclick = t.onkeydown = null; }, ms || 3500);
   }
 
   // ---------- ritas in i Ankomster ----------
@@ -312,10 +332,7 @@
 
   // Registrera service workern i bakgrunden när man är inloggad (så notisklick öppnar appen)
   if (supported && token()) { register().catch(function () {}); }
-  // Notisklick: öppna Ankomster
-  if (supported) navigator.serviceWorker.addEventListener('message', function (e) {
-    if (e.data && e.data.type === 'bev-open' && String(e.data.tag || '').indexOf('prognos') !== 0 && typeof window.openItem === 'function' && window.ANKOMSTER) window.openItem(ANKOMSTER.id);
-  });
+  // Notisklick (sw.js 'bev-open') sköts nu av notis.js (NOTIS.goTo): rätt flik i Ankomster, rätt zon i Prognos (t551u)
   // ---------- utloggning: inga notiser till en utloggad telefon ----------
   // Avregistrerar push i webbläsaren och tar bort telefonen (och, om ingen annan telefon har notiser, bevakningarna) hos servern.
   // Väntar högst 4 s så att utloggningen aldrig fastnar.

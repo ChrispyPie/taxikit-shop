@@ -2,6 +2,7 @@
 // spårar bokningar per zon/kategori/block med tidsuppskattning + konfidens.
 import webpush from "npm:web-push@3.6.7";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { type NotisTarget, notisKey, notisUrl, saveNotice } from "./notis.ts";
 
 const ORIGINS = ["https://taxikit.shop", "https://www.taxikit.shop", "https://chrispypie.github.io", "http://localhost:8765"];
 const LOGIN_URL = "https://prognos.taxigoteborg.nu/api/prognos-login";
@@ -71,12 +72,17 @@ async function ensureVapid() {
   vapidReady = true;
 }
 
-async function sendTo(driver: string, msg: { title: string; body: string; tag: string }) {
+async function sendTo(driver: string, msg: { title: string; body: string; tag: string }, dayMs?: number, target?: NotisTarget) {
+  const ts = Date.now();
+  const nkey = notisKey(msg, ts, dayMs);
+  // Spara i notisflödet först – samma nyckel som appen, så den syns bara en gång (t547u).
+  // target = zon/kategori/tid/id så att notisen öppnar rätt zon i Prognos (t551u).
+  await saveNotice(sb, driver, msg, nkey, target);
   await ensureVapid();
   if (!vapidReady) return;
   const { data } = await sb.rpc("bev_svc_targets", { p_driver: driver });
   const subs = (data || []) as { id: number; endpoint: string; p256dh: string; auth: string }[];
-  const payload = JSON.stringify({ ...msg, url: APP_URL, ts: Date.now() });
+  const payload = JSON.stringify({ ...msg, url: target ? notisUrl(msg, target) : APP_URL, ts, nkey, target });
   for (const s of subs) {
     try {
       await webpush.sendNotification(
@@ -147,10 +153,10 @@ async function insertBooking(
   block: number,
   snapId: number | null,
   confidence: Conf,
-  notifyList: { zone_id: string; zone_name: string; category: string; estimated_at: string }[],
+  notifyList: { zone_id: string; zone_name: string; category: string; estimated_at: string; id?: string }[],
   notify: boolean,
 ) {
-  await sb.rpc("prognos_svc_insert_booking", {
+  const { data: bid } = await sb.rpc("prognos_svc_insert_booking", {
     p_zone: zone,
     p_zone_name: zname,
     p_cat: cat,
@@ -166,6 +172,7 @@ async function insertBooking(
       zone_name: zname,
       category: cat,
       estimated_at: est.toISOString(),
+      id: bid != null ? String(bid) : undefined,
     });
   }
 }
@@ -187,7 +194,7 @@ async function reconcileZoneCat(
   observed: Date,
   snapId: number | null,
   isSeed: boolean,
-  newEvents: { zone_id: string; zone_name: string; category: string; estimated_at: string }[],
+  newEvents: { zone_id: string; zone_name: string; category: string; estimated_at: string; id?: string }[],
 ): Promise<{ created: number; canceled: number; updated: number }> {
   let created = 0, canceled = 0, updated = 0;
   const delta = [0, 1, 2].map((i) => newBlocks[i] - oldBlocks[i]);
@@ -375,7 +382,7 @@ async function tick(): Promise<Response> {
   });
 
   let created = 0, canceled = 0, updated = 0;
-  const newEvents: { zone_id: string; zone_name: string; category: string; estimated_at: string }[] = [];
+  const newEvents: { zone_id: string; zone_name: string; category: string; estimated_at: string; id?: string }[] = [];
   const isSeed = !prev || !prev.zones;
 
   if (payload.zones) {
@@ -417,7 +424,8 @@ async function tick(): Promise<Response> {
     });
     const body = `${ev.zone_name} · ${CAT_SV[ev.category] || ev.category} · ca ${hm}`;
     for (const d of list) {
-      await sendTo(d, { title: "Ny förbokning", body, tag: "prognos-" + ev.zone_id + "-" + ev.category });
+      await sendTo(d, { title: "Ny förbokning", body, tag: "prognos-" + ev.zone_id + "-" + ev.category }, Date.parse(ev.estimated_at),
+        { zone: String(ev.zone_id), cat: ev.category, at: ev.estimated_at, id: ev.id });
     }
   }
 

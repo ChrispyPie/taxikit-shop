@@ -148,11 +148,92 @@
   }
 
   function visibleZones() {
-    var filt = loadZones();
+    var filt = loadZones(), f = focusNow();
     return ZONE_ORDER.filter(function (z) {
-      return !filt || filt.indexOf(z.id) >= 0;
+      // Zonen en notis pekar på visas även om den är bortfiltrerad (t551u)
+      return !filt || filt.indexOf(z.id) >= 0 || (f && f.zone === z.id);
     });
   }
+
+  // ---------- Notis -> rätt zon (t551u) ----------
+  // NOTIS.goTo / ?sida=prognos&zon=161 anropar P.focus({ zone, cat, at, id }) innan sidan öppnas:
+  // rätt zonflik väljs och förbokningen markeras i schemat en stund.
+  var FOCUS_MS = 15 * 60000;
+  P.focus = function (t) {
+    if (!t || !ZONE_BY_ID[String(t.zone)]) return false;
+    var at = Date.parse(t.at || '');
+    st.focus = {
+      zone: String(t.zone),
+      cat: t.cat && CAT_META[t.cat] ? String(t.cat) : null,
+      at: isFinite(at) ? at : null,
+      id: t.id != null && t.id !== '' ? String(t.id) : null,
+      until: Date.now() + FOCUS_MS,
+      scrolled: false
+    };
+    saveTab(st.focus.zone);
+    st.panel = 'schema';
+    if (onPage()) paint();
+    return true;
+  };
+  function focusNow() {
+    var f = st.focus;
+    if (f && Date.now() > f.until) f = st.focus = null;
+    return f || null;
+  }
+  // Förbokningen notisen gäller: samma id i listan (tiden kan ha flyttats), annars zon + kategori + närmast i tid
+  function focusBooking(f) {
+    var list = st.bookings || [], hit = null, best = 1e15;
+    if (f.id) list.forEach(function (b) { if (!hit && String(b.id) === f.id) hit = b; });
+    if (hit) return hit;
+    if (f.at == null) return null;
+    list.forEach(function (b) {
+      if (String(b.zone_id) !== f.zone || (f.cat && b.category !== f.cat)) return;
+      var d = Math.abs(Date.parse(b.estimated_at) - f.at);
+      if (d <= 10 * 60000 && d < best) { best = d; hit = b; }
+    });
+    return hit;
+  }
+  // Vilken ruta i schemat som ska markeras + en rad ovanför: "🔔 Ny förbokning · Kombi · ca 14:35"
+  function focusInfo(zid) {
+    var f = focusNow();
+    if (!f || f.dismissed || f.zone !== String(zid)) return null;
+    var b = focusBooking(f);
+    var cat = b ? b.category : f.cat, at = b ? Date.parse(b.estimated_at) : f.at;
+    var info = { cat: cat, at: at, slot: null, hint: '' };
+    var now = floor5(new Date()).getTime(), end = now + 120 * 60000;
+    if (at != null && isFinite(at)) {
+      var slot = floor5(new Date(at)).getTime();
+      if (slot >= now && slot < end) info.slot = slot + '|' + cat;
+      else if (slot < now) info.hint = 'Tiden har passerat.';
+      else info.hint = 'Ligger längre fram än 2 timmar – syns i schemat när den närmar sig.';
+    }
+    if (!b && st.loadedOnce && f.id) info.hint = info.hint || 'Hittas inte längre – kan vara avbokad eller flyttad.';
+    var cats = loadCats();
+    if (cat && cats.length && cats.indexOf(cat) < 0) { info.slot = null; info.hint = (CAT_LABEL[cat] || cat) + ' är dold av Filter.'; info.filter = true; }
+    return info;
+  }
+  function renderFocusNote(info) {
+    if (!info) return '';
+    var d = info.at != null && isFinite(info.at) ? new Date(info.at) : null;
+    return '<div class="pg-focus-note" role="status"><span>🔔 <strong>Ny förbokning</strong>' +
+      (info.cat ? ' · ' + esc(CAT_LABEL[info.cat] || info.cat) : '') +
+      (d ? ' · ca ' + p2(d.getHours()) + ':' + p2(d.getMinutes()) : '') +
+      (info.hint ? '<span class="pg-focus-hint">' + esc(info.hint) + (info.filter ? ' <button type="button" class="pg-focus-link" data-panel="filter">Ändra ›</button>' : '') + '</span>' : '') +
+      '</span><button type="button" class="pg-focus-x" data-pg-unfocus aria-label="Ta bort markeringen">✕</button></div>';
+  }
+  (function () {
+    var css = document.createElement('style');
+    css.textContent =
+      '.pg-focus-note{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin:.4rem 0 .5rem;padding:.5rem .65rem;' +
+      'border-radius:10px;border:1px solid var(--accent,#f5b301);background:color-mix(in srgb,var(--accent,#f5b301) 14%,transparent);font-size:.9rem;line-height:1.35}' +
+      '.pg-focus-hint{display:block;font-size:.82rem;opacity:.85;margin-top:.15rem}' +
+      '.pg-focus-link{background:none;border:0;padding:0;color:inherit;font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}' +
+      '.pg-focus-x{background:none;border:0;color:inherit;font-size:1rem;line-height:1;padding:.1rem .25rem;cursor:pointer;opacity:.75}' +
+      '.pg-td-cell.pg-focus{outline:3px solid var(--accent,#f5b301);outline-offset:-3px;border-radius:6px;animation:pgFocus 1.2s ease-in-out 3}' +
+      '@keyframes pgFocus{50%{background:color-mix(in srgb,var(--accent,#f5b301) 35%,transparent)}}' +
+      '@media (prefers-reduced-motion:reduce){.pg-td-cell.pg-focus{animation:none}}';
+    (document.head || document.documentElement).appendChild(css);
+  })();
 
   function floor5(d) {
     var x = new Date(d);
@@ -501,7 +582,7 @@
       esc(sum.text) + '</span>';
   }
 
-  function renderCarTimeline(zoneId) {
+  function renderCarTimeline(zoneId, focusSlot) {
     var cats = loadCats().filter(function (k) { return ALL_CAT_KEYS.indexOf(k) >= 0; });
     // Behåll schemaordning även om filter tar bort några
     cats = ALL_CAT_KEYS.filter(function (k) { return cats.indexOf(k) >= 0; });
@@ -547,7 +628,9 @@
         var meta = CAT_META[k] || {};
         var sum = cellSummary(bySlot[d.getTime() + '|' + k]);
         var tdCls = 'pg-td-cell' + (meta.child ? ' pg-td-child' : '');
-        html += '<td class="' + tdCls + '">' + countCell(sum) + '</td>';
+        var isF = focusSlot && focusSlot === d.getTime() + '|' + k;
+        if (isF) tdCls += ' pg-focus';
+        html += '<td class="' + tdCls + '"' + (isF ? ' id="pg-focus-cell"' : '') + '>' + countCell(sum) + '</td>';
       });
       html += '<td class="pg-td-spacer" aria-hidden="true"></td>';
       html += '</tr>';
@@ -574,11 +657,13 @@
     var zid = st.zoneTab;
     if (!ZONE_BY_ID[zid]) zid = '293';
     var notice = renderFilterNotice();
+    var fi = focusInfo(zid);
+    notice = renderFocusNote(fi) + notice;
     if (!st.err && st.loadedOnce && !(zoneCounts()[zid])) {
       return notice + '<div class="pg-card pg-empty-card">Inga förbokningar i ' + esc(ZONE_BY_ID[zid].name) +
         ' de närmaste 2 timmarna.</div>';
     }
-    return notice + renderCarTimeline(zid);
+    return notice + renderCarTimeline(zid, fi && fi.slot);
   }
 
   var WD = ['söndag', 'måndag', 'tisdag', 'onsdag', 'torsdag', 'fredag', 'lördag'];
@@ -813,6 +898,12 @@
     bind(st.el);
     fitDiagHead(st.el);
     fitTabs(st.el);
+    // Notis -> rulla fram den markerade förbokningen en gång
+    var fc = st.focus && !st.focus.scrolled && st.el.querySelector('#pg-focus-cell');
+    if (fc) {
+      st.focus.scrolled = true;
+      setTimeout(function () { try { fc.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) { fc.scrollIntoView(); } }, 60);
+    }
   }
 
   // Flikraden: får den inte plats på en rad → dela jämnt (3+2) i stället för en ensam flik på rad två.
@@ -862,9 +953,15 @@
     root.querySelectorAll('[data-pg-report]').forEach(function (btn) { btn.onclick = reportBug; });
     root.querySelectorAll('[data-ztab]').forEach(function (btn) {
       btn.onclick = function () {
-        saveTab(btn.getAttribute('data-ztab'));
+        var z = btn.getAttribute('data-ztab');
+        if (st.focus && st.focus.zone !== z) st.focus = null;   // annan zon vald -> släpp markeringen
+        saveTab(z);
         paint();
       };
+    });
+    root.querySelectorAll('[data-pg-unfocus]').forEach(function (btn) {
+      // ✕: markeringen bort, men zonen ligger kvar tills man byter zon eller lämnar Prognos
+      btn.onclick = function () { if (st.focus) st.focus.dismissed = true; paint(); };
     });
     var codeEl = root.querySelector('#pg-code');
     if (codeEl) {
@@ -974,6 +1071,7 @@
   P.refresh = function () { if (onPage()) return refresh(); };
 
   P.stop = function () {
+    st.focus = null;   // lämnar Prognos -> markeringen från notisen är klar
     if (st.poll) { clearInterval(st.poll); st.poll = null; }
     if (badge.viewing) { badge.viewing = false; markSeen(); }  // lämnar Prognos → nollställ
   };
