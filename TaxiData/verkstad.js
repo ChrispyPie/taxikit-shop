@@ -49,6 +49,7 @@
     forbidden: 'Du har inte behörighet att göra det.',
     demo_read_only: 'Det här är ett demokonto. Du kan titta runt men inte ändra något.',
     need_text: 'Skriv vad det gäller.',
+    msg_too_long: 'Meddelandet får vara högst 1000 tecken.',
     reply_closed: 'Ägaren har redan bestämt sig. Svaret skickades inte.',
     bad_supply: 'Välj vad som behövs.',
     bad_type: 'Välj typ av underhåll.',
@@ -82,12 +83,14 @@
       '.vk-msg .w{display:block;font-size:.72rem;color:var(--muted);margin-bottom:.1rem}' +
       '.vk-reply{margin-top:.5rem}.vk-reply textarea{width:100%;box-sizing:border-box;padding:.5rem;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:.95rem;background:var(--surface);color:var(--text)}' +
       '.vk-reply .pm-btns{margin-top:.4rem}' +
+      '.bv-issue.new{border:2px solid var(--primary)}.bv-new{display:inline-block;margin-left:.35rem;font-size:.72rem;font-weight:700;color:#fff;background:var(--primary);border-radius:999px;padding:.05rem .45rem;vertical-align:middle}' +
+      '.bv-thr .vk-msg.boss .w b,.bv-thr .vk-msg.own .w b{color:var(--text)}' +
       '.vk-owner{display:block;width:100%;margin-bottom:.7rem;padding:.6rem;border-radius:10px;border:2px solid var(--primary);background:var(--surface);color:var(--primary);font-size:.95rem;font-weight:600}';
     document.head.appendChild(x);
   })();
   function whQ(d) { return ((d && d.entries) || []).filter(function (x) { return x.status === 'pending' && x.waiting_on === 'driver'; }).length; }
   var st = { el: null, data: null, bil: null, err: null, bilErr: null, form: null, busy: false,
-    tab: localStorage.getItem('bil_tab') || 'fel', car: null, showDone: false, f: null, photos: {}, mDone: null, tf: null, tr: null, tlog: {}, drafts: {} };
+    tab: localStorage.getItem('bil_tab') || 'fel', car: null, showDone: false, f: null, photos: {}, mDone: null, tf: null, tr: null, tlog: {}, drafts: {}, idrafts: {}, iopen: {}, seenQ: {} };
   if (!TABS.some(function (t) { return t[0] === st.tab; })) st.tab = 'fel';
 
   // ---------- hjälp ----------
@@ -117,6 +120,8 @@
       return i.kind === 'fault' && (i.status !== 'klar' || i.id === keep) && (!car || i.car_id === car);
     });
   }
+  // Ärenden med nytt meddelande från den andra sidan (ägaren ↔ föraren), servern räknar "unread"
+  function issUnread(kind) { return ((st.bil && st.bil.issues) || []).filter(function (i) { return i.unread > 0 && (!kind || i.kind === kind); }).length; }
   function issueLabel(id) {
     var i = ((st.bil && st.bil.issues) || []).filter(function (x) { return x.id === id; })[0];
     return i ? 'Felanmälan: ' + cut(i.body, 60) : 'Kopplad till en felanmälan';
@@ -183,7 +188,7 @@
       if (fail(e)) return;
       st.err = 'Kunde inte hämta verkstadstimmarna. Försök igen.';
     });
-    var b = rpc('get_bil', {}).then(function (d) { st.bil = d; badge(d); })
+    var b = rpc('get_bil', {}).then(function (d) { st.bil = d; st.seenQ = {}; badge(d); })
       .catch(function (e) { if (fail(e)) return; st.bilErr = 'Kunde inte hämta bilarna. Försök igen.'; });
     return Promise.all([a, b]).then(draw);
   }
@@ -194,14 +199,16 @@
     if (!n && d.is_admin) n = ((d.cars || []).filter(function (c) { return c.blocking; })).length;
     if (!n) n = (d.tasks || []).filter(function (t) { return t.mine && t.status !== 'klar'; }).length;
     if (!n) n = whQ(st.data);
+    if (!n) n = issUnread();
     setBadge('bil', n);
   }
   V.refreshBadge = function () {
     if (!localStorage.getItem('taxi_session')) return;
     rpc('bil_badge', {}).then(function (b) {
       if (!window.setBadge || !b) return;
-      // servern räknar "står" bara för ägaren/S admin, "tasks" = mina öppna uppgifter, "wh_q" = frågor om min verkstadstid
-      setBadge('bil', (+b.unread || 0) || (+b.blocking || 0) || (+b.tasks || 0) || (+b.wh_q || 0));
+      // servern räknar "står" bara för ägaren/S admin, "tasks" = mina öppna uppgifter, "wh_q" = frågor om min verkstadstid,
+      // "iss_msg" = ärenden med nytt meddelande som jag inte har läst
+      setBadge('bil', (+b.unread || 0) || (+b.blocking || 0) || (+b.tasks || 0) || (+b.wh_q || 0) || (+b.iss_msg || 0));
     }).catch(function () {});
   };
 
@@ -217,10 +224,11 @@
     var top = document.getElementById('bv-top'); if (!top) return;
     var unread = st.bil ? +st.bil.unread || 0 : 0, tl = tabs();
     var open = st.bil ? (st.bil.tasks || []).filter(function (t) { return t.mine && t.status !== 'klar'; }).length : 0;
-    var q = whQ(st.data);
+    var q = whQ(st.data), nf = issUnread('fault'), ns = issUnread('supply');
     top.innerHTML = '<div class="bv-tabs' + (tl.length > 4 ? ' five' : '') + '">' + tl.map(function (t) {
       return '<button type="button" class="tl-tab bv-tab' + (st.tab === t[0] ? ' active' : '') + '" data-t="' + t[0] + '"><span>' + t[1] + '</span>' + t[2] +
-        (t[0] === 'uppg' && open ? '<b class="bv-tn">' + open + '</b>' : '') + (t[0] === 'timmar' && q ? '<b class="bv-tn">' + q + '</b>' : '') + '</button>';
+        (t[0] === 'uppg' && open ? '<b class="bv-tn">' + open + '</b>' : '') + (t[0] === 'timmar' && q ? '<b class="bv-tn">' + q + '</b>' : '') +
+        (t[0] === 'fel' && nf ? '<b class="bv-tn">' + nf + '</b>' : '') + (t[0] === 'behov' && ns ? '<b class="bv-tn">' + ns + '</b>' : '') + '</button>';
     }).join('') + '<button type="button" class="bv-bell" id="bv-bell" aria-label="Notiser">🔔' + (unread ? '<b>' + unread + '</b>' : '') + '</button></div>';
     top.querySelectorAll('.bv-tab').forEach(function (b) { b.onclick = function () { V.openTab(b.dataset.t); }; });
     document.getElementById('bv-bell').onclick = showNotices;
@@ -416,21 +424,48 @@
     st.form = newForm(null); st.form.car = i.car_id; st.form.issue = i.id;
     draw(); window.scrollTo(0, 0);
   }
+  // Tråd på ärendet: meddelanden (car_issue_message) + statusändringar med ägarens kommentar, i tidsordning
+  function issueThread(i) {
+    var hs = (i.history || []).filter(function (u, k) { return !(k === 0 && u.status === 'ny' && !u.comment); });
+    var ms = i.msgs || [];
+    if (!ms.length && !hs.some(function (u) { return u.comment; })) return '';
+    var rows = ms.map(function (m) { return { at: m.at, m: m }; }).concat(hs.map(function (u) { return { at: u.at, u: u }; }));
+    rows.sort(function (a, b) { return new Date(a.at) - new Date(b.at); });
+    return '<div class="vk-thr bv-thr">' + rows.map(function (r) {
+      var t = esc(when(r.at));
+      if (r.u) {
+        var lbl = r.u.status === 'klar' ? '✅ Klar' : r.u.status === 'pagar' ? '🔄 Pågår' : '↩️ Öppnad igen';
+        return '<div class="vk-msg sys">' + lbl + ' · ' + t + (r.u.comment ? '<br>Ägaren: "' + esc(r.u.comment) + '"' : '') + '</div>';
+      }
+      var m = r.m, who = m.mine ? 'Du' : m.role === 'owner' ? esc(m.who || 'Ägaren') + ' (ägare)' : esc(m.who || 'Föraren');
+      return '<div class="vk-msg ' + (m.mine ? 'own' : 'boss') + '"><span class="w"><b>' + who + '</b> · ' + t + '</span>' + esc(m.body) + '</div>';
+    }).join('') + '</div>';
+  }
+  function canMsg(i) { return admin() ? !i.mine : i.mine; }
   function issueCard(i) {
     var c = carById(i.car_id), sup = SUPPLY.filter(function (s) { return s[0] === i.supply; })[0];
-    var h = '<div class="vk-card bv-issue' + (i.blocking && i.status !== 'klar' ? ' stop' : '') + (i.status === 'klar' ? ' done' : '') + '">' +
+    var isNew = i.unread > 0 || i._new, thr = issueThread(i);
+    var h = '<div class="vk-card bv-issue' + (i.blocking && i.status !== 'klar' ? ' stop' : '') + (i.status === 'klar' ? ' done' : '') + (isNew ? ' new' : '') + '" data-iid="' + i.id + '">' +
       '<div class="vk-ihead"><span class="vk-when">' + (i.kind === 'supply' ? (sup ? sup[1] + ' ' + sup[2] : 'Behövs') + ' · ' : '') +
       (i.car ? 'Bil ' + esc(i.car) : 'Alla bilar') + (c && c.modell ? ' <small>' + esc(cut(c.modell, 20)) + '</small>' : '') + '</span>' +
       '<span class="bv-st ' + i.status + '">' + ISTATUS[i.status] + '</span></div>';
+    if (isNew) h += '<div class="bv-stopline" style="color:var(--primary)">💬 Nytt svar från ' + (admin() ? 'föraren' : 'ägaren') + '</div>';
     if (i.blocking && i.status !== 'klar') h += '<div class="bv-stopline">🛑 Bilen står</div>';
     if (i.body) h += '<div class="bv-text">' + esc(i.body) + '</div>';
     h += '<div class="vk-imeta">' + esc(when(i.created_at)) + (i.mine ? ' · av dig' : i.reporter ? ' · av ' + esc(i.reporter_name ? i.reporter_name + ' (' + i.reporter + ')' : i.reporter) : '') +
       (i.photos ? ' · 📷 ' + i.photos : '') + (i.workshop_min ? ' · ⏱️ ' + dur(i.workshop_min) + ' verkstad' : '') + '</div>';
-    if (i.status_comment) h += '<div class="vk-boss">' + esc(i.status_comment) + '</div>';
+    if (i.status_comment && !thr) h += '<div class="vk-boss">' + esc(i.status_comment) + '</div>';
+    h += thr;
+    if (canMsg(i) && (st.iopen[i.id] || isNew)) {
+      h += '<div class="vk-reply"><textarea class="bv-mtext" data-id="' + i.id + '" maxlength="1000" rows="2" placeholder="' +
+        (admin() ? 'Skriv till föraren (status ändras inte)' : 'Skriv till ägaren') + '">' + esc(st.idrafts[i.id] || '') + '</textarea>' +
+        '<div class="pm-btns"><button type="button" class="primary bv-msend" data-id="' + i.id + '"' + (st.busy ? ' disabled' : '') + '>Skicka</button></div></div>';
+    }
     var ph = st.photos[i.id];
     h += photoBlock('issue_id', i.id) + taskLinks(i.tasks);
     var act = [];
     if (i.photos && !ph) act.push('<button type="button" data-a="photos">📷 Visa foto</button>');
+    if (canMsg(i) && !st.iopen[i.id] && !isNew) act.push('<button type="button" class="bv-send" data-a="msg">💬 ' + (admin() ? 'Skriv till föraren' : 'Skriv till ägaren') + '</button>');
     if (i.kind === 'fault' && i.status !== 'klar') act.push('<button type="button" data-a="hours">⏱️ Verkstadstid</button>');
     if (admin()) {
       if (i.status === 'ny') act.push('<button type="button" class="bv-pagar" data-a="pagar">Pågår</button>');
@@ -459,12 +494,13 @@
     if (!open.length) h += '<div class="tl-msg">' + (kind === 'fault' ? 'Inga öppna fel. 👍' : 'Inget som behövs just nu.') + '</div>';
     open.forEach(function (i) { h += issueCard(i); });
     if (done.length) {
-      h += '<button type="button" class="ank-more" id="bv-done">' + (st.showDone ? 'Dölj klara' : 'Visa klara (' + done.length + ')') + '</button>';
+      var dn = done.filter(function (i) { return i.unread > 0; }).length;
+      h += '<button type="button" class="ank-more" id="bv-done">' + (st.showDone ? 'Dölj klara' : 'Visa klara (' + done.length + ')' + (dn ? ' · 💬 ' + dn + ' nytt' : '')) + '</button>';
       if (st.showDone) done.forEach(function (i) { h += issueCard(i); });
     }
     h += '<div class="tl-foot">' + (admin()
-      ? 'Du som ägare (och S admin) ser alla förares anmälningar. Varje förare ser bara sina egna. Du kan ändra status eller skicka en anmälan vidare som uppgift till en förare. "Bilen står" hamnar alltid överst.'
-      : 'Bara du och ägaren ser dina anmälningar. Ägaren ändrar status (Ny → Pågår → Klar). Du kan ändra eller ta bort så länge den är Ny.') + '</div>';
+      ? 'Du som ägare (och S admin) ser alla förares anmälningar. Varje förare ser bara sina egna. Du kan ändra status, skriva till föraren utan att ändra status eller skicka en anmälan vidare som uppgift till en förare. "Bilen står" hamnar alltid överst.'
+      : 'Bara du och ägaren ser dina anmälningar. Ägaren ändrar status (Ny → Pågår → Klar). Du kan ändra eller ta bort så länge den är Ny. Du och ägaren kan skriva till varandra på anmälan.') + '</div>';
     body.innerHTML = h;
     bindCars(body);
     var nb = document.getElementById('bv-new'); if (nb) nb.onclick = function () { st.f = newIssue(kind, null); draw(); };
@@ -481,9 +517,34 @@
         else if (a === 'addphoto') addPhoto(i);
         else if (a === 'hours') startHours(i);
         else if (a === 'task') startTask({ issue: i });
+        else if (a === 'msg') { st.iopen[i.id] = true; draw(); var t = body.querySelector('.bv-mtext[data-id="' + i.id + '"]'); if (t) t.focus(); }
       };
     });
+    body.querySelectorAll('.bv-mtext').forEach(function (t) { t.oninput = function () { st.idrafts[+t.dataset.id] = t.value; }; });
+    body.querySelectorAll('.bv-msend').forEach(function (b) {
+      b.onclick = function () { var i = all.filter(function (x) { return x.id === +b.dataset.id; })[0]; if (i) sendIssueMsg(i); };
+    });
     if (st.f && st.f.kind === kind) bindIssueForm(body);
+    markSeen(open.concat(st.showDone ? done : []));
+  }
+  // Ärendet syns på skärmen = läst. Markeringen "Nytt svar" ligger kvar tills nästa laddning så man ser vad som var nytt.
+  function markSeen(list) {
+    var ids = list.filter(function (i) { return i.unread > 0 && !st.seenQ[i.id]; }).map(function (i) { return i.id; });
+    if (!ids.length) return;
+    ids.forEach(function (id) { st.seenQ[id] = true; });
+    rpc('car_issue_seen', { p_ids: ids }).then(function () {
+      (st.bil.issues || []).forEach(function (i) { if (ids.indexOf(i.id) >= 0) { i.unread = 0; i._new = true; } });
+      badge(st.bil); drawTop();
+    }).catch(function () { ids.forEach(function (id) { delete st.seenQ[id]; }); });
+  }
+  function sendIssueMsg(i) {
+    var txt = String(st.idrafts[i.id] || '').trim();
+    if (!txt) { alert('Skriv ett meddelande först.'); return; }
+    if (st.busy) return;
+    st.busy = true;
+    rpc('car_issue_message', { p_id: i.id, p_body: txt })
+      .then(function () { st.busy = false; delete st.idrafts[i.id]; st.iopen[i.id] = false; flash('Meddelandet är skickat till ' + (admin() ? 'föraren' : 'ägaren') + '.'); return load(); })
+      .catch(function (e) { st.busy = false; if (fail(e)) return; alert(errText(e)); draw(); });
   }
 
   // ---------- underhåll ----------
