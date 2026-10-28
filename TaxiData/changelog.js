@@ -10,68 +10,73 @@
  *   'agare' = ägaren (och tillfälligt S admin), t.ex. Åkeridata, Admin › Bil & verkstad, Önskemål och idéer
  * Ett fjärde fält (valfritt) är texten som alla andra ser i stället. Utan det ser de inte raden alls.
  * En dag där ingen rad syns för föraren visas inte, och ger ingen prick eller notis.
+ * tid (valfritt): klockslaget då raden gick live, svensk tid 'HH:MM', t.ex. tid: '22:48'.
+ *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-10-28', id: '2026-10-28y', rader: [
+  { datum: '2026-10-28', id: '2026-10-28z', tid: '23:33', rader: [
+    ['Fixat', 'Notiser: Nyheter i appen visar nu rätt tid, till exempel "5 min sedan", i stället för "11 tim sedan".']
+  ] },
+  { datum: '2026-10-28', id: '2026-10-28y', tid: '22:48', rader: [
     ['Nytt', 'Om appen: längst ner står nu en copyrightrad, © 2026 Christian Parsa.']
   ] },
-  { datum: '2026-10-28', id: '2026-10-28x', rader: [
+  { datum: '2026-10-28', id: '2026-10-28x', tid: '22:41', rader: [
     ['Fixat', 'Prognos: en ny förbokning långt fram (80–120 minuter) kunde saknas i schemat i upp till 7 minuter, fast den redan syntes i originalprognosen. Det hände med en storbil på Landvetter i kväll. Nu syns den direkt, längst ner i schemat.']
   ] },
-  { datum: '2026-10-28', id: '2026-10-28w', rader: [
+  { datum: '2026-10-28', id: '2026-10-28w', tid: '16:05', rader: [
     ['Förbättrat', 'Notiser: när ett flyg eller tåg du bevakar ändrar status, eller när en ny förbokning du bevakar kommer in i Prognos, sparas notisen nu direkt under Notiser. Den finns där även om du missade den på telefonen eller har stängt av notiser i telefonen. Tryck på den för att komma dit den gäller: rätt flik i Ankomster (Flyg eller Tåg), eller rätt zon i Prognos med förbokningen markerad i schemat.'],
     ['Förbättrat', 'Notiser: den lilla rutan som visas en kort stund när en notis kommer går nu att trycka på (Visa ›). Den öppnar samma ställe som notisen, t.ex. Prognos på zonen där förbokningen kom in. Samma sak när du trycker på notisen i telefonen.'],
     ['Nytt', 'Notiser: en liten flik med en pil i högra kanten av skärmen visar att panelen finns. Tryck på fliken eller dra från kanten för att öppna den. En röd prick på fliken betyder att du har olästa notiser.']
   ] },
-  { datum: '2026-10-28', id: '2026-10-28vb', rader: [
+  { datum: '2026-10-28', id: '2026-10-28vb', tid: '15:52', rader: [
     ['Ändrat', 'Namn visas nu kortare i hela appen: förnamn och första bokstaven i efternamnet, till exempel Christian P eller Bernt N. Det gäller i topplistor, forumet, kalendern, Bil & verkstad, Åkeridata och admin. Väldigt långa förnamn kortas av. Hela namnet syns bara i din egen profil.']
   ] },
-  { datum: '2026-10-28', id: '2026-10-28va', rader: [
+  { datum: '2026-10-28', id: '2026-10-28va', tid: '15:52', rader: [
     ['Förbättrat', 'Bil & verkstad: i tråden på en anmälan står det nu vem som skrev eller ändrade status, med namn (eller förar-id om namn saknas) och roll under, till exempel Förare, Ägare eller S admin. Förut kunde det stå Ägaren fast någon annan hade skrivit.']
   ] },
-  { datum: '2026-10-28', id: '2026-10-28s', rader: [
+  { datum: '2026-10-28', id: '2026-10-28s', tid: '15:03', rader: [
     ['Förbättrat', 'Lönekoll och Körpassdata öppnas snabbare. Appen hämtar nu bara dina egna körningar, och hämtningen börjar redan när startsidan visas. Byter du sida används det som redan är hämtat, så sidan syns direkt och uppdateras sedan tyst i bakgrunden.']
   ] },
-  { datum: '2026-10-28', id: '2026-10-28r', rader: [
+  { datum: '2026-10-28', id: '2026-10-28r', tid: '15:00', rader: [
     ['Nytt', 'Notiser: alla notiser sparas nu i appen, så att de inte försvinner. Tryck på 🔔 uppe till höger eller dra in panelen från högra kanten av skärmen. Där ser du notiser om bevakade flyg och tåg, Prognos, Bil & verkstad, Forum, Kalender och nyheter i appen, med hur länge sedan de kom.'],
     ['Nytt', 'Notiser: tryck på en notis för att komma dit den gäller. Den markeras då som läst. Med Markera alla som lästa tar du bort alla markeringar på en gång. Siffran på 🔔 visar hur många som är olästa.']
   ] },
-  { datum: '2026-10-28', id: '2026-10-28q', rader: [
+  { datum: '2026-10-28', id: '2026-10-28q', tid: '05:15', rader: [
     ['Nytt', 'Åkeridata: uppe till höger väljer du nu Åkeri, Bil eller Chaufför. Väljer du Bil eller Chaufför väljer du sedan vilken bil eller förare. Alla siffror, målet och listan med körpass visas då bara för den bilen eller föraren, med samma flikar som förut. Valet sparas till nästa gång.', 'agare'],
     ['Nytt', 'Åkeridata › Bil: du ser vilka förare som har kört bilen, med timmar och inkört, och hur många dagar bilen inte körts i perioden. Målet är målet för en bil. Bilar som inte finns i bilregistret men har körningar visas med texten (ej i bilregistret).', 'agare'],
     ['Nytt', 'Åkeridata › Chaufför: du ser vilka bilar föraren har kört. Här visas inget mål, eftersom målen gäller per bil.', 'agare']
   ] },
-  { datum: '2026-10-28', id: '2026-10-28p', rader: [
+  { datum: '2026-10-28', id: '2026-10-28p', tid: '05:15', rader: [
     ['Nytt', 'Bil & verkstad: nu kan du och ägaren skriva till varandra på ett ärende, till exempel när något behövs till bilen eller när du har anmält ett fel. Ägaren kan svara utan att ändra status, och du kan svara tillbaka. Alla meddelanden syns i en tråd på ärendet med namn och tid.'],
     ['Nytt', 'När den andra har svarat syns "Nytt svar" på ärendet och en siffra på fliken och på Bil & verkstad på startsidan. Markeringen försvinner när du har tittat på ärendet.'],
     ['Förbättrat', 'Admin › Bil & verkstad: knappen "Skicka meddelande" ligger bredvid Pågår och Åtgärdad. Kommentaren du skriver när du ändrar status syns också i tråden. Det går att skriva även efter att ärendet är åtgärdat.', 'agare']
   ] },
-  { datum: '2026-10-28', id: '2026-10-28o', rader: [
+  { datum: '2026-10-28', id: '2026-10-28o', tid: '03:57', rader: [
     ['Nytt', 'Admin › Önskemål och idéer: ägaren kan skriva vad som ska ändras eller läggas till i appen. Christian går igenom allt innan något ändras. Inget ändras automatiskt när man skickar.', 'agare'],
     ['Nytt', 'Där syns också tidigare önskemål med datum, status (Ny, Läst, Planerad, Klar eller Inte nu) och svar från Christian. Ett önskemål går att ta bort så länge det har status Ny.', 'agare']
   ] },
-  { datum: '2026-10-27', id: '2026-10-27c', rader: [
+  { datum: '2026-10-27', id: '2026-10-27c', tid: '21:45', rader: [
     ['Fixat', 'Admin › Chaufförer: en förare som inte har aktiverat sitt konto får inte längre texten "logga in med lösenordet du valde". Den texten skickas bara till förare som verkligen har valt lösenord. Alla andra får en aktiveringslänk.', 'admin'],
     ['Förbättrat', 'Admin › Chaufförer: bjud in med ett tryck. Tryck Dela inbjudan så aktiveras kontot och du får direkt texten med aktiveringslänken att skicka. Trycker du två gånger skapas ingen extra länk, och om något går fel visas ett fel i stället för fel text.', 'admin'],
     ['Förbättrat', 'Admin › Chaufförer: du ser hela texten innan du skickar den, och kan kopiera eller dela den.', 'admin']
   ] },
-  { datum: '2026-10-27', id: '2026-10-27b', rader: [
+  { datum: '2026-10-27', id: '2026-10-27b', tid: '01:19', rader: [
     ['Förbättrat', 'Demokonton: den som tittar ser inte längre vems siffror det är. Förarens namn och förar-ID visas som Demoförare och bilarna som Demobil 1, 2 och så vidare. Siffrorna är fortfarande riktiga. Det döljs även i det som skickas till telefonen.', 'admin'],
     ['Fixat', 'Åkeridata blir inte längre blek om servern behöver använda reservvägen. Siffrorna visas som vanligt.', 'agare']
   ] },
-  { datum: '2026-10-27', id: '2026-10-27a', rader: [
+  { datum: '2026-10-27', id: '2026-10-27a', tid: '00:22', rader: [
     ['Förbättrat', 'Åkeridata: sidan hämtar nu bara den period du tittar på (dag, vecka, månad eller år) i stället för hela året på en gång. Den öppnar snabbare och drar mindre mobildata. Siffrorna räknas på samma sätt som förut, och äldre år fungerar som vanligt. När du tittar på ett helt år hämtas resorna i ett körpass först när du fäller ut passet.', 'agare']
   ] },
-  { datum: '2026-10-26', id: '2026-10-26o', rader: [
+  { datum: '2026-10-26', id: '2026-10-26o', tid: '23:55', rader: [
     ['Fixat', 'Appen fastnar inte längre på inloggningssidan när mobilnätet hackar. Om servern inte svarar inom 10 sekunder går appen vidare ändå.']
   ] },
-  { datum: '2026-10-26', id: '2026-10-26n', rader: [
+  { datum: '2026-10-26', id: '2026-10-26n', tid: '22:37', rader: [
     ['Nytt', 'Admin › Bil & verkstad: ägaren ser allt som behövs till bilarna och alla felanmälningar, sorterat per bil. Där kan ägaren markera Pågår eller Åtgärdad, skriva ett meddelande till föraren eller ta bort. Admin-rutan visar en siffra när något nytt har kommit in.', 'agare']
   ] },
-  { datum: '2026-10-26', id: '2026-10-26i', rader: [
+  { datum: '2026-10-26', id: '2026-10-26i', tid: '22:30', rader: [
     ['Nytt', 'Körpassdata, Åkeridata och Topplistor: äldre år (2025) hämtas nu automatiskt när du bläddrar dit, till exempel från januari i år bakåt till december. Första gången tar det en kort stund. När du tittar på i år hämtas inget extra, och inget sparas i telefonen.', 'agare', 'Körpassdata och Topplistor: äldre år (2025) hämtas nu automatiskt när du bläddrar dit, till exempel från januari i år bakåt till december. Första gången tar det en kort stund. När du tittar på i år hämtas inget extra, och inget sparas i telefonen.'],
   ] },
-  { datum: '2026-10-26', id: '2026-10-26h', rader: [
+  { datum: '2026-10-26', id: '2026-10-26h', tid: '22:28', rader: [
     ['Förbättrat', 'Chaufförer: varje förare visar när den senast körde, och listan sorteras med den som kört senast överst. Förare som inte kört på 60 dagar visas gråare.', 'admin'],
     ['Nytt', 'Demokonto: ägaren kan bjuda in någon att titta på appen i 3 dagar. Personen skriver sitt namn och väljer eget lösenord, och kan bara titta.', 'admin'],
     ['Nytt', 'Demokonto: välj Förare eller Ägare. Ägar-demot visar adminpanelen med påhittade exempeluppgifter, aldrig åkeriets riktiga.', 'admin'],
