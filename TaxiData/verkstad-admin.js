@@ -12,6 +12,8 @@
  */
 (function () {
   'use strict';
+  // Kort namn för visning ("Christian P"), se namn.js
+  function sn(s) { return window.shortName ? window.shortName(s) : (s == null ? '' : String(s)); }
   var MONL = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
   var WD = ['sön', 'mån', 'tis', 'ons', 'tor', 'fre', 'lör'];
   var STATUS = { pending: 'Väntar', approved: 'Godkänd', rejected: 'Nekad' };
@@ -84,7 +86,7 @@
     var a = new Date(s), b = new Date(e), same = a.toDateString() === b.toDateString();
     return dl(a) + ' ' + hm(a) + '–' + (same ? '' : dl(b) + ' ') + hm(b);
   }
-  function who(x) { return x.namn ? esc(x.namn) + ' <span style="color:var(--c-718096);font-weight:400">(' + esc(x.driver_id) + ')</span>' : esc(x.driver_id); }
+  function who(x) { return x.namn ? esc(sn(x.namn)) + ' <span style="color:var(--c-718096);font-weight:400">(' + esc(x.driver_id) + ')</span>' : esc(x.driver_id); }
   function err(e) { return ERR[e && e.message] || errText(e); }
   function hrs(m) { return (Math.round((m || 0) / 60 * 100) / 100).toLocaleString('sv-SE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
   function cap(t) { return t.replace(/^./, function (c) { return c.toUpperCase(); }); }
@@ -106,7 +108,7 @@
         return '<div class="vka-m sys">' + (m.kind === 'approved' ? '✅ Godkänd' : '❌ Nekad') + ' · ' + t + (m.body ? '<br>"' + esc(m.body) + '"' : '') + '</div>';
       }
       var own = m.role === 'owner';
-      return '<div class="vka-m ' + (own ? 'own' : 'drv') + '"><span class="w">' + (own ? 'Du (ägaren)' : esc(m.who || 'Föraren')) + ' · ' + t + '</span>' + esc(m.body) + '</div>';
+      return '<div class="vka-m ' + (own ? 'own' : 'drv') + '"><span class="w">' + (own ? 'Du (ägaren)' : esc(sn(m.who) || 'Föraren')) + ' · ' + t + '</span>' + esc(m.body) + '</div>';
     }).join('') + '</div>';
   }
 
@@ -262,15 +264,15 @@
     rows.sort(function (a, b) { return new Date(a.at) - new Date(b.at); });
     return '<div class="vka-thr">' + rows.map(function (r) {
       var u = r.u, m = r.m;
-      if (u) return '<div class="vka-m sys">' + (u.status === 'ny' && u !== (i.history || [])[0] ? '↩️ Öppnad igen' : esc(ISTATUS[u.status] || u.status)) + ' · ' + esc(when(u.at)) + (u.who ? '<br><b>' + esc(u.who) + '</b>' + whoRole(u) : '') + (u.comment ? (u.who ? '' : '<br>') + '"' + esc(u.comment) + '"' : '') + '</div>';
-      var own = m.mine, who = m.cat ? esc(m.who) : own ? 'Du' : m.role === 'owner' ? esc(m.who || 'Ägaren') + ' (ägare)' : esc(m.who || 'Föraren');
+      if (u) return '<div class="vka-m sys">' + (u.status === 'ny' && u !== (i.history || [])[0] ? '↩️ Öppnad igen' : esc(ISTATUS[u.status] || u.status)) + ' · ' + esc(when(u.at)) + (u.who ? '<br><b>' + esc(sn(u.who)) + '</b>' + whoRole(u) : '') + (u.comment ? (u.who ? '' : '<br>') + '"' + esc(u.comment) + '"' : '') + '</div>';
+      var own = m.mine, who = m.cat ? esc(sn(m.who)) : own ? 'Du' : m.role === 'owner' ? esc(sn(m.who) || 'Ägaren') + ' (ägare)' : esc(sn(m.who) || 'Föraren');
       return '<div class="vka-m ' + (own ? 'own' : 'drv') + '"><span class="w"><b>' + who + '</b> · ' + esc(when(m.at)) + whoRole(m) + '</span>' + esc(m.body) + '</div>';
     }).join('') + '</div>';
   }
   function issueCard(i) {
     var sup = SUPPLY[i.supply], open = i.status !== 'klar';
     var what = i.kind === 'supply' ? (sup ? sup[0] + ' ' + sup[1] : '🧴 Behövs') : (i.blocking ? '🛑 Bilen står' : '⚠️ Fel');
-    var by = i.mine ? 'dig' : i.reporter_name ? esc(i.reporter_name) + ' <span style="color:var(--c-718096)">(' + esc(i.reporter) + ')</span>' : esc(i.reporter || 'föraren');
+    var by = i.mine ? 'dig' : i.reporter_name ? esc(sn(i.reporter_name)) + ' <span style="color:var(--c-718096)">(' + esc(i.reporter) + ')</span>' : esc(i.reporter || 'föraren');
     var isNew = i.unread > 0 || i._new;
     queueSeen(i);
     var h = '<div class="vka-card' + (i.status === 'ny' ? ' new' : '') + (isNew ? ' ans' : '') + (open && i.blocking ? ' stop' : '') + (open ? '' : ' done') + '">' +

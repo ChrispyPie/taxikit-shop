@@ -12,6 +12,9 @@
  * En dag där ingen rad syns för föraren visas inte, och ger ingen prick eller notis.
  */
 window.CHANGELOG = [
+  { datum: '2026-10-28', id: '2026-10-28vb', rader: [
+    ['Ändrat', 'Namn visas nu kortare i hela appen: förnamn och första bokstaven i efternamnet, till exempel Christian P eller Bernt N. Det gäller i topplistor, forumet, kalendern, Bil & verkstad, Åkeridata och admin. Väldigt långa förnamn kortas av. Hela namnet syns bara i din egen profil.']
+  ] },
   { datum: '2026-10-28', id: '2026-10-28va', rader: [
     ['Förbättrat', 'Bil & verkstad: i tråden på en anmälan står det nu vem som skrev eller ändrade status, med namn (eller förar-id om namn saknas) och roll under, till exempel Förare, Ägare eller S admin. Förut kunde det stå Ägaren fast någon annan hade skrivit.']
   ] },

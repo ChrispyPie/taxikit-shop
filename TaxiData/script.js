@@ -164,7 +164,7 @@ async function loadDriverNames() {
     const rows = await tripRpc('admin_list_drivers');
     if (Array.isArray(rows)) rows.forEach(r => {
       const n = ((r.first_name || '') + ' ' + (r.last_name || '')).trim();
-      driverNames[r.id] = n;
+      driverNames[r.id] = window.shortNameParts ? shortNameParts(r.first_name, r.last_name) : n;   // "Christian P", se namn.js
     });
     return Array.isArray(rows) ? rows : [];
   } catch (e) { return []; }
@@ -860,9 +860,10 @@ function akSetScope(scope, id) {
   akSetupPicker();
 }
 function akCarLabel(c) { return c.taxi + (c.in_register ? '' : ' (ej i bilregistret)'); }
+function shortLabel(n) { return window.shortName ? shortName(n) : (n || ''); }   // kort namn, se namn.js
 function akDriverLabel(d) {
   if (d.id === currentDriver && !d.name) return 'Jag (' + d.id + ')';
-  return d.name ? d.name + ' (' + d.id + ')' : d.id;
+  return d.name ? shortLabel(d.name) + ' (' + d.id + ')' : d.id;
 }
 function akOptions(scope) {
   const ch = companyApi.choices || {};
@@ -945,7 +946,7 @@ function akBreakdownHtml(P) {
   if (P.breakdown === null) return `<div class="section"><div class="stat-row ak-bd-title"><span class="toggle"></span><span class="label">${title}</span><span class="value"></span></div>
     <div class="sub visible"><span>Visas för perioder upp till ett år</span><span></span></div></div>`;
   const rows = (P.breakdown || []).map(b => {
-    const name = bil ? (b.name ? b.name + ' (' + b.forar + ')' : b.forar != null ? (b.forar === currentDriver ? 'Jag (' + b.forar + ')' : b.forar) : 'Förare ' + b.anon_nr)
+    const name = bil ? (b.name ? shortLabel(b.name) + ' (' + b.forar + ')' : b.forar != null ? (b.forar === currentDriver ? 'Jag (' + b.forar + ')' : b.forar) : 'Förare ' + b.anon_nr)
                      : b.taxi + (b.in_register === false ? ' (ej i bilregistret)' : '');
     const key = 'bd:' + P.scope + ':' + (bil ? (b.forar || 'a' + b.anon_nr) : b.taxi);
     return `<div class="stat-row" data-key="${escHtml(key)}" onclick="toggle(this)"><span class="toggle">+</span><span class="label">${escHtml(name)}</span><span class="value">${formatSEK(Number(b.inkort) || 0)}</span></div>

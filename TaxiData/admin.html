@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="tema.js?v=20261026tm1"></script>
+  <script src="namn.js?v=20261028nm1"></script>
   <link rel="stylesheet" href="tema.css?v=20261026tm1">
   <title>Admin – TaxiData</title>
   <style>
@@ -102,9 +103,9 @@
 
   <script src="serverstatus.js?v=20261026tm1"></script>
   <script src="demo.js?v=am1"></script>
-  <script src="verkstad-admin.js?v=20261028va1"></script>
+  <script src="verkstad-admin.js?v=20261028nm1"></script>
   <script src="profilbild.js?v=zdm1"></script>
-  <script src="onskemal-admin.js?v=onk1"></script>
+  <script src="onskemal-admin.js?v=20261028nm1"></script>
   <script>
     const APP_VERSION = '1.0.26';
     console.log('Admin version:', APP_VERSION);
@@ -401,6 +402,7 @@
       const first = d.first_name || '';
       const last = d.last_name || '';
       if (!first && !last) return id;
+      if (window.shortNameParts) return esc(shortNameParts(first, last, id));   // "Christian P", se namn.js
       if (!last) return first;
       return first + ' ' + last[0];
     }
@@ -811,7 +813,7 @@
       if (!hidden) {
         h += `<p style="padding:6px 16px 0; margin:0; font-size:calc(12px * var(--font-scale, 1)); color:var(--c-718096);">Demokonton ser appen med riktiga siffror, men förarens namn, förar-ID och bilnummer är utbytta (Demoförare, Demobil). De kan bara titta. De räknas inte bland förarna. Varje konto gäller i 3 dagar från att det skapas.</p>`;
         demoList.forEach(d => {
-          const name = ((d.first_name || '') + ' ' + (d.last_name || '')).trim();
+          const name = window.shortNameParts ? shortNameParts(d.first_name, d.last_name) : ((d.first_name || '') + ' ' + (d.last_name || '')).trim();
           const ended = d.status === 'ended';
           const st = ended ? '<span class="status status-inactive">Avslutat</span>'
             : d.status === 'pending' ? '<span class="status status-pending">Väntar</span>'
