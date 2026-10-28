@@ -482,6 +482,8 @@
     loadList().then(function () { if (st.view === 'list' && root === content) drawList(); });
     // Förifyllt nytt inlägg från en annan sida (t.ex. Prognos → "Rapportera fel")
     if (pre) openEditor(null, pre);
+    // Från notisflödet: öppna inlägget direkt
+    else if (F._post) { var pid = F._post; F._post = null; st.view = 'post'; st.post = null; push('post'); drawPost(); loadPost(pid).then(drawPost); }
   }
   function rulesAccept() {
     var content = root;
@@ -532,6 +534,11 @@
         }
       }
     }).catch(function () {});
+  };
+  // Öppna ett inlägg direkt (notisflödet, notis.js)
+  F.openPost = function (id) {
+    F._post = +id || null;
+    if (typeof window.openItem === 'function') window.openItem(F.id);
   };
   // Öppna Forum direkt i "Nytt inlägg" med kategori/rubrik/text ifyllda. Inget skickas förrän föraren trycker Publicera.
   F.compose = function (pre) {

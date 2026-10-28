@@ -7,6 +7,10 @@
  * Äldre historik (före 24 okt 2026) är återskapad i efterhand och ungefärlig.
  */
 window.CHANGELOG = [
+  { datum: '2026-10-28', id: '2026-10-28r', rader: [
+    ['Nytt', 'Notiser: alla notiser sparas nu i appen, så att de inte försvinner. Tryck på 🔔 uppe till höger eller dra in panelen från högra kanten av skärmen. Där ser du notiser om bevakade flyg och tåg, Prognos, Bil & verkstad, Forum, Kalender och nyheter i appen, med hur länge sedan de kom.'],
+    ['Nytt', 'Notiser: tryck på en notis för att komma dit den gäller. Den markeras då som läst. Med Markera alla som lästa tar du bort alla markeringar på en gång. Siffran på 🔔 visar hur många som är olästa.']
+  ] },
   { datum: '2026-10-28', id: '2026-10-28q', rader: [
     ['Nytt', 'Åkeridata: uppe till höger väljer du nu Åkeri, Bil eller Chaufför. Väljer du Bil eller Chaufför väljer du sedan vilken bil eller förare. Alla siffror, målet och listan med körpass visas då bara för den bilen eller föraren, med samma flikar som förut. Valet sparas till nästa gång.'],
     ['Nytt', 'Åkeridata › Bil: du ser vilka förare som har kört bilen, med timmar och inkört, och hur många dagar bilen inte körts i perioden. Målet är målet för en bil. Bilar som inte finns i bilregistret men har körningar visas med texten (ej i bilregistret).'],

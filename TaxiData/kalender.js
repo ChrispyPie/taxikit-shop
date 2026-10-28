@@ -138,6 +138,8 @@
       st.loaded = { from: from, to: to };
       if (st.open) st.open = byId(st.open.id) || st.open;
       draw();
+      // Från notisflödet: öppna händelsen om den finns i det som hämtats
+      if (K._ev) { var ev = byId(K._ev); K._ev = null; if (ev) openEvent(ev.id); }
       if (first && (range()[0] < from || range()[1] > to)) load();   // första gången: om dagens datum var gissning
     }).catch(function (e) {
       if (fail(e)) return;
@@ -153,6 +155,11 @@
     });
   }
 
+  // Öppna Kalender och en viss händelse (notisflödet, notis.js)
+  K.openEvent = function (id) {
+    K._ev = +id || null;
+    if (typeof window.openItem === 'function') window.openItem(K.id);
+  };
   K.render = function (content) {
     st.el = content; st.open = null; st.form = null; st.comments = null;
     st.today = null; st.cur = null; st.data = null;
