@@ -12,6 +12,9 @@
  * En dag där ingen rad syns för föraren visas inte, och ger ingen prick eller notis.
  */
 window.CHANGELOG = [
+  { datum: '2026-10-28', id: '2026-10-28y', rader: [
+    ['Nytt', 'Om appen: längst ner står nu en copyrightrad, © 2026 Christian Parsa.']
+  ] },
   { datum: '2026-10-28', id: '2026-10-28x', rader: [
     ['Fixat', 'Prognos: en ny förbokning långt fram (80–120 minuter) kunde saknas i schemat i upp till 7 minuter, fast den redan syntes i originalprognosen. Det hände med en storbil på Landvetter i kväll. Nu syns den direkt, längst ner i schemat.']
   ] },

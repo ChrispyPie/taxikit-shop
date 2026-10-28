@@ -11,6 +11,7 @@
     '.om-faq summary { cursor: pointer; font-weight: 600; color: var(--primary); }\n' +
     '.om-faq p { margin: .35rem 0 0; white-space: pre-wrap; font-size: .93rem; color: var(--text); }\n' +
     '.om-ver { text-align: center; color: var(--text-soft); font-size: .85rem; margin: .4rem 0 1rem; }\n' +
+    '.om-copy { font-size: .75rem; opacity: .8; }\n' +
     '#om-nyheter { margin-bottom: .7rem; }\n' +
     '.om-nyh-rubrik { font-weight: 700; color: var(--primary); font-size: 1.05rem; margin: .6rem .1rem .5rem; }\n' +
     '.om-nyh-dag { background: var(--surface); border: 1px solid var(--border, #cbd5e0); border-radius: 12px; padding: .55rem .75rem .6rem; margin-bottom: .7rem; }\n' +
@@ -155,7 +156,7 @@
       (window.FORUM ? '<div class="vk-iact"><button data-om="forum">💬 Gå till Forum</button></div>' : '') + '</div>' +
       '<div class="vk-card om-faq"><div class="vk-lbl">Vanliga frågor</div>';
     (d.faq || []).forEach(function (x) { h += '<details><summary>' + esc(x.q) + '</summary><p>' + esc(x.a) + '</p></details>'; });
-    h += '</div><div class="om-ver">Version ' + esc(d.version) + '</div>';
+    h += '</div><div class="om-ver">Version ' + esc(d.version) + '<br><span class="om-copy">© 2026 Christian Parsa</span></div>';
     content.innerHTML = h;
     markSeenSoon();
     if (serverSeen === undefined && localStorage.getItem('taxi_session')) {
