@@ -35,6 +35,24 @@
   // Vad föraren senast sett sparas per förare på servern (changelog_seen_get/_set) och cachas i localStorage
   // så att pricken inte blinkar. Ny förare (ingen markering): bara senaste datumet räknas som nytt.
   function nyhId(dag) { return dag.id || dag.datum; }
+  // Vem ser vad (t543u): rader märkta 'admin' eller 'agare' i changelog.js visas bara för de rollerna.
+  // Rollen är samma som styr menyn (menuRole i index.html: get_me, eller demots roll). Okänd roll = förare.
+  var AUD = { admin: ['admin', 'agare', 'superadmin'], agare: ['agare', 'superadmin'] };
+  function minRoll() { try { return (typeof window.menuRole === 'function' && window.menuRole()) || 'standard'; } catch (e) { return 'standard'; } }
+  function lista() {
+    var roll = minRoll(), ut = [];
+    (window.CHANGELOG || []).forEach(function (dag) {
+      var rader = [];
+      (dag.rader || []).forEach(function (r) {
+        var aud = r[2] || dag.aud;
+        if (!aud || (AUD[aud] || []).indexOf(roll) >= 0) rader.push([r[0], r[1]]);
+        else if (r[3]) rader.push([r[0], r[3]]);
+      });
+      if (rader.length) ut.push(Object.assign({}, dag, { rader: rader }));
+    });
+    return ut;
+  }
+  O.lista = lista;
   function cacheKey() { return NYH_KEY + ':' + (localStorage.getItem('taxi_driver') || ''); }
   function cacheGet() { try { return localStorage.getItem(cacheKey()); } catch (e) { return null; } }
   function cacheSet(v) { try { localStorage.setItem(cacheKey(), v); } catch (e) {} }
@@ -51,15 +69,15 @@
   }
   // Markering att jämföra mot. Ingen markering alls = ny förare: allt utom senaste datumet räknas som sett.
   function seenMark(v) {
-    var L = window.CHANGELOG || [];
+    var L = lista();
     if (v) return v;
     return L.length > 1 ? nyhId(L[1]) : (L.length ? nyhId(L[0]) : '');
   }
-  function newest() { var L = window.CHANGELOG || []; return L.length ? nyhId(L[0]) : ''; }
+  function newest() { var L = lista(); return L.length ? nyhId(L[0]) : ''; }
   function hasUnseen(v) { var n = newest(); return !!n && n > seenMark(v); }
   // För notisflödet (notis.js): finns det nyheter föraren inte sett? Ger senaste nyhetens id, datum och första raden.
   O.unseen = function () {
-    var L = window.CHANGELOG || [];
+    var L = lista();
     if (!L.length || !hasUnseen(serverSeen !== undefined ? serverSeen : cacheGet())) return null;
     var r = (L[0].rader || [])[0];
     var p = String(L[0].datum || '').split('-');
@@ -107,7 +125,7 @@
     return (i > 0 && i <= 24) ? '<b>' + esc(t.slice(0, i + 1)) + '</b> ' + esc(t.slice(i + 2)) : esc(t);
   }
   function nyheter(alla, mark) {
-    var L = window.CHANGELOG || [];
+    var L = lista();
     if (!L.length) return '';
     var sett = seenMark(mark);
     var h = '<div id="om-nyheter"><div class="om-nyh-rubrik"><span class="badge-host' + (hasUnseen(mark) ? ' has-badge' : '') + '" data-badge="nyheter" style="padding-right:12px">Nyheter</span></div>';

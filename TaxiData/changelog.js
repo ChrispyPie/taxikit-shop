@@ -5,6 +5,11 @@
  * Ny omgång samma dag som redan finns? Lägg en ny dag överst med id: '2026-10-26c' (så får förarna 'Ny' igen).
  * Det förarna senast sett sparas per förare på servern (tabell changelog_seen).
  * Äldre historik (före 24 okt 2026) är återskapad i efterhand och ungefärlig.
+ * Vem som ser raden (tredje fältet, valfritt). Utan fält ser alla raden.
+ *   'admin' = de som har Admin-rutan (admin, ägare, S admin), t.ex. Admin › Chaufförer och demokonton
+ *   'agare' = ägaren (och tillfälligt S admin), t.ex. Åkeridata, Admin › Bil & verkstad, Önskemål och idéer
+ * Ett fjärde fält (valfritt) är texten som alla andra ser i stället. Utan det ser de inte raden alls.
+ * En dag där ingen rad syns för föraren visas inte, och ger ingen prick eller notis.
  */
 window.CHANGELOG = [
   { datum: '2026-10-28', id: '2026-10-28s', rader: [
@@ -15,50 +20,50 @@ window.CHANGELOG = [
     ['Nytt', 'Notiser: tryck på en notis för att komma dit den gäller. Den markeras då som läst. Med Markera alla som lästa tar du bort alla markeringar på en gång. Siffran på 🔔 visar hur många som är olästa.']
   ] },
   { datum: '2026-10-28', id: '2026-10-28q', rader: [
-    ['Nytt', 'Åkeridata: uppe till höger väljer du nu Åkeri, Bil eller Chaufför. Väljer du Bil eller Chaufför väljer du sedan vilken bil eller förare. Alla siffror, målet och listan med körpass visas då bara för den bilen eller föraren, med samma flikar som förut. Valet sparas till nästa gång.'],
-    ['Nytt', 'Åkeridata › Bil: du ser vilka förare som har kört bilen, med timmar och inkört, och hur många dagar bilen inte körts i perioden. Målet är målet för en bil. Bilar som inte finns i bilregistret men har körningar visas med texten (ej i bilregistret).'],
-    ['Nytt', 'Åkeridata › Chaufför: du ser vilka bilar föraren har kört. Här visas inget mål, eftersom målen gäller per bil.']
+    ['Nytt', 'Åkeridata: uppe till höger väljer du nu Åkeri, Bil eller Chaufför. Väljer du Bil eller Chaufför väljer du sedan vilken bil eller förare. Alla siffror, målet och listan med körpass visas då bara för den bilen eller föraren, med samma flikar som förut. Valet sparas till nästa gång.', 'agare'],
+    ['Nytt', 'Åkeridata › Bil: du ser vilka förare som har kört bilen, med timmar och inkört, och hur många dagar bilen inte körts i perioden. Målet är målet för en bil. Bilar som inte finns i bilregistret men har körningar visas med texten (ej i bilregistret).', 'agare'],
+    ['Nytt', 'Åkeridata › Chaufför: du ser vilka bilar föraren har kört. Här visas inget mål, eftersom målen gäller per bil.', 'agare']
   ] },
   { datum: '2026-10-28', id: '2026-10-28p', rader: [
     ['Nytt', 'Bil & verkstad: nu kan du och ägaren skriva till varandra på ett ärende, till exempel när något behövs till bilen eller när du har anmält ett fel. Ägaren kan svara utan att ändra status, och du kan svara tillbaka. Alla meddelanden syns i en tråd på ärendet med namn och tid.'],
     ['Nytt', 'När den andra har svarat syns "Nytt svar" på ärendet och en siffra på fliken och på Bil & verkstad på startsidan. Markeringen försvinner när du har tittat på ärendet.'],
-    ['Förbättrat', 'Admin › Bil & verkstad: knappen "Skicka meddelande" ligger bredvid Pågår och Åtgärdad. Kommentaren du skriver när du ändrar status syns också i tråden. Det går att skriva även efter att ärendet är åtgärdat.']
+    ['Förbättrat', 'Admin › Bil & verkstad: knappen "Skicka meddelande" ligger bredvid Pågår och Åtgärdad. Kommentaren du skriver när du ändrar status syns också i tråden. Det går att skriva även efter att ärendet är åtgärdat.', 'agare']
   ] },
   { datum: '2026-10-28', id: '2026-10-28o', rader: [
-    ['Nytt', 'Admin › Önskemål och idéer: ägaren kan skriva vad som ska ändras eller läggas till i appen. Christian går igenom allt innan något ändras. Inget ändras automatiskt när man skickar.'],
-    ['Nytt', 'Där syns också tidigare önskemål med datum, status (Ny, Läst, Planerad, Klar eller Inte nu) och svar från Christian. Ett önskemål går att ta bort så länge det har status Ny.']
+    ['Nytt', 'Admin › Önskemål och idéer: ägaren kan skriva vad som ska ändras eller läggas till i appen. Christian går igenom allt innan något ändras. Inget ändras automatiskt när man skickar.', 'agare'],
+    ['Nytt', 'Där syns också tidigare önskemål med datum, status (Ny, Läst, Planerad, Klar eller Inte nu) och svar från Christian. Ett önskemål går att ta bort så länge det har status Ny.', 'agare']
   ] },
   { datum: '2026-10-27', id: '2026-10-27c', rader: [
-    ['Fixat', 'Admin › Chaufförer: en förare som inte har aktiverat sitt konto får inte längre texten "logga in med lösenordet du valde". Den texten skickas bara till förare som verkligen har valt lösenord. Alla andra får en aktiveringslänk.'],
-    ['Förbättrat', 'Admin › Chaufförer: bjud in med ett tryck. Tryck Dela inbjudan så aktiveras kontot och du får direkt texten med aktiveringslänken att skicka. Trycker du två gånger skapas ingen extra länk, och om något går fel visas ett fel i stället för fel text.'],
-    ['Förbättrat', 'Admin › Chaufförer: du ser hela texten innan du skickar den, och kan kopiera eller dela den.']
+    ['Fixat', 'Admin › Chaufförer: en förare som inte har aktiverat sitt konto får inte längre texten "logga in med lösenordet du valde". Den texten skickas bara till förare som verkligen har valt lösenord. Alla andra får en aktiveringslänk.', 'admin'],
+    ['Förbättrat', 'Admin › Chaufförer: bjud in med ett tryck. Tryck Dela inbjudan så aktiveras kontot och du får direkt texten med aktiveringslänken att skicka. Trycker du två gånger skapas ingen extra länk, och om något går fel visas ett fel i stället för fel text.', 'admin'],
+    ['Förbättrat', 'Admin › Chaufförer: du ser hela texten innan du skickar den, och kan kopiera eller dela den.', 'admin']
   ] },
   { datum: '2026-10-27', id: '2026-10-27b', rader: [
-    ['Förbättrat', 'Demokonton: den som tittar ser inte längre vems siffror det är. Förarens namn och förar-ID visas som Demoförare och bilarna som Demobil 1, 2 och så vidare. Siffrorna är fortfarande riktiga. Det döljs även i det som skickas till telefonen.'],
-    ['Fixat', 'Åkeridata blir inte längre blek om servern behöver använda reservvägen. Siffrorna visas som vanligt.']
+    ['Förbättrat', 'Demokonton: den som tittar ser inte längre vems siffror det är. Förarens namn och förar-ID visas som Demoförare och bilarna som Demobil 1, 2 och så vidare. Siffrorna är fortfarande riktiga. Det döljs även i det som skickas till telefonen.', 'admin'],
+    ['Fixat', 'Åkeridata blir inte längre blek om servern behöver använda reservvägen. Siffrorna visas som vanligt.', 'agare']
   ] },
   { datum: '2026-10-27', id: '2026-10-27a', rader: [
-    ['Förbättrat', 'Åkeridata: sidan hämtar nu bara den period du tittar på (dag, vecka, månad eller år) i stället för hela året på en gång. Den öppnar snabbare och drar mindre mobildata. Siffrorna räknas på samma sätt som förut, och äldre år fungerar som vanligt. När du tittar på ett helt år hämtas resorna i ett körpass först när du fäller ut passet.']
+    ['Förbättrat', 'Åkeridata: sidan hämtar nu bara den period du tittar på (dag, vecka, månad eller år) i stället för hela året på en gång. Den öppnar snabbare och drar mindre mobildata. Siffrorna räknas på samma sätt som förut, och äldre år fungerar som vanligt. När du tittar på ett helt år hämtas resorna i ett körpass först när du fäller ut passet.', 'agare']
   ] },
   { datum: '2026-10-26', id: '2026-10-26o', rader: [
     ['Fixat', 'Appen fastnar inte längre på inloggningssidan när mobilnätet hackar. Om servern inte svarar inom 10 sekunder går appen vidare ändå.']
   ] },
   { datum: '2026-10-26', id: '2026-10-26n', rader: [
-    ['Nytt', 'Admin › Bil & verkstad: ägaren ser allt som behövs till bilarna och alla felanmälningar, sorterat per bil. Där kan ägaren markera Pågår eller Åtgärdad, skriva ett meddelande till föraren eller ta bort. Admin-rutan visar en siffra när något nytt har kommit in.']
+    ['Nytt', 'Admin › Bil & verkstad: ägaren ser allt som behövs till bilarna och alla felanmälningar, sorterat per bil. Där kan ägaren markera Pågår eller Åtgärdad, skriva ett meddelande till föraren eller ta bort. Admin-rutan visar en siffra när något nytt har kommit in.', 'agare']
   ] },
   { datum: '2026-10-26', id: '2026-10-26i', rader: [
-    ['Nytt', 'Körpassdata, Åkeridata och Topplistor: äldre år (2025) hämtas nu automatiskt när du bläddrar dit, till exempel från januari i år bakåt till december. Första gången tar det en kort stund. När du tittar på i år hämtas inget extra, och inget sparas i telefonen.'],
+    ['Nytt', 'Körpassdata, Åkeridata och Topplistor: äldre år (2025) hämtas nu automatiskt när du bläddrar dit, till exempel från januari i år bakåt till december. Första gången tar det en kort stund. När du tittar på i år hämtas inget extra, och inget sparas i telefonen.', 'agare', 'Körpassdata och Topplistor: äldre år (2025) hämtas nu automatiskt när du bläddrar dit, till exempel från januari i år bakåt till december. Första gången tar det en kort stund. När du tittar på i år hämtas inget extra, och inget sparas i telefonen.'],
   ] },
   { datum: '2026-10-26', id: '2026-10-26h', rader: [
-    ['Förbättrat', 'Chaufförer: varje förare visar när den senast körde, och listan sorteras med den som kört senast överst. Förare som inte kört på 60 dagar visas gråare.'],
-    ['Nytt', 'Demokonto: ägaren kan bjuda in någon att titta på appen i 3 dagar. Personen skriver sitt namn och väljer eget lösenord, och kan bara titta.'],
-    ['Nytt', 'Demokonto: välj Förare eller Ägare. Ägar-demot visar adminpanelen med påhittade exempeluppgifter, aldrig åkeriets riktiga.'],
-    ['Nytt', 'Chaufförer: demokonton visas i en egen grupp Demo, där du kan skapa nya, se när de går ut och avsluta dem i förtid.'],
-    ['Förbättrat', 'Demokonton syns inte bland förarna och ser inga andra förares namn eller bilder.'],
+    ['Förbättrat', 'Chaufförer: varje förare visar när den senast körde, och listan sorteras med den som kört senast överst. Förare som inte kört på 60 dagar visas gråare.', 'admin'],
+    ['Nytt', 'Demokonto: ägaren kan bjuda in någon att titta på appen i 3 dagar. Personen skriver sitt namn och väljer eget lösenord, och kan bara titta.', 'admin'],
+    ['Nytt', 'Demokonto: välj Förare eller Ägare. Ägar-demot visar adminpanelen med påhittade exempeluppgifter, aldrig åkeriets riktiga.', 'admin'],
+    ['Nytt', 'Chaufförer: demokonton visas i en egen grupp Demo, där du kan skapa nya, se när de går ut och avsluta dem i förtid.', 'admin'],
+    ['Förbättrat', 'Demokonton syns inte bland förarna och ser inga andra förares namn eller bilder.', 'admin'],
     ['Fixat', 'Forum: rättat stavfel i forumreglerna (Roxx och uthängningar).'],
     ['Nytt', 'Prognos: en röd siffra på Prognos-rutan visar hur många nya bokningar som kommit sedan du tittade sist.'],
     ['Nytt', 'Verkstadstimmar: ägaren kan ställa frågor och föraren svara innan beslut.'],
-    ['Nytt', 'Verkstadstimmar: ägaren ser godkända timmar per månad och kan ladda ner dem.'],
+    ['Nytt', 'Verkstadstimmar: ägaren ser godkända timmar per månad och kan ladda ner dem.', 'agare'],
     ['Förbättrat', 'Topplistor: listan för arbetstimmar är borttagen.'],
     ['Nytt', 'Forum: regler för god ton. Du godkänner dem första gången du öppnar forumet.'],
     ['Nytt', 'Prognos: se kommande bokningar per zon, i tider var 5:e minut och per bilkategori. Uppdateras varje minut.'],
@@ -104,7 +109,7 @@ window.CHANGELOG = [
   ]},
   { datum: '2026-10-18', ungefar: true, rader: [
     ['Nytt', 'Appen: startskärm med ikoner, profilmeny och inloggning mot servern.'],
-    ['Nytt', 'Admin: lista över förare, uppdelad på kategori.'],
+    ['Nytt', 'Admin: lista över förare, uppdelad på kategori.', 'admin'],
     ['Nytt', 'Körpassdata: välj egen period med kalender.']
   ]},
   { datum: '2026-10-16', ungefar: true, rader: [
