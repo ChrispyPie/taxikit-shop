@@ -1,6 +1,8 @@
 /* Admin › Bil & verkstad.
  * Behövs till bilen och felanmälningar: ägaren (och S admin) ser alla öppna anmälningar per bil och
- * markerar dem som Pågår / Åtgärdad (med valfritt meddelande till föraren) eller tar bort dem
+ * markerar dem som Pågår / Åtgärdad (med valfritt meddelande till föraren) eller tar bort dem.
+ * Ägaren kan också skriva till föraren utan att ändra status (car_issue_message); föraren kan svara i appen.
+ * "Nytt svar" visas tills ägaren har sett ärendet (car_issue_seen).
  * (get_bil, set_car_issue_status, edge-funktionen bil-foto). Underhåll och uppgifter hanteras i appen (verkstad.js).
  * Verkstadstimmar: ägaren (och S admin) godkänner eller nekar förarnas verkstadstid,
  * kan fråga föraren (tråd fram och tillbaka tills beslut), ser månadens summa per förare
@@ -25,6 +27,8 @@
   var SUPPLY = { kvitto: ['🧾', 'Kvittorullar'], spolar: ['💧', 'Spolarvätska'], rengoring: ['🧽', 'Rengöring'], annat: ['✏️', 'Annat'] };
   ERR.forbidden = 'Du har inte behörighet att göra det.';
   ERR.not_editable = 'Det går inte att ändra längre.';
+  ERR.msg_too_long = 'Meddelandet får vara högst 1000 tecken.';
+  ERR.too_many = 'Du har skickat väldigt många meddelanden idag. Försök igen i morgon.';
   ERR.demo_read_only = 'Det här är ett demokonto. Du kan titta runt men inte ändra något.';
   var A = window.VERKSTAD_ADMIN = { data: null, month: null, open: {}, busy: false, el: null, newIss: 0, showDone: {}, photos: {} };
 
@@ -121,14 +125,15 @@
   A.count = function () {
     var a = rpc('workshop_pending_count', {}).then(function (n) { A.pending = +n || 0; }).catch(function () {});
     // bil_open_count finns från migrationen 20261026n. Saknas den blir siffran bara verkstadstiderna som förut.
-    var b = rpc('bil_open_count', {}).then(function (r) { A.newIss = ((r && +r.supply) || 0) + ((r && +r.fault) || 0); }).catch(function () {});
+    // + msg = ärenden där föraren har skrivit något som ägaren inte har läst (migrationen 20261028a)
+    var b = rpc('bil_open_count', {}).then(function (r) { A.newIss = ((r && +r.supply) || 0) + ((r && +r.fault) || 0) + ((r && +r.msg) || 0); }).catch(function () {});
     return Promise.all([a, b]).then(function () { return A.total(); });
   };
   A.total = function () { return (A.pending || 0) + (A.newIss || 0); };
   A.badge = function () { var n = A.total(); return n > 0 ? '<span class="vka-badge" aria-label="' + n + ' väntar">' + n + '</span>' : ''; };
-  function countNew() { A.newIss = ((A.bil && A.bil.issues) || []).filter(function (i) { return i.status === 'ny'; }).length; }
+  function countNew() { A.newIss = ((A.bil && A.bil.issues) || []).filter(function (i) { return i.status === 'ny' || i.unread > 0; }).length; }
   A.loadBil = function () {
-    return rpc('get_bil', {}).then(function (b) { A.bil = b; countNew(); render(); }).catch(function () { A.bil = { error: true }; render(); });
+    return rpc('get_bil', {}).then(function (b) { A.bil = b; seenQ = {}; countNew(); render(); }).catch(function () { A.bil = { error: true }; render(); });
   };
   A.shift = function (k) { A.month = new Date(A.month.getFullYear(), A.month.getMonth() + k, 1); A.load(); };
 
@@ -218,21 +223,55 @@
       .catch(function (e) { A.photos[id] = null; alert(err(e)); render(); });
   };
   A.toggleDone = function (k) { A.showDone[k] = !A.showDone[k]; render(); };
+  // Meddelande till föraren utan att ändra status
+  A.imsg = function (id) {
+    if (A.busy) return;
+    var t = document.getElementById('vka-ic-' + id), c = t ? t.value.trim() : '';
+    if (!c) { alert('Skriv meddelandet till föraren först.'); if (t) t.focus(); return; }
+    A.busy = true;
+    rpc('car_issue_message', { p_id: id, p_body: c })
+      .then(function () { A.busy = false; return A.loadBil(); })
+      .catch(function (e) { A.busy = false; alert(err(e)); A.loadBil(); });
+  };
+  // Ärenden som syns på skärmen räknas som lästa. "Nytt svar" ligger kvar tills nästa laddning.
+  var seenQ = {}, seenT = null;
+  function queueSeen(i) {
+    if (!(i.unread > 0) || seenQ[i.id]) return;
+    seenQ[i.id] = true;
+    clearTimeout(seenT); seenT = setTimeout(flushSeen, 300);
+  }
+  function flushSeen() {
+    var ids = Object.keys(seenQ).filter(function (k) { return seenQ[k] === true; }).map(Number);
+    if (!ids.length) return;
+    ids.forEach(function (id) { seenQ[id] = 'sent'; });
+    rpc('car_issue_seen', { p_ids: ids }).then(function () {
+      ids.forEach(function (id) { var i = issById(id); if (i) { i.unread = 0; i._new = true; } });
+      countNew();
+    }).catch(function () { ids.forEach(function (id) { delete seenQ[id]; }); });
+  }
   function when(ts) { var d = new Date(ts); return dl(d) + ' ' + hm(d); }
   function ichip(i) { return '<span class="vka-chip ' + i.status + '">' + ISTATUS[i.status] + '</span>'; }
+  // Tråd: statusändringar (som förut) + meddelanden mellan ägaren och föraren, i tidsordning
   function ihist(i) {
-    var hs = (i.history || []);
-    if (!hs.length) return '';
-    return '<div class="vka-thr">' + hs.map(function (u) {
-      return '<div class="vka-m sys">' + esc(ISTATUS[u.status] || u.status) + ' · ' + esc(when(u.at)) + (u.comment ? '<br>"' + esc(u.comment) + '"' : '') + '</div>';
+    var rows = (i.history || []).map(function (u) { return { at: u.at, u: u }; })
+      .concat((i.msgs || []).map(function (m) { return { at: m.at, m: m }; }));
+    if (!rows.length) return '';
+    rows.sort(function (a, b) { return new Date(a.at) - new Date(b.at); });
+    return '<div class="vka-thr">' + rows.map(function (r) {
+      var u = r.u, m = r.m;
+      if (u) return '<div class="vka-m sys">' + esc(ISTATUS[u.status] || u.status) + ' · ' + esc(when(u.at)) + (u.comment ? '<br>"' + esc(u.comment) + '"' : '') + '</div>';
+      var own = m.mine, who = own ? 'Du' : m.role === 'owner' ? esc(m.who || 'Ägaren') + ' (ägare)' : esc(m.who || 'Föraren');
+      return '<div class="vka-m ' + (own ? 'own' : 'drv') + '"><span class="w"><b>' + who + '</b> · ' + esc(when(m.at)) + '</span>' + esc(m.body) + '</div>';
     }).join('') + '</div>';
   }
   function issueCard(i) {
     var sup = SUPPLY[i.supply], open = i.status !== 'klar';
     var what = i.kind === 'supply' ? (sup ? sup[0] + ' ' + sup[1] : '🧴 Behövs') : (i.blocking ? '🛑 Bilen står' : '⚠️ Fel');
     var by = i.mine ? 'dig' : i.reporter_name ? esc(i.reporter_name) + ' <span style="color:var(--c-718096)">(' + esc(i.reporter) + ')</span>' : esc(i.reporter || 'föraren');
-    var h = '<div class="vka-card' + (i.status === 'ny' ? ' new' : '') + (open && i.blocking ? ' stop' : '') + (open ? '' : ' done') + '">' +
-      '<div class="vka-top"><div class="vka-what">' + what + '</div>' + ichip(i) + '</div>';
+    var isNew = i.unread > 0 || i._new;
+    queueSeen(i);
+    var h = '<div class="vka-card' + (i.status === 'ny' ? ' new' : '') + (isNew ? ' ans' : '') + (open && i.blocking ? ' stop' : '') + (open ? '' : ' done') + '">' +
+      '<div class="vka-top"><div class="vka-what">' + what + '</div><div>' + (isNew ? '<span class="vka-chip ans">💬 Nytt svar</span> ' : '') + ichip(i) + '</div></div>';
     if (i.body) h += '<div class="vka-txt">' + esc(i.body) + '</div>';
     h += '<div class="vka-meta">' + esc(when(i.created_at)) + ' · av ' + by + (i.photos ? ' · 📷 ' + i.photos : '') + '</div>';
     h += ihist(i);
@@ -241,12 +280,15 @@
     else if (ph && ph.length) h += '<div class="vka-ph">' + ph.map(function (p) { return p.url ? '<a href="' + esc(p.url) + '" target="_blank" rel="noopener"><img src="' + esc(p.url) + '" alt="Foto"></a>' : ''; }).join('') + '</div>';
     else if (i.photos) h += '<button class="vka-ask" onclick="VERKSTAD_ADMIN.iphotos(' + i.id + ')">📷 Visa foto</button>';
     if (open) {
-      h += '<textarea id="vka-ic-' + i.id + '" maxlength="500" placeholder="Meddelande till föraren (valfritt). Skickas när du trycker Pågår eller Åtgärdad."></textarea>' +
+      h += '<textarea id="vka-ic-' + i.id + '" maxlength="500" placeholder="Skriv till föraren (status ändras inte)"></textarea>' +
+        (i.mine ? '' : '<button class="vka-ask" onclick="VERKSTAD_ADMIN.imsg(' + i.id + ')">💬 Skicka meddelande</button>') +
         '<div class="vka-btns">' +
         (i.status === 'ny' ? '<button onclick="VERKSTAD_ADMIN.iset(' + i.id + ',\'pagar\')">Pågår</button>' : '') +
         '<button class="vka-ok" onclick="VERKSTAD_ADMIN.iset(' + i.id + ',\'klar\')">✓ Åtgärdad</button>' +
         '<button class="vka-del" onclick="VERKSTAD_ADMIN.idel(' + i.id + ')" aria-label="Ta bort">Ta bort</button></div>';
     } else {
+      if (!i.mine) h += '<textarea id="vka-ic-' + i.id + '" maxlength="500" placeholder="Skriv till föraren (ärendet är åtgärdat, status ändras inte)."></textarea>' +
+        '<button class="vka-ask" onclick="VERKSTAD_ADMIN.imsg(' + i.id + ')">💬 Skicka meddelande</button>';
       h += '<div class="vka-btns"><button onclick="VERKSTAD_ADMIN.iset(' + i.id + ',\'ny\')">Öppna igen</button>' +
         '<button class="vka-del" onclick="VERKSTAD_ADMIN.idel(' + i.id + ')">Ta bort</button></div>';
     }
@@ -269,7 +311,8 @@
       h += groups[k].map(issueCard).join('');
     });
     if (done.length) {
-      h += '<button class="vka-more" onclick="VERKSTAD_ADMIN.toggleDone(\'' + kind + '\')">' + (A.showDone[kind] ? 'Dölj åtgärdade' : 'Visa åtgärdade (' + done.length + ')') + '</button>';
+      var dn = done.filter(function (i) { return i.unread > 0; }).length;
+      h += '<button class="vka-more" onclick="VERKSTAD_ADMIN.toggleDone(\'' + kind + '\')">' + (A.showDone[kind] ? 'Dölj åtgärdade' : 'Visa åtgärdade (' + done.length + ')' + (dn ? ' · 💬 ' + dn + ' nytt svar' : '')) + '</button>';
       if (A.showDone[kind]) h += done.map(issueCard).join('');
     }
     return h;

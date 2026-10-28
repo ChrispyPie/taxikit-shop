@@ -120,7 +120,8 @@
       case 'car_model_makes': return [];
       case 'car_model_variants': return [];
       case 'workshop_pending_count': return 1;
-      case 'bil_open_count': return { supply: 2, fault: 1 };
+      case 'bil_open_count': return { supply: 2, fault: 1, msg: 1 };
+      case 'car_issue_seen': return 0;
       case 'get_bil': {
         var ex = function (id, kind, car, sup, body, status, d, h, by, name, extra) {
           return Object.assign({ id: id, kind: kind, car: car, car_id: car ? id : null, supply: sup, body: body, status: status, blocking: false,
@@ -130,7 +131,8 @@
           ex(901, 'supply', '9001', 'kvitto', 'Sista rullen i bilen (exempel)', 'ny', 0, 19, '900103', 'Bengt P'),
           ex(902, 'supply', '9002', 'annat', 'Ny laddkabel behövs, den gamla glappar (exempel)', 'ny', 1, 22, '900104', 'Cecilia T'),
           ex(903, 'supply', null, 'spolar', '', 'pagar', 2, 7, '900105', 'David D',
-            { history: [{ status: 'pagar', comment: 'Köper en dunk i morgon (exempel)', at: iso(1, 10) }] }),
+            { history: [{ status: 'pagar', comment: 'Köper en dunk i morgon (exempel)', at: iso(1, 10) }],
+              msgs: [{ id: 1, role: 'driver', who: 'David D', body: 'Den är nästan slut i bil 9003 också (exempel)', at: iso(1, 12), mine: false }], unread: 1 }),
           ex(904, 'fault', '9003', null, 'Varningslampa för däcktryck lyser (exempel)', 'ny', 0, 3, '900103', 'Bengt P'),
           ex(905, 'supply', '9001', 'rengoring', 'Spillt kaffe i baksätet (exempel)', 'klar', 4, 18, '900105', 'David D',
             { closed_at: iso(3, 9), history: [{ status: 'klar', comment: 'Tvättad (exempel)', at: iso(3, 9) }] })] };
