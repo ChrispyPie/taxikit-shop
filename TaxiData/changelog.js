@@ -14,7 +14,7 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-10-29', id: '2026-10-29b', tid: '02:40', rader: [
+  { datum: '2026-10-29', id: '2026-10-29b', tid: '02:58', rader: [
     ['Förbättrat', 'Forumet: förar-ID står nu bredvid namnet på inlägg och kommentarer, till exempel Anna S · 179890. Förar-ID står på taxilegitimationen, så det blir lättare att se vem som skrev.'],
     ['Förbättrat', 'Admin › Chaufförer: alla som har Admin-rutan ser nu förnamn och första bokstaven i efternamnet i förarlistan, till exempel Anna S · 179890. Övriga uppgifter visas fortfarande bara för ägaren.', 'admin'],
     ['Nytt', 'Admin › Chaufförer › Logg: loggen visar nu mycket mer. Där står vem som ändrade en förares uppgifter och vilka fält, men inte vad som skrevs. Där syns också utloggningar, forum, kalender, notiser och ny resdata. Överst väljer du vad som ska visas, och valet sparas i telefonen. Längst ner finns knappen Visa fler.', 'admin']
