@@ -79,6 +79,13 @@
     .info-box li { margin-bottom: 4px; }
     #access-denied { display: none; text-align: center; padding: 48px 16px; }
     #access-denied h2 { margin-bottom: 16px; }
+    .log-filter { padding: 10px 12px; }
+    .log-filter-head { display: flex; gap: 14px; align-items: baseline; font-size: calc(13px * var(--font-scale, 1)); color: var(--c-4a5568); margin-bottom: 6px; }
+    .log-filter-head span { font-weight: 600; flex: 1; }
+    .log-filter-head a { color: var(--c-3182ce); }
+    .log-chips { display: flex; flex-wrap: wrap; gap: 6px 8px; }
+    .log-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border: 1px solid var(--c-e2e8f0); border-radius: 16px; font-size: calc(13px * var(--font-scale, 1)); cursor: pointer; }
+    .log-chip input { width: 16px; height: 16px; margin: 0; }
   </style>
 </head>
 <body>
@@ -105,7 +112,7 @@
   </div>
 
   <script src="serverstatus.js?v=20261026tm1"></script>
-  <script src="demo.js?v=am1"></script>
+  <script src="demo.js?v=am2"></script>
   <script src="verkstad-admin.js?v=20261028nm1"></script>
   <script src="profilbild.js?v=zdm1"></script>
   <script src="onskemal-admin.js?v=20261028nm1"></script>
@@ -400,17 +407,18 @@
       return days[d.getDay()] + ' ' + d.getDate() + ' ' + months[d.getMonth()];
     }
 
-    function getDisplayName(id) {
+    // Förnamn + första bokstaven i efternamnet syns för alla admin-roller (pt604u). Ägaren får hela efternamnet
+    // från servern, övriga bara initialen (last_initial). Returnerar HTML (escapad).
+    function plainName(id) {
       const d = drivers[id];
       if (!d) return id;
-      if (!isOwner()) return id;
       const first = d.first_name || '';
-      const last = d.last_name || '';
+      const last = d.last_name || d.last_initial || '';
       if (!first && !last) return id;
-      if (window.shortNameParts) return esc(shortNameParts(first, last, id));   // "Christian P", se namn.js
-      if (!last) return first;
-      return first + ' ' + last[0];
+      if (window.shortNameParts) return shortNameParts(first, last, id);   // "Christian P", se namn.js
+      return last ? first + ' ' + last[0] : first;
     }
+    function getDisplayName(id) { return esc(plainName(id)); }
 
     function inPeriod(dateStr) {
       if (!dateStr) return false;
@@ -1415,37 +1423,99 @@
 
     function catName(c) { return (logRoleLabels[c] || c || '').toLowerCase(); }
 
+    // Namn · förar-id i loggen, t.ex. "Anna S · 650020" (bara id om namnet saknas)
+    function T(id) {
+      if (!id) return '?';
+      const n = plainName(id);
+      return n && n !== id ? n + ' · ' + id : id;
+    }
+    // "… av Anna S · 650020" när någon annan än författaren gjorde ändringen
+    function by(e) { return e.target_id && e.target_id !== e.actor_id ? ' av ' + T(e.target_id) : ''; }
+    function q(t) { return '"' + (t || '') + '"'; }
+    const driverFields = { first_name: 'förnamn', last_name: 'efternamn', address: 'adress', postal_code: 'postnummer', city: 'ort',
+      email: 'e-post', phone: 'telefon', emergency_first_name: 'anhörigs förnamn', emergency_last_name: 'anhörigs efternamn',
+      emergency_address: 'anhörigs adress', emergency_postal_code: 'anhörigs postnummer', emergency_city: 'anhörigs ort',
+      emergency_phone: 'anhörigs telefon', emergency_relation: 'anhörigs relation', notes: 'anteckningar' };
+    const forumFields = { title: 'rubrik', body: 'text', category: 'kategori' };
+    const eventFields = { title: 'namn', category: 'kategori', venue_id: 'plats', venue_name: 'plats', starts_at: 'starttid', ends_at: 'sluttid', comment: 'kommentar', address: 'adress', url: 'länk' };
+    const forumCats = { allmant: 'Allmänt', forslag: 'Förslag', buggar: 'Buggar', akeri: 'åkeriets forum' };
+    const forumSt = { ny: 'Ny', pagar: 'Pågår', klar: 'Klar', avvisad: 'Avvisad' };
+    function fieldList(f, labels) {
+      if (!Array.isArray(f)) return '';
+      const L = labels || driverFields;
+      return [...new Set(f.map(x => L[x] || x))].join(', ');
+    }
+    function remind(d) {
+      if (d.kind !== 'before_end' || d.min == null) return '';
+      return ' (' + (d.min ? d.min + ' min före slut' : 'vid slut') + ')';
+    }
+
+    // Filter i loggen: grupper av händelsetyper. 'x_*' = alla som börjar på x_. Valet sparas på enheten.
+    const LOG_GROUPS = [
+      ['inloggning', 'Inloggning', ['login', 'login_failed', 'logout']],
+      ['konto', 'Konton och lösenord', ['activate', 'deactivate', 'deactivate_cleanup', 'auto_deactivate', 'activation_*', 'password_*', 'require_password_change', 'demo_*']],
+      ['profil', 'Profiländringar', ['profile_update', 'photo_*']],
+      ['admin', 'Adminändringar', ['driver_edit', 'category_change', 'company_rename', 'goals_change', 'fuel_settings', 'car_*']],
+      ['forum', 'Forum', ['forum_*']],
+      ['kalender', 'Kalender', ['event_*']],
+      ['notiser', 'Notiser och bevakningar', ['push_*', 'watch_*', 'prognos_watch_*']],
+      ['bil', 'Bil och verkstad', ['bil_*', 'workshop_*']],
+      ['onskemal', 'Önskemål', ['dev_wish_*']],
+      ['system', 'System', ['data_*']],
+      ['ovrigt', 'Övrigt', []]
+    ];
+    const LOG_HIDE_KEY = 'admin_log_hidden';
+    function logHidden() {
+      try { const v = JSON.parse(localStorage.getItem(LOG_HIDE_KEY) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; }
+    }
+    function actMatch(action, pat) { return pat.endsWith('*') ? action.startsWith(pat.slice(0, -1)) : action === pat; }
+    function logGroupOf(action) {
+      const g = LOG_GROUPS.find(g => g[2].some(p => actMatch(action || '', p)));
+      return g ? g[0] : 'ovrigt';
+    }
+    function visibleLogGroups() { return LOG_GROUPS.filter(g => g[0] !== 'bil' || canSeeAkeridata()); }
+    function toggleLogGroup(key, on) {
+      const h = new Set(logHidden());
+      if (on) h.delete(key); else h.add(key);
+      localStorage.setItem(LOG_HIDE_KEY, JSON.stringify([...h]));
+      openLog();
+    }
+    function setAllLogGroups(on) {
+      localStorage.setItem(LOG_HIDE_KEY, JSON.stringify(on ? [] : LOG_GROUPS.map(g => g[0])));
+      openLog();
+    }
+
     function describeLog(e) {
-      const who = e.actor_role === 'system' ? 'Systemet' : (logRoleLabels[e.actor_role] || 'Förare') + ' ' + (e.actor_id || '?');
+      const who = e.actor_role === 'system' ? 'Systemet' : (logRoleLabels[e.actor_role] || 'Förare') + ' ' + T(e.actor_id);
       const d = e.details || {};
       switch (e.action) {
         case 'login': return who + ' loggade in' + (e.via_master ? ' (med huvudlösenordet)' : '');
-        case 'login_failed': return 'Misslyckad inloggning för ' + (e.target_id || '?') + (failReasons[d.reason] ? ' (' + failReasons[d.reason] + ')' : '');
-        case 'activate': return who + ' aktiverade ' + e.target_id + (d.category ? ' som ' + catName(d.category) : '');
-        case 'deactivate': return who + ' avaktiverade ' + e.target_id;
-        case 'deactivate_cleanup': return 'Systemet städade avaktiverade ' + e.target_id + ' (gammalt lösenord och nollställning borttagna)';
-        case 'auto_deactivate': return 'Systemet avaktiverade ' + e.target_id + ' (' + (d.days || 30) + ' dagar utan inloggning)';
-        case 'activation_link': return who + ' skapade ny aktiveringslänk för ' + e.target_id;
-        case 'activation_complete': return (e.target_id || '?') + ' aktiverade sitt konto och valde lösenord';
-        case 'activation_failed': return 'Misslyckad kontoaktivering för ' + (e.target_id || '?') + ' (fel förar-ID)';
+        case 'login_failed': return 'Misslyckad inloggning för ' + T(e.target_id) + (failReasons[d.reason] ? ' (' + failReasons[d.reason] + ')' : '');
+        case 'activate': return who + ' aktiverade ' + T(e.target_id) + (d.category ? ' som ' + catName(d.category) : '');
+        case 'deactivate': return who + ' avaktiverade ' + T(e.target_id);
+        case 'deactivate_cleanup': return 'Systemet städade avaktiverade ' + T(e.target_id) + ' (gammalt lösenord och nollställning borttagna)';
+        case 'auto_deactivate': return 'Systemet avaktiverade ' + T(e.target_id) + ' (' + (d.days || 30) + ' dagar utan inloggning)';
+        case 'activation_link': return who + ' skapade ny aktiveringslänk för ' + T(e.target_id);
+        case 'activation_complete': return T(e.target_id) + ' aktiverade sitt konto och valde lösenord';
+        case 'activation_failed': return 'Misslyckad kontoaktivering för ' + T(e.target_id) + ' (fel förar-ID)';
         case 'goals_change': return who + ' ändrade åkeriets mål' + (d.to ? ' (per bil: ' + d.to.month + ' kr/mån, ' + d.to.week + ' kr/v, ' + d.to.day + ' kr/dag' + (d.to.cars ? ', ' + d.to.cars + ' bilar' : '') + ')' : '');
         case 'car_add': return who + ' lade till bil ' + (e.target_id || '') + (d.modell ? ' (' + d.modell + ')' : '');
         case 'car_edit': return who + ' ändrade bil ' + (e.target_id || '');
         case 'fuel_settings': return who + ' ändrade åkeriets drivmedelspriser';
         case 'car_delete': return who + ' tog bort bil ' + (e.target_id || '') + (d.modell ? ' (' + d.modell + ')' : '');
-        case 'profile_update': return who + ' uppdaterade sina personuppgifter' + (e.via_master ? ' (med huvudlösenordet)' : '');
+        case 'profile_update': return who + ' ändrade sina personuppgifter' + (d.fields && d.fields.length ? ' (' + fieldList(d.fields) + ')' : '') + (d.via === 'forum' ? ' i forumet' : d.via === 'demo' ? ' när demokontot startades' : '') + (e.via_master ? ' (med huvudlösenordet)' : '');
         case 'password_change': return who + ' bytte lösenord' + (e.via_master ? ' (med huvudlösenordet)' : '');
-        case 'password_change_failed': return 'Misslyckat lösenordsbyte för ' + (e.target_id || '?') + ' (fel nuvarande lösenord)';
-        case 'require_password_change': return who + ' nollställde lösenordet för ' + (e.target_id || '?');
-        case 'password_reset_request': return 'Glömt lösenord för ' + (e.target_id || '?') + ': ' + (resetResults[String(d.result || '').split(':')[0]] || d.result || '?');
+        case 'password_change_failed': return 'Misslyckat lösenordsbyte för ' + T(e.target_id) + ' (fel nuvarande lösenord)';
+        case 'require_password_change': return who + ' nollställde lösenordet för ' + T(e.target_id);
+        case 'password_reset_request': return 'Glömt lösenord för ' + T(e.target_id) + ': ' + (resetResults[String(d.result || '').split(':')[0]] || d.result || '?');
         case 'password_reset': return who + ' valde nytt lösenord via e-postlänken' + (d.sessions_ended ? ' (' + d.sessions_ended + ' inloggningar avslutades)' : '');
         case 'password_forced_change': return who + ' valde nytt lösenord efter nollställning';
         case 'workshop_add': return who + ' registrerade verkstadstid ' + wsSpan(d);
         case 'workshop_edit': return who + ' ändrade sin verkstadstid till ' + wsSpan(d);
         case 'workshop_delete': return who + ' tog bort sin verkstadstid ' + wsSpan(d);
-        case 'workshop_approve': return who + ' godkände verkstadstid för ' + (e.target_id || '?') + ' ' + wsSpan(d) + (d.kr != null ? ' = ' + formatSEK(d.kr) : '') + (d.from === 'rejected' ? ' (var nekad)' : '') + (d.comment ? ' – "' + d.comment + '"' : '');
-        case 'workshop_reject': return who + ' nekade verkstadstid för ' + (e.target_id || '?') + ' ' + wsSpan(d) + (d.from === 'approved' ? ' (var godkänd)' : '') + (d.comment ? ' – "' + d.comment + '"' : '');
-        case 'workshop_ask': return who + ' frågade ' + (e.target_id || '?') + ' om verkstadstid ' + wsSpan(d) + (d.from === 'approved' ? ' (öppnade igen, var godkänd)' : d.from === 'rejected' ? ' (öppnade igen, var nekad)' : '') + (d.comment ? ' – "' + d.comment + '"' : '');
+        case 'workshop_approve': return who + ' godkände verkstadstid för ' + T(e.target_id) + ' ' + wsSpan(d) + (d.kr != null ? ' = ' + formatSEK(d.kr) : '') + (d.from === 'rejected' ? ' (var nekad)' : '') + (d.comment ? ' – "' + d.comment + '"' : '');
+        case 'workshop_reject': return who + ' nekade verkstadstid för ' + T(e.target_id) + ' ' + wsSpan(d) + (d.from === 'approved' ? ' (var godkänd)' : '') + (d.comment ? ' – "' + d.comment + '"' : '');
+        case 'workshop_ask': return who + ' frågade ' + T(e.target_id) + ' om verkstadstid ' + wsSpan(d) + (d.from === 'approved' ? ' (öppnade igen, var godkänd)' : d.from === 'rejected' ? ' (öppnade igen, var nekad)' : '') + (d.comment ? ' – "' + d.comment + '"' : '');
         case 'workshop_reply': return who + ' svarade om sin verkstadstid ' + wsSpan(d) + (d.comment ? ' – "' + d.comment + '"' : '');
         case 'workshop_rate': return who + ' ändrade timpriset för verkstadstid från ' + d.from + ' till ' + d.to + ' kr/h';
         case 'bil_issue_add': return who + (d.kind === 'supply' ? ' skrev att något behövs' : ' anmälde fel') + (d.car ? ' på bil ' + d.car : '') + (d.blocking ? ' (bilen står)' : '');
@@ -1458,15 +1528,55 @@
         case 'bil_maint_done': return who + ' markerade underhåll klart (' + (d.type || '') + ')' + (d.km != null ? ' vid ' + d.km + ' km' : '') + (d.cost != null ? ' = ' + formatSEK(d.cost) : '');
         case 'bil_maint_delete': return who + ' tog bort underhåll (' + (d.type || '') + ')';
         case 'bil_km': return who + ' angav mätarställning ' + d.to + ' km för bil ' + (d.car || '?');
-        case 'bil_task_add': return who + ' skickade uppgiften "' + (d.title || '') + '" till ' + (e.target_id || '?') + (d.car ? ' (bil ' + d.car + ')' : '');
-        case 'bil_task_edit': return who + ' ändrade uppgiften "' + (d.title || '') + '" (' + (e.target_id || '?') + ')';
-        case 'bil_task_delete': return who + ' tog bort uppgiften "' + (d.title || '') + '" (' + (e.target_id || '?') + ')';
+        case 'bil_task_add': return who + ' skickade uppgiften "' + (d.title || '') + '" till ' + T(e.target_id) + (d.car ? ' (bil ' + d.car + ')' : '');
+        case 'bil_task_edit': return who + ' ändrade uppgiften "' + (d.title || '') + '" (' + T(e.target_id) + ')';
+        case 'bil_task_delete': return who + ' tog bort uppgiften "' + (d.title || '') + '" (' + T(e.target_id) + ')';
         case 'bil_task_reply': return who + ' svarade på uppgiften "' + (d.title || '') + '"' + (d.booked_at ? ' – bokad ' + new Date(d.booked_at).toLocaleString('sv-SE', { dateStyle: 'short', timeStyle: 'short' }) : '') + (d.place ? ', ' + d.place : '');
         case 'bil_task_done': return who + ' markerade uppgiften "' + (d.title || '') + '" klar' + (d.car ? ' (bil ' + d.car + ')' : '') + (d.comment ? ' – "' + d.comment + '"' : '');
         case 'bil_prefs': return who + ' ändrade sina notisval för Bil & verkstad';
         case 'dev_wish_add': return who + ' skickade ett önskemål om appen' + (d.text ? ' – "' + d.text + '"' : '');
         case 'dev_wish_delete': return who + ' tog bort ett önskemål om appen' + (d.text ? ' – "' + d.text + '"' : '');
-        case 'category_change': return who + ' ändrade kategori på ' + e.target_id + ' till ' + catName(d.to);
+        case 'category_change': return who + ' ändrade kategori på ' + T(e.target_id) + ' till ' + catName(d.to);
+        case 'logout': return who + ' loggade ut' + (e.via_master ? ' (inloggad med huvudlösenordet)' : '');
+        case 'driver_edit': return d.new ? who + ' lade upp ' + T(e.target_id) + (d.fields && d.fields.length ? ' (' + fieldList(d.fields) + ')' : '')
+                                         : who + ' ändrade ' + (fieldList(d.fields) || 'uppgifter') + ' för ' + T(e.target_id);
+        case 'demo_create': return who + ' skapade demokontot ' + (e.target_id || '?') + (d.role ? ' (' + (d.role === 'agare' ? 'ägare' : 'förare') + ')' : '');
+        case 'demo_link': return who + ' skapade ny länk till demokontot ' + (e.target_id || '?');
+        case 'demo_end': return who + ' avslutade demokontot ' + (e.target_id || '?');
+        case 'demo_activated': return 'Demokontot ' + (e.target_id || '?') + ' startades';
+        case 'forum_post_add': return who + ' skrev inlägget ' + q(d.title) + (forumCats[d.cat] ? ' i ' + forumCats[d.cat] : '');
+        case 'forum_post_edit': return who + ' ändrade ' + (fieldList(d.fields, forumFields) || 'inlägget') + ' i inlägget ' + q(d.title) + by(e);
+        case 'forum_post_delete': return who + ' tog bort inlägget ' + q(d.title) + by(e);
+        case 'forum_post_hide': return who + ' dolde inlägget ' + q(d.title) + by(e);
+        case 'forum_post_unhide': return who + ' visade inlägget ' + q(d.title) + ' igen' + by(e);
+        case 'forum_status': return who + ' ändrade status på ' + q(d.title) + ' från ' + (forumSt[d.from] || d.from || 'ingen') + ' till ' + (forumSt[d.to] || d.to || 'ingen');
+        case 'forum_comment_add': return who + ' kommenterade ett inlägg i forumet';
+        case 'forum_comment_edit': return who + ' ändrade en kommentar i forumet' + by(e);
+        case 'forum_comment_delete': return who + ' tog bort en kommentar i forumet' + by(e);
+        case 'forum_comment_hide': return who + ' dolde en kommentar i forumet' + by(e);
+        case 'forum_comment_unhide': return who + ' visade en kommentar i forumet igen' + by(e);
+        case 'forum_rules': return who + ' godkände forumreglerna';
+        case 'company_rename': return who + ' bytte namn på åkeriet till ' + q(d.name);
+        case 'event_suggest': return who + ' föreslog evenemanget ' + q(d.title);
+        case 'event_add': return who + ' lade till evenemanget ' + q(d.title);
+        case 'event_edit': return who + ' ändrade ' + (fieldList(d.fields, eventFields) || 'evenemanget') + ' för ' + q(d.title);
+        case 'event_delete': return who + ' tog bort evenemanget ' + q(d.title);
+        case 'event_decide': return who + (d.to === 'active' ? ' godkände' : d.to === 'rejected' ? ' nekade' : ' ändrade') + ' förslaget ' + q(d.title) + (e.target_id ? ' från ' + T(e.target_id) : '');
+        case 'event_comment_add': return who + ' kommenterade ett evenemang';
+        case 'event_comment_delete': return who + ' tog bort en kommentar på ett evenemang' + by(e);
+        case 'event_remind_on': return who + ' slog på påminnelse för ett evenemang' + remind(d);
+        case 'event_remind_off': return who + ' stängde av påminnelse för ett evenemang' + remind(d);
+        case 'push_on': return who + ' slog på notiser på en enhet';
+        case 'push_off': return who + ' stängde av notiser på en enhet';
+        case 'push_expired': return 'Systemet tog bort en enhet som inte längre tar emot notiser (' + T(e.target_id) + ')';
+        case 'watch_on': return who + ' började bevaka ' + (d.kind === 'tag' ? 'tåg ' : d.kind === 'flyg' ? 'flyg ' : '') + (d.ident || '');
+        case 'watch_off': return who + ' slutade bevaka ' + (d.kind === 'tag' ? 'tåg ' : d.kind === 'flyg' ? 'flyg ' : '') + (d.ident || '');
+        case 'prognos_watch_on': return who + ' slog på bevakning av prognosen';
+        case 'prognos_watch_off': return who + ' stängde av bevakning av prognosen';
+        case 'photo_set': return who + ' bytte profilbild';
+        case 'photo_delete': return who + ' tog bort profilbilden' + by(e);
+        case 'data_import': return who + ' läste in ny resdata' + (d.trips != null ? ' (' + d.trips + ' resor' + (d.trips_before != null ? ', förut ' + d.trips_before : '') + '; ' + d.shifts + ' pass' + (d.shifts_before != null ? ', förut ' + d.shifts_before : '') + ')' : '');
+        case 'data_delete': return who + ' tog bort en resdatafil';
         default: return who + ': ' + e.action + ' ' + (e.target_id || '');
       }
     }
@@ -1488,12 +1598,41 @@
       return new Date(t).toLocaleString('sv-SE', { timeZone: 'Europe/Stockholm', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
     }
 
+    // Loggen hämtas 200 rader i taget (admin_log_page, filtret görs på servern). Finns inte den funktionen
+    // än används admin_get_log (300 senaste) och filtret görs här.
+    let logMore = false, logBusy = false, logOld = false;
+    const LOG_PAGE = 200;
+    async function fetchLogPage(before) {
+      const hidden = logHidden();
+      const hide = LOG_GROUPS.filter(g => hidden.includes(g[0])).flatMap(g => g[2]);
+      if (!logOld) {
+        try {
+          const r = await rpc('admin_log_page', { p_limit: LOG_PAGE, p_hide: hide.length ? hide : null,
+            p_before: before ? before.time : null, p_before_id: before ? before.id : null });
+          if (r && Array.isArray(r.rows)) return { rows: r.rows, more: !!r.more };
+        } catch (e) {
+          if (!(e.code === 'PGRST202' || /admin_log_page/.test(e.message))) throw e;
+        }
+        logOld = true;
+      }
+      if (before) return { rows: [], more: false };
+      const rows = await rpc('admin_get_log', { p_limit: 300 });
+      return { rows: rows || [], more: false };
+    }
+    function filterLog(rows) {
+      const hidden = logHidden();
+      return rows.filter(e => !hidden.includes(logGroupOf(e.action)));
+    }
+
     async function openLog() {
       showLog = true;
       logEntries = null;
+      logMore = false;
       render();
       try {
-        logEntries = await rpc('admin_get_log', { p_limit: 300 });
+        const r = await fetchLogPage(null);
+        logEntries = r.rows;
+        logMore = r.more;
       } catch (e) {
         logEntries = [];
         alert(errText(e));
@@ -1501,17 +1640,43 @@
       render();
     }
 
+    async function moreLog() {
+      if (logBusy || !logEntries || !logEntries.length) return;
+      logBusy = true;
+      render();
+      try {
+        const r = await fetchLogPage(logEntries[logEntries.length - 1]);
+        logEntries = logEntries.concat(r.rows);
+        logMore = r.more;
+      } catch (e) { alert(errText(e)); }
+      logBusy = false;
+      render();
+    }
+
+    function renderLogFilter() {
+      const hidden = logHidden();
+      let h = '<div class="section log-filter"><div class="log-filter-head"><span>Visa</span>' +
+        '<a href="#" onclick="setAllLogGroups(true);return false;">Alla</a><a href="#" onclick="setAllLogGroups(false);return false;">Inga</a></div><div class="log-chips">';
+      visibleLogGroups().forEach(g => {
+        h += `<label class="log-chip"><input type="checkbox" ${hidden.includes(g[0]) ? '' : 'checked'} onchange="toggleLogGroup('${g[0]}', this.checked)"> ${esc(g[1])}</label>`;
+      });
+      return h + '</div></div>';
+    }
+
     function renderLog(content) {
-      if (logEntries === null) { content.innerHTML = '<div class="section"><p style="padding:16px;">Laddar...</p></div>'; return; }
-      let html = '<div class="section">';
-      if (!logEntries.length) html += '<p style="padding:16px;">Ingen aktivitet ännu.</p>';
-      logEntries.forEach(e => {
+      let html = renderLogFilter();
+      if (logEntries === null) { content.innerHTML = html + '<div class="section"><p style="padding:16px;">Laddar...</p></div>'; return; }
+      const rows = filterLog(logEntries);
+      html += '<div class="section">';
+      if (!rows.length) html += '<p style="padding:16px;">' + (logEntries.length || logHidden().length ? 'Inget att visa med de här valen.' : 'Ingen aktivitet ännu.') + '</p>';
+      rows.forEach(e => {
         html += `<div class="row" style="flex-direction:column; align-items:flex-start; gap:2px;">
           <span style="font-size:calc(12px * var(--font-scale, 1)); color:var(--c-718096);">${esc(formatLogTime(e.time))}</span>
           <span class="label">${esc(describeLog(e))}</span>
         </div>`;
       });
       html += '</div>';
+      if (logMore) html += `<div style="text-align:center; padding:8px 16px 24px;"><button onclick="moreLog()" style="width:100%;" ${logBusy ? 'disabled' : ''}>${logBusy ? 'Laddar...' : 'Visa fler'}</button></div>`;
       content.innerHTML = html;
     }
 

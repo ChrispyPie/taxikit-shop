@@ -108,10 +108,14 @@
                 { id: 'DEMO9', role: 'forare', first_name: 'Exempel', last_name: 'Demo', status: 'ended', expires_at: iso(2, 8), ended_at: iso(2, 8), created_at: iso(5, 8) }];
       }
       case 'admin_get_log':
-        return [
-          { created_at: iso(0, 9), actor_id: '900101', actor_role: 'agare', action: 'login', target_id: '900101', details: {} },
-          { created_at: iso(1, 14), actor_id: '900101', actor_role: 'agare', action: 'activate', target_id: '900107', details: {} },
-          { created_at: iso(2, 7), actor_id: '900103', actor_role: 'standard', action: 'login', target_id: '900103', details: {} }];
+      case 'admin_log_page': {
+        var rows = [
+          { id: 4, time: iso(0, 9), actor_id: me, actor_role: 'agare', action: 'login', target_id: me, details: {} },
+          { id: 3, time: iso(0, 8), actor_id: me, actor_role: 'agare', action: 'driver_edit', target_id: '900104', details: { fields: ['phone'] } },
+          { id: 2, time: iso(1, 14), actor_id: me, actor_role: 'agare', action: 'activate', target_id: '900107', details: {} },
+          { id: 1, time: iso(2, 7), actor_id: '900103', actor_role: 'standard', action: 'login', target_id: '900103', details: {} }];
+        return name === 'admin_get_log' ? rows : { rows: args && args.p_before ? [] : rows, more: false };
+      }
       case 'list_cars':
         return { can_edit: true, fuel: { prices: {}, config: { el_surcharge: 0, el_home_share: 100 } }, cars: [
           { id: 1, bilnummer: '9001', modell: 'Exempelbil Kombi', regnr: 'ABC 123', kategorier: ['app', 'storbil'], fuel: 'el', cons: 1.8, price_mode: 'auto', calc: { mode: 'auto', kr_per_mil: 3.2 } },
