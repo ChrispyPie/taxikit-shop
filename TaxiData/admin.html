@@ -87,6 +87,48 @@
     .log-chips { display: flex; flex-wrap: wrap; gap: 6px 8px; }
     .log-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border: 1px solid var(--c-e2e8f0); border-radius: 16px; font-size: calc(13px * var(--font-scale, 1)); cursor: pointer; }
     .log-chip input { width: 16px; height: 16px; margin: 0; }
+    /* Bilar: vinst/förlust-lista och kalkyl */
+    .bk-top { display: flex; align-items: center; gap: 8px; padding: 8px 16px 0; }
+    .bk-total { flex: 1; min-width: 0; display: flex; flex-direction: column; font-size: calc(13px * var(--font-scale, 1)); color: var(--c-4a5568); }
+    .bk-total b { font-size: calc(17px * var(--font-scale, 1)); }
+    #car-add { padding: 8px 12px; white-space: nowrap; }
+    .bk-list { overflow: hidden; }
+    .bk-row { border-bottom: 1px solid var(--c-edf2f7); }
+    .bk-row:last-child { border-bottom: none; }
+    .bk-head { display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; }
+    .bk-head:hover { background: var(--c-f7fafc); }
+    .bk-img { width: 64px; height: 38px; object-fit: contain; flex: none; }
+    .bk-id { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .bk-id b { font-size: calc(16px * var(--font-scale, 1)); }
+    .bk-id span { font-size: calc(12px * var(--font-scale, 1)); color: var(--c-718096); letter-spacing: 0.5px; }
+    .bk-res { font-weight: 700; font-size: calc(15px * var(--font-scale, 1)); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .bk-na { font-weight: 400; font-size: calc(12px * var(--font-scale, 1)); color: var(--c-718096); white-space: normal; }
+    .bk-chev { color: var(--c-718096); font-size: calc(12px * var(--font-scale, 1)); width: 10px; }
+    .bk-pos { color: var(--c-276749); }
+    .bk-neg { color: var(--c-c53030); }
+    .bk-calc { padding: 4px 12px 12px; background: var(--c-f7fafc); font-size: calc(13px * var(--font-scale, 1)); }
+    .bk-period { color: var(--c-4a5568); padding: 6px 0; }
+    .bk-line { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--c-e2e8f0); }
+    .bk-l { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+    .bk-note { display: block; font-weight: 400; font-size: calc(11.5px * var(--font-scale, 1)); color: var(--c-718096); margin-top: 2px; }
+    .bk-v { font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .bk-result { border-bottom: none; font-size: calc(16px * var(--font-scale, 1)); }
+    .bk-result .bk-l { font-weight: 700; }
+    .bk-empty, .bk-miss { color: var(--c-975a16); margin: 8px 0; }
+    .bk-info { color: var(--c-4a5568); font-size: calc(12px * var(--font-scale, 1)); display: flex; flex-direction: column; gap: 4px; margin-top: 6px; overflow-wrap: anywhere; }
+    .bk-edit { width: 100%; margin-top: 12px; }
+    .bk-foot { padding: 0 16px; font-size: calc(12px * var(--font-scale, 1)); color: var(--c-718096); }
+    .bk-types { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+    .bk-type { display: flex !important; flex-direction: column; align-items: center; gap: 2px; padding: 6px 2px; border: 2px solid var(--c-e2e8f0); border-radius: 8px; cursor: pointer; margin: 0 !important; text-align: center; }
+    .bk-type input { position: absolute; opacity: 0; width: 1px !important; height: 1px; }
+    .bk-type img { width: 100%; max-width: 64px; height: auto; }
+    .bk-type span { font-size: calc(11px * var(--font-scale, 1)); color: var(--primary); overflow-wrap: anywhere; }
+    .bk-type:has(input:checked) { border-color: var(--primary-bg); background: var(--c-e6f0fa); }
+    .bk-form .form-row .form-group { min-width: 0; }
+    .bk-form input { box-sizing: border-box; max-width: 100%; }
+    .bk-fh { font-weight: 600; font-size: calc(14px * var(--font-scale, 1)); margin: 16px 0 8px; padding-top: 12px; border-top: 1px solid var(--c-e2e8f0); }
+    .bk-hint { display: block; font-size: calc(11px * var(--font-scale, 1)); color: var(--c-718096); margin-top: 4px; }
+    .bk-preview { font-size: calc(15px * var(--font-scale, 1)); font-weight: 600; color: var(--primary); margin-bottom: 8px; }
   </style>
 </head>
 <body>
@@ -113,7 +155,7 @@
   </div>
 
   <script src="serverstatus.js?v=20261026tm1"></script>
-  <script src="demo.js?v=20261029d"></script>
+  <script src="demo.js?v=20261029h"></script>
   <script src="verkstad-admin.js?v=20261028nm1"></script>
   <script src="profilbild.js?v=zdm1"></script>
   <script src="onskemal-admin.js?v=20261028nm1"></script>
@@ -281,6 +323,7 @@
       password_too_short: 'Lösenordet måste vara minst 6 tecken.',
       not_pending: 'Föraren har redan valt lösenord. Avaktivera och aktivera igen för en ny länk.',
       bad_id: 'Ogiltigt förar-ID.',
+      invalid_kalkyl: 'Kontrollera kalkylen (belopp 0 kr eller mer, livslängd 1–30 år, mil per år, datum och intäkt om du valt Ange själv).',
       invalid_car: 'Kontrollera fälten (bilnummer, bilmodell, minst en kategori, drivmedel och förbrukning eller kr/mil 0–1000).',
       invalid_price: 'Kontrollera priserna (tal större än 0, påslag 0–20 kr/kWh, laddning 0–100 %).',
       duplicate_car: 'Det finns redan en bil med det bilnumret.',
@@ -1107,25 +1150,169 @@
       </details>`;
     }
 
+    // ---- Bilkalkyl: vinst/förlust per bil (som Taxi Göteborgs "Bilar i Taxitrafik") ----
+    // Vinst = inkört − förarlön − avgifter − bilkostnader, allt utan moms, senaste 12 månaderna (eller kortare om bilen är ny/ur trafik).
+    // Inkört kommer från resdatan per bil (list_cars → intakt). Förarlönen räknas med samma formel som Lönekoll (lonekoll.js):
+    //   (inkört inkl. moms + Uber tillbaka till brutto) ÷ 1,06 − Uberavgift − adm.avgift − inpasseringsavgift = lönegrund,
+    //   × provision, + semesterersättning, + arbetsgivaravgift (det ägaren betalar).
+    // Uberavgift, adm.avgift, inpassering och taxiavgift visas som Avgifter. Bränslepriserna är inkl. moms och räknas om till exkl. moms.
+    // Saknas resdata kan ägaren fylla i intäkt per år (exkl. moms) på bilen.
+    const BK = { moms: 6, uber: 25, uberIn: 26, adm: 1.3, inpass: 2500, provision: 37, semester: 13, agavg: 31.42, bransleMoms: 25 };
+    const BK_TYPES = { sedan: 'Personbil', kombi: 'Kombi', storbil: 'Storbil', special: 'Specialfordon' };
+    let openCars = {};     // bilens id -> uträkningen visas
+    function carType(c) {
+      const k = c.kalkyl || {};
+      if (k.bildtyp) return k.bildtyp;
+      if (k.specialfordon) return 'special';
+      const cat = c.kategorier || [];
+      return cat.includes('Storbil') ? 'storbil' : cat.includes('Kombi') ? 'kombi' : 'sedan';
+    }
+    function kr0(n) { return n == null || isNaN(n) ? '–' : Math.round(n).toLocaleString('sv-SE').replace(/\u2212/g, '−') + ' kr'; }
+    function krSign(n) { return n == null ? '–' : (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(Math.round(n)).toLocaleString('sv-SE') + ' kr'; }
+    function svDate(d) { if (!d) return ''; const [y, m, dd] = String(d).slice(0, 10).split('-').map(Number); return dd + '/' + m + ' ' + y; }
+    function nz(v) { return v == null || v === '' ? null : Number(v); }
+
+    function carKalk(c) {
+      const K = c.kalkyl || {}, I = c.intakt || {};
+      const dagar = I.dagar != null ? Number(I.dagar) : 365, f = dagar / 365;
+      const manual = K.intakt_mode === 'manual' && K.intakt_ar != null;
+      const r = { f, dagar, manual, from: I.from, to: I.to, missing: [] };
+      // Inkört
+      if (manual) {
+        r.inkortEx = nz(K.intakt_ar) * f; r.uber = 0; r.inpassMan = 0;
+      } else if (Number(I.inkort) > 0) {
+        r.inkortIncl = Number(I.inkort); r.uber = Number(I.uber) || 0;
+        r.inkortEx = (r.inkortIncl + r.uber * BK.uberIn / 100) / (1 + BK.moms / 100);
+        r.inpassMan = Number(I.inpass_man) || 0;
+      } else r.inkortEx = null;
+      // Förarlön (samma som Lönekoll) och avgifter
+      if (r.inkortEx != null) {
+        r.uberFee = r.uber * BK.uber / 100;
+        r.adm = r.inkortEx * BK.adm / 100;
+        r.inpass = r.inpassMan * BK.inpass;
+        r.lonegrund = Math.max(0, r.inkortEx - r.uberFee - r.adm - r.inpass);
+        r.lon = r.lonegrund * BK.provision / 100;
+        r.sem = r.lon * BK.semester / 100;
+        r.agavg = (r.lon + r.sem) * BK.agavg / 100;
+        r.forarlon = r.lon + r.sem + r.agavg;
+      }
+      r.taxiavg = nz(K.taxiavg_ar) != null ? nz(K.taxiavg_ar) * f : null;
+      r.avgifter = (r.uberFee || 0) + (r.adm || 0) + (r.inpass || 0) + (r.taxiavg || 0);
+      // Bilkostnader
+      const per = (v) => v == null ? null : v * f;
+      r.avskr = nz(K.inkopspris) != null && nz(K.livslangd_ar) ? nz(K.inkopspris) / nz(K.livslangd_ar) * f : null;
+      r.rantor = per(nz(K.rantor_ar)); r.skatt = per(nz(K.skatt_ar)); r.service = per(nz(K.service_ar));
+      r.forsakring = per(nz(K.forsakring_ar)); r.tvatt = per(nz(K.tvatt_ar));
+      const km = Number(I.km) || 0;
+      r.milData = !manual && km > 0;
+      r.mil = r.milData ? km / 10 : nz(K.mil_ar) != null ? nz(K.mil_ar) * f : null;
+      const kpm = c.calc && c.calc.kr_per_mil != null ? Number(c.calc.kr_per_mil) : null;
+      r.krMilEx = kpm != null ? kpm / (1 + BK.bransleMoms / 100) : null;
+      r.bransle = r.krMilEx != null && r.mil != null ? r.krMilEx * r.mil : null;
+      r.bilkostnad = ['avskr', 'rantor', 'skatt', 'service', 'forsakring', 'tvatt', 'bransle'].reduce((s, k) => s + (r[k] || 0), 0);
+      // Vad saknas
+      if (nz(K.inkopspris) == null || !nz(K.livslangd_ar)) r.missing.push('inköpspris och livslängd');
+      if (nz(K.forsakring_ar) == null) r.missing.push('försäkring');
+      if (nz(K.skatt_ar) == null) r.missing.push('skatt');
+      if (nz(K.service_ar) == null) r.missing.push('rep o service');
+      if (nz(K.taxiavg_ar) == null) r.missing.push('taxiavgift');
+      if (r.bransle == null) r.missing.push(r.krMilEx == null ? 'bränslekostnad' : 'mil per år');
+      r.vinst = r.inkortEx == null ? null : r.inkortEx - r.forarlon - r.avgifter - r.bilkostnad;
+      // Som i det gamla verktyget: total kostnad per mil för ett helt år (utan förarlön)
+      const mA = nz(K.mil_ar);
+      if (mA) {
+        const fast = ['rantor_ar', 'skatt_ar', 'service_ar', 'taxiavg_ar', 'forsakring_ar', 'tvatt_ar'].reduce((s, k) => s + (nz(K[k]) || 0), 0)
+          + (nz(K.inkopspris) != null && nz(K.livslangd_ar) ? nz(K.inkopspris) / nz(K.livslangd_ar) : 0);
+        r.kostMil = fast / mA + (r.krMilEx || 0);
+      }
+      return r;
+    }
+
+    function periodText(r) {
+      if (r.dagar >= 365) return 'senaste 12 mån';
+      if (!r.dagar) return 'ur trafik hela perioden';
+      return svDate(r.from) + '–' + svDate(r.to) + ' (' + r.dagar + ' dagar)';
+    }
+
+    function bkLine(label, val, note, cls) {
+      return `<div class="bk-line ${cls || ''}"><span class="bk-l">${label}${note ? `<span class="bk-note">${note}</span>` : ''}</span><span class="bk-v">${val}</span></div>`;
+    }
+
+    function renderCarCalc(c, r) {
+      const K = c.kalkyl || {}, I = c.intakt || {};
+      const pct = (n) => String(n).replace('.', ',') + ' %';
+      let h = '<div class="bk-calc">';
+      h += `<div class="bk-period">Period: ${periodText(r)}${r.manual ? ' · intäkt ifylld av ägaren' : ''}</div>`;
+      if (r.inkortEx == null) {
+        h += `<p class="bk-empty">${r.dagar ? 'Ingen resdata för ' + esc(c.bilnummer) + ' under perioden.' : 'Bilen var inte i trafik under perioden.'}${carList.can_edit ? ' Tryck på Ändra och fyll i intäkt per år under Intäkt.' : ''}</p>`;
+      } else {
+        h += bkLine('Inkört', kr0(r.inkortEx), r.manual ? 'Ifyllt: ' + kr0(nz(K.intakt_ar)) + ' per år, utan moms'
+          : 'Från resdatan, utan moms (' + kr0(r.inkortIncl) + ' inkl. ' + BK.moms + ' % moms' + (r.uber ? ', Uber räknat som brutto' : '') + '). ' +
+            I.kordagar + ' dagar, ' + I.forare + ' förare, ' + Math.round(Number(I.km) || 0).toLocaleString('sv-SE') + ' km', 'bk-sum');
+        h += bkLine('− Förarlön', kr0(r.forarlon), 'Som i Lönekoll: lönegrund ' + kr0(r.lonegrund) + ' × ' + pct(BK.provision) + ' = ' + kr0(r.lon) +
+          ', + semesterersättning ' + pct(BK.semester) + ' ' + kr0(r.sem) + ', + arbetsgivaravgift ' + pct(BK.agavg) + ' ' + kr0(r.agavg), 'bk-minus');
+        const av = [];
+        if (r.uberFee) av.push('Uberavgift ' + pct(BK.uber) + ' ' + kr0(r.uberFee));
+        av.push('adm.avgift ' + pct(BK.adm) + ' ' + kr0(r.adm));
+        if (r.inpass) av.push('inpassering ' + kr0(r.inpass));
+        av.push('taxiavgift ' + (r.taxiavg != null ? kr0(r.taxiavg) : 'ej ifylld'));
+        h += bkLine('− Avgifter', kr0(r.avgifter), av.join(', '), 'bk-minus');
+      }
+      const bk = [];
+      bk.push('värdeminskning ' + (r.avskr != null ? kr0(r.avskr) + ' (' + kr0(nz(K.inkopspris)) + ' / ' + String(nz(K.livslangd_ar)).replace('.', ',') + ' år)' : 'ej ifylld'));
+      [['rantor', 'räntor'], ['skatt', 'skatt'], ['service', 'rep o service'], ['forsakring', 'försäkring'], ['tvatt', 'tvätt o övrigt']]
+        .forEach(([k, t]) => { if (r[k] != null) bk.push(t + ' ' + kr0(r[k])); });
+      bk.push('bränsle ' + (r.bransle != null ? kr0(r.bransle) + ' (' + Math.round(r.mil).toLocaleString('sv-SE') + ' mil' + (r.milData ? ' enligt resdatan' : ' enligt mil per år') +
+        ' × ' + num(r.krMilEx) + ' kr/mil utan moms)' : 'saknas'));
+      h += bkLine((r.inkortEx == null ? '' : '− ') + 'Bilkostnader', kr0(r.bilkostnad), bk.join(', '), 'bk-minus');
+      if (r.vinst != null) h += `<div class="bk-line bk-result ${r.vinst >= 0 ? 'bk-pos' : 'bk-neg'}"><span class="bk-l">= ${r.vinst >= 0 ? 'Vinst' : 'Förlust'}</span><span class="bk-v">${krSign(r.vinst)}</span></div>`;
+      if (r.missing.length) h += `<p class="bk-miss">Ej ifyllt: ${r.missing.join(', ')}. Det som saknas räknas som 0 kr.</p>`;
+      const info = [];
+      if (r.kostMil != null) info.push('Beräknad total kostnad/mil (utan förarlön): <b>' + num(r.kostMil) + ' kr</b>');
+      if (r.inkortEx != null && r.mil) info.push('Inkört per mil: ' + num(r.inkortEx / r.mil) + ' kr');
+      const dts = [['i_trafik', 'I trafik'], ['ur_trafik', 'Ur trafik'], ['besiktning', 'Besiktning'], ['plombering', 'Plombering'], ['alkotest', 'Alkolås/alkotest']]
+        .filter(([k]) => K[k]).map(([k, t]) => t + ' ' + svDate(K[k]));
+      if (dts.length) info.push(dts.join(' · '));
+      if (c.modell || (c.kategorier || []).length) info.push(esc(c.modell || '') + ((c.kategorier || []).length ? ' · ' + esc(c.kategorier.join(', ')) : ''));
+      const cost = carCostLine(c); if (cost) info.push(cost);
+      h += `<div class="bk-info">${info.map(x => '<div>' + x + '</div>').join('')}</div>`;
+      if (carList.can_edit) h += `<button class="bk-edit" onclick="event.stopPropagation(); editCar(${c.id})">Ändra bil och kalkyl</button>`;
+      return h + '</div>';
+    }
+
+    function toggleCar(id) { openCars[id] = !openCars[id]; render(); }
+
     function renderCars(content) {
       if (carList === null) { content.innerHTML = '<div class="section"><p style="padding:16px;">Laddar...</p></div>'; return; }
       if (carList.error) { content.innerHTML = '<div class="section"><p style="padding:16px;">Kunde inte hämta bilarna.</p></div>'; return; }
       const cars = carList.cars || [];
-      let html = `<div style="display:flex; align-items:center; justify-content:space-between; padding:4px 16px 0;">
-        <span style="font-size:calc(13px * var(--font-scale, 1)); color:var(--c-4a5568);">${cars.length} ${cars.length === 1 ? 'bil' : 'bilar'} – styr åkeriets mål</span>
-        ${carList.can_edit ? '<button id="car-add" onclick="editCar(\'new\')" style="font-size:calc(22px * var(--font-scale, 1)); padding:2px 14px;" aria-label="Lägg till bil">+</button>' : ''}
-      </div>` + renderFuelBox() + '<div class="section">';
-      if (!cars.length) html += `<p style="padding:16px;">Inga bilar inlagda ännu.${carList.can_edit ? ' Tryck på + för att lägga till en bil.' : ''}</p>`;
-      cars.forEach(c => {
-        const cost = carCostLine(c);
-        html += `<div class="row car-row" ${carList.can_edit ? `onclick="editCar(${c.id})"` : ''} style="flex-direction:column; align-items:flex-start; gap:2px;${carList.can_edit ? '' : ' cursor:default;'}">
-          <span class="label">${esc(c.bilnummer)} · ${esc(c.modell)}${c.regnr ? ' <span style="font-weight:400; color:var(--c-718096);">(' + esc(c.regnr) + ')</span>' : ''}</span>
-          <span style="font-size:calc(12px * var(--font-scale, 1)); color:var(--c-718096);">${esc((c.kategorier || []).join(', '))}</span>
-          ${cost ? `<span class="car-cost" style="font-size:calc(12px * var(--font-scale, 1)); color:var(--c-2d3748);">${cost}</span>` : ''}
+      const today = carList.idag || new Date().toISOString().slice(0, 10);
+      const rows = cars.map(c => ({ c, r: carKalk(c), ut: c.kalkyl && c.kalkyl.ur_trafik && c.kalkyl.ur_trafik < today }));
+      const active = rows.filter(x => !x.ut), out = rows.filter(x => x.ut);
+      const withRes = active.filter(x => x.r.vinst != null), tot = withRes.reduce((s, x) => s + x.r.vinst, 0);
+      let html = `<div class="bk-top">
+        <div class="bk-total"><span>${active.length} ${active.length === 1 ? 'bil' : 'bilar'} i trafik${withRes.length ? ', ' + periodText({ dagar: 365 }) : ''}</span>
+          ${withRes.length ? `<b class="${tot >= 0 ? 'bk-pos' : 'bk-neg'}">Totalt ${krSign(tot)}</b>` : ''}</div>
+        ${carList.can_edit ? '<button id="car-add" onclick="editCar(\'new\')" aria-label="Lägg till bil">+ Ny bil</button>' : ''}
+      </div>` + renderFuelBox();
+      const list = (arr) => arr.map(({ c, r }) => {
+        const open = !!openCars[c.id], t = carType(c);
+        return `<div class="bk-row${open ? ' open' : ''}" data-id="${c.id}">
+          <div class="bk-head" onclick="toggleCar(${c.id})" role="button" aria-expanded="${open}">
+            <img class="bk-img" src="bil-${t}.webp" alt="${BK_TYPES[t]}" width="64" height="38">
+            <div class="bk-id"><b>${esc(c.bilnummer)}</b><span>${c.regnr ? esc(c.regnr) : 'Reg.nr saknas'}</span></div>
+            <div class="bk-res ${r.vinst == null ? '' : r.vinst >= 0 ? 'bk-pos' : 'bk-neg'}">${r.vinst == null ? '<span class="bk-na">Intäkt saknas</span>' : krSign(r.vinst)}</div>
+            <span class="bk-chev">${open ? '▾' : '▸'}</span>
+          </div>
+          ${open ? renderCarCalc(c, r) : ''}
         </div>`;
-      });
-      html += '</div>';
-      if (!carList.can_edit) html += '<p style="padding:0 16px; font-size:calc(12px * var(--font-scale, 1)); color:var(--c-718096);">Du kan se bilarna men inte ändra dem.</p>';
+      }).join('');
+      html += '<div class="section bk-list">';
+      if (!cars.length) html += `<p style="padding:16px;">Inga bilar inlagda ännu.${carList.can_edit ? ' Tryck på + Ny bil för att lägga till en bil.' : ''}</p>`;
+      html += list(active) + '</div>';
+      if (out.length) html += '<div class="section-header" style="margin:0 16px; border-radius:8px;">Ur trafik</div><div class="section bk-list">' + list(out) + '</div>';
+      html += `<p class="bk-foot">Vinst = inkört − förarlön − avgifter − bilkostnader, utan moms. Inkört och körda mil kommer från resdatan för bilnumret. Förarlönen räknas som i Lönekoll (provision ${String(BK.provision)} %, semesterersättning ${BK.semester} %) plus arbetsgivaravgift ${String(BK.agavg).replace('.', ',')} %. Tryck på en bil för att se uträkningen. Antalet bilar styr åkeriets mål.</p>`;
+      if (!carList.can_edit) html += '<p class="bk-foot">Du kan se bilarna men inte ändra dem.</p>';
       content.innerHTML = html;
     }
 
@@ -1197,6 +1384,7 @@
           <div class="form-group"><label>Bilnummer (taxinr)</label><input id="c-nr" value="${esc(c.bilnummer || '')}" placeholder="t.ex. A446" autocapitalize="characters"></div>
           <div class="form-group"><label>Reg.nr (valfritt)</label><input id="c-reg" value="${esc(c.regnr || '')}" placeholder="t.ex. ABC123" autocapitalize="characters"></div>
         </div>
+${renderBildtypPicker(c)}
         <div class="form-group"><label>Märke</label><select id="c-make" onchange="carMakeChanged()"><option value="">Laddar...</option></select>
           <input id="c-make-own" value="${esc(carForm.own ? c.make || '' : '')}" placeholder="Märke" maxlength="40" style="margin-top:6px; ${carForm.own ? '' : 'display:none;'}"></div>
         <div class="form-group" id="c-model-g"><label>Modell</label><select id="c-model" onchange="carModelChanged()"></select></div>
@@ -1238,6 +1426,7 @@
           <div id="c-mp-date" style="font-size:calc(11px * var(--font-scale, 1)); color:var(--c-718096); margin:-6px 0 8px;">${c.price_mode === 'manual' && c.manual_price_set_at ? 'Manuellt pris satt ' + sd(c.manual_price_set_at) : ''}</div>
           <div id="c-result" style="font-size:calc(15px * var(--font-scale, 1)); font-weight:600; color:var(--primary); margin-bottom:8px;"></div>
         </div>
+        ${renderKalkylForm(c)}
         <div class="modal-buttons">
           <button onclick="editingCar = null; render();">Avbryt</button>
           <button id="c-save" onclick="saveCar()" style="background: var(--primary-bg); color:white;">Spara</button>
@@ -1245,7 +1434,65 @@
         ${!isNew ? `<button id="c-delete" onclick="deleteCar()" style="width:100%; margin-top:16px; color:var(--c-c53030); border-color:var(--c-c53030);">Ta bort bil</button>` : ''}
       </div>`;
       carCalcUpdate();
+      kalkylPreview();
       fillCarMakes();
+    }
+
+    // Kalkyldelen av formuläret (bildtyp, datum, kostnader per år, intäkt). Alla belopp utan moms.
+    const KALK_MONEY = [['inkopspris', 'Inköpspris netto (kr)'], ['rantor_ar', 'Räntor per år (kr)'], ['skatt_ar', 'Fordonsskatt per år (kr)'],
+      ['service_ar', 'Rep o service per år (kr)'], ['forsakring_ar', 'Försäkring per år (kr)'], ['taxiavg_ar', 'Taxiavgift per år (kr)'], ['tvatt_ar', 'Tvätt o övrigt per år (kr)']];
+    const KALK_DATES = [['i_trafik', 'I trafik från'], ['ur_trafik', 'Ur trafik från'], ['besiktning', 'Bilbesiktning'], ['plombering', 'Plombering (taxameter)'], ['alkotest', 'Alkolås/alkotest']];
+    function renderBildtypPicker(c) {
+      const t = carType(c);
+      return `<div class="form-group"><label>Bildtyp (bild i listan)</label><div class="bk-types">
+        ${Object.keys(BK_TYPES).map(k => `<label class="bk-type"><input type="radio" name="c-bt" value="${k}" ${t === k ? 'checked' : ''}><img src="bil-${k}.webp" alt="" width="64" height="38"><span>${k === 'special' ? 'Special' : BK_TYPES[k]}</span></label>`).join('')}
+      </div>
+      <label class="radio-l"><input type="checkbox" id="c-special" ${(c.kalkyl || {}).specialfordon ? 'checked' : ''}> Specialfordon (t.ex. rullstolsbil)</label></div>`;
+    }
+    function renderKalkylForm(c) {
+      const K = c.kalkyl || {};
+      const money = (k, l) => `<div class="form-group"><label>${l}</label><input id="k-${k}" type="text" inputmode="decimal" value="${K[k] != null ? numTrim(K[k]) : ''}" placeholder="0" oninput="kalkylPreview()"></div>`;
+      const pairs = (arr, fn) => { let h = ''; for (let i = 0; i < arr.length; i += 2) h += '<div class="form-row">' + fn(...arr[i]) + (arr[i + 1] ? fn(...arr[i + 1]) : '<div class="form-group"></div>') + '</div>'; return h; };
+      const manual = K.intakt_mode === 'manual';
+      return `<div class="bk-form">
+        <div class="bk-fh">Datum</div>
+        ${pairs(KALK_DATES, (k, l) => `<div class="form-group"><label>${l}</label><input id="k-${k}" type="date" value="${K[k] ? String(K[k]).slice(0, 10) : ''}"></div>`)}
+        <div class="bk-fh">Kostnader (utan moms)</div>
+        <div class="form-row"><div class="form-group"><label>Inköpspris netto (kr)</label><input id="k-inkopspris" type="text" inputmode="decimal" value="${K.inkopspris != null ? numTrim(K.inkopspris) : ''}" placeholder="0" oninput="kalkylPreview()"></div>
+          <div class="form-group"><label>Ekonomisk livslängd (år)</label><input id="k-livslangd_ar" type="text" inputmode="decimal" value="${K.livslangd_ar != null ? numTrim(K.livslangd_ar) : ''}" placeholder="t.ex. 4" oninput="kalkylPreview()"></div></div>
+        ${pairs(KALK_MONEY.slice(1), money)}
+        <div class="form-group"><label>Beräknat antal mil per år</label><input id="k-mil_ar" type="text" inputmode="numeric" value="${K.mil_ar != null ? K.mil_ar : ''}" placeholder="t.ex. 9000" oninput="kalkylPreview()">
+          <span class="bk-hint">Används för kostnad/mil och när resdata saknas. Bränsle per mil kommer från Bränslekostnad ovan.</span></div>
+        <div class="bk-fh">Intäkt</div>
+        <div class="form-group">
+          <label class="radio-l"><input type="radio" name="k-im" value="data" ${manual ? '' : 'checked'} onchange="kalkylPreview()"> Från resdatan (inkört med bilnumret)</label>
+          <label class="radio-l"><input type="radio" name="k-im" value="manual" ${manual ? 'checked' : ''} onchange="kalkylPreview()"> Ange själv (om resdata saknas)</label>
+        </div>
+        <div class="form-group" id="k-ia-g"><label>Intäkt per år, utan moms (kr)</label><input id="k-intakt_ar" type="text" inputmode="decimal" value="${K.intakt_ar != null ? numTrim(K.intakt_ar) : ''}" placeholder="t.ex. 900000" oninput="kalkylPreview()"></div>
+        <div id="k-preview" class="bk-preview"></div>
+      </div>`;
+    }
+    function readKalkyl() {
+      const v = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+      const k = { bildtyp: (document.querySelector('input[name="c-bt"]:checked') || {}).value || null,
+        specialfordon: !!(document.getElementById('c-special') || {}).checked,
+        intakt_mode: (document.querySelector('input[name="k-im"]:checked') || {}).value || 'data' };
+      KALK_DATES.forEach(([f]) => { k[f] = v('k-' + f) || null; });
+      ['inkopspris', 'livslangd_ar', 'mil_ar', 'intakt_ar'].concat(KALK_MONEY.slice(1).map(x => x[0])).forEach(f => {
+        const s = v('k-' + f); k[f] = s === '' ? null : parseNum(s);
+      });
+      if (k.intakt_mode !== 'manual') k.intakt_ar = null;
+      return k;
+    }
+    function kalkylPreview() {
+      const box = document.getElementById('k-preview'); if (!box) return;
+      const k = readKalkyl();
+      const g = document.getElementById('k-ia-g'); if (g) g.style.display = k.intakt_mode === 'manual' ? '' : 'none';
+      const c = editingCar === 'new' ? {} : (carList.cars || []).find(x => x.id === editingCar) || {};
+      const bad = Object.entries(k).filter(([f, x]) => typeof x === 'number' && (isNaN(x) || x < 0));
+      if (bad.length) { box.textContent = 'Kontrollera beloppen – bara siffror.'; return; }
+      const r = carKalk(Object.assign({}, c, { kalkyl: k, intakt: Object.assign({}, c.intakt || {}, { dagar: 365 }) }));
+      box.innerHTML = r.kostMil != null ? 'Beräknad total kostnad/mil (utan förarlön): <b>' + num(r.kostMil) + ' kr</b>' : 'Fyll i mil per år för att se kostnad/mil.';
     }
 
     async function fillCarMakes() {
@@ -1396,8 +1643,16 @@
         if (pm === 'manual' && car.manual_price == null && car.manual_el_price == null) { alert('Fyll i ett eget pris eller välj Automatiskt pris.'); return; }
         if (bad(car.manual_price, 0, 1000) || bad(car.manual_el_price, 0, 1000)) { alert('Priset ska vara ett tal, t.ex. 2,50.'); return; }
       }
+      const k = readKalkyl();
+      const money = ['inkopspris', 'intakt_ar'].concat(KALK_MONEY.slice(1).map(x => x[0]));
+      if (money.some(f => k[f] != null && !(k[f] >= 0 && k[f] <= 50000000))) { alert('Beloppen ska vara tal i kronor, t.ex. 350000.'); return; }
+      if (k.livslangd_ar != null && !(k.livslangd_ar > 0 && k.livslangd_ar <= 30)) { alert('Livslängden ska vara 1–30 år, t.ex. 4.'); return; }
+      if (k.mil_ar != null && !(k.mil_ar > 0 && k.mil_ar <= 100000)) { alert('Mil per år ska vara ett tal, t.ex. 9000.'); return; }
+      if (k.inkopspris != null && k.livslangd_ar == null) { alert('Fyll i ekonomisk livslängd i år.'); return; }
+      if (k.intakt_mode === 'manual' && k.intakt_ar == null) { alert('Fyll i intäkt per år eller välj Från resdatan.'); return; }
+      if (k.i_trafik && k.ur_trafik && k.ur_trafik < k.i_trafik) { alert('Ur trafik kan inte vara före I trafik.'); return; }
       try {
-        await rpc('save_car', { p_id: editingCar === 'new' ? null : editingCar, p_car: car });
+        await rpc('save_car_full', { p_id: editingCar === 'new' ? null : editingCar, p_car: car, p_kalkyl: k });
         editingCar = null; carForm = null;
         await loadCars();
       } catch (e) { alert(errText(e)); }
@@ -1502,6 +1757,14 @@
         case 'goals_change': return who + ' ändrade åkeriets mål' + (d.to ? ' (per bil: ' + d.to.month + ' kr/mån, ' + d.to.week + ' kr/v, ' + d.to.day + ' kr/dag' + (d.to.cars ? ', ' + d.to.cars + ' bilar' : '') + ')' : '');
         case 'car_add': return who + ' lade till bil ' + (e.target_id || '') + (d.modell ? ' (' + d.modell + ')' : '');
         case 'car_edit': return who + ' ändrade bil ' + (e.target_id || '');
+        case 'car_kalkyl': {
+          const names = { bildtyp: 'bildtyp', specialfordon: 'specialfordon', i_trafik: 'i trafik', ur_trafik: 'ur trafik', besiktning: 'besiktning', plombering: 'plombering',
+            alkotest: 'alkotest', livslangd_ar: 'livslängd', inkopspris: 'inköpspris', rantor_ar: 'räntor', skatt_ar: 'skatt', service_ar: 'rep o service', taxiavg_ar: 'taxiavgift',
+            forsakring_ar: 'försäkring', tvatt_ar: 'tvätt o övrigt', mil_ar: 'mil per år', intakt_mode: 'intäkt', intakt_ar: 'intäkt per år' };
+          const fr = d.from || {}, to = d.to || {};
+          const ch = Object.keys(names).filter(k => JSON.stringify(fr[k] ?? null) !== JSON.stringify(to[k] ?? null)).map(k => names[k]);
+          return who + (d.ny ? ' fyllde i kalkylen för bil ' : ' ändrade kalkylen för bil ') + (e.target_id || '') + (ch.length ? ' (' + ch.join(', ') + ')' : '');
+        }
         case 'fuel_settings': return who + ' ändrade åkeriets drivmedelspriser';
         case 'car_delete': return who + ' tog bort bil ' + (e.target_id || '') + (d.modell ? ' (' + d.modell + ')' : '');
         case 'profile_update': return who + ' ändrade sina personuppgifter' + (d.fields && d.fields.length ? ' (' + fieldList(d.fields) + ')' : '') + (d.via === 'forum' ? ' i forumet' : d.via === 'demo' ? ' när demokontot startades' : '') + (e.via_master ? ' (med huvudlösenordet)' : '');
@@ -1535,6 +1798,14 @@
         case 'bil_task_reply': return who + ' svarade på uppgiften "' + (d.title || '') + '"' + (d.booked_at ? ' – bokad ' + new Date(d.booked_at).toLocaleString('sv-SE', { dateStyle: 'short', timeStyle: 'short' }) : '') + (d.place ? ', ' + d.place : '');
         case 'bil_task_done': return who + ' markerade uppgiften "' + (d.title || '') + '" klar' + (d.car ? ' (bil ' + d.car + ')' : '') + (d.comment ? ' – "' + d.comment + '"' : '');
         case 'bil_prefs': return who + ' ändrade sina notisval för Bil & verkstad';
+        // Sjukanmälan (t611u): syns bara för ägaren och S admin (bil_* filtreras bort för andra). Inga hälsouppgifter eller kommentarer i loggen.
+        case 'bil_sjuk_add': return who + ' sjukanmälde sig';
+        case 'bil_sjuk_recover': return who + ' friskanmälde en sjukperiod';
+        case 'bil_sjuk_status': return who + ' ändrade status på en sjukanmälan';
+        case 'bil_sjuk_lon': return who + ' ändrade sjuklön på en sjukperiod';
+        case 'bil_sjuk_cert': return who + ' laddade upp ett läkarintyg';
+        case 'bil_sjuk_cert_delete': return who + ' tog bort ett läkarintyg';
+        case 'bil_sjuk_delete': return who + ' tog bort en sjukperiod';
         case 'dev_wish_add': return who + ' skickade ett önskemål om appen' + (d.text ? ' – "' + d.text + '"' : '');
         case 'dev_wish_delete': return who + ' tog bort ett önskemål om appen' + (d.text ? ' – "' + d.text + '"' : '');
         case 'category_change': return who + ' ändrade kategori på ' + T(e.target_id) + ' till ' + catName(d.to);

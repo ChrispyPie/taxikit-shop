@@ -1,4 +1,4 @@
--- Ångra 20261029e_tagnotiser: återställ bevakning_tick som den var och ta bort tågnotiserna.
+-- Ångra 20261029i_tagnotiser: återställ bevakning_tick som den var och ta bort tågnotiserna.
 -- OBS: förarnas sparade tågnotiser försvinner.
 CREATE OR REPLACE FUNCTION private.bevakning_tick() RETURNS integer LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public', 'pg_temp' AS $function$
 declare v_key text; resp extensions.http_response;

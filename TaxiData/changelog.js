@@ -8,15 +8,25 @@
  * Vem som ser raden (tredje fältet, valfritt). Utan fält ser alla raden.
  *   'admin' = de som har Admin-rutan (admin, ägare, S admin), t.ex. Admin › Chaufförer och demokonton
  *   'agare' = ägaren (och tillfälligt S admin), t.ex. Åkeridata, Admin › Bil & verkstad, Önskemål och idéer
+ *   'flagga:sjuk' = bara de som har funktionsflaggan 'sjuk' (test av nya funktioner, private.feature_flags)
  * Ett fjärde fält (valfritt) är texten som alla andra ser i stället. Utan det ser de inte raden alls.
  * En dag där ingen rad syns för föraren visas inte, och ger ingen prick eller notis.
  * tid (valfritt): klockslaget då raden gick live, svensk tid 'HH:MM', t.ex. tid: '22:48'.
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-10-29', id: '2026-10-29e', tid: '03:45', rader: [
+  { datum: '2026-10-29', id: '2026-10-29i', tid: '06:12', rader: [
     ['Nytt', 'Ankomster › Tåg: Mina tågnotiser. Välj vilka tåg du alltid vill ha notis om, till exempel snabbtågen från Stockholm, och bara de tider du jobbar, till exempel 17:00–05:00 måndag till fredag. Du får notis före ankomsten (till exempel 20 min före), när tåget blir försenat och om det ställs in. Notiserna kommer även när appen är stängd, om notiser är påslagna. Tåg som matchar får en liten klocka 🔔 i listan.'],
     ['Nytt', 'Admin › Chaufförer › Logg: ändringar i Mina tågnotiser syns under Notiser och bevakningar.', 'admin']
+  ] },
+  { datum: '2026-10-29', id: '2026-10-29h', tid: '06:07', rader: [
+    ['Nytt', 'Admin › Bilar visar nu om varje bil går plus eller minus. Listan har en bild för biltypen, bilnummer, reg.nr och vinst eller förlust i kronor, grönt för plus och rött för minus. Tryck på en bil för att se uträkningen: inkört, förarlön, avgifter, bilkostnader och vinst eller förlust, allt utan moms och för de senaste 12 månaderna. Inkört och körda mil hämtas från resdatan för bilen. Fyll i bilens kostnader under Ändra: inköpspris, livslängd, räntor, skatt, service, försäkring, taxiavgift, tvätt, mil per år och datum för besiktning, plombering och alkotest. Saknas resdata kan du fylla i intäkten själv.', 'agare']
+  ] },
+  { datum: '2026-10-29', id: '2026-10-29g', tid: '04:24', rader: [
+    ['Nytt', 'Test: i listan Förarnas sjukperioder ser du nu alla sjukanmälningar, även dina egna. Då kan du testa både förarens och ägarens sida själv, till exempel godkänna eller begära läkarintyg på din egen. Det här är tillfälligt och tas bort när testet är klart.', 'flagga:sjuk_se_allt']
+  ] },
+  { datum: '2026-10-29', id: '2026-10-29f', tid: '04:15', rader: [
+    ['Nytt', 'Test: Bil & verkstad heter nu Anmälningar & ärenden och har fliken 🤒 Sjuk. Där sjukanmäler du dig, friskanmäler dig och laddar upp läkarintyg. Ägaren får en notis och kan godkänna, begära läkarintyg eller avslå. Appen räknar sjukdagarna och visar vad som gäller dag 1, dag 2–14 och efter dag 14. Bara du, ägaren och S admin ser din sjukanmälan. Just nu syns det här bara för Christian och Berra.', 'flagga:sjuk']
   ] },
   { datum: '2026-10-29', id: '2026-10-29d', tid: '03:51', rader: [
     ['Förbättrat', 'Säkerhet: inloggningar och ändringar loggas nu med IP-adress och enhet, så att missbruk går att utreda. Loggen sparas i 13 månader. Det står också på inloggningssidan och under Om appen.'],

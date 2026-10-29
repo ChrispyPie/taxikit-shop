@@ -1,4 +1,4 @@
--- 20261029e: Mina tågnotiser (t609u). Fasta notiser för vissa tåg, t.ex. snabbtågen från Stockholm,
+-- 20261029i (hette först 20261029e): Mina tågnotiser (t609u). Fasta notiser för vissa tåg, t.ex. snabbtågen från Stockholm,
 -- bara under de tider föraren väljer (t.ex. 17:00–05:00 mån–fre).
 --
 -- Nytt (bara tillägg, inget befintligt tas bort):
@@ -11,7 +11,7 @@
 --  * private.bevakning_tick ersätts: anropar edge-funktionen även när någon tågnotis är aktiv just nu
 --    (samma pg_cron-jobb som i dag, ingen ny schemaläggning, inget i cron-job.org).
 -- Loggar ändringar i Admin › Logg som watch_train_save / watch_train_delete (gruppen Notiser och bevakningar).
--- Ångra: undo/20261029e_tagnotiser_undo.sql
+-- Ångra: undo/20261029i_tagnotiser_undo.sql
 
 create table if not exists public.train_watches (
   id bigserial primary key,

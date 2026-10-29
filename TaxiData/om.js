@@ -40,13 +40,19 @@
   // Rollen är samma som styr menyn (menuRole i index.html: get_me, eller demots roll). Okänd roll = förare.
   var AUD = { admin: ['admin', 'agare', 'superadmin'], agare: ['agare', 'superadmin'] };
   function minRoll() { try { return (typeof window.menuRole === 'function' && window.menuRole()) || 'standard'; } catch (e) { return 'standard'; } }
+  // 'flagga:sjuk' = bara de som har funktionsflaggan (window.TAXI_FEATURES från get_my_features, t611u)
+  function harFlagga(aud) {
+    if (String(aud).indexOf('flagga:') !== 0) return false;
+    try { if (window.DEMO && DEMO.on && DEMO.on()) return false; } catch (e) {}
+    return (window.TAXI_FEATURES || []).indexOf(String(aud).slice(7)) >= 0;
+  }
   function lista() {
     var roll = minRoll(), ut = [];
     (window.CHANGELOG || []).forEach(function (dag) {
       var rader = [];
       (dag.rader || []).forEach(function (r) {
         var aud = r[2] || dag.aud;
-        if (!aud || (AUD[aud] || []).indexOf(roll) >= 0) rader.push([r[0], r[1]]);
+        if (!aud || (AUD[aud] || []).indexOf(roll) >= 0 || harFlagga(aud)) rader.push([r[0], r[1]]);
         else if (r[3]) rader.push([r[0], r[3]]);
       });
       if (rader.length) ut.push(Object.assign({}, dag, { rader: rader }));

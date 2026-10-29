@@ -124,11 +124,20 @@
         }
         return name === 'admin_get_log' ? rows : { rows: args && args.p_before ? [] : rows, more: false };
       }
-      case 'list_cars':
-        return { can_edit: true, fuel: { prices: {}, config: { el_surcharge: 0, el_home_share: 100 } }, cars: [
-          { id: 1, bilnummer: '9001', modell: 'Exempelbil Kombi', regnr: 'ABC 123', kategorier: ['app', 'storbil'], fuel: 'el', cons: 1.8, price_mode: 'auto', calc: { mode: 'auto', kr_per_mil: 3.2 } },
-          { id: 2, bilnummer: '9002', modell: 'Provmodell Sedan', regnr: 'DEF 456', kategorier: ['app'], fuel: 'laddhybrid', cons: 0.3, cons_el: 1.2, el_share: 60, price_mode: 'auto', calc: { mode: 'auto', kr_per_mil: 6.4 } },
-          { id: 3, bilnummer: '9003', modell: 'Demobuss', regnr: 'GHI 789', kategorier: ['storbil'], fuel: 'diesel', cons: 0.7, price_mode: 'auto', calc: { mode: 'auto', kr_per_mil: 13.1 } }] };
+      case 'list_cars': {
+        var idag = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+        var yr = function (d) { return new Date(Date.now() - d * 864e5).toISOString().slice(0, 10); };
+        return { can_edit: true, idag: idag, fuel: { prices: {}, config: { el_surcharge: 0, el_home_share: 100 } }, cars: [
+          { id: 1, bilnummer: '9001', modell: 'Exempelbil Kombi', regnr: 'ABC 123', kategorier: ['Kombi'], fuel: 'el', cons: 1.8, price_mode: 'auto', calc: { mode: 'auto', kr_per_mil: 3.2 },
+            kalkyl: { bildtyp: 'kombi', specialfordon: false, i_trafik: '2024-03-01', besiktning: yr(-40), plombering: yr(-200), alkotest: yr(-90), livslangd_ar: 4, inkopspris: 420000, rantor_ar: 9000, skatt_ar: 3200, service_ar: 18000, taxiavg_ar: 60000, forsakring_ar: 24000, tvatt_ar: 6000, mil_ar: 9000, intakt_mode: 'data', intakt_ar: null },
+            intakt: { from: yr(365), to: idag, dagar: 365, inkort: 1150000, uber: 90000, bom: 4000, km: 88000, kordagar: 310, forare: 3, pass: 330, inpass_man: 14, forsta: yr(365), sista: idag } },
+          { id: 2, bilnummer: '9002', modell: 'Provmodell Sedan', regnr: 'DEF 456', kategorier: ['Sedan'], fuel: 'laddhybrid', cons: 0.3, cons_el: 1.2, el_share: 60, price_mode: 'auto', calc: { mode: 'auto', kr_per_mil: 6.4 },
+            kalkyl: { bildtyp: 'sedan', livslangd_ar: 5, inkopspris: 380000, rantor_ar: 8000, skatt_ar: 2500, service_ar: 15000, taxiavg_ar: 60000, forsakring_ar: 22000, tvatt_ar: 5000, mil_ar: 7000, intakt_mode: 'data' },
+            intakt: { from: yr(365), to: idag, dagar: 365, inkort: 520000, uber: 20000, bom: 1500, km: 52000, kordagar: 220, forare: 2, pass: 230, inpass_man: 8, forsta: yr(365), sista: idag } },
+          { id: 3, bilnummer: '9003', modell: 'Demobuss', regnr: 'GHI 789', kategorier: ['Storbil'], fuel: 'diesel', cons: 0.7, price_mode: 'auto', calc: { mode: 'auto', kr_per_mil: 13.1 },
+            kalkyl: { bildtyp: 'special', specialfordon: true, livslangd_ar: 6, inkopspris: 650000, forsakring_ar: 30000, mil_ar: 6000, intakt_mode: 'manual', intakt_ar: 700000 },
+            intakt: { from: yr(365), to: idag, dagar: 365, inkort: 0, uber: 0, bom: 0, km: 0, kordagar: 0, forare: 0, pass: 0, inpass_man: 0 } }] };
+      }
       case 'car_model_makes': return [];
       case 'car_model_variants': return [];
       case 'workshop_pending_count': return 1;
