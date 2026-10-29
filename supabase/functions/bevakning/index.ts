@@ -1,12 +1,14 @@
 // bevakning: webbnotiser (push) för bevakade flyg (Landvetter) och tåg (Göteborg C).
 //  - action "vapid": publik VAPID-nyckel (skapas första gången och sparas i Supabase Vault, privata nyckeln lämnar aldrig servern)
 //  - action "test":  skickar en testnotis till förarens egna enheter (kräver inloggning, token)
-//  - action "tick":  körs av pg_cron varje minut NÄR det finns aktiva bevakningar (kräver x-tick-key)
+//  - action "tick":  körs av pg_cron varje minut NÄR det finns aktiva bevakningar eller tågnotiser (kräver x-tick-key)
+// Mina tågnotiser (fasta notiser för t.ex. snabbtågen från Stockholm, inom förarens tider): se tagnotis.ts
 // Flygdata: samma cache som appen (skiftlogg/feed/got.json, uppdateras ca var 5:e minut från Swedavia).
 // Tågdata: samma Vercel-funktion som appen (/api/trains, CDN-cache 60 s) – ingen extra last på Trafikverket.
 import webpush from "npm:web-push@3.6.7";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { notisKey, notisUrl, saveNotice } from "./notis.ts";
+import { decide, sentMap, type SentState, type TrainWatch } from "./tagnotis.ts";
 
 // Hur länge en bevakning ligger kvar efter sista händelsen (tåg ankommit / sista väskan ute). EN konstant.
 const AFTER_MIN = 30;
@@ -188,10 +190,19 @@ async function tickFlights(watches: Watch[]) {
   return n;
 }
 
+// Tåglistan hämtas högst en gång per tick (delas av bevakningar och tågnotiser)
+let trainCache: Promise<Record<string, unknown>[]> | null = null;
+function loadTrains() {
+  if (!trainCache) {
+    trainCache = getJson(TRAIN_URLS).then((j) => ((j.trains || []) as Record<string, unknown>[]).filter((t) => t.dir === "ANK"));
+    trainCache.catch(() => {});
+  }
+  return trainCache;
+}
+
 async function tickTrains(watches: Watch[]) {
   if (!watches.length) return 0;
-  const j = await getJson(TRAIN_URLS);
-  const list = ((j.trains || []) as Record<string, unknown>[]).filter((t) => t.dir === "ANK") as Record<string, string>[];
+  const list = (await loadTrains()) as Record<string, string>[];
   let n = 0;
   for (const w of watches) {
     const t = findItem(list, w);
@@ -226,6 +237,22 @@ async function tickTrains(watches: Watch[]) {
   return n;
 }
 
+// Mina tågnotiser. Saknas funktionen i databasen (SQL inte körd än) blir det inga notiser, inget fel.
+async function tickTrainWatches() {
+  const { data, error } = await sb.rpc("tw_svc_active");
+  if (error || !data) return 0;
+  const d = data as { watches: TrainWatch[]; sent: { driver_id: string; ident: string; sched: string; state: SentState }[] };
+  if (!d.watches?.length) return 0;
+  const list = await loadTrains();
+  const todo = decide(d.watches, list, sentMap(d.sent), Date.now());
+  for (const o of todo) {
+    // Markera först, så en notis aldrig skickas två gånger även om sändningen tar tid
+    await sb.rpc("tw_svc_mark", { p_driver: o.driver, p_ident: o.ident, p_sched: o.sched, p_state: o.state });
+    await sendTo(o.driver, o.msg);
+  }
+  return todo.length;
+}
+
 Deno.serve(async (req) => {
   const h = headers(req.headers.get("origin") || "");
   const out = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: h });
@@ -249,8 +276,10 @@ Deno.serve(async (req) => {
       if (!key || req.headers.get("x-tick-key") !== key) return out({ error: "forbidden" }, 403);
       const [fl, tr] = await Promise.all([sb.rpc("bev_svc_active", { p_kind: "flyg" }), sb.rpc("bev_svc_active", { p_kind: "tag" })]);
       const res: Record<string, unknown> = {};
+      trainCache = null;
       try { res.flyg = await tickFlights((fl.data || []) as Watch[]); } catch (e) { res.flygErr = String(e).slice(0, 100); }
       try { res.tag = await tickTrains((tr.data || []) as Watch[]); } catch (e) { res.tagErr = String(e).slice(0, 100); }
+      try { res.tagnotis = await tickTrainWatches(); } catch (e) { res.tagnotisErr = String(e).slice(0, 100); }
       return out(res);
     }
     return out({ error: "bad_action" }, 400);

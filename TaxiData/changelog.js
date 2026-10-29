@@ -15,6 +15,10 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-10-29', id: '2026-10-29i', tid: '06:12', rader: [
+    ['Nytt', 'Ankomster › Tåg: Mina tågnotiser. Välj vilka tåg du alltid vill ha notis om, till exempel snabbtågen från Stockholm, och bara de tider du jobbar, till exempel 17:00–05:00 måndag till fredag. Du får notis före ankomsten (till exempel 20 min före), när tåget blir försenat och om det ställs in. Notiserna kommer även när appen är stängd, om notiser är påslagna. Tåg som matchar får en liten klocka 🔔 i listan.'],
+    ['Nytt', 'Admin › Chaufförer › Logg: ändringar i Mina tågnotiser syns under Notiser och bevakningar.', 'admin']
+  ] },
   { datum: '2026-10-29', id: '2026-10-29h', tid: '06:07', rader: [
     ['Nytt', 'Admin › Bilar visar nu om varje bil går plus eller minus. Listan har en bild för biltypen, bilnummer, reg.nr och vinst eller förlust i kronor, grönt för plus och rött för minus. Tryck på en bil för att se uträkningen: inkört, förarlön, avgifter, bilkostnader och vinst eller förlust, allt utan moms och för de senaste 12 månaderna. Inkört och körda mil hämtas från resdatan för bilen. Fyll i bilens kostnader under Ändra: inköpspris, livslängd, räntor, skatt, service, försäkring, taxiavgift, tvätt, mil per år och datum för besiktning, plombering och alkotest. Saknas resdata kan du fylla i intäkten själv.', 'agare']
   ] },

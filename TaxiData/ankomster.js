@@ -78,7 +78,8 @@
       info: trainLine(t),
       tid: t.id || '', schedRaw: t.sched || '',
       note: '',
-      group: trainGroup(t)
+      group: trainGroup(t),
+      snabb: !!t.snabb
     };
   }
   // Nedersta raden: "Anlänt spår 5" / "Inkommande spår 5" / "Senast sedd: Alingsås 15:12" / "Ej avgått".
@@ -313,6 +314,7 @@
     el.innerHTML = html;
     keepActiveInView(el);
     if (window.BEVAKNING) BEVAKNING.decorate(el);  // bevakning: notisknapp + långtryck
+    if (window.TAGNOTIS) TAGNOTIS.decorate(el);    // Mina tågnotiser (tagnotis.js), bara på Tåg-fliken
   }
 
   function load(id, quiet) {

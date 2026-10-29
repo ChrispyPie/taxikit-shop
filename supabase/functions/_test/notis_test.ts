@@ -67,7 +67,7 @@ Deno.test("bevakning tick: flyg landat → notis sparas + push med samma nyckel"
   await import("../bevakning/index.ts");
   assert(handler, "Deno.serve anropades inte");
   const r = await handler!(new Request("http://x/", { method: "POST", headers: { "x-tick-key": "k", "content-type": "application/json" }, body: JSON.stringify({ action: "tick" }) }));
-  const j = await r.json(); eq(j, { flyg: 1, tag: 1 }, "tick-svar");
+  const j = await r.json(); eq(j, { flyg: 1, tag: 1, tagnotis: 0 }, "tick-svar (tagnotis 0: tw_svc_active saknas = inga tågnotiser)");
   globalThis.fetch = realFetch;
   const adds = (g.__calls as Call[]).filter((c) => c.fn === "notis_svc_add");
   const sent = (g.__sent as { payload: string }[]).map((s) => JSON.parse(s.payload));
