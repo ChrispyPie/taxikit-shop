@@ -14,6 +14,10 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-10-29', id: '2026-10-29a', tid: '01:30', rader: [
+    ['Förbättrat', 'Profil: ditt förar-ID står nu överst i din profil och under ditt namn i profilmenyn, även när du har fyllt i ditt namn.'],
+    ['Förbättrat', 'Admin › Chaufförer: förar-ID står nu bredvid namnet i förarlistan, till exempel Anna S · 179890, och överst när du redigerar en förare.', 'admin']
+  ] },
   { datum: '2026-10-28', id: '2026-10-28z', tid: '23:33', rader: [
     ['Fixat', 'Notiser: Nyheter i appen visar nu rätt tid, till exempel "5 min sedan", i stället för "11 tim sedan".']
   ] },
