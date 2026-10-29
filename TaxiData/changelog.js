@@ -15,7 +15,7 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-10-29', id: '2026-10-29k', tid: 'HH:MM', rader: [
+  { datum: '2026-10-29', id: '2026-10-29k', tid: '19:09', rader: [
     ['Nytt', 'Admin › Bilar: bilbesiktning, plombering av taxametern och alkolås/alkotest. Fyll i när det senast gjordes under Ändra bil och kalkyl. Nästa datum räknas som ett år senare, eller så skriver du in ett eget datum. Du får en notis en månad och en vecka innan, och när datumet har passerat. I listan syns det med orange (snart) eller rött (passerat).', 'agare'],
     ['Nytt', 'Önskemål och idéer: nu kan du lägga till bilder, till exempel ett foto av dina anteckningar. Högst 4 bilder per önskemål. Bara du och Christian ser bilderna.', 'agare']
   ] },
