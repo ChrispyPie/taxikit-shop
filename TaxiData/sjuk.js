@@ -84,8 +84,9 @@
   function errText(e) { return ERR[e && e.message] || 'Det gick inte att spara. Försök igen.'; }
   function fail(e) { if (e && e.code === '28000') { location.reload(); return true; } return false; }
 
-  // Ägarlistan: alla andras perioder (de egna står redan överst)
-  function others() { var d = st.data || {}; return (d.all || []).filter(function (r) { return r.driver_id !== d.me; }); }
+  // Ägarlistan: alla andras perioder (de egna står redan överst).
+  // Tillfälligt test: med flaggan 'sjuk_se_allt' skickar servern se_allt: true och då syns även de egna här.
+  function others() { var d = st.data || {}; return d.se_allt ? (d.all || []) : (d.all || []).filter(function (r) { return r.driver_id !== d.me; }); }
   // Hur många som väntar på något (siffra på fliken): ägaren = nya anmälningar, föraren = begärt intyg
   S.pending = function () {
     var d = st.data; if (!d) return 0;
@@ -228,7 +229,7 @@
       var F = { att: ['Att hantera', function (r) { return r.open || r.status === 'ny' || r.status === 'intyg_begart' || (r.status === 'godkand' && r.sjuklon !== 'utbetald'); }],
                 pagar: ['Pågår', function (r) { return r.open; }], alla: ['Alla', function () { return true; }] };
       var list = all.filter(F[st.filter][1]);
-      h += '<div class="vk-ltitle sj-boss">Förarnas sjukperioder · ägare</div><div class="sj-filter">' + Object.keys(F).map(function (k) {
+      h += '<div class="vk-ltitle sj-boss">Förarnas sjukperioder · ägare' + (d.se_allt ? ' <small>(test: även dina egna)</small>' : '') + '</div><div class="sj-filter">' + Object.keys(F).map(function (k) {
         return '<button type="button" class="bv-opt' + (st.filter === k ? ' on' : '') + '" data-f="' + k + '">' + F[k][0] + ' (' + all.filter(F[k][1]).length + ')</button>';
       }).join('') + '</div>';
       if (!list.length) h += '<div class="tl-msg">Inga sjukperioder här.</div>';
