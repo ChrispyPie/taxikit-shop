@@ -118,10 +118,10 @@
     .bk-info { color: var(--c-4a5568); font-size: calc(12px * var(--font-scale, 1)); display: flex; flex-direction: column; gap: 4px; margin-top: 6px; overflow-wrap: anywhere; }
     .bk-edit { width: 100%; margin-top: 12px; }
     .bk-foot { padding: 0 16px; font-size: calc(12px * var(--font-scale, 1)); color: var(--c-718096); }
-    .bk-types { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+    .bk-types { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
     .bk-type { display: flex !important; flex-direction: column; align-items: center; gap: 2px; padding: 6px 2px; border: 2px solid var(--c-e2e8f0); border-radius: 8px; cursor: pointer; margin: 0 !important; text-align: center; }
     .bk-type input { position: absolute; opacity: 0; width: 1px !important; height: 1px; }
-    .bk-type img { width: 100%; max-width: 64px; height: auto; }
+    .bk-type img { width: 100%; max-width: 80px; height: auto; }
     .bk-type span { font-size: calc(11px * var(--font-scale, 1)); color: var(--primary); overflow-wrap: anywhere; }
     .bk-type:has(input:checked) { border-color: var(--primary-bg); background: var(--c-e6f0fa); }
     .bk-form .form-row .form-group { min-width: 0; }
@@ -155,7 +155,7 @@
   </div>
 
   <script src="serverstatus.js?v=20261026tm1"></script>
-  <script src="demo.js?v=20261029h"></script>
+  <script src="demo.js?v=20261029j"></script>
   <script src="verkstad-admin.js?v=20261028nm1"></script>
   <script src="profilbild.js?v=zdm1"></script>
   <script src="onskemal-admin.js?v=20261028nm1"></script>
@@ -1158,14 +1158,15 @@
     // Uberavgift, adm.avgift, inpassering och taxiavgift visas som Avgifter. Bränslepriserna är inkl. moms och räknas om till exkl. moms.
     // Saknas resdata kan ägaren fylla i intäkt per år (exkl. moms) på bilen.
     const BK = { moms: 6, uber: 25, uberIn: 26, adm: 1.3, inpass: 2500, provision: 37, semester: 13, agavg: 31.42, bransleMoms: 25 };
-    const BK_TYPES = { sedan: 'Personbil', kombi: 'Kombi', storbil: 'Storbil', special: 'Specialfordon' };
+    const BK_TYPES = { sedan: 'Personbil', kombi: 'Kombi', storbil: 'Storbil', miljobil: 'Miljöbil', executive: 'Executive' };
+    const BK_IMG_V = '20261029j';   // ändra när bilbilderna byts, så att gamla bilder inte visas från cachen
     let openCars = {};     // bilens id -> uträkningen visas
     function carType(c) {
       const k = c.kalkyl || {};
-      if (k.bildtyp) return k.bildtyp;
-      if (k.specialfordon) return 'special';
+      if (k.bildtyp === 'special') return 'miljobil';   // gamla namnet
+      if (BK_TYPES[k.bildtyp]) return k.bildtyp;
       const cat = c.kategorier || [];
-      return cat.includes('Storbil') ? 'storbil' : cat.includes('Kombi') ? 'kombi' : 'sedan';
+      return cat.includes('Storbil') ? 'storbil' : cat.includes('Kombi') ? 'kombi' : cat.includes('Miljö') ? 'miljobil' : 'sedan';
     }
     function kr0(n) { return n == null || isNaN(n) ? '–' : Math.round(n).toLocaleString('sv-SE').replace(/\u2212/g, '−') + ' kr'; }
     function krSign(n) { return n == null ? '–' : (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(Math.round(n)).toLocaleString('sv-SE') + ' kr'; }
@@ -1299,7 +1300,7 @@
         const open = !!openCars[c.id], t = carType(c);
         return `<div class="bk-row${open ? ' open' : ''}" data-id="${c.id}">
           <div class="bk-head" onclick="toggleCar(${c.id})" role="button" aria-expanded="${open}">
-            <img class="bk-img" src="bil-${t}.webp" alt="${BK_TYPES[t]}" width="64" height="38">
+            <img class="bk-img" src="bil-${t}.webp?v=${BK_IMG_V}" alt="${BK_TYPES[t]}" width="64" height="38">
             <div class="bk-id"><b>${esc(c.bilnummer)}</b><span>${c.regnr ? esc(c.regnr) : 'Reg.nr saknas'}</span></div>
             <div class="bk-res ${r.vinst == null ? '' : r.vinst >= 0 ? 'bk-pos' : 'bk-neg'}">${r.vinst == null ? '<span class="bk-na">Intäkt saknas</span>' : krSign(r.vinst)}</div>
             <span class="bk-chev">${open ? '▾' : '▸'}</span>
@@ -1445,7 +1446,7 @@ ${renderBildtypPicker(c)}
     function renderBildtypPicker(c) {
       const t = carType(c);
       return `<div class="form-group"><label>Bildtyp (bild i listan)</label><div class="bk-types">
-        ${Object.keys(BK_TYPES).map(k => `<label class="bk-type"><input type="radio" name="c-bt" value="${k}" ${t === k ? 'checked' : ''}><img src="bil-${k}.webp" alt="" width="64" height="38"><span>${k === 'special' ? 'Special' : BK_TYPES[k]}</span></label>`).join('')}
+        ${Object.keys(BK_TYPES).map(k => `<label class="bk-type"><input type="radio" name="c-bt" value="${k}" ${t === k ? 'checked' : ''}><img src="bil-${k}.webp?v=${BK_IMG_V}" alt="" width="64" height="38"><span>${BK_TYPES[k]}</span></label>`).join('')}
       </div>
       <label class="radio-l"><input type="checkbox" id="c-special" ${(c.kalkyl || {}).specialfordon ? 'checked' : ''}> Specialfordon (t.ex. rullstolsbil)</label></div>`;
     }
