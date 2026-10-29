@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-10-29', id: '2026-10-29j', tid: '06:43', rader: [
+    ['Förbättrat', 'Admin › Bilar har nya bilder: vita bilar, som i vår flotta. Biltypen Special heter nu Miljöbil (en vit elbil med ett grönt löv) och det finns en ny biltyp, Executive (en svart SUV). Det finns också bilder för Toyota Mirai och Renault Trafic. Står Mirai, Trafic eller Transporter i bilmodellen väljs den bilden av sig själv, men du kan alltid välja en annan. Bilar som hade Special har nu Miljöbil. Kryssrutan Specialfordon finns kvar som förut.', 'agare']
+  ] },
   { datum: '2026-10-29', id: '2026-10-29i', tid: '06:12', rader: [
     ['Nytt', 'Ankomster › Tåg: Mina tågnotiser. Välj vilka tåg du alltid vill ha notis om, till exempel snabbtågen från Stockholm, och bara de tider du jobbar, till exempel 17:00–05:00 måndag till fredag. Du får notis före ankomsten (till exempel 20 min före), när tåget blir försenat och om det ställs in. Notiserna kommer även när appen är stängd, om notiser är påslagna. Tåg som matchar får en liten klocka 🔔 i listan.'],
     ['Nytt', 'Admin › Chaufförer › Logg: ändringar i Mina tågnotiser syns under Notiser och bevakningar.', 'admin']

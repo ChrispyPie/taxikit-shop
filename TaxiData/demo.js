@@ -135,8 +135,14 @@
             kalkyl: { bildtyp: 'sedan', livslangd_ar: 5, inkopspris: 380000, rantor_ar: 8000, skatt_ar: 2500, service_ar: 15000, taxiavg_ar: 60000, forsakring_ar: 22000, tvatt_ar: 5000, mil_ar: 7000, intakt_mode: 'data' },
             intakt: { from: yr(365), to: idag, dagar: 365, inkort: 520000, uber: 20000, bom: 1500, km: 52000, kordagar: 220, forare: 2, pass: 230, inpass_man: 8, forsta: yr(365), sista: idag } },
           { id: 3, bilnummer: '9003', modell: 'Demobuss', regnr: 'GHI 789', kategorier: ['Storbil'], fuel: 'diesel', cons: 0.7, price_mode: 'auto', calc: { mode: 'auto', kr_per_mil: 13.1 },
-            kalkyl: { bildtyp: 'special', specialfordon: true, livslangd_ar: 6, inkopspris: 650000, forsakring_ar: 30000, mil_ar: 6000, intakt_mode: 'manual', intakt_ar: 700000 },
-            intakt: { from: yr(365), to: idag, dagar: 365, inkort: 0, uber: 0, bom: 0, km: 0, kordagar: 0, forare: 0, pass: 0, inpass_man: 0 } }] };
+            kalkyl: { bildtyp: 'storbil', specialfordon: true, livslangd_ar: 6, inkopspris: 650000, forsakring_ar: 30000, mil_ar: 6000, intakt_mode: 'manual', intakt_ar: 700000 },
+            intakt: { from: yr(365), to: idag, dagar: 365, inkort: 0, uber: 0, bom: 0, km: 0, kordagar: 0, forare: 0, pass: 0, inpass_man: 0 } },
+          { id: 4, bilnummer: '9004', modell: 'Exempelbil El', regnr: 'JKL 012', kategorier: ['Miljö', 'Sedan'], fuel: 'el', cons: 1.6, price_mode: 'auto', calc: { mode: 'auto', kr_per_mil: 2.9 },
+            kalkyl: { bildtyp: 'miljobil', livslangd_ar: 5, inkopspris: 450000, rantor_ar: 9000, skatt_ar: 1500, service_ar: 9000, taxiavg_ar: 60000, forsakring_ar: 23000, tvatt_ar: 5000, mil_ar: 9000, intakt_mode: 'data' },
+            intakt: { from: yr(365), to: idag, dagar: 365, inkort: 980000, uber: 60000, bom: 3000, km: 81000, kordagar: 290, forare: 3, pass: 300, inpass_man: 12, forsta: yr(365), sista: idag } },
+          { id: 5, bilnummer: '9005', modell: 'Exempel SUV', regnr: 'MNO 345', kategorier: ['Storbil'], fuel: 'laddhybrid', cons: 0.5, cons_el: 2.2, el_share: 40, price_mode: 'auto', calc: { mode: 'auto', kr_per_mil: 9.8 },
+            kalkyl: { bildtyp: 'executive', livslangd_ar: 4, inkopspris: 820000, rantor_ar: 22000, skatt_ar: 6000, service_ar: 20000, taxiavg_ar: 60000, forsakring_ar: 32000, tvatt_ar: 8000, mil_ar: 8000, intakt_mode: 'data' },
+            intakt: { from: yr(365), to: idag, dagar: 365, inkort: 760000, uber: 10000, bom: 2000, km: 60000, kordagar: 240, forare: 2, pass: 200, inpass_man: 9, forsta: yr(365), sista: idag } }] };
       }
       case 'car_model_makes': return [];
       case 'car_model_variants': return [];
