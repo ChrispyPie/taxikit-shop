@@ -1,8 +1,8 @@
 {
   "airport": "GOT",
-  "updated": "2026-10-29T05:55:24+01:00",
+  "updated": "2026-10-29T06:01:00+01:00",
   "arrivalsUpdated": "2026-10-29T05:50:34+01:00",
-  "departuresUpdated": "2026-10-29T05:01:01+01:00",
+  "departuresUpdated": "2026-10-29T06:01:01+01:00",
   "yesterdayUpdated": "2026-10-29T05:50:35+01:00",
   "tomorrowUpdated": "2026-10-28T23:01:02+01:00",
   "error": null,
@@ -2993,25 +2993,6 @@
   ],
   "departures": [
     {
-      "id": "FR5658D",
-      "dir": "AVG",
-      "other": "Edinburgh",
-      "iata": "",
-      "airline": "Ryanair Ltd",
-      "status": "DEL",
-      "statusSv": "Borttagen",
-      "sched": "2026-10-27T16:55:00Z",
-      "est": "",
-      "act": "",
-      "terminal": "T1",
-      "gate": "",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": ""
-    },
-    {
       "id": "LH2431",
       "dir": "AVG",
       "other": "München",
@@ -3048,25 +3029,6 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 21:03"
-    },
-    {
-      "id": "AY866",
-      "dir": "AVG",
-      "other": "Helsingfors",
-      "iata": "",
-      "airline": "Finnair",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-10-27T16:30:00Z",
-      "est": "",
-      "act": "2026-10-27T16:26:12Z",
-      "terminal": "T1",
-      "gate": "17",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 17:34"
     },
     {
       "id": "AY868",
@@ -3162,44 +3124,6 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 20:49"
-    },
-    {
-      "id": "KL1236",
-      "dir": "AVG",
-      "other": "Amsterdam",
-      "iata": "",
-      "airline": "KLM",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-10-27T16:20:00Z",
-      "est": "",
-      "act": "2026-10-27T16:10:05Z",
-      "terminal": "T1",
-      "gate": "19",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 17:16"
-    },
-    {
-      "id": "FR5658",
-      "dir": "AVG",
-      "other": "Edinburgh",
-      "iata": "",
-      "airline": "Ryanair Ltd",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-10-27T16:55:00Z",
-      "est": "",
-      "act": "2026-10-27T16:47:23Z",
-      "terminal": "T1",
-      "gate": "21B",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 17:54"
     },
     {
       "id": "FR4011",
@@ -5479,7 +5403,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gå till gate"
     },
     {
       "id": "LO496",
@@ -5525,18 +5449,18 @@
       "other": "Amsterdam",
       "iata": "",
       "airline": "KLM",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-10-29T05:00:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-10-29T04:52:58Z",
       "terminal": "T1",
       "gate": "17",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "LH2433",
@@ -5555,7 +5479,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "LH821",
@@ -5574,7 +5498,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gå till gate"
     },
     {
       "id": "FR5636",
@@ -5745,7 +5669,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Omedelbar avgång"
     },
     {
       "id": "SK146",
@@ -5878,7 +5802,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Omedelbar avgång"
     },
     {
       "id": "SK158",
