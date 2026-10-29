@@ -15,6 +15,10 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-10-29', id: '2026-10-29k', tid: 'HH:MM', rader: [
+    ['Nytt', 'Admin › Bilar: bilbesiktning, plombering av taxametern och alkolås/alkotest. Fyll i när det senast gjordes under Ändra bil och kalkyl. Nästa datum räknas som ett år senare, eller så skriver du in ett eget datum. Du får en notis en månad och en vecka innan, och när datumet har passerat. I listan syns det med orange (snart) eller rött (passerat).', 'agare'],
+    ['Nytt', 'Önskemål och idéer: nu kan du lägga till bilder, till exempel ett foto av dina anteckningar. Högst 4 bilder per önskemål. Bara du och Christian ser bilderna.', 'agare']
+  ] },
   { datum: '2026-10-29', id: '2026-10-29j', tid: '06:43', rader: [
     ['Förbättrat', 'Admin › Bilar har nya bilder: vita bilar, som i vår flotta. Biltypen Special heter nu Miljöbil (en vit elbil med ett grönt löv) och det finns en ny biltyp, Executive (en svart SUV). Det finns också bilder för Toyota Mirai och Renault Trafic. Står Mirai, Trafic eller Transporter i bilmodellen väljs den bilden av sig själv, men du kan alltid välja en annan. Bilar som hade Special har nu Miljöbil. Kryssrutan Specialfordon finns kvar som förut.', 'agare']
   ] },

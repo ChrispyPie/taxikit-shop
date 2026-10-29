@@ -346,6 +346,8 @@
     else if (k.indexOf('forum') === 0) {
       if (it.forum_post_id && window.FORUM && FORUM.openPost) FORUM.openPost(it.forum_post_id);
       else if (window.FORUM) open(FORUM.id);
+    } else if (k === 'bil_maint' && /: (bilbesiktning|plombering av taxametern|alkolås\/alkotest) (ska|skulle)/i.test(String(it.body || ''))) {
+      location.href = 'admin.html#bilar';   // besiktning, plombering, alkolås: datumen ändras under Admin › Bilar
     } else if (k.indexOf('bil') === 0) {
       if (!window.VERKSTAD) return;
       open(VERKSTAD.id);
