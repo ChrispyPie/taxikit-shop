@@ -91,7 +91,10 @@
   function whQ(d) { return ((d && d.entries) || []).filter(function (x) { return x.status === 'pending' && x.waiting_on === 'driver'; }).length; }
   var st = { el: null, data: null, bil: null, err: null, bilErr: null, form: null, busy: false,
     tab: localStorage.getItem('bil_tab') || 'fel', car: null, showDone: false, f: null, photos: {}, mDone: null, tf: null, tr: null, tlog: {}, drafts: {}, idrafts: {}, iopen: {}, seenQ: {} };
-  if (!TABS.some(function (t) { return t[0] === st.tab; })) st.tab = 'fel';
+  if (st.tab !== 'sjuk' && !TABS.some(function (t) { return t[0] === st.tab; })) st.tab = 'fel';
+  // Fliken Sjuk (sjuk.js) syns bara med funktionsflaggan 'sjuk'
+  function sjukOn() { return !!(window.SJUK && SJUK.enabled()); }
+  window.addEventListener('taxi:features', function () { if (window.SJUK) V.title = SJUK.title(V.title); if (st.wantSjuk && sjukOn()) { st.tab = 'sjuk'; st.sjOn = false; } st.wantSjuk = false; if (st.el && document.getElementById('bv-top')) draw(); });
 
   // ---------- hjälp ----------
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -116,7 +119,10 @@
   }
   function carById(id) { return ((st.bil && st.bil.cars) || []).filter(function (c) { return c.id === id; })[0] || null; }
   function admin() { return !!(st.bil && st.bil.is_admin); }
-  function tabs() { return TABS.filter(function (t) { return t[0] !== 'uppg' || admin() || (st.bil && (st.bil.tasks || []).length); }); }
+  function tabs() {
+    var t = TABS.filter(function (t) { return t[0] !== 'uppg' || admin() || (st.bil && (st.bil.tasks || []).length); });
+    return sjukOn() ? [['sjuk', '🤒', 'Sjuk']].concat(t) : t;
+  }
   function openFaults(car, keep) {
     return ((st.bil && st.bil.issues) || []).filter(function (i) {
       return i.kind === 'fault' && (i.status !== 'klar' || i.id === keep) && (!car || i.car_id === car);
@@ -215,22 +221,24 @@
   };
 
   V.render = function (content) {
-    st.el = content; st.form = null; st.f = null; st.mDone = null; st.tf = null; st.tr = null; window.VERKSTAD_LAST = null;
+    st.el = content; st.sjOn = false; st.form = null; st.f = null; st.mDone = null; st.tf = null; st.tr = null; window.VERKSTAD_LAST = null;
     content.innerHTML = '<div id="bv-root"><div id="bv-top"></div><div id="vk-body"><div class="tl-msg">Laddar…</div></div></div>';
     drawTop();
     load();
   };
-  V.openTab = function (t) { st.tab = t; localStorage.setItem('bil_tab', t); st.f = null; st.mDone = null; st.tf = null; st.tr = null; drawTop(); draw(); window.scrollTo(0, 0); };
+  V.openTab = function (t) { st.tab = t; st.sjOn = false; localStorage.setItem('bil_tab', t); st.f = null; st.mDone = null; st.tf = null; st.tr = null; drawTop(); draw(); window.scrollTo(0, 0); };
 
   function drawTop() {
     var top = document.getElementById('bv-top'); if (!top) return;
     var unread = st.bil ? +st.bil.unread || 0 : 0, tl = tabs();
     var open = st.bil ? (st.bil.tasks || []).filter(function (t) { return t.mine && t.status !== 'klar'; }).length : 0;
     var q = whQ(st.data), nf = issUnread('fault'), ns = issUnread('supply');
-    top.innerHTML = '<div class="bv-tabs' + (tl.length > 4 ? ' five' : '') + '">' + tl.map(function (t) {
+    var ns2 = sjukOn() && SJUK.pending ? SJUK.pending() : 0;
+    top.innerHTML = '<div class="bv-tabs' + (tl.length > 4 ? ' five' : '') + (tl.length > 5 ? ' six' : '') + '">' + tl.map(function (t) {
       return '<button type="button" class="tl-tab bv-tab' + (st.tab === t[0] ? ' active' : '') + '" data-t="' + t[0] + '"><span>' + t[1] + '</span>' + t[2] +
         (t[0] === 'uppg' && open ? '<b class="bv-tn">' + open + '</b>' : '') + (t[0] === 'timmar' && q ? '<b class="bv-tn">' + q + '</b>' : '') +
-        (t[0] === 'fel' && nf ? '<b class="bv-tn">' + nf + '</b>' : '') + (t[0] === 'behov' && ns ? '<b class="bv-tn">' + ns + '</b>' : '') + '</button>';
+        (t[0] === 'fel' && nf ? '<b class="bv-tn">' + nf + '</b>' : '') + (t[0] === 'behov' && ns ? '<b class="bv-tn">' + ns + '</b>' : '') +
+        (t[0] === 'sjuk' && ns2 ? '<b class="bv-tn">' + ns2 + '</b>' : '') + '</button>';
     }).join('') + '<button type="button" class="bv-bell" id="bv-bell" aria-label="Notiser">🔔' + (unread ? '<b>' + unread + '</b>' : '') + '</button></div>';
     top.querySelectorAll('.bv-tab').forEach(function (b) { b.onclick = function () { V.openTab(b.dataset.t); }; });
     document.getElementById('bv-bell').onclick = showNotices;
@@ -238,7 +246,9 @@
 
   function draw() {
     var body = st.el && document.getElementById('vk-body'); if (!body) return;
+    if (st.tab === 'sjuk' && !sjukOn()) { st.tab = 'fel'; st.wantSjuk = !window.TAXI_FEATURES; }
     drawTop();
+    if (st.tab === 'sjuk') { if (!st.sjOn) { st.sjOn = true; SJUK.render(body, drawTop); } return; }
     if (st.tab === 'timmar') return drawHours(body);
     if (st.bil && st.tab === 'uppg' && !tabs().some(function (t) { return t[0] === 'uppg'; })) st.tab = 'fel';
     if (st.bilErr) { body.innerHTML = '<div class="tl-msg err">' + esc(st.bilErr) + '</div>'; return; }
@@ -947,7 +957,7 @@
     var p = {}, src = (st.bil && st.bil.prefs) || {};
     NTYPES.forEach(function (t) { p[t[0]] = src[t[0]] === 'mail' ? 'mail' : 'app'; });
     function paint(msg) {
-      m.querySelector('.pm-box').innerHTML = '<div class="pm-head" style="justify-content:center">⚙️ Notiser för Bil & verkstad</div>' +
+      m.querySelector('.pm-box').innerHTML = '<div class="pm-head" style="justify-content:center">⚙️ Notiser för ' + esc(V.title) + '</div>' +
         '<div class="vk-foot2">Välj för varje typ. Mejl skickas inom några minuter.</div>' +
         (st.bil && st.bil.has_email === false ? '<div class="vk-warn">Du har ingen mejladress sparad, så mejl kan inte skickas än. Be S admin lägga in din mejladress.</div>' : '') +
         NTYPES.map(function (t) {
@@ -979,7 +989,7 @@
         document.body.appendChild(m);
         m.addEventListener('click', function (e) { if (e.target === m) m.classList.remove('open'); });
       }
-      m.querySelector('.pm-box').innerHTML = '<div class="pm-head" style="justify-content:center">🔔 Bil & verkstad</div>' +
+      m.querySelector('.pm-box').innerHTML = '<div class="pm-head" style="justify-content:center">🔔 ' + esc(V.title) + '</div>' +
         ((list || []).length ? list.map(function (n) {
           var wh = /^bil_wh/.test(n.kind || '');
           return '<div class="kal-com' + (n.read ? '' : ' unread') + '"' + (wh ? ' data-wh="1" role="button" style="cursor:pointer"' : '') + '><div class="kal-cwho">' + esc(when(n.created_at)) + '</div><div>' + esc(n.body) + (wh ? ' <b>›</b>' : '') + '</div></div>';
