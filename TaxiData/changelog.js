@@ -14,6 +14,10 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-10-29', id: '2026-10-29e', tid: '03:45', rader: [
+    ['Nytt', 'Ankomster › Tåg: Mina tågnotiser. Välj vilka tåg du alltid vill ha notis om, till exempel snabbtågen från Stockholm, och bara de tider du jobbar, till exempel 17:00–05:00 måndag till fredag. Du får notis före ankomsten (till exempel 20 min före), när tåget blir försenat och om det ställs in. Notiserna kommer även när appen är stängd, om notiser är påslagna. Tåg som matchar får en liten klocka 🔔 i listan.'],
+    ['Nytt', 'Admin › Chaufförer › Logg: ändringar i Mina tågnotiser syns under Notiser och bevakningar.', 'admin']
+  ] },
   { datum: '2026-10-29', id: '2026-10-29c', tid: '03:09', rader: [
     ['Fixat', 'Inloggning: säkrare. Huvudlösenordet är borttaget, så bara ditt eget lösenord fungerar för ditt förar-ID. Om förar-ID eller lösenord är fel får alla samma meddelande, så ingen kan se vilka konton som finns.'],
     ['Fixat', 'Glömt lösenord: försök med påhittade förar-ID kan inte längre stoppa riktiga förare från att få en återställningslänk.', 'admin']

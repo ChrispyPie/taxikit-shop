@@ -1573,6 +1573,8 @@
         case 'watch_off': return who + ' slutade bevaka ' + (d.kind === 'tag' ? 'tåg ' : d.kind === 'flyg' ? 'flyg ' : '') + (d.ident || '');
         case 'prognos_watch_on': return who + ' slog på bevakning av prognosen';
         case 'prognos_watch_off': return who + ' stängde av bevakning av prognosen';
+        case 'watch_train_save': return who + (d.new ? ' lade till tågnotisen ' : ' ändrade tågnotisen ') + q(d.name) + (d.enabled === false ? ' (avstängd)' : '');
+        case 'watch_train_delete': return who + ' tog bort tågnotisen ' + q(d.name);
         case 'photo_set': return who + ' bytte profilbild';
         case 'photo_delete': return who + ' tog bort profilbilden' + by(e);
         case 'data_import': return who + ' läste in ny resdata' + (d.trips != null ? ' (' + d.trips + ' resor' + (d.trips_before != null ? ', förut ' + d.trips_before : '') + '; ' + d.shifts + ' pass' + (d.shifts_before != null ? ', förut ' + d.shifts_before : '') + ')' : '');
