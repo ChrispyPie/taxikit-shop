@@ -1,10 +1,10 @@
 {
   "airport": "GOT",
-  "updated": "2026-10-29T21:40:31+01:00",
-  "arrivalsUpdated": "2026-10-29T21:40:33+01:00",
+  "updated": "2026-10-29T21:45:33+01:00",
+  "arrivalsUpdated": "2026-10-29T21:45:33+01:00",
   "departuresUpdated": "2026-10-29T21:40:34+01:00",
   "yesterdayUpdated": "2026-10-29T05:50:35+01:00",
-  "tomorrowUpdated": "2026-10-29T20:45:38+01:00",
+  "tomorrowUpdated": "2026-10-29T21:45:34+01:00",
   "error": null,
   "arrivals": [
     {
@@ -35,25 +35,6 @@
       "status": "DEL",
       "statusSv": "Borttagen",
       "sched": "2026-10-28T11:35:00Z",
-      "est": "",
-      "act": "",
-      "terminal": "T1",
-      "gate": "",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": ""
-    },
-    {
-      "id": "FR7253",
-      "dir": "ANK",
-      "other": "London STN",
-      "iata": "",
-      "airline": "Ryanair Ltd",
-      "status": "DEL",
-      "statusSv": "Borttagen",
-      "sched": "2026-10-28T08:45:00Z",
       "est": "",
       "act": "",
       "terminal": "T1",
@@ -1752,8 +1733,8 @@
       "baggage": "2",
       "firstBag": "2026-10-29T20:38:17Z",
       "firstBagEst": "2026-10-29T20:52:14Z",
-      "lastBag": "",
-      "rawStatus": "Första bagage · Landat 21:26"
+      "lastBag": "2026-10-29T20:41:25Z",
+      "rawStatus": "Landat 21:26 · Sista bagage"
     },
     {
       "id": "LX1228",
@@ -1783,7 +1764,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-29T22:20:00Z",
-      "est": "2026-10-29T22:19:00Z",
+      "est": "2026-10-29T22:20:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "12",
@@ -1791,7 +1772,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 23:19"
+      "rawStatus": "Ankommer 23:20"
     },
     {
       "id": "SK2051",
@@ -1978,10 +1959,10 @@
       "terminal": "T1",
       "gate": "16",
       "baggage": "2",
-      "firstBag": "2026-10-29T20:38:18Z",
+      "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 23:08 · Första bagage"
+      "rawStatus": "Beräknad 23:08"
     },
     {
       "id": "AY861",
@@ -2160,11 +2141,11 @@
       "other": "Palma",
       "iata": "",
       "airline": "Ryanair Ltd",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 21:44",
       "sched": "2026-10-29T20:45:00Z",
       "est": "2026-10-29T20:46:00Z",
-      "act": "",
+      "act": "2026-10-29T20:44:00Z",
       "terminal": "T1",
       "gate": "21A",
       "baggage": "3",
