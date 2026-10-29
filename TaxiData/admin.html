@@ -56,6 +56,9 @@
     .row .drv-name { flex: 1; display: flex; flex-direction: column; min-width: 0; }
     .row .drv-last { font-size: calc(12px * var(--font-scale, 1)); font-weight: 400; color: var(--c-718096); margin-top: 2px; }
     .row.drv-old .drv-name { opacity: 0.6; }
+    .row .drv-id { font-weight: 400; color: var(--c-718096); font-variant-numeric: tabular-nums; }
+    .drv-fid { font-size: calc(14px * var(--font-scale, 1)); color: var(--c-4a5568); margin-bottom: 12px; }
+    .drv-fid b { color: var(--text, inherit); font-variant-numeric: tabular-nums; }
     .status-pending { background: var(--c-fefcbf); color: var(--c-975a16); }
     .acct-info { font-size: calc(13px * var(--font-scale, 1)); color: var(--c-4a5568); margin-top: 12px; line-height: 1.5; }
     .form-group { margin-bottom: 12px; }
@@ -325,8 +328,10 @@
     function driverRow(id) {
       const status = getDriverStatus(id);
       const last = lastDriveText(id);
+      const name = getDisplayName(id);
+      // Förar-id syns även när föraren har namn (t599u). Utan namn är namnet redan id:t.
       return `<div class="row${isInactiveDriver(id) ? ' drv-old' : ''}" onclick="editDriver('${id}')">
-            <span class="label drv-name"><span>${getDisplayName(id)}</span>${last ? `<span class="drv-last">${last}</span>` : ''}</span>
+            <span class="label drv-name"><span>${name}${name !== id ? `<span class="drv-id"> · ${esc(id)}</span>` : ''}</span>${last ? `<span class="drv-last">${last}</span>` : ''}</span>
             <span class="status status-${status}">${statusLabels[status]}</span>
           </div>`;
     }
@@ -588,6 +593,7 @@
       const allowedCats = getAllowedCategories();
 
       content.innerHTML = `<div class="section" style="padding:16px;">
+        <div class="drv-fid">Förar-ID <b>${esc(editingDriver)}</b></div>
         <div class="form-row">
           <div class="form-group"><label>Förnamn</label><input id="f-first-name" value="${v(d.first_name)}" ${personalDisabled}></div>
           <div class="form-group"><label>Efternamn</label><input id="f-last-name" value="${v(d.last_name)}" ${personalDisabled}></div>

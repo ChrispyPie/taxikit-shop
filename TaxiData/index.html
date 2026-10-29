@@ -37,7 +37,7 @@
     .profile-menu { position: absolute; right: 16px; top: 56px; background: var(--surface); border: 1px solid var(--c-cbd5e0); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: none; z-index: 100; min-width: 180px; }
     .profile-menu.show { display: block; }
     .profile-menu div { padding: 12px 16px; cursor: pointer; }
-    .profile-menu div:hover { background: var(--c-f7fafc); }
+    .profile-menu > div:hover { background: var(--c-f7fafc); }
     .hidden { display: none !important; }
     .profile-btn.has-badge::after { top: -2px; right: -2px; }
     .profile-menu div.has-badge::after { position: static; display: inline-block; margin-left: 8px; vertical-align: middle; border: none; }
@@ -62,6 +62,9 @@
     .p-msg { min-height: 1.2em; margin-top: 8px; font-size: 0.9rem; text-align: center; }
     .p-msg.err { color: var(--danger-text); }
     .p-msg.ok { color: var(--ok); }
+    .p-fid { font-size: 0.9rem; color: var(--text-soft); margin: -4px 0 10px; }
+    .p-fid b { color: var(--text); font-variant-numeric: tabular-nums; }
+    #full-name .fid { padding: 0; cursor: default; font-size: 0.8rem; font-weight: 400; color: var(--muted); margin-top: 2px; }
     .p-note { font-size: 0.85rem; color: var(--text-soft); margin-bottom: 10px; }
     .p-note.warn { color: var(--danger-text); font-weight: 600; }
     .app-toast { position: fixed; left: 12px; right: 12px; top: 12px; z-index: 300; background: var(--toast-bad); color: white; padding: 12px 14px; border-radius: 10px; font-weight: 600; box-shadow: 0 4px 14px rgba(0,0,0,0.25); text-align: center; }
@@ -147,7 +150,7 @@
   <script src="profilbild.js?v=zdm1"></script>
   <script src="forum.js?v=20261028nm1"></script>
   <script src="om-data.js?v=zzzda1"></script>
-  <script src="changelog.js?v=20261028z"></script>
+  <script src="changelog.js?v=20261029a"></script>
   <script src="om.js?v=20261028tid"></script>
   <script src="lonekoll.js?v=20261028sp1"></script>
   <script src="prognos.js?v=20261028x"></script>
@@ -308,7 +311,14 @@
 
     function setFullName() {
       var fullName = ((driverData.first_name || '') + ' ' + (driverData.last_name || '')).trim();
-      document.getElementById('full-name').textContent = fullName || driverId;
+      var fn = document.getElementById('full-name');
+      fn.textContent = fullName || driverId;
+      // Förar-id under namnet (bara det egna). Demo har inget riktigt id (t599u)
+      if (fullName && driverId && driverId !== fullName && !(driverData && driverData.demo)) {
+        var sm = document.createElement('div');
+        sm.className = 'fid'; sm.textContent = 'Förar-ID ' + driverId;
+        fn.appendChild(sm);
+      }
       if (window.PROFILBILD) {
         var pm = document.getElementById('profile-menu');
         PROFILBILD.init({ button: document.getElementById('profile-btn'), menu: pm, before: pm.lastElementChild });
@@ -533,6 +543,7 @@
       if (d.via_master) html += '<p class="p-note warn">Inloggad med huvudlösenordet (förare ' + pEsc(d.id) + ').</p>';
       else if (missing) html += '<p class="p-note warn">Fyll i förnamn, efternamn, telefon och e-post för att fortsätta. Övriga uppgifter är frivilliga.</p>';
       html += '<div class="p-card"><h3>Personuppgifter <small>* obligatoriskt</small></h3>' +
+        '<p class="p-fid">Förar-ID <b>' + pEsc(d.id) + '</b></p>' +
         '<div class="p-row">' + pInput('p-first-name', 'Förnamn', d.first_name, { req: 1, ac: 'given-name' }) + pInput('p-last-name', 'Efternamn', d.last_name, { req: 1, ac: 'family-name' }) + '</div>' +
         pInput('p-phone', 'Telefon', d.phone, { req: 1, type: 'tel', im: 'tel', ac: 'tel' }) +
         pInput('p-email', 'E-post', d.email, { req: 1, type: 'email', im: 'email', ac: 'email' }) +
