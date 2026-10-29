@@ -15,7 +15,7 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-10-29', id: '2026-10-29f', tid: '04:20', rader: [
+  { datum: '2026-10-29', id: '2026-10-29f', tid: '04:15', rader: [
     ['Nytt', 'Test: Bil & verkstad heter nu Anmälningar & ärenden och har fliken 🤒 Sjuk. Där sjukanmäler du dig, friskanmäler dig och laddar upp läkarintyg. Ägaren får en notis och kan godkänna, begära läkarintyg eller avslå. Appen räknar sjukdagarna och visar vad som gäller dag 1, dag 2–14 och efter dag 14. Bara du, ägaren och S admin ser din sjukanmälan. Just nu syns det här bara för Christian och Berra.', 'flagga:sjuk']
   ] },
   { datum: '2026-10-29', id: '2026-10-29d', tid: '03:51', rader: [
