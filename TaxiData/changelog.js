@@ -14,6 +14,10 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-10-29', id: '2026-10-29d', tid: '03:51', rader: [
+    ['Förbättrat', 'Säkerhet: inloggningar och ändringar loggas nu med IP-adress och enhet, så att missbruk går att utreda. Loggen sparas i 13 månader. Det står också på inloggningssidan och under Om appen.'],
+    ['Nytt', 'Admin › Chaufförer › Logg: varje rad visar nu enhet och webbläsare, till exempel Chrome på Android. Ägare och S admin ser också IP-adressen. Tryck på en IP-adress eller enhet för att se allt från den, eller sök i rutan överst.', 'admin']
+  ] },
   { datum: '2026-10-29', id: '2026-10-29c', tid: '03:09', rader: [
     ['Fixat', 'Inloggning: säkrare. Huvudlösenordet är borttaget, så bara ditt eget lösenord fungerar för ditt förar-ID. Om förar-ID eller lösenord är fel får alla samma meddelande, så ingen kan se vilka konton som finns.'],
     ['Fixat', 'Glömt lösenord: försök med påhittade förar-ID kan inte längre stoppa riktiga förare från att få en återställningslänk.', 'admin']
