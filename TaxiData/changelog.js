@@ -14,6 +14,10 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-10-29', id: '2026-10-29c', tid: '03:02', rader: [
+    ['Fixat', 'Inloggning: säkrare. Huvudlösenordet är borttaget, så bara ditt eget lösenord fungerar för ditt förar-ID. Om förar-ID eller lösenord är fel får alla samma meddelande, så ingen kan se vilka konton som finns.'],
+    ['Fixat', 'Glömt lösenord: försök med påhittade förar-ID kan inte längre stoppa riktiga förare från att få en återställningslänk.', 'admin']
+  ] },
   { datum: '2026-10-29', id: '2026-10-29b', tid: '02:58', rader: [
     ['Förbättrat', 'Forumet: förar-ID står nu bredvid namnet på inlägg och kommentarer, till exempel Anna S · 179890. Förar-ID står på taxilegitimationen, så det blir lättare att se vem som skrev.'],
     ['Förbättrat', 'Admin › Chaufförer: alla som har Admin-rutan ser nu förnamn och första bokstaven i efternamnet i förarlistan, till exempel Anna S · 179890. Övriga uppgifter visas fortfarande bara för ägaren.', 'admin'],

@@ -1415,7 +1415,7 @@
     // ---- Aktivitetslogg ----
     const logRoleLabels = { superadmin: 'S admin', agare: 'Ägare', admin: 'Admin', standard: 'Standard', semester: 'Semester', avslutad: 'Avslutad' };
     const resetResults = { sent: 'länk skickad', email_not_configured: 'e-post ej konfigurerad', send_failed: 'e-post kunde inte skickas', no_email: 'ingen e-postadress', inactive: 'kontot inaktivt', unknown_id: 'okänt förar-ID', rate_limited_id: 'för många försök', rate_limited_total: 'för många försök totalt' };
-    const failReasons = { wrong_password: 'fel lösenord', inactive: 'kontot inaktivt', ended: 'kontot avslutat', pending: 'har inte aktiverat kontot än' };
+    const failReasons = { wrong_password: 'fel lösenord', inactive: 'kontot inaktivt', ended: 'kontot avslutat', pending: 'har inte aktiverat kontot än', unknown_id: 'okänt förar-ID', demo_ended: 'demokontot har gått ut' };
 
     function esc(x) {
       return String(x == null ? '' : x).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
