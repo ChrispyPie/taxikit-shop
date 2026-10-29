@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="tema.js?v=20261026tm1"></script>
+  <script src="enhet.js?v=20261029d"></script>
   <script src="namn.js?v=20261028nm1"></script>
   <link rel="stylesheet" href="tema.css?v=20261026tm1">
   <title>Admin – TaxiData</title>
@@ -112,7 +113,7 @@
   </div>
 
   <script src="serverstatus.js?v=20261026tm1"></script>
-  <script src="demo.js?v=am2"></script>
+  <script src="demo.js?v=20261029d"></script>
   <script src="verkstad-admin.js?v=20261028nm1"></script>
   <script src="profilbild.js?v=zdm1"></script>
   <script src="onskemal-admin.js?v=20261028nm1"></script>
@@ -1600,11 +1601,49 @@
 
     // Loggen hämtas 200 rader i taget (admin_log_page, filtret görs på servern). Finns inte den funktionen
     // än används admin_get_log (300 senaste) och filtret görs här.
-    let logMore = false, logBusy = false, logOld = false;
+    let logMore = false, logBusy = false, logOld = false, logNoV2 = false, logSok = '', logSeesIp = false;
+
+    // Webbläsare och system i klartext ur user agent, t.ex. 'Chrome på Android'. Hela texten visas när man håller över.
+    function simpleUA(ua) {
+      if (!ua) return '';
+      let b = 'Okänd webbläsare';
+      if (/EdgA?\/|Edg\//.test(ua)) b = 'Edge';
+      else if (/SamsungBrowser\//.test(ua)) b = 'Samsung Internet';
+      else if (/OPR\/|Opera/.test(ua)) b = 'Opera';
+      else if (/FxiOS|Firefox\//.test(ua)) b = 'Firefox';
+      else if (/CriOS|Chrome\//.test(ua)) b = 'Chrome';
+      else if (/Safari\//.test(ua) && /Version\//.test(ua)) b = 'Safari';
+      else if (/iPhone|iPad/.test(ua)) b = 'Appen på iPhone';
+      else if (/curl|python|node|okhttp|Go-http/i.test(ua)) b = 'Skript (' + ua.split(/[\s/]/)[0] + ')';
+      let o = '';
+      if (/Android/.test(ua)) o = 'Android';
+      else if (/iPhone/.test(ua)) o = 'iPhone';
+      else if (/iPad/.test(ua)) o = 'iPad';
+      else if (/Windows/.test(ua)) o = 'Windows';
+      else if (/Mac OS X|Macintosh/.test(ua)) o = 'Mac';
+      else if (/CrOS/.test(ua)) o = 'Chromebook';
+      else if (/Linux/.test(ua)) o = 'Linux';
+      return o ? b + ' på ' + o : b;
+    }
+    function setLogSok(v) {
+      logSok = (v || '').trim();
+      openLog();
+    }
     const LOG_PAGE = 200;
     async function fetchLogPage(before) {
       const hidden = logHidden();
       const hide = LOG_GROUPS.filter(g => hidden.includes(g[0])).flatMap(g => g[2]);
+      // admin_log_page_v2: samma som admin_log_page men med IP (ägare/S admin), enhet och webbläsare, och sökning.
+      if (!logOld && !logNoV2) {
+        try {
+          const r = await rpc('admin_log_page_v2', { p_limit: LOG_PAGE, p_hide: hide.length ? hide : null,
+            p_before: before ? before.time : null, p_before_id: before ? before.id : null, p_sok: logSok || null });
+          if (r && Array.isArray(r.rows)) { logSeesIp = !!r.ip; return { rows: r.rows, more: !!r.more }; }
+        } catch (e) {
+          if (!(e.code === 'PGRST202' || /admin_log_page_v2/.test(e.message))) throw e;
+        }
+        logNoV2 = true;
+      }
       if (!logOld) {
         try {
           const r = await rpc('admin_log_page', { p_limit: LOG_PAGE, p_hide: hide.length ? hide : null,
@@ -1660,7 +1699,22 @@
       visibleLogGroups().forEach(g => {
         h += `<label class="log-chip"><input type="checkbox" ${hidden.includes(g[0]) ? '' : 'checked'} onchange="toggleLogGroup('${g[0]}', this.checked)"> ${esc(g[1])}</label>`;
       });
-      return h + '</div></div>';
+      h += '</div></div>';
+      if (!logNoV2) {
+        const ph = logSeesIp ? 'Sök IP-adress eller enhets-id' : 'Sök enhets-id';
+        h += `<div class="section log-filter"><form onsubmit="setLogSok(this.q.value);return false;" style="display:flex; gap:8px;">
+          <input name="q" type="search" value="${esc(logSok)}" placeholder="${ph}" autocomplete="off" autocapitalize="off" spellcheck="false" style="flex:1; min-width:0; margin:0;">
+          <button type="submit" style="width:auto; margin:0;">Sök</button>${logSok ? `<button type="button" onclick="setLogSok('')" style="width:auto; margin:0;">Rensa</button>` : ''}</form></div>`;
+      }
+      return h;
+    }
+
+    function logMetaLine(e) {
+      const parts = [];
+      if (e.ip) parts.push(`<a href="#" style="color:var(--c-3182ce);" onclick="setLogSok(${esc(JSON.stringify(e.ip))});return false;">IP ${esc(e.ip)}</a>`);
+      if (e.device) parts.push(`<a href="#" style="color:var(--c-3182ce);" onclick="setLogSok(${esc(JSON.stringify(e.device))});return false;" title="${esc(e.device)}">Enhet ${esc(e.device.slice(0, 8))}</a>`);
+      if (e.ua) parts.push(`<span title="${esc(e.ua)}">${esc(simpleUA(e.ua))}</span>`);
+      return parts.length ? `<span style="font-size:calc(12px * var(--font-scale, 1)); color:var(--c-718096);">${parts.join(' · ')}</span>` : '';
     }
 
     function renderLog(content) {
@@ -1668,11 +1722,12 @@
       if (logEntries === null) { content.innerHTML = html + '<div class="section"><p style="padding:16px;">Laddar...</p></div>'; return; }
       const rows = filterLog(logEntries);
       html += '<div class="section">';
-      if (!rows.length) html += '<p style="padding:16px;">' + (logEntries.length || logHidden().length ? 'Inget att visa med de här valen.' : 'Ingen aktivitet ännu.') + '</p>';
+      if (!rows.length) html += '<p style="padding:16px;">' + (logEntries.length || logHidden().length || logSok ? 'Inget att visa med de här valen.' : 'Ingen aktivitet ännu.') + '</p>';
       rows.forEach(e => {
         html += `<div class="row" style="flex-direction:column; align-items:flex-start; gap:2px;">
           <span style="font-size:calc(12px * var(--font-scale, 1)); color:var(--c-718096);">${esc(formatLogTime(e.time))}</span>
           <span class="label">${esc(describeLog(e))}</span>
+          ${logMetaLine(e)}
         </div>`;
       });
       html += '</div>';

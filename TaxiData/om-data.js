@@ -19,6 +19,8 @@ window.OM_DATA = {
   builder_demo: 'Appen är under utveckling. Saker kan ändras, och ibland blir något fel.',   // demokonton: inget namn
   report: 'Hittar du ett fel eller har en idé? Skriv i Forum under Buggar eller Förslag. Där ser du också när det händer något med ditt inlägg.',
   faq: [
+    { q: 'Vad loggas när jag använder appen?',
+      a: 'Inloggningar och ändringar loggas med IP-adress och enhet för säkerhetens skull. Loggen sparas i 13 månader. Loggen visar till exempel när någon loggar in, byter lösenord eller ändrar uppgifter. Den används bara för att upptäcka och utreda missbruk. Enheten är ett slumpat nummer som appen sparar i telefonen, inte telefonens namn eller nummer.' },
     { q: 'Hur räknar Lönekoll ut min lön?',
       a: 'Lönekoll tar det du kört in i månaden, drar bort BOM, moms och avgifter och räknar sedan provision, semesterersättning och skatt, på samma sätt som lönebeskedet. Procent och avdrag kan du ändra själv. Det är en uppskattning, lönebeskedet gäller.' },
     { q: 'Var kommer mina pass och resor ifrån?',
