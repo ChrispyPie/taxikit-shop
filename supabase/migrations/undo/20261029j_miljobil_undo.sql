@@ -1,6 +1,6 @@
 -- Ångra 20261029j_miljobil.sql.
 -- 1) save_car_full som den var live före bytet (sedan, kombi, storbil, special).
--- 2) Miljöbil blir 'special' igen. Bilar med 'executive' får tom bildtyp (listan väljer då bild efter kategori).
+-- 2) Miljöbil och Toyota Mirai blir 'special' igen, Renault Trafic blir 'storbil'. Bilar med 'executive' får tom bildtyp (listan väljer då bild efter kategori).
 --    Kör först raden nedan och spara svaret om du vill kunna sätta tillbaka Executive senare:
 --    select id, bilnummer from public.cars where bildtyp = 'executive';
 -- 3) Checken som förut.
@@ -71,7 +71,8 @@ end $function$
 revoke all on function public.save_car_full(text, bigint, jsonb, jsonb) from public;
 grant execute on function public.save_car_full(text, bigint, jsonb, jsonb) to anon, authenticated;
 
-update public.cars set bildtyp = 'special' where bildtyp = 'miljobil';
+update public.cars set bildtyp = 'special' where bildtyp in ('miljobil','mirai');
+update public.cars set bildtyp = 'storbil' where bildtyp = 'trafic';
 update public.cars set bildtyp = null where bildtyp = 'executive';
 alter table public.cars drop constraint if exists cars_bildtyp_check;
 alter table public.cars add constraint cars_bildtyp_check check (bildtyp in ('sedan','kombi','storbil','special'));

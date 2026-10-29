@@ -1,5 +1,6 @@
 -- Bilar: bildtyp 'special' heter nu 'miljobil' (Miljöbil, mest Tesla) och ny bildtyp 'executive' (svart premium-SUV) (t625u).
 -- Specialfordon (kryssrutan, kolumnen specialfordon) ändras inte.
+-- Bilder för en viss modell (t627u): 'mirai' (Toyota Mirai, miljöbil) och 'trafic' (Renault Trafic, storbil).
 -- 1) Bredare check på public.cars.bildtyp: sedan, kombi, storbil, miljobil, executive ('special' tillåts också en stund,
 --    så att inget går sönder mitt i bytet; save_car_full gör om 'special' till 'miljobil').
 -- 2) Befintliga 'special' blir 'miljobil'.
@@ -8,7 +9,7 @@
 
 alter table public.cars drop constraint if exists cars_bildtyp_check;
 alter table public.cars add constraint cars_bildtyp_check
-  check (bildtyp in ('sedan','kombi','storbil','miljobil','executive','special'));
+  check (bildtyp in ('sedan','kombi','storbil','miljobil','executive','mirai','trafic','special'));
 
 update public.cars set bildtyp = 'miljobil' where bildtyp = 'special';
 
@@ -46,7 +47,7 @@ begin
   exception when invalid_text_representation or numeric_value_out_of_range or datetime_field_overflow or invalid_datetime_format then
     raise exception 'invalid_kalkyl' using errcode = '22023';
   end;
-  if (v_typ is not null and v_typ not in ('sedan','kombi','storbil','miljobil','executive'))
+  if (v_typ is not null and v_typ not in ('sedan','kombi','storbil','miljobil','executive','mirai','trafic'))
      or (v_it is not null and v_it not between date '1990-01-01' and date '2100-01-01')
      or (v_ut is not null and v_ut not between date '1990-01-01' and date '2100-01-01')
      or (v_it is not null and v_ut is not null and v_ut < v_it)
