@@ -108,12 +108,20 @@
                 { id: 'DEMO9', role: 'forare', first_name: 'Exempel', last_name: 'Demo', status: 'ended', expires_at: iso(2, 8), ended_at: iso(2, 8), created_at: iso(5, 8) }];
       }
       case 'admin_get_log':
-      case 'admin_log_page': {
+      case 'admin_log_page':
+      case 'admin_log_page_v2': {
         var rows = [
           { id: 4, time: iso(0, 9), actor_id: me, actor_role: 'agare', action: 'login', target_id: me, details: {} },
           { id: 3, time: iso(0, 8), actor_id: me, actor_role: 'agare', action: 'driver_edit', target_id: '900104', details: { fields: ['phone'] } },
           { id: 2, time: iso(1, 14), actor_id: me, actor_role: 'agare', action: 'activate', target_id: '900107', details: {} },
           { id: 1, time: iso(2, 7), actor_id: '900103', actor_role: 'standard', action: 'login', target_id: '900103', details: {} }];
+        if (name === 'admin_log_page_v2') {   // påhittad enhet och webbläsare, ingen IP i demot
+          var ua = 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Mobile Safari/537.36';
+          rows.forEach(function (r) { r.device = r.actor_id === me ? 'demo0000-0000-4000-8000-000000000001' : 'demo0000-0000-4000-8000-000000000002'; r.ua = ua; });
+          var s = args && args.p_sok;
+          if (s) rows = rows.filter(function (r) { return r.device.indexOf(s) === 0; });
+          return { rows: args && args.p_before ? [] : rows, more: false, ip: false };
+        }
         return name === 'admin_get_log' ? rows : { rows: args && args.p_before ? [] : rows, more: false };
       }
       case 'list_cars':
