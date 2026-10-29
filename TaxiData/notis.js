@@ -80,6 +80,7 @@
     if (tag.indexOf('tag') === 0) return 'tag';
     if (tag.indexOf('prognos') === 0) return 'prognos';
     if (tag === 'test') return 'test';
+    if (tag.indexOf('sjuk') === 0) return 'sjuk';
     return 'push';
   }
   // Samma nyckel som sw.js räknar fram (notisKey) – så sparas en notis bara en gång.
@@ -252,7 +253,7 @@
 
   // Ikon: notisens egen emoji först (t.ex. "💬 Ägaren skrev…"), annars efter typ
   var ICON = { flyg: '🛬', tag: '🚆', prognos: '🔮', test: '🔔', nyheter: '✨', reminder: '📅',
-    bil_stop: '🛑', bil_fault: '⚠️', bil_supply: '🧴', bil_maint: '🔧', bil_suggest: '💡', bil_status: '🛠️', bil_issue_msg: '💬' };
+    bil_stop: '🛑', bil_fault: '⚠️', bil_supply: '🧴', bil_maint: '🔧', bil_suggest: '💡', bil_status: '🛠️', bil_issue_msg: '💬', sjuk: '🤒' };
   var EMO = /^((?:\p{Extended_Pictographic}|\p{Regional_Indicator})(?:\uFE0F|\u200D|\p{Extended_Pictographic}|\p{Emoji_Modifier})*)\s*/u;
   function iconOf(it) {
     var k = String(it.kind || '');
@@ -277,7 +278,7 @@
     if (!items.length) {
       h = st.items === null && st.loading ? '<div class="np-msg">Laddar…</div>'
         : st.err ? '<div class="np-msg">Kunde inte hämta notiserna. Kontrollera nätet och försök igen.</div>'
-        : '<div class="np-msg">Inga notiser än.<br>Här samlas notiser om bevakade flyg och tåg, Prognos, Bil &amp; verkstad, Forum och Kalender.</div>';
+        : '<div class="np-msg">Inga notiser än.<br>Här samlas notiser om bevakade flyg och tåg, Prognos, ' + esc(window.VERKSTAD ? VERKSTAD.title : 'Bil & verkstad') + ', Forum och Kalender.</div>';
     } else {
       items.forEach(function (it, i) {
         var v = view(it);
@@ -350,6 +351,12 @@
       open(VERKSTAD.id);
       var t = bilTab(it);
       if (t && VERKSTAD.openTab) { try { VERKSTAD.openTab(t); } catch (e) {} }
+    } else if (k === 'sjuk') {
+      // Sjukanmälan (sjuk.js): Anmälningar & ärenden › fliken Sjuk
+      if (!window.VERKSTAD) return;
+      try { localStorage.setItem('bil_tab', 'sjuk'); } catch (e) {}
+      open(VERKSTAD.id);
+      if (VERKSTAD.openTab) { try { VERKSTAD.openTab('sjuk'); } catch (e) {} }
     } else if (it.src === 'e') {
       if (it.event_id && window.KALENDER && KALENDER.openEvent) KALENDER.openEvent(it.event_id);
       else if (window.KALENDER) open(KALENDER.id);

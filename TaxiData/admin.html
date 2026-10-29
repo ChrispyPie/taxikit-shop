@@ -1535,6 +1535,14 @@
         case 'bil_task_reply': return who + ' svarade på uppgiften "' + (d.title || '') + '"' + (d.booked_at ? ' – bokad ' + new Date(d.booked_at).toLocaleString('sv-SE', { dateStyle: 'short', timeStyle: 'short' }) : '') + (d.place ? ', ' + d.place : '');
         case 'bil_task_done': return who + ' markerade uppgiften "' + (d.title || '') + '" klar' + (d.car ? ' (bil ' + d.car + ')' : '') + (d.comment ? ' – "' + d.comment + '"' : '');
         case 'bil_prefs': return who + ' ändrade sina notisval för Bil & verkstad';
+        // Sjukanmälan (t611u): syns bara för ägaren och S admin (bil_* filtreras bort för andra). Inga hälsouppgifter eller kommentarer i loggen.
+        case 'bil_sjuk_add': return who + ' sjukanmälde sig';
+        case 'bil_sjuk_recover': return who + ' friskanmälde en sjukperiod';
+        case 'bil_sjuk_status': return who + ' ändrade status på en sjukanmälan';
+        case 'bil_sjuk_lon': return who + ' ändrade sjuklön på en sjukperiod';
+        case 'bil_sjuk_cert': return who + ' laddade upp ett läkarintyg';
+        case 'bil_sjuk_cert_delete': return who + ' tog bort ett läkarintyg';
+        case 'bil_sjuk_delete': return who + ' tog bort en sjukperiod';
         case 'dev_wish_add': return who + ' skickade ett önskemål om appen' + (d.text ? ' – "' + d.text + '"' : '');
         case 'dev_wish_delete': return who + ' tog bort ett önskemål om appen' + (d.text ? ' – "' + d.text + '"' : '');
         case 'category_change': return who + ' ändrade kategori på ' + T(e.target_id) + ' till ' + catName(d.to);

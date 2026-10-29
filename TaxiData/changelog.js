@@ -8,12 +8,16 @@
  * Vem som ser raden (tredje fältet, valfritt). Utan fält ser alla raden.
  *   'admin' = de som har Admin-rutan (admin, ägare, S admin), t.ex. Admin › Chaufförer och demokonton
  *   'agare' = ägaren (och tillfälligt S admin), t.ex. Åkeridata, Admin › Bil & verkstad, Önskemål och idéer
+ *   'flagga:sjuk' = bara de som har funktionsflaggan 'sjuk' (test av nya funktioner, private.feature_flags)
  * Ett fjärde fält (valfritt) är texten som alla andra ser i stället. Utan det ser de inte raden alls.
  * En dag där ingen rad syns för föraren visas inte, och ger ingen prick eller notis.
  * tid (valfritt): klockslaget då raden gick live, svensk tid 'HH:MM', t.ex. tid: '22:48'.
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-10-29', id: '2026-10-29f', tid: '04:15', rader: [
+    ['Nytt', 'Test: Bil & verkstad heter nu Anmälningar & ärenden och har fliken 🤒 Sjuk. Där sjukanmäler du dig, friskanmäler dig och laddar upp läkarintyg. Ägaren får en notis och kan godkänna, begära läkarintyg eller avslå. Appen räknar sjukdagarna och visar vad som gäller dag 1, dag 2–14 och efter dag 14. Bara du, ägaren och S admin ser din sjukanmälan. Just nu syns det här bara för Christian och Berra.', 'flagga:sjuk']
+  ] },
   { datum: '2026-10-29', id: '2026-10-29d', tid: '03:51', rader: [
     ['Förbättrat', 'Säkerhet: inloggningar och ändringar loggas nu med IP-adress och enhet, så att missbruk går att utreda. Loggen sparas i 13 månader. Det står också på inloggningssidan och under Om appen.'],
     ['Nytt', 'Admin › Chaufförer › Logg: varje rad visar nu enhet och webbläsare, till exempel Chrome på Android. Ägare och S admin ser också IP-adressen. Tryck på en IP-adress eller enhet för att se allt från den, eller sök i rutan överst.', 'admin']
