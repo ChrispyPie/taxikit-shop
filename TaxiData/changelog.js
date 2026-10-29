@@ -14,7 +14,7 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-10-29', id: '2026-10-29c', tid: '03:02', rader: [
+  { datum: '2026-10-29', id: '2026-10-29c', tid: '03:09', rader: [
     ['Fixat', 'Inloggning: säkrare. Huvudlösenordet är borttaget, så bara ditt eget lösenord fungerar för ditt förar-ID. Om förar-ID eller lösenord är fel får alla samma meddelande, så ingen kan se vilka konton som finns.'],
     ['Fixat', 'Glömt lösenord: försök med påhittade förar-ID kan inte längre stoppa riktiga förare från att få en återställningslänk.', 'admin']
   ] },
