@@ -1,14 +1,15 @@
 /* Sjukanmälan (t611u) – fliken "Sjuk" under Anmälningar & ärenden (verkstad.js).
- * Bakom funktionsflaggan 'sjuk' (servern: private.feature_flags, get_my_features). Utan flaggan syns ingenting,
+ * Bakom funktionsflaggan 'sjuk' (servern: private.feature_flags, get_my_features). Sedan 30 okt 2026 gäller flaggan alla
+ * (private.feature_global, migrationen 20261030b). Utan flaggan syns ingenting,
  * och servern nekar ändå alla anrop (sjuk_* kontrollerar inloggning, flagga och roll, demo nekas).
  * Föraren: Anmäl sjuk (startdatum + valfri kommentar), Friskanmäl, ladda upp läkarintyg.
  * Ägaren och S admin: alla sjukperioder, Godkänn / Begär läkarintyg / Avslå, sjuklön beviljad / utbetald.
  * Ingen diagnos eller orsak frågas efter. Intyg ligger i en privat bucket (edge-funktionen "sjuk", signerade länkar).
  */
 (function () {
-  // Nytt namn på Bil & verkstad. Bara för den som har flaggan 'sjuk' tills vidare.
-  // Byt NAMN_FOR_ALLA till true så får alla det nya namnet (en rad).
-  var NAMN = 'Anmälningar & ärenden', NAMN_FOR_ALLA = false;
+  // Nytt namn på Bil & verkstad. Gäller alla sedan 30 okt 2026 (sjukanmälan för alla förare).
+  // Ångra namnet: sätt NAMN_FOR_ALLA till false (då får bara de med flaggan 'sjuk' det nya namnet).
+  var NAMN = 'Anmälningar & ärenden', NAMN_FOR_ALLA = true;
 
   // Klick på en sjuk-notis öppnar /TaxiData/?sida=sjuk → Anmälningar & ärenden, fliken Sjuk.
   try {

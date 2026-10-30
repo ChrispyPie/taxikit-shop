@@ -160,7 +160,7 @@
 
   <script src="serverstatus.js?v=20261026tm1"></script>
   <script src="demo.js?v=20261029j"></script>
-  <script src="verkstad-admin.js?v=20261028nm1"></script>
+  <script src="verkstad-admin.js?v=20261030sj"></script>
   <script src="profilbild.js?v=zdm1"></script>
   <script src="onskemal-admin.js?v=20261029k"></script>
   <script>
@@ -174,7 +174,7 @@
     const menu = [
       { id: 'akeridata', icon: '📊', label: 'Åkeridata', serverStatus: true },
       { id: 'bilar', icon: '🚕', label: 'Bilar' },
-      { id: 'verkstad', icon: '🛠️', label: 'Bil & verkstad' },
+      { id: 'verkstad', icon: '🛠️', label: 'Anmälningar & ärenden' },
       { id: 'chaufforer', icon: '👥', label: 'Chaufförer' },
       { id: 'onskemal', icon: '💡', label: 'Önskemål och idéer' },
       // Statistik borttagen 2026-10-25 (tom platshållare): { id: 'statistik', icon: '📈', label: 'Statistik' },
@@ -580,7 +580,7 @@
         else if (editingCar) renderEditCar(content);
         else renderCars(content);
       } else if (path[0].id === 'verkstad') {
-        title.textContent = 'Bil & verkstad';
+        title.textContent = 'Anmälningar & ärenden';
         if (!canSeeAkeridata()) content.innerHTML = '<div class="section"><p style="padding:16px;">Ingen behörighet</p></div>';
         else VERKSTAD_ADMIN.render(content);
       } else if (path[0].id === 'onskemal') {
@@ -1952,7 +1952,7 @@ ${renderBildtypPicker(c)}
         case 'bil_task_delete': return who + ' tog bort uppgiften "' + (d.title || '') + '" (' + T(e.target_id) + ')';
         case 'bil_task_reply': return who + ' svarade på uppgiften "' + (d.title || '') + '"' + (d.booked_at ? ' – bokad ' + new Date(d.booked_at).toLocaleString('sv-SE', { dateStyle: 'short', timeStyle: 'short' }) : '') + (d.place ? ', ' + d.place : '');
         case 'bil_task_done': return who + ' markerade uppgiften "' + (d.title || '') + '" klar' + (d.car ? ' (bil ' + d.car + ')' : '') + (d.comment ? ' – "' + d.comment + '"' : '');
-        case 'bil_prefs': return who + ' ändrade sina notisval för Bil & verkstad';
+        case 'bil_prefs': return who + ' ändrade sina notisval för Anmälningar & ärenden';
         // Sjukanmälan (t611u): syns bara för ägaren och S admin (bil_* filtreras bort för andra). Inga hälsouppgifter eller kommentarer i loggen.
         case 'bil_sjuk_add': return who + ' sjukanmälde sig';
         case 'bil_sjuk_recover': return who + ' friskanmälde en sjukperiod';

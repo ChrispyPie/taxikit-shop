@@ -332,7 +332,7 @@
     var sug = m.filter(function (x) { return x.status === 'forslag'; }).length;
     var h = issueSection('supply') + issueSection('fault');
     h += '<div class="vka-card"><div class="vka-who">🗓️ Underhåll och uppgifter</div><div class="vka-meta">Underhåll: ' + (late ? late + ' försenat, ' : '') + soon + ' snart' + (sug ? ', ' + sug + ' förslag' : '') + '</div>' +
-      '<button style="margin-top:10px;width:100%;padding:10px;border-radius:8px" onclick="VERKSTAD_ADMIN.openApp(\'underhall\')">Hantera i appen › Bil & verkstad</button></div>';
+      '<button style="margin-top:10px;width:100%;padding:10px;border-radius:8px" onclick="VERKSTAD_ADMIN.openApp(\'underhall\')">Hantera i appen › Anmälningar & ärenden</button></div>';
     return h;
   }
   A.openApp = function (tab) { localStorage.setItem('taxi_view', 'verkstad'); localStorage.setItem('bil_tab', tab || 'fel'); location.href = 'index.html'; };

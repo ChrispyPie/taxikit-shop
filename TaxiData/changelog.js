@@ -16,9 +16,12 @@
  */
 window.CHANGELOG = [
   // tid: sätt klockslaget när det går live (Christians "kör"), t.ex. tid: '03:15'. Datum och id också om det inte går live 30 okt.
+  { datum: '2026-10-30', id: '2026-10-30b', tid: 'HH:MM', rader: [
+    ['Nytt', 'Sjukanmälan finns nu för alla förare. Bil & verkstad heter nu Anmälningar & ärenden och har fliken 🤒 Sjuk. Där sjukanmäler du dig, friskanmäler dig och laddar upp ett foto av läkarintyget. Ägaren får en notis och svarar dig i appen. Tryck på 💰 Beräknad sjuklön så ser du ungefär hur mycket sjuklön det blir. Ingen diagnos eller orsak behövs. Bara du, ägaren och S admin ser din sjukanmälan.']
+  ] },
   { datum: '2026-10-30', id: '2026-10-30a', tid: '04:23', rader: [
     ['Förbättrat', 'Admin › Bilar: förarlönen i bilkalkylen räknas nu med hela lönekostnaden. Utöver arbetsgivaravgiften 31,42 % kommer pension 4,4 %, löneskatt 1,067 % och övriga försäkringar 0,26 %. Det står i uträkningen för varje bil. Du kan ändra procentsatserna själv under Ändra lönekostnad och sjuklön, längst ner på sidan Bilar.', 'agare'],
-    ['Nytt', 'Sjukanmälan: tryck på 💰 Beräknad sjuklön på en sjukperiod. Appen räknar ut ungefär hur mycket sjuklön det blir: 80 % av din snittlön de senaste 6 månaderna, från resdatan i appen, minus karensavdrag. Du ser också hur det är uträknat. Ägaren ser samma sak.', 'flagga:sjuk']
+    ['Nytt', 'Sjukanmälan: tryck på 💰 Beräknad sjuklön på en sjukperiod. Appen räknar ut ungefär hur mycket sjuklön det blir: 80 % av din snittlön de senaste 6 månaderna, från resdatan i appen, minus karensavdrag. Du ser också hur det är uträknat. Ägaren ser samma sak.']
   ] },
   { datum: '2026-10-29', id: '2026-10-29k', tid: '19:09', rader: [
     ['Nytt', 'Admin › Bilar: bilbesiktning, plombering av taxametern och alkolås/alkotest. Fyll i när det senast gjordes under Ändra bil och kalkyl. Nästa datum räknas som ett år senare, eller så skriver du in ett eget datum. Du får en notis en månad och en vecka innan, och när datumet har passerat. I listan syns det med orange (snart) eller rött (passerat).', 'agare'],
@@ -38,7 +41,7 @@ window.CHANGELOG = [
     ['Nytt', 'Test: i listan Förarnas sjukperioder ser du nu alla sjukanmälningar, även dina egna. Då kan du testa både förarens och ägarens sida själv, till exempel godkänna eller begära läkarintyg på din egen. Det här är tillfälligt och tas bort när testet är klart.', 'flagga:sjuk_se_allt']
   ] },
   { datum: '2026-10-29', id: '2026-10-29f', tid: '04:15', rader: [
-    ['Nytt', 'Test: Bil & verkstad heter nu Anmälningar & ärenden och har fliken 🤒 Sjuk. Där sjukanmäler du dig, friskanmäler dig och laddar upp läkarintyg. Ägaren får en notis och kan godkänna, begära läkarintyg eller avslå. Appen räknar sjukdagarna och visar vad som gäller dag 1, dag 2–14 och efter dag 14. Bara du, ägaren och S admin ser din sjukanmälan. Just nu syns det här bara för Christian och Berra.', 'flagga:sjuk']
+    ['Nytt', 'Test: Bil & verkstad heter nu Anmälningar & ärenden och har fliken 🤒 Sjuk. Där sjukanmäler du dig, friskanmäler dig och laddar upp läkarintyg. Ägaren får en notis och kan godkänna, begära läkarintyg eller avslå. Appen räknar sjukdagarna och visar vad som gäller dag 1, dag 2–14 och efter dag 14. Bara du, ägaren och S admin ser din sjukanmälan. Just nu syns det här bara för Christian och Berra.', 'agare']
   ] },
   { datum: '2026-10-29', id: '2026-10-29d', tid: '03:51', rader: [
     ['Förbättrat', 'Säkerhet: inloggningar och ändringar loggas nu med IP-adress och enhet, så att missbruk går att utreda. Loggen sparas i 13 månader. Det står också på inloggningssidan och under Om appen.'],
