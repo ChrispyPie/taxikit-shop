@@ -15,6 +15,11 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  // tid: sätt klockslaget när det går live (Christians "kör"), t.ex. tid: '03:15'. Datum och id också om det inte går live 30 okt.
+  { datum: '2026-10-30', id: '2026-10-30a', tid: '04:23', rader: [
+    ['Förbättrat', 'Admin › Bilar: förarlönen i bilkalkylen räknas nu med hela lönekostnaden. Utöver arbetsgivaravgiften 31,42 % kommer pension 4,4 %, löneskatt 1,067 % och övriga försäkringar 0,26 %. Det står i uträkningen för varje bil. Du kan ändra procentsatserna själv under Ändra lönekostnad och sjuklön, längst ner på sidan Bilar.', 'agare'],
+    ['Nytt', 'Sjukanmälan: tryck på 💰 Beräknad sjuklön på en sjukperiod. Appen räknar ut ungefär hur mycket sjuklön det blir: 80 % av din snittlön de senaste 6 månaderna, från resdatan i appen, minus karensavdrag. Du ser också hur det är uträknat. Ägaren ser samma sak.', 'flagga:sjuk']
+  ] },
   { datum: '2026-10-29', id: '2026-10-29k', tid: '19:09', rader: [
     ['Nytt', 'Admin › Bilar: bilbesiktning, plombering av taxametern och alkolås/alkotest. Fyll i när det senast gjordes under Ändra bil och kalkyl. Nästa datum räknas som ett år senare, eller så skriver du in ett eget datum. Du får en notis en månad och en vecka innan, och när datumet har passerat. I listan syns det med orange (snart) eller rött (passerat).', 'agare'],
     ['Nytt', 'Önskemål och idéer: nu kan du lägga till bilder, till exempel ett foto av dina anteckningar. Högst 4 bilder per önskemål. Bara du och Christian ser bilderna.', 'agare']
