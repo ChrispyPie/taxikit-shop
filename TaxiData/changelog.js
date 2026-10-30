@@ -16,7 +16,7 @@
  */
 window.CHANGELOG = [
   // tid: sätt klockslaget när det går live (Christians "kör"), t.ex. tid: '03:15'. Datum och id också om det inte går live 30 okt.
-  { datum: '2026-10-30', id: '2026-10-30a', tid: 'HH:MM', rader: [
+  { datum: '2026-10-30', id: '2026-10-30a', tid: '04:23', rader: [
     ['Förbättrat', 'Admin › Bilar: förarlönen i bilkalkylen räknas nu med hela lönekostnaden. Utöver arbetsgivaravgiften 31,42 % kommer pension 4,4 %, löneskatt 1,067 % och övriga försäkringar 0,26 %. Det står i uträkningen för varje bil. Du kan ändra procentsatserna själv under Ändra lönekostnad och sjuklön, längst ner på sidan Bilar.', 'agare'],
     ['Nytt', 'Sjukanmälan: tryck på 💰 Beräknad sjuklön på en sjukperiod. Appen räknar ut ungefär hur mycket sjuklön det blir: 80 % av din snittlön de senaste 6 månaderna, från resdatan i appen, minus karensavdrag. Du ser också hur det är uträknat. Ägaren ser samma sak.', 'flagga:sjuk']
   ] },
