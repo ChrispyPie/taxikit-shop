@@ -37,7 +37,7 @@
     bad_file: 'Filen går inte att läsa. Ta ett foto eller välj en PDF.',
     too_many: 'Det finns redan 10 intyg på den här perioden.'
   };
-  var st = { data: null, err: null, body: null, onChange: null, form: null, busy: false, flash: null, certs: {}, decide: null, filter: 'att' };
+  var st = { data: null, err: null, body: null, onChange: null, form: null, busy: false, flash: null, certs: {}, lon: {}, decide: null, filter: 'att' };
 
   function feats() { return window.TAXI_FEATURES || []; }
   function demo() { try { return !!(window.DEMO && DEMO.on && DEMO.on()); } catch (e) { return false; } }
@@ -96,15 +96,16 @@
 
   // Regler (information). Kalenderdagar räknat från första sjukdagen.
   function regel(day) {
-    if (day <= 1) return 'Dag 1: karensavdrag.';
+    if (day <= 1) return 'Dag 1: sjuklön från arbetsgivaren (80 %) minus karensavdrag.';
     if (day <= 7) return 'Dag ' + day + ': sjuklön från arbetsgivaren (80 %). Från dag 8 behövs läkarintyg.';
     if (day <= 14) return 'Dag ' + day + ': sjuklön från arbetsgivaren (80 %). Läkarintyg behövs från dag 8.';
     return 'Dag ' + day + ': efter dag 14 betalar Försäkringskassan sjukpenning. Läkarintyg behövs.';
   }
   function reglerBox() {
     return '<details class="vk-card sj-rules"><summary>ℹ️ Så funkar sjukfrånvaro</summary><ul>' +
-      '<li><b>Dag 1:</b> karensavdrag.</li>' +
-      '<li><b>Dag 2–14:</b> sjuklön från arbetsgivaren, 80 % av lönen.</li>' +
+      '<li><b>Dag 1–14:</b> sjuklön från arbetsgivaren, 80 % av lönen.</li>' +
+      '<li><b>Karensavdrag:</b> en gång per sjukperiod dras 20 % av en veckas sjuklön.</li>' +
+      '<li><b>💰 Beräknad sjuklön</b> visar ungefär hur mycket det blir, räknat på din snittlön de senaste 6 månaderna.</li>' +
       '<li><b>Från dag 8:</b> läkarintyg behövs. Ta ett foto av intyget och ladda upp det här.</li>' +
       '<li><b>Efter dag 14:</b> Försäkringskassan tar över. Arbetsgivaren anmäler till Försäkringskassan och du ansöker om sjukpenning där.</li>' +
       '</ul><p>Det här är bara information. Det som gäller exakt står i ditt anställningsavtal, kollektivavtalet och hos Försäkringskassan.</p>' +
@@ -118,7 +119,7 @@
       .then(function () { draw(); if (st.onChange) st.onChange(); });
   }
   S.render = function (body, onChange) {
-    st.body = body; st.onChange = onChange || null; st.form = null; st.decide = null; st.certs = {};
+    st.body = body; st.onChange = onChange || null; st.form = null; st.decide = null; st.certs = {}; st.lon = {};
     if (!st.data) body.innerHTML = '<div class="tl-msg">Laddar…</div>'; else draw();
     load();
   };
@@ -156,6 +157,7 @@
           ((x.mine || boss) ? '<button type="button" class="sj-cdel" data-c="' + x.id + '" data-r="' + r.id + '" aria-label="Ta bort intyget">×</button>' : '') + '</div>';
       }).join('') + '</div>';
     } else if (c && !c.length) h += '<div class="vk-imeta">Inga intyg.</div>';
+    h += lonBox(r);
     // Ägarens beslut
     if (boss && st.decide && st.decide.id === r.id) {
       var lbl = { godkand: 'Godkänn', intyg_begart: 'Begär läkarintyg', avslagen: 'Avslå' }[st.decide.status];
@@ -169,6 +171,7 @@
     } else if (r.open) a.push('<button type="button" data-a="frisk">💪 Friskanmäl</button>');
     a.push('<label class="sj-up">📷 Läkarintyg<input type="file" accept="image/*,application/pdf" data-up="' + r.id + '" hidden></label>');
     if (r.certs && !(c && c.length)) a.push('<button type="button" data-a="certs">📄 Visa intyg</button>');
+    a.push('<button type="button" data-a="lon">' + (st.lon[r.id] ? 'Dölj sjuklön' : '💰 Beräknad sjuklön') + '</button>');
     if (boss && !(st.decide && st.decide.id === r.id)) {
       if (r.status !== 'godkand') a.push('<button type="button" class="kal-ok" data-a="godkand">✓ Godkänn</button>');
       if (r.status !== 'intyg_begart') a.push('<button type="button" class="bv-pagar" data-a="intyg_begart">📄 Begär läkarintyg</button>');
@@ -280,6 +283,7 @@
           var a = b.dataset.a;
           if (a === 'frisk') { st.form = { kind: 'frisk', id: id, back: today() }; draw(); window.scrollTo(0, 0); }
           else if (a === 'certs') showCerts(id);
+          else if (a === 'lon') showLon(id);
           else if (a === 'del') {
             if (!confirm('Ta bort sjukperioden och alla intyg? Det går inte att ångra.')) return;
             act(fn({ action: 'delete', report_id: id }), 'Sjukperioden är borttagen.');
@@ -309,6 +313,39 @@
   }
 
   // Foto: skala ner i telefonen (max 1600 px, jpeg). PDF skickas som den är (högst 3 MB).
+  // ---------- beräknad sjuklön (önskemål #39) ----------
+  // Servern (sjuk_lon_calc) räknar: snittlön de senaste månaderna före första sjukdagen ur resdatan (samma lön som Lönekoll),
+  // × sjuklön 80 %, minus karensavdrag 20 % av en veckas sjuklön, för dag 1–14. Procenten ställer ägaren in under Admin › Bilar.
+  function showLon(id) {
+    if (st.lon[id] && st.lon[id] !== 'loading') { delete st.lon[id]; draw(); return; }
+    st.lon[id] = 'loading'; draw();
+    rpc('sjuk_lon_calc', { p_id: id }).then(function (b) { st.lon[id] = b || { err: true }; })
+      .catch(function (e) { if (fail(e)) return; st.lon[id] = { err: true, missing: e && e.code === 'PGRST202' }; })
+      .then(function () { draw(); });
+  }
+  function kr(n) { return n == null ? '–' : Math.round(Number(n)).toLocaleString('sv-SE') + ' kr'; }
+  function pct(n) { return String(Number(n)).replace('.', ',') + ' %'; }
+  function lonBox(r) {
+    var x = st.lon[r.id];
+    if (!x) return '';
+    if (x === 'loading') return '<div class="vk-imeta">Räknar sjuklön…</div>';
+    var h = '<div class="vk-boss sj-sjuklon"><b>💰 Beräknad sjuklön</b> <small>(uppskattning)</small><br>';
+    if (x.err) return h + (x.missing ? 'Det här finns inte på servern ännu.' : 'Kunde inte räkna sjuklönen just nu. Försök igen.') + '</div>';
+    var c = x.cfg || {};
+    if (x.ingen_data) return h + 'Det finns ingen resdata före ' + esc(dsv(r.start)) + ', så sjuklönen kan inte räknas här.</div>';
+    var L = x.lon || {}, sista = Number(c.sjuklon_dagar) || 14;
+    h += 'Snittlön ' + esc(dsv(L.from)) + ' – ' + esc(dsv(L.to)) + ' (' + dagar(L.kalenderdagar) + '): ' + kr(x.bas) +
+      (c.sem_i_snitt ? ' inkl. semesterersättning' : ', provisionen utan semesterersättning') + ' = <b>' + kr(x.per_dag) + ' per dag</b>.';
+    if (x.kortare) h += ' Kortare än ' + c.snitt_man + ' månader, eftersom resdatan börjar ' + esc(dsv(L.forsta)) + '.';
+    h += '<br><small>Samma som ' + kr(x.per_kordag) + ' per kördag (' + L.kordagar + ' dagar), ' + kr(x.per_pass) + ' per pass, ' + kr(x.per_timme) + ' per timme.</small>';
+    h += '<br>Sjuklön ' + pct(c.sjuklon_pct) + ': ' + kr(x.sjuklon_dag) + ' per dag × ' + dagar(x.agare_dagar) + ' = ' + kr(x.brutto);
+    h += '<br>− Karensavdrag (' + pct(c.karens_pct) + ' av en veckas sjuklön): ' + kr(x.karens);
+    h += '<br><b>= Sjuklön från åkeriet: ' + kr(x.att_betala) + (x.open ? ' hittills' : '') + '</b> (före skatt)';
+    if (x.fk_dagar > 0) h += '<br>Dag ' + (sista + 1) + '–' + x.dagar + ' (' + dagar(x.fk_dagar) + '): Försäkringskassan betalar sjukpenning. Föraren ansöker om den hos Försäkringskassan.';
+    else if (x.open) h += '<br><small>Från dag ' + (sista + 1) + ' betalar Försäkringskassan sjukpenning i stället.</small>';
+    return h + '<br><small>Räknat på resdatan i appen, samma lön som i Lönekoll. Det som gäller exakt står i lönebeskedet.</small></div>';
+  }
+
   function shrink(file) {
     return new Promise(function (ok, no) {
       var url = URL.createObjectURL(file), img = new Image();

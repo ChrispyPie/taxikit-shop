@@ -337,7 +337,8 @@
       demo_ended: 'Demokontot är redan avslutat.',
       too_many_demos: 'Det finns redan 10 aktiva demokonton. Avsluta något först.',
       demo_source_missing: 'Kontot som demot visar finns inte eller är inte aktivt.',
-      bad_role: 'Välj Förare eller Ägare.'
+      bad_role: 'Välj Förare eller Ägare.',
+      invalid_lonekost: 'Kontrollera procentsatserna (0–100 %), antal månader (1–24) och antal dagar (1–90).'
     };
     function errText(e) { return errorTexts[e.message] || ('Fel: ' + e.message); }
 
@@ -574,7 +575,7 @@
         location.href = 'akeridata.html';
         return;
       } else if (path[0].id === 'bilar') {
-        title.textContent = editingCar ? (editingCar === 'fuel' ? 'Drivmedelspriser' : editingCar === 'new' ? 'Ny bil' : 'Ändra bil') : 'Bilar';
+        title.textContent = editingCar ? (editingCar === 'fuel' ? 'Drivmedelspriser' : editingCar === 'lonekost' ? 'Lönekostnad och sjuklön' : editingCar === 'new' ? 'Ny bil' : 'Ändra bil') : 'Bilar';
         if (!canSeeAkeridata()) content.innerHTML = '<div class="section"><p style="padding:16px;">Ingen behörighet</p></div>';
         else if (editingCar) renderEditCar(content);
         else renderCars(content);
@@ -1103,8 +1104,10 @@
     async function loadCars() {
       carList = null;
       render();
+      const lk = rpc('get_lonekost').catch(() => null);   // saknas funktionen på servern används standardvärdena (LK_DEF)
       try { carList = await rpc('list_cars'); }
       catch (e) { carList = { can_edit: false, cars: [], error: true }; }
+      lonekost = await lk;
       render();
     }
 
@@ -1161,7 +1164,19 @@
     //   × provision, + semesterersättning, + arbetsgivaravgift (det ägaren betalar).
     // Uberavgift, adm.avgift, inpassering och taxiavgift visas som Avgifter. Bränslepriserna är inkl. moms och räknas om till exkl. moms.
     // Saknas resdata kan ägaren fylla i intäkt per år (exkl. moms) på bilen.
-    const BK = { moms: 6, uber: 25, uberIn: 26, adm: 1.3, inpass: 2500, provision: 37, semester: 13, agavg: 31.42, bransleMoms: 25 };
+    // Pension, löneskatt och övriga försäkringar (önskemål #37) läggs ovanpå. Procenten är åkeriets egna och sparas på servern
+    // (get_lonekost/save_lonekost, tabell private.lonekost_settings). Ägaren ändrar dem under Bilar › Lönekostnad och sjuklön.
+    // bas 'lon' = de tre räknas på lönen före semesterersättning, 'lon_sem' = på lön + semesterersättning.
+    const BK = { moms: 6, uber: 25, uberIn: 26, adm: 1.3, inpass: 2500, provision: 37, semester: 13, bransleMoms: 25 };
+    const LK_DEF = { agavg: 31.42, pension: 4.4, loneskatt: 1.067, ovr_forsakr: 0.26, bas: 'lon',
+      sjuklon_pct: 80, karens_pct: 20, snitt_man: 6, sem_i_snitt: false, sjuklon_dagar: 14 };
+    let lonekost = null;   // { can_edit, cfg } från get_lonekost
+    function lkCfg() {
+      const c = Object.assign({}, LK_DEF, (lonekost && lonekost.cfg) || {});
+      ['agavg', 'pension', 'loneskatt', 'ovr_forsakr', 'sjuklon_pct', 'karens_pct', 'snitt_man', 'sjuklon_dagar'].forEach(k => { c[k] = Number(c[k]); });
+      return c;
+    }
+    function pctTxt(n) { return String(Number(Number(n).toFixed(3))).replace('.', ',') + ' %'; }
     const BK_TYPES = { sedan: 'Personbil', kombi: 'Kombi', storbil: 'Storbil', miljobil: 'Miljöbil', executive: 'Executive',
       mirai: 'Toyota Mirai (Miljöbil)', trafic: 'Renault Trafic (Storbil)' };   // de två sista är bilder för en viss modell
     const BK_IMG_V = '20261029m';   // ändra när bilbilderna byts, så att gamla bilder inte visas från cachen
@@ -1248,8 +1263,13 @@
         r.lonegrund = Math.max(0, r.inkortEx - r.uberFee - r.adm - r.inpass);
         r.lon = r.lonegrund * BK.provision / 100;
         r.sem = r.lon * BK.semester / 100;
-        r.agavg = (r.lon + r.sem) * BK.agavg / 100;
-        r.forarlon = r.lon + r.sem + r.agavg;
+        const L = lkCfg();
+        r.agavg = (r.lon + r.sem) * L.agavg / 100;
+        r.lkBas = L.bas === 'lon_sem' ? r.lon + r.sem : r.lon;
+        r.pension = r.lkBas * L.pension / 100;
+        r.loneskatt = r.lkBas * L.loneskatt / 100;
+        r.ovrForsakr = r.lkBas * L.ovr_forsakr / 100;
+        r.forarlon = r.lon + r.sem + r.agavg + r.pension + r.loneskatt + r.ovrForsakr;
       }
       r.taxiavg = nz(K.taxiavg_ar) != null ? nz(K.taxiavg_ar) * f : null;
       r.avgifter = (r.uberFee || 0) + (r.adm || 0) + (r.inpass || 0) + (r.taxiavg || 0);
@@ -1305,7 +1325,10 @@
           : 'Från resdatan, utan moms (' + kr0(r.inkortIncl) + ' inkl. ' + BK.moms + ' % moms' + (r.uber ? ', Uber räknat som brutto' : '') + '). ' +
             I.kordagar + ' dagar, ' + I.forare + ' förare, ' + Math.round(Number(I.km) || 0).toLocaleString('sv-SE') + ' km', 'bk-sum');
         h += bkLine('− Förarlön', kr0(r.forarlon), 'Som i Lönekoll: lönegrund ' + kr0(r.lonegrund) + ' × ' + pct(BK.provision) + ' = ' + kr0(r.lon) +
-          ', + semesterersättning ' + pct(BK.semester) + ' ' + kr0(r.sem) + ', + arbetsgivaravgift ' + pct(BK.agavg) + ' ' + kr0(r.agavg), 'bk-minus');
+          ', + semesterersättning ' + pct(BK.semester) + ' ' + kr0(r.sem) + ', + arbetsgivaravgift ' + pctTxt(lkCfg().agavg) + ' ' + kr0(r.agavg) +
+          ', + pension ' + pctTxt(lkCfg().pension) + ' ' + kr0(r.pension) + ', + löneskatt ' + pctTxt(lkCfg().loneskatt) + ' ' + kr0(r.loneskatt) +
+          ', + övriga försäkringar ' + pctTxt(lkCfg().ovr_forsakr) + ' ' + kr0(r.ovrForsakr) +
+          ' (de tre sista på ' + (lkCfg().bas === 'lon_sem' ? 'lön + semesterersättning ' : 'lönen före semesterersättning ') + kr0(r.lkBas) + ')', 'bk-minus');
         const av = [];
         if (r.uberFee) av.push('Uberavgift ' + pct(BK.uber) + ' ' + kr0(r.uberFee));
         av.push('adm.avgift ' + pct(BK.adm) + ' ' + kr0(r.adm));
@@ -1372,7 +1395,8 @@
       if (!cars.length) html += `<p style="padding:16px;">Inga bilar inlagda ännu.${carList.can_edit ? ' Tryck på + Ny bil för att lägga till en bil.' : ''}</p>`;
       html += list(active) + '</div>';
       if (out.length) html += '<div class="section-header" style="margin:0 16px; border-radius:8px;">Ur trafik</div><div class="section bk-list">' + list(out) + '</div>';
-      html += `<p class="bk-foot">Vinst = inkört − förarlön − avgifter − bilkostnader, utan moms. Inkört och körda mil kommer från resdatan för bilnumret. Förarlönen räknas som i Lönekoll (provision ${String(BK.provision)} %, semesterersättning ${BK.semester} %) plus arbetsgivaravgift ${String(BK.agavg).replace('.', ',')} %. Tryck på en bil för att se uträkningen. Antalet bilar styr åkeriets mål.</p>`;
+      html += `<p class="bk-foot">Vinst = inkört − förarlön − avgifter − bilkostnader, utan moms. Inkört och körda mil kommer från resdatan för bilnumret. Förarlönen räknas som i Lönekoll (provision ${String(BK.provision)} %, semesterersättning ${BK.semester} %) plus arbetsgivaravgift ${pctTxt(lkCfg().agavg)}, pension ${pctTxt(lkCfg().pension)}, löneskatt ${pctTxt(lkCfg().loneskatt)} och övriga försäkringar ${pctTxt(lkCfg().ovr_forsakr)}. Tryck på en bil för att se uträkningen. Antalet bilar styr åkeriets mål.</p>`;
+      if (carList.can_edit) html += '<div style="padding:0 16px 12px;"><button id="lk-edit" onclick="editCar(\'lonekost\')" style="width:100%;">Ändra lönekostnad och sjuklön</button></div>';
       if (!carList.can_edit) html += '<p class="bk-foot">Du kan se bilarna men inte ändra dem.</p>';
       content.innerHTML = html;
     }
@@ -1426,6 +1450,58 @@
       } catch (e) { alert(errText(e)); }
     }
 
+    // --- Lönekostnad och sjuklön (önskemål #37 och #39) ---
+    const LK_FIELDS = [
+      ['agavg', 'Arbetsgivaravgift (%)', 'På lön + semesterersättning'],
+      ['pension', 'Pension (%)', ''],
+      ['loneskatt', 'Löneskatt (%)', 'Särskild löneskatt på pensionen (24,26 % × 4,4 % ≈ 1,067 %)'],
+      ['ovr_forsakr', 'Övriga försäkringar (%)', '']
+    ];
+    const SJ_FIELDS = [
+      ['sjuklon_pct', 'Sjuklön (% av snittlönen)', 'Sjuklönelagen: 80 %'],
+      ['karens_pct', 'Karensavdrag (% av en veckas sjuklön)', 'Sjuklönelagen: 20 %'],
+      ['snitt_man', 'Snittlön från senaste (månader)', 'Före första sjukdagen'],
+      ['sjuklon_dagar', 'Åkeriet betalar sjuklön dag 1 till dag', 'Sedan Försäkringskassan (sjuklönelagen: 14)']
+    ];
+    function renderLonekostSettings(content) {
+      const c = lkCfg(), hint = (t) => t ? `<span style="font-size:calc(11px * var(--font-scale, 1)); color:var(--c-718096);">${t}</span>` : '';
+      const inp = ([k, label, h]) => `<div class="form-group"><label for="lk-${k}">${label}</label>
+        <input id="lk-${k}" type="text" inputmode="decimal" value="${numTrim(c[k])}">${hint(h)}</div>`;
+      content.innerHTML = `<div class="section" style="padding:16px;">
+        <h3 style="margin-top:0;">Lönekostnad i bilkalkylen</h3>
+        <p style="font-size:calc(13px * var(--font-scale, 1)); color:var(--c-4a5568); margin-top:0;">Det åkeriet betalar ovanpå förarens lön (provision ${BK.provision} % + semesterersättning ${BK.semester} %). Används i vinst/förlust per bil.</p>
+        ${LK_FIELDS.map(inp).join('')}
+        <div class="form-group"><label for="lk-bas">Pension, löneskatt och övriga försäkringar räknas på</label>
+          <select id="lk-bas"><option value="lon"${c.bas === 'lon_sem' ? '' : ' selected'}>Lönen före semesterersättning</option>
+          <option value="lon_sem"${c.bas === 'lon_sem' ? ' selected' : ''}>Lön + semesterersättning</option></select></div>
+        <h3>Sjuklön i Sjukanmälan</h3>
+        <p style="font-size:calc(13px * var(--font-scale, 1)); color:var(--c-4a5568); margin-top:0;">Appen räknar fram sjuklönen från förarens snittlön i resdatan. Föraren och ägaren ser beloppet. Det är en uppskattning.</p>
+        ${SJ_FIELDS.map(inp).join('')}
+        <div class="form-group"><label style="display:flex; gap:8px; align-items:center;"><input id="lk-sem_i_snitt" type="checkbox"${c.sem_i_snitt ? ' checked' : ''} style="width:auto;"> Räkna med semesterersättningen (${BK.semester} %) i snittlönen</label></div>
+        ${lonekost && lonekost.cfg && lonekost.cfg.sparad ? '' : '<p style="font-size:calc(12px * var(--font-scale, 1)); color:var(--c-718096);">Standardvärden. Inget är sparat ännu.</p>'}
+        <div class="modal-buttons">
+          <button onclick="editingCar = null; render();">Avbryt</button>
+          <button id="lk-save" onclick="saveLonekost()" style="background: var(--primary-bg); color:white;">Spara</button>
+        </div></div>`;
+    }
+    async function saveLonekost() {
+      const cfg = { bas: document.getElementById('lk-bas').value, sem_i_snitt: document.getElementById('lk-sem_i_snitt').checked };
+      for (const [k, label] of LK_FIELDS.concat(SJ_FIELDS)) {
+        const v = parseNum(document.getElementById('lk-' + k).value);
+        const heltal = k === 'snitt_man' || k === 'sjuklon_dagar';
+        const max = k === 'snitt_man' ? 24 : k === 'sjuklon_dagar' ? 90 : 100, min = heltal ? 1 : 0;
+        if (v == null || isNaN(v) || v < min || v > max || (heltal && !Number.isInteger(v))) {
+          alert(label.replace(/ \(.*\)$/, '') + ': skriv ' + (heltal ? 'ett heltal ' : 'ett tal ') + min + '–' + max + '.'); return;
+        }
+        cfg[k] = v;
+      }
+      try {
+        lonekost = await rpc('save_lonekost', { p_cfg: cfg });
+        editingCar = null;
+        render();
+      } catch (e) { alert(e.code === 'PGRST202' ? 'Det här finns inte på servern ännu.' : errText(e)); }
+    }
+
     // --- Ny/ändra bil ---
     function consOf(v, fuel) {
       if (!v) return null;
@@ -1436,6 +1512,7 @@
 
     function renderEditCar(content) {
       if (editingCar === 'fuel') { renderFuelSettings(content); return; }
+      if (editingCar === 'lonekost') { renderLonekostSettings(content); return; }
       const c = editingCar === 'new' ? { kategorier: [], cost_mode: 'calc', price_mode: 'auto' } : (carList.cars || []).find(x => x.id === editingCar);
       if (!c) { editingCar = null; render(); return; }
       if (!carForm) carForm = { make: c.make || '', model: '', model_id: c.model_id || null, own: !c.model_id && !!c.make };
