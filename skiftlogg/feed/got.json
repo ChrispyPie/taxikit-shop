@@ -1,8 +1,8 @@
 {
   "airport": "GOT",
-  "updated": "2026-10-30T16:35:24+01:00",
-  "arrivalsUpdated": "2026-10-30T16:35:25+01:00",
-  "departuresUpdated": "2026-10-30T15:40:38+01:00",
+  "updated": "2026-10-30T16:40:33+01:00",
+  "arrivalsUpdated": "2026-10-30T16:40:35+01:00",
+  "departuresUpdated": "2026-10-30T16:40:36+01:00",
   "yesterdayUpdated": "2026-10-30T05:15:38+01:00",
   "tomorrowUpdated": "2026-10-30T16:01:09+01:00",
   "error": null,
@@ -1676,8 +1676,8 @@
       "baggage": "3",
       "firstBag": "2026-10-30T15:17:56Z",
       "firstBagEst": "2026-10-30T15:15:38Z",
-      "lastBag": "",
-      "rawStatus": "Första bagage · Landat 15:55"
+      "lastBag": "2026-10-30T15:38:13Z",
+      "rawStatus": "Landat 15:55 · Sista bagage"
     },
     {
       "id": "LH820",
@@ -2000,7 +2000,7 @@
       "firstBag": "2026-10-30T15:30:47Z",
       "firstBagEst": "2026-10-30T15:30:53Z",
       "lastBag": "2026-10-30T15:35:13Z",
-      "rawStatus": "Första bagage · Landat 16:12"
+      "rawStatus": "Landat 16:12 · Sista bagage"
     },
     {
       "id": "LH2430",
@@ -2334,7 +2334,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-10-30T16:55:00Z",
-      "est": "2026-10-30T17:05:00Z",
+      "est": "2026-10-30T17:04:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "15",
@@ -2342,7 +2342,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 18:05"
+      "rawStatus": "Ankommer 18:04"
     },
     {
       "id": "KL1229",
@@ -5726,7 +5726,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd"
+      "rawStatus": "Startat 15:47"
     },
     {
       "id": "FR9021",
@@ -5734,18 +5734,18 @@
       "other": "Alicante",
       "iata": "",
       "airline": "Ryanair Ltd",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-10-30T15:00:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-10-30T15:00:42Z",
       "terminal": "T1",
       "gate": "16",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Omedelbar avgång"
+      "rawStatus": "Startat 16:10"
     },
     {
       "id": "AY864",
@@ -5916,7 +5916,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gå till gate"
     },
     {
       "id": "LH2431",
@@ -5930,7 +5930,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "12",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -5981,18 +5981,18 @@
       "other": "Manchester",
       "iata": "",
       "airline": "Ryanair Ltd",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-10-30T15:10:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-10-30T15:15:07Z",
       "terminal": "T1",
       "gate": "22",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Boarding"
+      "rawStatus": "Startat 16:23"
     },
     {
       "id": "AY868",
@@ -6220,7 +6220,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Boarding"
     },
     {
       "id": "EW9221",
@@ -6505,7 +6505,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gå till gate"
     },
     {
       "id": "DK1724",
@@ -6828,7 +6828,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd"
+      "rawStatus": "Startat 15:41"
     }
   ]
 }
