@@ -16,7 +16,7 @@
  */
 window.CHANGELOG = [
   // tid: sätt klockslaget när det går live (Christians "kör"), t.ex. tid: '03:15'. Datum och id också om det inte går live 30 okt.
-  { datum: '2026-10-30', id: '2026-10-30b', tid: 'HH:MM', rader: [
+  { datum: '2026-10-30', id: '2026-10-30b', tid: '04:25', rader: [
     ['Nytt', 'Sjukanmälan finns nu för alla förare. Bil & verkstad heter nu Anmälningar & ärenden och har fliken 🤒 Sjuk. Där sjukanmäler du dig, friskanmäler dig och laddar upp ett foto av läkarintyget. Ägaren får en notis och svarar dig i appen. Tryck på 💰 Beräknad sjuklön så ser du ungefär hur mycket sjuklön det blir. Ingen diagnos eller orsak behövs. Bara du, ägaren och S admin ser din sjukanmälan.']
   ] },
   { datum: '2026-10-30', id: '2026-10-30a', tid: '04:23', rader: [
