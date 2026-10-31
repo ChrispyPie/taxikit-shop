@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="sv"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0E1114">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="data.js"></script><script src="app.js"></script>
+<title>Kategorier – TaxiKit v2</title></head>
+<body data-page="cats"><main class="wrap" id="app"></main>
+<script>
+const {S,D,t,card,carName,shell,get,set}=TK; shell('cats');
+const qs=new URLSearchParams(location.search);
+let cat=qs.get('cat')||'alla', q=(qs.get('q')||'').toLowerCase(), sort='pop', mine=get('onlymine',S.car!=='alla');
+function render(){
+  let list=D.products.filter(p=>(cat==='alla'||p.cat===cat)&&(!q||p.name.toLowerCase().includes(q))&&(!mine||TK.fitsCar(p,S.car)));
+  if(sort==='low') list=[...list].sort((a,b)=>a.price-b.price);
+  if(sort==='high') list=[...list].sort((a,b)=>b.price-a.price);
+  const c=D.cats.find(x=>x.id===cat);
+  document.getElementById('app').innerHTML=`
+  <label class="search" style="margin-top:12px">🔎<input value="${q}" placeholder="${t('search')}" id="q"></label>
+  <h1 style="font-size:26px;margin:4px 0 8px">${c?c.icon+' '+(S.lang==='en'?c.en:c.name):'Allt för skiftet'}</h1>
+  <div class="chips"><button class="chip ${cat==='alla'?'on':''}" data-c="alla">Allt</button>${D.cats.map(x=>`<button class="chip ${cat===x.id?'on':''}" data-c="${x.id}">${x.icon} ${S.lang==='en'?x.en:x.name}</button>`).join('')}</div>
+  <div class="toolbar">
+    <label class="sw"><input type="checkbox" id="mine" ${mine?'checked':''}><i></i><span>${t('onlymine')}${S.car!=='alla'?' ('+carName(S.car).split(' (')[0]+')':''}</span></label>
+    <select id="sort"><option value="pop">Populärast</option><option value="low" ${sort==='low'?'selected':''}>Lägst pris</option><option value="high" ${sort==='high'?'selected':''}>Högst pris</option></select>
+  </div>
+  <div class="toolbar" style="margin-top:-4px"><span>${list.length} produkter</span><span>Exempeldata</span></div>
+  <div class="grid">${list.map(p=>card(p)).join('')||'<p class="empty">Inget matchar. Testa att stänga av bilfiltret.</p>'}</div>`;
+  document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{cat=b.dataset.c;render()});
+  document.getElementById('sort').onchange=e=>{sort=e.target.value;render()};
+  document.getElementById('mine').onchange=e=>{mine=e.target.checked;set('onlymine',mine);if(mine&&S.car==='alla')document.querySelector('[data-open-set]').click();render()};
+  document.getElementById('q').onkeydown=e=>{if(e.key==='Enter'){q=e.target.value.toLowerCase();render()}};
+}
+render();
+</script></body></html>

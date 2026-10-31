@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="sv"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0E1114">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="data.js"></script><script src="app.js"></script>
+<title>TaxiKit v2 – prototyp</title></head>
+<body data-page="home"><main class="wrap" id="app"></main>
+<script>
+const {S,D,t,card,carName,shell}=TK; shell('home');
+const car=S.car, pop=D.products.filter(p=>p.shifts.includes('natt')&&TK.fitsCar(p,car)).slice(0,8);
+const again=(TK.get('history',['spypasar','kvittorulle','vatservetter','mints'])).map(TK.prod).filter(Boolean);
+document.getElementById('app').innerHTML=`
+  <label class="search" style="margin-top:12px">🔎<input placeholder="${t('search')}" onkeydown="if(event.key==='Enter')location='kategori.html?q='+encodeURIComponent(this.value)"></label>
+  <section class="hero">
+    <div class="kicker">● Ledig · TaxiKit</div>
+    <h1>Allt för skiftet.<br>Inget krångel.</h1>
+    <p>Det vi inte har, det behöver du inte. Bygg ditt kit på 30 sekunder, så kommer påfyllningen av sig själv.</p>
+    <div class="row"><a class="btn go" href="kit.html">🧰 Bygg mitt skift-kit</a><a class="btn ghost" href="kategori.html">Handla allt</a></div>
+  </section>
+  <div class="carchip" data-open-set><span class="ic">${carName(car).includes('storbil')?'🚐':'🚗'}</span><div><small>${t('yourcar')}</small><strong>${car==='alla'?t('pickcar'):carName(car)}</strong></div><span class="ch">${t('change')} ›</span></div>
+  <div class="sec"><h2>↻ ${t('buyagain')}</h2><a href="bagage.html">Påfyllning</a></div>
+  <div class="hscroll">${again.map(p=>card(p)).join('')}</div>
+  <div class="sec"><h2>${t('cats')}</h2><a href="kategori.html">${t('all')}</a></div>
+  <div class="cats">${D.cats.map(c=>`<a class="cat" href="kategori.html?cat=${c.id}"><span class="ic">${c.icon}</span><strong>${S.lang==='en'?c.en:c.name}</strong><small>${c.hint}</small></a>`).join('')}
+    <a class="cat" href="kit.html" style="border-color:var(--taklampa)"><span class="ic">🧰</span><strong>Färdiga kit</strong><small>Natt, flyg, storbil…</small></a></div>
+  <div class="sec"><h2>🌙 ${t('popular')}</h2><a href="kategori.html">${t('all')}</a></div>
+  <div class="hscroll">${pop.map(p=>card(p)).join('')}</div>
+  <div class="trust">
+    <div><b>↩️ 14 dagars ångerrätt</b>Ångra direkt här på sajten</div>
+    <div><b>🚚 Från EU-lager</b>Leveranstid visas per vara</div>
+    <div><b>📱 Swish, kort, Klarna</b>Planerat i riktiga kassan</div>
+    <div><b>🚖 Av en taxiförare</b>Testat i Göteborg</div>
+  </div>
+  <footer>TaxiKit · prototyp v2 · Alla priser är exempel</footer>`;
+</script></body></html>
