@@ -16,7 +16,7 @@
  */
 window.CHANGELOG = [
   // tid: sätt klockslaget när Zonguiden går live (Christians "kör"), t.ex. tid: '14:05'. Byt datum och id om det inte blir 31 okt.
-  { datum: '2026-10-31', id: '2026-10-31a', tid: 'HH:MM', rader: [
+  { datum: '2026-10-31', id: '2026-10-31a', tid: '21:28', rader: [
     ['Nytt', 'Admin › Zonguide (test): se i vilka zoner åkeriets resor oftast startar en viss veckodag och timme, de senaste 12 veckorna. Sidan visar topp 5 just nu och hela passet 06–05. Den visar också hur mycket underlag det finns. Magasinet räknas inte. Bara du och S admin ser sidan, förarna ser den inte än.', 'agare']
   ] },
   { datum: '2026-10-30', id: '2026-10-30b', tid: '04:25', rader: [
