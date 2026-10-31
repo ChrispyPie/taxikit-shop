@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="sv"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0E1114">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="data.js"></script><script src="app.js"></script>
+<title>Bagaget – TaxiKit v2</title></head>
+<body data-page="bag"><main class="wrap" id="app"></main>
+<script>
+const {S,D,t,shell,kr,priceHTML,set}=TK; shell('bag');
+const FREE=499; /* exempelgräns för fri frakt */
+function render(){
+  const cart=S.cart, app=document.getElementById('app');
+  if(!cart.length){app.innerHTML=`<div class="empty"><div class="ic">🧳</div><h2>Bagaget är tomt</h2><p>Börja med ett färdigt kit, det tar 30 sekunder.</p><a class="btn go" href="kit.html">🧰 Bygg mitt skift-kit</a></div>`;return}
+  const lines=cart.map(l=>({...l,p:TK.prod(l.id)})).filter(l=>l.p);
+  const price=l=>l.every?Math.round(l.p.price*0.9):l.p.price;
+  const sub=lines.reduce((a,l)=>a+price(l)*l.qty,0);
+  const left=Math.max(0,FREE-sub), ship=left?49:0;
+  app.innerHTML=`<h1 style="font-size:26px;margin:16px 0 4px">🧳 Bagaget</h1><p style="color:var(--muted);margin:0 0 6px">${TK.cartCount()} varor</p>
+  <div class="prog">${left?`Handla för <b>${kr(left)}</b> till så får du <b>fri frakt</b>`:'🎉 Du har <b>fri frakt</b>'} <span class="ex">exempel</span><div class="b"><i style="width:${Math.min(100,sub/FREE*100)}%"></i></div></div>
+  ${lines.map((l,i)=>`<div class="line"><a class="ic" href="produkt.html?id=${l.p.id}">${l.p.icon}</a><div class="mid"><div class="nm">${l.p.name}</div>
+    ${l.every?`<div class="sub">↻ Påfyllning var ${l.every}:e vecka · −10 %</div>`:(l.p.consumable?`<button class="chip" style="height:28px;font-size:12px;margin-top:4px" data-sub="${i}">↻ Gör till påfyllning, spara 10 %</button>`:'')}
+    <div class="bot"><div class="qty"><button data-m="${i}">−</button><span>${l.qty}</span><button data-p="${i}">+</button></div>${priceHTML(price(l)*l.qty)}</div></div></div>`).join('')}
+  <div class="totals"><div><span>Delsumma</span><span>${kr(sub)}</span></div><div><span>${t('ship')} <span class="ex">exempel</span></span><span>${ship?kr(ship):'0 kr'}</span></div>
+    <div><span>varav moms</span><span>${kr((sub+ship)*0.2)}</span></div><div class="t"><span>${t('total')}</span>${priceHTML(sub+ship)}</div></div>
+  <button class="btn go block" id="co">🔒 ${t('checkout')}</button>
+  <div class="pay"><span>Swish</span><span>Kort</span><span>Klarna</span><span>Apple Pay</span></div>
+  <p class="note">14 dagars ångerrätt · Ångra köp direkt via ”Ångra avtalet här” i din order</p>
+  <p class="note">Prototyp: kassan är inte kopplad. Inga pengar dras.</p>`;
+  app.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{const c=S.cart;c[b.dataset.m].qty--;if(c[b.dataset.m].qty<1)c.splice(b.dataset.m,1);set('cart',c);TK.refreshBadges();render()});
+  app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{const c=S.cart;c[b.dataset.p].qty++;set('cart',c);TK.refreshBadges();render()});
+  app.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{const c=S.cart;const l=c[b.dataset.sub];l.every=TK.prod(l.id).every||4;set('cart',c);render()});
+  document.getElementById('co').onclick=()=>alert('Prototyp: här tar den riktiga kassan över (t.ex. Shopify Checkout med Swish, kort och Klarna). Inget köp görs.');
+}
+render();
+</script></body></html>
