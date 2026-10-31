@@ -15,7 +15,10 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  // tid: sätt klockslaget när det går live (Christians "kör"), t.ex. tid: '03:15'. Datum och id också om det inte går live 30 okt.
+  // tid: sätt klockslaget när Zonguiden går live (Christians "kör"), t.ex. tid: '14:05'. Byt datum och id om det inte blir 31 okt.
+  { datum: '2026-10-31', id: '2026-10-31a', tid: 'HH:MM', rader: [
+    ['Nytt', 'Admin › Zonguide (test): se i vilka zoner åkeriets resor oftast startar en viss veckodag och timme, de senaste 12 veckorna. Sidan visar topp 5 just nu och hela passet 06–05. Den visar också hur mycket underlag det finns. Magasinet räknas inte. Bara du och S admin ser sidan, förarna ser den inte än.', 'agare']
+  ] },
   { datum: '2026-10-30', id: '2026-10-30b', tid: '04:25', rader: [
     ['Nytt', 'Sjukanmälan finns nu för alla förare. Bil & verkstad heter nu Anmälningar & ärenden och har fliken 🤒 Sjuk. Där sjukanmäler du dig, friskanmäler dig och laddar upp ett foto av läkarintyget. Ägaren får en notis och svarar dig i appen. Tryck på 💰 Beräknad sjuklön så ser du ungefär hur mycket sjuklön det blir. Ingen diagnos eller orsak behövs. Bara du, ägaren och S admin ser din sjukanmälan.']
   ] },
