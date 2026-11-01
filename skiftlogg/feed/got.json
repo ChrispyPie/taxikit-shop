@@ -1,7 +1,7 @@
 {
   "airport": "GOT",
-  "updated": "2026-11-02T00:45:31+01:00",
-  "arrivalsUpdated": "2026-11-02T00:45:32+01:00",
+  "updated": "2026-11-02T00:50:34+01:00",
+  "arrivalsUpdated": "2026-11-02T00:50:35+01:00",
   "departuresUpdated": "2026-11-02T00:10:41+01:00",
   "yesterdayUpdated": "2026-11-02T00:25:27+01:00",
   "tomorrowUpdated": "2026-11-01T23:01:19+01:00",
@@ -842,25 +842,6 @@
       "firstBagEst": "2026-10-31T22:42:15Z",
       "lastBag": "2026-10-31T22:47:39Z",
       "rawStatus": "Landat 23:17 · Sista bagage"
-    },
-    {
-      "id": "FR8058",
-      "dir": "ANK",
-      "other": "Milano MXP",
-      "iata": "",
-      "airline": "Ryanair Ltd",
-      "status": "LAN",
-      "statusSv": "Landat 12:46",
-      "sched": "2026-10-31T11:45:00Z",
-      "est": "2026-10-31T11:45:00Z",
-      "act": "2026-10-31T11:46:00Z",
-      "terminal": "T1",
-      "gate": "20A",
-      "baggage": "1",
-      "firstBag": "2026-10-31T11:59:53Z",
-      "firstBagEst": "2026-10-31T12:11:27Z",
-      "lastBag": "2026-10-31T12:02:00Z",
-      "rawStatus": "Landat 12:46 · Sista bagage"
     },
     {
       "id": "FR5657",
@@ -3604,18 +3585,18 @@
       "other": "Stockholm ARN",
       "iata": "",
       "airline": "SAS Scandinavian Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 00:45",
       "sched": "2026-11-01T23:55:00Z",
       "est": "2026-11-01T23:46:00Z",
-      "act": "",
+      "act": "2026-11-01T23:45:00Z",
       "terminal": "T1",
       "gate": "20A",
       "baggage": "2",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 00:46"
+      "rawStatus": "Landat 00:45"
     },
     {
       "id": "FR091",
@@ -3651,7 +3632,7 @@
       "gate": "21A",
       "baggage": "3",
       "firstBag": "",
-      "firstBagEst": "",
+      "firstBagEst": "2026-11-02T00:02:00Z",
       "lastBag": "",
       "rawStatus": "Landat 00:41"
     }
