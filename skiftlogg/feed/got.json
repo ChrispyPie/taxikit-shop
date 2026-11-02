@@ -1,8 +1,8 @@
 {
   "airport": "GOT",
-  "updated": "2026-11-02T05:55:24+01:00",
+  "updated": "2026-11-02T06:01:01+01:00",
   "arrivalsUpdated": "2026-11-02T05:40:40+01:00",
-  "departuresUpdated": "2026-11-02T05:01:02+01:00",
+  "departuresUpdated": "2026-11-02T06:01:07+01:00",
   "yesterdayUpdated": "2026-11-02T05:15:36+01:00",
   "tomorrowUpdated": "2026-11-01T23:01:19+01:00",
   "error": null,
@@ -3202,25 +3202,6 @@
   ],
   "departures": [
     {
-      "id": "BA7793",
-      "dir": "AVG",
-      "other": "London LHR",
-      "iata": "",
-      "airline": "British Airways",
-      "status": "DEL",
-      "statusSv": "Borttagen",
-      "sched": "2026-10-31T16:10:00Z",
-      "est": "",
-      "act": "",
-      "terminal": "T1",
-      "gate": "",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": ""
-    },
-    {
       "id": "BLX347",
       "dir": "AVG",
       "other": "Stockholm ARN",
@@ -3278,25 +3259,6 @@
       "rawStatus": "Startat 18:19"
     },
     {
-      "id": "AF1453",
-      "dir": "AVG",
-      "other": "Paris CDG",
-      "iata": "",
-      "airline": "Air France",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-10-31T16:10:00Z",
-      "est": "",
-      "act": "2026-10-31T16:15:52Z",
-      "terminal": "T1",
-      "gate": "14",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 17:26"
-    },
-    {
       "id": "TK1800",
       "dir": "AVG",
       "other": "Istanbul IST",
@@ -3316,25 +3278,6 @@
       "rawStatus": "Startat 18:21"
     },
     {
-      "id": "AY866",
-      "dir": "AVG",
-      "other": "Helsingfors",
-      "iata": "",
-      "airline": "Finnair",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-10-31T16:30:00Z",
-      "est": "",
-      "act": "2026-10-31T16:29:00Z",
-      "terminal": "T1",
-      "gate": "17",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 17:35"
-    },
-    {
       "id": "LH819",
       "dir": "AVG",
       "other": "Frankfurt",
@@ -3352,44 +3295,6 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 18:51"
-    },
-    {
-      "id": "KL1236",
-      "dir": "AVG",
-      "other": "Amsterdam",
-      "iata": "",
-      "airline": "KLM",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-10-31T16:20:00Z",
-      "est": "",
-      "act": "2026-10-31T16:12:56Z",
-      "terminal": "T1",
-      "gate": "19",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 17:23"
-    },
-    {
-      "id": "BA793",
-      "dir": "AVG",
-      "other": "London LHR",
-      "iata": "",
-      "airline": "British Airways",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-10-31T16:10:00Z",
-      "est": "",
-      "act": "2026-10-31T16:07:42Z",
-      "terminal": "T1",
-      "gate": "22",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 17:15"
     },
     {
       "id": "D85059",
@@ -3485,25 +3390,6 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 18:38"
-    },
-    {
-      "id": "FR5636",
-      "dir": "AVG",
-      "other": "Banja Luka",
-      "iata": "",
-      "airline": "Ryanair Ltd",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-10-31T15:55:00Z",
-      "est": "2026-10-31T16:50:00Z",
-      "act": "2026-10-31T16:55:54Z",
-      "terminal": "T1",
-      "gate": "20B",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 18:04"
     },
     {
       "id": "D85605",
@@ -5696,18 +5582,18 @@
       "other": "Amsterdam",
       "iata": "",
       "airline": "KLM",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-02T05:00:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-02T04:59:28Z",
       "terminal": "T1",
       "gate": "17",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "AF1553",
@@ -5726,7 +5612,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Omedelbar avgång"
     },
     {
       "id": "FR967",
@@ -5745,7 +5631,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gå till gate"
     },
     {
       "id": "BLX283",
@@ -5764,7 +5650,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gå till gate"
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "LO496",
@@ -5802,7 +5688,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Boarding"
     },
     {
       "id": "SK2907",
@@ -5821,7 +5707,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Boarding"
     },
     {
       "id": "FR8057",
@@ -5840,7 +5726,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gå till gate"
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "DK844",
@@ -5897,7 +5783,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "SN2324",
@@ -5954,7 +5840,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Omedelbar avgång"
     },
     {
       "id": "SK142",
@@ -6106,7 +5992,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Omedelbar avgång"
     },
     {
       "id": "SK1801",
