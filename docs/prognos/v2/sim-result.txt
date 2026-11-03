@@ -1,0 +1,25 @@
+
+=== v1 (nu) ===
+bilbokningar skapade: 282, fristående barn-bokningar: 19, pushar: 287
+återskapade (samma block inom 5 min): 17, pushar inom 10 min efter att samma zon/kategori försvann: 69
+bokningsminuter dolda fast prognosen har dem kvar: 581, visade som "snart": 0
+tidsfel (försvann − uppskattad tid), minuter:
+  0–40 bil         n=  27  median   13  medel |fel| 17.8
+  0–40 Övriga      n=  15  median  -11  medel |fel| 10.8
+  40–80 osäker     n=  11  median  -50  medel |fel| 41.8
+  40–80 → säker    n=  31  median    1  medel |fel| 5.4
+  80–120 trolig    n=  18  median  -84  medel |fel| 89.5
+  80–120 → säker   n= 170  median    1  medel |fel| 8.5
+
+=== v2 (PR) ===
+bilbokningar skapade: 265, fristående barn-bokningar: 0, pushar: 229
+återskapade (samma block inom 5 min): 1, pushar inom 10 min efter att samma zon/kategori försvann: 12
+bokningsminuter dolda fast prognosen har dem kvar: 0, visade som "snart": 576
+tidsfel (försvann − uppskattad tid), minuter:
+  0–40 bil         n=  25  median    6  medel |fel| 14.0
+  0–40 Övriga      n=  15  median    0  medel |fel| 1.5
+  40–80 osäker     n=   6  median  -38  medel |fel| 36.5
+  40–80 → säker    n=  26  median    2  medel |fel| 10.3
+  80–120 trolig    n=  11  median  -73  medel |fel| 75.3
+  80–120 → säker   n= 170  median    2  medel |fel| 8.0
+v2: ignorerade tomma svar: 10, stängda som passerade >15 min ('expired'): 0, flaggor satta: 17, bilbokningar med barnstol/babyskydd: 10, nedtystade pushar: 39

@@ -15,6 +15,14 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  // tid: sätt klockslaget när Prognos v2 går live (Christians "kör"), t.ex. tid: '14:05'. Byt datum och id om det inte blir 3 nov.
+  { datum: '2026-11-03', id: '2026-11-03a', tid: 'HH:MM', rader: [
+    ['Förbättrat', 'Prognos: håll fingret på en ruta i schemat så får du en förklaring. Du ser kategori, om bokningen är säker, trolig eller osäker och varför, när den först syntes och ungefär när den kommer. Rutan försvinner när du släpper. Ett kort tryck fungerar också.'],
+    ['Förbättrat', 'Prognos: barnstol och babyskydd sitter nu ihop med en bil. Bilens ruta får en liten rosa prick, och spalterna Barnstol och Babyskydd visar bilarna som har tillvalet. Antalet på zonflikarna räknar bara bilar. Bevakar du barnstol eller babyskydd får du notis när en bil med det tillvalet dyker upp.'],
+    ['Förbättrat', 'Prognos: färre falska notiser. Bokningar som försvinner en minut och kommer tillbaka ger inte ny notis, och ett tomt svar från prognosen tömmer inte schemat.'],
+    ['Förbättrat', 'Prognos: bättre tider för bokningar med kort varsel. Övriga brukar komma inom ca 10 min. Osäkra bokningar 40–80 min fram visas som "om 40–80 min". En bokning vars tid har passerat ligger kvar under Snart så länge prognosen har den.'],
+    ['Nytt', 'Prognos › Landvetter: ✈ på en ruta betyder att flyg runt den tiden är försenade, så tiden kan ändras. Håll på rutan för att se vilka flyg.']
+  ] },
   // tid: sätt klockslaget när Zonguiden går live (Christians "kör"), t.ex. tid: '14:05'. Byt datum och id om det inte blir 31 okt.
   { datum: '2026-10-31', id: '2026-10-31a', tid: '21:28', rader: [
     ['Nytt', 'Admin › Zonguide (test): se i vilka zoner åkeriets resor oftast startar en viss veckodag och timme, de senaste 12 veckorna. Sidan visar topp 5 just nu och hela passet 06–05. Den visar också hur mycket underlag det finns. Magasinet räknas inte. Bara du och S admin ser sidan, förarna ser den inte än.', 'agare']

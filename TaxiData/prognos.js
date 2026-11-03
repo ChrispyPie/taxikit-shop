@@ -23,8 +23,8 @@
   var ZONE_BY_ID = {};
   ZONE_ORDER.forEach(function (z) { ZONE_BY_ID[z.id] = z; });
 
-  // Alla kategorier i schemat; barnstol/babyskydd sist (paras alltid med bil men eget spalt –
-  // vi vet inte vilken bil de hör till när flera kommer samtidigt).
+  // Alla kategorier i schemat; barnstol/babyskydd sist. Sedan v2 (t833u) är de tillval på en
+  // bilbokning (b.addons) – spalterna visar bilarna med tillvalet.
   var SCHEDULE_CATS = [
     // Koder (endast referens): A=Kombi, H=Miljöbil, F=Barnstol, 3=Babyskydd
     { k: 'app', head: 'Kombi', label: 'Kombi', child: false },
@@ -62,7 +62,10 @@
     codeMsg: '',
     poll: null,
     seenIds: {},
-    inAppAlert: true
+    inAppAlert: true,
+    flights: null,       // Landvetter-ankomster (för flygvarningen i 293)
+    cellMap: {},         // data-pg-cell -> bokningar i rutan (förklaringsrutan)
+    pendingPaint: false  // omritning väntar tills förklaringsrutan stängs
   };
 
   function esc(s) {
@@ -204,6 +207,7 @@
     if (at != null && isFinite(at)) {
       var slot = floor5(new Date(at)).getTime();
       if (slot >= now && slot < end) info.slot = slot + '|' + cat;
+      else if (slot < now && b && isSnart(b, now)) info.slot = 'snart|' + cat;
       else if (slot < now) info.hint = 'Tiden har passerat.';
       else info.hint = 'Ligger längre fram än 2 timmar – syns i schemat när den närmar sig.';
     }
@@ -338,8 +342,10 @@
       rpc('prognos_morgon', {}),
       rpc('prognos_zones', {}),
       rpc('prognos_watch_list', {}),
-      rpc('prognos_original', {}).catch(function () { return null; })
+      rpc('prognos_original', {}).catch(function () { return null; }),
+      (window.ANKOMSTER && ANKOMSTER.flightItems ? ANKOMSTER.flightItems(120000) : Promise.resolve(null)).catch(function () { return null; })
     ]).then(function (xs) {
+      if (xs[6]) st.flights = xs[6];
       st.status = xs[0] || {};
       st.bookings = xs[1] || [];
       st.morgon = xs[2];
@@ -438,7 +444,7 @@
     var cats = loadCats();
     var zones = loadZones();
     var html = '<div class="pg-card"><h3>Kategorier att visa</h3>' +
-      '<p class="pg-muted">Barnstol och babyskydd paras alltid med en bilbokning, men visas i egna spalter (vi vet inte vilken bil de hör till).</p><div class="pg-chips">';
+      '<p class="pg-muted">Barnstol och babyskydd är tillval på en bilbokning. Spalterna visar bilarna som har tillvalet, och bilens ruta får en liten markering. Antalet per zon räknar bara bilar.</p><div class="pg-chips">';
     ALL_CATS.forEach(function (c) {
       var on = cats.indexOf(c.k) >= 0;
       html += '<button type="button" class="pg-chip' + (on ? ' on' : '') + '" data-cat="' + c.k + '">' +
@@ -459,7 +465,7 @@
   function renderNotis() {
     var html = '<div class="pg-card"><h3>Notis vid ny bokning</h3>' +
       ensurePushHint() +
-      '<p class="pg-muted">Välj zon + kategori. Barnstol/babyskydd kan bevakas som egna kategorier.</p>';
+      '<p class="pg-muted">Välj zon + kategori. Bevakar du barnstol/babyskydd får du notis när en bil med det tillvalet dyker upp.</p>';
     visibleZones().forEach(function (z) {
       html += '<div class="pg-watch-zone"><div class="pg-watch-title">' + esc(z.name) +
         ' <span class="pg-muted">(' + esc(z.id) + ')</span></div><div class="pg-chips">';
@@ -554,14 +560,17 @@
     return html;
   }
 
-  /** Antal öppna förbokningar per zon i schemafönstret (nu → +2 h) för valda kategorier. */
+  /** Antal öppna bilbokningar per zon i schemafönstret (Snart + nu → +2 h) för valda kategorier. */
   function zoneCounts() {
     var cats = loadCats();
     var now = floor5(new Date()), end = schedEnd(new Date()), out = {};
+    // v2: en bil räknas en gång (tillvalet barnstol/babyskydd räknas inte som egen bokning).
+    // Gamla fristående barnbokningar räknas inte heller – de är tillval till en bil.
     (st.bookings || []).forEach(function (b) {
-      if (cats.indexOf(b.category) < 0) return;
+      if (CHILD_KEYS.indexOf(b.category) >= 0) return;
+      if (!inCats(b, cats)) return;
       var d = floor5(new Date(b.estimated_at));
-      if (d < now || d >= end) return;
+      if (d >= end || (d < now && !isSnart(b, now.getTime()))) return;
       out[b.zone_id] = (out[b.zone_id] || 0) + 1;
     });
     return out;
@@ -588,9 +597,249 @@
   function countCell(sum) {
     if (!sum) return '';
     var tip = sum.tip + (sum.mixed ? ' · blandat → svagaste markering' : '');
-    return '<span class="pg-n pg-c-' + sum.conf + '" title="' + esc(tip) + '">' +
+    return '<span class="pg-n pg-c-' + sum.conf + (sum.mixed ? ' pg-mixed' : '') + (sum.addon ? ' pg-addon' : '') + (sum.flight ? ' pg-fly' : '') + '">' +
       esc(sum.text) + '</span>';
   }
+
+  // ---------- Prognos v2 (t833u): tillval, "Snart", flygvarning, tryck-och-håll-förklaring ----------
+  // Barnstol/babyskydd är tillval på en bilbokning (b.addons). Spalterna Barnst./Babysk. visar de
+  // bilar som har tillvalet, plus ev. gamla fristående barnbokningar från före v2.
+  var CHILD_KEYS = ['barnstol', 'babyskydd'];
+  function addonsOf(b) { return b && Array.isArray(b.addons) ? b.addons : []; }
+  function inColumn(b, k) {
+    if (CHILD_KEYS.indexOf(k) >= 0) return b.category === k || addonsOf(b).indexOf(k) >= 0;
+    return b.category === k;
+  }
+  // Bokningen visas i schemat om någon av förarens valda spalter innehåller den
+  function inCats(b, cats) {
+    for (var i = 0; i < cats.length; i++) if (inColumn(b, cats[i])) return true;
+    return false;
+  }
+  var SNART_BACK_MS = 3 * 3600000;
+  // "Snart": tiden har passerat men bokningen finns kvar i prognosen → kan komma när som helst.
+  // Döljs aldrig så länge prognosen fortfarande har den (servern stänger den när den försvinner).
+  function isSnart(b, nowSlot) {
+    var t = Date.parse(b.estimated_at);
+    return isFinite(t) && floor5(new Date(t)).getTime() < nowSlot && t >= Date.now() - SNART_BACK_MS;
+  }
+  function addonText(b) {
+    return addonsOf(b).map(function (a) { return (CAT_LABEL[a] || a).toLowerCase(); }).join(' + ');
+  }
+
+  // Landvetter (293): varna när flyg som landar runt bokningens tid är försenade (Ankomster-data).
+  // Bara en varning – tiderna i schemat flyttas aldrig.
+  var FLIGHT_ZONE = '293';
+  var FLIGHT_TXT = 'Flyg runt denna tid är försenade, tiden kan ändras';
+  function flightInfo(zoneId, slotMs) {
+    if (String(zoneId) !== FLIGHT_ZONE || !st.flights || !st.flights.length) return null;
+    // Resenären kliver in ca 10–50 min efter planerad landning
+    var from = slotMs - 50 * 60000, to = slotMs - 5 * 60000;
+    var late = [];
+    st.flights.forEach(function (f) {
+      if (!f.sched || f.sched < from || f.sched >= to) return;
+      if (f.canceled) { late.push({ f: f, txt: 'inställt' }); return; }
+      var w = f.act || f.est;
+      if (!w) return;
+      var dmin = Math.round((w - f.sched) / 60000);
+      if (dmin >= 15) late.push({ f: f, d: dmin, txt: '+' + dmin + ' min' });
+    });
+    if (!late.length) return null;
+    late.sort(function (a, b) { return (b.d || 999) - (a.d || 999); });
+    return { list: late };
+  }
+
+  // Flygvarning för en bokning utifrån dess egen beräknade tid (null om den inte berörs)
+  function bookingFlight(zoneId, b) {
+    var t = Date.parse(b && b.estimated_at);
+    return isFinite(t) ? flightInfo(zoneId, t) : null;
+  }
+  // Samlad flygvarning för en ruta: bara flyg som berör någon av rutans bokningar
+  function cellFlights(zoneId, list) {
+    if (String(zoneId) !== FLIGHT_ZONE) return null;
+    var seen = {}, all = [], ids = {};
+    (list || []).forEach(function (b) {
+      var fi = bookingFlight(zoneId, b);
+      if (!fi) return;
+      ids[b.id] = true;
+      fi.list.forEach(function (x) {
+        var k = (x.f.no || '') + '|' + x.f.sched;
+        if (!seen[k]) { seen[k] = 1; all.push(x); }
+      });
+    });
+    if (!all.length) return null;
+    all.sort(function (a, b) { return (b.d || 999) - (a.d || 999); });
+    return { list: all, ids: ids };
+  }
+
+  // Lättbegriplig förklaring till säker/trolig/osäker för en bokning
+  function bookingWhy(b) {
+    var est = Date.parse(b.estimated_at), obs = Date.parse(b.observed_at || b.first_seen);
+    var cb = b.current_block != null ? +b.current_block : +b.block_index;
+    var bi = +b.block_index;
+    var c = b.confidence || 'trolig';
+    var snart = isSnart(b, floor5(new Date()).getTime());
+    var why = '', when = '';
+    if (c === 'saker') {
+      var lim = cb === 0 ? 40 : 80;
+      why = 'Passerade ' + lim + '-minutersgränsen i prognosen' + (isFinite(est) ? ' ca ' + hm(new Date(est - lim * 60000)) : '') +
+        ', så tiden brukar stämma på ±5 min.';
+    } else if (c === 'trolig') {
+      if (b.category === 'ovrigt' && bi === 0) why = 'Övriga som dyker upp med kort varsel brukar komma inom ca 10 min.';
+      else if (bi === 2) why = 'Dök upp ca 2 timmar fram i prognosen. Brukar stämma, och blir säker när den passerar 80-minutersgränsen.';
+      else why = 'Tiden är uppskattad från när den dök upp i prognosen.';
+    } else {
+      if (cb === 1 && isFinite(obs)) {
+        why = 'Dök upp direkt 40–80 min fram, inte från 2-timmarsblocket, så exakt tid går inte att räkna ut.';
+        when = 'om 40–80 min (' + hm(new Date(obs + 40 * 60000)) + '–' + hm(new Date(obs + 80 * 60000)) + ')';
+      } else {
+        why = 'Dök upp med kort varsel (under 40 min före), så exakt tid går inte att räkna ut.';
+        if (isFinite(obs)) when = 'senast ca ' + hm(new Date(obs + 40 * 60000));
+      }
+    }
+    if (snart) why += ' Tiden har passerat men bokningen finns kvar i prognosen – kan komma när som helst.';
+    if (!when && isFinite(est)) when = 'ca ' + hm(new Date(est));
+    return { conf: c, why: why, when: when, first: isFinite(obs) ? hm(new Date(obs)) : '–' };
+  }
+
+  // Cellinnehåll för förklaringsrutan: rad (tid eller "Snart"), spalt, bokningar, ev. flygvarning
+  function popHtml(info) {
+    var html = '<div class="pg-pop-head"><strong>' + esc(info.rowTxt) + ' · ' + esc(CAT_LABEL[info.cat] || info.cat) + '</strong>' +
+      ' <span class="pg-pop-n">' + info.list.length + ' st</span></div>';
+    var child = CHILD_KEYS.indexOf(info.cat) >= 0;
+    info.list.slice(0, 6).forEach(function (b) {
+      var w = bookingWhy(b);
+      var what = child && b.category !== info.cat
+        ? (CAT_LABEL[info.cat] || info.cat) + ' på ' + (CAT_LABEL[b.category] || b.category)
+        : (CAT_LABEL[b.category] || b.category);
+      var add = !child && addonsOf(b).length ? ' + ' + addonText(b) : '';
+      html += '<div class="pg-pop-b"><div><span class="pg-n pg-c-' + esc(w.conf) + '">' + esc(CONF_TXT[w.conf] || w.conf) + '</span> ' +
+        '<strong>' + esc(what + add) + '</strong>' + (info.flight && info.flight.ids && info.flight.ids[b.id] ? ' <span class="pg-pop-flyb" title="' + esc(FLIGHT_TXT) + '">✈</span>' : '') + '</div>' +
+        '<div class="pg-pop-why">' + esc(w.why) + '</div>' +
+        '<div class="pg-pop-meta">Tid: ' + esc(w.when) + ' · Först sedd ' + esc(w.first) + '</div></div>';
+    });
+    if (info.list.length > 6) html += '<div class="pg-pop-meta">… +' + (info.list.length - 6) + ' till</div>';
+    if (info.flight) {
+      html += '<div class="pg-pop-fly">✈ ' + esc(FLIGHT_TXT) + '<span class="pg-pop-meta">' +
+        info.flight.list.slice(0, 3).map(function (x) {
+          return esc((x.f.no || '') + (x.f.from ? ' från ' + x.f.from : '') + ' ' + hm(x.f.sched) + ' ' + x.txt);
+        }).join('<br>') + '</span></div>';
+    }
+    return html;
+  }
+
+  // Tryck och håll (~300 ms) → förklaring, försvinner när man släpper. Kort tryck/Enter = visa tills man trycker utanför.
+  // Medan rutan visas ritas schemat inte om (st.pendingPaint) så den inte hoppar.
+  var pop = { el: null, timer: 0, cell: null, held: false, pinned: false, down: null, x: 0, y: 0, moved: false, ptrAt: 0, eat: false };
+  function popEl() {
+    if (!pop.el) {
+      pop.el = document.createElement('div');
+      pop.el.className = 'pg-pop';
+      pop.el.setAttribute('role', 'tooltip');
+      pop.el.hidden = true;
+      document.body.appendChild(pop.el);
+    }
+    return pop.el;
+  }
+  function showPop(cell) {
+    var info = st.cellMap && st.cellMap[cell.getAttribute('data-pg-cell')];
+    if (!info) return false;
+    var el = popEl();
+    el.innerHTML = popHtml(info);
+    el.hidden = false;
+    if (pop.cell && pop.cell !== cell) pop.cell.classList.remove('pg-held');
+    pop.cell = cell;
+    cell.classList.add('pg-held');
+    var vw = document.documentElement.clientWidth || window.innerWidth, vh = window.innerHeight;
+    var w = Math.min(320, vw - 16);
+    el.style.width = w + 'px';
+    var r = cell.getBoundingClientRect(), h = el.offsetHeight;
+    var left = Math.max(8, Math.min(vw - w - 8, r.left + r.width / 2 - w / 2));
+    // Ovanför fingret i första hand, så tummen inte skymmer
+    var top = r.top - h - 10 >= 8 ? r.top - h - 10 : Math.min(vh - h - 8, r.bottom + 10);
+    el.style.left = Math.round(left) + 'px';
+    el.style.top = Math.round(Math.max(8, top)) + 'px';
+    return true;
+  }
+  function hidePop() {
+    clearTimeout(pop.timer); pop.timer = 0;
+    if (pop.el) pop.el.hidden = true;
+    if (pop.cell) pop.cell.classList.remove('pg-held');
+    pop.cell = null; pop.held = false; pop.pinned = false; pop.down = null;
+    if (st.pendingPaint) { st.pendingPaint = false; paint(); }
+  }
+  function popOpen() { return !!(pop.cell && (pop.held || pop.pinned)); }
+  function bindPop(root) {
+    if (root._pgPop) return;
+    root._pgPop = true;
+    root.addEventListener('pointerdown', function (e) {
+      var cell = e.target.closest && e.target.closest('[data-pg-cell]');
+      pop.ptrAt = Date.now();
+      if (!cell) return;
+      if (pop.pinned && pop.cell !== cell) hidePop();
+      pop.down = cell; pop.x = e.clientX; pop.y = e.clientY; pop.moved = false;
+      clearTimeout(pop.timer);
+      pop.timer = setTimeout(function () {
+        pop.timer = 0;
+        if (pop.down !== cell || pop.moved) return;
+        if (showPop(cell)) {
+          pop.held = true; pop.pinned = false; pop.eat = true;
+          try { if (navigator.vibrate) navigator.vibrate(10); } catch (x) {}
+        }
+      }, 300);
+    });
+    root.addEventListener('pointermove', function (e) {
+      if (!pop.down || pop.held) return;
+      if (Math.abs(e.clientX - pop.x) > 10 || Math.abs(e.clientY - pop.y) > 10) {
+        pop.moved = true; clearTimeout(pop.timer); pop.timer = 0;
+      }
+    });
+    var up = function (e) {
+      var cell = pop.down;
+      clearTimeout(pop.timer); pop.timer = 0; pop.down = null;
+      if (pop.held) { hidePop(); return; }            // släpp → bort
+      if (e.type !== 'pointerup' || !cell || pop.moved) return;
+      // Kort tryck: visa/dölj (reserv för den som inte håller kvar)
+      if (pop.pinned && pop.cell === cell) hidePop();
+      else if (showPop(cell)) pop.pinned = true;
+    };
+    root.addEventListener('pointerup', up);
+    root.addEventListener('pointercancel', up);
+    root.addEventListener('contextmenu', function (e) {
+      if (e.target.closest && e.target.closest('[data-pg-cell]')) e.preventDefault();
+    });
+    root.addEventListener('click', function (e) {
+      if (pop.eat) { pop.eat = false; e.preventDefault(); e.stopPropagation(); }
+    }, true);
+    root.addEventListener('selectstart', function (e) {
+      if (e.target.closest && e.target.closest('[data-pg-cell]')) e.preventDefault();
+    });
+    // Tangentbord: fokus visar, Enter/mellanslag växlar, Esc stänger
+    root.addEventListener('focusin', function (e) {
+      var cell = e.target.closest && e.target.closest('[data-pg-cell]');
+      if (!cell || Date.now() - pop.ptrAt < 800) return;
+      if (showPop(cell)) pop.pinned = true;
+    });
+    root.addEventListener('focusout', function (e) {
+      var cell = e.target.closest && e.target.closest('[data-pg-cell]');
+      if (cell && pop.cell === cell && !pop.held) hidePop();
+    });
+    root.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && popOpen()) { hidePop(); return; }
+      var cell = e.target.closest && e.target.closest('[data-pg-cell]');
+      if (!cell || (e.key !== 'Enter' && e.key !== ' ')) return;
+      e.preventDefault();
+      if (pop.cell === cell && pop.pinned) hidePop();
+      else if (showPop(cell)) pop.pinned = true;
+    });
+  }
+  // Tryck utanför eller rulla → stäng en fäst ruta
+  document.addEventListener('pointerdown', function (e) {
+    if (!pop.pinned || !pop.cell) return;
+    if (pop.el && pop.el.contains(e.target)) return;
+    if (e.target.closest && e.target.closest('[data-pg-cell]')) return;
+    hidePop();
+  }, true);
+  window.addEventListener('scroll', function () { if (pop.pinned) hidePop(); }, true);
 
   function renderCarTimeline(zoneId, focusSlot) {
     var cats = loadCats().filter(function (k) { return ALL_CAT_KEYS.indexOf(k) >= 0; });
@@ -602,16 +851,23 @@
     var rows = [];
     for (var t0 = new Date(now); t0 < end; t0 = addMin(t0, 5)) rows.push(new Date(t0));
 
-    var bySlot = {};
+    var bySlot = {}, hasSnart = false, nowMs = now.getTime();
     (st.bookings || []).forEach(function (b) {
       if (String(b.zone_id) !== String(zoneId)) return;
-      if (cats.indexOf(b.category) < 0) return;
       var d = floor5(new Date(b.estimated_at));
-      if (d < now || d >= end) return;
-      var key = d.getTime() + '|' + b.category;
-      if (!bySlot[key]) bySlot[key] = [];
-      bySlot[key].push(b);
+      var slot;
+      if (d >= end) return;
+      if (d < now) { if (!isSnart(b, nowMs)) return; slot = 'snart'; }
+      else slot = d.getTime();
+      cats.forEach(function (k) {
+        if (!inColumn(b, k)) return;
+        var key = slot + '|' + k;
+        if (!bySlot[key]) bySlot[key] = [];
+        bySlot[key].push(b);
+        if (slot === 'snart') hasSnart = true;
+      });
     });
+    st.cellMap = {};
 
     var html = '<div class="pg-scroll pg-scroll-fit"><table class="pg-table pg-table-fit pg-table-diag"><thead><tr>' +
       '<th class="pg-th-time">Tid</th>';
@@ -632,15 +888,30 @@
     // Tom reservkolumn så sista diagonala rubriken inte klipps i högerkant
     html += '<th class="pg-th-spacer" aria-hidden="true"></th>';
     html += '</tr></thead><tbody>';
+    if (hasSnart) rows.unshift('snart');
     rows.forEach(function (d) {
-      html += '<tr><td class="pg-td-time">' + p2(d.getHours()) + ':' + p2(d.getMinutes()) + '</td>';
+      var slot = d === 'snart' ? 'snart' : d.getTime();
+      var rowTxt = d === 'snart' ? 'Snart' : p2(d.getHours()) + ':' + p2(d.getMinutes());
+      html += '<tr' + (d === 'snart' ? ' class="pg-tr-snart"' : '') + '><td class="pg-td-time"' +
+        (d === 'snart' ? ' title="Tiden har passerat men bokningen finns kvar i prognosen – kan komma när som helst"' : '') + '>' + rowTxt + '</td>';
       cats.forEach(function (k) {
         var meta = CAT_META[k] || {};
-        var sum = cellSummary(bySlot[d.getTime() + '|' + k]);
+        var key = slot + '|' + k, list = bySlot[key];
+        var sum = cellSummary(list);
         var tdCls = 'pg-td-cell' + (meta.child ? ' pg-td-child' : '');
-        var isF = focusSlot && focusSlot === d.getTime() + '|' + k;
+        var isF = focusSlot && focusSlot === key;
         if (isF) tdCls += ' pg-focus';
-        html += '<td class="' + tdCls + '"' + (isF ? ' id="pg-focus-cell"' : '') + '>' + countCell(sum) + '</td>';
+        var attrs = '';
+        if (sum) {
+          // ✈ per bokning (dess egen beräknade tid), inte per rad – bara rutor med berörda bokningar markeras
+          var fly = d === 'snart' ? null : cellFlights(zoneId, list);
+          st.cellMap[key] = { rowTxt: rowTxt, cat: k, list: list, flight: fly };
+          sum.addon = !meta.child && list.some(function (b) { return addonsOf(b).length > 0; });
+          sum.flight = !!fly;
+          attrs = ' data-pg-cell="' + esc(key) + '" tabindex="0" aria-label="' + esc(rowTxt + ', ' + (meta.label || k) + ': ' + sum.n + ' st, ' + sum.tip +
+            (sum.addon ? ', med tillval' : '') + (fly ? ', ' + FLIGHT_TXT : '') + '. Håll för förklaring.') + '"';
+        }
+        html += '<td class="' + tdCls + '"' + (isF ? ' id="pg-focus-cell"' : '') + attrs + '>' + countCell(sum) + '</td>';
       });
       html += '<td class="pg-td-spacer" aria-hidden="true"></td>';
       html += '</tr>';
@@ -659,7 +930,7 @@
     var childOn = ALL_CATS.some(function (c) { return c.child && cats.indexOf(c.k) >= 0; });
     return '<button type="button" class="pg-filter-notice" data-panel="filter">' +
       '<strong>Filter aktivt:</strong> ' + esc(names) + ' dold' + (hiddenCars.length > 1 ? 'a' : '') +
-      (childOn ? '<span class="pg-filter-notice-sub">Barnstol/babyskydd kan höra till en dold bil.</span>' : '') +
+      (childOn ? '<span class="pg-filter-notice-sub">Barnstol/babyskydd visas ändå när de sitter på en dold bil.</span>' : '') +
       '<span class="pg-filter-notice-go" aria-hidden="true">Ändra ›</span></button>';
   }
 
@@ -775,7 +1046,7 @@
     }
     return '<div class="pg-status">Senaste uppdatering: <strong>' + esc(lastTxt) +
       '</strong>' + (warn ? ' · <span class="pg-stale">' + esc(warn) + '</span>' : '') +
-      '<br><span class="pg-muted">Heldraget = säker, streckat = trolig, svagt = osäker. Blandat antal markeras med ?.</span></div>' +
+      '<br><span class="pg-muted">Håll fingret på en ruta för förklaring.</span></div>' +
       renderWarn();
   }
 
@@ -871,6 +1142,8 @@
 
   function paint() {
     if (!onPage()) return;
+    // Förklaringsrutan är öppen → rita om när den stängs (annars hoppar den/försvinner under fingret)
+    if (popOpen()) { st.pendingPaint = true; return; }
     var tabs = '<div class="pg-tabs">' +
       '<button type="button" class="pg-tab' + (st.panel === 'schema' ? ' on' : '') + '" data-panel="schema">Schema</button>' +
       '<button type="button" class="pg-tab' + (st.panel === 'morgon' ? ' on' : '') + '" data-panel="morgon">Morgon</button>' +
@@ -898,7 +1171,10 @@
       body += statusLine();
       body += '<div class="pg-legend"><span class="pg-n pg-c-saker">2</span> säker ' +
         '<span class="pg-n pg-c-trolig">2</span> trolig ' +
-        '<span class="pg-n pg-c-osaker">2?</span> osäker/blandat</div>';
+        '<span class="pg-n pg-c-osaker">2</span> osäker ' +
+        '<span class="pg-n pg-c-trolig pg-mixed">2?</span> blandat ' +
+        '<span class="pg-n pg-c-saker pg-addon">1</span> med barnstol/babyskydd' +
+        (st.zoneTab === FLIGHT_ZONE ? ' <span class="pg-n pg-c-saker pg-fly">1</span> försenat flyg' : '') + '</div>';
       body += renderZoneTabs();
       body += renderTimeline();
       body += renderMorgonTeaser();
@@ -906,6 +1182,7 @@
 
     st.el.innerHTML = '<div class="pg">' + tabs + body + '</div>';
     bind(st.el);
+    bindPop(st.el);
     fitDiagHead(st.el);
     fitTabs(st.el);
     // Notis -> rulla fram den markerade förbokningen en gång

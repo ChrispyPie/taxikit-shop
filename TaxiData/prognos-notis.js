@@ -40,10 +40,17 @@
   }
 
   function tagOf(zone, cat) { return 'prognos-' + zone + '-' + cat; }
-  function watched(b) {
-    return (st.watches || []).some(function (w) {
-      return String(w.zone_id) === String(b.zone_id) && (w.category === b.category || w.category === '*');
+  // v2 (t833u): barnstol/babyskydd är tillval på bilbokningen (b.addons). Returnerar vilken bevakad
+  // kategori som träffar (bilen själv, eller ett av tillvalen i cats), annars null.
+  function addonsOf(b) { return Array.isArray(b.addons) ? b.addons : []; }
+  function watched(b, cats) {
+    var hit = null;
+    (st.watches || []).forEach(function (w) {
+      if (hit || String(w.zone_id) !== String(b.zone_id)) return;
+      if (cats.indexOf(w.category) >= 0) hit = w.category;
+      else if (w.category === '*' && cats.length) hit = cats[0];
     });
+    return hit;
   }
   // Avdubblering: samma zon+kategori+tid ringer en gång (push och appens egen koll kan se samma bokning).
   function fresh(key) {
@@ -73,24 +80,39 @@
           var first = !st.seen; if (first) st.seen = {};
           var now = Date.now(), hits = [];
           list.forEach(function (b) {
-            if (st.seen[b.id]) return;
-            st.seen[b.id] = 1;
+            // Sett-nyckeln innehåller tillvalen: får en redan sedd bil barnstol senare ringer bara barnstolsbevakningen
+            var ad = addonsOf(b), prev = st.seen[b.id], adKey = ad.slice().sort().join(',');
+            if (prev === adKey) return;
+            st.seen[b.id] = adKey;
             if (first || b.status === 'canceled' || Date.parse(b.estimated_at) < now) return;
-            if (watched(b)) hits.push(b);
+            // Gamla fristående barnbokningar (före v2) ringer inte – de hör till en bil
+            if (b.category === 'barnstol' || b.category === 'babyskydd') return;
+            var isNew = prev === undefined;
+            var prevAd = isNew ? [] : String(prev).split(',');
+            var newAd = ad.filter(function (a) { return prevAd.indexOf(a) < 0; });
+            var cat = watched(b, isNew ? [b.category].concat(ad) : newAd);
+            if (cat) hits.push({ b: b, cat: cat, addon: !isNew });
           });
-          hits.forEach(function (b) {
-            var t = new Date(b.estimated_at);
-            var key = tagOf(b.zone_id, b.category) + '@' + p2(t.getHours()) + p2(t.getMinutes());
+          hits.forEach(function (h) {
+            var b = h.b, t = new Date(b.estimated_at), ad = addonsOf(b);
+            var key = tagOf(b.zone_id, h.cat) + '@' + p2(t.getHours()) + p2(t.getMinutes());
             if (!fresh(key)) return;
-            // Spara i notisflödet (samma nyckel som en push om samma bokning, så den bara syns en gång).
-            // target = vart notisen leder: zon, kategori, tid och bokningens id (markeras i schemat).
-            var body = (ZONE_SV[b.zone_id] || b.zone_name || b.zone_id) + ' · ' + (CAT_SV[b.category] || b.category) +
-              ' · ca ' + p2(t.getHours()) + ':' + p2(t.getMinutes());
+            // Samma text som pushen från servern (prognos-sync/plan.ts noticeText), så den bara syns en gång.
+            // target = vart notisen leder: zon, bilens kategori, tid och bokningens id (markeras i schemat).
+            var car = CAT_SV[b.category] || b.category;
+            var what = h.cat === b.category
+              ? car + (ad.length ? ' + ' + ad.map(function (a) { return (CAT_SV[a] || a).toLowerCase(); }).join(' + ') : '')
+              : (CAT_SV[h.cat] || h.cat) + ' (' + car + ')';
+            var hhmmTxt = p2(t.getHours()) + ':' + p2(t.getMinutes());
+            var when = b.confidence === 'osaker' && +(b.current_block != null ? b.current_block : b.block_index) === 1
+              ? 'om 40–80 min (ca ' + hhmmTxt + ')' : 'ca ' + hhmmTxt;
+            var title = h.addon ? (CAT_SV[h.cat] || h.cat) + ' på förbokning' : 'Ny förbokning';
+            var body = (ZONE_SV[b.zone_id] || b.zone_name || b.zone_id) + ' · ' + what + ' · ' + when;
             var item = { key: 'prognos|' + key + '|' + t.getFullYear() + p2(t.getMonth() + 1) + p2(t.getDate()), kind: 'prognos',
-              tag: tagOf(b.zone_id, b.category), title: 'Ny förbokning', body: body,
+              tag: tagOf(b.zone_id, h.cat), title: title, body: body,
               target: { zone: String(b.zone_id), cat: b.category, at: b.estimated_at, id: b.id != null ? String(b.id) : undefined } };
             if (window.NOTIS && NOTIS.add) NOTIS.add(item);
-            ring('Ny förbokning', body, item);
+            ring(title, body, item);
           });
         });
       })

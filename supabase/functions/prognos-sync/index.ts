@@ -1,16 +1,15 @@
 // prognos-sync: hämtar prognos-public-data.json varje minut, sparar snapshot,
 // spårar bokningar per zon/kategori/block med tidsuppskattning + konfidens.
+// v2 (t833u): själva logiken ligger i plan.ts (glappskydd, tider per kategori, tillval, städning).
 import webpush from "npm:web-push@3.6.7";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { type NotisTarget, notisKey, notisUrl, saveNotice } from "./notis.ts";
+import { type Conf, type Feed, feedFromPayload, noticeText, type OpenB, type Op, plan, type SyncState } from "./plan.ts";
 
 const ORIGINS = ["https://taxikit.shop", "https://www.taxikit.shop", "https://chrispypie.github.io", "http://localhost:8765"];
 const LOGIN_URL = "https://prognos.taxigoteborg.nu/api/prognos-login";
 const DATA_URL = "https://prognos.taxigoteborg.nu/prognos-public-data.json";
 const APP_URL = "/TaxiData/?sida=prognos";
-const CATS = ["app", "barnstol", "ovrigt", "storbil", "elbil", "babyskydd"] as const;
-// Blockgränser: 0 = 0–40, 1 = 40–80, 2 = 80–120 minuter framåt
-const BOUNDARY_MIN = [40, 80, 120]; // när en bokning korsar in i block i från i+1
 const CAT_SV: Record<string, string> = {
   app: "Kombi",
   barnstol: "Barnstol",
@@ -20,7 +19,6 @@ const CAT_SV: Record<string, string> = {
   babyskydd: "Babyskydd",
 };
 
-type Conf = "saker" | "trolig" | "osaker";
 
 // Tidsgräns mot prognos.taxigoteborg.nu: om deras server hänger avbryts anropet,
 // körningen hoppas över och senaste bra data ligger kvar.
@@ -98,197 +96,90 @@ async function sendTo(driver: string, msg: { title: string; body: string; tag: s
   }
 }
 
-type Block = Record<string, number> & { total?: number };
-type Zone = { id: string; name: string; total: number; blocks: Block[] } & Record<string, number>;
-type Payload = { zones: Record<string, Zone>; morgonprognos?: unknown; generated_at?: string };
+type Payload = { zones?: Record<string, unknown>; morgonprognos?: unknown; generated_at?: string };
 
-type Tracked = {
-  id: number;
-  block: number;
-  estimated_at: string;
-  confidence: Conf;
-  observed_at: string;
-};
+const STATE_KEY = "sync_state_v2";
+const OPEN_COLS = "id, zone_id, zone_name, category, estimated_at, observed_at, block_index, current_block, confidence";
 
-function blockVal(b: Block | undefined, cat: string): number {
-  if (!b) return 0;
-  const v = b[cat];
-  return typeof v === "number" && Number.isFinite(v) ? v : 0;
-}
-
-/** Avrunda till närmaste jämna 5-minutersstreck (bokningar landar nästan alltid där). */
-function snap5(d: Date): Date {
-  const x = new Date(d);
-  x.setSeconds(0, 0);
-  const m = x.getMinutes();
-  const rounded = Math.round(m / 5) * 5;
-  if (rounded === 60) {
-    x.setHours(x.getHours() + 1);
-    x.setMinutes(0);
-  } else {
-    x.setMinutes(rounded);
+// Alla öppna bokningar i ett anrop. Faller tillbaka utan addons om kolumnen inte finns (SQL ej körd).
+async function loadOpen(): Promise<{ open: OpenB[]; hasAddons: boolean }> {
+  let hasAddons = true;
+  // deno-lint-ignore no-explicit-any
+  let res: { data: any[] | null; error: unknown } = await sb.from("prognos_bookings").select(OPEN_COLS + ", addons").eq("status", "open");
+  if (res.error) {
+    hasAddons = false;
+    res = await sb.from("prognos_bookings").select(OPEN_COLS).eq("status", "open");
   }
-  return x;
+  // deno-lint-ignore no-explicit-any
+  const rows = (res.data || []) as any[];
+  return {
+    hasAddons,
+    open: rows.map((r) => ({
+      id: Number(r.id),
+      zone_id: String(r.zone_id),
+      zone_name: r.zone_name || String(r.zone_id),
+      category: String(r.category),
+      block: Number(r.current_block ?? r.block_index ?? 0),
+      est: Date.parse(r.estimated_at),
+      obs: Date.parse(r.observed_at),
+      confidence: (r.confidence as Conf) || "trolig",
+      addons: Array.isArray(r.addons) ? r.addons : [],
+    })),
+  };
 }
 
-function plusMin(obs: Date, mins: number): Date {
-  return snap5(new Date(obs.getTime() + mins * 60_000));
+async function loadState(): Promise<SyncState | null> {
+  const { data } = await sb.from("prognos_meta").select("value").eq("key", STATE_KEY).maybeSingle();
+  const v = (data as { value?: SyncState } | null)?.value;
+  return v && v.v === 2 && v.conf ? v : null;
 }
 
-async function openTracked(zone: string, cat: string): Promise<Tracked[]> {
-  const { data } = await sb.rpc("prognos_svc_open_bookings", { p_zone: zone, p_cat: cat });
-  return ((data || []) as Tracked[]).map((t) => ({
-    ...t,
-    block: Number(t.block),
-    confidence: (t.confidence as Conf) || "trolig",
-  }));
+async function saveState(st: SyncState) {
+  await sb.from("prognos_meta").upsert({ key: STATE_KEY, value: st, updated_at: new Date().toISOString() }, { onConflict: "key" });
 }
 
-async function insertBooking(
-  zone: string,
-  zname: string,
-  cat: string,
-  est: Date,
-  obs: Date,
-  block: number,
-  snapId: number | null,
-  confidence: Conf,
-  notifyList: { zone_id: string; zone_name: string; category: string; estimated_at: string; id?: string }[],
-  notify: boolean,
-) {
-  const { data: bid } = await sb.rpc("prognos_svc_insert_booking", {
-    p_zone: zone,
-    p_zone_name: zname,
-    p_cat: cat,
-    p_est: est.toISOString(),
-    p_obs: obs.toISOString(),
-    p_block: block,
-    p_snap: snapId,
-    p_confidence: confidence,
-  });
-  if (notify) {
-    notifyList.push({
-      zone_id: zone,
-      zone_name: zname,
-      category: cat,
-      estimated_at: est.toISOString(),
-      id: bid != null ? String(bid) : undefined,
-    });
-  }
-}
-
-/**
- * Diff per zon/kategori:
- * 1) Korsningar (FIFO): block N+1 minskar och block N ökar → flyttad, tid = now+boundary (säker).
- * 2) Nya i block 2 (80–120) utan korsning: now+120, trolig.
- * 3) Nya i block 1 (40–80) utan korsning från 2: osäker (direktbokning), tid mitt i fönstret tills den korsar till 0.
- * 4) Nya i block 0 (0–40): osäker/direkt, now+20 tills mer info.
- * 5) Kvarvarande minskningar = cancelled/assigned/announced.
- */
-async function reconcileZoneCat(
-  zid: string,
-  zname: string,
-  cat: string,
-  oldBlocks: number[],
-  newBlocks: number[],
-  observed: Date,
-  snapId: number | null,
-  isSeed: boolean,
-  newEvents: { zone_id: string; zone_name: string; category: string; estimated_at: string; id?: string }[],
-): Promise<{ created: number; canceled: number; updated: number }> {
-  let created = 0, canceled = 0, updated = 0;
-  const delta = [0, 1, 2].map((i) => newBlocks[i] - oldBlocks[i]);
-  // Arbetskopior av hur många "slots" som återstår att förklara per block
-  const rise = delta.map((d) => Math.max(0, d));
-  const fall = delta.map((d) => Math.max(0, -d));
-
-  let tracked = await openTracked(zid, cat);
-  // Sortera FIFO per block: äldst estimated_at först
-  const byBlock = (b: number) =>
-    tracked.filter((t) => t.block === b).sort((a, b2) =>
-      a.estimated_at < b2.estimated_at ? -1 : a.estimated_at > b2.estimated_at ? 1 : a.id - b2.id
-    );
-
-  // --- Korsningar: 2→1 (exakt 80 min), 1→0 (exakt 40 min) ---
-  for (const from of [2, 1] as const) {
-    const to = from - 1;
-    const moves = Math.min(fall[from], rise[to]);
-    if (moves <= 0) continue;
-    const candidates = byBlock(from);
-    for (let i = 0; i < moves; i++) {
-      const item = candidates[i];
-      const est = plusMin(observed, BOUNDARY_MIN[to]); // 80 resp 40
-      if (item) {
-        await sb.rpc("prognos_svc_update_booking", {
-          p_id: item.id,
-          p_est: est.toISOString(),
-          p_block: to,
-          p_confidence: "saker",
-        });
-        updated++;
-        item.block = to;
-        item.estimated_at = est.toISOString();
-        item.confidence = "saker";
-      } else {
-        // Ingen spårad post att flytta (t.ex. efter prune) – skapa säker vid gränsen
-        await insertBooking(zid, zname, cat, est, observed, to, snapId, "saker", newEvents, !isSeed);
-        created++;
+/** Utför planens ops i ordning. Returnerar tmp-id -> riktigt id. */
+async function applyOps(ops: Op[], snapId: number | null, hasAddons: boolean): Promise<Map<string, number>> {
+  const ids = new Map<string, number>();
+  const real = (id: number | string) => (typeof id === "number" ? id : ids.get(id));
+  for (const o of ops) {
+    if (o.op === "insert") {
+      const { data: bid } = await sb.rpc("prognos_svc_insert_booking", {
+        p_zone: o.zone,
+        p_zone_name: o.zname,
+        p_cat: o.cat,
+        p_est: new Date(o.est).toISOString(),
+        p_obs: new Date(o.obs).toISOString(),
+        p_block: o.block,
+        p_snap: snapId,
+        p_confidence: o.confidence,
+      });
+      if (bid != null) {
+        ids.set(o.tmp, Number(bid));
+        if (hasAddons && o.addons.length) {
+          await sb.from("prognos_bookings").update({ addons: o.addons }).eq("id", Number(bid));
+        }
       }
+    } else if (o.op === "move") {
+      const id = real(o.id);
+      if (id == null) continue;
+      await sb.rpc("prognos_svc_update_booking", {
+        p_id: id,
+        p_est: new Date(o.est).toISOString(),
+        p_block: o.block,
+        p_confidence: o.confidence,
+      });
+    } else if (o.op === "close") {
+      const id = real(o.id);
+      if (id == null) continue;
+      await sb.from("prognos_bookings").update({ status: o.status }).eq("id", id).eq("status", "open");
+    } else if (o.op === "addons") {
+      const id = real(o.id);
+      if (id == null || !hasAddons) continue;
+      await sb.from("prognos_bookings").update({ addons: o.addons }).eq("id", id);
     }
-    fall[from] -= moves;
-    rise[to] -= moves;
-    // Uppdatera lokal tracked-vy
-    tracked = await openTracked(zid, cat);
   }
-
-  // --- Nya som inte förklaras av korsning ---
-  // Block 2: ny förbokning ~120 min fram, trolig
-  for (let i = 0; i < rise[2]; i++) {
-    const est = plusMin(observed, 120);
-    await insertBooking(zid, zname, cat, est, observed, 2, snapId, "trolig", newEvents, !isSeed);
-    created++;
-  }
-  rise[2] = 0;
-
-  // Block 1: direktbokning i 40–80 utan dropp i block 2 → osäker
-  for (let i = 0; i < rise[1]; i++) {
-    const est = plusMin(observed, 60); // mitt tills den bekräftas vid 40-gränsen
-    await insertBooking(zid, zname, cat, est, observed, 1, snapId, "osaker", newEvents, !isSeed);
-    created++;
-  }
-  rise[1] = 0;
-
-  // Block 0: syns nära i tid (direkt / redan nära) → osäker runt +20
-  for (let i = 0; i < rise[0]; i++) {
-    const est = plusMin(observed, 20);
-    await insertBooking(zid, zname, cat, est, observed, 0, snapId, "osaker", newEvents, !isSeed);
-    created++;
-  }
-  rise[0] = 0;
-
-  // --- Kvarvarande fall: cancelled/assigned/announced (FIFO i det blocket) ---
-  tracked = await openTracked(zid, cat);
-  for (const b of [0, 1, 2] as const) {
-    if (fall[b] <= 0) continue;
-    const candidates = byBlock(b);
-    const n = Math.min(fall[b], candidates.length);
-    for (let i = 0; i < n; i++) {
-      const { error } = await sb.from("prognos_bookings").update({ status: "canceled" }).eq("id", candidates[i].id);
-      if (error) {
-        await sb.rpc("prognos_svc_cancel_n", { p_zone: zid, p_cat: cat, p_n: 1 });
-      }
-      canceled++;
-    }
-    // Om fler fall än spårade poster (bör inte hända ofta)
-    const leftover = fall[b] - n;
-    if (leftover > 0) {
-      const { data: nCancel } = await sb.rpc("prognos_svc_cancel_n", { p_zone: zid, p_cat: cat, p_n: leftover });
-      canceled += (nCancel as number) || 0;
-    }
-    fall[b] = 0;
-  }
-
-  return { created, canceled, updated };
+  return ids;
 }
 
 async function tick(): Promise<Response> {
@@ -369,10 +260,29 @@ async function tick(): Promise<Response> {
     await sb.rpc("prognos_svc_set_status", { p_status: "error", p_err: "data_bad_json" });
     return new Response(JSON.stringify({ ok: false, reason: "data_bad_json" }), { status: 200 });
   }
-  const observed = new Date();
+  const now = Date.now();
+  const feed = feedFromPayload(payload);
 
-  const { data: prevRaw } = await sb.rpc("prognos_svc_latest_payload");
-  const prev = (prevRaw || null) as Payload | null;
+  // Läge från förra körningen. Saknas det (första v2-körningen) byggs det från senaste sparade prognos.
+  const state = await loadState();
+  let prevFeed: Feed | null = null;
+  if (!state) {
+    const { data: prevRaw } = await sb.rpc("prognos_svc_latest_payload");
+    const prev = (prevRaw || null) as Payload | null;
+    prevFeed = prev && prev.zones ? feedFromPayload(prev) : null;
+  }
+
+  const { open, hasAddons } = await loadOpen();
+  const res = plan({ feed, state, prevFeed, open, now });
+
+  // Helt tomt svar fast förra minuten hade bokningar = glapp hos källan (första tomma i rad).
+  // Sparas som ej ok (syns inte i Original-fliken och används inte som "förra"), inga bokningar ändras.
+  if (res.stats.glitch) {
+    await sb.rpc("prognos_svc_insert_snapshot", { p_payload: payload, p_ok: false, p_http: 200, p_err: "tomt_svar_ignorerat" });
+    await saveState(res.state);
+    await sb.rpc("prognos_svc_set_status", { p_status: "ok", p_err: null });
+    return new Response(JSON.stringify({ ok: true, glitch: true }), { status: 200 });
+  }
 
   const { data: snapId } = await sb.rpc("prognos_svc_insert_snapshot", {
     p_payload: payload,
@@ -381,51 +291,29 @@ async function tick(): Promise<Response> {
     p_err: null,
   });
 
-  let created = 0, canceled = 0, updated = 0;
-  const newEvents: { zone_id: string; zone_name: string; category: string; estimated_at: string; id?: string }[] = [];
-  const isSeed = !prev || !prev.zones;
+  const ids = await applyOps(res.ops, (snapId as number) || null, hasAddons);
+  await saveState(res.state);
+  const stats = res.stats;
 
-  if (payload.zones) {
-    const zoneIds = new Set([
-      ...Object.keys(payload.zones),
-      ...((prev && prev.zones) ? Object.keys(prev.zones) : []),
-    ]);
-    for (const zid of zoneIds) {
-      const nz = payload.zones[zid];
-      const oz = prev && prev.zones ? prev.zones[zid] : undefined;
-      const zname = (nz && nz.name) || (oz && oz.name) || zid;
-      for (const cat of CATS) {
-        const newBlocks = [0, 1, 2].map((i) => blockVal(nz?.blocks?.[i], cat));
-        const oldBlocks = isSeed
-          ? [0, 0, 0]
-          : [0, 1, 2].map((i) => blockVal(oz?.blocks?.[i], cat));
-        // Seed: behandla nuvarande block som "nya" utan push
-        const r = await reconcileZoneCat(
-          zid, zname, cat, oldBlocks, newBlocks, observed,
-          (snapId as number) || null, isSeed, newEvents,
-        );
-        created += r.created;
-        canceled += r.canceled;
-        updated += r.updated;
-      }
-    }
-  }
-
-  for (const ev of newEvents) {
+  // Utan addons-kolumnen (SQL inte körd) kan flaggorna inte sparas – då bara vanliga bilpushar.
+  const notices = hasAddons ? res.notices : res.notices.filter((n) => n.watchCat === n.carCat).map((n) => ({ ...n, addons: [] }));
+  for (const n of notices) {
     // Bara förare som är inloggade (giltig session) – ingen push till utloggade (t335u)
     const { data: drivers } = await sb.rpc("prognos_svc_watch_drivers_active", {
-      p_zone: ev.zone_id,
-      p_cat: ev.category,
+      p_zone: n.zone,
+      p_cat: n.watchCat,
     });
     const list = (drivers || []) as string[];
+    if (!list.length) continue;
     // Edge-runtime går i UTC → formatera i svensk tid
-    const hm = new Date(ev.estimated_at).toLocaleTimeString("sv-SE", {
+    const hm = new Date(n.est).toLocaleTimeString("sv-SE", {
       hour: "2-digit", minute: "2-digit", timeZone: "Europe/Stockholm",
     });
-    const body = `${ev.zone_name} · ${CAT_SV[ev.category] || ev.category} · ca ${hm}`;
+    const msg = noticeText(n, hm, CAT_SV);
+    const id = typeof n.ref === "number" ? n.ref : ids.get(n.ref);
+    const estIso = new Date(n.est).toISOString();
     for (const d of list) {
-      await sendTo(d, { title: "Ny förbokning", body, tag: "prognos-" + ev.zone_id + "-" + ev.category }, Date.parse(ev.estimated_at),
-        { zone: String(ev.zone_id), cat: ev.category, at: ev.estimated_at, id: ev.id });
+      await sendTo(d, msg, n.est, { zone: String(n.zone), cat: n.carCat, at: estIso, id: id != null ? String(id) : undefined });
     }
   }
 
@@ -435,10 +323,14 @@ async function tick(): Promise<Response> {
   return new Response(
     JSON.stringify({
       ok: true,
-      created,
-      canceled,
-      updated,
-      seed: isSeed,
+      created: stats.created,
+      canceled: stats.canceled,
+      updated: stats.moved,
+      expired: stats.expired,
+      pending: stats.pendingFalls,
+      suppressed: stats.suppressedPush,
+      flags: stats.flagsAdded,
+      seed: stats.seed,
       zones: Object.keys(payload.zones || {}).length,
     }),
     { status: 200 },

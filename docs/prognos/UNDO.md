@@ -159,3 +159,16 @@ delete from vault.secrets where name in ('PROGNOS_PIN', 'PROGNOS_TICK_KEY');
 - Backup-gren: backup/pre-prognos-badge-2026-10-26 (= main 34e30b6 före ändringen).
 - Undo före merge: stäng PR:en. Efter merge: git revert -m 1 <merge-sha> via PR (ingen force push) + ny cache-bust.
 - Changelog-post (TaxiData/changelog.js) läggs till först när det går live.
+
+## t833 – Prognos v2: glitchskydd, tider per kategori, barnstol/babyskydd som tillval, tryck-och-håll, flygvarning (PR feat/prognos-v2, EJ mergad)
+- **Backup-gren:** `backup/pre-prognos-v2-20261103` = origin/main `fe91bc1` före ändringen.
+- **Ändrat:** `supabase/functions/prognos-sync/index.ts` (använder nya `plan.ts`), nya `plan.ts` + `plan_test.ts`, `scripts/prognos-sim.ts`, `TaxiData/prognos.js`, `prognos-notis.js`, `ankomster.js` (`ANKOMSTER.flightItems`), `style.css`, `changelog.js` (post `2026-11-03a`, tid sätts vid go-live), `index.html` (`?v=20261103pg2`/`20261103a`).
+- **SQL (INTE applicerad):** `supabase/migrations/20261103a_prognos_v2.sql` – kolumn `prognos_bookings.addons text[] default '{}'`, `prognos_list_bookings` med `addons` och passerade öppna bokningar (≤ 3 h) för "Snart", gamla fristående barnbokningar → `status='merged'`.
+- **Ångra SQL:** `supabase/migrations/undo/20261103a_prognos_v2_undo.sql` (kör EFTER att gamla prognos-sync deployats igen). Återställer exakt gamla `prognos_list_bookings`, öppnar `merged`-barnbokningar med framtida tid, droppar `addons`.
+- **Synkens state:** rad `prognos_meta.key = 'sync_state_v2'` (kan tas bort: `delete from public.prognos_meta where key = 'sync_state_v2';`, ofarligt att lämna).
+- **Go-live-ordning:** 1) SQL, 2) deploy `prognos-sync`, 3) merga PR (Pages publicerar), 4) sätt `tid` i changelog-posten.
+- **Ångra i omvänd ordning:**
+  1. Frontend: före merge stäng PR:en. Efter merge: `git revert -m 1 <merge-sha>` via ny PR (ingen force push).
+  2. Edge function: deploya `prognos-sync` från `backup/pre-prognos-v2-20261103` (`git checkout backup/pre-prognos-v2-20261103 -- supabase/functions/prognos-sync/index.ts` i en tillfällig gren, `supabase functions deploy prognos-sync --project-ref lpfdryvukqmjlgenuzpb`).
+  3. SQL: kör undo-filen ovan.
+- Skärmdumpar (exempeldata, 360 px): `docs/prognos/v2/*.png`. Simulering mot 2 dygns historik: `docs/prognos/v2/sim-result.txt`.
