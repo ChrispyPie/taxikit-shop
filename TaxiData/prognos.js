@@ -648,6 +648,29 @@
     return { list: late };
   }
 
+  // Flygvarning för en bokning utifrån dess egen beräknade tid (null om den inte berörs)
+  function bookingFlight(zoneId, b) {
+    var t = Date.parse(b && b.estimated_at);
+    return isFinite(t) ? flightInfo(zoneId, t) : null;
+  }
+  // Samlad flygvarning för en ruta: bara flyg som berör någon av rutans bokningar
+  function cellFlights(zoneId, list) {
+    if (String(zoneId) !== FLIGHT_ZONE) return null;
+    var seen = {}, all = [], ids = {};
+    (list || []).forEach(function (b) {
+      var fi = bookingFlight(zoneId, b);
+      if (!fi) return;
+      ids[b.id] = true;
+      fi.list.forEach(function (x) {
+        var k = (x.f.no || '') + '|' + x.f.sched;
+        if (!seen[k]) { seen[k] = 1; all.push(x); }
+      });
+    });
+    if (!all.length) return null;
+    all.sort(function (a, b) { return (b.d || 999) - (a.d || 999); });
+    return { list: all, ids: ids };
+  }
+
   // Lättbegriplig förklaring till säker/trolig/osäker för en bokning
   function bookingWhy(b) {
     var est = Date.parse(b.estimated_at), obs = Date.parse(b.observed_at || b.first_seen);
@@ -690,7 +713,7 @@
         : (CAT_LABEL[b.category] || b.category);
       var add = !child && addonsOf(b).length ? ' + ' + addonText(b) : '';
       html += '<div class="pg-pop-b"><div><span class="pg-n pg-c-' + esc(w.conf) + '">' + esc(CONF_TXT[w.conf] || w.conf) + '</span> ' +
-        '<strong>' + esc(what + add) + '</strong></div>' +
+        '<strong>' + esc(what + add) + '</strong>' + (info.flight && info.flight.ids && info.flight.ids[b.id] ? ' <span class="pg-pop-flyb" title="' + esc(FLIGHT_TXT) + '">✈</span>' : '') + '</div>' +
         '<div class="pg-pop-why">' + esc(w.why) + '</div>' +
         '<div class="pg-pop-meta">Tid: ' + esc(w.when) + ' · Först sedd ' + esc(w.first) + '</div></div>';
     });
@@ -871,7 +894,6 @@
       var rowTxt = d === 'snart' ? 'Snart' : p2(d.getHours()) + ':' + p2(d.getMinutes());
       html += '<tr' + (d === 'snart' ? ' class="pg-tr-snart"' : '') + '><td class="pg-td-time"' +
         (d === 'snart' ? ' title="Tiden har passerat men bokningen finns kvar i prognosen – kan komma när som helst"' : '') + '>' + rowTxt + '</td>';
-      var fly = d === 'snart' ? null : flightInfo(zoneId, slot);
       cats.forEach(function (k) {
         var meta = CAT_META[k] || {};
         var key = slot + '|' + k, list = bySlot[key];
@@ -881,6 +903,8 @@
         if (isF) tdCls += ' pg-focus';
         var attrs = '';
         if (sum) {
+          // ✈ per bokning (dess egen beräknade tid), inte per rad – bara rutor med berörda bokningar markeras
+          var fly = d === 'snart' ? null : cellFlights(zoneId, list);
           st.cellMap[key] = { rowTxt: rowTxt, cat: k, list: list, flight: fly };
           sum.addon = !meta.child && list.some(function (b) { return addonsOf(b).length > 0; });
           sum.flight = !!fly;
