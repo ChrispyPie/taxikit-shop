@@ -38,7 +38,7 @@
   function nyhId(dag) { return dag.id || dag.datum; }
   // Vem ser vad (t543u): rader märkta 'admin' eller 'agare' i changelog.js visas bara för de rollerna.
   // Rollen är samma som styr menyn (menuRole i index.html: get_me, eller demots roll). Okänd roll = förare.
-  var AUD = { admin: ['admin', 'agare', 'superadmin'], agare: ['agare', 'superadmin'] };
+  var AUD = { admin: ['admin', 'agare', 'superadmin'], agare: ['agare', 'superadmin'], superadmin: ['superadmin'] };
   function minRoll() { try { return (typeof window.menuRole === 'function' && window.menuRole()) || 'standard'; } catch (e) { return 'standard'; } }
   // 'flagga:sjuk' = bara de som har funktionsflaggan (window.TAXI_FEATURES från get_my_features, t611u)
   function harFlagga(aud) {

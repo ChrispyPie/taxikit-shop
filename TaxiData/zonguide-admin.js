@@ -1,9 +1,10 @@
 /* Admin › Zonguide (test, bara för admin).
  * Visar var åkeriets resor oftast har startat en viss veckodag och timme, de senaste 12 veckorna (eller 8/26).
- * Ägaren och S admin ser sidan, samma som Åkeridata och Bilar. Vanliga förare ser den inte (t812u).
+ * Bara S admin ser sidan: den ligger i S admin-panelen (sadmin.html) sedan 2026-11-04, servern kollar private.require_sadmin.
+ * Test: måste utvärderas när det finns fler åkerier och mer data (t840u).
  * Server: public.zonguide(p_token, p_dow, p_hour, p_weeks) räknar fram allt när sidan öppnas (ingen cron).
  * Ett körpass räknas 06–05, så söndag 02 hör till lördagens pass i dygnsöversikten.
- * Magasinet (290) räknas inte. Använder admin.html:s rpc(), esc(), errText() och render().
+ * Magasinet (290) räknas inte. Använder sidans rpc(), esc(), errText(), render() och path (sadmin.html).
  * Ångra: supabase/migrations/undo/20261031a_zonguide_undo.sql + revert av merge-commiten.
  */
 (function () {
@@ -113,9 +114,10 @@
     var el = content || document.getElementById('content');
     if (!el || !(path[0] && path[0].id === 'zonguide')) return;
     var t = nowSthlm(), isNow = Z.dow === t.dow && Z.hour === t.h, d = Z.data;
-    var h = '<div class="zg-info"><b>🧭 Zonguide</b><span class="zg-test">Test, bara för admin</span><br>' +
+    var h = '<div class="zg-info"><b>🧭 Zonguide</b><span class="zg-test">Test, bara för S admin</span><br>' +
       'Här ser du var åkeriets resor oftast har startat en viss veckodag och timme. Siffrorna kommer från alla förares resor de senaste ' + Z.weeks + ' veckorna. ' +
-      'Magasinet räknas inte. Förarna ser inte den här sidan.</div>';
+      'Magasinet räknas inte. Förarna ser inte den här sidan.</div>' +
+      '<div class="zg-note">⚠️ Zonguiden är i test. Vi måste utvärdera hur väl den stämmer när det finns fler åkerier och mer data. I dag bygger den bara på ett åkeri.</div>';
     var sp = isNow ? special(t) : '';
     if (sp) h += '<div class="zg-note">' + esc(sp) + '</div>';
     h += '<div class="zg-ctl"><select aria-label="Veckodag" onchange="ZONGUIDE_ADMIN.set(this.value, ZONGUIDE_ADMIN.hour)">' +

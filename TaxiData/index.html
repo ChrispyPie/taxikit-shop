@@ -154,8 +154,8 @@
   <script src="profilbild.js?v=zdm1"></script>
   <script src="forum.js?v=20261029fl1"></script>
   <script src="om-data.js?v=20261030b"></script>
-  <script src="changelog.js?v=20261104a"></script>
-  <script src="om.js?v=20261029tn2"></script>
+  <script src="changelog.js?v=20261104sa2"></script>
+  <script src="om.js?v=20261104sa2"></script>
   <script src="lonekoll.js?v=20261028sp1"></script>
   <script src="prognos.js?v=20261103pg2"></script>
   <script src="prognos-notis.js?v=20261103pg2"></script>
@@ -184,7 +184,9 @@
       { id: 'admin', icon: '🔐', label: 'Admin', roles: ADMIN_ROLLER, submenu: [
         { id: 'akeridata', icon: '📊', label: 'Åkeridata', roles: AKERI_ROLLER },
         { id: 'chaufforer', icon: '👥', label: 'Chaufförer', roles: ADMIN_ROLLER }
-      ]}
+      ]},
+      // S admin-panelen (sadmin.html). Servern släpper bara in S admin (private.require_sadmin), inte demo eller master.
+      { id: 'sadmin', icon: '🛡️', label: 'S admin', roles: ['superadmin'] }
     ];
 
     var current = null;
@@ -861,6 +863,10 @@
       if (item && !canSee(item)) return;
       if (id === 'admin') {
         location.href = 'admin.html';
+        return;
+      }
+      if (id === 'sadmin') {
+        location.href = 'sadmin.html';
         return;
       }
       if (id === 'kordata') {
