@@ -31,7 +31,7 @@
     ]
   };
 
-  var state = { tab: null, data: {}, err: {}, updated: {}, showPast: false, timer: null, tick: null, el: null, loading: {} };
+  var state = { tab: null, data: {}, err: {}, updated: {}, at: {}, showPast: false, timer: null, tick: null, el: null, loading: {} };
 
   // ---------- hjälp ----------
   function esc(s) {
@@ -322,7 +322,7 @@
     if (!s || state.loading[id]) return;
     state.loading[id] = true; if (!quiet) paint();
     s.load().then(function (r) {
-      state.data[id] = r.items; state.updated[id] = r.updated; state.err[id] = false;
+      state.data[id] = r.items; state.updated[id] = r.updated; state.at[id] = Date.now(); state.err[id] = false;
       try { document.dispatchEvent(new CustomEvent('ankomster:data', { detail: { id: id } })); } catch (e) {}
       if (id === 'tag') Object.keys(state.open).forEach(function (k) { fetchRoute(k, true); });
     }).catch(function () { state.err[id] = true; })
@@ -385,6 +385,19 @@
   };
   A.when = when;
   A.hm = hm;
+  // För Prognos (t833u): flyg till Landvetter, för förseningsvarningen i zon 293.
+  // Återanvänder Ankomsters data om den är färsk (högst maxAgeMs), annars en egen hämtning.
+  var flightP = null;
+  A.flightItems = function (maxAgeMs) {
+    maxAgeMs = maxAgeMs || 120000;
+    if (state.data.flyg && Date.now() - (state.at.flyg || 0) < maxAgeMs) return Promise.resolve(state.data.flyg);
+    if (flightP) return flightP;
+    flightP = loadFlights().then(function (r) {
+      state.data.flyg = r.items; state.updated.flyg = r.updated; state.at.flyg = Date.now();
+      return r.items;
+    }).catch(function () { return state.data.flyg || []; }).then(function (x) { flightP = null; return x; });
+    return flightP;
+  };
   // För bevakning.js: hämta en rad via nyckel och rita om.
   A.item = function (key) {
     for (var id in state.data) {
