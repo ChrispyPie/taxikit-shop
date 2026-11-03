@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="tema.js?v=20261026tm1"></script>
+  <script src="enhet.js?v=20261029d"></script>
+  <link rel="stylesheet" href="tema.css?v=20261026tm1">
+  <title>S admin – TaxiData</title>
+  <!-- S admin-panelen (20261104b). Bara drivers.category = 'superadmin', inte demo och inte master-inloggning.
+       Skyddet sitter på servern: private.require_sadmin i varje RPC (sadmin_me, sadmin_prognos_trips, zonguide).
+       Ångra: supabase/migrations/undo/20261104b_sadmin_undo.sql + revert av merge-commiten. -->
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
+    header { background: var(--bg); padding: 12px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--c-d0e0ea); }
+    header h1 { font-size: calc(18px * var(--font-scale, 1)); flex: 1; text-align: center; }
+    button { background: var(--surface); border: 2px solid var(--primary); color: var(--primary); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: calc(14px * var(--font-scale, 1)); }
+    #content { padding: 16px; max-width: 760px; margin: 0 auto; }
+    .breadcrumb { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--surface); border-bottom: 1px solid var(--c-e2e8f0); font-size: calc(14px * var(--font-scale, 1)); }
+    .breadcrumb span { cursor: pointer; color: var(--c-3182ce); }
+    .breadcrumb .sep { color: var(--c-a0aec0); cursor: default; }
+    .sa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+    .sa-tile { background: var(--surface); border-radius: 12px; padding: 18px 10px; text-align: center; cursor: pointer; border: 1px solid var(--c-e2e8f0); }
+    .sa-tile .e { font-size: calc(30px * var(--font-scale, 1)); }
+    .sa-tile .l { margin-top: 6px; font-weight: 600; font-size: calc(14px * var(--font-scale, 1)); }
+    .sa-tile .s { margin-top: 2px; font-size: calc(11px * var(--font-scale, 1)); color: var(--c-718096); }
+    .sa-tile.off { opacity: .5; cursor: default; }
+    .sa-info { background: var(--surface); border-radius: 12px; padding: 12px; margin-bottom: 12px; font-size: calc(14px * var(--font-scale, 1)); line-height: 1.45; }
+    .sa-warn { background: var(--c-fefcbf); color: var(--c-975a16); border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; font-size: calc(14px * var(--font-scale, 1)); line-height: 1.45; }
+    .sa-card { background: var(--surface); border-radius: 12px; padding: 12px; margin-bottom: 12px; }
+    .sa-card h3 { font-size: calc(16px * var(--font-scale, 1)); margin-bottom: 6px; }
+    .sa-sub { font-size: calc(13px * var(--font-scale, 1)); color: var(--c-718096); margin: 2px 0 8px; }
+    .sa-kv { display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; border-top: 1px solid var(--c-edf2f7); font-size: calc(14px * var(--font-scale, 1)); }
+    .sa-kv b { font-variant-numeric: tabular-nums; }
+    table.sa-t { width: 100%; border-collapse: collapse; font-size: calc(13px * var(--font-scale, 1)); }
+    .sa-t th, .sa-t td { text-align: left; padding: 5px 4px; border-top: 1px solid var(--c-edf2f7); white-space: nowrap; }
+    .sa-t th { color: var(--c-718096); font-weight: 600; }
+    .sa-t td.n { text-align: right; font-variant-numeric: tabular-nums; }
+    .sa-scroll { overflow-x: auto; }
+    .sa-ctl { display: flex; gap: 6px; margin-bottom: 12px; }
+    .sa-ctl button.on { background: var(--primary); color: var(--on-primary, #fff); }
+    #denied { display: none; text-align: center; padding: 48px 16px; }
+    #denied h2 { margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+  <div id="denied">
+    <h2>Ingen behörighet</h2>
+    <p>S admin-panelen är bara för S admin.</p>
+    <button onclick="location.href='index.html'" style="margin-top:16px;">Tillbaka</button>
+  </div>
+  <div id="sa-app" style="display:none">
+    <header>
+      <button onclick="location.href='index.html'" style="font-size:calc(20px * var(--font-scale, 1));" aria-label="Hem">🏠</button>
+      <h1 id="title">S admin</h1>
+      <button onclick="location.href='admin.html'" aria-label="Admin">🔐</button>
+    </header>
+    <div class="breadcrumb" id="breadcrumb"></div>
+    <div id="content"><div class="sa-sub">Laddar…</div></div>
+  </div>
+
+  <script src="zonguide-admin.js?v=20261104sa1"></script>
+  <script>
+    const SUPABASE_URL = 'https://lpfdryvukqmjlgenuzpb.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_7LwIOZ5ygRvJqJKFxl4cNQ_LvrzrHrP';
+    // Vyerna. Servern kontrollerar behörigheten i varje anrop (private.require_sadmin).
+    const VIEWS = [
+      { id: 'zonguide', icon: '🧭', label: 'Zonguide', sub: 'Test' },
+      { id: 'prognos', icon: '📈', label: 'Prognos mot resor', sub: 'Test, lite data' },
+      { id: 'akerier', icon: '🏢', label: 'Åkerier', sub: 'Kommer senare', off: true },
+      { id: 'betalning', icon: '💳', label: 'Betalningar', sub: 'Kommer senare', off: true }
+    ];
+    let path = [];   // samma form som i admin.html, zonguide-admin.js läser path[0].id
+    let me = null;
+    const P = { data: null, err: '', days: 30, offset: 10, busy: false };
+
+    function getToken() { return localStorage.getItem('taxi_session') || ''; }
+    async function rpc(name, args = {}) {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + name, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ p_token: getToken(), ...args })
+      });
+      const text = await res.text();
+      const body = text ? JSON.parse(text) : null;
+      if (!res.ok) {
+        const err = new Error((body && body.message) || ('HTTP ' + res.status));
+        err.code = body && body.code;
+        if (err.code === '28000') {
+          ['taxi_session', 'taxi_logged_in', 'taxi_driver', 'taxi_view', 'taxi_demo'].forEach(k => localStorage.removeItem(k));
+          location.href = 'index.html';
+        }
+        throw err;
+      }
+      return body;
+    }
+    function esc(x) { return String(x == null ? '' : x).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+    function errText(e) { return e && e.message === 'forbidden' ? 'Du har inte behörighet.' : 'Fel: ' + (e && e.message); }
+    function sthlm(ts, withDay) {
+      if (!ts) return '–';
+      const o = { timeZone: 'Europe/Stockholm', hour: '2-digit', minute: '2-digit' };
+      if (withDay) { o.day = 'numeric'; o.month = 'numeric'; }
+      return new Date(ts).toLocaleString('sv-SE', o);
+    }
+    function min(x) { return x == null ? '–' : (x > 0 ? '+' : '') + Math.round(x) + ' min'; }
+
+    function openView(id) {
+      const v = VIEWS.find(x => x.id === id);
+      if (!v || v.off) return;
+      path = [{ id }];
+      if (id === 'zonguide') { ZONGUIDE_ADMIN.load(); return; }
+      if (id === 'prognos') { loadPrognos(); return; }
+      render();
+    }
+    function home() { path = []; render(); }
+
+    function render() {
+      const bc = document.getElementById('breadcrumb');
+      bc.innerHTML = '<span onclick="home()">S admin</span>' + (path.length ? '<span class="sep">›</span>' + esc(VIEWS.find(v => v.id === path[0].id).label) : '');
+      const el = document.getElementById('content');
+      const title = document.getElementById('title');
+      if (!path.length) {
+        title.textContent = 'S admin';
+        el.innerHTML = '<div class="sa-info">Här finns det som bara S admin ser: tester och saker som gäller alla åkerier. ' +
+          'Servern kontrollerar varje gång att du är S admin. Demokonton och master-inloggning kommer inte in.</div>' +
+          '<div class="sa-grid">' + VIEWS.map(v => '<div class="sa-tile' + (v.off ? ' off' : '') + '" onclick="openView(\'' + v.id + '\')"><div class="e">' + v.icon +
+          '</div><div class="l">' + esc(v.label) + '</div><div class="s">' + esc(v.sub) + '</div></div>').join('') + '</div>';
+        return;
+      }
+      if (path[0].id === 'zonguide') {
+        title.textContent = 'Zonguide';
+        ZONGUIDE_ADMIN.render(el);
+        return;
+      }
+      if (path[0].id === 'prognos') { title.textContent = 'Prognos mot resor'; renderPrognos(el); }
+    }
+
+    async function loadPrognos() {
+      P.err = ''; P.busy = true; render();
+      try { P.data = await rpc('sadmin_prognos_trips', { p_days: P.days, p_offset: P.offset }); }
+      catch (e) { P.data = null; P.err = errText(e); }
+      P.busy = false; render();
+    }
+    function setDays(d) { P.days = d; loadPrognos(); }
+    function setOffset(o) { P.offset = o; loadPrognos(); }
+    function bars(list, unit) {
+      if (!list || !list.length) return '<div class="sa-sub">Inget än.</div>';
+      const mx = Math.max(...list.map(x => x.n));
+      return list.map(x => '<div class="sa-kv"><span>' + (x.fran > 0 ? '+' : '') + x.fran + ' till ' + (x.fran + 5 > 0 ? '+' : '') + (x.fran + 5) + ' ' + unit + '</span>' +
+        '<b><span style="display:inline-block;height:8px;border-radius:4px;background:var(--primary);width:' + Math.max(6, Math.round(80 * x.n / mx)) + 'px;margin-right:6px"></span>' + x.n + '</b></div>').join('');
+    }
+
+    function renderPrognos(el) {
+      const d = P.data;
+      let h = '<div class="sa-warn">⚠️ Test. Historiken sparas från 4 nov 2026, så underlaget är fortfarande tunt. ' +
+        'Dra inga slutsatser förrän det finns flera veckor och fler åkerier. Landvetter visas för sig, där stämmer tiderna sämre (flygen).</div>';
+      h += '<div class="sa-info">Resdatan har bara <b>taxameterns starttid</b> (när resan med kunden startar, hela minuter). ' +
+        'Den har ingen tid för när bokningen kom till bilen och ingen beställd tid. Prognostiden är tänkt som när bokningen går ut till bilarna. ' +
+        'Därför visas både <b>rå skillnad</b> (resans start − prognostid) och <b>justerad</b> (resans start − offset − prognostid). ' +
+        '<b>Borta</b> = när bokningen försvann ur prognosen, det närmaste vi har till när den gick ut.</div>';
+      h += '<div class="sa-ctl">' + [7, 30, 90].map(n => '<button class="' + (n === P.days ? 'on' : '') + '" onclick="setDays(' + n + ')">' + n + ' dagar</button>').join('') + '</div>';
+      h += '<div class="sa-ctl" style="flex-wrap:wrap"><span class="sa-sub" style="margin:6px 4px 0 0">Offset:</span>' + [0, 5, 10, 15, 20, 30].map(n => '<button class="' + (n === P.offset ? 'on' : '') + '" onclick="setOffset(' + n + ')">' + n + ' min</button>').join('') + '</div>';
+      if (P.err) h += '<div class="sa-warn">' + esc(P.err) + '</div>';
+      if (!d) { el.innerHTML = h + (P.err ? '' : '<div class="sa-sub">Laddar…</div>'); return; }
+      h += '<div class="sa-sub">Från ' + sthlm(d.from, true) + ' till ' + sthlm(d.to, true) + ' (svensk tid). ' + (d.history_rows || 0) + ' bokningar i historiken. Offset ' + d.offset + ' min.' + (P.busy ? ' Uppdaterar…' : '') + '</div>';
+      (d.groups || []).forEach(g => {
+        const namn = g.grp === 'landvetter' ? '✈️ Landvetter (293)' : '🏙️ Stan (15, 161, 163, 406, 432)';
+        const offs = g.offsets || [];
+        const best = offs.filter(o => o.traffar).sort((a, b) => a.median_abs - b.median_abs)[0];
+        h += '<div class="sa-card"><h3>' + namn + '</h3>' +
+          '<div class="sa-sub">Prognosen</div>' +
+          '<div class="sa-kv"><span>Bokningar i prognosen</span><b>' + g.bokningar + ' (säkra ' + g.saker + ')</b></div>' +
+          '<div class="sa-kv"><span>Säkra som försvann inom ±5 min från prognostiden</span><b>' + g.saker_borta_5min + ' av ' + g.saker_borta_n + '</b></div>' +
+          '<div class="sa-kv"><span>Säkra: när de försvann jämfört med prognostiden (median)</span><b>' + min(g.saker_borta_median) + '</b></div>' +
+          '<div class="sa-sub" style="margin-top:10px">Åkeriets resor från zonen</div>' +
+          '<div class="sa-kv"><span>Resor</span><b>' + g.resor + '</b></div>' +
+          '<div class="sa-kv"><span>Med en bokning nära (start − ' + d.offset + ' min, ±20 min)</span><b>' + g.traffar + (g.resor ? ' (' + Math.round(100 * g.traffar / g.resor) + ' %)' : '') + '</b></div>' +
+          '<div class="sa-kv"><span>Rå skillnad, median</span><b>' + min(g.median_raw) + '</b></div>' +
+          '<div class="sa-kv"><span>Justerad med ' + d.offset + ' min, median</span><b>' + min(g.median_adj) + '</b></div>' +
+          '<div class="sa-kv"><span>Resans start efter att bokningen försvann (median)</span><b>' + min(g.borta_median) + ' (' + g.borta_n + ' resor)</b></div>' +
+          '<div class="sa-sub" style="margin-top:10px">Vilken offset passar bäst? Lägst median = bäst. Med så här lite data är skillnaderna slump.</div>' +
+          '<div class="sa-scroll"><table class="sa-t"><tr><th>Offset</th><th class="n">Resor med träff</th><th class="n">Median avvikelse</th></tr>' +
+          offs.map(o => '<tr' + (best && o.offset === best.offset ? ' style="font-weight:700"' : '') + '><td>' + o.offset + ' min</td><td class="n">' + o.traffar + '</td><td class="n">' + (o.median_abs == null ? '–' : o.median_abs + ' min') + '</td></tr>').join('') + '</table></div>' +
+          '<div class="sa-sub" style="margin-top:10px">Fördelning, rå skillnad (resans start − närmaste prognostid inom ±60 min)</div>' + bars(g.fordelning, 'min') +
+          '<div class="sa-sub" style="margin-top:10px">Fördelning, resans start − när bokningen försvann</div>' + bars(g.borta_fordelning, 'min') +
+          '</div>';
+      });
+      const r = d.resor || [];
+      h += '<div class="sa-card"><h3>Senaste resorna</h3><div class="sa-sub">Plus = resan startade efter prognostiden. Justerad = med offset ' + d.offset + ' min. Borta = resans start minus när bokningen försvann ur prognosen.</div>';
+      if (!r.length) h += '<div class="sa-sub">Inga resor från prognoszonerna än i perioden.</div>';
+      else h += '<div class="sa-scroll"><table class="sa-t"><tr><th>Tid</th><th>Bil</th><th>Zon</th><th>Bokning</th><th class="n">Rå</th><th class="n">Justerad</th><th class="n">Borta</th></tr>' +
+        r.map(x => '<tr><td>' + sthlm(x.at, true) + '</td><td>' + esc(x.taxi) + '</td><td>' + esc(x.zon) + '</td><td>' +
+          (x.kategori ? esc(x.kategori) + ' · ' + esc(x.sakerhet) : '<span style="color:var(--c-a0aec0)">ingen</span>') + '</td><td class="n">' +
+          min(x.raw_min) + '</td><td class="n">' + min(x.adj_min) + '</td><td class="n">' + min(x.borta_fore_start) + '</td></tr>').join('') + '</table></div>';
+      h += '</div>';
+      el.innerHTML = h;
+    }
+
+    (async function init() {
+      if (!getToken()) { location.href = 'index.html'; return; }
+      try { me = await rpc('sadmin_me'); } catch (e) { me = null; }
+      if (!me || !me.ok) { document.getElementById('denied').style.display = 'block'; return; }
+      document.getElementById('sa-app').style.display = 'block';
+      const h = location.hash.replace('#', '');
+      if (h) { history.replaceState(null, '', location.pathname); openView(h); } else render();
+    })();
+  </script>
+</body>
+</html>

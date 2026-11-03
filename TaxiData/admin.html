@@ -163,7 +163,6 @@
   <script src="verkstad-admin.js?v=20261030sj"></script>
   <script src="profilbild.js?v=zdm1"></script>
   <script src="onskemal-admin.js?v=20261029k"></script>
-  <script src="zonguide-admin.js?v=20261031zg1"></script>
   <script>
     const APP_VERSION = '1.0.26';
     console.log('Admin version:', APP_VERSION);
@@ -178,7 +177,7 @@
       { id: 'verkstad', icon: '🛠️', label: 'Anmälningar & ärenden' },
       { id: 'chaufforer', icon: '👥', label: 'Chaufförer' },
       { id: 'onskemal', icon: '💡', label: 'Önskemål och idéer' },
-      { id: 'zonguide', icon: '🧭', label: 'Zonguide (test)' },   // test, bara ägaren och S admin (COMPANY_VIEWS)
+      // Zonguide (test) flyttad till S admin-panelen (sadmin.html) 2026-11-04
       // Statistik borttagen 2026-10-25 (tom platshållare): { id: 'statistik', icon: '📈', label: 'Statistik' },
       
     ];
@@ -234,7 +233,7 @@
       return isOwner() || AKERI_EXTRA_ROLES.includes(getMyCategory());
     }
 
-    const COMPANY_VIEWS = ['akeridata', 'bilar', 'verkstad', 'onskemal', 'zonguide'];   // zonguide: test, förarna ser den inte än. onskemal: ägaren skriver till Christian
+    const COMPANY_VIEWS = ['akeridata', 'bilar', 'verkstad', 'onskemal'];   // zonguide flyttad till sadmin.html (bara S admin). onskemal: ägaren skriver till Christian
 
     function isSuperAdmin() {
       return getMyCategory() === 'superadmin';
@@ -589,10 +588,6 @@
         title.textContent = 'Önskemål och idéer';
         if (!canSeeAkeridata()) content.innerHTML = '<div class="section"><p style="padding:16px;">Ingen behörighet</p></div>';
         else ONSKEMAL_ADMIN.render(content);
-      } else if (path[0].id === 'zonguide') {
-        title.textContent = 'Zonguide';
-        if (!canSeeAkeridata()) content.innerHTML = '<div class="section"><p style="padding:16px;">Ingen behörighet</p></div>';
-        else ZONGUIDE_ADMIN.render(content);
       } else if (path[0].id === 'chaufforer') {
         if (showLog) {
           title.textContent = 'Logg';
@@ -2183,7 +2178,6 @@ ${renderBildtypPicker(c)}
       selectedCar = null;
       if (id === 'verkstad') { VERKSTAD_ADMIN.load(); return; }
       if (id === 'onskemal') { if (canSeeAkeridata()) { ONSKEMAL_ADMIN.load(); return; } }
-      if (id === 'zonguide') { if (canSeeAkeridata()) { ZONGUIDE_ADMIN.load(); return; } }
       render();
     }
 
