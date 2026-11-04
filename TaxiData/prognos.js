@@ -743,18 +743,32 @@
     var html = '<div class="pg-pop-head"><strong>' + esc(info.rowTxt) + ' · ' + esc(CAT_LABEL[info.cat] || info.cat) + '</strong>' +
       ' <span class="pg-pop-n">' + info.list.length + ' st</span></div>';
     var child = CHILD_KEYS.indexOf(info.cat) >= 0;
-    info.list.slice(0, 6).forEach(function (b) {
+    // t873u: likadana bokningar slås ihop till ett kort med antal
+    var groups = [], gmap = {};
+    info.list.forEach(function (b) {
       var w = bookingWhy(b);
       var what = child && b.category !== info.cat
         ? (CAT_LABEL[info.cat] || info.cat) + ' på ' + (CAT_LABEL[b.category] || b.category)
         : (CAT_LABEL[b.category] || b.category);
       var add = !child && addonsOf(b).length ? ' + ' + addonText(b) : '';
+      var fly = !!(info.flight && info.flight.ids && info.flight.ids[b.id]);
+      var key = [w.conf, what + add, w.why, w.when, w.first, fly ? 1 : 0].join('\u0001');
+      if (gmap[key]) { gmap[key].n++; return; }
+      gmap[key] = { w: w, label: what + add, fly: fly, n: 1 };
+      groups.push(gmap[key]);
+    });
+    groups.slice(0, 8).forEach(function (g) {
+      var w = g.w;
       html += '<div class="pg-pop-b"><div><span class="pg-n pg-c-' + esc(w.conf) + '">' + esc(CONF_TXT[w.conf] || w.conf) + '</span> ' +
-        '<strong>' + esc(what + add) + '</strong>' + (info.flight && info.flight.ids && info.flight.ids[b.id] ? ' <span class="pg-pop-flyb" title="' + esc(FLIGHT_TXT) + '">✈</span>' : '') + '</div>' +
+        '<strong>' + esc(g.label) + '</strong>' + (g.n > 1 ? ' <span class="pg-pop-n">' + g.n + ' st</span>' : '') +
+        (g.fly ? ' <span class="pg-pop-flyb" title="' + esc(FLIGHT_TXT) + '">✈</span>' : '') + '</div>' +
         '<div class="pg-pop-why">' + esc(w.why) + '</div>' +
         '<div class="pg-pop-meta">Tid: ' + esc(w.when) + ' · Först sedd ' + esc(w.first) + '</div></div>';
     });
-    if (info.list.length > 6) html += '<div class="pg-pop-meta">… +' + (info.list.length - 6) + ' till</div>';
+    if (groups.length > 8) {
+      var rest = 0; groups.slice(8).forEach(function (g) { rest += g.n; });
+      html += '<div class="pg-pop-meta">… +' + rest + ' till</div>';
+    }
     if (info.flight) {
       html += '<div class="pg-pop-fly">✈ ' + esc(FLIGHT_TXT) + '<span class="pg-pop-meta">' +
         info.flight.list.slice(0, 3).map(function (x) {
@@ -876,7 +890,12 @@
     if (e.target.closest && e.target.closest('[data-pg-cell]')) return;
     hidePop();
   }, true);
-  window.addEventListener('scroll', function () { if (pop.pinned) hidePop(); }, true);
+  // Rulla i själva rutan stänger inte (t873u), bara rullning av sidan/schemat
+  window.addEventListener('scroll', function (e) {
+    if (!pop.pinned) return;
+    if (pop.el && e.target && e.target !== document && pop.el.contains(e.target)) return;
+    hidePop();
+  }, true);
 
   function renderCarTimeline(zoneId, focusSlot) {
     var cats = loadCats().filter(function (k) { return ALL_CAT_KEYS.indexOf(k) >= 0; });

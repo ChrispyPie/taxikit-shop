@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-04', id: '2026-11-04d', tid: '23:16', rader: [
+    ['Fixat', 'Prognos: likadana bokningar i förklaringsrutan slås ihop till en rad, till exempel "Kombi 6 st", i stället för samma text flera gånger. Det går också att skrolla i rutan utan att den stängs.']
+  ] },
   { datum: '2026-11-04', id: '2026-11-04c', tid: '04:46', rader: [
     ['Nytt', 'S admin: ny utvärdering, Prognostid: utskick eller kund? Den visar om prognosens tid ligger närmast när bokningen går ut till bil eller kundens beställda tid. Stan visas samlat och per zon, Landvetter för sig. Där finns också verifierade fall och en testknapp i Prognos som visar kundens tid (prognostid + offset per zon). Förarnas prognos och notiser ändras inte.', 'superadmin']
   ] },
