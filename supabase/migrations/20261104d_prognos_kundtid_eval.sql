@@ -81,7 +81,10 @@ grant execute on function public.sadmin_truth_add(text, text, text, timestamptz,
 --  borta  = när bokningen försvann ur prognosen − prognostid (närmaste mått på utskicket). Bara säkra/troliga, status canceled,
 --           pålitlig sluttid, och försvann tidigast 20 min före prognostiden (tidigare = troligen avbokad/flyttad), senast 40 min efter.
 --  start  = taxameterns start − närmaste prognostid (40 min före till 10 min efter starten). bokad = resan har BOOKNR i resapost.
---  Om prognostid = utskick: borta ≈ 0 och start ≈ +offset. Om prognostid = kundens tid: borta ≈ −offset och start ≈ 0.
+--  in120 = (först sedd i 80–120-blocket + 120 min) − prognostid. Prognosen är ett rullande 120-minutersfönster (läses varje minut).
+--  OBS (analys 4 nov): i stan försvinner bokningen nästan exakt 120 min efter att den kom in (borta − in120 ≈ 0), alltså när dess
+--  egen tid passerar, inte när den skickas ut. Borta säger därför inget om utskick. Svaret bygger på resans start:
+--  start ≈ 0 → prognostid = kundens tid; start ≈ +offset (körtid efter utskick) → prognostid = utskick. Gräns: +5 min.
 create or replace function public.sadmin_prognos_kundtid_eval(p_token text, p_days integer default 30, p_test integer default 10)
 returns json language plpgsql security definer set search_path to 'public', 'pg_temp' as $$
 declare a record; v_days int; v_t int; v_from timestamptz; v_res json;
@@ -102,6 +105,9 @@ begin
      where estimated_at >= v_from and status = 'canceled' and tid_ok and ended_at is not null
        and confidence in ('saker','trolig')
        and ended_at between estimated_at - interval '20 minutes' and estimated_at + interval '40 minutes'
+  ), fi as (
+    select zone_id, extract(epoch from (first_seen_at + interval '120 minutes' - estimated_at)) / 60 d
+      from b where estimated_at >= v_from and first_block = 2
   ), t as (
     select f.ts at time zone 'Europe/Stockholm' as at, f.taxi, c.kategorier,
            case when btrim(f.data->>'startzon') in ('291','292','293') then '293' else btrim(f.data->>'startzon') end zone_id,
@@ -131,6 +137,8 @@ begin
       (select count(*) from ex where ex.zone_id = any(g.zones)) ex_n,
       (select percentile_cont(array[0.25,0.5,0.75]) within group (order by d) from ex where ex.zone_id = any(g.zones)) ex_q,
       (select count(*) filter (where abs(d) <= abs(d + v_t)) from ex where ex.zone_id = any(g.zones)) ex_utskick,
+      (select count(*) from fi where fi.zone_id = any(g.zones)) fi_n,
+      (select percentile_cont(0.5) within group (order by d) from fi where fi.zone_id = any(g.zones)) fi_med,
       (select count(*) from st where st.zone_id = any(g.zones)) st_n,
       (select percentile_cont(array[0.25,0.5,0.75]) within group (order by s) from st where st.zone_id = any(g.zones)) st_q,
       (select count(*) from st where st.zone_id = any(g.zones) and bokad) stb_n,
@@ -144,8 +152,9 @@ begin
         'narmast_utskick', ex_utskick, 'narmast_kund', ex_n - ex_utskick,
         'start_n', st_n, 'start_p25', round(st_q[1]::numeric, 1), 'start_median', round(st_q[2]::numeric, 1), 'start_p75', round(st_q[3]::numeric, 1),
         'bokad_n', stb_n, 'bokad_median', round(stb_med::numeric, 1),
-        'svar', case when ex_n < 20 then 'för lite data'
-                     when ex_q[2] > -v_t / 2.0 then 'utskick'
+        'in120_n', fi_n, 'in120_median', round(fi_med::numeric, 1),
+        'svar', case when st_n < 20 then 'för lite data'
+                     when st_q[2] >= 5 then 'utskick'
                      else 'kundens tid' end)
       order by array_position(array['stan','15','161','163','406','432','293'], z)) from r),
     'truth', (select json_agg(json_build_object('zone', zone_id, 'booknr', booknr, 'prognos', prognos_at, 'bokad', booked_at,

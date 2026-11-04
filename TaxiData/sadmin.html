@@ -240,9 +240,9 @@
       let h = '<div class="sa-warn">⚠️ Test. Bara S admin ser det här. Förarnas prognos, notiser och push ändras inte.</div>';
       h += '<div class="sa-info">Frågan: är prognosens tid när bokningen <b>går ut till bil</b> eller kundens <b>beställda tid</b>? ' +
         'I stan skickas bokningen normalt ut ca 10 min före kundens tid. ' +
-        '<b>Borta</b> = när bokningen försvann ur prognosen − prognostid (närmaste mått på utskicket, prognosen läses varje minut). ' +
-        'Om prognostiden är utskicket hamnar Borta nära 0. Om den är kundens tid hamnar Borta nära −10. ' +
-        '<b>Start</b> = taxameterns start − närmaste prognostid. ' +
+        '<b>Start</b> = taxameterns start − närmaste prognostid. Nära 0 = prognostiden är kundens tid. Ca +5 till +10 = prognostiden är utskicket. Svaret bygger på det (minst 20 resor). ' +
+        '<b>In + 2 h</b> = när bokningen kom in i 80–120-blocket + 120 min, jämfört med prognostiden. ' +
+        '<b>Borta</b> = när bokningen försvann. I stan försvinner den när dess egen tid passerar, inte när den skickas ut, så Borta säger inget om utskicket. ' +
         'Landvetter visas för sig: där flyttas tiderna efter flygen och skickas ut för hand.</div>';
       h += '<div class="sa-ctl">' + [7, 30, 90].map(n => '<button class="' + (n === K.days ? 'on' : '') + '" onclick="setKtDays(' + n + ')">' + n + ' dagar</button>').join('') + '</div>';
       if (K.err) h += '<div class="sa-warn">' + esc(K.err) + '</div>';
@@ -253,16 +253,15 @@
       const stan = gs.find(g => g.z === 'stan'), lv = gs.find(g => g.z === '293');
       const card = (g, titel, extra) => '<div class="sa-card"><h3>' + titel + '</h3>' +
         '<div class="sa-kv"><span>Svar</span><b>' + svar(g) + '</b></div>' +
-        '<div class="sa-kv"><span>Borta − prognostid</span><b>' + q(g, 'borta') + '</b></div>' +
-        '<div class="sa-kv"><span>Närmast utskick / närmast kundtid</span><b>' + g.narmast_utskick + ' / ' + g.narmast_kund + ' av ' + g.borta_n + '</b></div>' +
+        '<div class="sa-kv"><span>In + 2 h − prognostid</span><b>' + min(g.in120_median) + ' · ' + (g.in120_n || 0) + ' bokningar</b></div>' +
+        '<div class="sa-kv"><span>Borta − prognostid</span><b>' + q(g, 'borta') + ' · ' + g.borta_n + '</b></div>' +
         '<div class="sa-kv"><span>Resans start − prognostid</span><b>' + q(g, 'start') + ' · ' + g.start_n + ' resor</b></div>' +
         '<div class="sa-kv"><span>Bokade resor (BOOKNR), start − prognostid</span><b>' + min(g.bokad_median) + ' · ' + g.bokad_n + ' resor</b></div>' + (extra || '') + '</div>';
       if (stan) {
         const off = stan.borta_median == null ? null : Math.round(stan.borta_median);
         h += card(stan, '🏙️ Stan samlat (15, 161, 163, 406, 432)',
-          '<div class="sa-sub" style="margin-top:8px">Fast mönster i stan: bokningen försvinner ca <b>' + min(off) + '</b> från prognostiden' +
-          (stan.start_median != null ? ' och resan startar ca <b>' + min(Math.round(stan.start_median)) + '</b> efter' : '') +
-          '. Kundens tid ≈ utskick + 10 min, så om prognostiden är utskicket är kundens tid ca prognostid + ' + Math.max(0, 10 + (off || 0)) + ' min.</div>');
+          '<div class="sa-sub" style="margin-top:8px">Fast mönster i stan: resan startar ca <b>' + min(stan.start_median == null ? null : Math.round(stan.start_median)) +
+          '</b> efter prognostiden, bokningen försvinner ca <b>' + min(off) + '</b> från den. Utskick sker normalt ca 10 min före kundens tid.</div>');
         h += '<div class="sa-card"><h3>Stan per zon</h3><div class="sa-scroll"><table class="sa-t"><tr><th>Zon</th><th class="n">Borta</th><th class="n">n</th><th class="n">Start</th><th class="n">n</th><th>Svar</th></tr>' +
           gs.filter(g => g.z !== 'stan' && g.z !== '293').map(g => '<tr><td>' + esc(g.label) + ' (' + g.z + ')</td><td class="n">' + min(g.borta_median) + '</td><td class="n">' + g.borta_n +
             '</td><td class="n">' + min(g.start_median) + '</td><td class="n">' + g.start_n + '</td><td>' + svar(g) + '</td></tr>').join('') + '</table></div></div>';
