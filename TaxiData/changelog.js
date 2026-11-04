@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-04', id: '2026-11-04h', tid: '23:26', rader: [
+    ['Förbättrat', 'Headern med hemknapp, rubrik, notiser och profil står nu kvar högst upp när du skrollar, så du slipper skrolla upp för att gå hem. Ikonerna visas utan ruta och ram.']
+  ] },
   { datum: '2026-11-04', id: '2026-11-04g', tid: '23:25', rader: [
     ['Fixat', 'Topplistor, Bil: du ser nu bara din egen bil (den du kör nu eller körde senast), med din placering, till exempel "plats 3 av 7". Andra bilar visas inte.']
   ] },

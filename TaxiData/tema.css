@@ -167,3 +167,38 @@ html[data-home="lista"] .icon { min-height: 52px; padding: 0 14px; display: flex
 html[data-home="lista"] .icon .emoji { font-size: 24px; line-height: 1; margin: 0 12px 0 0; width: 30px; text-align: center; flex-shrink: 0; }
 html[data-home="lista"] .icon .label { font-size: calc(15px * var(--font-scale, 1)); flex: 1; }
 html[data-home="lista"] .icon::after { content: '›'; color: var(--c-a0aec0); font-size: 22px; margin-left: 8px; }
+
+/* Fast header (2026-11-04): headern står kvar högst upp, bara innehållet skrollar.
+   Hem-, notis- och profilikonerna visas utan bakgrund och ram. Gäller alla sidor som laddar tema.css. */
+html body header {
+  position: sticky;
+  top: 0;
+  z-index: 60; /* under menyer/popups/modaler (100+) */
+  background: var(--bg);
+  padding-top: max(0.8rem, env(safe-area-inset-top));
+}
+html body header > button,
+html body header .profile-btn {
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: var(--primary);
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.3rem;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  font-size: calc(20px * var(--font-scale, 1));
+}
+html body header > button:hover,
+html body header .profile-btn:hover { background: none; color: var(--primary); }
+html body header > button:active,
+html body header .profile-btn:active { background: rgba(127,127,127,0.18); transform: scale(0.94); }
+html body header > button:focus-visible,
+html body header .profile-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+html body .hdr-right { display: flex; align-items: center; gap: 0.1rem; }
+/* Profilmenyn följer med den fasta headern */
+#profile-menu { position: fixed !important; top: calc(68px + env(safe-area-inset-top)) !important; }
