@@ -9,7 +9,7 @@
  * som räknar på servern över arkivet + nuvarande data (samma regler, litet svar). Bara då – aldrig i år.
  * Svaret sparas i minnet under sessionen så att man kan bläddra fram och tillbaka utan att hämta igen.
  * Förare/Bil (t876u): växlaren högst upp byter alla listor till per bil (public.get_leaderboard_bil, bilnummer
- * från passen och resorna). Valet sparas i localStorage ('tl_mode'). Demokonto får "Bil 1", "Bil 2" … från servern.
+ * från passen och resorna). Valet sparas i localStorage ('tl_mode'). Vanliga förare får bara sin egen bil (scope 'own', t880u). Demokonto får "Bil 1", "Bil 2" … från servern.
  */
 (function () {
   'use strict';
@@ -218,17 +218,22 @@
   // ---------- bilvy: samma listor per bilnummer ----------
   function drawBil(d) {
     if (!d || (!d.cars && !d.workshop_cars)) return '<div class="tl-msg">Ingen bil har kört ' + esc(T.periodText()) + ' än.</div>';
-    var h = '<div class="tl-info">' + (d.cars ? d.cars + ' bilar med pass ' + esc(T.periodText()) + '. ' : 'Inga pass ' + esc(T.periodText()) + ' än. ') +
-      (d.arkiv ? '📦 Äldre data från arkivet. ' : '') +
-      (d.demo ? 'Demokonto: bilarna visas som "Bil 1", "Bil 2" … ' : '') + 'Bilar du har kört är markerade.</div>';
+    var own = d.scope === 'own';
+    var h = '<div class="tl-info">' + (own
+      ? '🔒 Visar bara din bil' + (d.own ? ' (' + esc(d.own) + ', din senaste bil)' : '') + ': din placering bland ' + (d.cars || 0) + ' bilar ' + esc(T.periodText()) + '. Andra bilar visas inte.'
+      : (d.cars ? d.cars + ' bilar med pass ' + esc(T.periodText()) + '. ' : 'Inga pass ' + esc(T.periodText()) + ' än. ') +
+        (d.arkiv ? '📦 Äldre data från arkivet. ' : '') +
+        (d.demo ? 'Demokonto: bilarna visas som "Bil 1", "Bil 2" … ' : '') + 'Bilar du har kört är markerade.') + '</div>';
+    if (own && !d.own) return h + '<div class="tl-msg">Vi hittar ingen bil i dina pass än.</div>';
     LISTS.forEach(function (L) {
       var x = d.lists && d.lists[L.k];
-      if (!x || !x.rows || !x.rows.length) return;
+      if (!x || !x.rows || (!x.rows.length && !own)) return;
       var open = !!st.open[L.k], rows = x.rows, show = open ? rows : rows.slice(0, 5);
       h += '<div class="tl-card"><div class="tl-head"><span class="tl-title">' + esc(BIL_T[L.k] || L.t) + '</span>' +
-        '<span class="tl-me">' + x.n + ' bilar</span></div>';
+        '<span class="tl-me">' + (own && x.me ? 'plats ' + x.me.pos + ' av ' + x.n : x.n + ' bilar') + '</span></div>';
+      if (own && !rows.length) h += '<div class="tl-row"><span class="tl-who">Din bil finns inte med i den här listan.</span></div>';
       show.forEach(function (r) {
-        var who = esc(r.id || '') + (r.modell ? ' <span class="tl-id">' + esc(r.modell) + '</span>' : '') + (r.du ? ' <span class="tl-id">· du har kört</span>' : '');
+        var who = esc(r.id || '') + (r.modell ? ' <span class="tl-id">' + esc(r.modell) + '</span>' : '') + (r.du && !own ? ' <span class="tl-id">· du har kört</span>' : '');
         h += '<div class="tl-row' + (r.du ? ' du' : '') + '"><span class="tl-pos">' + (r.pos <= 3 ? ['🥇', '🥈', '🥉'][r.pos - 1] : r.pos + '.') + '</span>' +
           '<span class="tl-who">' + who + '</span><span class="tl-val">' + fmt(r.v, L.f) + '</span></div>';
       });
