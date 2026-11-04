@@ -15,7 +15,7 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-11-04', id: '2026-11-04d', tid: '23:16', rader: [
+  { datum: '2026-11-04', id: '2026-11-04d', tid: '23:17', rader: [
     ['Fixat', 'Prognos: likadana bokningar i förklaringsrutan slås ihop till en rad, till exempel "Kombi 6 st", i stället för samma text flera gånger. Det går också att skrolla i rutan utan att den stängs.']
   ] },
   { datum: '2026-11-04', id: '2026-11-04c', tid: '04:46', rader: [
