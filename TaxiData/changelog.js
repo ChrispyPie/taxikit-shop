@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-04', id: '2026-11-04c', tid: '04:46', rader: [
+    ['Nytt', 'S admin: ny utvärdering, Prognostid: utskick eller kund? Den visar om prognosens tid ligger närmast när bokningen går ut till bil eller kundens beställda tid. Stan visas samlat och per zon, Landvetter för sig. Där finns också verifierade fall och en testknapp i Prognos som visar kundens tid (prognostid + offset per zon). Förarnas prognos och notiser ändras inte.', 'superadmin']
+  ] },
   { datum: '2026-11-04', id: '2026-11-04b', tid: '00:38', rader: [
     ['Nytt', 'S admin-panel: en egen ruta 🛡️ S admin på startsidan. Där finns Zonguiden (test) och en ny rapport, Prognos mot resor, som jämför prognosen med åkeriets resor. Landvetter visas för sig. Underlaget är tunt än så länge. Servern släpper bara in S admin, inte demokonton eller master-inloggning.', 'superadmin'],
     ['Förbättrat', 'Zonguiden (test) har flyttat från Admin till S admin medan vi testar den. Den ska utvärderas när det finns fler åkerier och mer data.', 'agare']

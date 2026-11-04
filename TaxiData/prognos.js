@@ -65,8 +65,35 @@
     inAppAlert: true,
     flights: null,       // Landvetter-ankomster (för flygvarningen i 293)
     cellMap: {},         // data-pg-cell -> bokningar i rutan (förklaringsrutan)
-    pendingPaint: false  // omritning väntar tills förklaringsrutan stängs
+    pendingPaint: false, // omritning väntar tills förklaringsrutan stängs
+    kt: null,            // S admin-test kundtid: offsets per zon från servern (sadmin_kundtid_get), false = ej S admin
+    ktRaw: []            // bokningarna som de kom från servern (testvyn flyttar bara visningen)
   };
+
+  // S admin-test (20261104d): visa kundens tid = prognostid + offset per zon. Bara när servern godkänt
+  // S admin (require_sadmin). Alla andra ser exakt samma vy som förut.
+  var LS_KT = 'prognos_kundtid_test';
+  function ktOn() { return !!st.kt && localStorage.getItem(LS_KT) === '1'; }
+  function ktApply(list) {
+    if (!ktOn()) return list;
+    return list.map(function (b) {
+      var off = st.kt[String(b.zone_id)];
+      off = off == null ? 10 : +off;
+      var t = Date.parse(b.estimated_at);
+      if (!isFinite(t)) return b;
+      var c = {}; for (var k in b) c[k] = b[k];
+      c._ut = b.estimated_at; c._off = off;
+      c.estimated_at = new Date(t + off * 60000).toISOString();
+      return c;
+    });
+  }
+  function ktBar() {
+    if (!st.kt) return '';
+    var on = ktOn();
+    return '<div class="pg-kt"><span>🧪 S admin-test: <b>kundtid</b>' + (on ? ' (prognostid + ' +
+      esc(String(st.kt[st.zoneTab] == null ? 10 : st.kt[st.zoneTab])) + ' min i den här zonen)' : '') + '</span>' +
+      '<button type="button" class="pg-kt-btn' + (on ? ' on' : '') + '" id="pg-kt-btn">' + (on ? 'På' : 'Av') + '</button></div>';
+  }
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -333,8 +360,16 @@
     toast('Ny förbokning – ' + msg, 8000);
   }
 
+  function ktCheck() {
+    if (st.kt !== null) return Promise.resolve();
+    if (!window.driverData || window.driverData.category !== 'superadmin') { st.kt = false; return Promise.resolve(); }
+    return rpc('sadmin_kundtid_get', {}).then(function (r) { st.kt = (r && r.ok && r.offsets) || false; },
+      function () { st.kt = false; });
+  }
+
   function refresh() {
     if (!token() || st.loading) return Promise.resolve();
+    if (st.kt === null) return ktCheck().then(refresh);
     st.loading = true;
     return Promise.all([
       rpc('prognos_status', {}),
@@ -347,7 +382,8 @@
     ]).then(function (xs) {
       if (xs[6]) st.flights = xs[6];
       st.status = xs[0] || {};
-      st.bookings = xs[1] || [];
+      st.ktRaw = xs[1] || [];
+      st.bookings = ktApply(st.ktRaw);
       st.morgon = xs[2];
       st.zones = xs[3] || [];
       st.orig = xs[5] || null;
@@ -681,7 +717,7 @@
     var why = '', when = '';
     if (c === 'saker') {
       var lim = cb === 0 ? 40 : 80;
-      why = 'Passerade ' + lim + '-minutersgränsen i prognosen' + (isFinite(est) ? ' ca ' + hm(new Date(est - lim * 60000)) : '') +
+      why = 'Passerade ' + lim + '-minutersgränsen i prognosen' + (isFinite(est) ? ' ca ' + hm(new Date((b._ut ? Date.parse(b._ut) : est) - lim * 60000)) : '') +
         ', så tiden brukar stämma på ±5 min.';
     } else if (c === 'trolig') {
       if (b.category === 'ovrigt' && bi === 0) why = 'Övriga som dyker upp med kort varsel brukar komma inom ca 10 min.';
@@ -698,6 +734,7 @@
     }
     if (snart) why += ' Tiden har passerat men bokningen finns kvar i prognosen – kan komma när som helst.';
     if (!when && isFinite(est)) when = 'ca ' + hm(new Date(est));
+    if (b._ut && isFinite(est) && c !== 'osaker') when = 'kund ca ' + hm(new Date(est)) + ' (ut till bil ca ' + hm(new Date(Date.parse(b._ut))) + ')';
     return { conf: c, why: why, when: when, first: isFinite(obs) ? hm(new Date(obs)) : '–' };
   }
 
@@ -1169,6 +1206,7 @@
       body += renderOriginal();
     } else {
       body += statusLine();
+      body += ktBar();
       body += '<div class="pg-legend"><span class="pg-n pg-c-saker">2</span> säker ' +
         '<span class="pg-n pg-c-trolig">2</span> trolig ' +
         '<span class="pg-n pg-c-osaker">2</span> osäker ' +
@@ -1182,6 +1220,11 @@
 
     st.el.innerHTML = '<div class="pg">' + tabs + body + '</div>';
     bind(st.el);
+    var ktb = st.el.querySelector('#pg-kt-btn');
+    if (ktb) ktb.onclick = function () {
+      localStorage.setItem(LS_KT, ktOn() ? '0' : '1');
+      st.bookings = ktApply(st.ktRaw); paint();
+    };
     bindPop(st.el);
     fitDiagHead(st.el);
     fitTabs(st.el);

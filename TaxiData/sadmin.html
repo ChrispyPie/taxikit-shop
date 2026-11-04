@@ -68,6 +68,7 @@
     const VIEWS = [
       { id: 'zonguide', icon: '🧭', label: 'Zonguide', sub: 'Test' },
       { id: 'prognos', icon: '📈', label: 'Prognos mot resor', sub: 'Test, lite data' },
+      { id: 'kundtid', icon: '⏱️', label: 'Prognostid: utskick eller kund?', sub: 'Test, utvärdering' },
       { id: 'akerier', icon: '🏢', label: 'Åkerier', sub: 'Kommer senare', off: true },
       { id: 'betalning', icon: '💳', label: 'Betalningar', sub: 'Kommer senare', off: true }
     ];
@@ -111,6 +112,7 @@
       path = [{ id }];
       if (id === 'zonguide') { ZONGUIDE_ADMIN.load(); return; }
       if (id === 'prognos') { loadPrognos(); return; }
+      if (id === 'kundtid') { loadKt(); return; }
       render();
     }
     function home() { path = []; render(); }
@@ -134,6 +136,7 @@
         return;
       }
       if (path[0].id === 'prognos') { title.textContent = 'Prognos mot resor'; renderPrognos(el); }
+      if (path[0].id === 'kundtid') { title.textContent = 'Prognostid: utskick eller kund?'; renderKt(el); }
     }
 
     async function loadPrognos() {
@@ -194,6 +197,94 @@
           (x.kategori ? esc(x.kategori) + ' · ' + esc(x.sakerhet) : '<span style="color:var(--c-a0aec0)">ingen</span>') + '</td><td class="n">' +
           min(x.raw_min) + '</td><td class="n">' + min(x.adj_min) + '</td><td class="n">' + min(x.borta_fore_start) + '</td></tr>').join('') + '</table></div>';
       h += '</div>';
+      el.innerHTML = h;
+    }
+
+    // ---- Prognostid: utskick eller kundens tid? (20261104d) ----
+    const K = { data: null, err: '', days: 30, busy: false, msg: '' };
+    const KT_ZONES = [['15', 'Draken'], ['161', 'Essity'], ['163', 'Astra'], ['406', 'Volvo'], ['432', 'Torslanda'], ['293', 'Landvetter']];
+    async function loadKt() {
+      K.err = ''; K.busy = true; render();
+      try { K.data = await rpc('sadmin_prognos_kundtid_eval', { p_days: K.days, p_test: 10 }); }
+      catch (e) { K.data = null; K.err = errText(e); }
+      K.busy = false; render();
+    }
+    function setKtDays(d) { K.days = d; loadKt(); }
+    async function saveKtOffset(z) {
+      const v = parseInt(document.getElementById('kto-' + z).value, 10);
+      try { await rpc('sadmin_kundtid_set', { p_zone: z, p_offset: v }); K.msg = 'Sparat.'; loadKt(); }
+      catch (e) { K.msg = errText(e); render(); }
+    }
+    function ktTs(id) {
+      const d = document.getElementById('ktt-date').value, t = document.getElementById(id).value;
+      if (!d || !t) return null;
+      return new Date(d + 'T' + t + ':00').toISOString();   // telefonens tid = svensk tid
+    }
+    async function addTruth() {
+      const prog = ktTs('ktt-prog');
+      if (!prog) { K.msg = 'Fyll i datum och prognostid.'; render(); return; }
+      try {
+        await rpc('sadmin_truth_add', { p_zone: document.getElementById('ktt-zone').value, p_booknr: document.getElementById('ktt-nr').value,
+          p_prognos: prog, p_booked: ktTs('ktt-book'), p_received: ktTs('ktt-recv'), p_note: document.getElementById('ktt-note').value });
+        K.msg = 'Fallet är sparat.'; loadKt();
+      } catch (e) { K.msg = errText(e); render(); }
+    }
+    function q(g, k) { return g[k + '_median'] == null ? '–' : min(g[k + '_median']) + ' <span class="sa-sub">(' + min(g[k + '_p25']) + ' till ' + min(g[k + '_p75']) + ')</span>'; }
+    function svar(g) {
+      if (g.svar === 'utskick') return '🚕 Närmast <b>utskicket</b>';
+      if (g.svar === 'kundens tid') return '🙋 Närmast <b>kundens tid</b>';
+      return 'För lite data';
+    }
+    function renderKt(el) {
+      const d = K.data;
+      let h = '<div class="sa-warn">⚠️ Test. Bara S admin ser det här. Förarnas prognos, notiser och push ändras inte.</div>';
+      h += '<div class="sa-info">Frågan: är prognosens tid när bokningen <b>går ut till bil</b> eller kundens <b>beställda tid</b>? ' +
+        'I stan skickas bokningen normalt ut ca 10 min före kundens tid. ' +
+        '<b>Start</b> = taxameterns start − närmaste prognostid. Nära 0 = prognostiden är kundens tid. Ca +5 till +10 = prognostiden är utskicket. Svaret bygger på det (minst 20 resor). ' +
+        '<b>In + 2 h</b> = när bokningen kom in i 80–120-blocket + 120 min, jämfört med prognostiden. ' +
+        '<b>Borta</b> = när bokningen försvann. I stan försvinner den när dess egen tid passerar, inte när den skickas ut, så Borta säger inget om utskicket. ' +
+        'Landvetter visas för sig: där flyttas tiderna efter flygen och skickas ut för hand.</div>';
+      h += '<div class="sa-ctl">' + [7, 30, 90].map(n => '<button class="' + (n === K.days ? 'on' : '') + '" onclick="setKtDays(' + n + ')">' + n + ' dagar</button>').join('') + '</div>';
+      if (K.err) h += '<div class="sa-warn">' + esc(K.err) + '</div>';
+      if (K.msg) h += '<div class="sa-sub">' + esc(K.msg) + '</div>';
+      if (!d) { el.innerHTML = h + (K.err ? '' : '<div class="sa-sub">Laddar…</div>'); return; }
+      h += '<div class="sa-sub">Från ' + sthlm(d.from, true) + ' till ' + sthlm(d.to, true) + ' (svensk tid).' + (K.busy ? ' Uppdaterar…' : '') + ' Median, inom parentes mittersta hälften (25–75 %).</div>';
+      const gs = d.groups || [];
+      const stan = gs.find(g => g.z === 'stan'), lv = gs.find(g => g.z === '293');
+      const card = (g, titel, extra) => '<div class="sa-card"><h3>' + titel + '</h3>' +
+        '<div class="sa-kv"><span>Svar</span><b>' + svar(g) + '</b></div>' +
+        '<div class="sa-kv"><span>In + 2 h − prognostid</span><b>' + min(g.in120_median) + ' · ' + (g.in120_n || 0) + ' bokningar</b></div>' +
+        '<div class="sa-kv"><span>Borta − prognostid</span><b>' + q(g, 'borta') + ' · ' + g.borta_n + '</b></div>' +
+        '<div class="sa-kv"><span>Resans start − prognostid</span><b>' + q(g, 'start') + ' · ' + g.start_n + ' resor</b></div>' +
+        '<div class="sa-kv"><span>Bokade resor (BOOKNR), start − prognostid</span><b>' + min(g.bokad_median) + ' · ' + g.bokad_n + ' resor</b></div>' + (extra || '') + '</div>';
+      if (stan) {
+        const off = stan.borta_median == null ? null : Math.round(stan.borta_median);
+        h += card(stan, '🏙️ Stan samlat (15, 161, 163, 406, 432)',
+          '<div class="sa-sub" style="margin-top:8px">Fast mönster i stan: resan startar ca <b>' + min(stan.start_median == null ? null : Math.round(stan.start_median)) +
+          '</b> efter prognostiden, bokningen försvinner ca <b>' + min(off) + '</b> från den. Utskick sker normalt ca 10 min före kundens tid.</div>');
+        h += '<div class="sa-card"><h3>Stan per zon</h3><div class="sa-scroll"><table class="sa-t"><tr><th>Zon</th><th class="n">Borta</th><th class="n">n</th><th class="n">Start</th><th class="n">n</th><th>Svar</th></tr>' +
+          gs.filter(g => g.z !== 'stan' && g.z !== '293').map(g => '<tr><td>' + esc(g.label) + ' (' + g.z + ')</td><td class="n">' + min(g.borta_median) + '</td><td class="n">' + g.borta_n +
+            '</td><td class="n">' + min(g.start_median) + '</td><td class="n">' + g.start_n + '</td><td>' + svar(g) + '</td></tr>').join('') + '</table></div></div>';
+      }
+      if (lv) h += card(lv, '✈️ Landvetter (293), för sig', '<div class="sa-sub" style="margin-top:8px">Styrs för hand efter flygen, så spridningen blir större. NejLogg 2023: utskick i median ca 1 min före beställd tid.</div>');
+      const tr = d.truth || [];
+      h += '<div class="sa-card"><h3>Verifierade fall</h3><div class="sa-sub">Minus = prognostiden låg före.</div>' +
+        (tr.length ? '<div class="sa-scroll"><table class="sa-t"><tr><th>Zon</th><th>Bokning</th><th>Prognos</th><th>Beställd</th><th>Fick bilen</th><th class="n">Prognos − beställd</th><th class="n">Prognos − fick</th></tr>' +
+          tr.map(x => '<tr><td>' + esc(x.zone) + '</td><td>' + esc(x.booknr || '') + '</td><td>' + sthlm(x.prognos, true) + '</td><td>' + sthlm(x.bokad) + '</td><td>' + sthlm(x.mottagen) +
+            '</td><td class="n">' + min(x.prognos_minus_bokad) + '</td><td class="n">' + min(x.prognos_minus_mottagen) + '</td></tr>' +
+            (x.note ? '<tr><td colspan="7" class="sa-sub">' + esc(x.note) + '</td></tr>' : '')).join('') + '</table></div>' : '<div class="sa-sub">Inga än.</div>') +
+        '<div class="sa-sub" style="margin-top:10px">Lägg till ett fall (svensk tid)</div>' +
+        '<div class="sa-ctl" style="flex-wrap:wrap;gap:6px"><select id="ktt-zone">' + KT_ZONES.map(z => '<option value="' + z[0] + '">' + z[1] + '</option>').join('') + '</select>' +
+        '<input id="ktt-nr" placeholder="Bokningsnr" size="8"><input id="ktt-date" type="date">' +
+        '<label class="sa-sub">Prognos <input id="ktt-prog" type="time"></label><label class="sa-sub">Beställd <input id="ktt-book" type="time"></label>' +
+        '<label class="sa-sub">Fick bilen <input id="ktt-recv" type="time"></label><input id="ktt-note" placeholder="Anteckning" size="20">' +
+        '<button onclick="addTruth()">Spara fall</button></div></div>';
+      const o = d.offsets || {};
+      h += '<div class="sa-card"><h3>Testvy i Prognos: kundtid</h3><div class="sa-sub">I Prognos › Schema ser bara S admin en knapp <b>🧪 S admin-test: kundtid</b>. ' +
+        'När den är på visas varje bokning på prognostid + offset för zonen. Förarna ser ingen skillnad.</div>' +
+        '<div class="sa-scroll"><table class="sa-t"><tr><th>Zon</th><th class="n">Offset (min)</th><th></th></tr>' +
+        KT_ZONES.map(z => '<tr><td>' + z[1] + ' (' + z[0] + ')</td><td class="n"><input id="kto-' + z[0] + '" type="number" min="0" max="45" style="width:60px" value="' + esc(o[z[0]] == null ? 10 : o[z[0]]) + '"></td>' +
+          '<td><button onclick="saveKtOffset(\'' + z[0] + '\')">Spara</button></td></tr>').join('') + '</table></div></div>';
       el.innerHTML = h;
     }
 
