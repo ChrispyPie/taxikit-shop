@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="sv"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0E1114">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="data.js"></script><script src="app.js"></script>
+<title>Produkt – TaxiKit v2</title></head>
+<body data-page="prod"><main class="wrap" id="app"></main>
+<script>
+const {S,D,t,card,carName,shell,kr,priceHTML}=TK; shell('cats');
+const p=TK.prod(new URLSearchParams(location.search).get('id'))||TK.prod('mobilhallare');
+const c=D.cats.find(x=>x.id===p.cat); let qty=1, mode=p.consumable?'sub':'once', every=p.every||4;
+const f=TK.fitsCar(p,S.car);
+const fitHTML = S.car==='alla' ? `<div class="fitbox" data-open-set>🚗 <div><b>Passar den din bil?</b><br>Välj bil så kollar vi åt dig.</div></div>`
+  : `<div class="fitbox ${f?'':'no'}">${f?'✅':'⛔'} <div><b>${f?t('fits')+' '+carName(S.car):t('nofit')+' '+carName(S.car)}</b><br>${p.fits.includes('alla')?t('allcars'):'Passar: '+p.fits.map(x=>carName(x).split(' (')[0]).join(', ')}</div></div>`;
+const also=D.products.filter(x=>x.id!==p.id&&(x.cat===p.cat||x.pains.some(y=>p.pains.includes(y)))).slice(0,6);
+function render(){
+  const subPrice=Math.round(p.price*0.9);
+  document.getElementById('app').innerHTML=`
+  <div class="toolbar" style="margin:12px 0 0"><a href="kategori.html?cat=${c.id}">‹ ${c.name}</a><span>Art.nr EX-${p.id.slice(0,4).toUpperCase()}</span></div>
+  <div class="pimg">${p.icon}${p.consumable?'<span class="tag" style="top:14px;left:14px">↻ Påfyllning</span>':''}</div>
+  <div class="dots"><span class="on"></span><span></span><span></span><span></span></div>
+  <h1 class="pname">${p.name}</h1>
+  <div class="pprice">${priceHTML(mode==='sub'?subPrice:p.price)} <small style="color:var(--muted)">${S.vat==='exkl'?'exkl. moms':'inkl. moms'}</small></div>
+  ${fitHTML}
+  ${p.consumable?`
+  <label class="opt ${mode==='once'?'on':''}"><input type="radio" name="m" value="once" ${mode==='once'?'checked':''}><div><div class="t">Köp en gång</div><div class="s">${kr(p.price)}</div></div></label>
+  <label class="opt ${mode==='sub'?'on':''}"><input type="radio" name="m" value="sub" ${mode==='sub'?'checked':''}><div><div class="t">Påfyllning, spara 10 % <span class="ex">exempel</span></div>
+    <div class="s">Kommer automatiskt. Pausa eller avsluta när du vill.</div>
+    <select id="every"><option value="2" ${every==2?'selected':''}>Var 2:a vecka</option><option value="4" ${every==4?'selected':''}>Var 4:e vecka</option><option value="8" ${every==8?'selected':''}>Var 8:e vecka</option></select></div></label>`:''}
+  <div class="ship">🚚 <span><b>Skickas från EU-lager</b> · leveranstid visas här när leverantören är vald</span></div>
+  <div class="ship">↩️ <span><b>14 dagars ångerrätt</b> · ångra direkt på sajten</span></div>
+  <details open><summary>Beskrivning</summary><p>${p.desc}</p><p>Exempeltext. Riktiga mått, material och bilder kommer från leverantören.</p></details>
+  <details><summary>Passar dessa bilar</summary><p>${p.fits.includes('alla')?'Alla bilar.':p.fits.map(carName).join(' · ')}</p></details>
+  <details><summary>Frakt & retur</summary><p>Fraktpris och leveranstid bestäms när leverantören är vald. Du har alltid 14 dagars ångerrätt enligt distansavtalslagen.</p></details>
+  <details><summary>Fråga en förare</summary><p>Har du kört med den här? Omdömen från andra förare visas här.</p></details>
+  <div class="sec"><h2>Ofta köpta ihop</h2></div>
+  <div class="hscroll">${also.map(x=>card(x)).join('')}</div>
+  <div style="height:70px"></div>
+  <div class="sticky"><div class="wrap"><div class="qty"><button id="minus">−</button><span>${qty}</span><button id="plus">+</button></div>
+    <button class="btn go" id="buy">${mode==='sub'?'↻ Starta påfyllning':t('add')}</button></div></div>`;
+  document.querySelectorAll('input[name=m]').forEach(r=>r.onchange=e=>{mode=e.target.value;render()});
+  const ev=document.getElementById('every'); if(ev) ev.onchange=e=>{every=+e.target.value};
+  document.getElementById('minus').onclick=()=>{qty=Math.max(1,qty-1);render()};
+  document.getElementById('plus').onclick=()=>{qty++;render()};
+  document.getElementById('buy').onclick=()=>TK.addToCart(p.id,qty,mode==='sub'?every:0);
+  document.querySelectorAll('.fitbox[data-open-set]').forEach(b=>b.onclick=()=>document.querySelector('nav [data-open-set]').click());
+}
+render();
+</script></body></html>

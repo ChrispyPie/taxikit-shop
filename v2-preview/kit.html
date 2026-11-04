@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="sv"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0E1114">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="data.js"></script><script src="app.js"></script>
+<title>Mitt skift-kit – TaxiKit v2</title></head>
+<body data-page="kit"><main class="wrap" id="app"></main>
+<script>
+const {S,D,t,carName,shell,kr,priceHTML,get,set}=TK; shell('kit');
+const qs=new URLSearchParams(location.search);
+let k=Object.assign({shift:null,car:S.car!=='alla'?S.car:null,pains:[],off:[],step:1},get('kit',{}));
+if(qs.get('step')) k.step=+qs.get('step');
+const save=()=>set('kit',k);
+function kitList(){
+  const car=k.car||'alla';
+  const base=D.products.filter(p=>p.shifts.includes(k.shift)&&TK.fitsCar(p,car)&&p.fits[0]!=='alla'||(p.shifts.includes(k.shift)&&p.fits.includes('alla')&&(p.pains.length||['kvittorulle','mints','forstahjalpen'].includes(p.id))));
+  const pain=D.products.filter(p=>p.pains.some(x=>k.pains.includes(x))&&TK.fitsCar(p,car));
+  const ids=[...new Set([...pain,...base].map(p=>p.id))].map(TK.prod).filter(p=>TK.fitsCar(p,car));
+  return ids.slice(0,9).map(p=>({p,why:p.pains.filter(x=>k.pains.includes(x)).map(x=>D.pains.find(y=>y.id===x).name)[0]||(p.consumable?'Förbrukas, fylls på automatiskt':'Basvara för '+D.shifts.find(s=>s.id===k.shift).name.toLowerCase())}));
+}
+function render(){
+  const st=k.step; const app=document.getElementById('app');
+  const head=`<div class="steps">${[1,2,3,4].map(i=>`<span class="${i<=st?'on':''}"></span>`).join('')}</div><div class="stepl">Steg ${st} av 4</div>`;
+  if(st===1) app.innerHTML=head+`<h1 class="big">Vilket skift kör du mest?</h1>
+    <div class="tiles">${D.shifts.map(s=>`<button class="tile ${k.shift===s.id?'on':''}" data-s="${s.id}"><span class="ic">${s.icon}</span><strong>${s.name}</strong><small>${s.hint}</small></button>`).join('')}</div>`;
+  if(st===2) app.innerHTML=head+`<h1 class="big">Vilken bil kör du?</h1>
+    <div class="tiles">${D.cars.filter(c=>c.id!=='alla').map(c=>`<button class="tile ${k.car===c.id?'on':''}" data-car="${c.id}"><span class="ic">${c.name.includes('storbil')?'🚐':'🚗'}</span><strong>${c.name.split(' (')[0]}</strong><small>${c.name.includes('storbil')?'Storbil':'Personbil'}</small></button>`).join('')}
+    <button class="tile" data-car="alla"><span class="ic">❔</span><strong>Annan bil</strong><small>Vi visar universella varor</small></button></div>`;
+  if(st===3) app.innerHTML=head+`<h1 class="big">Vad stör dig mest?</h1><p style="color:var(--muted);margin-top:-6px">Välj så många du vill. Eller hoppa över.</p>
+    <div class="tiles">${D.pains.map(x=>`<button class="tile ${k.pains.includes(x.id)?'on':''}" data-p="${x.id}"><span class="ic">${{rygg:'🦴',stok:'🌀',spy:'🤢',mobil:'🪫',kundladd:'🔋'}[x.id]}</span><strong>${x.name}</strong></button>`).join('')}</div>
+    <div style="height:14px"></div><button class="btn go block" data-next>Visa mitt kit ›</button>`;
+  if(st===4){
+    const list=kitList(); const on=list.filter(x=>!k.off.includes(x.p.id));
+    const sum=on.reduce((a,x)=>a+x.p.price,0), disc=Math.round(sum*0.9);
+    const sh=D.shifts.find(s=>s.id===k.shift);
+    app.innerHTML=head+`<h1 class="big">Ditt ${sh.name.toLowerCase()}-kit ${sh.icon}</h1>
+    <p style="color:var(--muted);margin-top:-6px">För ${k.car&&k.car!=='alla'?carName(k.car):'alla bilar'}${k.pains.length?' · fokus: '+k.pains.map(x=>D.pains.find(y=>y.id===x).name.toLowerCase()).join(', '):''}. Bocka ur det du redan har.</p>
+    <div class="kitlist">${list.map(({p,why})=>`<div class="kititem ${k.off.includes(p.id)?'off':''}"><a class="ic" href="produkt.html?id=${p.id}">${p.icon}</a>
+      <div><div class="nm">${p.name}</div><div class="why">${why}</div></div>
+      <div class="r"><div class="price" style="font-size:14px">${kr(p.price)}</div><label class="sw" style="justify-content:flex-end;margin-top:4px"><input type="checkbox" data-t="${p.id}" ${k.off.includes(p.id)?'':'checked'}><i></i></label></div></div>`).join('')}</div>
+    <div class="totals"><div><span>${on.length} varor</span><span style="text-decoration:line-through">${kr(sum)}</span></div>
+      <div><span>Kit-rabatt 10 % <span class="ex">exempel</span></span><span>−${kr(sum-disc)}</span></div>
+      <div class="t"><span>Kit-pris</span>${priceHTML(disc)}</div></div>
+    <label class="opt on"><input type="checkbox" id="refill" checked><div><div class="t">↻ Fyll på förbrukningsvaror automatiskt</div><div class="s">Kvittorullar, spypåsar, servetter m.m. kommer när de brukar ta slut. Pausa när du vill.</div></div></label>
+    <button class="btn go block" data-all>🧳 Lägg hela kitet i bagaget</button>
+    <button class="btn ghost block" style="margin-top:10px" data-restart>Börja om</button>`;
+  }
+  app.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{k.shift=b.dataset.s;k.step=2;save();render()});
+  app.querySelectorAll('[data-car]').forEach(b=>b.onclick=()=>{k.car=b.dataset.car;if(k.car!=='alla')set('car',k.car);k.step=3;save();render()});
+  app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{const i=k.pains.indexOf(b.dataset.p);i<0?k.pains.push(b.dataset.p):k.pains.splice(i,1);save();render()});
+  app.querySelectorAll('[data-next]').forEach(b=>b.onclick=()=>{k.step=4;k.off=[];save();render()});
+  app.querySelectorAll('[data-t]').forEach(c=>c.onchange=()=>{const id=c.dataset.t;k.off=c.checked?k.off.filter(x=>x!==id):[...k.off,id];save();render()});
+  app.querySelectorAll('[data-restart]').forEach(b=>b.onclick=()=>{k={shift:null,car:null,pains:[],off:[],step:1};save();render()});
+  app.querySelectorAll('[data-all]').forEach(b=>b.onclick=()=>{const refill=document.getElementById('refill').checked;
+    kitList().filter(x=>!k.off.includes(x.p.id)).forEach(({p})=>{const c=S.cart;const ev=refill&&p.consumable?p.every:0;const e=c.find(l=>l.id===p.id&&(l.every||0)===ev);e?e.qty++:c.push({id:p.id,qty:1,every:ev,kit:true});set('cart',c)});
+    TK.refreshBadges();TK.toast('✓ Kitet ligger i bagaget');setTimeout(()=>location='bagage.html',700)});
+  if(st>1) app.insertAdjacentHTML('afterbegin',`<button class="chip" style="margin-top:12px" onclick="k.step--;save();render()">‹ Tillbaka</button>`);
+  window.scrollTo(0,0);
+}
+if(!k.shift) k.step=1; render();
+</script></body></html>
