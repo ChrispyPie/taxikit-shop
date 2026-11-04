@@ -1,31 +1,12 @@
 {
   "airport": "GOT",
-  "updated": "2026-11-04T10:25:25+01:00",
-  "arrivalsUpdated": "2026-11-04T10:25:30+01:00",
-  "departuresUpdated": "2026-11-04T09:30:53+01:00",
+  "updated": "2026-11-04T10:30:58+01:00",
+  "arrivalsUpdated": "2026-11-04T10:30:59+01:00",
+  "departuresUpdated": "2026-11-04T10:31:01+01:00",
   "yesterdayUpdated": "2026-11-04T05:15:46+01:00",
   "tomorrowUpdated": "2026-11-03T23:01:04+01:00",
   "error": null,
   "arrivals": [
-    {
-      "id": "KL1239",
-      "dir": "ANK",
-      "other": "Amsterdam",
-      "iata": "",
-      "airline": "KLM",
-      "status": "LAN",
-      "statusSv": "Landat 22:30",
-      "sched": "2026-11-02T21:25:00Z",
-      "est": "2026-11-02T21:34:00Z",
-      "act": "2026-11-02T21:30:00Z",
-      "terminal": "T1",
-      "gate": "17",
-      "baggage": "1",
-      "firstBag": "2026-11-02T21:47:50Z",
-      "firstBagEst": "2026-11-02T21:50:15Z",
-      "lastBag": "2026-11-02T21:50:28Z",
-      "rawStatus": "Landat 22:30 · Sista bagage"
-    },
     {
       "id": "FR964",
       "dir": "ANK",
@@ -63,25 +44,6 @@
       "firstBagEst": "2026-11-02T23:12:26Z",
       "lastBag": "2026-11-02T23:14:18Z",
       "rawStatus": "Landat 23:47 · Sista bagage"
-    },
-    {
-      "id": "SK169",
-      "dir": "ANK",
-      "other": "Stockholm ARN",
-      "iata": "",
-      "airline": "SAS Scandinavian Airlines",
-      "status": "LAN",
-      "statusSv": "Landat 22:26",
-      "sched": "2026-11-02T21:45:00Z",
-      "est": "2026-11-02T21:29:00Z",
-      "act": "2026-11-02T21:26:00Z",
-      "terminal": "T1",
-      "gate": "16",
-      "baggage": "2",
-      "firstBag": "2026-11-02T21:42:26Z",
-      "firstBagEst": "2026-11-02T21:55:33Z",
-      "lastBag": "2026-11-02T21:44:02Z",
-      "rawStatus": "Landat 22:26 · Sista bagage"
     },
     {
       "id": "SN2319",
@@ -1897,7 +1859,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-11-04T11:05:00Z",
-      "est": "2026-11-04T11:01:00Z",
+      "est": "2026-11-04T11:09:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "23",
@@ -1905,7 +1867,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 12:01"
+      "rawStatus": "Ankommer 12:09"
     },
     {
       "id": "LH2428",
@@ -4201,7 +4163,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "22",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -4233,18 +4195,18 @@
       "other": "Amsterdam",
       "iata": "",
       "airline": "KLM",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-04T09:05:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-04T09:01:45Z",
       "terminal": "T1",
       "gate": "17",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Startat 10:10"
     },
     {
       "id": "AY862",
@@ -4312,7 +4274,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-11-04T10:55:00Z",
-      "est": "",
+      "est": "2026-11-04T11:15:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "16",
@@ -4320,7 +4282,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Försenad till 12:15"
     },
     {
       "id": "FR5636",
@@ -4423,18 +4385,18 @@
       "other": "Alicante",
       "iata": "",
       "airline": "Norwegian",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-04T09:10:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-04T09:07:55Z",
       "terminal": "T1",
       "gate": "21A",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gå till gate"
+      "rawStatus": "Startat 10:16"
     },
     {
       "id": "LH2429",
@@ -4681,7 +4643,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gå till gate"
     },
     {
       "id": "LH2431",
@@ -4746,18 +4708,18 @@
       "other": "Stockholm ARN",
       "iata": "",
       "airline": "SAS Scandinavian Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-04T09:00:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-04T09:04:03Z",
       "terminal": "T1",
       "gate": "15",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gå till gate"
+      "rawStatus": "Startat 10:13"
     },
     {
       "id": "SK431",
@@ -4860,18 +4822,18 @@
       "other": "Köpenhamn",
       "iata": "",
       "airline": "SAS Scandinavian Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-04T09:00:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-04T08:55:46Z",
       "terminal": "T1",
       "gate": "16",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Boarding"
+      "rawStatus": "Startat 10:04"
     },
     {
       "id": "SK449",
