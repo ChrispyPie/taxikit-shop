@@ -130,11 +130,14 @@
   // ---------- flyg ----------
   function flightItem(f) {
     var st = String(f.status || '').toUpperCase();
-    var bag = [], arr = d(f.act) || d(f.est) || d(f.sched), fb = d(f.firstBag);
+    // En statusrad: Sista bagage > Första bagage > Bagage ca. Terminal, band och gate visas inte (onödigt för förare).
+    // Swedavias ankomstdata har ingen avgångs-/i luften-status, så före landning lämnas raden tom.
+    var bag = '', arr = d(f.act) || d(f.est) || d(f.sched), fb = d(f.firstBag), lb = d(f.lastBag);
     if (fb && arr && fb < arr - 30 * 60000) fb = null;  // gammal tid från tidigare flyg
-    if (f.baggage) bag.push('Band ' + f.baggage);
-    if (fb) bag.push('Första väskan ' + hm(fb));
-    else if (f.firstBagEst && !f.lastBag) bag.push('Väskor ca ' + hm(d(f.firstBagEst)));
+    if (lb && arr && lb < arr - 30 * 60000) lb = null;
+    if (lb) bag = 'Sista bagage kl ' + hm(lb);
+    else if (fb) bag = 'Första bagage kl ' + hm(fb);
+    else if (f.firstBagEst) bag = 'Bagage ca kl ' + hm(d(f.firstBagEst));
     var special = { RER: 'Omdirigerad', DIV: 'Omdirigerad', FLS: 'Stoppad' }[st];
     return {
       key: 'f' + f.id + '|' + f.sched,
@@ -146,7 +149,7 @@
       canceled: st === 'CAN',
       removed: st === 'DEL',
       special: special || '',
-      info: [f.terminal ? 'Terminal ' + String(f.terminal).replace(/^T/i, '') : ''].concat(bag).filter(Boolean).join(' · '),
+      info: bag,
       note: (!special && st && st !== 'SCH' && st !== 'LAN' && st !== 'CAN' && f.statusSv) ? f.statusSv : ''
     };
   }
