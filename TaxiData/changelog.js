@@ -15,7 +15,7 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-11-04', id: '2026-11-04e', tid: 'HH:MM', rader: [
+  { datum: '2026-11-04', id: '2026-11-04e', tid: '23:22', rader: [
     ['Nytt', 'Topplistor: ny växlare högst upp, Förare eller Bil. Väljer du Bil visas alla listor per bil i stället för per förare, till exempel Bästa bil (mest inkört), kr/timme och flest körningar. Bilar du har kört är markerade. Appen kommer ihåg ditt val.']
   ] },
   { datum: '2026-11-04', id: '2026-11-04d', tid: '23:17', rader: [
