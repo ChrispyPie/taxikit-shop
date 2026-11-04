@@ -15,7 +15,7 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-11-05', id: '2026-11-05a', tid: '01:00', rader: [
+  { datum: '2026-11-05', id: '2026-11-05a', tid: '00:50', rader: [
     ['Förbättrat', 'Ankomster, flyg: terminal och bagageband visas inte längre. Under flyget står bara bagagestatus: "Bagage ca kl", "Första bagage kl" eller "Sista bagage kl". Finns ingen info är raden tom.']
   ] },
   { datum: '2026-11-04', id: '2026-11-04i', tid: '23:40', rader: [
