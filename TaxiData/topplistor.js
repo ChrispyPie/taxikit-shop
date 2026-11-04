@@ -8,6 +8,8 @@
  * Äldre år (t381u): går perioden in i ett år före i år hämtas listorna från public.get_leaderboard_archive,
  * som räknar på servern över arkivet + nuvarande data (samma regler, litet svar). Bara då – aldrig i år.
  * Svaret sparas i minnet under sessionen så att man kan bläddra fram och tillbaka utan att hämta igen.
+ * Förare/Bil (t876u): växlaren högst upp byter alla listor till per bil (public.get_leaderboard_bil, bilnummer
+ * från passen och resorna). Valet sparas i localStorage ('tl_mode'). Demokonto får "Bil 1", "Bil 2" … från servern.
  */
 (function () {
   'use strict';
@@ -30,12 +32,16 @@
   ];
   T.lists = LISTS;
 
-  var TAB_KEY = 'tl_tab';
+  var TAB_KEY = 'tl_tab', MODE_KEY = 'tl_mode';
+  // Rubriker i bilvyn ("Bästa bil" = mest inkört, t875u)
+  var BIL_T = { inkort: 'Bästa bil – mest inkört', antal: 'Flest körningar' };
   var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
   var WD = ['Sön', 'Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör'];
   var st = { tab: localStorage.getItem(TAB_KEY) || 'dag', lastTab: 'dag', date: new Date(), range: null, data: null, err: null, loading: false, arkiv: false, seq: 0, el: null, open: {} };
   var arkivCache = {};   // 'från|till' → svar från arkivet (bara i minnet)
   if (['dag', 'vecka', 'manad', 'ar'].indexOf(st.tab) < 0) st.tab = 'dag';
+  st.mode = localStorage.getItem(MODE_KEY) === 'bil' ? 'bil' : 'forare';
+  T.mode = function () { return st.mode; };
   st.lastTab = st.tab;
 
   // ---------- hjälp ----------
@@ -99,16 +105,18 @@
   // Perioden går in i ett äldre år (före 1 januari i år) → arkivet
   function isArchive(r) { return r[0].getFullYear() < new Date().getFullYear(); }
   function load() {
-    var r = range(), my = ++st.seq, old = isArchive(r), key = iso(r[0]) + '|' + iso(r[1]);
+    var r = range(), my = ++st.seq, bil = st.mode === 'bil', old = isArchive(r), key = (bil ? 'bil|' : '') + iso(r[0]) + '|' + iso(r[1]);
     window.TOPPLISTOR_LAST = null;
     st.err = null; st.arkiv = old;
-    var got = old && arkivCache[key] ? Promise.resolve(arkivCache[key])
+    if (bil !== st.dataBil) st.data = null;   // byt inte bara siffror: töm listan när läget byts
+    var got = (old || bil) && arkivCache[key] ? Promise.resolve(arkivCache[key])
       : (st.loading = true, old && (st.data = null), draw(),
-         rpc(old ? 'get_leaderboard_archive' : 'get_leaderboard', { p_from: iso(r[0]), p_to: iso(r[1]) }));
+         rpc(bil ? 'get_leaderboard_bil' : old ? 'get_leaderboard_archive' : 'get_leaderboard', { p_from: iso(r[0]), p_to: iso(r[1]) }));
     got.then(function (d) {
-      if (old && d) arkivCache[key] = d;
+      if ((old || bil) && d) arkivCache[key] = d;
       if (my !== st.seq) return;
-      st.loading = false; st.data = d || null; draw();
+      st.loading = false; st.data = d || null; st.dataBil = bil; draw();
+      if (bil) return;   // hjälpboten kommenterar bara förarlistorna
       var info = { tab: st.tab, current: isCurrent(), period: T.periodText(), data: st.data };
       window.TOPPLISTOR_LAST = info;
       document.dispatchEvent(new CustomEvent('topplistor:data', { detail: info }));
@@ -123,7 +131,10 @@
   T.render = function (content) {
     st.el = content;
     content.innerHTML =
-      '<div class="tl-controls"><div class="tabs">' +
+      '<div class="tl-controls"><div class="tabs tl-modes" role="tablist" aria-label="Visa topplistor per">' +
+        '<button type="button" class="tab tl-mode" data-mode="forare">👤 Förare</button>' +
+        '<button type="button" class="tab tl-mode" data-mode="bil">🚕 Bil</button></div>' +
+      '<div class="tabs">' +
         '<button type="button" class="tl-tab" data-tab="dag">Dag</button>' +
         '<button type="button" class="tl-tab" data-tab="vecka">Vecka</button>' +
         '<button type="button" class="tl-tab" data-tab="manad">Månad</button>' +
@@ -140,6 +151,9 @@
 
     content.querySelectorAll('.tl-tab').forEach(function (b) {
       b.onclick = function () { st.tab = b.dataset.tab; st.lastTab = st.tab; st.range = null; localStorage.setItem(TAB_KEY, st.tab); load(); };
+    });
+    content.querySelectorAll('.tl-mode').forEach(function (b) {
+      b.onclick = function () { if (st.mode === b.dataset.mode) return; st.mode = b.dataset.mode; localStorage.setItem(MODE_KEY, st.mode); st.open = {}; load(); };
     });
     document.getElementById('tl-prev').onclick = function () { move(-1); };
     document.getElementById('tl-next').onclick = function () { if (!isCurrent()) move(1); };
@@ -162,6 +176,7 @@
   function draw() {
     if (!st.el || !document.getElementById('tl-body')) return;
     st.el.querySelectorAll('.tl-tab').forEach(function (b) { b.classList.toggle('active', b.dataset.tab === st.tab); });
+    st.el.querySelectorAll('.tl-mode').forEach(function (b) { var on = b.dataset.mode === st.mode; b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
     var de = document.getElementById('tl-date'); de.textContent = label(); de.classList.toggle('period', st.tab === 'period');
     document.getElementById('tl-period').classList.toggle('active', st.tab === 'period');
     document.getElementById('tl-today').classList.toggle('active', st.tab === 'dag' && sod(st.date).getTime() === sod(new Date()).getTime());
@@ -171,6 +186,7 @@
     if (st.err) h = '<div class="tl-msg err">' + esc(st.err) + '</div>';
     else if (st.loading && st.arkiv) h = '<div class="tl-msg arkiv-loading" role="status" aria-live="polite"><span class="arkiv-spin" aria-hidden="true"></span>Hämtar ' + esc(label()) + ' från arkivet…</div>';
     else if (st.loading && !d) h = '<div class="tl-msg">Laddar…</div>';
+    else if (st.mode === 'bil') h = drawBil(d);
     else if (!d || (!d.drivers && !d.workshop_drivers)) h = '<div class="tl-msg">Ingen har kört ' + esc(T.periodText()) + ' än.</div>';
     else {
       h += '<div class="tl-info">' + (d.drivers ? d.drivers + ' förare med pass ' + esc(T.periodText()) + '. ' : 'Inga pass ' + esc(T.periodText()) + ' än. ') +
@@ -197,6 +213,29 @@
     }
     body.innerHTML = h;
     body.querySelectorAll('.tl-more').forEach(function (b) { b.onclick = function () { st.open[b.dataset.k] = !st.open[b.dataset.k]; draw(); }; });
+  }
+
+  // ---------- bilvy: samma listor per bilnummer ----------
+  function drawBil(d) {
+    if (!d || (!d.cars && !d.workshop_cars)) return '<div class="tl-msg">Ingen bil har kört ' + esc(T.periodText()) + ' än.</div>';
+    var h = '<div class="tl-info">' + (d.cars ? d.cars + ' bilar med pass ' + esc(T.periodText()) + '. ' : 'Inga pass ' + esc(T.periodText()) + ' än. ') +
+      (d.arkiv ? '📦 Äldre data från arkivet. ' : '') +
+      (d.demo ? 'Demokonto: bilarna visas som "Bil 1", "Bil 2" … ' : '') + 'Bilar du har kört är markerade.</div>';
+    LISTS.forEach(function (L) {
+      var x = d.lists && d.lists[L.k];
+      if (!x || !x.rows || !x.rows.length) return;
+      var open = !!st.open[L.k], rows = x.rows, show = open ? rows : rows.slice(0, 5);
+      h += '<div class="tl-card"><div class="tl-head"><span class="tl-title">' + esc(BIL_T[L.k] || L.t) + '</span>' +
+        '<span class="tl-me">' + x.n + ' bilar</span></div>';
+      show.forEach(function (r) {
+        var who = esc(r.id || '') + (r.modell ? ' <span class="tl-id">' + esc(r.modell) + '</span>' : '') + (r.du ? ' <span class="tl-id">· du har kört</span>' : '');
+        h += '<div class="tl-row' + (r.du ? ' du' : '') + '"><span class="tl-pos">' + (r.pos <= 3 ? ['🥇', '🥈', '🥉'][r.pos - 1] : r.pos + '.') + '</span>' +
+          '<span class="tl-who">' + who + '</span><span class="tl-val">' + fmt(r.v, L.f) + '</span></div>';
+      });
+      if (rows.length > 5) h += '<button type="button" class="tl-more" data-k="' + L.k + '">' + (open ? 'Visa färre' : 'Visa alla ' + rows.length) + '</button>';
+      h += '</div>';
+    });
+    return h + '<div class="tl-foot">Räknas på bilnumret i passen och resorna, med samma regler som förarlistorna. Kr/mil kräver minst 1 mil, kr/timme minst 30 min. Verkstadstimmar räknas på bilen när ägaren har godkänt dem.</div>';
   }
 
   // ---------- egen period: kalender (samma utseende som Körpassdata) ----------
