@@ -561,6 +561,9 @@ html[data-theme="dark"] .pg-n.pg-c-saker { border-color: #bee3f8; }
 .pg-bar-n { width: 28px; text-align: right; font-size: 0.8rem; color: var(--text); font-variant-numeric: tabular-nums; }
 
 .pg-legend { display: flex; gap: 8px; align-items: center; font-size: 0.78rem; color: var(--muted); margin: 2px 0 6px; flex-wrap: wrap; }
+.pg-kt { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 0.8rem; margin: 4px 0 6px; padding: 6px 10px; border: 1px dashed var(--primary); border-radius: 8px; color: var(--text); }
+.pg-kt-btn { padding: 3px 12px; font-size: 0.8rem; }
+.pg-kt-btn.on { background: var(--primary); color: var(--on-primary, #fff); }
 .pg-badge.pg-c-saker { opacity: 1; border: 1px solid var(--c-2a4365, #2a4365); }
 .pg-badge.pg-c-trolig { opacity: 0.85; border: 1px dashed var(--c-2a4365, #2a4365); }
 .pg-badge.pg-c-osaker { opacity: 0.55; border: 1px dotted var(--muted); background: var(--surface-soft); color: var(--text-soft); }

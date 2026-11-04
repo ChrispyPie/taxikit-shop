@@ -20,3 +20,9 @@ Om bara Zonguiden ska tillbaka till ägaren: kör bara delen i 20261104b-undo so
 
 ## Berra som S admin senare
 Inget kodbyte behövs: sätt hans kategori till 'superadmin' i drivers (görs först när Christian säger till).
+
+## Prognostid: utskick eller kund? (20261104d, PR feat/prognos-kundtid)
+Backup-gren: `backup/pre-prognos-kundtid-20261104` (eb53291d).
+- Appen: `git revert -m 1 <merge-sha>` i en ny PR (ingen force push). Förarnas vy påverkas inte av ändringen, testknappen syns bara för S admin.
+- Databasen: `supabase/migrations/undo/20261104d_prognos_kundtid_eval_undo.sql` (tar bort sadmin_prognos_kundtid_eval, sadmin_truth_add, sadmin_kundtid_set/get, private.prognos_truth, private.prognos_kundtid_cfg). Sparade fall och offsets försvinner.
+- Ordning: revert av appen först (annars visar S admin-sidan bara fel), sedan undo-SQL.
