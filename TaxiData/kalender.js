@@ -121,6 +121,7 @@
   // ---------- data ----------
   function range() {
     var c = st.cur;
+    if (st.view === 'ar') return [c.slice(0, 4) + '-01-01', c.slice(0, 4) + '-12-31'];
     if (st.view === 'manad') { var f = monday(c.slice(0, 8) + '01'); return [f, addDays(f, 41)]; }
     if (st.view === 'vecka') { var m = monday(c); return [m, addDays(m, 6)]; }
     return [c, c];
@@ -129,7 +130,7 @@
     st.err = null;
     var r = range(), t = st.today || todayKey();
     var from = r[0] < t ? r[0] : t, to = r[1] > t ? r[1] : t;
-    if ((kd(to) - kd(from)) / 864e5 > 62) { from = r[0]; to = r[1]; }
+    if ((kd(to) - kd(from)) / 864e5 > 370) { from = r[0]; to = r[1]; }
     var want = from + '|' + to + '|' + (st.city || '');
     st.want = want;
     return rpc('get_events', { p_from: from, p_to: to, p_city: st.city }).then(function (d) {
@@ -219,6 +220,7 @@
   }
   function navLabel() {
     var c = st.cur;
+    if (st.view === 'ar') return c.slice(0, 4);
     if (st.view === 'manad') { var d = kd(c); return MONL[d.getUTCMonth()].replace(/^./, function (x) { return x.toUpperCase(); }) + ' ' + d.getUTCFullYear(); }
     if (st.view === 'vecka') { var m = monday(c), s = addDays(m, 6); return 'v.' + isoWeek(m) + ' · ' + kd(m).getUTCDate() + '/' + (kd(m).getUTCMonth() + 1) + '–' + kd(s).getUTCDate() + '/' + (kd(s).getUTCMonth() + 1); }
     return c === st.today ? 'Idag' : dayLabel(c);
@@ -237,6 +239,29 @@
       if (i === 34 && addDays(first, 35).slice(0, 7) !== mon) break;
     }
     return h + '</div><div class="tl-foot">Tryck på en dag för att se evenemangen.</div>';
+  }
+  // År: 12 små månadsrutnät. Bygg en dag -> typer-karta en gång (snabbt för ett helt år).
+  function yearHtml() {
+    var y = st.cur.slice(0, 4), map = {}, from = y + '-01-01', to = y + '-12-31';
+    ((st.data && st.data.events) || []).forEach(function (e) {
+      if (!shown(e)) return;
+      var s = parts(e.starts_at).key, en = e.ends_at ? parts(e.ends_at).key : s;
+      if (s < from) s = from; if (en > to) en = to;
+      for (var k = s, n = 0; k <= en && n < 370; k = addDays(k, 1), n++) (map[k] = map[k] || {})[e.category] = 1;
+    });
+    var h = '<div class="kal-year">';
+    for (var m = 0; m < 12; m++) {
+      var mk = y + '-' + p2(m + 1), first = mk + '-01', off = (wd(first) + 6) % 7;
+      h += '<div class="kal-ym"><button type="button" class="kal-ymt" data-m="' + first + '">' + MONL[m].replace(/^./, function (x) { return x.toUpperCase(); }) + '</button><div class="kal-ymg">' +
+        ['M', 'T', 'O', 'T', 'F', 'L', 'S'].map(function (x) { return '<span class="kal-ywd">' + x + '</span>'; }).join('');
+      for (var i = 0; i < off; i++) h += '<span></span>';
+      for (var k = first; k.slice(0, 7) === mk; k = addDays(k, 1)) {
+        var c = map[k], dots = c ? TYPES.filter(function (t) { return c[t.id]; }).slice(0, 3).map(function (t) { return '<i class="kal-dot kal-' + t.id + '"></i>'; }).join('') : '';
+        h += '<button type="button" class="kal-yday' + (k === st.today ? ' today' : '') + (c ? ' has' : '') + '" data-k="' + k + '"><span>' + kd(k).getUTCDate() + '</span><span class="kal-ydots">' + dots + '</span></button>';
+      }
+      h += '</div></div>';
+    }
+    return h + '</div><div class="tl-foot">Tryck på en dag för att se den, eller på månadens namn för månaden.</div>';
   }
   function dayListHtml(k, withHead) {
     var evs = eventsOn(k).sort(sortByStart), h = '';
@@ -266,7 +291,7 @@
       : esc(d.city.name)) + '</span>' +
       '<button type="button" class="kal-bell" id="kal-bell" aria-label="Påminnelser">🔔' + (d.unread_notices ? '<b>' + d.unread_notices + '</b>' : '') + '</button></div>';
     h += tonightHtml();
-    h += '<div class="tabs kal-tabs">' + [['dag', 'Dag'], ['vecka', 'Vecka'], ['manad', 'Månad']].map(function (v) {
+    h += '<div class="tabs kal-tabs">' + [['dag', 'Dag'], ['vecka', 'Vecka'], ['manad', 'Månad'], ['ar', 'År']].map(function (v) {
       return '<button type="button" class="tab' + (st.view === v[0] ? ' active' : '') + '" data-v="' + v[0] + '">' + v[1] + '</button>';
     }).join('') + '</div>';
     h += '<div class="date-nav kal-nav"><button type="button" id="kal-prev" aria-label="Föregående">‹</button><span class="tl-date kal-date">' + esc(navLabel()) +
@@ -275,6 +300,7 @@
     h += chipsHtml();
     var r = range(), have = st.loaded && st.loaded.from <= r[0] && st.loaded.to >= r[1];
     if (!have) h += '<div class="tl-msg">Laddar…</div>';
+    else if (st.view === 'ar') h += yearHtml();
     else if (st.view === 'manad') h += monthHtml();
     else if (st.view === 'vecka') h += weekHtml();
     else h += dayListHtml(st.cur, false);
@@ -288,8 +314,8 @@
     body.querySelectorAll('.kal-tabs .tab').forEach(function (b) {
       b.onclick = function () { st.view = b.dataset.v; localStorage.setItem('taxi_kal_view', st.view); go(st.cur); };
     });
-    document.getElementById('kal-prev').onclick = function () { go(st.view === 'manad' ? addMonths(st.cur, -1) : addDays(st.cur, st.view === 'vecka' ? -7 : -1)); };
-    document.getElementById('kal-next').onclick = function () { go(st.view === 'manad' ? addMonths(st.cur, 1) : addDays(st.cur, st.view === 'vecka' ? 7 : 1)); };
+    document.getElementById('kal-prev').onclick = function () { go(st.view === 'ar' ? addMonths(st.cur, -12) : st.view === 'manad' ? addMonths(st.cur, -1) : addDays(st.cur, st.view === 'vecka' ? -7 : -1)); };
+    document.getElementById('kal-next').onclick = function () { go(st.view === 'ar' ? addMonths(st.cur, 12) : st.view === 'manad' ? addMonths(st.cur, 1) : addDays(st.cur, st.view === 'vecka' ? 7 : 1)); };
     document.getElementById('kal-pick').onclick = function () { openCal(st.cur, function (k) { go(k); }, 'Gå till datum'); };
     var tb = document.getElementById('kal-today'); if (tb) tb.onclick = function () { go(st.today); };
     var ta = document.getElementById('kal-today-all'); if (ta) ta.onclick = function () { st.view = 'dag'; localStorage.setItem('taxi_kal_view', 'dag'); go(st.today); };
@@ -302,6 +328,12 @@
         if (i >= 0) st.filter.splice(i, 1); else st.filter.push(t);
         localStorage.setItem(filterKey(), JSON.stringify(st.filter)); draw();
       };
+    });
+    body.querySelectorAll('.kal-yday').forEach(function (b) {
+      b.onclick = function () { st.view = 'dag'; localStorage.setItem('taxi_kal_view', 'dag'); go(b.dataset.k); };
+    });
+    body.querySelectorAll('.kal-ymt').forEach(function (b) {
+      b.onclick = function () { st.view = 'manad'; localStorage.setItem('taxi_kal_view', 'manad'); go(b.dataset.m); };
     });
     body.querySelectorAll('.kal-mday').forEach(function (b) {
       b.onclick = function () { st.view = 'dag'; localStorage.setItem('taxi_kal_view', 'dag'); go(b.dataset.k); };

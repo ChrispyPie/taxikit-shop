@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-04', id: '2026-11-04i', tid: '23:40', rader: [
+    ['Nytt', 'Kalender: ny vy "År" bredvid Dag, Vecka och Månad. Där ser du hela året med färgade prickar för evenemangen. Tryck på en dag för att se den, eller på månadens namn för att öppna månaden.']
+  ] },
   { datum: '2026-11-04', id: '2026-11-04h', tid: '23:28', rader: [
     ['Förbättrat', 'Headern med hemknapp, rubrik, notiser och profil står nu kvar högst upp när du skrollar, så du slipper skrolla upp för att gå hem. Ikonerna visas utan ruta och ram.']
   ] },
