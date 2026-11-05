@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-05', id: '2026-11-05b', tid: '01:07', rader: [
+    ['Förbättrat', 'Ankomster, flyg: statusraden visar nu "Landat kl" och sedan bagaget, till exempel "Landat kl 00:01 · Bagage ca kl 00:26". "Planerad" skrivs aldrig eftersom klockslaget redan syns. Flyg som Swedavia har tagit bort ur tidtabellen visas nu som "Borttagen" i stället för att försvinna. Skickar Swedavia andra lägen visas de också, till exempel "Avgått/på väg", "Inställt" eller "Omdirigerad".']
+  ] },
   { datum: '2026-11-05', id: '2026-11-05a', tid: '00:50', rader: [
     ['Förbättrat', 'Ankomster, flyg: terminal och bagageband visas inte längre. Under flyget står bara bagagestatus: "Bagage ca kl", "Första bagage kl" eller "Sista bagage kl". Finns ingen info är raden tom.']
   ] },
