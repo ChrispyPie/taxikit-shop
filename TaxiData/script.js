@@ -215,7 +215,6 @@ function goHome() {
 function showApp() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
-  document.getElementById('driver-label').textContent = currentDriver;
   syncTabs();
   loadData().then(render);
 }
