@@ -131,13 +131,22 @@
   function flightItem(f) {
     var st = String(f.status || '').toUpperCase();
     // En statusrad: Sista bagage > Första bagage > Bagage ca. Terminal, band och gate visas inte (onödigt för förare).
-    // Swedavias ankomstdata har ingen avgångs-/i luften-status, så före landning lämnas raden tom.
+    // Före landning: bara status om Swedavia skickar en (t.ex. ACT = Avgått/på väg), annars tom rad.
     var bag = '', arr = d(f.act) || d(f.est) || d(f.sched), fb = d(f.firstBag), lb = d(f.lastBag);
     if (fb && arr && fb < arr - 30 * 60000) fb = null;  // gammal tid från tidigare flyg
     if (lb && arr && lb < arr - 30 * 60000) lb = null;
     if (lb) bag = 'Sista bagage kl ' + hm(lb);
     else if (fb) bag = 'Första bagage kl ' + hm(fb);
     else if (f.firstBagEst) bag = 'Bagage ca kl ' + hm(d(f.firstBagEst));
+    // Statusraden (t894u): Planerad skrivs aldrig (klockslaget syns ju). Landat kl HH:MM, sedan bagaget efter.
+    // DEL betyder enligt Swedavia "Deleted" (borttagen ur tidtabellen), inte inställd (det är CAN).
+    var landed = st === 'LAN' ? (d(f.act) || d(f.est) || d(f.sched)) : null;
+    // Alla koder i Swedavia FlightInfo v2 (apideveloper.swedavia.se/content/Using_the_FlightInfo_API.pdf):
+    // SCH FPL FLS SEQ ACT CAN LAN RER DIV DEL. Okänd kod: Swedavias egen svenska text visas.
+    var WORD = { SCH: '', FPL: '', SEQ: '', ACT: 'Avgått/på väg', FLS: 'Stoppad', CAN: 'Inställt',
+                 RER: 'Omdirigerad', DIV: 'Omdirigerad', DEL: 'Borttagen' };
+    var head = landed ? 'Landat kl ' + hm(landed) : (st in WORD ? WORD[st] : (f.statusSv || st));
+    var line = st === 'DEL' || st === 'CAN' ? head : [head, bag].filter(Boolean).join(' · ');
     var special = { RER: 'Omdirigerad', DIV: 'Omdirigerad', FLS: 'Stoppad' }[st];
     return {
       key: 'f' + f.id + '|' + f.sched,
@@ -149,25 +158,27 @@
       canceled: st === 'CAN',
       removed: st === 'DEL',
       special: special || '',
-      info: bag,
-      note: (!special && st && st !== 'SCH' && st !== 'LAN' && st !== 'CAN' && f.statusSv) ? f.statusSv : ''
+      info: line,
+      note: ''  // statusen står nu i statusraden (info)
     };
   }
   function loadFlights() {
     return getJson(FLIGHT_URLS, true).then(function (j) {
       return { updated: j.arrivalsUpdated || j.updated,
-               items: (j.arrivals || []).map(flightItem).filter(function (x) { return !x.removed; }) };
+               items: (j.arrivals || []).map(flightItem) };
     });
   }
 
   // ---------- status ----------
   function when(it) { return it.act || it.est || it.sched; }
   function badge(it) {
+    if (it.removed || (it.key[0] === 'f' && (it.canceled || it.special))) return '';  // flyg: ordet står i statusraden
     if (it.canceled) return '<span class="ank-badge bad">Inställd</span>';
     if (it.special) return '<span class="ank-badge bad">' + esc(it.special) + '</span>';
     var delay = (it.sched && (it.act || it.est)) ? Math.round(((it.act || it.est) - it.sched) / 60000) : 0;
     var dtxt = delay >= 1 ? '+' + delay + ' min' : (delay <= -3 ? delay + ' min' : '');
-    if (it.act) return '<span class="ank-badge done">' + (it.key[0] === 'f' ? 'Landat' : 'Ankom') + ' ' + hm(it.act) + '</span>' +
+    if (it.act && it.key[0] === 'f') return dtxt ? '<span class="ank-delay ' + (delay >= 15 ? 'bad' : delay >= 1 ? 'warn' : 'early') + '">' + dtxt + '</span>' : '';  // Landat står i statusraden
+    if (it.act) return '<span class="ank-badge done">Ankom ' + hm(it.act) + '</span>' +
       (dtxt ? '<span class="ank-delay ' + (delay >= 15 ? 'bad' : delay >= 1 ? 'warn' : 'early') + '">' + dtxt + '</span>' : '');
     if (delay >= 15) return '<span class="ank-badge bad">' + dtxt + '</span>';
     if (delay >= 1) return '<span class="ank-badge warn">' + dtxt + '</span>';
@@ -239,12 +250,12 @@
   function rowHtml(it) {
     var shown = when(it), changed = it.sched && shown && Math.abs(shown - it.sched) >= 60000;
     var bev = window.BEVAKNING, watched = !!(bev && bev.isWatched(it.key));  // bevakning.js
-    var cls = 'ank-row' + (it.canceled ? ' canceled' : '') + (it.act ? ' arrived' : '') + (watched ? ' watched' : '');
+    var cls = 'ank-row' + (it.canceled || it.removed ? ' canceled' : '') + (it.act ? ' arrived' : '') + (watched ? ' watched' : '');
     var star = bev && (watched || it.key[0] === 'f')
       ? '<button class="ank-star' + (watched ? ' on' : '') + '" data-bev-star aria-label="' + (watched ? 'Sluta bevaka' : 'Bevaka') + '">' + (watched ? '⭐' : '☆') + '</button>' : '';
     return '<div class="' + cls + (it.tid ? ' ank-tap' : '') + '"' + (it.tid ? ' data-ank-route="' + esc(it.key) + '"' : '') + ' data-ank-key="' + esc(it.key) + '">' +
-      '<div class="ank-time"><div class="ank-new' + (changed && !it.act ? ' changed' : '') + '">' + hm(it.canceled ? it.sched : shown) + '</div>' +
-        (changed && !it.canceled ? '<div class="ank-old">' + hm(it.sched) + '</div>' : '') + '</div>' +
+      '<div class="ank-time"><div class="ank-new' + (changed && !it.act ? ' changed' : '') + '">' + hm(it.canceled || it.removed ? it.sched : shown) + '</div>' +
+        (changed && !it.canceled && !it.removed ? '<div class="ank-old">' + hm(it.sched) + '</div>' : '') + '</div>' +
       '<div class="ank-main"><div class="ank-from">' + esc(it.from) + '</div>' +
         '<div class="ank-meta"><b>' + esc(it.no) + '</b>' + (it.sub ? ' · ' + esc(it.sub) : '') + '</div>' +
         (it.info ? '<div class="ank-meta">' + esc(it.info) + '</div>' : '') +
@@ -377,9 +388,9 @@
     return p.then(function (items) {
       var now = Date.now(), filt = s.summaryFilter || null;
       var up = items.filter(function (it) {
-        var w = when(it); return w && !it.act && w >= now - 60000 && w <= now + 6 * 3600000 && (!filt || filt(it));
+        var w = when(it); return w && !it.act && !it.removed && w >= now - 60000 && w <= now + 6 * 3600000 && (!filt || filt(it));
       }).sort(function (a, b) { return when(a) - when(b); });
-      var live = up.filter(function (it) { return !it.canceled && !it.special; });
+      var live = up.filter(function (it) { return !it.canceled && !it.special && !it.removed; });
       var delayed = live.filter(function (it) { return it.est && it.sched && it.est - it.sched >= 5 * 60000; });
       return { source: s, next: live[0] || null, after: live[1] || null, canceled: up.length - live.length,
                delayed: delayed.length, worst: delayed.sort(function (a, b) { return (b.est - b.sched) - (a.est - a.sched); })[0] || null,
