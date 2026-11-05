@@ -59,16 +59,19 @@
 
   function paint() {
     if (!btn) return;
-    if (P.url) {
-      btn.classList.add('pfp-has');
-      btn.style.backgroundImage = 'url("' + P.url + '")';
-      if (!btn.dataset.pfpText) btn.dataset.pfpText = btn.textContent;
-      btn.textContent = '';
-    } else {
-      btn.classList.remove('pfp-has');
-      btn.style.backgroundImage = '';
-      if (btn.dataset.pfpText) btn.textContent = btn.dataset.pfpText;
-    }
+    // Samma bild på alla profilknappar (även Körpassdata-headern)
+    [btn].concat([].slice.call(document.querySelectorAll('.kp-profile-btn'))).forEach(function (btn) {
+      if (P.url) {
+        btn.classList.add('pfp-has');
+        btn.style.backgroundImage = 'url("' + P.url + '")';
+        if (!btn.dataset.pfpText) btn.dataset.pfpText = btn.textContent;
+        btn.textContent = '';
+      } else {
+        btn.classList.remove('pfp-has');
+        btn.style.backgroundImage = '';
+        if (btn.dataset.pfpText) btn.textContent = btn.dataset.pfpText;
+      }
+    });
     if (items.change) items.change.style.display = P.canEdit ? '' : 'none';
     if (items.remove) items.remove.style.display = P.canEdit && P.url ? '' : 'none';
     if (items.change) items.change.textContent = P.url ? 'Byt profilbild' : 'Lägg till profilbild';
