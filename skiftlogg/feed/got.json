@@ -1,7 +1,7 @@
 {
   "airport": "GOT",
-  "updated": "2026-11-05T17:45:37+01:00",
-  "arrivalsUpdated": "2026-11-05T17:45:50+01:00",
+  "updated": "2026-11-05T17:50:38+01:00",
+  "arrivalsUpdated": "2026-11-05T17:50:40+01:00",
   "departuresUpdated": "2026-11-05T17:01:22+01:00",
   "yesterdayUpdated": "2026-11-05T05:10:46+01:00",
   "tomorrowUpdated": "2026-11-05T17:01:17+01:00",
@@ -1457,18 +1457,18 @@
       "other": "London LHR",
       "iata": "",
       "airline": "British Airways",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 17:45",
       "sched": "2026-11-05T16:55:00Z",
       "est": "2026-11-05T16:45:00Z",
-      "act": "",
+      "act": "2026-11-05T16:45:00Z",
       "terminal": "T1",
       "gate": "22",
       "baggage": "3",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 17:45"
+      "rawStatus": "Landat 17:45"
     },
     {
       "id": "FR091",
@@ -1598,10 +1598,10 @@
       "terminal": "T1",
       "gate": "23",
       "baggage": "3",
-      "firstBag": "",
+      "firstBag": "2026-11-05T16:45:04Z",
       "firstBagEst": "2026-11-05T16:51:57Z",
       "lastBag": "",
-      "rawStatus": "Landat 17:22"
+      "rawStatus": "Första bagage · Landat 17:22"
     },
     {
       "id": "SK430",
@@ -1904,8 +1904,8 @@
       "baggage": "5",
       "firstBag": "2026-11-05T16:43:58Z",
       "firstBagEst": "2026-11-05T16:46:31Z",
-      "lastBag": "",
-      "rawStatus": "Landat 17:26"
+      "lastBag": "2026-11-05T16:45:30Z",
+      "rawStatus": "Landat 17:26 · Sista bagage"
     },
     {
       "id": "AF1452",
@@ -2245,7 +2245,7 @@
       "gate": "15",
       "baggage": "4",
       "firstBag": "",
-      "firstBagEst": "",
+      "firstBagEst": "2026-11-05T17:09:50Z",
       "lastBag": "",
       "rawStatus": "Landat 17:41"
     },
