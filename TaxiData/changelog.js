@@ -15,7 +15,7 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-11-06', id: '2026-11-06e', rader: [
+  { datum: '2026-11-06', id: '2026-11-06e', tid: '20:29', rader: [
     'Meddelanden och Ärenden under profilikonen. Växla på samma sida: privata samtal med ämne och svarstråd, eller dina pågående och avslutade ärenden.',
     'Skicka meddelande på en profil öppnar ett nytt privat meddelande med mottagaren förvald.',
     'Admin har en gemensam, kompakt Ärenden-lista med typ- och statusfilter. Klara ligger kvar under Visa klara.',

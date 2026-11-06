@@ -16,7 +16,7 @@
 ## Databas och behörighet
 Migrationer: `supabase/migrations/20261106g_meddelanden_loner.sql` och den additiva designändringen `20261106g2_meddelanden_tradar.sql`.
 
-**Applicerad i Supabase 6 november 2026 under PR-arbetet.** Den är rent additiv: nya tabeller/index, nytt privat schema, en ny nullable conversation_id-kolumn och nya RPC:er. Inga befintliga funktioner, roller, data eller sidbeteenden ersätts. Frontend går inte live förrän Christian säger kör.
+**Applicerad i Supabase 6 november 2026 under PR-arbetet.** Den är rent additiv: nya tabeller/index, nytt privat schema, en ny nullable conversation_id-kolumn och nya RPC:er. Inga befintliga funktioner, roller, data eller sidbeteenden ersätts. Christian godkände publicering 6 november kl. 20:26 (Europe/Stockholm). PR #79 mergades som `38948deacc35113aeb79d3e02760854f0e5a980c`; första lyckade Pages-deploy blev klar kl. 20:29 (Europe/Stockholm), körning `42279911551`. Ingen ytterligare SQL behövdes vid publiceringen.
 
 - `public.direct_messages` och `public.message_conversations`: RLS aktiverad och inga direkta tabell-/sekvensrättigheter för anon/authenticated. Avsiktligt inga RLS-policies: custom session-auth sker i RPC:erna.
 - `messaging_private`: ej ett exponerat API-schema. SECURITY DEFINER med tom `search_path` och kvalificerade objektnamn. Publika funktioner är SECURITY INVOKER-wrappers.
@@ -48,4 +48,4 @@ Mobiltestet startar en egen isolerad headless Chrome utan sparade webbläsarsess
 
 ## Återställning
 Se [UNDO.md](UNDO.md). Backup före arbetet: `backup/pre-meddelanden-20261106` från main `040dd24b`.
-Vid framtida merge: skapa först `backup/pre-meddelanden-merge-20261106` från dåvarande origin/main. Ingen merge är gjord i denna PR.
+Backup precis före merge: `backup/pre-meddelanden-merge-20261106` = `05c7b1a5f6d360b174b90ed6f5ab42ea9384fd90`, pushad före merge.
