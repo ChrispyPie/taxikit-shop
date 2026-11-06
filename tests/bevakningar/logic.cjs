@@ -17,3 +17,13 @@ check(M.inWindow({days:[7],from_min:3*60,to_min:4*60},'2026-03-29T01:30:00Z'));
 // Flera påminnelser skapar en enda kalenderpost.
 check(M.normalize([],[],[],[],[{id:11,title:'Test',starts_at:iso(10),subs:[{},{}]}],now).length===1);
 console.log(`${n} logic assertions passed (deduplication, expiry, delay, event end, overnight and DST).`);
+// Tidslinje: kolumner, luckor, faktiska längder och klippning vid midnatt.
+const day='2026-11-06',event=(id,start,end)=>({id,kind:'event',at:Date.parse(day+'T'+start+':00+01:00'),end:Date.parse(day+'T'+end+':00+01:00')});
+let layout=M.timelineLayout([event('a','18:00','20:00'),event('b','18:30','19:00'),event('c','19:00','20:30'),event('d','21:00','22:00')],day);
+check(layout[0].columns===2);check(layout[1].column===1);check(layout[2].column===1);check(layout[3].columns===1);check(layout[0].to-layout[0].from===120);
+const nightEvent={id:'nightEvent',kind:'event',at:Date.parse('2026-11-06T23:00:00+01:00'),end:Date.parse('2026-11-07T02:00:00+01:00')};
+check(M.daySegments([nightEvent],day)[0].from===23*60);check(M.daySegments([nightEvent],day)[0].to===1440);check(M.daySegments([nightEvent],'2026-11-07')[0].from===0);check(M.daySegments([nightEvent],'2026-11-07')[0].to===120);
+const midnightEvent={...nightEvent,end:Date.parse('2026-11-07T00:00:00+01:00')};check(M.daySegments([midnightEvent],'2026-11-07').length===0);
+check(M.timelineLayout([event('a','18:00','19:00'),event('b','19:00','20:00')],day).every(x=>x.columns===1));
+check(M.daySegments([{id:'train',kind:'tag',at:Date.parse('2026-11-06T18:00:00+01:00'),end:Date.parse('2026-11-06T18:00:00+01:00')}],day)[0].to===18*60+32);
+console.log(`${n} total logic assertions passed including timeline layout.`);

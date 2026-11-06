@@ -17,7 +17,7 @@
 window.CHANGELOG = [
   // Utkast: fyll i faktisk tid vid godkänd driftsättning.
   { datum: '2026-11-06', id: '2026-11-06-bevakningar', tid: '', rader: [
-    ['Nytt', 'Mina bevakningar på hemskärmen samlar dina bevakade tåg, flyg och kalenderhändelser i tidsordning. Öppna en rad eller sluta bevaka direkt i listan.'],
+    ['Nytt', 'Mina bevakningar på hemskärmen visar tåg, flyg och kalenderhändelser som en tidslinje med klockslag, nu-linje och lediga luckor. Välj dag eller växla till Lista. Tryck på ett block för att öppna det, eller på ⋯ för att sluta bevaka.'],
     ['Nytt', 'I Kalender kan du slå på Visa mina bevakningar för att se dina tåg och flyg som rader och prickar. Valet sparas på telefonen.']
   ] },
   { datum: '2026-11-06', id: '2026-11-06l', tid: '22:58', rader: [

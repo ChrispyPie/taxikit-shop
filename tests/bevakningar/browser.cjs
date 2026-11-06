@@ -13,12 +13,13 @@ try{
  async function shot(name){check(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'ingen sidscroll');await p.screenshot({path:path.join(out,name+'.png')});}
  await p.waitForSelector('#app',{visible:true});
  check(await p.evaluate(()=>Array.from(document.querySelectorAll('#content .label')).some(e=>e.textContent==='Mina bevakningar')),'rutan syns för förare');await shot('01-hemskarm');
- await p.evaluate(()=>openItem('mina-bevakningar'));await p.waitForFunction(()=>document.querySelectorAll('.mb-row').length===4);await shot('02-blandat-flode');
+ await p.evaluate(()=>{localStorage.setItem('taxi_mb_view','list');openItem('mina-bevakningar');});await p.waitForFunction(()=>document.querySelectorAll('.mb-row').length===4);await shot('02-blandat-flode');
  check(await p.evaluate(()=>Array.from(document.querySelectorAll('.mb-time')).map(e=>e.textContent).join('|').startsWith('18:30🚆|18:40✈️|19:00🚆|19:20📅')),'sortering, försening, matchad tågnotis');
  check(await p.$eval('.mb',e=>e.textContent.includes('10 min sen')&&e.textContent.includes('Första bagage')),'status återanvänds');
  await p.evaluate(()=>{WATCH_TEST.savedEvent={...WATCH_TEST.event};WATCH_TEST.event.starts_at='2026-11-07T18:20:00Z';WATCH_TEST.event.ends_at='2026-11-07T19:40:00Z';openItem('mina-bevakningar');});await p.waitForFunction(()=>document.querySelector('.mb')?.textContent.includes('I morgon'));check(true,'gruppering per dag');
  await p.click('[data-mb-open="0"]');await p.waitForFunction(()=>document.getElementById('title').textContent==='Ankomster');await p.waitForFunction(()=>document.querySelector('[data-ank-key^="t9991|"]')?.style.outline);check(true,'rätt tåg markerat');
- await p.evaluate(()=>openItem('mina-bevakningar'));await p.waitForSelector('[data-mb-open="3"]');await p.click('[data-mb-open="3"]');await p.waitForFunction(()=>document.querySelector('.kal-detail')||document.getElementById('content').textContent.includes('Exempelkonsert'));
+ await p.evaluate(()=>openItem('mina-bevakningar'));await p.waitForSelector('[data-mb-open="3"]');await p.$eval('[data-mb-open="3"]',e=>e.scrollIntoView({block:'center'}));await new Promise(r=>setTimeout(r,100));await p.click('[data-mb-open="3"]');await p.waitForFunction(()=>document.querySelector('.kal-detail')||document.getElementById('content').textContent.includes('Exempelkonsert'));
+ await p.waitForFunction(()=>WATCH_TEST.calls.some(c=>c.fn==='get_event_comments'&&c.args.p_event_id===99901));
  check(await p.evaluate(()=>WATCH_TEST.calls.some(c=>c.fn==='get_event_comments'&&c.args.p_event_id===99901)),'rätt kalenderhändelse öppnad');
  await p.evaluate(()=>{WATCH_TEST.event=WATCH_TEST.savedEvent;openItem('kalender');});await p.waitForSelector('#kal-show-watches');await p.click('#kal-show-watches');await p.waitForSelector('[data-watch]');await p.evaluate(()=>scrollTo(0,0));await shot('04-kalender-pa');
  check(await p.evaluate(()=>document.querySelectorAll('[data-watch]').length===3),'tåg och flyg i kalender');

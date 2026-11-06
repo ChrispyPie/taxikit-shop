@@ -79,10 +79,56 @@ Ingen merge före hans **kör**. Se UNDO.md för återställning.
 ## Testresultat för utkastet
 
 - Syntaxkontroll inklusive inline-script i index.html: godkänd.
-- Nya logiktester: 14 kontroller godkända.
-- Nya mobiltester: 25 kontroller godkända, fyra skärmbilder i 390 × 844 pixlar.
+- Nya logiktester: 26 kontroller godkända (inklusive tidslinjens kolumner och midnatt).
+- Nya mobiltester: 25 list-/bevakningskontroller + 23 tidslinjekontroller godkända. Åtta skärmbilder i 390 × 844 pixlar.
 - Befintliga meddelandetester: 84 databaskontroller + 38 webbläsarkontroller godkända.
 - Befintliga intygstester: 56 kontroller godkända.
 - Deno: 16 tester godkända, 3 tick-integrationstester ger `forbidden` i sina gamla
   auth-fixtures. Exakt samma 3 fel bekräftade på oförändrad main; ingen backendkod
   ändras i denna PR. Testerna kördes utan ärvda hemligheter eller verkliga API-anrop.
+
+## Tidslinje (uppföljning på PR #81)
+
+Tidslinje är standard. `Tidslinje | Lista` sparas per enhet som `taxi_mb_view`;
+bara visningsvalet sparas, aldrig bevakningsdata. Listan behåller alla dagar i ordning.
+
+Tidslinjen har en egen skrollyta med **00–24**, timstreck och svagare halvtimmesstreck.
+Skalan är 90 pixlar per timme. Vid öppning visas nuvarande tid ungefär en timme ned
+från skrollytans topp. En röd **nu**-linje visas bara på dagens datum. På andra dagar
+visas den första bevakningen med en timmes marginal, eller 08 om dagen är tom.
+Dagvalet har I dag, I morgon, föregående/nästa dag samt prickar där det finns poster.
+Uppdateringar behåller skrollpositionen och flyttar inte tillbaka användaren till nu.
+
+Kalenderhändelser får höjd efter start/slut. Händelser över midnatt delas visuellt
+på båda dagarna och märks med ↔. Tåg/flyg är korta markörer (32 minuter på skalan),
+**inte arbetspass eller beräknad körtid**. Mycket korta kalenderhändelser får minst
+24 minuter på skalan för att gå att läsa och trycka på. Flera samtidiga block delas
+upp i kolumner. Ledigt-etiketter visas för luckor på minst 45 minuter mellan de
+ritade blocken; de tar inte hänsyn till resväg, bagageväntan eller andra åtaganden.
+
+Tryck på blocket öppnar källan. ⋯ öppnar en meny med Sluta bevaka och Avbryt;
+ändringen kräver samma bekräftelse som i listan. Tangentbord kan stänga med Escape.
+Menyn håller kvar samma post även om en pågående datahämtning ändrar ordningen.
+
+### Avgränsningar i tidslinjen
+
+- Nattpass visas som två civila dygn. Byt till I morgon för efter-midnatt-poster.
+- Skalan är lokal väggklocka i Stockholm, alltid 00–24. På dagen då vintertid
+  börjar delar de två förekomsterna av klockan 02 samma plats på skalan.
+- Många samtidiga bevakningar ger smala kolumner på en telefon. Full rubrik finns
+  i knappens tillgängliga namn och via källan eller Lista.
+- Gamla poster som källan redan har tagit bort kan inte visas som historik.
+
+Nya syntetiska mobilbilder, 390×844:
+`05-tidslinje-blandat.png`, `06-tidslinje-overlapp.png`,
+`07-tidslinje-imorgon.png`, `08-listval.png`, i samma skärmbildsmapp som ovan.
+
+```sh
+node tests/bevakningar/logic.cjs    # 26 kontroller, inklusive kolumner och midnatt
+node tests/bevakningar/browser.cjs
+node tests/bevakningar/timeline.cjs
+```
+
+Kvällens main-ändringar integrerades med en vanlig merge-commit på feature-grenen,
+inte genom omskrivning av redan publicerade commits. Ingen force-push behövs.
+PR #81 är fortfarande ett utkast och får inte mergas utan Christians kör.
