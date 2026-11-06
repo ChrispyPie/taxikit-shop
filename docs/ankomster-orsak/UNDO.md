@@ -1,20 +1,23 @@
 # Ångra Ankomster-orsak (2026-11-06)
 
-Utkast i PR – får inte mergas förrän Christian säger kör.
+Live efter Christians "kör" (t1002u).
 
-- Backup av main före ändringen: `backup/pre-ankomster-orsak-20261106` (= tippen på origin/main när arbetet startade).
-- Worktree: `/workspace/tk-orsak`, branch `feature/ankomster-orsak`.
+- Backup av main före feature-arbetet: `backup/pre-ankomster-orsak-20261106`.
+- Backup av main före merge: `backup/pre-ankomster-orsak-merge-20261106` (= origin/main tip 49158750, efter PR #81 Mina bevakningar).
+- Worktree: `/workspace/tk-orsak`, branch `feature/ankomster-orsak`, PR #82.
+- Merge-SHA: (fylls i efter merge).
 - Ändrade filer:
   - `api/trains.js` – INCLUDE Deviation/OtherInformation/Booking, fälten `reason` och `info` i JSON.
   - `scripts/fetch_got_flights.py` – fältet `reason` (samma som `rawStatus`/remarks).
   - `TaxiData/ankomster.js` – orsakspanel vid tryck på inställt/borttaget/omdirigerat.
   - `TaxiData/style.css` – `.ank-reason`.
-  - `TaxiData/changelog.js` + cache-bust i `TaxiData/index.html`.
-- Nyheter: `2026-11-06m` (tom `tid` tills live).
+  - `TaxiData/changelog.js` + cache-bust `?v=20261106n` i `TaxiData/index.html` (style.css, ankomster.js, changelog.js).
+- Nyheter: `2026-11-06n`, tid `23:15` (Europe/Stockholm).
 
 ## Återställ
 1. Ta en ny backup från då aktuell main.
-2. Stäng PR:n utan merge, eller `git revert` av merge-committen på main (ingen force push).
+2. `git revert` av merge-committen på main (ingen force push), eller återställ till `backup/pre-ankomster-orsak-merge-20261106` via revert-kedja.
 3. Ladda om appen. Stationslistan för tåg fungerar som tidigare utan orsakspanelen.
+4. Vercel: api/trains.js följer main – en revert tar bort reason/info där också.
 
 Inga databasändringar.

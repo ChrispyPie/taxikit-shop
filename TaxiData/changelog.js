@@ -15,8 +15,12 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-11-06', id: '2026-11-06m', tid: '', rader: [
-    ['Nytt', 'Ankomster: tryck på ett inställt eller borttaget tåg eller flyg för att se orsaken, till exempel banarbete. Finns ingen orsak står det så.'],
+  { datum: '2026-11-06', id: '2026-11-06n', tid: '23:15', rader: [
+    ['Nytt', 'Ankomster: tryck på ett inställt eller borttaget tåg eller flyg för att se orsaken, till exempel banarbete. Finns ingen orsak står det så.']
+  ] },
+  { datum: '2026-11-06', id: '2026-11-06m', tid: '23:09', rader: [
+    ['Nytt', 'Mina bevakningar på hemskärmen visar tåg, flyg och kalenderhändelser som en tidslinje med klockslag, nu-linje och lediga luckor. Välj dag eller växla till Lista. Tryck på ett block för att öppna det, eller på ⋯ för att sluta bevaka.'],
+    ['Nytt', 'I Kalender kan du slå på Visa mina bevakningar för att se dina tåg och flyg som rader och prickar. Valet sparas på telefonen.']
   ] },
   { datum: '2026-11-06', id: '2026-11-06l', tid: '22:58', rader: [
     ['Förbättrat', 'Ankomster, tåg: inställda tåg visas som flygen, med överstruken tid och "Inställt" i röd text. Inställda och borttagna tåg och flyg är dessutom gråa, så att de syns mindre.']

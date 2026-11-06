@@ -368,7 +368,7 @@
       var list = data.filter(function (it) {
         var w = when(it); if (!w) return false;
         var ref = it.act ? it.act : (it.canceled ? it.sched : w);
-        return ref >= from && w <= to;
+        return it.key === state.watchHighlight || (ref >= from && w <= to);
       }).sort(function (a, b) { return when(a) - when(b); });
       if (s.groups) {
         var act = activeGroup(s);
@@ -397,6 +397,20 @@
     keepActiveInView(el);
     if (window.BEVAKNING) BEVAKNING.decorate(el);  // bevakning: notisknapp + långtryck
     if (window.TAGNOTIS) TAGNOTIS.decorate(el);    // Mina tågnotiser (tagnotis.js), bara på Tåg-fliken
+    if (state.watchHighlight) {
+      var target = Array.from(el.querySelectorAll('[data-ank-key]')).find(function (r) { return r.getAttribute('data-ank-key') === state.watchHighlight; });
+      if (target) {
+        target.setAttribute('tabindex', '-1'); target.style.outline = '2px solid #fbbf24';
+        if (state.watchFocus) requestAnimationFrame(function () {
+          if (!target.isConnected) return;
+          target.scrollIntoView({ block: 'center' }); target.focus({ preventScroll: true });
+          state.watchFocus = false;
+        });
+      } else if (data && !state.loading[s.id]) {
+        var note = document.createElement('div'); note.className = 'ank-warn';
+        note.textContent = 'Ankomsten finns inte längre i tidtabellen.'; el.appendChild(note);
+      }
+    }
   }
 
   function load(id, quiet) {
@@ -415,7 +429,7 @@
     var rr = !e.target.closest('button, a, input') && e.target.closest('[data-ank-route]');
     if (rr) { toggleRoute(rr.getAttribute('data-ank-route')); return; }
     var t = e.target.closest('[data-ank-tab]');
-    if (t) { state.tab = t.getAttribute('data-ank-tab'); localStorage.setItem('ank_tab', state.tab); state.showPast = false; paint(); load(state.tab, true); return; }
+    if (t) { state.watchHighlight = null; state.watchFocus = false; state.tab = t.getAttribute('data-ank-tab'); localStorage.setItem('ank_tab', state.tab); state.showPast = false; paint(); load(state.tab, true); return; }
     if (e.target.closest('[data-ank-refresh]')) { load(state.tab); return; }
     if (e.target.closest('[data-ank-past]')) { state.showPast = !state.showPast; paint({ anchor: true }); return; }
     var g = e.target.closest('[data-ank-filter]');
@@ -438,6 +452,9 @@
     el.innerHTML = ''; el.appendChild(state.el);
     var saved = localStorage.getItem('ank_tab');
     state.tab = A.sources.some(function (x) { return x.id === saved; }) ? saved : A.sources[0].id;
+    state.watchHighlight = A._watchTarget || null; state.watchFocus = !!A._watchTarget;
+    A._watchTarget = null;
+    if (state.watchHighlight) state.showPast = true;
     paint();
     load(state.tab, true);
     state.timer = setInterval(function () { if (!document.hidden) load(state.tab, true); }, A.refreshMs);
@@ -445,6 +462,22 @@
     document.addEventListener('visibilitychange', onVisible);
   };
   A.stop = stop;
+
+  // Mina bevakningar delar samma normalisering och offentliga tidtabell som Ankomster.
+  A.watchItems = function (kind) {
+    var source = A.sources.filter(function (s) { return s.id === kind; })[0];
+    return source.load().then(function (r) {
+      state.data[kind] = r.items; state.updated[kind] = r.updated; state.at[kind] = Date.now();
+      return r.items;
+    });
+  };
+  A.openWatch = function (key) {
+    localStorage.setItem('ank_tab', key.charAt(0) === 'f' ? 'flyg' : 'tag');
+    localStorage.setItem('ank_tagfilter', '');
+    A._watchTarget = key;
+    window.openItem(A.id);
+  };
+
 
   // För hjälpboten: nästa ankomst (inte inställd, inte redan ankommen) och lite fakta. Bara verklig data.
   A.current = function () { return state.el ? state.tab : null; };

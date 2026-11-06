@@ -7,7 +7,8 @@
   <script src="tema.js?v=20261026tm1"></script>
   <script src="enhet.js?v=20261029d"></script>
   <script src="namn.js?v=20261028nm1"></script>
-  <link rel="stylesheet" href="style.css?v=20261106orsak1">
+  <link rel="stylesheet" href="style.css?v=20261106n">
+  <link rel="stylesheet" href="mina-bevakningar.css?v=20261106m">
   <link rel="stylesheet" href="tema.css?v=20261104sh1">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -150,19 +151,20 @@
   <script src="badges.js?v=20261024x"></script>
   <script src="demo.js?v=am1q"></script>
   <script src="script.js?v=20261105kh1"></script>
-  <script src="ankomster.js?v=20261106orsak1"></script>
+  <script src="ankomster.js?v=20261106n"></script>
   <script src="bevakning.js?v=20261028v"></script>
   <script src="tagnotis.js?v=20261029tn"></script>
   <script src="topplistor.js?v=20261106rekord7"></script>
   <script src="sjuk.js?v=20261106ik1"></script>
   <script src="verkstad.js?v=20261106msg1"></script>
-  <script src="kalender.js?v=20261104ar1"></script>
+  <script src="mina-bevakningar.js?v=20261106m"></script>
+  <script src="kalender.js?v=20261106m"></script>
   <script src="hjalpbot.js?v=zzzda1"></script>
   <script src="profilbild.js?v=20261105kh1"></script>
   <script src="profil-sida.js?v=20261106msg1"></script>
   <script src="forum.js?v=20261106ik1"></script>
   <script src="om-data.js?v=20261106msg1"></script>
-  <script src="changelog.js?v=20261106m1"></script>
+  <script src="changelog.js?v=20261106n"></script>
   <script src="om.js?v=20261106sc1"></script>
   <script src="lonekoll.js?v=20261028sp1"></script>
   <script src="prognos.js?v=20261104kt2"></script>
@@ -179,6 +181,7 @@
     // Åkeridata: ägaren + tillfälligt S admin (samma som private.company_view_roles() på servern)
     var AKERI_ROLLER = ['agare', 'superadmin'];
     var menu = [
+      { id: MINA_BEVAKNINGAR.id, icon: MINA_BEVAKNINGAR.icon, label: MINA_BEVAKNINGAR.title, roles: ALLA },
       { id: 'kordata', icon: '🚗', label: 'Körpassdata', roles: ALLA },
       { id: LONEKOLL.id, icon: LONEKOLL.icon, label: LONEKOLL.title, roles: ALLA },
       // Namn och ikon för Ankomster ändras i ankomster.js (ANKOMSTER.title / icon)
@@ -232,6 +235,7 @@
     }
 
     function clearSession() {
+      if (window.MINA_BEVAKNINGAR) MINA_BEVAKNINGAR.stop();
       if (window.PROFILBILD) PROFILBILD.reset();
       localStorage.removeItem('taxi_session');
       localStorage.removeItem('taxi_logged_in');
@@ -383,7 +387,7 @@
         
         if (typeof loadData === 'function') loadData().then(render);
       } else {
-        if (savedView === ANKOMSTER.id || savedView === PROGNOS.id || savedView === TOPPLISTOR.id || savedView === VERKSTAD.id || savedView === KALENDER.id || savedView === FORUM.id || savedView === OM.id || savedView === LONEKOLL.id) {
+        if (savedView === ANKOMSTER.id || savedView === PROGNOS.id || savedView === TOPPLISTOR.id || savedView === VERKSTAD.id || savedView === KALENDER.id || savedView === FORUM.id || savedView === OM.id || savedView === LONEKOLL.id || savedView === MINA_BEVAKNINGAR.id) {
           current = savedView;
           try { history.pushState({ view: current }, ''); } catch (e) {}
         }
@@ -784,7 +788,7 @@
         // Inkorgen gick tillbaka från en tråd till listan
       } else if (current === 'profil' && window.PROFIL_SIDA && PROFIL_SIDA.back && PROFIL_SIDA.back()) {
         // profilens under-vy (redigera/galleri/gästbok)
-      } else if (current === 'profil' || current === 'inkorg' || current === ANKOMSTER.id || current === PROGNOS.id || current === TOPPLISTOR.id || current === VERKSTAD.id || current === KALENDER.id || current === FORUM.id || current === OM.id || current === LONEKOLL.id) {
+      } else if (current === 'profil' || current === 'inkorg' || current === ANKOMSTER.id || current === PROGNOS.id || current === TOPPLISTOR.id || current === VERKSTAD.id || current === KALENDER.id || current === FORUM.id || current === OM.id || current === LONEKOLL.id || current === MINA_BEVAKNINGAR.id) {
         goHome();
       }
     });
@@ -809,6 +813,7 @@
       title.style.fontSize = ''; title.style.maxWidth = ''; title.style.whiteSpace = ''; title.style.textAlign = '';
 
       if (current !== ANKOMSTER.id) ANKOMSTER.stop();
+      if (current !== MINA_BEVAKNINGAR.id) MINA_BEVAKNINGAR.stop();
       if (current !== PROGNOS.id && PROGNOS.stop) PROGNOS.stop();
       if (current === 'profil') {
         title.textContent = 'Profil';
@@ -839,6 +844,9 @@
       } else if (current === OM.id) {
         title.textContent = OM.title;
         OM.render(content);
+      } else if (current === MINA_BEVAKNINGAR.id) {
+        title.textContent = MINA_BEVAKNINGAR.title;
+        MINA_BEVAKNINGAR.render(content);
       } else if (current === LONEKOLL.id) {
         title.textContent = LONEKOLL.title;
         LONEKOLL.render(content);
@@ -916,6 +924,7 @@
       if (lockBlocked()) return;
       var item = findItem(id);
       if (item && !canSee(item)) return;
+      if (id !== MINA_BEVAKNINGAR.id) MINA_BEVAKNINGAR.stop();
       if (id === 'admin') {
         location.href = 'admin.html';
         return;
@@ -931,7 +940,7 @@
         if (window.initServerStatus) initServerStatus('server-status');
         
         if (typeof loadData === 'function') loadData().then(render);
-      } else if (id === ANKOMSTER.id || id === PROGNOS.id || id === TOPPLISTOR.id || id === VERKSTAD.id || id === KALENDER.id || id === FORUM.id || id === OM.id || id === LONEKOLL.id) {
+      } else if (id === ANKOMSTER.id || id === PROGNOS.id || id === TOPPLISTOR.id || id === VERKSTAD.id || id === KALENDER.id || id === FORUM.id || id === OM.id || id === LONEKOLL.id || id === MINA_BEVAKNINGAR.id) {
         document.getElementById('dashboard-view').classList.add('hidden');  // t.ex. "Om appen" från profilmenyn i Körpassdata
         document.getElementById('app').style.display = 'block';
         localStorage.setItem('taxi_view', id);
