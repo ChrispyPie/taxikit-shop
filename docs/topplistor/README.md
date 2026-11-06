@@ -6,7 +6,7 @@ Branch: `feat/topplistor-rekord` · Backup: `backup/pre-rekord-20261106` (= main
 
 ## Design
 - Växel **Topplista | Rekord** (rubrik Rekord: *Rekordtavlan*).
-- Väljare: **Vad** (mått), **Period** (Dag/Vecka/Månad/År; Egen period i Topplista via 📅), **Sortera** (Störst/Minst först), **Förare/Bil**.
+- Väljare: **Vad** (mått), **Period** (Dag/Vecka/Månad/År; Egen period i Topplista via 📅), **Förare/Bil**. Listan visas **helt expanderad**, alltid störst först (läs nerifrån för minst).
 - **Topplista + period** = ranking för aktuell dag/vecka/månad/år (eller egen period).
 - **Rekord + period** = varje förares bästa sådan period sedan **2025-01-01**.
 - Anonym ranking; egen rad som "Du: plats X av N".
@@ -28,7 +28,7 @@ Datum på rekord visas som **månad + år** (t.ex. `sep -26`), även när grain 
 | inkort_pass | Inkört per pass | |
 | dricks_pct | Dricks i % av inkört | inkört ≥ 100 kr |
 | flyg | Flygresor | start- eller slutzon 291–293 |
-| langst | Längsta körningen | ≥ 0,5 km; Minst först = kortaste |
+| langst | Längsta körningen | ≥ 0,5 km; botten av listan = kortaste |
 | belopp | Högsta enskilda belopp | enskild resa |
 | passresor | Flest körningar per pass | enskilt pass |
 
@@ -68,5 +68,5 @@ Datum på rekord visas som **månad + år** (t.ex. `sep -26`), även när grain 
 4. Skriv Nyheter-rad.
 
 ## Skärmdumpar
-- Harness: `/workspace/taxidata-cleanup/harness/rekord/`
-- Bilder: `/workspace/taxidata-cleanup/screenshots/rekord/` och `docs/topplistor/real/`
+- Harness: `docs/topplistor/harness.html` (eller `/workspace/taxidata-cleanup/harness/rekord/`)
+- Bilder v2 (utan sorteringsknappar, full lista): `/workspace/taxidata-cleanup/screenshots/rekord/v2/` och `docs/topplistor/real/`

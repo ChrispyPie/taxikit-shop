@@ -33,35 +33,27 @@
   localStorage.setItem('tl_view', new URLSearchParams(location.search).get('view') || 'topplista');
   localStorage.setItem('tl_tab', new URLSearchParams(location.search).get('tab') || 'manad');
   localStorage.setItem('tl_metric', new URLSearchParams(location.search).get('metric') || 'inkort');
-  localStorage.setItem('tl_sort', new URLSearchParams(location.search).get('sort') || 'desc');
   localStorage.setItem('tl_mode', 'forare');
 
   function rowsTopp() {
-    return [
-      {pos:1,v:18420,du:false},{pos:2,v:17210,du:false},
-      {pos:3,v:16890,du:true},{pos:4,v:15100,du:false},
-      {pos:5,v:14250,du:false},{pos:6,v:13800,du:false},
-      {pos:7,v:12940,du:false},{pos:8,v:12100,du:false},
-      {pos:9,v:11450,du:false},{pos:10,v:10800,du:false}
-    ];
+    var vals = [18420,17210,16890,15100,14250,13800,12940,12100,11450,10800,9950,9320,8710,8100,7480];
+    return vals.map(function (v, i) { return {pos:i+1,v:v,du:i===2}; });
   }
   function rowsRekord(grain) {
     var when = grain === 'dag'
-      ? ['jun -26','maj -25','sep -26','aug -26','mar -26','okt -25','jul -26','apr -26']
-      : ['jun -26','maj -26','sep -26','mar -26','okt -25','aug -25','jul -26','feb -26'];
+      ? ['jun -26','maj -25','sep -26','aug -26','mar -26','okt -25','jul -26','apr -26','feb -26','jan -26','nov -25','dec -25','okt -26','sep -25','jul -25']
+      : ['jun -26','maj -26','sep -26','mar -26','okt -25','aug -25','jul -26','feb -26','apr -26','jan -26','nov -25','dec -25','maj -25','mar -25','aug -26'];
     var vals = grain === 'dag'
-      ? [9840,9210,8760,8450,8100,7890,7650,7420]
-      : [84200,79100,78450,71800,68900,65400,62150,58700];
+      ? [9840,9210,8760,8450,8100,7890,7650,7420,7100,6880,6650,6420,6190,5950,5710]
+      : [84200,79100,78450,71800,68900,65400,62150,58700,55200,52100,49800,47100,44500,41800,39200];
     return vals.map(function (v, i) {
       return {pos:i+1,v:v,du:i===2,when:when[i]};
     });
   }
-  function rowsAsc() {
-    return [
-      {pos:1,v:0.6,du:false,when:'mar -26'},{pos:2,v:0.8,du:false,when:'jan -26'},
-      {pos:3,v:1.1,du:true,when:'sep -26'},{pos:4,v:1.4,du:false,when:'maj -25'},
-      {pos:5,v:1.7,du:false,when:'jul -26'},{pos:6,v:2.0,du:false,when:'apr -26'}
-    ];
+  function rowsLangst() {
+    var vals = [86.4,72.1,61.0,48.5,39.2,28.7,19.4,12.8,8.3,5.1,3.2,2.0,1.4,0.9,0.6];
+    var when = ['jun -26','maj -26','sep -26','mar -26','okt -25','aug -25','jul -26','feb -26','apr -26','jan -26','nov -25','dec -25','mar -25','maj -25','aug -26'];
+    return vals.map(function (v, i) { return {pos:i+1,v:v,du:i===2,when:when[i]}; });
   }
 
   var origFetch = window.fetch;
@@ -73,7 +65,7 @@
       return Promise.resolve({ ok: true, json: function () {
         return Promise.resolve({
           view:'topplista', metric:metric, sort:body.p_sort||'desc', entity:'forare',
-          from:body.p_from, to:body.p_to, named:false, n:23,
+          from:body.p_from, to:body.p_to, named:false, n:15,
           me:{pos:3,v:16890},
           rows: rowsTopp(),
           note:'Dricks räknas bara kort (kontantdricks saknas). 0 km-megafärder och pass över 16 h filtreras bort.'
@@ -84,12 +76,12 @@
       var body = JSON.parse(opts.body || '{}');
       var grain = body.p_grain || 'manad';
       var metric = body.p_metric || 'inkort';
-      var sort = body.p_sort || 'desc';
-      var r = (metric === 'langst' && sort === 'asc') ? rowsAsc() : rowsRekord(grain);
+      var sort = 'desc';
+      var r = (metric === 'langst') ? rowsLangst() : rowsRekord(grain);
       return Promise.resolve({ ok: true, json: function () {
         return Promise.resolve({
           view:'rekord', metric:metric, sort:sort, entity:'forare', grain:grain,
-          since:'2025-01-01', named:false, n:23, privacy_when:'month_year',
+          since:'2025-01-01', named:false, n:15, privacy_when:'month_year',
           min_trips: metric==='snitt' ? (grain==='dag'?5:grain==='vecka'?15:grain==='manad'?20:100) : null,
           me:{pos:3,v:r[2].v,when:r[2].when},
           rows:r,

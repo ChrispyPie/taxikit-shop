@@ -31,7 +31,7 @@
   LISTS.forEach(function (L) { BY_K[L.k] = L; });
 
   var VIEW_KEY = 'tl_view', TAB_KEY = 'tl_tab', MODE_KEY = 'tl_mode';
-  var METRIC_KEY = 'tl_metric', SORT_KEY = 'tl_sort';
+  var METRIC_KEY = 'tl_metric';
   var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
   var WD = ['Sön', 'Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör'];
   var GRAIN_SV = { dag: 'dag', vecka: 'vecka', manad: 'månad', ar: 'år' };
@@ -44,8 +44,7 @@
     range: null,
     mode: localStorage.getItem(MODE_KEY) === 'bil' ? 'bil' : 'forare',
     metric: localStorage.getItem(METRIC_KEY) || 'inkort',
-    sort: localStorage.getItem(SORT_KEY) === 'asc' ? 'asc' : 'desc',
-    data: null, err: null, loading: false, arkiv: false, seq: 0, el: null, open: false, menu: false
+    data: null, err: null, loading: false, arkiv: false, seq: 0, el: null, menu: false
   };
   if (['dag', 'vecka', 'manad', 'ar'].indexOf(st.tab) < 0) st.tab = 'dag';
   if (!BY_K[st.metric]) st.metric = 'inkort';
@@ -113,9 +112,9 @@
   }
 
   function cacheKey() {
-    if (st.view === 'rekord') return ['rekord', st.tab, st.metric, st.sort, st.mode].join('|');
+    if (st.view === 'rekord') return ['rekord', st.tab, st.metric, st.mode].join('|');
     var r = range();
-    return ['topp', iso(r[0]), iso(r[1]), st.metric, st.sort, st.mode].join('|');
+    return ['topp', iso(r[0]), iso(r[1]), st.metric, st.mode].join('|');
   }
 
   function load() {
@@ -133,13 +132,13 @@
       if (st.view === 'rekord') {
         got = rpc('get_rekord_metric', {
           p_grain: st.tab === 'period' ? 'manad' : st.tab,
-          p_metric: st.metric, p_sort: st.sort, p_entity: bil ? 'bil' : 'forare'
+          p_metric: st.metric, p_sort: 'desc', p_entity: bil ? 'bil' : 'forare'
         });
       } else {
         var r = range();
         got = rpc('get_topplista_metric', {
           p_from: iso(r[0]), p_to: iso(r[1]),
-          p_metric: st.metric, p_sort: st.sort, p_entity: bil ? 'bil' : 'forare'
+          p_metric: st.metric, p_sort: 'desc', p_entity: bil ? 'bil' : 'forare'
         });
       }
     }
@@ -187,10 +186,7 @@
           '<div class="tl-selwrap" id="tl-selwrap">' +
             '<button type="button" class="tl-sel" id="tl-sel" aria-haspopup="listbox" aria-expanded="false"></button>' +
             '<span class="tl-chev" aria-hidden="true">▾</span>' +
-            '<div class="tl-menu" id="tl-menu" role="listbox" hidden></div></div>' +
-          '<div class="tabs tl-sorts" role="tablist" aria-label="Sortera">' +
-            '<button type="button" class="tab tl-sort" data-sort="desc">Störst först</button>' +
-            '<button type="button" class="tab tl-sort" data-sort="asc">Minst först</button></div></div>' +
+            '<div class="tl-menu" id="tl-menu" role="listbox" hidden></div></div></div>' +
         '<div id="tl-status-slot"></div></div>' +
       '<div id="tl-body"></div>';
 
@@ -203,17 +199,14 @@
         if (st.view === b.dataset.view) return;
         st.view = b.dataset.view; localStorage.setItem(VIEW_KEY, st.view);
         if (st.view === 'rekord' && st.tab === 'period') { st.tab = st.lastTab || 'manad'; st.range = null; }
-        st.open = false; load();
+        load();
       };
     });
     content.querySelectorAll('.tl-tab').forEach(function (b) {
-      b.onclick = function () { st.tab = b.dataset.tab; st.lastTab = st.tab; st.range = null; localStorage.setItem(TAB_KEY, st.tab); st.open = false; load(); };
+      b.onclick = function () { st.tab = b.dataset.tab; st.lastTab = st.tab; st.range = null; localStorage.setItem(TAB_KEY, st.tab); load(); };
     });
     content.querySelectorAll('.tl-mode').forEach(function (b) {
-      b.onclick = function () { if (st.mode === b.dataset.mode) return; st.mode = b.dataset.mode; localStorage.setItem(MODE_KEY, st.mode); st.open = false; load(); };
-    });
-    content.querySelectorAll('.tl-sort').forEach(function (b) {
-      b.onclick = function () { if (st.sort === b.dataset.sort) return; st.sort = b.dataset.sort; localStorage.setItem(SORT_KEY, st.sort); st.open = false; load(); };
+      b.onclick = function () { if (st.mode === b.dataset.mode) return; st.mode = b.dataset.mode; localStorage.setItem(MODE_KEY, st.mode); load(); };
     });
     document.getElementById('tl-prev').onclick = function () { move(-1); };
     document.getElementById('tl-next').onclick = function () { if (!isCurrent()) move(1); };
@@ -275,7 +268,7 @@
     menu.querySelectorAll('.tl-opt').forEach(function (b) {
       b.onclick = function () {
         st.metric = b.dataset.k; localStorage.setItem(METRIC_KEY, st.metric);
-        st.menu = false; st.open = false; load();
+        st.menu = false; load();
       };
     });
   }
@@ -289,8 +282,6 @@
     st.el.querySelectorAll('.tl-view').forEach(function (b) { var on = b.dataset.view === st.view; b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
     st.el.querySelectorAll('.tl-tab').forEach(function (b) { b.classList.toggle('active', b.dataset.tab === st.tab); });
     st.el.querySelectorAll('.tl-mode').forEach(function (b) { var on = b.dataset.mode === st.mode; b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
-    st.el.querySelectorAll('.tl-sort').forEach(function (b) { var on = b.dataset.sort === st.sort; b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
-
     var nav = document.getElementById('tl-datenav');
     if (nav) nav.style.display = rek ? 'none' : '';
     var de = document.getElementById('tl-date');
@@ -328,12 +319,12 @@
       }
       if (d.note) h += '<div class="tl-note">' + esc(d.note) + '</div>';
 
-      var rows = d.rows || [], show = st.open ? rows : rows.slice(0, 8);
+      var rows = d.rows || [];
       h += '<div class="tl-card"><div class="tl-head"><span class="tl-title">' + esc(L.t) + '</span>' +
         '<span class="tl-me">' + (d.me ? 'Du: plats ' + d.me.pos + ' av ' + d.n : (d.n || 0) + (st.mode === 'bil' ? ' bilar' : ' förare')) + '</span></div>';
 
       if (own && !rows.length) h += '<div class="tl-row"><span class="tl-who">Din bil finns inte med i den här listan.</span></div>';
-      show.forEach(function (r) {
+      rows.forEach(function (r) {
         var who;
         if (st.mode === 'bil') {
           who = esc(r.id || '') + (r.modell ? ' <span class="tl-id">' + esc(r.modell) + '</span>' : '') +
@@ -348,19 +339,12 @@
           (r.pos <= 3 ? ['🥇', '🥈', '🥉'][r.pos - 1] : r.pos + '.') + '</span>' +
           '<span class="tl-who">' + who + '</span><span class="tl-val">' + fmt(r.v, L.f) + when + '</span></div>';
       });
-      if (d.me && !st.open && d.me.pos > 8 && rows.length > 8) {
-        h += '<div class="tl-row du"><span class="tl-pos">' + d.me.pos + '.</span><span class="tl-who">Du</span><span class="tl-val">' +
-          fmt(d.me.v, L.f) + (d.me.when ? '<span class="tl-when">· ' + esc(d.me.when) + '</span>' : '') + '</span></div>';
-      }
-      if (rows.length > 8) h += '<button type="button" class="tl-more" id="tl-more">' + (st.open ? 'Visa färre' : 'Visa alla ' + rows.length) + '</button>';
       h += '</div>';
       h += '<div class="tl-foot">Kr/mil kräver minst 1 mil, kr/timme minst 30 min. Inkört som i Körpassdata. ' +
         (rek && L.k === 'snitt' && d.min_trips ? 'Snitt i rekord kräver minst ' + d.min_trips + ' resor. ' : '') +
-        'Längsta körningen: minst 0,5 km (sortera Minst först för kortaste).</div>';
+        'Listan är sorterad störst först — läs nerifrån för minst. Längsta körningen: minst 0,5 km (botten = kortaste).</div>';
     }
     body.innerHTML = h;
-    var more = document.getElementById('tl-more');
-    if (more) more.onclick = function () { st.open = !st.open; draw(); };
   }
 
   // ---------- egen period ----------
