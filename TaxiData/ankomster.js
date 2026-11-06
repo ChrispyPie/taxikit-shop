@@ -89,7 +89,7 @@
   function trainLine(t) {
     var tr = t.track && String(t.track).toLowerCase() !== 'x' ? ' spår ' + t.track : '';
     if (t.act) return 'Anlänt' + tr;
-    if (t.canceled) return tr ? 'Spår ' + t.track : '';
+    if (t.canceled) return 'Inställt' + (tr ? ' · Spår ' + t.track : '');
     var arr = d(t.est) || d(t.sched), mins = arr ? (arr - Date.now()) / 60000 : 1e9;
     var seen = t.lastSeen && t.lastSeenTs ? d(t.lastSeenTs) : null;
     if (NEAR_G[t.lastSeenSig] || (mins <= 10 && (seen || mins <= 5))) return 'Inkommande' + tr;
@@ -172,16 +172,14 @@
   // ---------- status ----------
   function when(it) { return it.act || it.est || it.sched; }
   function badge(it) {
-    if (it.removed || (it.key[0] === 'f' && (it.canceled || it.special))) return '';  // flyg: ordet står i statusraden
-    if (it.canceled) return '<span class="ank-badge bad">Inställd</span>';
+    if (it.removed || it.canceled || (it.key[0] === 'f' && it.special)) return '';  // ordet står i röd statusrad (tåg och flyg)
     if (it.special) return '<span class="ank-badge bad">' + esc(it.special) + '</span>';
     var delay = (it.sched && (it.act || it.est)) ? Math.round(((it.act || it.est) - it.sched) / 60000) : 0;
     var dtxt = delay >= 1 ? '+' + delay + ' min' : (delay <= -3 ? delay + ' min' : '');
-    if (it.act && it.key[0] === 'f') return dtxt ? '<span class="ank-delay ' + (delay >= 15 ? 'bad' : delay >= 1 ? 'warn' : 'early') + '">' + dtxt + '</span>' : '';  // Landat står i statusraden
+    if (it.act && it.key[0] === 'f') return dtxt ? '<span class="ank-delay ' + (delay >= 1 ? 'bad' : 'early') + '">' + dtxt + '</span>' : '';  // Landat står i statusraden
     if (it.act) return '<span class="ank-badge done">Ankom ' + hm(it.act) + '</span>' +
-      (dtxt ? '<span class="ank-delay ' + (delay >= 15 ? 'bad' : delay >= 1 ? 'warn' : 'early') + '">' + dtxt + '</span>' : '');
-    if (delay >= 15) return '<span class="ank-badge bad">' + dtxt + '</span>';
-    if (delay >= 1) return '<span class="ank-badge warn">' + dtxt + '</span>';
+      (dtxt ? '<span class="ank-delay ' + (delay >= 1 ? 'bad' : 'early') + '">' + dtxt + '</span>' : '');
+    if (delay >= 1) return '<span class="ank-delay bad">' + dtxt + '</span>';  // försenad: röd text, ingen ruta
     if (delay <= -3) return '<span class="ank-badge early">Tidig</span>';
     return '<span class="ank-badge ok">I tid</span>';
   }
@@ -258,7 +256,7 @@
         (changed && !it.canceled && !it.removed ? '<div class="ank-old">' + hm(it.sched) + '</div>' : '') + '</div>' +
       '<div class="ank-main"><div class="ank-from">' + esc(it.from) + '</div>' +
         '<div class="ank-meta"><b>' + esc(it.no) + '</b>' + (it.sub ? ' · ' + esc(it.sub) : '') + '</div>' +
-        (it.info ? '<div class="ank-meta' + (it.key[0] === 'f' && (it.canceled || it.removed || it.special) ? ' bad' : '') + '">' + esc(it.info) + '</div>' : '') +
+        (it.info ? '<div class="ank-meta' + ((it.canceled || it.removed || (it.key[0] === 'f' && it.special)) ? ' bad' : '') + '">' + esc(it.info) + '</div>' : '') +
         (it.note ? '<div class="ank-note">' + esc(it.note) + '</div>' : '') + '</div>' +
       '<div class="ank-status">' + badge(it) + star + '</div></div>';
   }
