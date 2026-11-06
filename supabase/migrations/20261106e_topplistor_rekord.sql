@@ -147,7 +147,7 @@ begin
       from tp where (v_entity = 'forare' or coalesce(c, '') <> '')
      group by 1
   ), pass_best as (
-    select case when v_entity = 'bil' then coalesce(nullif(tr.c,''), sh.c) else sh.f end ent,
+    select case when v_entity = 'bil' then x.c else x.f end ent,
            max(cnt) passresor
       from (
         select sh.f, sh.c, sh.st, count(*) cnt
