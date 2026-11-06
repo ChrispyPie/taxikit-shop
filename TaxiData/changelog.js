@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-06', id: '2026-11-06a', tid: '17:35', rader: [
+    ['Nytt', 'Forum: klassisk layout med sektioner (Hjälp & guider, Frågor & svar, Allmänt, Önskemål & förslag, Buggar, Mitt åkeri, Admin). Önskemål och Buggar har status Ny / Pågår / Planerad / Klar. I Frågor & svar kan du markera svar som Löst.']
+  ] },
   { datum: '2026-11-05', id: '2026-11-05c', tid: '01:11', rader: [
     ['Förbättrat', 'Körpassdata har nu samma meny högst upp som de andra sidorna: hemknapp, notiser och profil. Den gamla bakåtpilen och förarnumret är borta.']
   ] },
