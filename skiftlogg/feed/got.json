@@ -1,8 +1,8 @@
 {
   "airport": "GOT",
-  "updated": "2026-11-06T07:55:24+01:00",
+  "updated": "2026-11-06T08:01:03+01:00",
   "arrivalsUpdated": "2026-11-06T07:50:47+01:00",
-  "departuresUpdated": "2026-11-06T07:01:03+01:00",
+  "departuresUpdated": "2026-11-06T08:01:04+01:00",
   "yesterdayUpdated": "2026-11-06T05:10:35+01:00",
   "tomorrowUpdated": "2026-11-05T23:01:17+01:00",
   "error": null,
@@ -2879,25 +2879,6 @@
   ],
   "departures": [
     {
-      "id": "FR6094D",
-      "dir": "AVG",
-      "other": "Gdansk",
-      "iata": "",
-      "airline": "Ryanair Ltd",
-      "status": "DEL",
-      "statusSv": "Borttagen",
-      "sched": "2026-11-04T18:20:00Z",
-      "est": "",
-      "act": "",
-      "terminal": "T1",
-      "gate": "",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": ""
-    },
-    {
       "id": "FR4506D",
       "dir": "AVG",
       "other": "Porto",
@@ -2955,25 +2936,6 @@
       "rawStatus": ""
     },
     {
-      "id": "KL1238",
-      "dir": "AVG",
-      "other": "Amsterdam",
-      "iata": "",
-      "airline": "KLM",
-      "status": "DEL",
-      "statusSv": "Borttagen",
-      "sched": "2026-11-04T18:30:00Z",
-      "est": "",
-      "act": "",
-      "terminal": "T1",
-      "gate": "",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": ""
-    },
-    {
       "id": "SK168",
       "dir": "AVG",
       "other": "Stockholm ARN",
@@ -3012,25 +2974,6 @@
       "rawStatus": "Startat 20:48"
     },
     {
-      "id": "TK1800",
-      "dir": "AVG",
-      "other": "Istanbul IST",
-      "iata": "",
-      "airline": "Turkish Airlines",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-11-04T17:15:00Z",
-      "est": "2026-11-04T18:00:00Z",
-      "act": "2026-11-04T18:18:41Z",
-      "terminal": "T1",
-      "gate": "23",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 19:31"
-    },
-    {
       "id": "FR5737",
       "dir": "AVG",
       "other": "London STN",
@@ -3067,25 +3010,6 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 20:18"
-    },
-    {
-      "id": "SK166",
-      "dir": "AVG",
-      "other": "Stockholm ARN",
-      "iata": "",
-      "airline": "SAS Scandinavian Airlines",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-11-04T18:55:00Z",
-      "est": "",
-      "act": "2026-11-04T18:38:16Z",
-      "terminal": "T1",
-      "gate": "16",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 19:45"
     },
     {
       "id": "SK449",
@@ -4833,7 +4757,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Omedelbar avgång"
     },
     {
       "id": "KL1230",
@@ -4904,7 +4828,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "21A",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -4942,7 +4866,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "22",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -5289,7 +5213,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Boarding"
     },
     {
       "id": "D82027",
@@ -5373,18 +5297,18 @@
       "other": "Warszawa",
       "iata": "",
       "airline": "LOT",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-06T07:00:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-06T07:00:06Z",
       "terminal": "T1",
       "gate": "19",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "DK1724",
@@ -5403,7 +5327,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Omedelbar avgång"
     },
     {
       "id": "KL1228",
@@ -5468,18 +5392,18 @@
       "other": "Bryssel",
       "iata": "",
       "airline": "Brussels Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-06T06:00:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-06T06:15:57Z",
       "terminal": "T1",
       "gate": "15",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd"
+      "rawStatus": "Startat 07:23"
     },
     {
       "id": "OJ812",
@@ -5493,7 +5417,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "14",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -5664,7 +5588,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "24B",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
