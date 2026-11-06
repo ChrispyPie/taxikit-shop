@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-06', id: '2026-11-06g', tid: '22:20', rader: [
+    ['Förbättrat', 'Ärenden: ärenden som behöver ditt svar har inte längre ljus bakgrund, så texten är lätt att läsa. De ligger kvar överst i en egen grupp med etiketten ✋ Behöver ditt svar.', 'admin']
+  ] },
   { datum: '2026-11-06', id: '2026-11-06f', tid: '20:43', rader: [
     ['Fixat', 'Läkarintyg går nu att öppna i dina Ärenden och för ägare/superadmin i Admin › Ärenden. Filerna är fortfarande privata och öppnas med kortlivade, säkra länkar.']
   ] },

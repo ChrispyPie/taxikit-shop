@@ -125,7 +125,7 @@
     '.ar-h{font-size:.78em;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--c-718096,#718096);margin:14px 2px 6px}' +
     '.ar-list{background:var(--surface,#fff);border:1px solid var(--border-soft,#e2e8f0);border-radius:12px;overflow:hidden}' +
     '.ar-row{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--border-soft,#e2e8f0);padding:11px 12px;cursor:pointer;color:inherit;font:inherit}' +
-    '.ar-row:last-child{border-bottom:0}.ar-row.need{background:#fff7ed}.ar-row.done{opacity:.72}' +
+    '.ar-row:last-child{border-bottom:0}.ar-row.done{opacity:.72}' +
     '.ar-ico{font-size:1.25em;line-height:1.2;flex:0 0 auto}.ar-main{flex:1;min-width:0}' +
     '.ar-t{display:flex;gap:6px;align-items:center;justify-content:space-between}.ar-t b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.96em}' +
     '.ar-s{font-size:.84em;color:var(--c-4a5568,#4a5568);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
