@@ -22,9 +22,12 @@ För återaktivering: ge tillbaka schema-USAGE och EXECUTE-grants från de två 
 ## Intygsfix 6 november 2026 (2026-11-06f)
 
 - Pushad backup från main: `backup/pre-intyg-fix-20261106` = `dfeb2ae9a4f36a8466f2f29d2340448042b9c6a5`.
-- Fixgren: `fix/sjuk-intyg-case-links`.
-- Ändrar endast gemensam filvisning i `arende-status.js`, anrop från `inkorg.js`/`arenden-admin.js`, cacheversioner och dokumentation/test. Nyheter publiceras med faktiskt verifierad drifttid.
-- Ångra endast fixen med en **ny revert-commit av fixens merge-commit**, `git revert -m 1 <intyg-fixens-merge-sha>`. Ångra vid behov även den separata Nyheter-committen. Ta en ny backup först; ingen reset/force push.
+- Fixgren: `fix/sjuk-intyg-case-links`, PR #80.
+- Merge: `04d7b4a888c6f893752840ea74ada1f0f9d0e57a`.
+- Första lyckade Pages-deploy: `42281978164`, klar 6 november 2026 kl. **20:43:38 (Europe/Stockholm)**. Samtliga sex kontrollerade frontendfiler matchade main kl. **20:43:55 (Europe/Stockholm)**.
+- Nyheter `2026-11-06f` använder den faktiska drifttiden **20:43 (Europe/Stockholm)**.
+- Ändrar endast gemensam filvisning i `arende-status.js`, anrop från `inkorg.js`/`arenden-admin.js`, cacheversioner och dokumentation/test. Nyheter publiceras separat med faktiskt verifierad drifttid.
+- Ångra endast fixen med en **ny revert-commit av fixens merge-commit**, `git revert -m 1 04d7b4a888c6f893752840ea74ada1f0f9d0e57a`. Ångra vid behov även den separata Nyheter-committen. Ta en ny backup först; ingen reset/force push.
 - Alternativt återställ de berörda frontendfilerna från backupgrenen med en ny normal commit och uppdatera deras cacheversioner. Återställ inte andra samtidiga förändringar.
 - **Ingen SQL eller Edge-funktion ändrades.** Det finns därför inget undo-SQL att köra. Inga intyg eller ärenden raderas; privat bucket och behörighetskontroller förblir orörda.
 - Kör befintlig Pages-publicering och kontrollera att de ändrade livefilerna matchar main. Om en GOT-cache-commit avbryter publiceringen, verifiera nästa körning innan klartbesked.

@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-06', id: '2026-11-06f', tid: '20:43', rader: [
+    ['Fixat', 'Läkarintyg går nu att öppna i dina Ärenden och för ägare/superadmin i Admin › Ärenden. Filerna är fortfarande privata och öppnas med kortlivade, säkra länkar.']
+  ] },
   { datum: '2026-11-06', id: '2026-11-06e', tid: '20:29', rader: [
     'Meddelanden och Ärenden under profilikonen. Växla på samma sida: privata samtal med ämne och svarstråd, eller dina pågående och avslutade ärenden.',
     'Skicka meddelande på en profil öppnar ett nytt privat meddelande med mottagaren förvald.',
