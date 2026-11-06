@@ -423,8 +423,10 @@
     };
   }
   function canOpen() {
-    var app = document.getElementById('app');
-    return !!token() && app && app.style.display !== 'none';
+    var app = document.getElementById('app'), dv = document.getElementById('dashboard-view');
+    var appOn = app && app.style.display !== 'none';
+    var dvOn = dv && !dv.classList.contains('hidden');   // Körpassdata döljer #app
+    return !!token() && (appOn || dvOn);
   }
   function show(on) {
     build();
@@ -527,6 +529,10 @@
   N.start = function () {
     build(); paintBadge(); refresh(true);
     clearInterval(st.timer);
+    try { var dvw = document.getElementById('dashboard-view'), apw = document.getElementById('app');
+      var mo = new MutationObserver(function () { paintEdge(); });
+      if (dvw) mo.observe(dvw, { attributes: true, attributeFilter: ['class'] });
+      if (apw) mo.observe(apw, { attributes: true, attributeFilter: ['style'] }); } catch (e) {}
     st.timer = setInterval(function () { if (document.visibilityState === 'visible') refresh(); }, 60000);
   };
   N.logout = function () {

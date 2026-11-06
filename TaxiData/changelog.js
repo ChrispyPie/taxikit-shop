@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-06', id: '2026-11-06h', tid: '22:30', rader: [
+    ['Fixat', 'Körpassdata: notiserna går nu att öppna där också, både med klockan högst upp och genom att dra fram panelen från högra kanten.']
+  ] },
   { datum: '2026-11-06', id: '2026-11-06g', tid: '22:20', rader: [
     ['Förbättrat', 'Ärenden: ärenden som behöver ditt svar har inte längre ljus bakgrund, så texten är lätt att läsa. De ligger kvar överst i en egen grupp med etiketten ✋ Behöver ditt svar.', 'admin']
   ] },
