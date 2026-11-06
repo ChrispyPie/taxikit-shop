@@ -235,6 +235,7 @@
     }
 
     function clearSession() {
+      if (window.MINA_BEVAKNINGAR) MINA_BEVAKNINGAR.stop();
       if (window.PROFILBILD) PROFILBILD.reset();
       localStorage.removeItem('taxi_session');
       localStorage.removeItem('taxi_logged_in');
@@ -923,6 +924,7 @@
       if (lockBlocked()) return;
       var item = findItem(id);
       if (item && !canSee(item)) return;
+      if (id !== MINA_BEVAKNINGAR.id) MINA_BEVAKNINGAR.stop();
       if (id === 'admin') {
         location.href = 'admin.html';
         return;

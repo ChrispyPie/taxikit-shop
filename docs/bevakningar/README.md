@@ -80,6 +80,7 @@ Ingen merge före hans **kör**. Se UNDO.md för återställning.
 
 - Syntaxkontroll inklusive inline-script i index.html: godkänd.
 - Nya logiktester: 14 kontroller godkända.
+- Nya mobiltester: 25 kontroller godkända, fyra skärmbilder i 390 × 844 pixlar.
 - Befintliga meddelandetester: 84 databaskontroller + 38 webbläsarkontroller godkända.
 - Befintliga intygstester: 56 kontroller godkända.
 - Deno: 16 tester godkända, 3 tick-integrationstester ger `forbidden` i sina gamla
