@@ -15,6 +15,11 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-06', id: '2026-11-06j', tid: '22:39', rader: [
+    ['Förbättrat', 'Nyheter: Visa alla lägger till äldre nyheter nedåt och du stannar där du var.'],
+    ['Förbättrat', 'Ankomster: Tidigare lägger de tidigare flygen och tågen ovanför, så vyn stannar på nuvarande tid. Skrolla upp för att se dem.'],
+    ['Förbättrat', 'Backa-swipen fungerar nu från vänstra halvan av skärmen, du behöver inte nå kanten. Dra tydligt åt höger.']
+  ] },
   { datum: '2026-11-06', id: '2026-11-06i', tid: '22:27', rader: [
     ['Nytt', 'Backa en sida genom att dra med tummen från vänsterkanten åt höger. Det fungerar på alla sidor, som telefonens bakåtknapp.']
   ] },

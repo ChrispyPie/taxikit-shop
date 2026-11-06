@@ -1,11 +1,13 @@
-/* Bakåt-swipe: dra från vänsterkanten åt höger = samma som telefonens bakåtknapp.
+/* Bakåt-swipe: dra åt höger från vänstra halvan av skärmen = samma som telefonens bakåtknapp.
  * Använder history.back() så att index.html:s popstate (stänger notiser, profilmeny,
  * går ur Forum/Inkorg/Profil m.m.) körs som vanligt. Saknas historik anropas goHome().
- * Högerkanten (notispanelen i notis.js) lämnas orörd. Ångra: se docs/swipe-back/UNDO.md. */
+ * Startzon = vänstra 50 % (telefonfodral täcker ofta kanten). Kräver tydlig horisontell
+ * dragning så vanlig scroll inte triggar bakåt. Högerkanten (notis.js) lämnas orörd.
+ * Ångra: se docs/swipe-back/UNDO.md och docs/scroll-fix/UNDO.md. */
 (function () {
-  var EDGE = 24;     // px från vänsterkanten där gesten får börja
-  var MIN_DX = 70;   // px åt höger innan gesten räknas som bakåt
+  var START_FRAC = 0.5;  // gesten får börja i vänstra halvan (fodral täcker kanten)
   var HINT_ID = 'swipe-back-hint';
+  function minDx() { return Math.max(100, Math.round(window.innerWidth * 0.28)); }
 
   var CSS =
     '#' + HINT_ID + '{position:fixed;left:0;top:50%;transform:translate(-120%,-50%);' +
@@ -97,9 +99,9 @@
     if (e.touches.length !== 1) { tg = null; return; }
     if (onLogin() || notisOpen()) { tg = null; return; }
     var t = e.touches[0];
-    if (t.clientX > EDGE) { tg = null; return; }
+    if (t.clientX > window.innerWidth * START_FRAC) { tg = null; return; }
     if (scrollsX(e.target) || blockedTarget(e.target)) { tg = null; return; }
-    tg = { x: t.clientX, y: t.clientY, active: false, dx: 0 };
+    tg = { x: t.clientX, y: t.clientY, active: false, dx: 0, dy: 0 };
   }, { passive: true });
 
   document.addEventListener('touchmove', function (e) {
@@ -117,6 +119,7 @@
     }
     if (dx < 0) dx = 0;
     tg.dx = dx;
+    tg.dy = dy;
     showHint(dx);
     // Lätt: vi preventDefaultar inte – låt sidan skrolla om gesten avbryts.
   }, { passive: true });
@@ -126,7 +129,9 @@
     var g = tg; tg = null;
     hideHint();
     if (!g.active) return;
-    if (g.dx >= MIN_DX && Math.abs(g.dx) > 0) goBack();
+    var need = minDx();
+    // Tydligt horisontellt: |dy| < dx/2, och långt nog så fodral/korta drag inte triggar.
+    if (g.dx >= need && Math.abs(g.dy || 0) < g.dx * 0.5) goBack();
   }, { passive: true });
 
   document.addEventListener('touchcancel', function () {

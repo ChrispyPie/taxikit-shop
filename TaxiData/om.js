@@ -189,8 +189,19 @@
       if (n) {
         var box = document.getElementById('om-nyheter');
         var alla = n.textContent === 'Visa alla';
+        // Behåll scroll-läget när listan växer (Visa alla). Annars hoppar mobilen till botten.
+        var y = window.scrollY || document.documentElement.scrollTop || 0;
+        try { n.blur(); } catch (err) {}
         if (box) box.outerHTML = nyheter(alla, shownMark);
-        if (!alla) { var nb = document.getElementById('om-nyheter'); if (nb) nb.scrollIntoView({ block: 'start' }); }
+        if (!alla) {
+          var nb = document.getElementById('om-nyheter');
+          if (nb) nb.scrollIntoView({ block: 'start' });
+        } else {
+          // Återställ efter att layouten hunnit ritas (iOS Safari behöver rAF).
+          var restore = function () { window.scrollTo(0, y); };
+          restore();
+          requestAnimationFrame(function () { restore(); requestAnimationFrame(restore); });
+        }
         return;
       }
       var b = e.target.closest('[data-om="forum"]');

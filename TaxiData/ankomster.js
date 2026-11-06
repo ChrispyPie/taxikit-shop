@@ -285,8 +285,40 @@
   });
   window.addEventListener('load', function () { keepActiveInView(document); });
 
-  function paint() {
+
+  // Scroll-ankare: behåll samma rad på samma skärmposition när listan växer uppåt
+  // (Visa tidigare). Safari saknar CSS overflow-anchor, så vi gör det manuellt.
+  function headerBottom() {
+    var h = document.querySelector('header');
+    return h ? h.getBoundingClientRect().bottom : 0;
+  }
+  function captureAnchor(root) {
+    if (!root) return null;
+    var cut = headerBottom() + 2;
+    var rows = root.querySelectorAll('[data-ank-key]');
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i].getBoundingClientRect();
+      if (r.bottom > cut + 4) {
+        return { key: rows[i].getAttribute('data-ank-key'), top: r.top };
+      }
+    }
+    return null;
+  }
+  function restoreAnchor(root, a) {
+    if (!a || !a.key || !root) return;
+    var neo = null, rows = root.querySelectorAll('[data-ank-key]');
+    for (var i = 0; i < rows.length; i++) {
+      if (rows[i].getAttribute('data-ank-key') === a.key) { neo = rows[i]; break; }
+    }
+    if (!neo) return;
+    var dy = neo.getBoundingClientRect().top - a.top;
+    if (Math.abs(dy) >= 1) window.scrollBy(0, dy);
+  }
+
+  function paint(opts) {
     var el = state.el; if (!el || !el.isConnected) return stop();
+    opts = opts || {};
+    var anchor = opts.anchor ? captureAnchor(el) : null;
     var s = src(), data = state.data[s.id], now = Date.now();
     var html = '<div class="tabs ank-tabs">' + A.sources.map(function (x) {
       return '<button class="tab' + (x.id === s.id ? ' active' : '') + '" data-ank-tab="' + x.id + '">' + x.icon + ' ' + esc(x.label) + '</button>';
@@ -326,6 +358,11 @@
       });
     }
     el.innerHTML = html;
+    if (anchor) {
+      restoreAnchor(el, anchor);
+      // iOS Safari layoutar ibland en frame senare
+      requestAnimationFrame(function () { restoreAnchor(el, anchor); });
+    }
     keepActiveInView(el);
     if (window.BEVAKNING) BEVAKNING.decorate(el);  // bevakning: notisknapp + långtryck
     if (window.TAGNOTIS) TAGNOTIS.decorate(el);    // Mina tågnotiser (tagnotis.js), bara på Tåg-fliken
@@ -349,7 +386,7 @@
     var t = e.target.closest('[data-ank-tab]');
     if (t) { state.tab = t.getAttribute('data-ank-tab'); localStorage.setItem('ank_tab', state.tab); state.showPast = false; paint(); load(state.tab, true); return; }
     if (e.target.closest('[data-ank-refresh]')) { load(state.tab); return; }
-    if (e.target.closest('[data-ank-past]')) { state.showPast = !state.showPast; paint(); return; }
+    if (e.target.closest('[data-ank-past]')) { state.showPast = !state.showPast; paint({ anchor: true }); return; }
     var g = e.target.closest('[data-ank-filter]');
     if (g) { localStorage.setItem('ank_tagfilter', g.getAttribute('data-ank-filter')); paint(); }
   }
