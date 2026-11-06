@@ -116,7 +116,7 @@
     try { var f = JSON.parse(localStorage.getItem(filterKey())); if (Array.isArray(f)) return f; } catch (e) {}
     return DEFAULT_FILTER.slice();
   }
-  function shown(e) { return st.filter.indexOf(e.category) >= 0 || (e.is_suggestion && (e.mine || st.data.can_approve)); }
+  function shown(e) { if (e.watchRow) return true; return st.filter.indexOf(e.category) >= 0 || (e.is_suggestion && (e.mine || st.data.can_approve)); }
 
   // ---------- data ----------
   function range() {
@@ -150,8 +150,29 @@
     });
   }
   function byId(id) { return ((st.data && st.data.events) || []).filter(function (e) { return e.id === id; })[0]; }
+  function allEvents() {
+    var list = (st.data && st.data.events) || [];
+    if (localStorage.getItem('taxi_kal_watches') !== '1') return list;
+    return list.concat((st.watchRows || []).map(function (r) {
+      return { id: r.id, title: r.title, venue: r.kind === 'flyg' ? 'Landvetter' : 'Göteborg C', category: 'bevakning', starts_at: new Date(r.at).toISOString(), watchRow: r };
+    }));
+  }
+  function loadWatches() {
+    var el = st.el, session = localStorage.getItem('taxi_session'), seq = ++st.watchSeq;
+    if (localStorage.getItem('taxi_kal_watches') !== '1') return;
+    st.watchError = ''; st.watchLoading = true;
+    MINA_BEVAKNINGAR.load(true).then(function (d) {
+      if (st.el !== el || seq !== st.watchSeq || session !== localStorage.getItem('taxi_session') || !el.isConnected) return;
+      st.watchRows = d.rows; st.watchLoading = false;
+      st.watchError = d.errors.length ? 'Kunde inte hämta alla bevakningar. Prova att slå av och på igen.' : '';
+      if (!st.form && !st.open) draw();
+    }).catch(function () {
+      if (seq !== st.watchSeq || session !== localStorage.getItem('taxi_session')) return;
+      st.watchLoading = false; st.watchError = 'Kunde inte hämta bevakningarna. Prova igen.'; if (!st.form && !st.open) draw();
+    });
+  }
   function eventsOn(key) {
-    return ((st.data && st.data.events) || []).filter(function (e) {
+    return allEvents().filter(function (e) {
       if (!shown(e)) return false;
       var s = parts(e.starts_at).key, en = e.ends_at ? parts(e.ends_at).key : s;
       return s <= key && en >= key;
@@ -159,16 +180,19 @@
   }
 
   // Öppna Kalender och en viss händelse (notisflödet, notis.js)
-  K.openEvent = function (id) {
-    K._ev = +id || null;
+  K.openEvent = function (id, date, city) {
+    K._ev = +id || null; K._date = date || null; K._city = city || null;
     if (typeof window.openItem === 'function') window.openItem(K.id);
   };
   K.render = function (content) {
+    st.watchSeq = (st.watchSeq || 0) + 1; st.watchRows = []; st.watchError = ''; st.watchLoading = false;
     st.el = content; st.open = null; st.form = null; st.comments = null;
     st.today = null; st.cur = null; st.data = null;
     content.innerHTML = '<div id="kal-body"><div class="tl-msg">Laddar…</div></div>';
-    st.cur = todayKey();
-    load();
+    st.cur = K._date ? parts(K._date).key : todayKey();
+    if (K._city) st.city = K._city;
+    K._date = K._city = null;
+    load(); loadWatches();
   };
 
   // ---------- rader ----------
@@ -187,6 +211,10 @@
     return h;
   }
   function row(e, opt) {
+    if (e.watchRow) {
+      var w = e.watchRow;
+      return '<button type="button" class="ank-row kal-row kal-bevakning" data-watch="' + esc(w.id) + '"><div class="ank-time"><div class="ank-new">' + parts(w.at).hm + '</div><div class="kal-ico">' + (w.kind === 'flyg' ? '✈️' : '🚆') + '</div></div><div class="ank-main"><div class="ank-from">' + esc(w.title) + '</div><div class="ank-meta">' + esc(w.status || 'Bevakas') + '</div></div><div class="ank-status">📌</div></button>';
+    }
     var s = parts(e.starts_at), now = Date.now();
     var ended = e.ends_at && new Date(e.ends_at).getTime() < now;
     var t = TYPE[e.category] || TYPE.ovrigt;
@@ -204,7 +232,7 @@
   function tonightHtml() {
     var t = st.today, now = Date.now();
     var list = eventsOn(t).filter(function (e) {
-      return parts(e.starts_at).key === t && !e.time_unknown && (!e.ends_at || new Date(e.ends_at).getTime() > now - 15 * 60000);
+      return !e.watchRow && parts(e.starts_at).key === t && !e.time_unknown && (!e.ends_at || new Date(e.ends_at).getTime() > now - 15 * 60000);
     }).sort(function (a, b) { return ms(a.ends_at || a.starts_at) - ms(b.ends_at || b.starts_at); });
     var h = '<div class="vk-card kal-tonight"><div class="kal-tt">' + (+parts(new Date().toISOString()).hm.slice(0, 2) >= 16 ? 'Ikväll' : 'Idag') +
       ' <span>· sorterat på sluttid</span></div>';
@@ -233,7 +261,7 @@
       if (k.slice(0, 7) !== mon) cls += ' out';
       if (k === st.today) cls += ' today';
       var counts = {}; evs.forEach(function (e) { counts[e.category] = (counts[e.category] || 0) + 1; });
-      var dots = TYPES.filter(function (t) { return counts[t.id]; }).map(function (t) { return '<i class="kal-dot kal-' + t.id + '"></i>'; }).join('');
+      var dots = (counts.bevakning ? '<i class="kal-dot kal-bevakning"></i>' : '') + TYPES.filter(function (t) { return counts[t.id]; }).map(function (t) { return '<i class="kal-dot kal-' + t.id + '"></i>'; }).join('');
       h += '<button type="button" class="' + cls + '" data-k="' + k + '"><span class="kal-dn">' + kd(k).getUTCDate() + '</span>' +
         (evs.length ? '<span class="kal-n">' + evs.length + '</span><span class="kal-dots">' + dots + '</span>' : '') + '</button>';
       if (i === 34 && addDays(first, 35).slice(0, 7) !== mon) break;
@@ -243,7 +271,7 @@
   // År: 12 små månadsrutnät. Bygg en dag -> typer-karta en gång (snabbt för ett helt år).
   function yearHtml() {
     var y = st.cur.slice(0, 4), map = {}, from = y + '-01-01', to = y + '-12-31';
-    ((st.data && st.data.events) || []).forEach(function (e) {
+    allEvents().forEach(function (e) {
       if (!shown(e)) return;
       var s = parts(e.starts_at).key, en = e.ends_at ? parts(e.ends_at).key : s;
       if (s < from) s = from; if (en > to) en = to;
@@ -256,7 +284,7 @@
         ['M', 'T', 'O', 'T', 'F', 'L', 'S'].map(function (x) { return '<span class="kal-ywd">' + x + '</span>'; }).join('');
       for (var i = 0; i < off; i++) h += '<span></span>';
       for (var k = first; k.slice(0, 7) === mk; k = addDays(k, 1)) {
-        var c = map[k], dots = c ? TYPES.filter(function (t) { return c[t.id]; }).slice(0, 3).map(function (t) { return '<i class="kal-dot kal-' + t.id + '"></i>'; }).join('') : '';
+        var c = map[k], dots = c ? (c.bevakning ? '<i class="kal-dot kal-bevakning"></i>' : '') + TYPES.filter(function (t) { return c[t.id]; }).slice(0, 3).map(function (t) { return '<i class="kal-dot kal-' + t.id + '"></i>'; }).join('') : '';
         h += '<button type="button" class="kal-yday' + (k === st.today ? ' today' : '') + (c ? ' has' : '') + '" data-k="' + k + '"><span>' + kd(k).getUTCDate() + '</span><span class="kal-ydots">' + dots + '</span></button>';
       }
       h += '</div></div>';
@@ -297,6 +325,9 @@
     h += '<div class="date-nav kal-nav"><button type="button" id="kal-prev" aria-label="Föregående">‹</button><span class="tl-date kal-date">' + esc(navLabel()) +
       '</span><button type="button" id="kal-next" aria-label="Nästa">›</button><button type="button" id="kal-pick" class="tl-period" aria-label="Välj datum">📅</button></div>';
     if (st.cur !== st.today) h += '<div class="kal-back"><button type="button" id="kal-today">Till idag</button></div>';
+    h += '<label class="kal-watch-toggle"><input type="checkbox" id="kal-show-watches"' + (localStorage.getItem('taxi_kal_watches') === '1' ? ' checked' : '') + '> Visa mina bevakningar</label>';
+    if (st.watchLoading) h += '<div role="status" class="kal-none">Hämtar bevakningar…</div>';
+    if (st.watchError) h += '<div role="status" class="mb-warning">' + esc(st.watchError) + '</div>';
     h += chipsHtml();
     var r = range(), have = st.loaded && st.loaded.from <= r[0] && st.loaded.to >= r[1];
     if (!have) h += '<div class="tl-msg">Laddar…</div>';
@@ -311,6 +342,16 @@
   }
   function go(key) { st.cur = key; draw(); var r = range(); if (!(st.loaded && st.loaded.from <= r[0] && st.loaded.to >= r[1])) load(); }
   function bindMain(body) {
+    document.getElementById('kal-show-watches').onchange = function (ev) {
+      localStorage.setItem('taxi_kal_watches', ev.target.checked ? '1' : '0');
+      if (ev.target.checked) loadWatches();
+      else { st.watchSeq++; st.watchRows = []; st.watchError = ''; st.watchLoading = false; }
+      draw();
+    };
+    body.querySelectorAll('[data-watch]').forEach(function (b) { b.onclick = function () {
+      var r = (st.watchRows || []).find(function (w) { return w.id === b.dataset.watch; });
+      if (r) MINA_BEVAKNINGAR.open(r);
+    }; });
     body.querySelectorAll('.kal-tabs .tab').forEach(function (b) {
       b.onclick = function () { st.view = b.dataset.v; localStorage.setItem('taxi_kal_view', st.view); go(st.cur); };
     });
