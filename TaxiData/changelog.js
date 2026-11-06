@@ -15,6 +15,12 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-06', id: '2026-11-06d', tid: '19:45', rader: [
+    ['Nytt', 'Topplistor har fått ett Rekord-läge. Tryck på Rekord högst upp för att se den bästa dagen, veckan, månaden eller året för varje förare sedan 2025. Listan är anonym och din egen plats är markerad med "Du".'],
+    ['Nytt', 'Välj vad du vill se i listan överst: Inkört, Dricks, Kr/mil, Kr/timme, Km, Antal resor, Kr/körning, Kr/pass, Dricks %, Flygresor, Km/körning, Belopp/körning och Körningar/pass. Hela listan visas, störst först. Läs nerifrån om du vill se de minsta.'],
+    ['Förbättrat', 'Vid snitt, till exempel Kr/körning, står antalet körningar inom parentes, så här: 312 kr (25 st). I Rekord krävs ett minsta antal körningar för snitt: 5 på en dag, 15 på en vecka, 20 på en månad och 100 på ett år.'],
+    ['Ändrat', 'Dricks räknas bara på kort, eftersom kontantdricks saknas i datan. Timmar och Verkstadstimmar finns inte längre i Topplistor.']
+  ] },
   { datum: '2026-11-06', id: '2026-11-06c', tid: '19:39', rader: [
     ['Nytt', 'Inkorg: tryck på profilikonen uppe till höger och välj Inkorg. Där ser du dina ärenden, till exempel felanmälan, verkstadstid och uppgifter, och svaren på dem. Ärenden där någon väntar på ditt svar är markerade med "Behöver ditt svar".'],
     ['Nytt', 'Klockan visar en kort notis när ägaren svarar på ett av dina ärenden. Tryck på den så öppnas svaret i Inkorgen. När du har läst svaret försvinner både notisen och pricken.'],

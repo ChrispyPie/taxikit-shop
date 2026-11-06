@@ -1,13 +1,16 @@
-# Ångra Topplistor + Rekordtavlan (20261106e)
+# Ångra Topplistor + Rekordtavlan (20261106e) — LIVE 2026-11-06 19:45
 
-## Om PR inte mergats
-Radera branchen `feat/topplistor-rekord`. Backup: `backup/pre-rekord-20261106` (= main @ `992ee47a`).
+## Läge
+- PR #77 mergad: merge-commit `257299e7` (main), Nyheter `2026-11-06d`
+- SQL applicerad i prod 2026-11-06 ~19:43 (migration `20261106e_topplistor_rekord` + `20261106e_topplistor_rekord_fix1`)
 
-## Om frontend är live men SQL inte
-1. Återställ `TaxiData/topplistor.js` + `style.css` + cache-bust i `index.html` från backup-branchen.
-2. Höj cache-bust.
+## Backups
+- `backup/pre-rekord-merge-20261106` = main före merge @ `b364a285`
+- `backup/pre-rekord-20261106` = main när PR startade @ `992ee47a`
 
-## Om SQL är applicerad
-1. Backa frontend först (annars 404 på RPC).
-2. Kör `supabase/migrations/undo/20261106e_topplistor_rekord_undo.sql`.
-3. Gamla `get_leaderboard*` lämnas orörda av både migration och undo.
+## Ångra frontend (gör först)
+1. Återställ `TaxiData/topplistor.js`, `TaxiData/style.css` och cache-bust i `TaxiData/index.html` från `backup/pre-rekord-merge-20261106` i en ny commit (ingen force push), eller `git revert -m 1 257299e7` plus revert av Nyheter-commiten.
+2. Höj cache-bust på `topplistor.js` så telefonerna hämtar om.
+
+## Ångra SQL (efter frontend)
+Kör `supabase/migrations/undo/20261106e_topplistor_rekord_undo.sql` (droppar bara `get_topplista_metric` och `get_rekord_metric`). Gamla `get_leaderboard*` är orörda och fungerar med gammal frontend.
