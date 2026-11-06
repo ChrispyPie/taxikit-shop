@@ -24,7 +24,8 @@
   var S = window.SJUK = {};
   var WD = ['sön', 'mån', 'tis', 'ons', 'tor', 'fre', 'lör'];
   var MON = ['jan', 'feb', 'mars', 'april', 'maj', 'juni', 'juli', 'aug', 'sep', 'okt', 'nov', 'dec'];
-  var STATUS = { ny: ['Väntar på ägaren', 'ny'], godkand: ['Godkänd', 'klar'], intyg_begart: ['Läkarintyg begärt', 'pagar'], avslagen: ['Avslagen', 'nej'] };
+  // Samma statusord överallt (arende-status.js): Ny / Pågår / Väntar på svar / Klar
+  var STATUS = { ny: ['Ny', 'ny'], godkand: ['Klar · godkänd', 'klar'], intyg_begart: ['Väntar på svar · läkarintyg', 'pagar'], avslagen: ['Klar · avslagen', 'nej'] };
   var LON = { ej: 'Sjuklön ej hanterad', beviljad: 'Sjuklön beviljad', utbetald: 'Sjuklön utbetald' };
   var ERR = {
     already_sick: 'Du har redan en pågående sjukanmälan. Friskanmäl den först.',

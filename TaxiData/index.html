@@ -99,7 +99,7 @@
       <h1 id="title">TaxiData</h1>
       <div class="hdr-right">
         <button class="profile-btn notis-btn" id="notis-btn" data-badge="notiser" onclick="NOTIS.toggle()" aria-label="Notiser">🔔</button>
-        <button class="profile-btn" id="profile-btn" data-badge="profile" onclick="toggleProfile()" aria-label="Profil">👤</button>
+        <button class="profile-btn" id="profile-btn" data-badge="profbtn" onclick="toggleProfile()" aria-label="Profil">👤</button>
       </div>
     </header>
     <div id="content">Laddar...</div>
@@ -108,6 +108,7 @@
   <div class="profile-menu" id="profile-menu">
       <div id="full-name" style="font-weight:600; border-bottom:1px solid var(--c-e2e8f0); cursor:default;"></div>
       <div id="menu-profile" data-badge="profile" onclick="openProfile()">Profil</div>
+      <div id="menu-inkorg" data-badge="inkorg" onclick="openInbox()">📥 Inkorg</div>
       <div id="menu-om" onclick="document.getElementById('profile-menu').classList.remove('show'); openItem('om')">Om appen</div>
       <div onclick="logout()">Logga ut</div>
     </div>
@@ -119,7 +120,7 @@
       <div class="hdr-right">
         <span id="driver-label"></span><!-- bara ägarens förarväljare, inget förarnummer -->
         <button class="profile-btn notis-btn" data-badge="notiser" onclick="NOTIS.toggle()" aria-label="Notiser">🔔</button>
-        <button class="profile-btn kp-profile-btn" data-badge="profile" onclick="toggleProfile()" aria-label="Profil">👤</button>
+        <button class="profile-btn kp-profile-btn" data-badge="profbtn" onclick="toggleProfile()" aria-label="Profil">👤</button>
       </div>
     </header>
     <div class="controls">
@@ -152,20 +153,22 @@
   <script src="bevakning.js?v=20261028v"></script>
   <script src="tagnotis.js?v=20261029tn"></script>
   <script src="topplistor.js?v=20261104bil2"></script>
-  <script src="sjuk.js?v=20261030sj4"></script>
-  <script src="verkstad.js?v=20261029sj1"></script>
+  <script src="sjuk.js?v=20261106ik1"></script>
+  <script src="verkstad.js?v=20261106ik1"></script>
   <script src="kalender.js?v=20261104ar1"></script>
   <script src="hjalpbot.js?v=zzzda1"></script>
   <script src="profilbild.js?v=20261105kh1"></script>
   <script src="profil-sida.js?v=20261106p1"></script>
-  <script src="forum.js?v=20261106fc3"></script>
+  <script src="forum.js?v=20261106ik1"></script>
   <script src="om-data.js?v=20261030b"></script>
   <script src="changelog.js?v=20261106b"></script>
   <script src="om.js?v=20261104sa2"></script>
   <script src="lonekoll.js?v=20261028sp1"></script>
   <script src="prognos.js?v=20261104kt2"></script>
   <script src="prognos-notis.js?v=20261103pg2"></script>
-  <script src="notis.js?v=20261029k"></script>
+  <script src="arende-status.js?v=20261106ik1"></script>
+  <script src="inkorg.js?v=20261106ik1"></script>
+  <script src="notis.js?v=20261106ik1"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -235,6 +238,7 @@
       localStorage.removeItem('taxi_view');
       if (window.DEMO) DEMO.clear();
       if (window.NOTIS) NOTIS.logout();
+      if (window.INKORG) INKORG.logout();
     }
 
     function showLoginError(msg) {
@@ -332,7 +336,9 @@
     }
 
     function updateProfileReminder() {
-      if (window.setBadge) setBadge('profile', !!driverData.needs_profile);
+      window.INKORG_NEEDS_PROFILE = !!driverData.needs_profile;   // inkorg.js lägger till sina olästa på samma prick
+      window.INKORG_ROLE = driverData.category || '';   // inkorg.js: vem som är ägare/S admin (notislänkar)
+      if (window.setBadge) { setBadge('profile', !!driverData.needs_profile); setBadge('profbtn', !!driverData.needs_profile || !!window.INKORG_HAS); }
     }
 
     function setFullName() {
@@ -356,6 +362,7 @@
       if (!(await loadDriverData())) return;
       document.getElementById('login-screen').style.display = 'none';
       if (window.NOTIS) NOTIS.start();
+      if (window.INKORG) INKORG.start();
       updateProfileReminder();
 
       var savedView = localStorage.getItem('taxi_view');
@@ -395,6 +402,19 @@
       try { await rpc('logout', { p_token: localStorage.getItem('taxi_session') || '' }); } catch (e) {}
       clearSession();
       location.reload();
+    }
+
+    // Inkorg (inkorg.js): mina ärenden och svaren på dem. Ligger under profilikonen, klockan är kvar för notiser.
+    function openInbox() {
+      if (lockBlocked()) return;
+      document.getElementById('profile-menu').classList.remove('show');
+      if (current === 'inkorg') { renderMenu(); return; }
+      localStorage.removeItem('taxi_view');
+      document.getElementById('dashboard-view').classList.add('hidden');
+      document.getElementById('app').style.display = 'block';
+      current = 'inkorg';
+      try { history.pushState({ view: 'inkorg' }, ''); } catch (e) {}
+      renderMenu();
     }
 
     function toggleProfile() {
@@ -759,9 +779,11 @@
         lockBlocked();
       } else if (current === FORUM.id && FORUM.back && FORUM.back()) {
         // forumet gick tillbaka från ett inlägg till listan
+      } else if (current === 'inkorg' && window.INKORG && INKORG.back()) {
+        // Inkorgen gick tillbaka från en tråd till listan
       } else if (current === 'profil' && window.PROFIL_SIDA && PROFIL_SIDA.back && PROFIL_SIDA.back()) {
         // profilens under-vy (redigera/galleri/gästbok)
-      } else if (current === 'profil' || current === ANKOMSTER.id || current === PROGNOS.id || current === TOPPLISTOR.id || current === VERKSTAD.id || current === KALENDER.id || current === FORUM.id || current === OM.id || current === LONEKOLL.id) {
+      } else if (current === 'profil' || current === 'inkorg' || current === ANKOMSTER.id || current === PROGNOS.id || current === TOPPLISTOR.id || current === VERKSTAD.id || current === KALENDER.id || current === FORUM.id || current === OM.id || current === LONEKOLL.id) {
         goHome();
       }
     });
@@ -789,6 +811,10 @@
       if (current === 'profil') {
         title.textContent = 'Profil';
         renderProfile();
+      } else if (current === 'inkorg' && window.INKORG) {
+        title.textContent = INKORG.title;
+        content.onclick = null;
+        INKORG.render(content);
       } else if (current === ANKOMSTER.id) {
         title.textContent = ANKOMSTER.title;
         ANKOMSTER.render(content);

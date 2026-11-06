@@ -268,6 +268,12 @@
     var txt = String(it.body || ''), ttl = String(it.title || ''), ico = null, m;
     try { m = EMO.exec(ttl || txt); } catch (e) { m = null; }
     if (m) { ico = m[1]; if (ttl) ttl = ttl.slice(m[0].length); else txt = txt.slice(m[0].length); }
+    if (it.case_kind && it.case_id && window.INKORG) {
+      // Svar/ändring på ett ärende: kort notis, hela svaret finns i tråden (Inkorgen eller Admin › Ärenden)
+      var mine = INKORG.has(it.case_kind, it.case_id);
+      var short = txt.replace(/\s+/g, ' ').trim(); if (short.length > 70) short = short.slice(0, 69) + '…';
+      return { ico: '📥', html: '<b>' + (mine ? 'Nytt i Inkorgen' : 'Nytt i Ärenden') + '</b> – ' + esc(short) };
+    }
     return { ico: ico || iconOf(it), html: ttl ? '<b>' + esc(ttl) + '</b>' + (txt ? ' – ' + esc(txt) : '') : esc(txt) };
   }
 
@@ -330,6 +336,12 @@
     var k = String(it.kind || '');
     var open = window.openItem;
     if (typeof open !== 'function') return;
+    // Notis som hör till ett ärende (2026-11-06): öppna tråden. Egna ärenden i Inkorgen, åkeriets i Admin › Ärenden.
+    if (it.case_kind && it.case_id && window.INKORG) {
+      if (INKORG.has(it.case_kind, it.case_id) || !INKORG.isAdmin()) INKORG.openCase(it.case_kind, it.case_id);
+      else location.href = 'admin.html#arende=' + encodeURIComponent(it.case_kind + ':' + it.case_id);
+      return;
+    }
     if (k === 'nyheter') {
       open('om');
       setTimeout(function () { var el = document.getElementById('om-nyheter'); if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80);
