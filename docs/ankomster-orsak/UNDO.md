@@ -5,7 +5,7 @@ Live efter Christians "kör" (t1002u).
 - Backup av main före feature-arbetet: `backup/pre-ankomster-orsak-20261106`.
 - Backup av main före merge: `backup/pre-ankomster-orsak-merge-20261106` (= origin/main tip 49158750, efter PR #81 Mina bevakningar).
 - Worktree: `/workspace/tk-orsak`, branch `feature/ankomster-orsak`, PR #82.
-- Merge-SHA: (fylls i efter merge).
+- Merge-SHA: `7750ac5a52e0b98163f6361cd4d9d139ec6fdac6` (Merge pull request #82).
 - Ändrade filer:
   - `api/trains.js` – INCLUDE Deviation/OtherInformation/Booking, fälten `reason` och `info` i JSON.
   - `scripts/fetch_got_flights.py` – fältet `reason` (samma som `rawStatus`/remarks).
