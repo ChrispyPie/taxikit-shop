@@ -145,6 +145,31 @@ function productName(f) {
     .join(" ");
 }
 
+// Deviation / OtherInformation / Booking: { Code, Description } eller sträng.
+// Hoppar över tomma och rena statusord som "Inställt" (det syns redan på raden).
+const SKIP_REASON = new Set(["inställt", "installd", "inställd", "canceled", "cancelled", "borttagen"]);
+function codesText(raw) {
+  if (!raw) return [];
+  const arr = Array.isArray(raw) ? raw : [raw];
+  const out = [];
+  for (const item of arr) {
+    let s = "";
+    if (typeof item === "string") s = item.trim();
+    else if (item && typeof item === "object") s = String(item.Description || item.Text || item.Code || "").trim();
+    if (!s) continue;
+    if (SKIP_REASON.has(s.toLowerCase())) continue;
+    if (!out.includes(s)) out.push(s);
+  }
+  return out;
+}
+
+// Kort orsakstext till UI. reason = huvudsak (Deviation), info = övrigt (OtherInformation + Booking).
+function reasonParts(f) {
+  const reason = codesText(f.Deviation).join(". ");
+  const info = codesText(f.OtherInformation).concat(codesText(f.Booking)).join(". ");
+  return { reason: reason || "", info: info || "" };
+}
+
 function slimTrain(f) {
   const act = String(f.ActivityType || "");
   const dir = act.toLowerCase().startsWith("ank") ? "ANK" : "AVG";
@@ -155,6 +180,7 @@ function slimTrain(f) {
   const prod = productName(f);
   const hay = (JSON.stringify(traffic) + " " + prod).toLowerCase();
   const snabb = ["snabbtåg", "x 2000", "x2000", "sx2000"].some((w) => hay.includes(w));
+  const parts = reasonParts(f);
   return {
     id: f.AdvertisedTrainIdent || "",
     dir,
@@ -170,6 +196,8 @@ function slimTrain(f) {
     product: prod,
     traffic,
     snabb,
+    reason: parts.reason,
+    info: parts.info,
   };
 }
 
@@ -207,7 +235,8 @@ async function stationQuery(key) {
     "<INCLUDE>AdvertisedTrainIdent</INCLUDE><INCLUDE>Canceled</INCLUDE>" +
     "<INCLUDE>TrackAtLocation</INCLUDE><INCLUDE>FromLocation</INCLUDE>" +
     "<INCLUDE>ToLocation</INCLUDE><INCLUDE>ProductInformation</INCLUDE>" +
-    "<INCLUDE>TypeOfTraffic</INCLUDE></QUERY>";
+    "<INCLUDE>TypeOfTraffic</INCLUDE>" +
+    "<INCLUDE>Deviation</INCLUDE><INCLUDE>OtherInformation</INCLUDE><INCLUDE>Booking</INCLUDE></QUERY>";
   return rowsOf(await tvPost(key, q)).map(slimTrain);
 }
 
@@ -358,7 +387,8 @@ async function routeFor(key, ident, schedIso) {
     "</AND></FILTER>" +
     "<INCLUDE>LocationSignature</INCLUDE><INCLUDE>ActivityType</INCLUDE><INCLUDE>Advertised</INCLUDE>" +
     "<INCLUDE>AdvertisedTimeAtLocation</INCLUDE><INCLUDE>EstimatedTimeAtLocation</INCLUDE>" +
-    "<INCLUDE>TimeAtLocation</INCLUDE><INCLUDE>TrackAtLocation</INCLUDE><INCLUDE>Canceled</INCLUDE></QUERY>";
+    "<INCLUDE>TimeAtLocation</INCLUDE><INCLUDE>TrackAtLocation</INCLUDE><INCLUDE>Canceled</INCLUDE>" +
+    "<INCLUDE>Deviation</INCLUDE><INCLUDE>OtherInformation</INCLUDE><INCLUDE>Booking</INCLUDE></QUERY>";
   const rows = rowsOf(await tvPost(key, q));
   // Bara den körning som ankommer G vid sched (±3 h) – inte gårdagens/morgondagens med samma nummer.
   const lo = sched - 14 * 3600000, hi = sched + 3 * 3600000;
@@ -390,7 +420,16 @@ async function routeFor(key, ident, schedIso) {
   const gi = list.findIndex((s) => s.sig === STATION && s.arrSched);
   if (gi >= 0) list = list.slice(0, gi + 1);
   list = list.map((s) => { const o = Object.assign({}, s); delete o.t; return o; });
-  const body = { id: ident, sched: schedIso, updated: new Date().toISOString(), error: null, stops: list, lastSeen: seen };
+  let reason = "", info = "";
+  for (const r of rows) {
+    if ((r.LocationSignature || "") !== STATION) continue;
+    const t = Date.parse(r.AdvertisedTimeAtLocation);
+    if (!Number.isFinite(t) || Math.abs(t - sched) > 3 * 3600000) continue;
+    const parts = reasonParts(r);
+    if (parts.reason && !reason) reason = parts.reason;
+    if (parts.info && !info) info = parts.info;
+  }
+  const body = { id: ident, sched: schedIso, updated: new Date().toISOString(), error: null, stops: list, lastSeen: seen, reason, info };
   ROUTE_CACHE.set(ck, { at: Date.now(), body });
   if (ROUTE_CACHE.size > 300) ROUTE_CACHE.delete(ROUTE_CACHE.keys().next().value);
   return body;
@@ -455,4 +494,4 @@ async function handler(req, res) {
 }
 
 module.exports = handler;
-module.exports._internal = { slimTrain, buildTrains, uniqueIdents, rowsOf };
+module.exports._internal = { slimTrain, buildTrains, uniqueIdents, rowsOf, codesText, reasonParts };

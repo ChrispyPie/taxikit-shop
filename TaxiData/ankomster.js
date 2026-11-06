@@ -79,7 +79,9 @@
       tid: t.id || '', schedRaw: t.sched || '',
       note: '',
       group: trainGroup(t),
-      snabb: !!t.snabb
+      snabb: !!t.snabb,
+      reason: String(t.reason || ''),
+      reasonInfo: String(t.info || '')
     };
   }
   // Nedersta raden: "Anlänt spår 5" / "Inkommande spår 5" / "Senast sedd: Alingsås 15:12" / "Ej avgått".
@@ -159,7 +161,9 @@
       removed: st === 'DEL',
       special: special || '',
       info: line,
-      note: ''  // statusen står nu i statusraden (info)
+      note: '',  // statusen står nu i statusraden (info)
+      reason: String(f.reason || f.rawStatus || ''),
+      reasonInfo: ''
     };
   }
   function loadFlights() {
@@ -191,16 +195,20 @@
   var ROUTE_URL = 'https://taxikit-shop.vercel.app/api/trains';
   state.open = {}; state.routes = {};
   function findItem(key) {
-    var list = state.data.tag || [];
-    for (var i = 0; i < list.length; i++) if (list[i].key === key) return list[i];
+    var lists = [state.data.tag || [], state.data.flyg || []];
+    for (var L = 0; L < lists.length; L++) {
+      for (var i = 0; i < lists[L].length; i++) if (lists[L][i].key === key) return lists[L][i];
+    }
     return null;
   }
   function toggleRoute(key) {
     if (state.open[key]) { delete state.open[key]; paint(); return; }
-    state.open[key] = true; paint(); fetchRoute(key, false);
+    state.open[key] = true; paint();
+    var it = findItem(key);
+    if (it && it.tid) fetchRoute(key, false);
   }
   function fetchRoute(key, quiet) {
-    var it = findItem(key); if (!it) return;
+    var it = findItem(key); if (!it || !it.tid) return;
     var r = state.routes[key] || (state.routes[key] = {});
     if (r.loading || (quiet && r.at && Date.now() - r.at < 45000)) return;
     r.loading = true;
@@ -215,18 +223,41 @@
     var m = Math.round((real - sched) / 60000);
     return m >= 1 ? '<span class="ank-st-dl' + (m >= 15 ? ' bad' : '') + '">+' + m + '</span>' : (m <= -2 ? '<span class="ank-st-dl early">' + m + '</span>' : '');
   }
+  // Orsakspanel: visas överst när man trycker på inställt/borttaget/omdirigerat.
+  function reasonText(it, extra) {
+    var r = String((extra && extra.reason) || it.reason || '').trim();
+    var i = String((extra && extra.info) || it.reasonInfo || '').trim();
+    var parts = [];
+    if (r) parts.push(r);
+    if (i && i !== r) parts.push(i);
+    return parts.join('. ');
+  }
+  function reasonHtml(it, extra) {
+    if (!(it.canceled || it.removed || it.special)) return '';
+    var txt = reasonText(it, extra);
+    var body = txt
+      ? 'Orsak: ' + esc(txt) + (txt.slice(-1) === '.' ? '' : '.')
+      : (it.key[0] === 'f'
+          ? 'Ingen orsak angiven av Swedavia.'
+          : 'Ingen orsak angiven av Trafikverket.');
+    return '<div class="ank-reason">' + body + '</div>';
+  }
+  function flightReasonHtml(it) {
+    return '<div class="ank-route">' + reasonHtml(it) + '</div>';
+  }
   function routeHtml(it) {
     var r = state.routes[it.key] || {};
-    if (!r.data) return '<div class="ank-route"><div class="ank-st-hint">' + (r.err ? 'Kunde inte hämta stationslistan.' : 'Hämtar stationslista…') + '</div></div>';
+    var head = reasonHtml(it, r.data || {});
+    if (!r.data) return '<div class="ank-route">' + head + '<div class="ank-st-hint">' + (r.err ? 'Kunde inte hämta stationslistan.' : 'Hämtar stationslista…') + '</div></div>';
     var stops = r.data.stops || [], seen = r.data.lastSeen;
-    if (!stops.length) return '<div class="ank-route"><div class="ank-st-hint">Ingen stationslista hos Trafikverket.</div></div>';
+    if (!stops.length) return '<div class="ank-route">' + head + '<div class="ank-st-hint">Ingen stationslista hos Trafikverket.</div></div>';
     var lastPassed = -1;
     stops.forEach(function (s, i) { if (s.arrAct || s.depAct) lastPassed = i; });
     var g = stops[stops.length - 1], arrived = !!(g && g.arrAct);
     var seenIdx = -1;
     if (seen) stops.forEach(function (s, i) { if (s.sig === seen.sig) seenIdx = i; });
     var atStation = seenIdx >= 0 && seenIdx === lastPassed && stops[seenIdx].arrAct && !stops[seenIdx].depAct && seenIdx < stops.length - 1;
-    var html = '<div class="ank-route">';
+    var html = '<div class="ank-route">' + head;
     stops.forEach(function (s, i) {
       var sch = d(s.arrSched) || d(s.depSched), real = d(s.arrAct) || d(s.depAct), est = d(s.arrEst) || d(s.depEst);
       if (i === 0) { sch = d(s.depSched) || sch; real = d(s.depAct) || real; est = d(s.depEst) || est; }
@@ -252,7 +283,8 @@
     var cls = 'ank-row' + (it.canceled || it.removed ? ' canceled' : '') + (it.act ? ' arrived' : '') + (watched ? ' watched' : '');
     var star = bev && (watched || it.key[0] === 'f')
       ? '<button class="ank-star' + (watched ? ' on' : '') + '" data-bev-star aria-label="' + (watched ? 'Sluta bevaka' : 'Bevaka') + '">' + (watched ? '⭐' : '☆') + '</button>' : '';
-    return '<div class="' + cls + (it.tid ? ' ank-tap' : '') + '"' + (it.tid ? ' data-ank-route="' + esc(it.key) + '"' : '') + ' data-ank-key="' + esc(it.key) + '">' +
+    var tap = !!(it.tid || it.canceled || it.removed || it.special);
+    return '<div class="' + cls + (tap ? ' ank-tap' : '') + '"' + (tap ? ' data-ank-route="' + esc(it.key) + '"' : '') + ' data-ank-key="' + esc(it.key) + '">' +
       '<div class="ank-time"><div class="ank-new' + (changed && !it.act ? ' changed' : '') + '">' + hm(it.canceled || it.removed ? it.sched : shown) + '</div>' +
         (changed && !it.canceled && !it.removed ? '<div class="ank-old">' + hm(it.sched) + '</div>' : '') + '</div>' +
       '<div class="ank-main"><div class="ank-from">' + esc(it.from) + '</div>' +
@@ -353,7 +385,7 @@
       list.forEach(function (it) {
         var k = dayKey(when(it));
         if (k !== lastDay) { html += '<div class="ank-day">' + dayLabel(when(it)) + '</div>'; lastDay = k; }
-        html += rowHtml(it) + (it.tid && state.open[it.key] ? routeHtml(it) : '');
+        html += rowHtml(it) + (state.open[it.key] ? (it.tid ? routeHtml(it) : flightReasonHtml(it)) : '');
       });
     }
     el.innerHTML = html;

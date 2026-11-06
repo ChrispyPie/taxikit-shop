@@ -135,6 +135,8 @@ def slim_flight(f, direction):
         "firstBagEst": first_str(baggage.get("estimatedFirstBagUtc"), baggage.get("estimatedFirstBag")),
         "lastBag": first_str(baggage.get("lastBagUtc"), baggage.get("lastBag")),
         "rawStatus": remark_text(f),
+        # reason: samma text, för Ankomsters orsakspanel (inställt/borttaget/omdirigerat).
+        "reason": remark_text(f),
     }
 
 
