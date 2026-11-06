@@ -1,17 +1,27 @@
 # Ångra Mina bevakningar
 
-Säkerhetsgren: `backup/pre-bevakningar-20261106` från `origin/main` före ändringen.
-Arbetet ligger i separat worktree `/workspace/tk-bevakningar`, på
-`feature/mina-bevakningar`. Huvudutcheckningen ändras inte.
+## Live (PR #81)
 
-## Före merge
+- Merge-commit: `76e40ad5023edf476be4c3b65b68e9ed331bd04c` (2026-11-06 ~23:09 Europe/Stockholm)
+- Nyheter: id `2026-11-06m`, tid `23:09`
+- Cache-bust: `mina-bevakningar.css/js`, `ankomster.js`, `kalender.js`, `changelog.js` → `?v=20261106m`
+- Ingen SQL eller serverändring
 
-Stäng PR:n. Ingen produktion eller databas har ändrats av denna PR.
+## Säkerhetsgrenar
 
-## Efter godkänd merge
+- `backup/pre-bevakningar-merge-20261106` = `origin/main` precis före merge (`fc52564b`)
+- `backup/pre-bevakningar-20261106` = äldre säkerhetsgren från innan feature-arbetet
 
-Gör en ny revert-commit av feature-/merge-committen och skicka genom vanlig granskning.
-För merge-commit: `git revert -m 1 <merge-sha>`; för squash: `git revert <squash-sha>`.
+Arbetet byggdes i worktree `/workspace/tk-bevakningar` på `feature/mina-bevakningar`.
+
+## Ångra efter merge
+
+Gör en ny revert-commit av merge-committen och skicka genom vanlig granskning:
+
+```bash
+git revert -m 1 76e40ad5023edf476be4c3b65b68e9ed331bd04c
+```
+
 Återställ inte hela main till säkerhetsgrenen: det skulle ta bort senare ändringar.
 Ingen force-push och ingen destruktiv reset.
 
