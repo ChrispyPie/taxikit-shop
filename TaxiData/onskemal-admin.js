@@ -1,7 +1,7 @@
 /* Admin › Önskemål och idéer.
  * Ägaren (och S admin) skriver vad som ska ändras eller läggas till i appen. Christian (och assistenten)
  * läser det via databasen och pratar igenom det innan något byggs. Inget ändras automatiskt.
- * Status (Ny / Läst / Planerad / Klar / Inte nu) och svar sätts av Christian, här visas de bara.
+ * Status (Ny / Läst / Planerad / Klar / Inte nu – visas som Ny / Pågår / Klar, se arende-status.js) och svar sätts av Christian, här visas de bara.
  * Ägaren kan ta bort sitt eget önskemål så länge det har status Ny.
  * Server: dev_wish_list, dev_wish_add, dev_wish_delete (tabell dev_wishes). Behörighet och åkeri kontrolleras där.
  * Bilder (högst 4 per önskemål): edge-funktionen onskemal-foto, privat bucket onskemal-foton. Bara den som skrev
@@ -13,7 +13,8 @@
   'use strict';
   // Kort namn för visning ("Christian P"), se namn.js
   function sn(s) { return window.shortName ? window.shortName(s) : (s == null ? '' : String(s)); }
-  var STATUS = { ny: 'Ny', last: 'Läst', planerad: 'Planerad', klar: 'Klar', inte_nu: 'Inte nu' };
+  // Samma statusord överallt (arende-status.js): Ny / Pågår / Väntar på svar / Klar
+  var STATUS = { ny: 'Ny', last: 'Pågår · läst', planerad: 'Pågår · planerad', klar: 'Klar', inte_nu: 'Klar · inte nu' };
   var MAX = 2000;
   var ERR = {
     need_text: 'Skriv något först.',

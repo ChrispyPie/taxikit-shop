@@ -1,6 +1,6 @@
 /* Admin › Bil & verkstad.
  * Behövs till bilen och felanmälningar: ägaren (och S admin) ser alla öppna anmälningar per bil och
- * markerar dem som Pågår / Åtgärdad (med valfritt meddelande till föraren) eller tar bort dem.
+ * markerar dem som Pågår / Klar (med valfritt meddelande till föraren) eller tar bort dem.
  * Ägaren kan också skriva till föraren utan att ändra status (car_issue_message); föraren kan svara i appen.
  * "Nytt svar" visas tills ägaren har sett ärendet (car_issue_seen).
  * (get_bil, set_car_issue_status, edge-funktionen bil-foto). Underhåll och uppgifter hanteras i appen (verkstad.js).
@@ -16,7 +16,8 @@
   function sn(s) { return window.shortName ? window.shortName(s) : (s == null ? '' : String(s)); }
   var MONL = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
   var WD = ['sön', 'mån', 'tis', 'ons', 'tor', 'fre', 'lör'];
-  var STATUS = { pending: 'Väntar', approved: 'Godkänd', rejected: 'Nekad' };
+  // Samma statusord överallt (arende-status.js): Ny / Pågår / Väntar på svar / Klar
+  var STATUS = { pending: 'Ny', approved: 'Klar · godkänd', rejected: 'Klar · nekad' };
   var ERR = {
     overlap: 'Föraren har redan godkänd eller väntande tid som krockar med den här.',
     not_found: 'Posten finns inte längre.',
@@ -25,7 +26,7 @@
     need_text: 'Skriv frågan till föraren först.',
     bad_period: 'Ogiltig period.'
   };
-  var ISTATUS = { ny: 'Ny', pagar: 'Pågår', klar: 'Åtgärdad' };
+  var ISTATUS = { ny: 'Ny', pagar: 'Pågår', klar: 'Klar' };
   var SUPPLY = { kvitto: ['🧾', 'Kvittorullar'], spolar: ['💧', 'Spolarvätska'], rengoring: ['🧽', 'Rengöring'], annat: ['✏️', 'Annat'] };
   ERR.forbidden = 'Du har inte behörighet att göra det.';
   ERR.not_editable = 'Det går inte att ändra längre.';
@@ -94,9 +95,9 @@
   function mine(x) { return x.status === 'pending' && x.waiting_on !== 'driver'; }
   function chip(x) {
     if (x.status !== 'pending') return '<span class="vka-chip ' + x.status + '">' + STATUS[x.status] + '</span>';
-    if (x.waiting_on === 'driver') return '<span class="vka-chip q">Fråga · väntar på svar</span>';
-    if (x.waiting_on === 'owner') return '<span class="vka-chip ans">Nytt svar</span>';
-    return '<span class="vka-chip pending">Väntar</span>';
+    if (x.waiting_on === 'driver') return '<span class="vka-chip q">Väntar på svar</span>';
+    if (x.waiting_on === 'owner') return '<span class="vka-chip ans">Pågår · nytt svar</span>';
+    return '<span class="vka-chip pending">Ny</span>';
   }
   function thread(x) {
     var ms = x.msgs || [];
@@ -213,7 +214,7 @@
   A.idel = function (id) {
     if (A.busy) return;
     var i = issById(id); if (!i) return;
-    if (!confirm('Ta bort anmälan helt?' + (i.body ? '\n\n"' + String(i.body).slice(0, 80) + '"' : '') + '\n\nFöraren får ingen notis. Vill du meddela föraren, välj Åtgärdad i stället.')) return;
+    if (!confirm('Ta bort anmälan helt?' + (i.body ? '\n\n"' + String(i.body).slice(0, 80) + '"' : '') + '\n\nFöraren får ingen notis. Vill du meddela föraren, välj Klar i stället.')) return;
     A.busy = true;
     photoApi({ action: 'delete_issue', issue_id: id })
       .then(function () { A.busy = false; return A.loadBil(); })
@@ -289,10 +290,10 @@
         (i.mine ? '' : '<button class="vka-ask" onclick="VERKSTAD_ADMIN.imsg(' + i.id + ')">💬 Skicka meddelande</button>') +
         '<div class="vka-btns">' +
         (i.status === 'ny' ? '<button onclick="VERKSTAD_ADMIN.iset(' + i.id + ',\'pagar\')">Pågår</button>' : '') +
-        '<button class="vka-ok" onclick="VERKSTAD_ADMIN.iset(' + i.id + ',\'klar\')">✓ Åtgärdad</button>' +
+        '<button class="vka-ok" onclick="VERKSTAD_ADMIN.iset(' + i.id + ',\'klar\')">✓ Klar</button>' +
         '<button class="vka-del" onclick="VERKSTAD_ADMIN.idel(' + i.id + ')" aria-label="Ta bort">Ta bort</button></div>';
     } else {
-      if (!i.mine) h += '<textarea id="vka-ic-' + i.id + '" maxlength="500" placeholder="Skriv till föraren (ärendet är åtgärdat, status ändras inte)."></textarea>' +
+      if (!i.mine) h += '<textarea id="vka-ic-' + i.id + '" maxlength="500" placeholder="Skriv till föraren (ärendet är klart, status ändras inte)."></textarea>' +
         '<button class="vka-ask" onclick="VERKSTAD_ADMIN.imsg(' + i.id + ')">💬 Skicka meddelande</button>';
       h += '<div class="vka-btns"><button onclick="VERKSTAD_ADMIN.iset(' + i.id + ',\'ny\')">Öppna igen</button>' +
         '<button class="vka-del" onclick="VERKSTAD_ADMIN.idel(' + i.id + ')">Ta bort</button></div>';
@@ -317,7 +318,7 @@
     });
     if (done.length) {
       var dn = done.filter(function (i) { return i.unread > 0; }).length;
-      h += '<button class="vka-more" onclick="VERKSTAD_ADMIN.toggleDone(\'' + kind + '\')">' + (A.showDone[kind] ? 'Dölj åtgärdade' : 'Visa åtgärdade (' + done.length + ')' + (dn ? ' · 💬 ' + dn + ' nytt svar' : '')) + '</button>';
+      h += '<button class="vka-more" onclick="VERKSTAD_ADMIN.toggleDone(\'' + kind + '\')">' + (A.showDone[kind] ? 'Dölj klara' : 'Visa klara (' + done.length + ')' + (dn ? ' · 💬 ' + dn + ' nytt svar' : '')) + '</button>';
       if (A.showDone[kind]) h += done.map(issueCard).join('');
     }
     return h;
