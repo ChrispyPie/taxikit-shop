@@ -157,6 +157,7 @@
   <script src="kalender.js?v=20261104ar1"></script>
   <script src="hjalpbot.js?v=zzzda1"></script>
   <script src="profilbild.js?v=20261105kh1"></script>
+  <script src="profil-sida.js?v=20261106p1"></script>
   <script src="forum.js?v=20261106fc3"></script>
   <script src="om-data.js?v=20261030b"></script>
   <script src="changelog.js?v=20261106a"></script>
@@ -541,6 +542,21 @@
 
     async function renderProfile() {
       var content = document.getElementById('content');
+      // Obligatoriska personuppgifter saknas → visa dem först (samma spärr som tidigare)
+      if (driverData.needs_profile && !driverData.via_master) {
+        return renderPersonalData();
+      }
+      if (window.PROFIL_SIDA) {
+        return PROFIL_SIDA.render(content);
+      }
+      return renderPersonalData();
+    }
+
+    window.renderPersonalData = renderPersonalData;
+
+    async function renderPersonalData(opts) {
+      opts = opts || {};
+      var content = document.getElementById('content');
       content.innerHTML = '<div class="p-card">Laddar…</div>';
       var d;
       try {
@@ -590,6 +606,9 @@
         '<div class="p-group"><label for="pw-new">Nytt lösenord</label><input id="pw-new" type="password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false"></div>' +
         '<div class="p-group"><label for="pw-new2">Nytt lösenord igen</label><input id="pw-new2" type="password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false"></div>' +
         '<button class="p-btn" id="pw-save" onclick="changePassword()">Byt lösenord</button><p class="p-msg" id="pw-msg"></p></div>';
+      if (opts && opts.fromProfile) {
+        html = '<p class="p-note"><button type="button" class="p-btn" style="width:auto;padding:8px 12px;margin-bottom:8px" onclick="if(window.PROFIL_SIDA)PROFIL_SIDA.render(document.getElementById(\'content\'))">‹ Tillbaka till profil</button></p>' + html;
+      }
       content.innerHTML = html;
       P_REQUIRED.forEach(function (id) {
         document.getElementById(id).addEventListener('input', function () { if (this.value.trim()) this.classList.remove('invalid'); });
@@ -740,6 +759,8 @@
         lockBlocked();
       } else if (current === FORUM.id && FORUM.back && FORUM.back()) {
         // forumet gick tillbaka från ett inlägg till listan
+      } else if (current === 'profil' && window.PROFIL_SIDA && PROFIL_SIDA.back && PROFIL_SIDA.back()) {
+        // profilens under-vy (redigera/galleri/gästbok)
       } else if (current === 'profil' || current === ANKOMSTER.id || current === PROGNOS.id || current === TOPPLISTOR.id || current === VERKSTAD.id || current === KALENDER.id || current === FORUM.id || current === OM.id || current === LONEKOLL.id) {
         goHome();
       }
