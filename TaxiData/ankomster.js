@@ -258,7 +258,7 @@
         (changed && !it.canceled && !it.removed ? '<div class="ank-old">' + hm(it.sched) + '</div>' : '') + '</div>' +
       '<div class="ank-main"><div class="ank-from">' + esc(it.from) + '</div>' +
         '<div class="ank-meta"><b>' + esc(it.no) + '</b>' + (it.sub ? ' · ' + esc(it.sub) : '') + '</div>' +
-        (it.info ? '<div class="ank-meta">' + esc(it.info) + '</div>' : '') +
+        (it.info ? '<div class="ank-meta' + (it.key[0] === 'f' && (it.canceled || it.removed || it.special) ? ' bad' : '') + '">' + esc(it.info) + '</div>' : '') +
         (it.note ? '<div class="ank-note">' + esc(it.note) + '</div>' : '') + '</div>' +
       '<div class="ank-status">' + badge(it) + star + '</div></div>';
   }

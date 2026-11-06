@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-06', id: '2026-11-06k', tid: '22:55', rader: [
+    ['Förbättrat', 'Ankomster: inställda och borttagna flyg och tåg har inte längre röd ruta. Tiden är överstruken och statusen står i röd text.']
+  ] },
   { datum: '2026-11-06', id: '2026-11-06j', tid: '22:39', rader: [
     ['Förbättrat', 'Nyheter: Visa alla lägger till äldre nyheter nedåt och du stannar där du var.'],
     ['Förbättrat', 'Ankomster: Tidigare lägger de tidigare flygen och tågen ovanför, så vyn stannar på nuvarande tid. Skrolla upp för att se dem.'],
