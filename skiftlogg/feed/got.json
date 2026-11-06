@@ -1,10 +1,10 @@
 {
   "airport": "GOT",
-  "updated": "2026-11-06T12:55:23+01:00",
-  "arrivalsUpdated": "2026-11-06T12:55:29+01:00",
-  "departuresUpdated": "2026-11-06T12:01:19+01:00",
+  "updated": "2026-11-06T13:01:04+01:00",
+  "arrivalsUpdated": "2026-11-06T13:01:05+01:00",
+  "departuresUpdated": "2026-11-06T13:01:08+01:00",
   "yesterdayUpdated": "2026-11-06T05:10:35+01:00",
-  "tomorrowUpdated": "2026-11-06T12:01:09+01:00",
+  "tomorrowUpdated": "2026-11-06T13:01:06+01:00",
   "error": null,
   "arrivals": [
     {
@@ -1752,8 +1752,8 @@
       "baggage": "2",
       "firstBag": "2026-11-06T11:54:46Z",
       "firstBagEst": "2026-11-06T12:07:19Z",
-      "lastBag": "",
-      "rawStatus": "Landat 12:41"
+      "lastBag": "2026-11-06T11:57:37Z",
+      "rawStatus": "Landat 12:41 · Sista bagage"
     },
     {
       "id": "FR3088",
@@ -1767,7 +1767,7 @@
       "est": "2026-11-06T14:53:00Z",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "22",
       "baggage": "4",
       "firstBag": "",
       "firstBagEst": "",
@@ -1981,7 +1981,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 15:03"
+      "rawStatus": "Beräknad 14:54"
     },
     {
       "id": "SK448",
@@ -2114,7 +2114,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 15:51"
+      "rawStatus": "Ankommer 15:54"
     },
     {
       "id": "FR4010",
@@ -2494,7 +2494,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 14:00"
+      "rawStatus": "Ankommer 14:06"
     },
     {
       "id": "EW8220",
@@ -5346,7 +5346,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd"
+      "rawStatus": "Startat 11:59"
     },
     {
       "id": "EW9221",
@@ -5430,18 +5430,18 @@
       "other": "München",
       "iata": "",
       "airline": "Lufthansa",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-06T11:25:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-06T11:17:42Z",
       "terminal": "T1",
       "gate": "12",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Boarding"
+      "rawStatus": "Startat 12:25"
     },
     {
       "id": "EW8221",
@@ -5620,18 +5620,18 @@
       "other": "Amsterdam",
       "iata": "",
       "airline": "KLM",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-06T11:00:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-06T11:01:23Z",
       "terminal": "T1",
       "gate": "17",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd"
+      "rawStatus": "Startat 12:09"
     },
     {
       "id": "FR090",
@@ -5658,18 +5658,18 @@
       "other": "Helsingfors",
       "iata": "",
       "airline": "Finnair",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-06T12:00:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-06T11:53:30Z",
       "terminal": "T1",
       "gate": "19",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gate stängd"
     },
     {
       "id": "BA795",
@@ -5688,7 +5688,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Gå till gate"
     },
     {
       "id": "KL1234",
@@ -5721,7 +5721,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "20A",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -5740,7 +5740,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "16",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -5759,7 +5759,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "23",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -5778,7 +5778,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "13",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -5797,7 +5797,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "22",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -5816,7 +5816,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "14",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6258,7 +6258,7 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": ""
+      "rawStatus": "Boarding"
     },
     {
       "id": "SK158",
@@ -6272,7 +6272,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "15",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6310,7 +6310,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "19",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
