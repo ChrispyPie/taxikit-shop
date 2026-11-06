@@ -13,7 +13,10 @@ Christians "kör" 6 nov 18:50 (t962u) på tre punkter + Inkorg och gemensam äre
    Klockan 🔔 är kvar för notiser. När ägaren svarar på ett ärende får klockan en kort notis ("Nytt i Inkorgen") som öppnar tråden. Läser man svaret försvinner både pricken i Inkorgen och notisen.
 5. **Admin › Ärenden** (ny första ruta): gemensam lista för ägaren och S admin, inte en personlig inkorg.
    Nya och olösta först, rubriker, tryck för att öppna ärendet separat med verktyg (svara, ändra status).
-   Gamla Admin › Anmälningar & ärenden finns kvar som förut.
+   Önskemål (Berra → Christian) finns också med i listan. Status och svar på önskemål sätts av Christian, inte i appen.
+   Gamla Admin › Anmälningar & ärenden finns kvar som förut (flyttar senare till ett löneverktyg).
+6. **Inget göms för att det är gammalt.** Alla klara ärenden finns kvar (underlag), ihopfällda under "Visa klara (N)".
+   De hämtas i omgångar om 300 ("Visa fler klara") så att listan går snabbt. Gamla datum visar årtal.
 
 ## Statusord, gammalt → nytt
 | Ärende | Gammalt (databas → gammalt ord) | Nytt ord |
@@ -51,8 +54,8 @@ Christians "kör" 6 nov 18:50 (t962u) på tre punkter + Inkorg och gemensam äre
 - `TaxiData/verkstad.js`, `verkstad-admin.js`, `sjuk.js`, `onskemal-admin.js`, `forum.js` – bara statusorden
 
 ## SQL (bara tillägg)
-- `supabase/migrations/20261106e_inkorg_arenden.sql`
-- Ångra: `supabase/migrations/undo/20261106e_inkorg_arenden_undo.sql` (se UNDO.md)
+- `supabase/migrations/20261106f_inkorg_arenden.sql`
+- Ångra: `supabase/migrations/undo/20261106f_inkorg_arenden_undo.sql` (se UNDO.md)
 
 Nytt: kolumnerna `event_notices.case_kind/case_id`, tabellen `case_reads`, triggern `aa_case_tag`,
 funktionerna `case_inbox`, `case_get`, `case_seen`, `case_admin_list`, `private.case_st`.
@@ -64,7 +67,7 @@ Testat lokalt i PGlite (Postgres 18) med stubbar: inkorg, tråd, läst-markering
 behörighet (annat åkeri och förare nekas adminlistan), ångra, och att migrationen kan köras två gånger.
 
 ## Gå live (när Christian sagt kör)
-1. Kör `20261106e_inkorg_arenden.sql` i Supabase.
+1. Kör `20261106f_inkorg_arenden.sql` i Supabase.
 2. Merga PR:en (GitHub Pages).
 3. Nyheter-rad i `changelog.js`.
 

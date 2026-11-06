@@ -2,13 +2,13 @@
  * Mina egna ärenden: felanmälan, behövs till bilen, verkstadstid, uppgift, sjukanmälan, önskemål.
  * Varje ärende är en tråd. Klockan (🔔) är kvar för notiser: när ägaren svarar på ett öppet ärende hamnar
  * svaret i tråden här och klockan får en kort notis som leder hit. Läser man svaret försvinner båda.
- * Servern: case_inbox, case_get, case_seen (supabase/migrations/20261106e_inkorg_arenden.sql).
+ * Servern: case_inbox, case_get, case_seen (supabase/migrations/20261106f_inkorg_arenden.sql).
  * Svar skickas med de vanliga funktionerna: car_issue_message (ärende), workshop_reply (verkstadstid).
  */
 (function () {
   var A = window.ARENDE, esc = A.esc;
   var I = window.INKORG = { id: 'inkorg', title: 'Inkorg' };
-  var st = { data: null, err: false, filter: 'alla', showDone: false, open: null, cur: null, busy: false, el: null };
+  var st = { data: null, err: false, filter: 'alla', showDone: false, open: null, cur: null, busy: false, el: null, klarLim: 300 };
 
   function badge() {
     var d = st.data || {}, n = (d.items || []).filter(function (x) { return x.needs || x.unread > 0; }).length;
@@ -20,7 +20,7 @@
   }
   I.refresh = function () {
     if (!localStorage.getItem('taxi_session')) return Promise.resolve();
-    return A.rpc('case_inbox', {}).then(function (d) { st.data = d || { items: [] }; st.err = false; badge(); if (st.el && !st.open) paint(); })
+    return A.rpc('case_inbox', { p_klar_limit: st.klarLim }).then(function (d) { st.data = d || { items: [] }; st.err = false; badge(); if (st.el && !st.open) paint(); })
       .catch(function (e) { if (e && e.code === '28000') return; st.err = true; if (st.el && !st.open) paint(); });
   };
   I.start = function () { I.refresh(); if (!I._t) I._t = setInterval(function () { if (!document.hidden) I.refresh(); }, 120000); };
@@ -46,6 +46,8 @@
   I.isAdmin = function () { return ['agare', 'superadmin'].indexOf(String(window.INKORG_ROLE || '')) >= 0; };
   I.filter = function (f) { st.filter = f; paint(); };
   I.toggleDone = function () { st.showDone = !st.showDone; paint(); };
+  // Klara sparas för alltid; de hämtas i omgångar så att listan går snabbt
+  I.more = function () { st.klarLim += 300; I.refresh(); };
   I.tap = function (kind, id) {
     st.open = { kind: kind, id: +id }; st.cur = null;
     try { history.pushState({ view: 'inkorg', c: kind + ':' + id }, ''); } catch (e) {}
@@ -78,8 +80,12 @@
       else if (!(st.filter === 'alla' && needs.length)) h += '<div class="ar-list"><div class="ar-empty">Inget här just nu. 👍</div></div>';
       if (sp.done.length) {
         var dn = sp.done.filter(function (x) { return x.unread > 0; }).length;
-        h += '<button type="button" class="ar-more" onclick="INKORG.toggleDone()">' + (st.showDone ? 'Dölj klara' : 'Visa klara (' + sp.done.length + ')' + (dn ? ' · ● ' + dn + ' nytt' : '')) + '</button>';
-        if (st.showDone) h += '<div class="ar-list" style="margin-top:8px">' + sp.done.map(row).join('') + '</div>';
+        var tot = Math.max(d.klar_total || 0, sp.done.length);
+        h += '<button type="button" class="ar-more" onclick="INKORG.toggleDone()">' + (st.showDone ? 'Dölj klara' : 'Visa klara (' + tot + ')' + (dn ? ' · ● ' + dn + ' nytt' : '')) + '</button>';
+        if (st.showDone) {
+          h += '<div class="ar-list" style="margin-top:8px">' + sp.done.map(row).join('') + '</div>';
+          if (tot > sp.done.length) h += '<button type="button" class="ar-more" onclick="INKORG.more()">Visa fler klara (' + (tot - sp.done.length) + ' till)</button>';
+        }
       }
     }
     el.innerHTML = h;

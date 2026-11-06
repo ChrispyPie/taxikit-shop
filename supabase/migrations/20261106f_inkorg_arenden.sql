@@ -7,7 +7,7 @@
 --   * nya funktioner: private.case_st, public.case_inbox, public.case_get, public.case_seen, public.case_admin_list
 -- En befintlig funktion byts ut med samma signatur och samma fält + två nya (case_kind, case_id):
 --   public.notis_feed
--- Ångra: supabase/migrations/undo/20261106e_inkorg_arenden_undo.sql och docs/inkorg/UNDO.md
+-- Ångra: supabase/migrations/undo/20261106f_inkorg_arenden_undo.sql och docs/inkorg/UNDO.md
 --
 -- Statusord (samma överallt):  ny = Ny, pagar = Pågår, vantar = Väntar på svar, klar = Klar
 -- De gamla statusvärdena i tabellerna ändras INTE. Översättningen görs i private.case_st (och samma tabell i appen).
@@ -109,11 +109,12 @@ as $function$
               else regexp_replace(btrim(p), '\s+', ' ', 'g') end
 $function$;
 
--- 5) Förarens inkorg: mina egna ärenden (öppna + klara de senaste 90 dagarna)
-create or replace function public.case_inbox(p_token text)
+-- 5) Förarens inkorg: mina egna ärenden. Inget göms för att det är gammalt: alla öppna + de senaste p_klar_limit klara
+--    (appen hämtar fler klara med "Visa fler"). klar_total = antal klara totalt.
+create or replace function public.case_inbox(p_token text, p_klar_limit integer default 300)
  returns jsonb language plpgsql stable security definer set search_path to 'public', 'pg_temp'
 as $function$
-declare a record; r jsonb; v_sjuk boolean;
+declare a record; r jsonb; v_sjuk boolean; v_lim integer := least(greatest(coalesce(p_klar_limit, 300), 1), 5000);
 begin
   select * into a from private.bil_actor(p_token);
   if private.is_demo() then return jsonb_build_object('items', '[]'::jsonb, 'unread', 0, 'needs', 0); end if;
@@ -131,7 +132,6 @@ begin
       left join lateral (select m.sender_role, m.body, m.created_at from public.car_issue_messages m
                           where m.issue_id = i.id order by m.created_at desc, m.id desc limit 1) lm on true
      where i.company_id = a.company_id and i.reported_by = a.driver_id
-       and (i.status <> 'klar' or greatest(i.updated_at, i.created_at) > now() - interval '90 days')
     union all
     -- Verkstadstid
     select 'wh', w.id, 'Verkstadstid', w.car_label, private.case_cut(w.comment), w.status, private.case_st('wh', w.status, w.waiting_on),
@@ -142,7 +142,6 @@ begin
       left join lateral (select m.sender_role, m.body, m.created_at from public.workshop_messages m
                           where m.hours_id = w.id order by m.created_at desc, m.id desc limit 1) lm on true
      where w.driver_id = a.driver_id
-       and (w.status = 'pending' or greatest(w.updated_at, w.created_at) > now() - interval '90 days')
     union all
     -- Uppgift som ägaren skickat till mig
     select 'task', t.id, t.title, t.car_label, private.case_cut(t.instruction), t.status, private.case_st('task', t.status),
@@ -151,7 +150,6 @@ begin
            private.case_unread_notices(a.driver_id, 'task', t.id)
       from public.car_tasks t
      where t.company_id = a.company_id and t.assigned_to = a.driver_id
-       and (t.status <> 'klar' or greatest(t.updated_at, t.created_at) > now() - interval '90 days')
     union all
     -- Sjukanmälan (inga kommentarer i listan)
     select 'sjuk', s.id, 'Sjukanmälan', null, 'Från ' || to_char(s.start_date, 'DD/MM'), s.status, private.case_st('sjuk', s.status),
@@ -162,7 +160,6 @@ begin
                 then 1 else 0 end
       from private.sick_reports s
      where v_sjuk and s.driver_id = a.driver_id
-       and (s.status in ('ny', 'intyg_begart') or greatest(s.updated_at, s.created_at) > now() - interval '90 days')
     union all
     -- Önskemål (ägaren → Christian)
     select 'wish', d.id, 'Önskemål', null, private.case_cut(d.body), d.status, private.case_st('wish', d.status),
@@ -173,7 +170,6 @@ begin
                 then 1 else 0 end
       from public.dev_wishes d
      where d.author_id = a.driver_id and d.company_id = a.company_id
-       and (d.status not in ('klar', 'inte_nu') or greatest(d.updated_at, d.created_at) > now() - interval '90 days')
   )
   select jsonb_build_object(
       'items', coalesce(jsonb_agg(jsonb_build_object('kind', x.kind, 'id', x.id, 'title', x.title, 'car', x.car, 'txt', x.txt,
@@ -181,8 +177,10 @@ begin
                  'last_from', case x.last_role when 'owner' then 'agare' when 'driver' then 'du' end, 'last_txt', x.last_txt, 'at', x.at)
                order by coalesce(x.needs, false) desc, (x.unread > 0) desc, (x.st = 'klar'), x.at desc), '[]'::jsonb),
       'unread', count(*) filter (where x.unread > 0),
-      'needs', count(*) filter (where x.needs))
-    into r from (select * from x order by x.at desc limit 300) x;
+      'needs', count(*) filter (where x.needs),
+      'klar_total', (select count(*) from x where x.st = 'klar'), 'klar_limit', v_lim)
+    into r from (select * from x where x.st <> 'klar'
+                 union all (select * from x where x.st = 'klar' order by x.at desc limit v_lim)) x;
   return r;
 end $function$;
 
@@ -262,12 +260,13 @@ begin
   return n;
 end $function$;
 
--- 8) Gemensam ärendelista för ägaren/S admin (alla admin ser samma lista). Öppna först, klara de senaste 60 dagarna.
+-- 8) Gemensam ärendelista för ägaren/S admin (alla admin ser samma lista). Öppna först, alla klara finns kvar
+--    (de senaste p_klar_limit skickas, appen hämtar fler). Önskemål finns med (Christians ja 6 nov).
 --    needs = "Behöver ditt svar": nytt ärende, eller föraren skrev senast / svarade på en fråga.
-create or replace function public.case_admin_list(p_token text)
+create or replace function public.case_admin_list(p_token text, p_klar_limit integer default 300)
  returns jsonb language plpgsql stable security definer set search_path to 'public', 'pg_temp'
 as $function$
-declare a record; r jsonb; v_sjuk boolean;
+declare a record; r jsonb; v_sjuk boolean; v_lim integer := least(greatest(coalesce(p_klar_limit, 300), 1), 5000);
 begin
   select * into a from private.bil_actor(p_token);
   if not a.is_admin then raise exception 'forbidden' using errcode = '42501'; end if;
@@ -285,7 +284,6 @@ begin
       left join lateral (select m.sender_role, m.created_at from public.car_issue_messages m
                           where m.issue_id = i.id order by m.created_at desc, m.id desc limit 1) lm on true
      where i.company_id = a.company_id
-       and (i.status <> 'klar' or greatest(i.updated_at, i.created_at) > now() - interval '60 days')
     union all
     select 'wh', w.id, 'Verkstadstid', w.car_label,
            to_char(w.start_at at time zone 'Europe/Stockholm', 'DD/MM HH24:MI') || ' · ' || (private.wh_minutes(w) / 60) || ' h ' || (private.wh_minutes(w) % 60) || ' min',
@@ -297,27 +295,34 @@ begin
       left join lateral (select m.sender_role, m.created_at from public.workshop_messages m
                           where m.hours_id = w.id order by m.created_at desc, m.id desc limit 1) lm on true
      where a.category = any (private.workshop_roles()) and private.actor_company(w.driver_id) = a.company_id
-       and (w.status = 'pending' or greatest(w.updated_at, w.created_at) > now() - interval '60 days')
     union all
     select 'task', t.id, t.title, t.car_label, private.case_cut(coalesce(t.reply, t.instruction)), t.status, private.case_st('task', t.status),
            private.bil_driver_name(t.assigned_to), t.assigned_to = a.driver_id,
            null, greatest(t.updated_at, t.created_at), false, false
       from public.car_tasks t
      where t.company_id = a.company_id
-       and (t.status <> 'klar' or greatest(t.updated_at, t.created_at) > now() - interval '60 days')
     union all
     select 'sjuk', s.id, 'Sjukanmälan', null, 'Från ' || to_char(s.start_date, 'DD/MM'), s.status, private.case_st('sjuk', s.status),
            private.bil_driver_name(s.driver_id), s.driver_id = a.driver_id,
            null, greatest(s.updated_at, s.created_at), (s.status = 'ny'), false
       from private.sick_reports s
      where v_sjuk and private.actor_company(s.driver_id) = a.company_id
-       and (s.status in ('ny', 'intyg_begart') or greatest(s.updated_at, s.created_at) > now() - interval '60 days')
+    union all
+    -- Önskemål (ägaren → Christian). Status och svar sätts av Christian via assistenten, inte här.
+    select 'wish', d.id, 'Önskemål', null, private.case_cut(d.body), d.status, private.case_st('wish', d.status),
+           private.bil_driver_name(d.author_id), d.author_id = a.driver_id,
+           case when d.reply is not null then 'owner' end, greatest(d.updated_at, d.created_at),
+           (d.status = 'ny' and d.author_id is distinct from a.driver_id and a.category = 'superadmin'), false
+      from public.dev_wishes d
+     where d.company_id = a.company_id
   )
   select jsonb_build_object('items', coalesce(jsonb_agg(jsonb_build_object('kind', x.kind, 'id', x.id, 'title', x.title, 'car', x.car,
                  'txt', x.txt, 'status', x.status, 'st', x.st, 'who', x.who, 'mine', x.mine, 'needs', coalesce(x.needs, false),
                  'urgent', x.urgent, 'last_from', case x.last_role when 'owner' then 'agare' when 'driver' then 'forare' end, 'at', x.at)
-               order by coalesce(x.needs, false) desc, x.urgent desc, (x.st = 'klar'), x.at desc), '[]'::jsonb))
-    into r from (select * from x order by x.at desc limit 400) x;
+               order by coalesce(x.needs, false) desc, x.urgent desc, (x.st = 'klar'), x.at desc), '[]'::jsonb),
+      'klar_total', (select count(*) from x where x.st = 'klar'), 'klar_limit', v_lim)
+    into r from (select * from x where x.st <> 'klar'
+                 union all (select * from x where x.st = 'klar' order by x.at desc limit v_lim)) x;
   return r;
 end $function$;
 
@@ -348,11 +353,11 @@ revoke all on function private.event_notice_case_tag() from public, anon, authen
 revoke all on function private.case_st(text, text, text) from public, anon, authenticated;
 revoke all on function private.case_unread_notices(text, text, bigint) from public, anon, authenticated;
 revoke all on function private.case_cut(text, int) from public, anon, authenticated;
-revoke all on function public.case_inbox(text) from public;
+revoke all on function public.case_inbox(text, integer) from public;
 revoke all on function public.case_get(text, text, bigint) from public;
 revoke all on function public.case_seen(text, text, bigint) from public;
-revoke all on function public.case_admin_list(text) from public;
-grant execute on function public.case_inbox(text) to anon, authenticated;
+revoke all on function public.case_admin_list(text, integer) from public;
+grant execute on function public.case_inbox(text, integer) to anon, authenticated;
 grant execute on function public.case_get(text, text, bigint) to anon, authenticated;
 grant execute on function public.case_seen(text, text, bigint) to anon, authenticated;
-grant execute on function public.case_admin_list(text) to anon, authenticated;
+grant execute on function public.case_admin_list(text, integer) to anon, authenticated;

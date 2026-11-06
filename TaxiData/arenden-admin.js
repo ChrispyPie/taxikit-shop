@@ -1,18 +1,18 @@
 /* Admin › Ärenden – gemensam ärendelista för ägaren och S admin (2026-11-06, Christians "kör" t962u)
  * Inte en personlig inkorg: alla admin ser samma lista. Nya och olösta först, kompakt lista med rubriker.
  * Tryck på ett ärende för att öppna det separat, med verktyg: ändra status och svara (som en mejlkorg med adminverktyg).
- * Klara ärenden är ihopfällda ("Visa klara (N)"). Filter per status. "Behöver ditt svar" markeras tydligt.
- * Servern: case_admin_list, case_get, case_seen (supabase/migrations/20261106e_inkorg_arenden.sql).
+ * Klara ärenden är ihopfällda ("Visa klara (N)") men tas aldrig bort på grund av ålder. Önskemål (ägaren → Christian) finns med. Filter per status. "Behöver ditt svar" markeras tydligt.
+ * Servern: case_admin_list, case_get, case_seen (supabase/migrations/20261106f_inkorg_arenden.sql).
  * Verktygen använder de vanliga funktionerna: set_car_issue_status, car_issue_message, admin_workshop_decide,
  * workshop_ask, sjuk_decide. Inget nytt sätt att ändra ärenden.
  */
 (function () {
   var A = window.ARENDE, esc = A.esc;
   var R = window.ARENDEN_ADMIN = {};
-  var st = { data: null, err: null, filter: 'alla', showDone: false, open: null, cur: null, busy: false, el: null };
+  var st = { data: null, err: null, filter: 'alla', showDone: false, open: null, cur: null, busy: false, el: null, klarLim: 300 };
 
   R.count = function () {
-    return A.rpc('case_admin_list', {}).then(function (d) { st.data = d || { items: [] }; st.err = null; return R.needs(); })
+    return A.rpc('case_admin_list', { p_klar_limit: st.klarLim }).then(function (d) { st.data = d || { items: [] }; st.err = null; return R.needs(); })
       .catch(function (e) { st.err = e; return 0; });
   };
   R.needs = function () { return ((st.data && st.data.items) || []).filter(function (x) { return x.needs; }).length; };
@@ -31,6 +31,8 @@
   R.isOpen = function () { return !!st.open; };
   R.filter = function (f) { st.filter = f; paint(); };
   R.toggleDone = function () { st.showDone = !st.showDone; paint(); };
+  // Klara sparas för alltid (underlag); de hämtas i omgångar
+  R.more = function () { st.klarLim += 300; R.load(); };
   R.tap = function (kind, id) { R.openCase(kind, id); try { window.scrollTo(0, 0); } catch (e) {} };
 
   function row(x) {
@@ -63,8 +65,12 @@
       h += group('Väntar på svar från föraren', o.filter(function (x) { return !x.needs && x.st === 'vantar'; }));
       if (!o.length) h += '<div class="ar-list"><div class="ar-empty">Inga öppna ärenden. 👍</div></div>';
       if (sp.done.length) {
-        h += '<button type="button" class="ar-more" onclick="ARENDEN_ADMIN.toggleDone()">' + (st.showDone ? 'Dölj klara' : 'Visa klara (' + sp.done.length + ')') + '</button>';
-        if (st.showDone) h += '<div class="ar-list" style="margin-top:8px">' + sp.done.map(row).join('') + '</div>';
+        var tot = Math.max(st.data.klar_total || 0, sp.done.length);
+        h += '<button type="button" class="ar-more" onclick="ARENDEN_ADMIN.toggleDone()">' + (st.showDone ? 'Dölj klara' : 'Visa klara (' + tot + ')') + '</button>';
+        if (st.showDone) {
+          h += '<div class="ar-list" style="margin-top:8px">' + sp.done.map(row).join('') + '</div>';
+          if (tot > sp.done.length) h += '<button type="button" class="ar-more" onclick="ARENDEN_ADMIN.more()">Visa fler klara (' + (tot - sp.done.length) + ' till)</button>';
+        }
       }
     } else {
       var t = st.filter === 'needs' ? '✋ Behöver ditt svar' : A.WORDS[st.filter];
@@ -98,6 +104,8 @@
         (d.status !== 'avslagen' ? btn('Avslå (Klar)', "ARENDEN_ADMIN.act('avslagen')") : '') +
         (d.status !== 'ny' ? btn('↩️ Öppna igen', "ARENDEN_ADMIN.act('ny')") : '') + '</div>' +
         '<div class="ar-note">Sjuklön och intyg hanteras som förut under Anmälningar & ärenden › Sjuk.</div>';
+    } else if (k === 'wish') {
+      h += '<div class="ar-note" style="margin-top:0">Önskemål till Christian. Status och svar sätts av Christian (via assistenten), inte här.</div>';
     } else if (k === 'task') {
       h += '<div class="ar-btns">' + btn('Öppna uppgiften i appen', "VERKSTAD_ADMIN.openApp('uppg')", 'pri') + '</div>';
     }

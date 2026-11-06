@@ -1,12 +1,12 @@
--- Ångra 20261106e_inkorg_arenden.sql (kör i Supabase SQL editor). Inga gamla data ändras av migrationen,
+-- Ångra 20261106f_inkorg_arenden.sql (kör i Supabase SQL editor). Inga gamla data ändras av migrationen,
 -- så ångra tar bara bort det nya och lägger tillbaka notis_feed som den var före 2026-11-06.
 
 drop trigger if exists aa_case_tag on public.event_notices;
 drop function if exists private.event_notice_case_tag();
-drop function if exists public.case_inbox(text);
+drop function if exists public.case_inbox(text, integer);
 drop function if exists public.case_get(text, text, bigint);
 drop function if exists public.case_seen(text, text, bigint);
-drop function if exists public.case_admin_list(text);
+drop function if exists public.case_admin_list(text, integer);
 drop function if exists private.case_unread_notices(text, text, bigint);
 drop function if exists private.case_cut(text, int);
 drop function if exists private.case_st(text, text, text);

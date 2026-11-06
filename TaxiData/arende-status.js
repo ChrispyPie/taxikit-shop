@@ -1,7 +1,7 @@
 /* Samma statusord överallt (2026-11-06, Christians "kör" t962u)
  * Alla ärenden (felanmälan, behövs till bilen, verkstadstid, uppgift, sjukanmälan, önskemål, forum-förslag)
  * visas med fyra ord: Ny, Pågår, Väntar på svar, Klar. Värdena i databasen ändras inte, bara orden i appen.
- * Samma tabell finns i databasen: private.case_st (supabase/migrations/20261106e_inkorg_arenden.sql).
+ * Samma tabell finns i databasen: private.case_st (supabase/migrations/20261106f_inkorg_arenden.sql).
  * Används av inkorg.js (förarens Inkorg) och arenden-admin.js (Admin › Ärenden).
  */
 (function () {
@@ -60,14 +60,15 @@
   // Vilka rader syns: open = öppna (enligt filtret), done = klara (visas bara under "Visa klara (N)" eller i filtret Klar)
   A.split = function (items, f) {
     items = items || [];
-    if (f === 'klar') return { open: items.filter(function (x) { return x.st === 'klar'; }), done: [] };
+    if (f === 'klar') return { open: items.filter(function (x) { return x.st === 'klar'; }).sort(function (a, b) { return new Date(b.at) - new Date(a.at); }), done: [] };
     var open = items.filter(function (x) {
       if (x.st === 'klar') return false;
       if (f === 'needs') return x.needs;
       if (f && f !== 'alla') return x.st === f;
       return true;
     });
-    var done = (f === 'alla' || !f) ? items.filter(function (x) { return x.st === 'klar'; }) : [];
+    var byAt = function (a, b) { return new Date(b.at) - new Date(a.at); };   // klara: senast först
+    var done = (f === 'alla' || !f) ? items.filter(function (x) { return x.st === 'klar'; }).sort(byAt) : [];
     return { open: open, done: done };
   };
 
@@ -83,7 +84,7 @@
     var days = Math.round((today - new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 86400000);
     if (days === 1) return 'i går';
     if (days < 7) return days + ' dagar sedan';
-    return d.getDate() + '/' + (d.getMonth() + 1);
+    return d.getDate() + '/' + (d.getMonth() + 1) + (d.getFullYear() !== new Date().getFullYear() ? ' ' + d.getFullYear() : '');
   };
   A.when = function (iso) {
     if (!iso) return '';
@@ -220,6 +221,7 @@
       if (d.status_at) rows.push({ at: d.status_at, h: sys('Status: ' + A.label('sjuk', d.status), d.status_at, d.status_comment ? (d.status_by ? esc(fname(d.status_by)) + ': ' : '') + '"' + esc(d.status_comment) + '"' : '') });
     } else if (c.kind === 'wish') {
       meta.push('Skrivet ' + esc(A.when(d.created_at)));
+      if (viewer === 'owner' && d.author && !d.mine) meta.push('av ' + esc(fname(d.author)));
       if (d.reply) rows.push({ at: d.updated_at, h: msg('Christian', d.updated_at, d.reply, false) });
     }
     rows.sort(function (a, b) { return new Date(a.at) - new Date(b.at); });
