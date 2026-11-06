@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=390"/>
+<title>Hall of Fame – mock (exempeldata)</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#e8f1f8;--surface:#fff;--text:#1a365d;--text-soft:#4a5568;--muted:#718096;
+  --primary:#1a365d;--on-primary:#fff;--border:#cbd5e0;--border-soft:#d0e0ea;
+  --du:#fef3c7;
+}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0f172a;color:var(--text)}
+.phone{width:390px;min-height:844px;margin:0 auto;background:var(--bg);overflow:hidden;position:relative}
+header{background:var(--bg);color:var(--primary);padding:0.8rem 1rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-soft)}
+header h1{font-size:1.1rem}
+.ex{background:#fefcbf;color:#975a16;font-size:11px;font-weight:700;text-align:center;padding:6px 10px;border-bottom:1px solid #f6e05e}
+.tl-controls{padding:0.7rem 0.7rem 0.4rem}
+.tabs{display:flex;justify-content:center;gap:0.4rem;margin-bottom:0.7rem}
+.tab{padding:0.45rem 1rem;border:2px solid var(--primary);border-radius:20px;background:var(--surface);color:var(--primary);font-size:0.9rem;font-weight:500}
+.tab.active{background:var(--primary);color:var(--on-primary)}
+.subtabs{display:flex;gap:0.35rem;margin-bottom:0.6rem;overflow-x:auto}
+.subtab{padding:0.35rem 0.75rem;border:1.5px solid var(--primary);border-radius:14px;background:var(--surface);color:var(--primary);font-size:0.78rem;white-space:nowrap}
+.subtab.active{background:var(--primary);color:var(--on-primary);font-weight:700}
+.tl-info{font-size:0.78rem;color:var(--muted);text-align:center;margin:0 0.7rem 0.55rem;line-height:1.35}
+.tl-body{padding:0 0.7rem 1.2rem}
+.tl-card{background:var(--surface);border-radius:12px;padding:0.55rem 0.65rem;margin-bottom:0.65rem}
+.tl-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:0.25rem}
+.tl-title{font-weight:700;color:var(--primary);font-size:0.95rem}
+.tl-me{font-size:0.75rem;color:var(--text-soft);white-space:nowrap}
+.tl-row{display:flex;align-items:center;gap:8px;padding:6px 6px;border-top:1px solid var(--border-soft);font-size:0.92rem}
+.tl-row.du{background:var(--du);border-radius:8px;font-weight:700;border-top-color:transparent;margin-top:2px}
+.tl-pos{width:2rem;text-align:center;flex-shrink:0}
+.tl-who{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tl-val{font-variant-numeric:tabular-nums;white-space:nowrap}
+.tl-when{font-size:0.7rem;color:var(--muted);font-weight:400;margin-left:4px}
+.badge-me{display:inline-block;font-size:0.65rem;background:#d69e2e;color:#fff;border-radius:8px;padding:1px 6px;margin-left:4px;font-weight:700;vertical-align:middle}
+.tl-foot{font-size:0.72rem;color:var(--muted);text-align:center;margin:0.2rem 0 0.6rem}
+</style>
+</head>
+<body>
+<div class="phone">
+  <header><h1>🏆 Topplistor</h1><span style="font-size:0.8rem;opacity:.7">⋯</span></header>
+  <div class="ex">EXEMPELDATA — inte riktiga rekord. Inget är live.</div>
+  <div class="tl-controls">
+    <div class="tabs">
+      <div class="tab">👤 Förare</div>
+      <div class="tab">🚕 Bil</div>
+      <div class="tab active">🏅 Hall of Fame</div>
+    </div>
+    <div class="subtabs">
+      <div class="subtab active">Alla rekord</div>
+      <div class="subtab">Körning</div>
+      <div class="subtab">Pass</div>
+      <div class="subtab">Månad</div>
+    </div>
+  </div>
+  <div class="tl-info">Personliga bästa sedan jan 2025. Andra förare visas utan namn. Bara din egen rad syns som "Du". Bilnummer visas aldrig.</div>
+  <div class="tl-body">
+
+    <div class="tl-card">
+      <div class="tl-head">
+        <span class="tl-title">Längsta körningen</span>
+        <span class="tl-me">Du: plats 4 av 23</span>
+      </div>
+      <div class="tl-row"><span class="tl-pos">🥇</span><span class="tl-who">Förare</span><span class="tl-val">312 km<span class="tl-when">· mar -26</span></span></div>
+      <div class="tl-row"><span class="tl-pos">🥈</span><span class="tl-who">Förare</span><span class="tl-val">298 km<span class="tl-when">· jun -26</span></span></div>
+      <div class="tl-row"><span class="tl-pos">🥉</span><span class="tl-who">Förare</span><span class="tl-val">291 km<span class="tl-when">· okt -25</span></span></div>
+      <div class="tl-row du"><span class="tl-pos">4</span><span class="tl-who">Du</span><span class="tl-val">287 km<span class="tl-when">· apr -26</span></span></div>
+      <div class="tl-row"><span class="tl-pos">5</span><span class="tl-who">Förare</span><span class="tl-val">241 km<span class="tl-when">· maj -26</span></span></div>
+    </div>
+
+    <div class="tl-card">
+      <div class="tl-head">
+        <span class="tl-title">Mest inkört på en månad</span>
+        <span class="tl-me">Du: plats 2 av 23</span>
+      </div>
+      <div class="tl-row"><span class="tl-pos">🥇</span><span class="tl-who">Förare</span><span class="tl-val">84 200 kr<span class="tl-when">· jun -26</span></span></div>
+      <div class="tl-row du"><span class="tl-pos">2</span><span class="tl-who">Du</span><span class="tl-val">78 450 kr<span class="tl-when">· sep -26</span></span></div>
+      <div class="tl-row"><span class="tl-pos">🥉</span><span class="tl-who">Förare</span><span class="tl-val">71 100 kr<span class="tl-when">· maj -25</span></span></div>
+      <div class="tl-row"><span class="tl-pos">4</span><span class="tl-who">Förare</span><span class="tl-val">68 900 kr<span class="tl-when">· mar -26</span></span></div>
+      <div class="tl-row"><span class="tl-pos">5</span><span class="tl-who">Förare</span><span class="tl-val">65 400 kr<span class="tl-when">· okt -25</span></span></div>
+    </div>
+
+    <div class="tl-card">
+      <div class="tl-head">
+        <span class="tl-title">Mest dricks på en månad</span>
+        <span class="tl-me">Du: plats 1 av 23</span>
+      </div>
+      <div class="tl-row du"><span class="tl-pos">🥇</span><span class="tl-who">Du <span class="badge-me">Du har detta rekord!</span></span><span class="tl-val">1 240 kr<span class="tl-when">· sep -25</span></span></div>
+      <div class="tl-row"><span class="tl-pos">🥈</span><span class="tl-who">Förare</span><span class="tl-val">1 085 kr<span class="tl-when">· jun -26</span></span></div>
+      <div class="tl-row"><span class="tl-pos">🥉</span><span class="tl-who">Förare</span><span class="tl-val">960 kr<span class="tl-when">· aug -25</span></span></div>
+      <div class="tl-row"><span class="tl-pos">4</span><span class="tl-who">Förare</span><span class="tl-val">890 kr<span class="tl-when">· mar -26</span></span></div>
+      <div class="tl-row"><span class="tl-pos">5</span><span class="tl-who">Förare</span><span class="tl-val">810 kr<span class="tl-when">· maj -26</span></span></div>
+    </div>
+
+    <div class="tl-card">
+      <div class="tl-head">
+        <span class="tl-title">Flest körningar på ett pass</span>
+        <span class="tl-me">Du: plats 6 av 23</span>
+      </div>
+      <div class="tl-row"><span class="tl-pos">🥇</span><span class="tl-who">Förare</span><span class="tl-val">18 st<span class="tl-when">· sep -26</span></span></div>
+      <div class="tl-row"><span class="tl-pos">🥈</span><span class="tl-who">Förare</span><span class="tl-val">17 st<span class="tl-when">· jun -26</span></span></div>
+      <div class="tl-row"><span class="tl-pos">🥉</span><span class="tl-who">Förare</span><span class="tl-val">16 st<span class="tl-when">· maj -25</span></span></div>
+      <div class="tl-row"><span class="tl-pos">4</span><span class="tl-who">Förare</span><span class="tl-val">15 st<span class="tl-when">· aug -26</span></span></div>
+      <div class="tl-row"><span class="tl-pos">5</span><span class="tl-who">Förare</span><span class="tl-val">15 st<span class="tl-when">· okt -25</span></span></div>
+      <div class="tl-row du"><span class="tl-pos">6</span><span class="tl-who">Du</span><span class="tl-val">14 st<span class="tl-when">· jul -26</span></span></div>
+    </div>
+
+    <div class="tl-card">
+      <div class="tl-head">
+        <span class="tl-title">Kortaste körningen</span>
+        <span class="tl-me">Du: plats 3 av 23</span>
+      </div>
+      <div class="tl-row"><span class="tl-pos">🥇</span><span class="tl-who">Förare</span><span class="tl-val">0,8 km<span class="tl-when">· maj -26</span></span></div>
+      <div class="tl-row"><span class="tl-pos">🥈</span><span class="tl-who">Förare</span><span class="tl-val">0,9 km<span class="tl-when">· jan -25</span></span></div>
+      <div class="tl-row du"><span class="tl-pos">3</span><span class="tl-who">Du</span><span class="tl-val">1,1 km<span class="tl-when">· feb -26</span></span></div>
+      <div class="tl-row"><span class="tl-pos">4</span><span class="tl-who">Förare</span><span class="tl-val">1,2 km<span class="tl-when">· apr -26</span></span></div>
+      <div class="tl-row"><span class="tl-pos">5</span><span class="tl-who">Förare</span><span class="tl-val">1,3 km<span class="tl-when">· sep -25</span></span></div>
+    </div>
+
+    <div class="tl-card">
+      <div class="tl-head">
+        <span class="tl-title">Längsta passet</span>
+        <span class="tl-me">Du: plats 5 av 23</span>
+      </div>
+      <div class="tl-row"><span class="tl-pos">🥇</span><span class="tl-who">Förare</span><span class="tl-val">14:20 h<span class="tl-when">· maj -25</span></span></div>
+      <div class="tl-row"><span class="tl-pos">🥈</span><span class="tl-who">Förare</span><span class="tl-val">13:55 h<span class="tl-when">· okt -25</span></span></div>
+      <div class="tl-row"><span class="tl-pos">🥉</span><span class="tl-who">Förare</span><span class="tl-val">13:40 h<span class="tl-when">· mar -26</span></span></div>
+      <div class="tl-row"><span class="tl-pos">4</span><span class="tl-who">Förare</span><span class="tl-val">13:10 h<span class="tl-when">· jun -26</span></span></div>
+      <div class="tl-row du"><span class="tl-pos">5</span><span class="tl-who">Du</span><span class="tl-val">12:45 h<span class="tl-when">· aug -26</span></span></div>
+    </div>
+
+    <div class="tl-card">
+      <div class="tl-head">
+        <span class="tl-title">Flest km på ett nattpass</span>
+        <span class="tl-me">Du: plats 7 av 23</span>
+      </div>
+      <div class="tl-row"><span class="tl-pos">🥇</span><span class="tl-who">Förare</span><span class="tl-val">420 km<span class="tl-when">· jun -26</span></span></div>
+      <div class="tl-row"><span class="tl-pos">🥈</span><span class="tl-who">Förare</span><span class="tl-val">398 km<span class="tl-when">· maj -26</span></span></div>
+      <div class="tl-row"><span class="tl-pos">🥉</span><span class="tl-who">Förare</span><span class="tl-val">375 km<span class="tl-when">· sep -25</span></span></div>
+      <div class="tl-row"><span class="tl-pos">4</span><span class="tl-who">Förare</span><span class="tl-val">360 km<span class="tl-when">· apr -26</span></span></div>
+      <div class="tl-row"><span class="tl-pos">5</span><span class="tl-who">Förare</span><span class="tl-val">341 km<span class="tl-when">· okt -25</span></span></div>
+      <div class="tl-row du"><span class="tl-pos">7</span><span class="tl-who">Du</span><span class="tl-val">298 km<span class="tl-when">· jul -26</span></span></div>
+    </div>
+
+    <div class="tl-card">
+      <div class="tl-head">
+        <span class="tl-title">Högsta enskilda beloppet</span>
+        <span class="tl-me">Du: plats 2 av 23</span>
+      </div>
+      <div class="tl-row"><span class="tl-pos">🥇</span><span class="tl-who">Förare</span><span class="tl-val">4 850 kr<span class="tl-when">· apr -26</span></span></div>
+      <div class="tl-row du"><span class="tl-pos">2</span><span class="tl-who">Du</span><span class="tl-val">4 210 kr<span class="tl-when">· jun -26</span></span></div>
+      <div class="tl-row"><span class="tl-pos">🥉</span><span class="tl-who">Förare</span><span class="tl-val">3 980 kr<span class="tl-when">· maj -26</span></span></div>
+      <div class="tl-row"><span class="tl-pos">4</span><span class="tl-who">Förare</span><span class="tl-val">3 650 kr<span class="tl-when">· okt -25</span></span></div>
+      <div class="tl-row"><span class="tl-pos">5</span><span class="tl-who">Förare</span><span class="tl-val">3 400 kr<span class="tl-when">· mar -26</span></span></div>
+    </div>
+
+    <div class="tl-card">
+      <div class="tl-head">
+        <span class="tl-title">Flest flygresor på ett pass</span>
+        <span class="tl-me">Du: plats 1 av 23</span>
+      </div>
+      <div class="tl-row du"><span class="tl-pos">🥇</span><span class="tl-who">Du <span class="badge-me">Du har detta rekord!</span></span><span class="tl-val">5 st<span class="tl-when">· jun -26</span></span></div>
+      <div class="tl-row"><span class="tl-pos">🥈</span><span class="tl-who">Förare</span><span class="tl-val">4 st<span class="tl-when">· jul -26</span></span></div>
+      <div class="tl-row"><span class="tl-pos">🥉</span><span class="tl-who">Förare</span><span class="tl-val">4 st<span class="tl-when">· maj -25</span></span></div>
+      <div class="tl-row"><span class="tl-pos">4</span><span class="tl-who">Förare</span><span class="tl-val">3 st<span class="tl-when">· apr -26</span></span></div>
+      <div class="tl-row"><span class="tl-pos">5</span><span class="tl-who">Förare</span><span class="tl-val">3 st<span class="tl-when">· sep -25</span></span></div>
+    </div>
+
+    <p class="tl-foot">Äldre år (före 2025) kan läggas till senare om ni vill.</p>
+  </div>
+</div>
+</body>
+</html>
