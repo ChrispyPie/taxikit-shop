@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-06', id: '2026-11-06i', tid: '22:27', rader: [
+    ['Nytt', 'Backa en sida genom att dra med tummen från vänsterkanten åt höger. Det fungerar på alla sidor, som telefonens bakåtknapp.']
+  ] },
   { datum: '2026-11-06', id: '2026-11-06h', tid: '22:30', rader: [
     ['Fixat', 'Körpassdata: notiserna går nu att öppna där också, både med klockan högst upp och genom att dra fram panelen från högra kanten.']
   ] },
