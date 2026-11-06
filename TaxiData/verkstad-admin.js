@@ -117,11 +117,11 @@
     if (!A.month) { var n = new Date(); A.month = new Date(n.getFullYear(), n.getMonth(), 1); }
     var from = A.month, to = new Date(A.month.getFullYear(), A.month.getMonth() + 1, 0);
     A.data = null; if (typeof render === 'function') render();
-    return rpc('admin_workshop_list', { p_from: ymd(from), p_to: ymd(to) })
+    return rpc('payroll_month', { p_month: ymd(from) })
       .then(function (d) {
         A.data = d; A.pending = (d.entries || []).filter(mine).length; render();
         // Sammanfattning av bilarna (samma data som appen visar)
-        return A.loadBil();
+        return d;
       })
       .catch(function (e) { A.data = { error: err(e) }; render(); });
   };
@@ -375,12 +375,9 @@
     var pend = (d.entries || []).filter(mine);
     var asked = (d.entries || []).filter(function (x) { return x.status === 'pending' && x.waiting_on === 'driver'; });
     var done = (d.entries || []).filter(function (x) { return x.status !== 'pending'; });
-    var h = bilSummary();
+    var h = '<p class="ar-note" style="text-align:center;margin-bottom:14px">(verktyg &amp; underlag)</p><p class="ar-note">Bara ägaren och superadmin ser löneunderlaget.</p>';
     h += '<div class="vka-h">⏱️ Verkstadstimmar</div>';
     h += '<div class="vka-card vka-rate"><span>Timpris: <b>' + kr(d.rate) + '/h</b></span><button onclick="VERKSTAD_ADMIN.setRate()">Ändra</button></div>';
-    h += '<div class="vka-h">Väntar på dig (' + pend.length + ')</div>';
-    h += pend.length ? pend.map(function (x) { return card(x, false); }).join('') : '<div class="vka-card" style="color:var(--c-718096)">Inget väntar på dig just nu.</div>';
-    if (asked.length) h += '<div class="vka-h">Du har frågat – väntar på föraren (' + asked.length + ')</div>' + asked.map(function (x) { return card(x, false); }).join('');
     h += '<div class="vka-h">Att betala per månad</div>';
     h += '<div class="vka-bar"><button onclick="VERKSTAD_ADMIN.shift(-1)" aria-label="Föregående månad">‹</button><b>' +
       cap(MONL[A.month.getMonth()]) + ' ' + A.month.getFullYear() + '</b>' +
@@ -399,8 +396,7 @@
       h += '<div class="vka-exp"><button onclick="VERKSTAD_ADMIN.csv()">⬇️ Ladda ner (CSV)</button><button onclick="VERKSTAD_ADMIN.copy()">📋 Kopiera</button></div>';
     }
     h += '</div>';
-    h += '<div class="vka-h">Beslutade i månaden (' + done.length + ')</div>';
-    h += done.length ? done.map(function (x) { return card(x, true); }).join('') : '<div class="vka-card" style="color:var(--c-718096)">Inga beslut den här månaden.</div>';
+    h += '<div class="vka-card"><b>Fler löneposter kommer senare</b><p class="vka-meta">Beslut om verkstadstid hanteras under Admin › Ärenden.</p></div>';
     h += '<div class="vka-note">Godkänd tid betalas med timpriset som gällde när den godkändes. Tiden räknas till den månad då verkstadsbesöket började. Alla beslut och frågor sparas i Chaufförer › Logg.' +
       (d.named ? '' : ' Du ser förar-ID, inte namn.') + '</div>';
     content.innerHTML = h;

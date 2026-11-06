@@ -225,9 +225,17 @@
     st.el = content; st.sjOn = false; st.form = null; st.f = null; st.mDone = null; st.tf = null; st.tr = null; window.VERKSTAD_LAST = null;
     content.innerHTML = '<div id="bv-root"><div id="bv-top"></div><div id="vk-body"><div class="tl-msg">Laddar…</div></div></div>';
     drawTop();
-    load();
+    return load();
   };
   V.openTab = function (t) { st.tab = t; st.sjOn = false; localStorage.setItem('bil_tab', t); st.f = null; st.mDone = null; st.tf = null; st.tr = null; drawTop(); draw(); window.scrollTo(0, 0); };
+
+  // Samma formulär och sparlogik, öppnade från Meddelanden/rapporter.
+  V.newReport = function (tab) {
+    V.openTab(tab);
+    if (tab === 'fel' || tab === 'behov') st.f = newIssue(tab === 'fel' ? 'fault' : 'supply', null);
+    else if (tab === 'timmar') st.form = newForm(null);
+    draw();
+  };
 
   function drawTop() {
     var top = document.getElementById('bv-top'); if (!top) return;
