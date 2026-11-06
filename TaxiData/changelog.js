@@ -15,6 +15,12 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-06', id: '2026-11-06e', rader: [
+    'Meddelanden och Ärenden under profilikonen. Växla på samma sida: privata samtal med ämne och svarstråd, eller dina pågående och avslutade ärenden.',
+    'Skicka meddelande på en profil öppnar ett nytt privat meddelande med mottagaren förvald.',
+    'Admin har en gemensam, kompakt Ärenden-lista med typ- och statusfilter. Klara ligger kvar under Visa klara.',
+    'Löner (verktyg & underlag) samlar timpris och verkstadstid per förare och månad. Bara ägaren och superadmin ser löneunderlag och andras sjukanmälningar.'
+  ] },
   { datum: '2026-11-06', id: '2026-11-06d', tid: '19:45', rader: [
     ['Nytt', 'Topplistor har fått ett Rekord-läge. Tryck på Rekord högst upp för att se den bästa dagen, veckan, månaden eller året för varje förare sedan 2025. Listan är anonym och din egen plats är markerad med "Du".'],
     ['Nytt', 'Välj vad du vill se i listan överst: Inkört, Dricks, Kr/mil, Kr/timme, Km, Antal resor, Kr/körning, Kr/pass, Dricks %, Flygresor, Km/körning, Belopp/körning och Körningar/pass. Hela listan visas, störst först. Läs nerifrån om du vill se de minsta.'],

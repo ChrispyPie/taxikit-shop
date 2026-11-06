@@ -223,7 +223,7 @@
       '<button type="button" class="ps-btn ghost" data-a="guestbook">Öppna gästbok</button></div>';
     h += '<div class="ps-acts">';
     if (d.can_edit) h += '<button type="button" class="ok" data-a="edit">Redigera profil</button>';
-    if (!d.mine) h += '<button type="button" class="ghost ps-ph" data-a="msg" title="Inkorg kommer senare">Skicka meddelande</button>';
+    if (!d.mine) h += '<button type="button" class="ghost" data-a="msg">Skicka meddelande</button>';
     h += '</div>';
     if (st.err) h += '<p class="ps-err">' + esc(st.err) + '</p>';
     return h;
@@ -598,7 +598,7 @@
     if (a === 'gallery') { go('gallery'); loadGallery(); return; }
     if (a === 'guestbook') { go('guestbook'); loadGuestbook(); return; }
     if (a === 'msg') {
-      toast('Inkorg kommer senare. Du kan inte skicka meddelande ännu.');
+      if (window.INKORG) INKORG.compose(st.data && st.data.id);
       return;
     }
     if (a === 'forum-threads') { st.view = 'forum'; st.forumKind = 'threads'; try { history.pushState({ view: 'profil', sub: 'forum' }, ''); } catch (e) {} loadForumList('threads'); return; }
