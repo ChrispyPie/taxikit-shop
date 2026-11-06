@@ -24,7 +24,7 @@ Rekordlistan visar **bara värde och placering** — ingen månad/dag. RPC retur
 | krtimme | Kr/timme | ≥ 30 min |
 | km | Km | pass-km |
 | antal | Antal resor | |
-| snitt | Kr/körning | snitt; Rekord: minsta antal resor (trösklar) |
+| snitt | Kr/körning | snitt; resegräns bara i Rekord |
 | inkort_pass | Kr/pass | snitt inkört per pass |
 | dricks_pct | Dricks % | inkört ≥ 100 kr |
 | flyg | Flygresor | start- eller slutzon 291–293 |
@@ -39,7 +39,8 @@ Rekordlistan visar **bara värde och placering** — ingen månad/dag. RPC retur
 - **Andel tomkörning** — STIG-data har inget tomkm-/ledig-fält. Utelämnad.
 - Sorteringsknappar Störst/Minst — alltid störst först, hela listan.
 
-### Trösklar (snitt i Rekord)
+### Trösklar — bara i Rekord, aldrig i Topplista
+Gäller snittmåtten Kr/körning, Kr/pass, Dricks %, Kr/mil, Kr/timme. Topplista har ingen resegräns.
 | Grain | Minsta antal resor |
 |-------|--------------------|
 | Dag | 5 |

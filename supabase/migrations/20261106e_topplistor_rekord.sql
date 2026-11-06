@@ -5,7 +5,8 @@
 -- Mått: inkort, dricks, krmil, krtimme, km, antal, snitt, langst, belopp, passresor, flyg, dricks_pct, inkort_pass.
 -- Borttaget i UI (inte här): timmar, verkstad, perskift. Andel tomkörning finns inte i STIG-datan (inga tomkm-fält).
 -- Outliers: 0 km + belopp ≥ 500 räknas bort; pass > 16 h räknas bort.
--- Snitt i Rekord kräver minst: dag 5, vecka 15, månad 20, år 100 resor i perioden.
+-- Snittmått (Kr/körning, Kr/pass, Dricks %, Kr/mil, Kr/timme) kräver i REKORD minst: dag 5, vecka 15, månad 20, år 100 resor.
+-- I TOPPLISTA finns ingen resegräns (bara skydd mot division: kr/mil ≥1 mil, kr/timme ≥30 min, dricks % inkört ≥100 kr).
 -- Rekord visar inga datum (integritet) — bara värde och placering.
 -- Bil: samma own-regel som get_leaderboard_bil (vanlig förare = bara egen bil).
 -- Ångra: supabase/migrations/undo/20261106e_topplistor_rekord_undo.sql
@@ -396,14 +397,14 @@ begin
         case v_metric
           when 'inkort' then round(inkort)
           when 'dricks' then round(dricks)
-          when 'krmil' then case when km >= 10 then round(inkort / (km / 10)) end
-          when 'krtimme' then case when mins >= 30 then round(inkort / (mins / 60.0)) end
+          when 'krmil' then case when km >= 10 and antal >= v_min_trips then round(inkort / (km / 10)) end
+          when 'krtimme' then case when mins >= 30 and antal >= v_min_trips then round(inkort / (mins / 60.0)) end
           when 'km' then round(km)
           when 'antal' then antal
           when 'snitt' then case when antal >= v_min_trips then round(inkort / antal) end
           when 'flyg' then flyg
-          when 'dricks_pct' then case when inkort >= 100 then round(100.0 * dricks / inkort, 1) end
-          when 'inkort_pass' then case when skift > 0 then round(inkort / skift) end
+          when 'dricks_pct' then case when inkort >= 100 and antal >= v_min_trips then round(100.0 * dricks / inkort, 1) end
+          when 'inkort_pass' then case when skift > 0 and antal >= v_min_trips then round(inkort / skift) end
         end::numeric v
       from per
       where not (v_metric = any (v_trip_metrics))
@@ -474,7 +475,7 @@ begin
     'scope', case when v_entity = 'bil' and not v_all and not v_demo then 'own' else 'all' end,
     'own', case when v_entity = 'bil' then v_car end,
     'updated', v_upd,
-    'min_trips', case when v_metric = 'snitt' then v_min_trips end,
+    'min_trips', case when v_metric in ('snitt','inkort_pass','dricks_pct','krmil','krtimme') then v_min_trips end,
     'n', (select count(*) from best),
     'me', (select jsonb_build_object('pos', f.pos, 'v', f.v) from filtered f where f.me order by f.pos limit 1),
     'rows', coalesce((select jsonb_agg(jsonb_strip_nulls(jsonb_build_object(
@@ -483,7 +484,7 @@ begin
             )) order by rn)
             from filtered), '[]'::jsonb),
     'note', 'Rekord sedan jan 2025. Dricks = kort. 0 km-megafärder och pass > 16 h bortfiltreras.'
-      || case when v_metric = 'snitt' then ' Kr/körning kräver minst ' || v_min_trips || ' resor i perioden.' else '' end
+      || case when v_metric in ('snitt','inkort_pass','dricks_pct','krmil','krtimme') then ' Rekord kräver minst ' || v_min_trips || ' resor i perioden.' else '' end
   ) into r;
   return r::json;
 end $function$;

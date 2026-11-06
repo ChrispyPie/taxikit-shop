@@ -340,7 +340,7 @@
       });
       h += '</div>';
       h += '<div class="tl-foot">Kr/mil kräver minst 1 mil, kr/timme minst 30 min. Inkört som i Körpassdata. ' +
-        (rek && L.k === 'snitt' && d.min_trips ? 'Kr/körning i rekord kräver minst ' + d.min_trips + ' resor. ' : '') +
+        (rek && d.min_trips ? 'Rekord kräver minst ' + d.min_trips + ' resor i perioden (gäller inte Topplista). ' : '') +
         'Störst först — läs nerifrån för minst. Km/körning: minst 0,5 km.</div>';
     }
     body.innerHTML = h;
