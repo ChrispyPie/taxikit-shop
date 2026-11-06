@@ -42,6 +42,8 @@
     '.fx-actions{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 .6rem}\n' +
     '.fx-actions button{border-radius:10px;padding:.45rem .85rem;font:inherit;font-size:.9rem;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text)}\n' +
     '.fx-actions .ok{background:var(--primary);color:var(--on-primary);border-color:var(--primary);font-weight:600}\n' +
+    '.fx-thhead{display:flex;gap:8px;padding:.35rem .5rem;background:var(--primary);color:var(--on-primary,#fff);font-size:.72rem;font-weight:700;border-radius:8px 8px 0 0}\n' +
+    '.fx-thhead span:nth-child(1){flex:1}.fx-thhead span:nth-child(2){width:2.2rem;text-align:center}.fx-thhead span:nth-child(3){width:5.2rem;text-align:right}\n' +
     '.fx-th{display:flex;gap:8px;align-items:flex-start;padding:.65rem .5rem;background:var(--surface);border-bottom:1px solid var(--border-soft,var(--border));cursor:pointer;width:100%;text-align:left;font:inherit;color:inherit}\n' +
     '.fx-th.dim{opacity:.55}\n' +
     '.fx-th .ti{flex:1;min-width:0}\n' +
@@ -175,9 +177,12 @@
           '<div class="ico">' + (locked ? '🔒' : esc(s.icon || '💬')) + '</div>' +
           '<div class="main"><div class="name">' + esc(s.title) + '</div>' +
           '<div class="desc">' + esc(s.description || '') + '</div>' +
-          '<div class="meta"><span>Trådar <b>' + (+s.threads || 0) + '</b></span><span>Inlägg <b>' + (+s.replies || 0) + '</b></span>' +
-          (s.unread ? '<span class="new">' + s.unread + ' nya</span>' : '') + '</div></div>' +
-          '<div class="last">' + (s.last ? (esc(when(s.last.at)) + '<br><span class="who">' + esc(s.last.mine ? 'Du' : sn(s.last.author)) + '</span>') : '—') + '</div></button>';
+          (locked
+            ? '<div class="meta"><span>Låst · bara ägare och S admin</span></div></div><div class="last">🔒</div>'
+            : '<div class="meta"><span>Trådar <b>' + (+s.threads || 0) + '</b></span><span>Inlägg <b>' + (+s.replies || 0) + '</b></span>' +
+              (s.unread ? '<span class="new">' + s.unread + ' nya</span>' : '') + '</div></div>' +
+              '<div class="last">' + (s.last ? (esc(when(s.last.at)) + '<br><span class="who">' + esc(s.last.mine ? 'Du' : sn(s.last.author)) + '</span>') : '—') + '</div>') +
+          '</button>';
       });
     });
     if (!(h.sections || []).length) html += '<div class="fx-empty">Inga sektioner ännu.</div>';
@@ -205,6 +210,7 @@
     if (!list.length) {
       html += '<div class="fx-empty">Inga trådar ännu.' + (sec && sec.can_write ? ' Tryck på + Ny tråd för att börja.' : '') + '</div>';
     } else {
+      html += '<div class="fx-thhead" aria-hidden="true"><span>Tråd</span><span>Sv</span><span>Senaste</span></div>';
       list.forEach(function (t) {
         html += '<button type="button" class="fx-th' + (t.status === 'klar' ? ' dim' : '') + '" data-a="thread" data-id="' + t.id + '">' +
           '<div class="ti"><div class="t">' + (t.unread ? '💬 ' : '') + esc(t.title) + stChip(t.status) + '</div>' +
@@ -254,7 +260,7 @@
       html += '<div class="fx-post' + (p.hidden ? ' hid' : '') + '"><div class="ph"><span class="au">' + who(p.author, p.aid) + '</span>' +
         '<span class="tm">#' + p.n + ' · ' + esc(when(p.created_at)) + (p.edited ? ' · redigerad' : '') + '</span></div>' +
         '<div class="pb">' + esc(p.body) + '</div>' +
-        '<div class="pf">' + (p.mine ? 'Du' : 'Förare') + (p.co ? ' · ' + esc(p.co) : '') + '</div></div>';
+        '<div class="pf">' + (p.mine ? 'Du' : esc(sn(p.author))) + (p.co ? ' · ' + esc(p.co) : '') + '</div></div>';
     });
     if (t.can_write) {
       html += '<div class="fx-reply">' + ruleBox(true) +
