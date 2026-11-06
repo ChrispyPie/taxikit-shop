@@ -117,6 +117,7 @@
       h += '<div class="ar-note">Ärendet är klart. Vill du ta upp det igen, gör en ny anmälan.</div>';
     }
     el.innerHTML = h + '</div>';
+    A.mountCertificates(c, el);
   }
   I.send = function () {
     var c = st.cur, ta = document.getElementById('ink-txt'), b = document.getElementById('ink-send');

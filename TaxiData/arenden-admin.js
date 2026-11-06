@@ -144,6 +144,7 @@
       return;
     }
     el.innerHTML = '<div style="padding:8px 12px 24px">' + back + A.view(c, 'owner') + tools(c) + '</div></div>';
+    A.mountCertificates(c, el);
   }
 
   R.act = function (a) {
