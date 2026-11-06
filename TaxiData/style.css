@@ -223,6 +223,8 @@ main { max-width: 900px; margin: 1rem auto; padding: 0 1rem; }
 .ank-st-dl.bad { color: var(--danger); }
 .ank-st-dl.early { color: var(--text-soft); }
 .ank-st-hint { color: var(--text-soft); font-size: 0.8rem; padding-bottom: 6px; }
+.ank-reason { background: var(--surface-soft); border: 1px solid var(--border-soft); border-radius: 8px; padding: 8px 10px; margin: 0 0 10px; font-size: 0.85rem; color: var(--text); line-height: 1.35; }
+.ank-reason:empty { display: none; }
 .ank-more { display: block; width: 100%; background: none; border: 1px dashed var(--border); color: var(--text-soft); border-radius: 8px; padding: 6px; font-size: 0.85rem; margin-bottom: 0.5rem; cursor: pointer; }
 .ank-day { font-weight: 700; font-size: 0.85rem; color: var(--text-soft); margin: 0.7rem 2px 0.3rem; }
 .ank-row { display: flex; gap: 10px; align-items: flex-start; background: var(--surface); border: 1px solid var(--border-soft); border-radius: 10px; padding: 9px 10px; margin-bottom: 6px; }
