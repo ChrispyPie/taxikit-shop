@@ -12,10 +12,10 @@ Branch: `feat/topplistor-rekord` · Backup: `backup/pre-rekord-20261106` (= main
 - Anonym ranking; egen rad som "Du: plats X av N".
 - Bil: vanliga förare ser bara egen bil (samma regel som idag).
 
-### Rekord-datum (integritetsval)
-Datum på rekord visas som **månad + år** (t.ex. `sep -26`), även när grain är Dag eller Vecka. Motivering: ~29 förare — exakt dag kan identifiera personen. Flaggat här och i RPC-fältet `privacy_when: month_year`.
+### Rekord utan datum
+Rekordlistan visar **bara värde och placering** — ingen månad/dag. RPC returnerar inte perioddatum (integritet).
 
-## Mått
+## Mått (korta namn)
 | Nyckel | Rubrik | Kommentar |
 |--------|--------|-----------|
 | inkort | Inkört | |
@@ -24,19 +24,20 @@ Datum på rekord visas som **månad + år** (t.ex. `sep -26`), även när grain 
 | krtimme | Kr/timme | ≥ 30 min |
 | km | Km | pass-km |
 | antal | Antal resor | |
-| snitt | Snitt per körning | Rekord: minsta antal resor (se trösklar) |
-| inkort_pass | Inkört per pass | |
-| dricks_pct | Dricks i % av inkört | inkört ≥ 100 kr |
+| snitt | Kr/körning | snitt; Rekord: minsta antal resor (trösklar) |
+| inkort_pass | Kr/pass | snitt inkört per pass |
+| dricks_pct | Dricks % | inkört ≥ 100 kr |
 | flyg | Flygresor | start- eller slutzon 291–293 |
-| langst | Längsta körningen | ≥ 0,5 km; botten av listan = kortaste |
-| belopp | Högsta enskilda belopp | enskild resa |
-| passresor | Flest körningar per pass | enskilt pass |
+| langst | Km/körning | enskild resa, ≥ 0,5 km; botten = kortaste |
+| belopp | Belopp/körning | enskild resa (skilt från Kr/körning = snitt) |
+| passresor | Körningar/pass | enskilt pass |
 
 ### Borttaget / utelämnat
 - **Timmar** — Berra vill inte uppmuntra långa pass.
 - **Verkstadstimmar** — ingen historik i arkivet.
-- **Högst snitt per pass** — ersatt av Inkört per pass.
-- **Andel tomkörning** — STIG-data har inget tomkm-/ledig-fält (bara `kilometer` på resa och `km` på pass). Utelämnad.
+- **Högst snitt per pass** — ersatt av Kr/pass.
+- **Andel tomkörning** — STIG-data har inget tomkm-/ledig-fält. Utelämnad.
+- Sorteringsknappar Störst/Minst — alltid störst först, hela listan.
 
 ### Trösklar (snitt i Rekord)
 | Grain | Minsta antal resor |
@@ -69,4 +70,4 @@ Datum på rekord visas som **månad + år** (t.ex. `sep -26`), även när grain 
 
 ## Skärmdumpar
 - Harness: `docs/topplistor/harness.html` (eller `/workspace/taxidata-cleanup/harness/rekord/`)
-- Bilder v2 (utan sorteringsknappar, full lista): `/workspace/taxidata-cleanup/screenshots/rekord/v2/` och `docs/topplistor/real/`
+- Bilder v3: `/workspace/taxidata-cleanup/screenshots/rekord/v3/` och `docs/topplistor/real/`

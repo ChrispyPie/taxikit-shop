@@ -18,13 +18,13 @@
     { k: 'krtimme', t: 'Kr/timme', f: 'kr', group: 'sum' },
     { k: 'km', t: 'Km', f: 'km', group: 'sum' },
     { k: 'antal', t: 'Antal resor', f: 'st', group: 'sum' },
-    { k: 'snitt', t: 'Snitt per körning', f: 'kr', group: 'sum' },
-    { k: 'inkort_pass', t: 'Inkört per pass', f: 'kr', group: 'sum' },
-    { k: 'dricks_pct', t: 'Dricks i % av inkört', f: 'pct', group: 'sum' },
+    { k: 'snitt', t: 'Kr/körning', f: 'kr', group: 'sum' },
+    { k: 'inkort_pass', t: 'Kr/pass', f: 'kr', group: 'sum' },
+    { k: 'dricks_pct', t: 'Dricks %', f: 'pct', group: 'sum' },
     { k: 'flyg', t: 'Flygresor', f: 'st', group: 'sum' },
-    { k: 'langst', t: 'Längsta körningen', f: 'km1', group: 'trip' },
-    { k: 'belopp', t: 'Högsta enskilda belopp', f: 'kr', group: 'trip' },
-    { k: 'passresor', t: 'Flest körningar per pass', f: 'st', group: 'trip' }
+    { k: 'langst', t: 'Km/körning', f: 'km1', group: 'trip' },
+    { k: 'belopp', t: 'Belopp/körning', f: 'kr', group: 'trip' },
+    { k: 'passresor', t: 'Körningar/pass', f: 'st', group: 'trip' }
   ];
   T.lists = LISTS;
   var BY_K = {};
@@ -239,7 +239,7 @@
 
   function metricSub(L) {
     if (st.view === 'rekord') {
-      if (L.group === 'trip') return 'bästa enskilda sedan 2025';
+      if (L.group === 'trip') return 'sedan 2025';
       return 'bästa ' + (GRAIN_SV[st.tab === 'period' ? 'manad' : st.tab] || 'period') + ' sedan 2025';
     }
     return L.group === 'trip' ? 'i vald period' : 'vald period';
@@ -334,15 +334,14 @@
             ? (r.namn && r.namn !== r.id ? esc(sn(r.namn)) + ' <span class="tl-id">' + esc(r.id) + '</span>' : esc(r.id))
             : (window.DEMO && DEMO.on() ? 'Förare ' + r.pos : ''));
         }
-        var when = r.when ? '<span class="tl-when">· ' + esc(r.when) + '</span>' : '';
         h += '<div class="tl-row' + (r.du ? ' du' : '') + '"><span class="tl-pos">' +
           (r.pos <= 3 ? ['🥇', '🥈', '🥉'][r.pos - 1] : r.pos + '.') + '</span>' +
-          '<span class="tl-who">' + who + '</span><span class="tl-val">' + fmt(r.v, L.f) + when + '</span></div>';
+          '<span class="tl-who">' + who + '</span><span class="tl-val">' + fmt(r.v, L.f) + '</span></div>';
       });
       h += '</div>';
       h += '<div class="tl-foot">Kr/mil kräver minst 1 mil, kr/timme minst 30 min. Inkört som i Körpassdata. ' +
-        (rek && L.k === 'snitt' && d.min_trips ? 'Snitt i rekord kräver minst ' + d.min_trips + ' resor. ' : '') +
-        'Listan är sorterad störst först — läs nerifrån för minst. Längsta körningen: minst 0,5 km (botten = kortaste).</div>';
+        (rek && L.k === 'snitt' && d.min_trips ? 'Kr/körning i rekord kräver minst ' + d.min_trips + ' resor. ' : '') +
+        'Störst först — läs nerifrån för minst. Km/körning: minst 0,5 km.</div>';
     }
     body.innerHTML = h;
   }

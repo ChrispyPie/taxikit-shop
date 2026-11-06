@@ -6,7 +6,7 @@
 -- Borttaget i UI (inte här): timmar, verkstad, perskift. Andel tomkörning finns inte i STIG-datan (inga tomkm-fält).
 -- Outliers: 0 km + belopp ≥ 500 räknas bort; pass > 16 h räknas bort.
 -- Snitt i Rekord kräver minst: dag 5, vecka 15, månad 20, år 100 resor i perioden.
--- Rekord-datum visas som månad+år (integritet, ~29 förare) — även för dag/vecka.
+-- Rekord visar inga datum (integritet) — bara värde och placering.
 -- Bil: samma own-regel som get_leaderboard_bil (vanlig förare = bara egen bil).
 -- Ångra: supabase/migrations/undo/20261106e_topplistor_rekord_undo.sql
 
@@ -251,7 +251,6 @@ declare
   v_min_trips int;
   v_metrics text[] := array['inkort','dricks','krmil','krtimme','km','antal','snitt','langst','belopp','passresor','flyg','dricks_pct','inkort_pass'];
   v_trip_metrics text[] := array['langst','belopp','passresor'];
-  v_mon text[] := array['jan','feb','mar','apr','maj','jun','jul','aug','sep','okt','nov','dec'];
 begin
   select * into a from private.session_actor(p_token);
   v_grain := lower(btrim(coalesce(p_grain, 'manad')));
@@ -455,17 +454,6 @@ begin
              when v_entity = 'forare' and v_owner then coalesce((select coalesce(nullif(btrim(coalesce(d.first_name,'')||' '||coalesce(d.last_name,'')),''), nullif(btrim(d.name),'')) from public.drivers d where d.id = b.ent), b.ent)
            end fname,
            case when v_entity = 'bil' and not v_demo then (select max(cr.modell) from public.cars cr where upper(btrim(cr.bilnummer)) = b.ent) end modell,
-           -- when: alltid månad+år för integritet (även om grain=dag/vecka)
-           case
-             when b.bucket ~ '^\d{4}-\d{2}$' then v_mon[substring(b.bucket from 6 for 2)::int] || ' -' || substring(b.bucket from 3 for 2)
-             when b.bucket ~ '^\d{4}-\d{2}-\d{2}$' then v_mon[substring(b.bucket from 6 for 2)::int] || ' -' || substring(b.bucket from 3 for 2)
-             when b.bucket ~ '^\d{4}-W' then v_mon[
-               extract(month from (to_date(substring(b.bucket from 1 for 4) || '0104', 'YYYYMMDD')
-                 + ((substring(b.bucket from 7 for 2)::int - 1) * 7))::date)::int
-             ] || ' -' || substring(b.bucket from 3 for 2)
-             when b.bucket ~ '^\d{4}$' then b.bucket
-             else b.bucket
-           end as when_lbl,
            rank() over (order by case when v_asc then b.v end asc nulls last, case when not v_asc then b.v end desc nulls last) pos,
            row_number() over (order by case when v_asc then b.v end asc nulls last, case when not v_asc then b.v end desc nulls last, b.ent) rn
       from best b
@@ -486,18 +474,16 @@ begin
     'scope', case when v_entity = 'bil' and not v_all and not v_demo then 'own' else 'all' end,
     'own', case when v_entity = 'bil' then v_car end,
     'updated', v_upd,
-    'privacy_when', 'month_year',
     'min_trips', case when v_metric = 'snitt' then v_min_trips end,
     'n', (select count(*) from best),
-    'me', (select jsonb_build_object('pos', f.pos, 'v', f.v, 'when', f.when_lbl) from filtered f where f.me order by f.pos limit 1),
+    'me', (select jsonb_build_object('pos', f.pos, 'v', f.v) from filtered f where f.me order by f.pos limit 1),
     'rows', coalesce((select jsonb_agg(jsonb_strip_nulls(jsonb_build_object(
               'pos', pos, 'v', v, 'du', case when me then true end,
-              'id', fid, 'namn', fname, 'modell', modell,
-              'when', when_lbl
+              'id', fid, 'namn', fname, 'modell', modell
             )) order by rn)
             from filtered), '[]'::jsonb),
-    'note', 'Rekord sedan jan 2025. Datum visas som månad+år. Dricks = kort. 0 km-megafärder och pass > 16 h bortfiltreras.'
-      || case when v_metric = 'snitt' then ' Snitt kräver minst ' || v_min_trips || ' resor i perioden.' else '' end
+    'note', 'Rekord sedan jan 2025. Dricks = kort. 0 km-megafärder och pass > 16 h bortfiltreras.'
+      || case when v_metric = 'snitt' then ' Kr/körning kräver minst ' || v_min_trips || ' resor i perioden.' else '' end
   ) into r;
   return r::json;
 end $function$;
