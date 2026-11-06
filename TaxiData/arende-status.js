@@ -145,6 +145,8 @@
     '.ar-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.ar-btns button{flex:1 1 auto;padding:10px 12px;border-radius:10px;border:1px solid var(--border,#cbd5e0);background:var(--surface,#fff);color:inherit;font:inherit;font-size:.92em;cursor:pointer}' +
     '.ar-btns .pri{background:var(--primary,#0a3d62);border-color:var(--primary,#0a3d62);color:#fff}.ar-btns .ok{background:#dcf5e3;border-color:#9ad8ad;color:#1d6b38}' +
     '.ar-tools{margin-top:12px;padding-top:10px;border-top:1px solid var(--border-soft,#e2e8f0)}.ar-tools .ar-h{margin-top:0}' +
+    '.ar-card [data-ar-certs]{margin-top:14px}.ar-card [data-ar-certs] h3{font-size:.9em;margin:0 0 8px}' +
+    '.ar-card .ar-cert-files{display:flex;gap:8px;flex-wrap:wrap}.ar-card .ar-cert-files button{min-height:44px;max-width:100%;padding:10px 12px;border:1px solid var(--border,#cbd5e0);border-radius:9px;background:var(--surface,#fff);color:inherit;font:inherit;font-size:.9em;cursor:pointer}.ar-cert-files button:disabled{opacity:.6}' +
     '.ar-note{font-size:.8em;color:var(--c-718096,#718096);margin-top:10px}' +
     '.ar-badge{display:inline-block;min-width:20px;height:20px;line-height:20px;border-radius:10px;background:#c2410c;color:#fff;font-size:12px;font-weight:700;padding:0 6px;text-align:center}' +
     '.icon{position:relative}.icon .ar-badge{position:absolute;top:6px;right:6px}';
@@ -177,6 +179,63 @@
   };
   function sys(t, at, extra) { return '<div class="ar-msg sys">' + t + (at ? ' · ' + esc(A.when(at)) : '') + (extra ? '<br>' + extra : '') + '</div>'; }
   function msg(who, at, body, me) { return '<div class="ar-msg' + (me ? ' me' : '') + '"><span class="w">' + who + ' · ' + esc(A.when(at)) + '</span>' + esc(body) + '</div>'; }
+
+  // Intyg finns redan i privata sjuk-intyg. Edge → databas kontrollerar ägare/förare
+  // innan några 15-minuterslänkar skapas. Inga intyg eller länkar sparas lokalt.
+  function certList(id) {
+    var url = typeof TRIP_API_URL !== 'undefined' ? TRIP_API_URL : typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : '';
+    var key = typeof TRIP_API_KEY !== 'undefined' ? TRIP_API_KEY : typeof SUPABASE_KEY !== 'undefined' ? SUPABASE_KEY : '';
+    return fetch(url + '/functions/v1/sjuk', {
+      method: 'POST', cache: 'no-store',
+      headers: { apikey: key, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'list', report_id: id, token: localStorage.getItem('taxi_session') || '' })
+    }).then(function (r) {
+      if (!r.ok) { var e = new Error('certs_unavailable'); e.denied = r.status === 403; throw e; }
+      return r.json();
+    }).then(function (b) { return b.certs || []; });
+  }
+  function certURL(x) {
+    var base = typeof TRIP_API_URL !== 'undefined' ? TRIP_API_URL : typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : '';
+    if (!x || !x.url) throw new Error('certs_unavailable');
+    var u = new URL(x.url, base + '/');
+    if (u.protocol !== 'https:' || u.origin !== new URL(base).origin || u.pathname.indexOf('/storage/v1/object/sign/sjuk-intyg/') !== 0) throw new Error('certs_unavailable');
+    return u.href;
+  }
+  function certError(el, e) {
+    el.textContent = e && e.denied ? 'Du har inte behörighet att öppna intygen.' : 'Kunde inte öppna intygen. Försök igen eller ladda om sidan.';
+  }
+  A.mountCertificates = function (c, root) {
+    var box = c.kind === 'sjuk' && root.querySelector('[data-ar-certs]');
+    if (!box) return Promise.resolve();
+    var message = box.querySelector('[role="status"]');
+    return certList(c.id).then(function (certs) {
+      if (!box.isConnected) return;
+      box.querySelector('.ar-cert-files').textContent = '';
+      message.textContent = certs.length ? 'Privata filer. En ny säker länk hämtas när du öppnar ett intyg.' : 'Inga uppladdade intyg.';
+      certs.forEach(function (cert, ix) {
+        var button = document.createElement('button'); button.type = 'button';
+        button.textContent = '📄 Intyg ' + (ix + 1) + (cert.mime === 'application/pdf' ? ' · PDF' : ' · Bild');
+        button.onclick = function () {
+          // Öppna tabben i själva trycket, så även mobilens popupskydd tillåter den.
+          // Länken hämtas på nytt vid VARJE öppning (aldrig en utgången eller cachad länk).
+          var tab = window.open('about:blank', '_blank');
+          if (tab) { tab.opener = null; tab.document.title = 'Läkarintyg'; tab.document.body.textContent = 'Hämtar en säker länk…'; }
+          button.disabled = true;
+          certList(c.id).then(function (fresh) {
+            if (!box.isConnected) { if (tab) tab.close(); return; }
+            var file = fresh.filter(function (x) { return x.id === cert.id; })[0], url = certURL(file);
+            if (tab) tab.location.replace(url);
+            else {
+              var a = document.createElement('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+              a.textContent = 'Tryck här för att öppna intyget'; message.textContent = ''; message.appendChild(a);
+            }
+          }).catch(function (e) { if (tab) tab.close(); if (box.isConnected) certError(message, e); })
+            .finally(function () { button.disabled = false; });
+        };
+        box.querySelector('.ar-cert-files').appendChild(button);
+      });
+    }).catch(function (e) { if (box.isConnected) certError(message, e); });
+  };
 
   A.view = function (c, viewer) {
     var d = c.data || {}, raw = d.status, h = '', rows = [], meta = [];
@@ -229,6 +288,7 @@
     h += '<div class="ar-card"><div class="ar-ct"><h2>' + A.iconOf(c) + ' ' + esc(A.title(c)) + '</h2>' + A.chip(c.st, A.detail(c.kind, raw)) + '</div>';
     h += '<div class="ar-m">' + meta.join(' · ') + '</div>';
     if (body) h += '<div class="ar-body">' + esc(body) + '</div>';
+    if (c.kind === 'sjuk' && d.certs) h += '<section data-ar-certs aria-label="Läkarintyg"><h3>Läkarintyg</h3><div class="ar-cert-files"></div><div class="ar-note" role="status">Hämtar intyg…</div></section>';
     h += rows.length ? '<div class="ar-thr">' + rows.map(function (r) { return r.h; }).join('') + '</div>' : '<div class="ar-note">Inga meddelanden än.</div>';
     return h;   // kortet stängs av den som anropar (svarsruta/verktyg läggs till först)
   };

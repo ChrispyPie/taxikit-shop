@@ -49,3 +49,21 @@ Mobiltestet startar en egen isolerad headless Chrome utan sparade webbläsarsess
 ## Återställning
 Se [UNDO.md](UNDO.md). Backup före arbetet: `backup/pre-meddelanden-20261106` från main `040dd24b`.
 Backup precis före merge: `backup/pre-meddelanden-merge-20261106` = `05c7b1a5f6d360b174b90ed6f5ab42ea9384fd90`, pushad före merge.
+
+
+## Intyg i Ärenden – 6 november 2026
+
+Orsak: den nya gemensamma `ARENDE.view` visade endast `Intyg: N` och uppladdningsknappen, men hämtade aldrig filförteckningen. Den gamla `sjuk.js`-vyn hade redan **Visa intyg**, bildminiatyrer och PDF-länkar.
+
+- Filerna ligger kvar i **privata** Storage-bucketen `sjuk-intyg`, med mönstret `<driver_id>/<report_id>/<slump-id>.jpg` eller `.pdf`. Metadata finns i `private.sick_certs`. Inga riktiga filnamn, sökvägar eller intyg behöver läsas för felsökningen.
+- Livekontroll av enbart aggregerad metadata: två uppladdade intyg, två lagrade objekt och två matchande poster; bucketen är inte publik. Inga Storage-policies ger direkt klientåtkomst. `anon`/`authenticated` får inte anropa `sjuk_svc_cert_list` direkt.
+- Båda ärendevyerna visar nu **Intyg 1 · Bild**, **Intyg 2 · PDF** osv. Inga intyg laddas ner automatiskt som miniatyrer.
+- Samma befintliga Edge-funktion `sjuk`, action `list`, används. Databasen validerar aktuell session, funktionsflagga, demo samt rapportägarskap/rollen `agare` eller `superadmin` **före** signering. Vanlig admin och annan förare nekas. Den aktiva Edge-funktionens källkod jämfördes med repot och var identisk.
+- En ny serverkontroll och nya **900 sekunders** signerade URL:er begärs vid varje öppning, så gamla länkar inte används. Ingen session eller signerad URL lagras av komponenten. Popupskydd har en klickbar reservlänk. Endast HTTPS från projektets privata signerade intygssökväg accepteras.
+- Inga SQL-, Storage-, roll- eller Edge-ändringar behövdes. All befintlig serverkontroll behålls; bucketen är fortsatt privat.
+
+### Testa intygsfixen
+
+`node tests/meddelanden/intyg.cjs`: 56 kontroller med riktig produktions-HTML/JS, befintlig Edge-handler och befintliga SQL-behörighetsfunktioner i isolerad PGlite. Sessioner och metadata är syntetiska, Storage-signeringen är stubbat. Testar egen förare, ägare/superadmin, annan förare, vanlig admin, ogiltig session, funktionsflagga, demo, upprepade öppningar, popupskydd, återkallad behörighet och farlig URL. Tre mobilskärmbilder. Inget riktigt intyg, ingen riktig användarsession och ingen riktig signerad URL har öppnats.
+
+Befintliga sviter: `node tests/meddelanden/db.cjs` och `node tests/meddelanden/browser.cjs`.

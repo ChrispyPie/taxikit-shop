@@ -17,3 +17,14 @@ Båda backupgrenarna är pushade. Inga force pushes har gjorts.
 Kör vid behov först `supabase/migrations/undo/20261106g2_meddelanden_tradar_undo.sql`, sedan `supabase/migrations/undo/20261106g_meddelanden_loner_undo.sql`.
 De återkallar execute/usage för nya API:er men tar inte bort trådar, meddelanden, läskvitton eller gamla ärenden. Ingen gammal funktion behöver återställas.
 För återaktivering: ge tillbaka schema-USAGE och EXECUTE-grants från de två migrationsfilerna, inte hela CREATE-migrationerna igen.
+
+
+## Intygsfix 6 november 2026 (2026-11-06f)
+
+- Pushad backup från main: `backup/pre-intyg-fix-20261106` = `dfeb2ae9a4f36a8466f2f29d2340448042b9c6a5`.
+- Fixgren: `fix/sjuk-intyg-case-links`.
+- Ändrar endast gemensam filvisning i `arende-status.js`, anrop från `inkorg.js`/`arenden-admin.js`, cacheversioner och dokumentation/test. Nyheter publiceras med faktiskt verifierad drifttid.
+- Ångra endast fixen med en **ny revert-commit av fixens merge-commit**, `git revert -m 1 <intyg-fixens-merge-sha>`. Ångra vid behov även den separata Nyheter-committen. Ta en ny backup först; ingen reset/force push.
+- Alternativt återställ de berörda frontendfilerna från backupgrenen med en ny normal commit och uppdatera deras cacheversioner. Återställ inte andra samtidiga förändringar.
+- **Ingen SQL eller Edge-funktion ändrades.** Det finns därför inget undo-SQL att köra. Inga intyg eller ärenden raderas; privat bucket och behörighetskontroller förblir orörda.
+- Kör befintlig Pages-publicering och kontrollera att de ändrade livefilerna matchar main. Om en GOT-cache-commit avbryter publiceringen, verifiera nästa körning innan klartbesked.
