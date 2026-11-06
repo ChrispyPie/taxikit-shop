@@ -19,10 +19,10 @@ window.CHANGELOG = [
     ['Fixat', 'Läkarintyg går nu att öppna i dina Ärenden och för ägare/superadmin i Admin › Ärenden. Filerna är fortfarande privata och öppnas med kortlivade, säkra länkar.']
   ] },
   { datum: '2026-11-06', id: '2026-11-06e', tid: '20:29', rader: [
-    'Meddelanden och Ärenden under profilikonen. Växla på samma sida: privata samtal med ämne och svarstråd, eller dina pågående och avslutade ärenden.',
-    'Skicka meddelande på en profil öppnar ett nytt privat meddelande med mottagaren förvald.',
-    'Admin har en gemensam, kompakt Ärenden-lista med typ- och statusfilter. Klara ligger kvar under Visa klara.',
-    'Löner (verktyg & underlag) samlar timpris och verkstadstid per förare och månad. Bara ägaren och superadmin ser löneunderlag och andras sjukanmälningar.'
+    ['Nytt', 'Meddelanden och Ärenden under profilikonen. Växla på samma sida: privata samtal med ämne och svarstråd, eller dina pågående och avslutade ärenden.'],
+    ['Nytt', 'Skicka meddelande på en profil öppnar ett nytt privat meddelande med mottagaren förvald.'],
+    ['Nytt', 'Admin har en gemensam, kompakt Ärenden-lista med typ- och statusfilter. Klara ligger kvar under Visa klara.', 'admin'],
+    ['Nytt', 'Löner (verktyg & underlag) samlar timpris och verkstadstid per förare och månad. Bara ägaren och superadmin ser löneunderlag och andras sjukanmälningar.', 'agare']
   ] },
   { datum: '2026-11-06', id: '2026-11-06d', tid: '19:45', rader: [
     ['Nytt', 'Topplistor har fått ett Rekord-läge. Tryck på Rekord högst upp för att se den bästa dagen, veckan, månaden eller året för varje förare sedan 2025. Listan är anonym och din egen plats är markerad med "Du".'],
