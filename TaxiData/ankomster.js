@@ -176,10 +176,11 @@
     if (it.special) return '<span class="ank-badge bad">' + esc(it.special) + '</span>';
     var delay = (it.sched && (it.act || it.est)) ? Math.round(((it.act || it.est) - it.sched) / 60000) : 0;
     var dtxt = delay >= 1 ? '+' + delay + ' min' : (delay <= -3 ? delay + ' min' : '');
-    if (it.act && it.key[0] === 'f') return dtxt ? '<span class="ank-delay ' + (delay >= 1 ? 'bad' : 'early') + '">' + dtxt + '</span>' : '';  // Landat står i statusraden
+    if (it.act && it.key[0] === 'f') return dtxt ? '<span class="ank-delay ' + (delay >= 15 ? 'bad' : delay >= 1 ? 'warn' : 'early') + '">' + dtxt + '</span>' : '';  // Landat står i statusraden
     if (it.act) return '<span class="ank-badge done">Ankom ' + hm(it.act) + '</span>' +
-      (dtxt ? '<span class="ank-delay ' + (delay >= 1 ? 'bad' : 'early') + '">' + dtxt + '</span>' : '');
-    if (delay >= 1) return '<span class="ank-delay bad">' + dtxt + '</span>';  // försenad: röd text, ingen ruta
+      (dtxt ? '<span class="ank-delay ' + (delay >= 15 ? 'bad' : delay >= 1 ? 'warn' : 'early') + '">' + dtxt + '</span>' : '');
+    if (delay >= 15) return '<span class="ank-badge bad">' + dtxt + '</span>';
+    if (delay >= 1) return '<span class="ank-badge warn">' + dtxt + '</span>';
     if (delay <= -3) return '<span class="ank-badge early">Tidig</span>';
     return '<span class="ank-badge ok">I tid</span>';
   }
