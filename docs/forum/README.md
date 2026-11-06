@@ -6,13 +6,17 @@ Branch: `feat/forum-classic` · Backup: `backup/pre-forum-classic-20261106`
 Forumet är ombyggt till klassisk layout: **sektioner → trådar → svar**.
 Fem standardsektioner (inga admin-skapade sektioner i v1):
 
-| Id | Titel | Scope | Status |
-|----|-------|-------|--------|
-| `allmant` | Allmänt | global | nej |
-| `onskemal` | Önskemål & förslag | global | Ny/Pågår/Planerad/Klar |
-| `buggar` | Buggar | global | Ny/Pågår/Planerad/Klar |
-| `akeri` | Mitt åkeri | eget åkeri | nej |
-| `admin` | Admin | ägare + S admin | nej (låst för förare) |
+| Id | Titel | Scope | Skriva | Extra |
+|----|-------|-------|--------|-------|
+| `hjalp` | Hjälp & guider | global | ägare + superadmin | sticky/pin, grupp HJÄLP |
+| `fragor` | Frågor & svar | global | alla | Löst ✓ på svar, grupp HJÄLP |
+| `allmant` | Allmänt | global | alla | |
+| `onskemal` | Önskemål & förslag | global | alla | status Ny/Pågår/Planerad/Klar |
+| `buggar` | Buggar | global | alla | status |
+| `akeri` | Mitt åkeri | eget åkeri | eget åkeri | |
+| `admin` | Admin | ägare + superadmin | ägare + superadmin | låst för förare |
+
+Guider-seed (ej applicerad): `supabase/migrations/20261106c_forum_guides_seed.sql`.
 
 ## Datamigrering
 **Ingen.** Forumet var tomt (`forum_posts` = 0). Gamla tabeller/RPC:er lämnas kvar orörda.

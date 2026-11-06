@@ -3,8 +3,10 @@
 -- Ingen datamigrering (forumet är tomt). Admin › Önskemål (dev_wishes) orörd — Forum › Önskemål startar tomt.
 -- Ångra: supabase/migrations/undo/20261106a_forum_classic_undo.sql
 --
--- Sektioner (seed): Allmänt, Önskemål & förslag (status), Buggar (status), Mitt åkeri (åkeri-scope), Admin (bara ägare/S).
--- Status (önskemål/buggar): ny | pagar | planerad | klar. Bara ägare/S sätter status.
+-- Sektioner (seed): Hjälp & guider, Frågor & svar, Allmänt, Önskemål & förslag, Buggar, Mitt åkeri, Admin.
+-- Hjälp & guider: alla läser, bara ägare/superadmin skriver; trådar kan pinas (sticky).
+-- Frågor & svar: alla läser/skriver; frågeställare eller ägare/superadmin kan markera svar som Löst.
+-- Status (önskemål/buggar): ny | pagar | planerad | klar. Bara ägare/superadmin sätter status.
 -- Tabellen forum_replies heter så för att inte krocka med befintliga forum_posts.
 
 -- ── Tabeller ───────────────────────────────────────────────────────────────
@@ -15,9 +17,11 @@ create table if not exists public.forum_sections (
   description text not null default '',
   icon        text not null default '💬',
   sort_order  int  not null default 0,
-  group_key   text not null default 'huvud' check (group_key in ('huvud','akeri','admin')),
+  group_key   text not null default 'huvud' check (group_key in ('hjalp','huvud','akeri','admin')),
   scope       text not null default 'global' check (scope in ('global','company','admin')),
   has_status  boolean not null default false,
+  can_solve   boolean not null default false,
+  can_pin     boolean not null default false,
   read_roles  text[] not null default array['forare','agare','sadmin']::text[],
   write_roles text[] not null default array['forare','agare','sadmin']::text[],
   active      boolean not null default true
@@ -35,6 +39,8 @@ create table if not exists public.forum_threads (
   status_comment   text check (status_comment is null or char_length(status_comment) <= 500),
   reply_count      int not null default 0,
   view_count       int not null default 0,
+  sticky           boolean not null default false,
+  solved_reply_id  bigint,
   hidden           boolean not null default false,
   created_at       timestamptz not null default clock_timestamp(),
   last_activity_at timestamptz not null default clock_timestamp()
@@ -58,6 +64,18 @@ create table if not exists public.forum_replies (
 );
 create index if not exists forum_replies_thread_idx
   on public.forum_replies (thread_id, created_at, id);
+
+-- Fäst löst-svar efter att forum_replies finns (undvik cirkel vid create)
+do $fk$ begin
+  alter table public.forum_threads
+    drop constraint if exists forum_threads_solved_reply_id_fkey;
+  alter table public.forum_threads
+    add constraint forum_threads_solved_reply_id_fkey
+    foreign key (solved_reply_id) references public.forum_replies(id) on delete set null;
+exception when others then null;
+end $fk$;
+create index if not exists forum_threads_sticky_idx
+  on public.forum_threads (section_id, sticky desc, last_activity_at desc);
 
 create table if not exists public.forum_reads (
   driver_id    text not null,
@@ -91,22 +109,29 @@ create trigger zz_demo_write_guard before insert or delete or update on public.f
   for each statement execute function private.demo_write_guard();
 
 -- Seed (idempotent). Önskemål startar tomt — ingen koppling till dev_wishes.
-insert into public.forum_sections (id, title, description, icon, sort_order, group_key, scope, has_status, read_roles, write_roles)
+insert into public.forum_sections
+  (id, title, description, icon, sort_order, group_key, scope, has_status, can_solve, can_pin, read_roles, write_roles)
 values
+  ('hjalp',    'Hjälp & guider',     'Guider, FAQ och steg-för-steg. Bara ägare och superadmin skapar trådar; alla kan läsa.',
+   '📖', 5,  'hjalp', 'global',  false, false, true,
+   array['forare','agare','sadmin']::text[], array['agare','sadmin']::text[]),
+  ('fragor',   'Frågor & svar',      'Ställ en fråga. Den som frågade eller ägare/superadmin kan markera ett svar som Löst ✓.',
+   '❓', 8,  'hjalp', 'global',  false, true,  false,
+   array['forare','agare','sadmin']::text[], array['forare','agare','sadmin']::text[]),
   ('allmant',  'Allmänt',            'Prat om jobbet, tips och frågor som gäller alla',
-   '💬', 10, 'huvud', 'global',  false,
+   '💬', 10, 'huvud', 'global',  false, false, false,
    array['forare','agare','sadmin']::text[], array['forare','agare','sadmin']::text[]),
   ('onskemal', 'Önskemål & förslag', 'Idéer till appen. Status: Ny / Pågår / Planerad / Klar',
-   '💡', 20, 'huvud', 'global',  true,
+   '💡', 20, 'huvud', 'global',  true,  false, false,
    array['forare','agare','sadmin']::text[], array['forare','agare','sadmin']::text[]),
   ('buggar',   'Buggar',             'Något som är trasigt i appen — beskriv gärna',
-   '🐞', 30, 'huvud', 'global',  true,
+   '🐞', 30, 'huvud', 'global',  true,  false, false,
    array['forare','agare','sadmin']::text[], array['forare','agare','sadmin']::text[]),
   ('akeri',    'Mitt åkeri',         'Bara förare i ditt åkeri ser den här sektionen',
-   '🚕', 40, 'akeri', 'company', false,
+   '🚕', 40, 'akeri', 'company', false, false, false,
    array['forare','agare','sadmin']::text[], array['forare','agare','sadmin']::text[]),
-  ('admin',    'Admin',              'Internt för ägare och S admin. Förare kan inte läsa.',
-   '🔒', 50, 'admin', 'admin',   false,
+  ('admin',    'Admin',              'Internt för ägare och superadmin. Förare kan inte läsa.',
+   '🔒', 50, 'admin', 'admin',   false, false, false,
    array['agare','sadmin']::text[],          array['agare','sadmin']::text[])
 on conflict (id) do update set
   title = excluded.title,
@@ -116,6 +141,8 @@ on conflict (id) do update set
   group_key = excluded.group_key,
   scope = excluded.scope,
   has_status = excluded.has_status,
+  can_solve = excluded.can_solve,
+  can_pin = excluded.can_pin,
   read_roles = excluded.read_roles,
   write_roles = excluded.write_roles,
   active = true;
@@ -184,6 +211,7 @@ begin
         select s.sort_order, jsonb_build_object(
           'id', s.id, 'title', s.title, 'description', s.description, 'icon', s.icon,
           'group', s.group_key, 'scope', s.scope, 'has_status', s.has_status,
+          'can_solve', s.can_solve, 'can_pin', s.can_pin,
           'can_read', private.fx_can_read(s, v_roles),
           'can_write', private.fx_can_write(s, v_roles, a.via_master),
           'locked', not private.fx_can_read(s, v_roles),
@@ -229,14 +257,19 @@ begin
   return jsonb_build_object(
     'section', jsonb_build_object(
       'id', s.id, 'title', s.title, 'description', s.description, 'icon', s.icon,
-      'has_status', s.has_status, 'can_write', private.fx_can_write(s, v_roles, a.via_master)),
+      'has_status', s.has_status, 'can_solve', s.can_solve, 'can_pin', s.can_pin,
+      'can_write', private.fx_can_write(s, v_roles, a.via_master)),
     'is_admin', a.is_admin, 'is_sadmin', a.is_sadmin,
     'has_name', private.forum_has_name(a.driver_id),
     'can_status', a.is_admin or a.is_sadmin,
+    'can_pin', s.can_pin and (a.is_admin or a.is_sadmin) and not coalesce(a.via_master, false),
     'threads', coalesce((
-      select jsonb_agg(j order by ord desc) from (
-        select t.last_activity_at as ord, jsonb_build_object(
+      select jsonb_agg(j order by sticky_ord desc, ord desc) from (
+        select t.sticky as sticky_ord, t.last_activity_at as ord, jsonb_build_object(
           'id', t.id, 'title', t.title, 'status', t.status,
+          'sticky', t.sticky,
+          'solved', t.solved_reply_id is not null,
+          'solved_reply_id', t.solved_reply_id,
           'author', private.forum_name(t.author_id),
           'aid', case when not private.is_demo() then t.author_id end,
           'mine', t.author_id = a.driver_id,
@@ -256,7 +289,7 @@ begin
         where t.section_id = s.id
           and private.fx_thread_visible(t, s, a.company_id, v_roles, a.is_sadmin, a.driver_id)
           and (not s.has_status or coalesce(p_include_klar, false) or coalesce(t.status, 'ny') <> 'klar')
-        order by t.last_activity_at desc
+        order by t.sticky desc, t.last_activity_at desc
         limit 100
       ) z
     ), '[]'::jsonb)
@@ -286,16 +319,23 @@ begin
     'status_comment', t.status_comment,
     'status_by', case when t.status_by is not null then private.forum_name(t.status_by) end,
     'status_at', t.status_at,
-    'section', jsonb_build_object('id', s.id, 'title', s.title, 'has_status', s.has_status),
+    'section', jsonb_build_object('id', s.id, 'title', s.title, 'has_status', s.has_status,
+                                  'can_solve', s.can_solve, 'can_pin', s.can_pin),
     'author', private.forum_name(t.author_id),
     'aid', case when not private.is_demo() then t.author_id end,
     'co', case when s.scope = 'global' then private.forum_co_name(t.company_id) end,
     'mine', t.author_id = a.driver_id,
     'hidden', t.hidden,
+    'sticky', t.sticky,
+    'solved', t.solved_reply_id is not null,
+    'solved_reply_id', t.solved_reply_id,
     'created_at', t.created_at, 'last_activity_at', t.last_activity_at,
     'replies_n', t.reply_count, 'views', t.view_count + 1,
     'can_write', private.fx_can_write(s, v_roles, a.via_master) and private.forum_has_name(a.driver_id),
     'can_status', (a.is_admin or a.is_sadmin) and s.has_status and not coalesce(a.via_master, false),
+    'can_pin', s.can_pin and (a.is_admin or a.is_sadmin) and not coalesce(a.via_master, false),
+    'can_solve', s.can_solve and not coalesce(a.via_master, false)
+                and (t.author_id = a.driver_id or a.is_admin or a.is_sadmin),
     'has_name', private.forum_has_name(a.driver_id),
     'my_name', private.forum_name(a.driver_id),
     'is_admin', a.is_admin, 'is_sadmin', a.is_sadmin,
@@ -310,7 +350,8 @@ begin
         'hidden', q.hidden,
         'created_at', q.created_at,
         'edited', q.edited_at is not null,
-        'n', q.n
+        'n', q.n,
+        'is_solution', t.solved_reply_id is not null and t.solved_reply_id = q.id
       ) order by q.n)
       from (
         select r.*, row_number() over (order by r.created_at, r.id) as n
@@ -444,6 +485,54 @@ begin
   return coalesce(n, 0);
 end $function$;
 
+
+-- ── RPC: fäst / lossa tråd (sticky) ────────────────────────────────────────
+
+create or replace function public.forum_thread_pin(p_token text, p_thread_id bigint, p_sticky boolean)
+ returns jsonb language plpgsql security definer set search_path to 'public', 'pg_temp' as $function$
+declare a record; t public.forum_threads; s public.forum_sections;
+begin
+  select * into a from private.forum_actor(p_token);
+  if coalesce(a.via_master, false) then raise exception 'via_master' using errcode = '42501'; end if;
+  if private.is_demo() then raise exception 'demo_read_only' using errcode = '42501'; end if;
+  if not (a.is_admin or a.is_sadmin) then raise exception 'forbidden' using errcode = '42501'; end if;
+  select * into t from public.forum_threads where id = p_thread_id;
+  if not found then raise exception 'not_found' using errcode = 'P0002'; end if;
+  select * into s from public.forum_sections where id = t.section_id;
+  if not s.can_pin then raise exception 'forbidden' using errcode = '42501'; end if;
+  update public.forum_threads set sticky = coalesce(p_sticky, false) where id = t.id;
+  return jsonb_build_object('ok', true, 'sticky', coalesce(p_sticky, false));
+end $function$;
+
+-- ── RPC: markera svar som Löst (eller nollställ) ───────────────────────────
+
+create or replace function public.forum_thread_solve(p_token text, p_thread_id bigint, p_reply_id bigint default null)
+ returns jsonb language plpgsql security definer set search_path to 'public', 'pg_temp' as $function$
+declare a record; t public.forum_threads; s public.forum_sections; r public.forum_replies;
+begin
+  select * into a from private.forum_actor(p_token);
+  if coalesce(a.via_master, false) then raise exception 'via_master' using errcode = '42501'; end if;
+  if private.is_demo() then raise exception 'demo_read_only' using errcode = '42501'; end if;
+  select * into t from public.forum_threads where id = p_thread_id;
+  if not found then raise exception 'not_found' using errcode = 'P0002'; end if;
+  select * into s from public.forum_sections where id = t.section_id;
+  if not s.can_solve then raise exception 'forbidden' using errcode = '42501'; end if;
+  -- frågeställaren eller ägare/superadmin
+  if not (t.author_id = a.driver_id or a.is_admin or a.is_sadmin) then
+    raise exception 'forbidden' using errcode = '42501';
+  end if;
+  if p_reply_id is null then
+    update public.forum_threads set solved_reply_id = null where id = t.id;
+    return jsonb_build_object('ok', true, 'solved', false);
+  end if;
+  select * into r from public.forum_replies where id = p_reply_id and thread_id = t.id and not hidden;
+  if not found then raise exception 'not_found' using errcode = 'P0002'; end if;
+  -- lösning får inte vara själva startinlägget om det är det enda — tillåt ändå (frågan kan ha svar i #1? nej, #1 är OP)
+  -- tillåt vilket svar som helst i tråden, inklusive OP om de vill (sällan)
+  update public.forum_threads set solved_reply_id = r.id, last_activity_at = clock_timestamp() where id = t.id;
+  return jsonb_build_object('ok', true, 'solved', true, 'solved_reply_id', r.id);
+end $function$;
+
 grant execute on function public.forum_home(text) to anon, authenticated;
 grant execute on function public.forum_section_threads(text, text, boolean) to anon, authenticated;
 -- Överlagring utan p_include_klar (PostgREST / äldre klienter)
@@ -458,3 +547,12 @@ grant execute on function public.forum_thread_new(text, text, text, text) to ano
 grant execute on function public.forum_thread_reply(text, bigint, text) to anon, authenticated;
 grant execute on function public.forum_thread_status(text, bigint, text, text) to anon, authenticated;
 grant execute on function public.forum_classic_badge(text) to anon, authenticated;
+
+grant execute on function public.forum_thread_pin(text, bigint, boolean) to anon, authenticated;
+grant execute on function public.forum_thread_solve(text, bigint, bigint) to anon, authenticated;
+
+create or replace function public.forum_thread_solve(p_token text, p_thread_id bigint)
+ returns jsonb language sql security definer set search_path to 'public', 'pg_temp' as $function$
+  select public.forum_thread_solve(p_token, p_thread_id, null::bigint);
+$function$;
+grant execute on function public.forum_thread_solve(text, bigint) to anon, authenticated;

@@ -57,6 +57,9 @@
     '.fx-st-pagar{background:var(--c-fefcbf,#fefcbf);color:var(--c-975a16,#975a16)}\n' +
     '.fx-st-planerad{background:var(--c-e9d8fd,#e9d8fd);color:var(--c-553c9a,#553c9a)}\n' +
     '.fx-st-klar{background:var(--c-c6f6d5,#c6f6d5);color:var(--c-22543d,#22543d)}\n' +
+    '.fx-st-lost{background:var(--c-c6f6d5,#c6f6d5);color:var(--c-22543d,#22543d)}\n' +
+    '.fx-pin{font-size:.72rem;margin-right:.2rem}\n' +
+    '.fx-sol{outline:2px solid var(--c-22543d,#22543d);outline-offset:-2px}\n' +
     '.fx-post{background:var(--surface);border:1px solid var(--border-soft,var(--border));border-radius:8px;margin:0 0 .55rem;overflow:hidden}\n' +
     '.fx-post .ph{display:flex;justify-content:space-between;gap:8px;padding:.45rem .6rem;background:var(--surface-soft,var(--bg,#f7fafc));border-bottom:1px solid var(--border-soft,var(--border));font-size:.82rem}\n' +
     '.fx-post .au{font-weight:700;color:var(--primary)}\n' +
@@ -146,7 +149,7 @@
   function setUnread(n) { if (window.setBadge) setBadge('forum', +n || 0); }
   function push(view) { try { history.pushState({ view: F.id, sub: view }, ''); } catch (e) {} }
   function flashHtml() { var f = st.flash; st.flash = null; return f ? '<div class="fx-flash">' + esc(f) + '</div>' : ''; }
-  function grpLabel(g) { return g === 'akeri' ? 'Åkeriet' : g === 'admin' ? 'Admin' : 'Huvud'; }
+  function grpLabel(g) { return g === 'hjalp' ? 'Hjälp' : g === 'akeri' ? 'Åkeriet' : g === 'admin' ? 'Admin' : 'Huvud'; }
 
   // ── Views ──────────────────────────────────────────────────────────────
 
@@ -178,7 +181,7 @@
           '<div class="main"><div class="name">' + esc(s.title) + '</div>' +
           '<div class="desc">' + esc(s.description || '') + '</div>' +
           (locked
-            ? '<div class="meta"><span>Låst · bara ägare och S admin</span></div></div><div class="last">🔒</div>'
+            ? '<div class="meta"><span>Låst · bara ägare och superadmin</span></div></div><div class="last">🔒</div>'
             : '<div class="meta"><span>Trådar <b>' + (+s.threads || 0) + '</b></span><span>Inlägg <b>' + (+s.replies || 0) + '</b></span>' +
               (s.unread ? '<span class="new">' + s.unread + ' nya</span>' : '') + '</div></div>' +
               '<div class="last">' + (s.last ? (esc(when(s.last.at)) + '<br><span class="who">' + esc(s.last.mine ? 'Du' : sn(s.last.author)) + '</span>') : '—') + '</div>') +
@@ -213,7 +216,9 @@
       html += '<div class="fx-thhead" aria-hidden="true"><span>Tråd</span><span>Sv</span><span>Senaste</span></div>';
       list.forEach(function (t) {
         html += '<button type="button" class="fx-th' + (t.status === 'klar' ? ' dim' : '') + '" data-a="thread" data-id="' + t.id + '">' +
-          '<div class="ti"><div class="t">' + (t.unread ? '💬 ' : '') + esc(t.title) + stChip(t.status) + '</div>' +
+          '<div class="ti"><div class="t">' + (t.sticky ? '<span class="fx-pin" title="Fäst">📌</span>' : '') +
+          (t.unread ? '💬 ' : '') + esc(t.title) + stChip(t.status) +
+          (t.solved ? '<span class="fx-st fx-st-lost">Löst ✓</span>' : '') + '</div>' +
           '<div class="s">av ' + esc(t.mine ? 'Du' : sn(t.author)) + (t.co ? ' · ' + esc(t.co) : '') + ' · ' + esc(when(t.created_at)) + '</div></div>' +
           '<div class="n">' + (+t.replies || 0) + '</div>' +
           '<div class="lm">' + esc(when(t.last_activity_at)) + '<br><span class="who">' + esc(sn(t.last_author || t.author)) + '</span></div></button>';
@@ -235,7 +240,11 @@
     if (!t) { root.innerHTML = html + '<div class="fx-empty">Laddar…</div>'; return; }
     html += '<div class="fx-crumb"><button type="button" data-a="home">Forum</button><span>›</span>' +
       '<button type="button" data-a="sec" data-id="' + esc(t.section.id) + '">' + esc(t.section.title) + '</button>' +
-      '<span>›</span><b>' + esc(t.title) + '</b>' + stChip(t.status) + '</div>';
+      '<span>›</span><b>' + (t.sticky ? '📌 ' : '') + esc(t.title) + '</b>' + stChip(t.status) +
+      (t.solved ? '<span class="fx-st fx-st-lost">Löst ✓</span>' : '') + '</div>';
+    if (t.can_pin) {
+      html += '<div class="fx-actions"><button type="button" data-a="pin">' + (t.sticky ? 'Lossa tråd' : 'Fäst tråd') + '</button></div>';
+    }
     if (st.err) html += '<div class="fx-err">' + esc(st.err) + '</div>';
     if (t.section.has_status && t.status) {
       html += '<div class="fx-status">Status: <b>' + esc(stName(t.status)) + '</b>' +
@@ -257,10 +266,16 @@
       }
     }
     (t.posts || []).forEach(function (p) {
-      html += '<div class="fx-post' + (p.hidden ? ' hid' : '') + '"><div class="ph"><span class="au">' + who(p.author, p.aid) + '</span>' +
-        '<span class="tm">#' + p.n + ' · ' + esc(when(p.created_at)) + (p.edited ? ' · redigerad' : '') + '</span></div>' +
+      html += '<div class="fx-post' + (p.hidden ? ' hid' : '') + (p.is_solution ? ' fx-sol' : '') + '"><div class="ph"><span class="au">' + who(p.author, p.aid) + '</span>' +
+        '<span class="tm">#' + p.n + ' · ' + esc(when(p.created_at)) + (p.edited ? ' · redigerad' : '') +
+        (p.is_solution ? ' · Löst ✓' : '') + '</span></div>' +
         '<div class="pb">' + esc(p.body) + '</div>' +
-        '<div class="pf">' + (p.mine ? 'Du' : esc(sn(p.author))) + (p.co ? ' · ' + esc(p.co) : '') + '</div></div>';
+        '<div class="pf">' + (p.mine ? 'Du' : esc(sn(p.author))) + (p.co ? ' · ' + esc(p.co) : '');
+      if (t.can_solve && p.n > 1) {
+        if (p.is_solution) html += ' · <button type="button" data-a="unsolve">Ta bort Löst</button>';
+        else html += ' · <button type="button" data-a="solve" data-id="' + p.id + '">Markera som Löst ✓</button>';
+      }
+      html += '</div></div>';
     });
     if (t.can_write) {
       html += '<div class="fx-reply">' + ruleBox(true) +
@@ -347,7 +362,7 @@
     if (a === 'rulesok') { rulesAccept(); return; }
     if (a === 'home') { goHome(); return; }
     if (a === 'sec') { goSection(el.getAttribute('data-id')); return; }
-    if (a === 'locked') { alert('Den här sektionen är bara för ägare och S admin.'); return; }
+    if (a === 'locked') { alert('Den här sektionen är bara för ägare och superadmin.'); return; }
     if (a === 'thread') { goThread(+el.getAttribute('data-id')); return; }
     if (a === 'new') { openEditor(null); return; }
     if (a === 'togklar') {
@@ -363,6 +378,39 @@
       st.busy = true; paint();
       rpc('forum_thread_status', { p_thread_id: st.thread.id, p_status: st.pick, p_comment: c ? c.value : '' }).then(function () {
         st.busy = false; st.pick = null; st.flash = 'Statusen är sparad.';
+        return loadThread(st.thread.id);
+      }).then(function () { paint(); }).catch(function (e) {
+        st.busy = false; if (!fail(e)) { st.err = errText(e); paint(); }
+      });
+      return;
+    }
+    if (a === 'pin') {
+      if (!st.thread || st.busy) return;
+      st.busy = true; paint();
+      rpc('forum_thread_pin', { p_thread_id: st.thread.id, p_sticky: !st.thread.sticky }).then(function () {
+        st.busy = false; st.flash = st.thread.sticky ? 'Tråden är lossad.' : 'Tråden är fäst.';
+        return loadThread(st.thread.id);
+      }).then(function () { paint(); }).catch(function (e) {
+        st.busy = false; if (!fail(e)) { st.err = errText(e); paint(); }
+      });
+      return;
+    }
+    if (a === 'solve') {
+      if (!st.thread || st.busy) return;
+      st.busy = true; paint();
+      rpc('forum_thread_solve', { p_thread_id: st.thread.id, p_reply_id: +el.getAttribute('data-id') }).then(function () {
+        st.busy = false; st.flash = 'Svaret är markerat som Löst ✓.';
+        return loadThread(st.thread.id);
+      }).then(function () { paint(); }).catch(function (e) {
+        st.busy = false; if (!fail(e)) { st.err = errText(e); paint(); }
+      });
+      return;
+    }
+    if (a === 'unsolve') {
+      if (!st.thread || st.busy) return;
+      st.busy = true; paint();
+      rpc('forum_thread_solve', { p_thread_id: st.thread.id, p_reply_id: null }).then(function () {
+        st.busy = false; st.flash = 'Löst-markeringen är borttagen.';
         return loadThread(st.thread.id);
       }).then(function () { paint(); }).catch(function (e) {
         st.busy = false; if (!fail(e)) { st.err = errText(e); paint(); }

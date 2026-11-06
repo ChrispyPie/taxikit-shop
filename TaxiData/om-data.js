@@ -11,11 +11,11 @@ window.OM_DATA = {
     ['🏆', 'Topplistor', 'hur du ligger till jämfört med andra (anonymt)'],
     ['🛠️', 'Anmälningar & ärenden', 'felanmälan, sånt som behövs till bilen, verkstadstimmar och sjukanmälan'],
     ['📅', 'Kalender', 'konserter, matcher, mässor och andra evenemang'],
-    ['💬', 'Forum', 'sektioner med trådar: Allmänt, Önskemål, Buggar, Mitt åkeri'],
+    ['💬', 'Forum', 'Hjälp & guider, Frågor & svar, Allmänt, Önskemål, Buggar, Mitt åkeri'],
     ['🔮', 'Prognos', 'kommande bokningar per zon och morgonprognos'],
     ['🤖', 'Hjälpbot', 'liten hjälpare längst ner på skärmen']
   ],
-  builder: 'Appen byggs av Christian (S admin) och är under utveckling. Saker kan ändras, och ibland blir något fel.',
+  builder: 'Appen byggs av Christian (superadmin) och är under utveckling. Saker kan ändras, och ibland blir något fel.',
   builder_demo: 'Appen är under utveckling. Saker kan ändras, och ibland blir något fel.',   // demokonton: inget namn
   report: 'Hittar du ett fel eller har en idé? Skriv i Forum under Buggar eller Önskemål & förslag. Där ser du också status (Ny / Pågår / Planerad / Klar).',
   faq: [
@@ -34,9 +34,9 @@ window.OM_DATA = {
     { q: 'Vem ser mitt namn i Topplistor?',
       a: 'Andra förare ser bara placering och värde, inte namn. Din egen rad visas som "Du". Bara ägaren ser namn.' },
     { q: 'Vem ser mina felanmälningar i Anmälningar & ärenden?',
-      a: 'Du ser dina egna anmälningar. Ägaren och S admin ser alla, så att felet kan åtgärdas. Andra förare ser inte dina anmälningar.' },
+      a: 'Du ser dina egna anmälningar. Ägaren och superadmin ser alla, så att felet kan åtgärdas. Andra förare ser inte dina anmälningar.' },
     { q: 'Vem ser det jag skriver i Forum?',
-      a: 'Allmänt, Önskemål & förslag och Buggar är gemensamma: där ser förare från alla anslutna åkerier det du skriver, med ditt åkeris namn bredvid ditt namn. Mitt åkeri ser bara förarna i ditt eget åkeri. Admin-sektionen syns bara för ägare och S admin. Ditt namn visas som förnamn och första bokstaven i efternamnet, t.ex. "Anna S.".' },
+      a: 'Allmänt, Önskemål & förslag och Buggar är gemensamma: där ser förare från alla anslutna åkerier det du skriver, med ditt åkeris namn bredvid ditt namn. Mitt åkeri ser bara förarna i ditt eget åkeri. Admin-sektionen syns bara för ägare och superadmin. Ditt namn visas som förnamn och första bokstaven i efternamnet, t.ex. "Anna S.".' },
     { q: 'Hur byter jag profilbild?',
       a: 'Tryck på den runda knappen uppe till höger och välj "Lägg till profilbild" eller "Byt profilbild". Där kan du också ta bort bilden.' },
     { q: 'Hur loggar jag in första gången?',
