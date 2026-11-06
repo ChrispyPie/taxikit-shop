@@ -101,6 +101,8 @@
     return Math.round(v).toLocaleString('sv-SE') + ' kr';
   }
   T.fmt = fmt;
+  // Snittmått: antal resor inom parentes, t.ex. "312 kr (25 st)"
+  function cnt(r) { return r && r.c != null ? ' <span class="tl-cnt">(' + Math.round(r.c).toLocaleString('sv-SE') + ' st)</span>' : ''; }
 
   function rpc(name, args) {
     args.p_token = localStorage.getItem('taxi_session') || '';
@@ -336,7 +338,7 @@
         }
         h += '<div class="tl-row' + (r.du ? ' du' : '') + '"><span class="tl-pos">' +
           (r.pos <= 3 ? ['🥇', '🥈', '🥉'][r.pos - 1] : r.pos + '.') + '</span>' +
-          '<span class="tl-who">' + who + '</span><span class="tl-val">' + fmt(r.v, L.f) + '</span></div>';
+          '<span class="tl-who">' + who + '</span><span class="tl-val">' + fmt(r.v, L.f) + cnt(r) + '</span></div>';
       });
       h += '</div>';
       h += '<div class="tl-foot">Kr/mil kräver minst 1 mil, kr/timme minst 30 min. Inkört som i Körpassdata. ' +

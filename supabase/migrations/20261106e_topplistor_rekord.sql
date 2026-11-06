@@ -9,6 +9,7 @@
 -- I TOPPLISTA finns ingen resegräns (bara skydd mot division: kr/mil ≥1 mil, kr/timme ≥30 min, dricks % inkört ≥100 kr).
 -- Rekord visar inga datum (integritet) — bara värde och placering.
 -- Bil: samma own-regel som get_leaderboard_bil (vanlig förare = bara egen bil).
+-- Snittmått skickar 'c' = antal resor bakom värdet (visas som "312 kr (25 st)").
 -- Ångra: supabase/migrations/undo/20261106e_topplistor_rekord_undo.sql
 
 create or replace function public.get_topplista_metric(
@@ -172,7 +173,8 @@ begin
         when 'langst' then round(coalesce(tb.langst, 0) * 10) / 10.0
         when 'belopp' then round(coalesce(tb.belopp, 0))
         when 'passresor' then coalesce(pb.passresor, 0)
-      end::numeric v
+      end::numeric v,
+      case when v_metric in ('snitt','inkort_pass','dricks_pct','krmil','krtimme') then per.antal end cnt
     from per
     left join trip_best tb on tb.ent = per.ent
     left join pass_best pb on pb.ent = per.ent
@@ -185,7 +187,7 @@ begin
   ), alias as (
     select ent, 'Bil ' || row_number() over (order by ent) lbl from (select distinct ent from vals) z
   ), ranked as (
-    select v, vals.ent,
+    select v, vals.cnt, vals.ent,
            case when v_entity = 'bil' then exists (select 1 from mine m where m.ent = vals.ent)
                 else vals.ent = a.driver_id end me,
            case
@@ -222,9 +224,9 @@ begin
     'own', case when v_entity = 'bil' then v_car end,
     'updated', v_upd,
     'n', (select count(*) from vals),
-    'me', (select jsonb_build_object('pos', f.pos, 'v', f.v) from filtered f where f.me order by f.pos limit 1),
+    'me', (select jsonb_strip_nulls(jsonb_build_object('pos', f.pos, 'v', f.v, 'c', f.cnt)) from filtered f where f.me order by f.pos limit 1),
     'rows', coalesce((select jsonb_agg(jsonb_strip_nulls(jsonb_build_object(
-              'pos', pos, 'v', v, 'du', case when me then true end,
+              'pos', pos, 'v', v, 'c', cnt, 'du', case when me then true end,
               'id', fid, 'namn', fname, 'modell', modell
             )) order by rn)
             from filtered), '[]'::jsonb),
@@ -392,7 +394,7 @@ begin
      group by 1, sh.st, 3
   ),
   cand as (
-    select ent, bucket, v from (
+    select ent, bucket, v, cnt from (
       select ent, bucket,
         case v_metric
           when 'inkort' then round(inkort)
@@ -405,18 +407,19 @@ begin
           when 'flyg' then flyg
           when 'dricks_pct' then case when inkort >= 100 and antal >= v_min_trips then round(100.0 * dricks / inkort, 1) end
           when 'inkort_pass' then case when skift > 0 and antal >= v_min_trips then round(inkort / skift) end
-        end::numeric v
+        end::numeric v,
+        case when v_metric in ('snitt','inkort_pass','dricks_pct','krmil','krtimme') then antal end cnt
       from per
       where not (v_metric = any (v_trip_metrics))
     ) x where v is not null and (v_metric not in ('flyg') or v > 0)
     union all
-    select ent, bucket, v from (
+    select ent, bucket, v, null::bigint cnt from (
       select ent, bucket, round(tkm * 10) / 10.0 v,
              row_number() over (partition by ent order by tkm desc, ts) rn
         from trip_evt where v_metric = 'langst' and tkm >= 0.5
     ) z where rn = 1
     union all
-    select ent, bucket, v from (
+    select ent, bucket, v, null::bigint cnt from (
       select ent, bucket,
              round(case when typ in ('160','283','163','1','161','185') then amt when typ = '164' then amt * 0.74 else 0 end) v,
              row_number() over (partition by ent order by
@@ -424,7 +427,7 @@ begin
         from trip_evt where v_metric = 'belopp'
     ) z where rn = 1 and v > 0
     union all
-    select ent, bucket, v from (
+    select ent, bucket, v, null::bigint cnt from (
       select ent, bucket, cnt::numeric v,
              row_number() over (partition by ent order by cnt desc, bucket desc) rn
         from pass_evt where v_metric = 'passresor'
@@ -432,7 +435,7 @@ begin
   ),
   -- bästa perioden per entitet
   best as (
-    select distinct on (ent) ent, bucket, v
+    select distinct on (ent) ent, bucket, v, cnt
       from cand
      order by ent,
               case when v_asc then v end asc nulls last,
@@ -443,7 +446,7 @@ begin
   ), alias as (
     select ent, 'Bil ' || row_number() over (order by ent) lbl from (select distinct ent from best) z
   ), ranked as (
-    select b.v, b.ent, b.bucket,
+    select b.v, b.cnt, b.ent, b.bucket,
            case when v_entity = 'bil' then exists (select 1 from mine m where m.ent = b.ent)
                 else b.ent = a.driver_id end me,
            case
@@ -477,9 +480,9 @@ begin
     'updated', v_upd,
     'min_trips', case when v_metric in ('snitt','inkort_pass','dricks_pct','krmil','krtimme') then v_min_trips end,
     'n', (select count(*) from best),
-    'me', (select jsonb_build_object('pos', f.pos, 'v', f.v) from filtered f where f.me order by f.pos limit 1),
+    'me', (select jsonb_strip_nulls(jsonb_build_object('pos', f.pos, 'v', f.v, 'c', f.cnt)) from filtered f where f.me order by f.pos limit 1),
     'rows', coalesce((select jsonb_agg(jsonb_strip_nulls(jsonb_build_object(
-              'pos', pos, 'v', v, 'du', case when me then true end,
+              'pos', pos, 'v', v, 'c', cnt, 'du', case when me then true end,
               'id', fid, 'namn', fname, 'modell', modell
             )) order by rn)
             from filtered), '[]'::jsonb),

@@ -50,6 +50,12 @@
     return vals.map(function (v, i) { return {pos:i+1,v:v,du:i===2}; });
   }
 
+  var AVG = {snitt:1, inkort_pass:1, dricks_pct:1, krmil:1, krtimme:1};
+  function snittRows(rek, grain) {
+    var vals = rek ? [412,398,371,355,342,330,318,305,296,284,270,262,251] : [389,366,341,322,312,300,291,280,268,255,247,236,219];
+    var c = rek ? (grain==='dag'?[7,6,9,5,8,6,7,5,9,6,5,8,6]:[46,38,52,29,41,33,27,35,22,31,24,28,20]) : [18,25,4,31,25,12,2,19,27,9,14,6,21];
+    return vals.map(function (v, i) { return {pos:i+1, v:v, c:c[i], du:i===2}; });
+  }
   var origFetch = window.fetch;
   window.fetch = function (url, opts) {
     var u = String(url);
@@ -60,8 +66,8 @@
         return Promise.resolve({
           view:'topplista', metric:metric, sort:body.p_sort||'desc', entity:'forare',
           from:body.p_from, to:body.p_to, named:false, n:15,
-          me:{pos:3,v:16890},
-          rows: rowsTopp(),
+          me:(metric==='snitt'?{pos:3,v:341,c:4}:{pos:3,v:16890}),
+          rows: metric==='snitt' ? snittRows(false) : rowsTopp(),
           note:'Dricks räknas bara kort (kontantdricks saknas). 0 km-megafärder och pass över 16 h filtreras bort.'
         });
       }});
@@ -71,12 +77,12 @@
       var grain = body.p_grain || 'manad';
       var metric = body.p_metric || 'inkort';
       var sort = 'desc';
-      var r = (metric === 'langst') ? rowsLangst() : rowsRekord(grain);
+      var r = metric === 'snitt' ? snittRows(true, grain) : (metric === 'langst') ? rowsLangst() : rowsRekord(grain);
       return Promise.resolve({ ok: true, json: function () {
         return Promise.resolve({
           view:'rekord', metric:metric, sort:sort, entity:'forare', grain:grain,
           since:'2025-01-01', named:false, n:15, min_trips: metric==='snitt' ? (grain==='dag'?5:grain==='vecka'?15:grain==='manad'?20:100) : null,
-          me:{pos:3,v:r[2].v},
+          me:{pos:3,v:r[2].v,c:r[2].c},
           rows:r,
           note:'Rekord sedan jan 2025.'
         });

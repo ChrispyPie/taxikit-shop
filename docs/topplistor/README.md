@@ -39,6 +39,9 @@ Rekordlistan visar **bara värde och placering** — ingen månad/dag. RPC retur
 - **Andel tomkörning** — STIG-data har inget tomkm-/ledig-fält. Utelämnad.
 - Sorteringsknappar Störst/Minst — alltid störst först, hela listan.
 
+### Antal inom parentes
+Snittmåtten (Kr/körning, Kr/pass, Dricks %, Kr/mil, Kr/timme) visar antal resor bakom värdet: `312 kr (25 st)`, i både Topplista och Rekord. RPC-fält `c`. Km/körning, Belopp/körning, Körningar/pass är enskilda värden och får inget antal.
+
 ### Trösklar — bara i Rekord, aldrig i Topplista
 Gäller snittmåtten Kr/körning, Kr/pass, Dricks %, Kr/mil, Kr/timme. Topplista har ingen resegräns.
 | Grain | Minsta antal resor |
