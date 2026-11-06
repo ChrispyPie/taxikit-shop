@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Topplistor harness</title>
+<link rel="stylesheet" href="/TaxiData/style.css">
+<style>
+  body{margin:0;background:#111;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  .phone{width:390px;height:844px;margin:0 auto;background:var(--bg,#e8f1f8);display:flex;flex-direction:column;overflow:hidden;position:relative}
+  .top{background:var(--primary,#1a365d);color:#fff;padding:10px 12px;display:flex;align-items:center;justify-content:space-between}
+  .top b{font-size:1rem}
+  #content{flex:1;overflow:auto;padding:10px 12px 16px;-webkit-overflow-scrolling:touch}
+  #banner{background:#2d3748;color:#eee;font-size:10px;padding:4px 10px;text-align:center}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div id="banner">HARNESS · topplistor.js · mockad RPC · 390px</div>
+  <div class="top"><b id="page-title">Topplistor</b><span></span></div>
+  <div id="content"></div>
+</div>
+<script>
+  window.TRIP_API_URL = 'https://mock.local';
+  window.TRIP_API_KEY = 'mock';
+  window.shortName = function (s) {
+    if (!s) return '';
+    var p = String(s).trim().split(/\s+/);
+    return p[0] + (p[1] ? ' ' + p[1].charAt(0) : '');
+  };
+  localStorage.setItem('taxi_session', 'fake');
+  localStorage.setItem('taxi_driver', '710022');
+  localStorage.setItem('tl_view', new URLSearchParams(location.search).get('view') || 'topplista');
+  localStorage.setItem('tl_tab', new URLSearchParams(location.search).get('tab') || 'manad');
+  localStorage.setItem('tl_metric', new URLSearchParams(location.search).get('metric') || 'inkort');
+  localStorage.setItem('tl_mode', 'forare');
+
+  function rowsTopp() {
+    var vals = [18420,17210,16890,15100,14250,13800,12940,12100,11450,10800,9950,9320,8710,8100,7480];
+    return vals.map(function (v, i) { return {pos:i+1,v:v,du:i===2}; });
+  }
+  function rowsRekord(grain) {
+    var vals = grain === 'dag'
+      ? [9840,9210,8760,8450,8100,7890,7650,7420,7100,6880,6650,6420,6190,5950,5710]
+      : [84200,79100,78450,71800,68900,65400,62150,58700,55200,52100,49800,47100,44500,41800,39200];
+    return vals.map(function (v, i) { return {pos:i+1,v:v,du:i===2}; });
+  }
+  function rowsLangst() {
+    var vals = [86.4,72.1,61.0,48.5,39.2,28.7,19.4,12.8,8.3,5.1,3.2,2.0,1.4,0.9,0.6];
+    return vals.map(function (v, i) { return {pos:i+1,v:v,du:i===2}; });
+  }
+
+  var AVG = {snitt:1, inkort_pass:1, dricks_pct:1, krmil:1, krtimme:1};
+  function snittRows(rek, grain) {
+    var vals = rek ? [412,398,371,355,342,330,318,305,296,284,270,262,251] : [389,366,341,322,312,300,291,280,268,255,247,236,219];
+    var c = rek ? (grain==='dag'?[7,6,9,5,8,6,7,5,9,6,5,8,6]:[46,38,52,29,41,33,27,35,22,31,24,28,20]) : [18,25,4,31,25,12,2,19,27,9,14,6,21];
+    return vals.map(function (v, i) { return {pos:i+1, v:v, c:c[i], du:i===2}; });
+  }
+  var origFetch = window.fetch;
+  window.fetch = function (url, opts) {
+    var u = String(url);
+    if (u.indexOf('/rpc/get_topplista_metric') >= 0) {
+      var body = JSON.parse(opts.body || '{}');
+      var metric = body.p_metric || 'inkort';
+      return Promise.resolve({ ok: true, json: function () {
+        return Promise.resolve({
+          view:'topplista', metric:metric, sort:body.p_sort||'desc', entity:'forare',
+          from:body.p_from, to:body.p_to, named:false, n:15,
+          me:(metric==='snitt'?{pos:3,v:341,c:4}:{pos:3,v:16890}),
+          rows: metric==='snitt' ? snittRows(false) : rowsTopp(),
+          note:'Dricks räknas bara kort (kontantdricks saknas). 0 km-megafärder och pass över 16 h filtreras bort.'
+        });
+      }});
+    }
+    if (u.indexOf('/rpc/get_rekord_metric') >= 0) {
+      var body = JSON.parse(opts.body || '{}');
+      var grain = body.p_grain || 'manad';
+      var metric = body.p_metric || 'inkort';
+      var sort = 'desc';
+      var r = metric === 'snitt' ? snittRows(true, grain) : (metric === 'langst') ? rowsLangst() : rowsRekord(grain);
+      return Promise.resolve({ ok: true, json: function () {
+        return Promise.resolve({
+          view:'rekord', metric:metric, sort:sort, entity:'forare', grain:grain,
+          since:'2025-01-01', named:false, n:15, min_trips: metric==='snitt' ? (grain==='dag'?5:grain==='vecka'?15:grain==='manad'?20:100) : null,
+          me:{pos:3,v:r[2].v,c:r[2].c},
+          rows:r,
+          note:'Rekord sedan jan 2025.'
+        });
+      }});
+    }
+    return origFetch.apply(this, arguments);
+  };
+</script>
+<script src="/TaxiData/topplistor.js?v=harness"></script>
+<script>
+  TOPPLISTOR.render(document.getElementById('content'));
+  var open = new URLSearchParams(location.search).get('open');
+  if (open === '1') {
+    setTimeout(function () {
+      var btn = document.getElementById('tl-sel');
+      if (btn) btn.click();
+    }, 200);
+  }
+</script>
+</body>
+</html>

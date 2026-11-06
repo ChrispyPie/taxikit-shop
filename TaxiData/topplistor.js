@@ -1,52 +1,59 @@
-/* Topplistor: anonymiserade topplistor för alla förare.
+/* Topplistor + Rekordtavlan (2026-11-06).
  *
- * Anonymiteten avgörs på servern (public.get_leaderboard): vanliga förare och S admin får bara
- * placering och värde, och den egna raden markerad "Du". Bara ägaren får namn och förar-id.
- * Appen visar det servern skickar – inga andra förares id finns i svaret.
- * Alla förare med pass i perioden räknas, även de utan konto i appen och avslutade förare.
- * Period: Dag / Vecka / Månad / År och egen period i kalendern, som i Körpassdata.
- * Äldre år (t381u): går perioden in i ett år före i år hämtas listorna från public.get_leaderboard_archive,
- * som räknar på servern över arkivet + nuvarande data (samma regler, litet svar). Bara då – aldrig i år.
- * Svaret sparas i minnet under sessionen så att man kan bläddra fram och tillbaka utan att hämta igen.
- * Förare/Bil (t876u): växlaren högst upp byter alla listor till per bil (public.get_leaderboard_bil, bilnummer
- * från passen och resorna). Valet sparas i localStorage ('tl_mode'). Vanliga förare får bara sin egen bil (scope 'own', t880u). Demokonto får "Bil 1", "Bil 2" … från servern.
+ * Växel Topplista | Rekord. Samma mått i båda. Period = aktuell period i Topplista,
+ * respektive varje förares bästa sådan period sedan jan 2025 i Rekord.
+ * Sortera störst/minst. Förare/Bil som förut (bil: vanliga förare ser bara egen bil).
+ * Anonymitet avgörs på servern. Arkiv läses automatiskt för äldre år / rekord.
  */
 (function () {
   'use strict';
 
   var T = window.TOPPLISTOR = { id: 'topplistor', title: 'Topplistor', icon: '🏆' };
 
-  // Ordning och namn på listorna. Nycklarna kommer från servern.
+  // Mått (utan "mest"). Andel tomkörning borttagen: STIG saknar tomkm-fält.
   var LISTS = [
-    { k: 'inkort', t: 'Mest inkört', f: 'kr' },
-    { k: 'dricks', t: 'Mest dricks', f: 'kr' },
-    { k: 'krmil', t: 'Bäst kr/mil', f: 'kr' },
-    { k: 'krtimme', t: 'Bäst kr/timme', f: 'kr' },
-    // 'timmar' (Flest jobbade timmar) borttagen 2026-10-26: ägaren vill inte uppmuntra att jobba mer än tillåtet.
-    // Servern skickar fortfarande listan, men appen visar bara nycklarna här.
-    { k: 'antal', t: 'Flest körningar', f: 'st' },
-    { k: 'snitt', t: 'Högst snitt per körning', f: 'kr' },
-    { k: 'perskift', t: 'Högst snitt per pass', f: 'kr' },
-    // Godkända verkstadstimmar (Verkstadstimmar), räknas per startdag
-    { k: 'verkstad', t: 'Flest verkstadstimmar', f: 'tid' }
+    { k: 'inkort', t: 'Inkört', f: 'kr', group: 'sum' },
+    { k: 'dricks', t: 'Dricks', f: 'kr', group: 'sum' },
+    { k: 'krmil', t: 'Kr/mil', f: 'kr', group: 'sum' },
+    { k: 'krtimme', t: 'Kr/timme', f: 'kr', group: 'sum' },
+    { k: 'km', t: 'Km', f: 'km', group: 'sum' },
+    { k: 'antal', t: 'Antal resor', f: 'st', group: 'sum' },
+    { k: 'snitt', t: 'Kr/körning', f: 'kr', group: 'sum' },
+    { k: 'inkort_pass', t: 'Kr/pass', f: 'kr', group: 'sum' },
+    { k: 'dricks_pct', t: 'Dricks %', f: 'pct', group: 'sum' },
+    { k: 'flyg', t: 'Flygresor', f: 'st', group: 'sum' },
+    { k: 'langst', t: 'Km/körning', f: 'km1', group: 'trip' },
+    { k: 'belopp', t: 'Belopp/körning', f: 'kr', group: 'trip' },
+    { k: 'passresor', t: 'Körningar/pass', f: 'st', group: 'trip' }
   ];
   T.lists = LISTS;
+  var BY_K = {};
+  LISTS.forEach(function (L) { BY_K[L.k] = L; });
 
-  var TAB_KEY = 'tl_tab', MODE_KEY = 'tl_mode';
-  // Rubriker i bilvyn ("Bästa bil" = mest inkört, t875u)
-  var BIL_T = { inkort: 'Bästa bil – mest inkört', antal: 'Flest körningar' };
+  var VIEW_KEY = 'tl_view', TAB_KEY = 'tl_tab', MODE_KEY = 'tl_mode';
+  var METRIC_KEY = 'tl_metric';
   var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
   var WD = ['Sön', 'Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör'];
-  var st = { tab: localStorage.getItem(TAB_KEY) || 'dag', lastTab: 'dag', date: new Date(), range: null, data: null, err: null, loading: false, arkiv: false, seq: 0, el: null, open: {} };
-  var arkivCache = {};   // 'från|till' → svar från arkivet (bara i minnet)
-  if (['dag', 'vecka', 'manad', 'ar'].indexOf(st.tab) < 0) st.tab = 'dag';
-  st.mode = localStorage.getItem(MODE_KEY) === 'bil' ? 'bil' : 'forare';
-  T.mode = function () { return st.mode; };
-  st.lastTab = st.tab;
+  var GRAIN_SV = { dag: 'dag', vecka: 'vecka', manad: 'månad', ar: 'år' };
 
-  // ---------- hjälp ----------
+  var st = {
+    view: localStorage.getItem(VIEW_KEY) === 'rekord' ? 'rekord' : 'topplista',
+    tab: localStorage.getItem(TAB_KEY) || 'dag',
+    lastTab: 'dag',
+    date: new Date(),
+    range: null,
+    mode: localStorage.getItem(MODE_KEY) === 'bil' ? 'bil' : 'forare',
+    metric: localStorage.getItem(METRIC_KEY) || 'inkort',
+    data: null, err: null, loading: false, arkiv: false, seq: 0, el: null, menu: false
+  };
+  if (['dag', 'vecka', 'manad', 'ar'].indexOf(st.tab) < 0) st.tab = 'dag';
+  if (!BY_K[st.metric]) st.metric = 'inkort';
+  st.lastTab = st.tab;
+  var cache = {};
+  T.mode = function () { return st.mode; };
+  T.view = function () { return st.view; };
+
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  // Kort namn för visning ("Christian P"), se namn.js
   function sn(s) { return window.shortName ? window.shortName(s) : (s == null ? '' : String(s)); }
   function sod(d) { var x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
   function p2(n) { return String(n).padStart(2, '0'); }
@@ -78,6 +85,7 @@
     return WD[f.getDay()] + ' ' + ddmm(f) + '-' + yy(f);
   }
   T.periodText = function () {
+    if (st.view === 'rekord') return 'bästa ' + (GRAIN_SV[st.tab] || 'perioden') + ' sedan 2025';
     if (st.tab === 'dag') return sod(st.date).getTime() === sod(new Date()).getTime() ? 'idag' : 'den dagen';
     if (st.tab === 'vecka') return isCurrent() ? 'den här veckan' : 'den veckan';
     if (st.tab === 'manad') return isCurrent() ? 'den här månaden' : 'den månaden';
@@ -86,11 +94,15 @@
   };
   function fmt(v, f) {
     if (v == null) return '–';
-    if (f === 'tid') { var m = Math.round(v); return Math.floor(m / 60) + ':' + p2(m % 60) + ' h'; }
+    if (f === 'pct') return (Math.round(v * 10) / 10).toLocaleString('sv-SE') + ' %';
+    if (f === 'km') return Math.round(v).toLocaleString('sv-SE') + ' km';
+    if (f === 'km1') return (Math.round(v * 10) / 10).toLocaleString('sv-SE') + ' km';
     if (f === 'st') return Math.round(v).toLocaleString('sv-SE') + ' st';
     return Math.round(v).toLocaleString('sv-SE') + ' kr';
   }
   T.fmt = fmt;
+  // Snittmått: antal resor inom parentes, t.ex. "312 kr (25 st)"
+  function cnt(r) { return r && r.c != null ? ' <span class="tl-cnt">(' + Math.round(r.c).toLocaleString('sv-SE') + ' st)</span>' : ''; }
 
   function rpc(name, args) {
     args.p_token = localStorage.getItem('taxi_session') || '';
@@ -101,67 +113,121 @@
     }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
   }
 
-  // ---------- data ----------
-  // Perioden går in i ett äldre år (före 1 januari i år) → arkivet
-  function isArchive(r) { return r[0].getFullYear() < new Date().getFullYear(); }
+  function cacheKey() {
+    if (st.view === 'rekord') return ['rekord', st.tab, st.metric, st.mode].join('|');
+    var r = range();
+    return ['topp', iso(r[0]), iso(r[1]), st.metric, st.mode].join('|');
+  }
+
   function load() {
-    var r = range(), my = ++st.seq, bil = st.mode === 'bil', old = isArchive(r), key = (bil ? 'bil|' : '') + iso(r[0]) + '|' + iso(r[1]);
+    var my = ++st.seq, key = cacheKey(), bil = st.mode === 'bil';
     window.TOPPLISTOR_LAST = null;
-    st.err = null; st.arkiv = old;
-    if (bil !== st.dataBil) st.data = null;   // byt inte bara siffror: töm listan när läget byts
-    var got = (old || bil) && arkivCache[key] ? Promise.resolve(arkivCache[key])
-      : (st.loading = true, old && (st.data = null), draw(),
-         rpc(bil ? 'get_leaderboard_bil' : old ? 'get_leaderboard_archive' : 'get_leaderboard', { p_from: iso(r[0]), p_to: iso(r[1]) }));
+    st.err = null;
+    st.arkiv = st.view === 'topplista' && range()[0].getFullYear() < new Date().getFullYear();
+    st.menu = false;
+
+    var got;
+    if (cache[key]) {
+      got = Promise.resolve(cache[key]);
+    } else {
+      st.loading = true; st.data = null; draw();
+      if (st.view === 'rekord') {
+        got = rpc('get_rekord_metric', {
+          p_grain: st.tab === 'period' ? 'manad' : st.tab,
+          p_metric: st.metric, p_sort: 'desc', p_entity: bil ? 'bil' : 'forare'
+        });
+      } else {
+        var r = range();
+        got = rpc('get_topplista_metric', {
+          p_from: iso(r[0]), p_to: iso(r[1]),
+          p_metric: st.metric, p_sort: 'desc', p_entity: bil ? 'bil' : 'forare'
+        });
+      }
+    }
     got.then(function (d) {
-      if ((old || bil) && d) arkivCache[key] = d;
+      if (d) cache[key] = d;
       if (my !== st.seq) return;
-      st.loading = false; st.data = d || null; st.dataBil = bil; draw();
-      if (bil) return;   // hjälpboten kommenterar bara förarlistorna
-      var info = { tab: st.tab, current: isCurrent(), period: T.periodText(), data: st.data };
+      st.loading = false; st.data = d || null; draw();
+      if (bil) return;
+      var info = { tab: st.tab, view: st.view, current: isCurrent(), period: T.periodText(), data: st.data, metric: st.metric };
       window.TOPPLISTOR_LAST = info;
       document.dispatchEvent(new CustomEvent('topplistor:data', { detail: info }));
-    }).catch(function () {
+    }).catch(function (e) {
       if (my !== st.seq) return;
-      st.loading = false; st.data = null; st.err = 'Kunde inte hämta topplistorna. Försök igen.'; draw();
+      st.loading = false; st.data = null;
+      st.err = (e && String(e.message) === '404')
+        ? 'Servern har inte den nya topplistefunktionen ännu. SQL 20261106e måste appliceras först.'
+        : 'Kunde inte hämta listan. Försök igen.';
+      draw();
     });
   }
 
-  // ---------- vy ----------
   var statusEl = null;
   T.render = function (content) {
     st.el = content;
     content.innerHTML =
-      '<div class="tl-controls"><div class="tabs tl-modes" role="tablist" aria-label="Visa topplistor per">' +
-        '<button type="button" class="tab tl-mode" data-mode="forare">👤 Förare</button>' +
-        '<button type="button" class="tab tl-mode" data-mode="bil">🚕 Bil</button></div>' +
-      '<div class="tabs">' +
-        '<button type="button" class="tl-tab" data-tab="dag">Dag</button>' +
-        '<button type="button" class="tl-tab" data-tab="vecka">Vecka</button>' +
-        '<button type="button" class="tl-tab" data-tab="manad">Månad</button>' +
-        '<button type="button" class="tl-tab" data-tab="ar">År</button></div>' +
-      '<div class="date-nav"><button type="button" id="tl-prev" aria-label="Föregående">‹</button><div id="tl-date" class="tl-date"></div>' +
-        '<button type="button" id="tl-next" aria-label="Nästa">›</button><button type="button" id="tl-today" aria-label="Idag">»</button>' +
-        '<button type="button" id="tl-period" class="tl-period" title="Välj egen period" aria-label="Välj egen period">📅</button></div>' +
-      '<div id="tl-status-slot"></div></div>' +
+      '<div class="tl-controls">' +
+        '<div class="tabs tl-views" role="tablist" aria-label="Topplista eller Rekord">' +
+          '<button type="button" class="tab tl-view" data-view="topplista">🏆 Topplista</button>' +
+          '<button type="button" class="tab tl-view" data-view="rekord">🏅 Rekord</button></div>' +
+        '<div class="tabs tl-modes" role="tablist" aria-label="Visa per">' +
+          '<button type="button" class="tab tl-mode" data-mode="forare">👤 Förare</button>' +
+          '<button type="button" class="tab tl-mode" data-mode="bil">🚕 Bil</button></div>' +
+        '<div class="tabs">' +
+          '<button type="button" class="tl-tab" data-tab="dag">Dag</button>' +
+          '<button type="button" class="tl-tab" data-tab="vecka">Vecka</button>' +
+          '<button type="button" class="tl-tab" data-tab="manad">Månad</button>' +
+          '<button type="button" class="tl-tab" data-tab="ar">År</button></div>' +
+        '<div class="date-nav" id="tl-datenav">' +
+          '<button type="button" id="tl-prev" aria-label="Föregående">‹</button>' +
+          '<div id="tl-date" class="tl-date"></div>' +
+          '<button type="button" id="tl-next" aria-label="Nästa">›</button>' +
+          '<button type="button" id="tl-today" aria-label="Idag">»</button>' +
+          '<button type="button" id="tl-period" class="tl-period" title="Välj egen period" aria-label="Välj egen period">📅</button></div>' +
+        '<div class="tl-row2">' +
+          '<div class="tl-selwrap" id="tl-selwrap">' +
+            '<button type="button" class="tl-sel" id="tl-sel" aria-haspopup="listbox" aria-expanded="false"></button>' +
+            '<span class="tl-chev" aria-hidden="true">▾</span>' +
+            '<div class="tl-menu" id="tl-menu" role="listbox" hidden></div></div></div>' +
+        '<div id="tl-status-slot"></div></div>' +
       '<div id="tl-body"></div>';
-    // Serverstatus-lampan: samma element återanvänds så att bara en timer körs
+
     if (!statusEl) { statusEl = document.createElement('div'); statusEl.id = 'tl-server-status'; statusEl.className = 'server-status'; statusEl.style.display = 'none'; }
     document.getElementById('tl-status-slot').appendChild(statusEl);
     if (window.initServerStatus) window.initServerStatus('tl-server-status');
 
+    content.querySelectorAll('.tl-view').forEach(function (b) {
+      b.onclick = function () {
+        if (st.view === b.dataset.view) return;
+        st.view = b.dataset.view; localStorage.setItem(VIEW_KEY, st.view);
+        if (st.view === 'rekord' && st.tab === 'period') { st.tab = st.lastTab || 'manad'; st.range = null; }
+        load();
+      };
+    });
     content.querySelectorAll('.tl-tab').forEach(function (b) {
       b.onclick = function () { st.tab = b.dataset.tab; st.lastTab = st.tab; st.range = null; localStorage.setItem(TAB_KEY, st.tab); load(); };
     });
     content.querySelectorAll('.tl-mode').forEach(function (b) {
-      b.onclick = function () { if (st.mode === b.dataset.mode) return; st.mode = b.dataset.mode; localStorage.setItem(MODE_KEY, st.mode); st.open = {}; load(); };
+      b.onclick = function () { if (st.mode === b.dataset.mode) return; st.mode = b.dataset.mode; localStorage.setItem(MODE_KEY, st.mode); load(); };
     });
     document.getElementById('tl-prev').onclick = function () { move(-1); };
     document.getElementById('tl-next').onclick = function () { if (!isCurrent()) move(1); };
     document.getElementById('tl-today').onclick = function () { st.date = new Date(); if (st.tab === 'period') { st.tab = st.lastTab; st.range = null; } load(); };
     document.getElementById('tl-period').onclick = openCal;
+    document.getElementById('tl-sel').onclick = function (e) {
+      e.stopPropagation();
+      st.menu = !st.menu; drawMenu();
+    };
+    document.addEventListener('click', function (e) {
+      if (!st.menu) return;
+      var wrap = document.getElementById('tl-selwrap');
+      if (wrap && !wrap.contains(e.target)) { st.menu = false; drawMenu(); }
+    });
     load();
   };
+
   function move(dir) {
+    if (st.view === 'rekord') return;
     if (st.tab === 'period' && st.range) {
       var n = days(st.range.from, st.range.to), f = new Date(st.range.from), t = new Date(st.range.to);
       f.setDate(f.getDate() + dir * n); t.setDate(t.getDate() + dir * n);
@@ -173,79 +239,119 @@
     load();
   }
 
+  function metricSub(L) {
+    if (st.view === 'rekord') {
+      if (L.group === 'trip') return 'sedan 2025';
+      return 'bästa ' + (GRAIN_SV[st.tab === 'period' ? 'manad' : st.tab] || 'period') + ' sedan 2025';
+    }
+    return L.group === 'trip' ? 'i vald period' : 'vald period';
+  }
+
+  function drawMenu() {
+    var btn = document.getElementById('tl-sel');
+    var menu = document.getElementById('tl-menu');
+    if (!btn || !menu) return;
+    var cur = BY_K[st.metric] || LISTS[0];
+    btn.textContent = cur.t;
+    btn.setAttribute('aria-expanded', st.menu ? 'true' : 'false');
+    if (!st.menu) { menu.hidden = true; menu.classList.remove('open'); return; }
+    var h = '<div class="tl-sep">Summeringar</div>';
+    LISTS.filter(function (L) { return L.group === 'sum'; }).forEach(function (L) {
+      h += '<button type="button" class="tl-opt' + (L.k === st.metric ? ' on' : '') + '" data-k="' + L.k + '" role="option" aria-selected="' + (L.k === st.metric) + '">' +
+        esc(L.t) + '<small>' + esc(metricSub(L)) + '</small></button>';
+    });
+    h += '<div class="tl-sep">Enskilda</div>';
+    LISTS.filter(function (L) { return L.group === 'trip'; }).forEach(function (L) {
+      h += '<button type="button" class="tl-opt' + (L.k === st.metric ? ' on' : '') + '" data-k="' + L.k + '" role="option" aria-selected="' + (L.k === st.metric) + '">' +
+        esc(L.t) + '<small>' + esc(metricSub(L)) + '</small></button>';
+    });
+    menu.innerHTML = h;
+    menu.hidden = false; menu.classList.add('open');
+    menu.querySelectorAll('.tl-opt').forEach(function (b) {
+      b.onclick = function () {
+        st.metric = b.dataset.k; localStorage.setItem(METRIC_KEY, st.metric);
+        st.menu = false; load();
+      };
+    });
+  }
+
   function draw() {
     if (!st.el || !document.getElementById('tl-body')) return;
+    var rek = st.view === 'rekord';
+    T.title = rek ? 'Rekordtavlan' : 'Topplistor';
+    var pageTitle = document.getElementById('page-title') || document.getElementById('title');
+    if (pageTitle && /topplist|rekord/i.test(pageTitle.textContent || '')) pageTitle.textContent = T.title;
+    st.el.querySelectorAll('.tl-view').forEach(function (b) { var on = b.dataset.view === st.view; b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
     st.el.querySelectorAll('.tl-tab').forEach(function (b) { b.classList.toggle('active', b.dataset.tab === st.tab); });
     st.el.querySelectorAll('.tl-mode').forEach(function (b) { var on = b.dataset.mode === st.mode; b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
-    var de = document.getElementById('tl-date'); de.textContent = label(); de.classList.toggle('period', st.tab === 'period');
-    document.getElementById('tl-period').classList.toggle('active', st.tab === 'period');
-    document.getElementById('tl-today').classList.toggle('active', st.tab === 'dag' && sod(st.date).getTime() === sod(new Date()).getTime());
-    var nx = document.getElementById('tl-next'); nx.disabled = isCurrent(); nx.style.opacity = isCurrent() ? '0.3' : '1';
+    var nav = document.getElementById('tl-datenav');
+    if (nav) nav.style.display = rek ? 'none' : '';
+    var de = document.getElementById('tl-date');
+    if (de) { de.textContent = label(); de.classList.toggle('period', st.tab === 'period'); }
+    var pb = document.getElementById('tl-period');
+    if (pb) pb.classList.toggle('active', st.tab === 'period');
+    var td = document.getElementById('tl-today');
+    if (td) td.classList.toggle('active', st.tab === 'dag' && sod(st.date).getTime() === sod(new Date()).getTime());
+    var nx = document.getElementById('tl-next');
+    if (nx) { nx.disabled = isCurrent(); nx.style.opacity = isCurrent() ? '0.3' : '1'; }
+
+    drawMenu();
 
     var body = document.getElementById('tl-body'), d = st.data, h = '';
+    var L = BY_K[st.metric] || LISTS[0];
+    var title = rek ? '🏅 Rekordtavlan' : '🏆 Topplistor';
+
     if (st.err) h = '<div class="tl-msg err">' + esc(st.err) + '</div>';
     else if (st.loading && st.arkiv) h = '<div class="tl-msg arkiv-loading" role="status" aria-live="polite"><span class="arkiv-spin" aria-hidden="true"></span>Hämtar ' + esc(label()) + ' från arkivet…</div>';
     else if (st.loading && !d) h = '<div class="tl-msg">Laddar…</div>';
-    else if (st.mode === 'bil') h = drawBil(d);
-    else if (!d || (!d.drivers && !d.workshop_drivers)) h = '<div class="tl-msg">Ingen har kört ' + esc(T.periodText()) + ' än.</div>';
+    else if (!d || !d.rows) h = '<div class="tl-msg">Ingen data ' + esc(T.periodText()) + ' än.</div>';
     else {
-      h += '<div class="tl-info">' + (d.drivers ? d.drivers + ' förare med pass ' + esc(T.periodText()) + '. ' : 'Inga pass ' + esc(T.periodText()) + ' än. ') +
-        (st.arkiv ? '📦 Äldre data från arkivet. ' : '') +
-        (d.named ? 'Du ser namn eftersom du är ägare.' : window.DEMO && DEMO.on() ? 'Demokonto: andra förare visas som "Förare 1", "Förare 2" … och inga namn skickas.' : 'Bara din egen rad visas som "Du".') + '</div>';
-      LISTS.forEach(function (L) {
-        var x = d.lists && d.lists[L.k];
-        if (!x || !x.rows || !x.rows.length) return;
-        var open = !!st.open[L.k], rows = x.rows, show = open ? rows : rows.slice(0, 5);
-        h += '<div class="tl-card"><div class="tl-head"><span class="tl-title">' + esc(L.t) + '</span>' +
-          '<span class="tl-me">' + (x.me ? 'Du: plats ' + x.me.pos + ' av ' + x.n : x.n + ' förare') + '</span></div>';
-        show.forEach(function (r) {
-          var who = r.du ? 'Du' : (d.named && r.id ? (r.namn && r.namn !== r.id ? esc(sn(r.namn)) + ' <span class="tl-id">' + esc(r.id) + '</span>' : esc(r.id)) : (window.DEMO && DEMO.on() ? 'Förare ' + r.pos : ''));  // demokonto: servern skickar inga namn
-          h += '<div class="tl-row' + (r.du ? ' du' : '') + '"><span class="tl-pos">' + (r.pos <= 3 ? ['🥇', '🥈', '🥉'][r.pos - 1] : r.pos + '.') + '</span>' +
-            '<span class="tl-who">' + who + '</span><span class="tl-val">' + fmt(r.v, L.f) + '</span></div>';
-        });
-        if (x.me && !open && x.me.pos > 5 && rows.length > 5) {
-          h += '<div class="tl-row du"><span class="tl-pos">' + x.me.pos + '.</span><span class="tl-who">Du</span><span class="tl-val">' + fmt(x.me.v, L.f) + '</span></div>';
+      var own = d.scope === 'own';
+      var whoN = st.mode === 'bil' ? ((d.n || 0) + ' bilar') : ((d.n || 0) + ' förare');
+      h += '<div class="tl-hint">' + esc(title) + ' · ' + esc(L.t) +
+        (rek ? ' · bästa ' + esc(GRAIN_SV[st.tab] || 'period') + ' sedan 2025' : ' · ' + esc(label())) + '</div>';
+      if (own) {
+        h += '<div class="tl-info">🔒 Visar bara din bil' + (d.own ? ' (' + esc(d.own) + ')' : '') +
+          ': din placering bland ' + (d.n || 0) + ' bilar. Andra bilar visas inte.</div>';
+      } else {
+        h += '<div class="tl-info">' + esc(whoN) + ' · ' + esc(T.periodText()) + '. ' +
+          (d.arkiv ? '📦 Äldre data från arkivet. ' : '') +
+          (d.named ? 'Du ser namn eftersom du är ägare.' :
+            (window.DEMO && DEMO.on() ? 'Demokonto: andra visas anonymt.' : 'Bara din egen rad visas som "Du".')) + '</div>';
+      }
+      if (d.note) h += '<div class="tl-note">' + esc(d.note) + '</div>';
+
+      var rows = d.rows || [];
+      h += '<div class="tl-card"><div class="tl-head"><span class="tl-title">' + esc(L.t) + '</span>' +
+        '<span class="tl-me">' + (d.me ? 'Du: plats ' + d.me.pos + ' av ' + d.n : (d.n || 0) + (st.mode === 'bil' ? ' bilar' : ' förare')) + '</span></div>';
+
+      if (own && !rows.length) h += '<div class="tl-row"><span class="tl-who">Din bil finns inte med i den här listan.</span></div>';
+      rows.forEach(function (r) {
+        var who;
+        if (st.mode === 'bil') {
+          who = esc(r.id || '') + (r.modell ? ' <span class="tl-id">' + esc(r.modell) + '</span>' : '') +
+            (r.du && !own ? ' <span class="tl-id">· du har kört</span>' : '');
+        } else {
+          who = r.du ? 'Du' : (d.named && r.id
+            ? (r.namn && r.namn !== r.id ? esc(sn(r.namn)) + ' <span class="tl-id">' + esc(r.id) + '</span>' : esc(r.id))
+            : (window.DEMO && DEMO.on() ? 'Förare ' + r.pos : ''));
         }
-        if (rows.length > 5) h += '<button type="button" class="tl-more" data-k="' + L.k + '">' + (open ? 'Visa färre' : 'Visa alla ' + rows.length) + '</button>';
-        h += '</div>';
+        h += '<div class="tl-row' + (r.du ? ' du' : '') + '"><span class="tl-pos">' +
+          (r.pos <= 3 ? ['🥇', '🥈', '🥉'][r.pos - 1] : r.pos + '.') + '</span>' +
+          '<span class="tl-who">' + who + '</span><span class="tl-val">' + fmt(r.v, L.f) + cnt(r) + '</span></div>';
       });
-      h += '<div class="tl-foot">Alla förare med pass i perioden räknas, även de utan konto i appen. Kr/mil kräver minst 1 mil, kr/timme minst 30 min. Inkört räknas som i Körpassdata. Verkstadstimmar räknas när ägaren har godkänt dem.</div>';
+      h += '</div>';
+      h += '<div class="tl-foot">Kr/mil kräver minst 1 mil, kr/timme minst 30 min. Inkört som i Körpassdata. ' +
+        (rek && d.min_trips ? 'Rekord kräver minst ' + d.min_trips + ' resor i perioden (gäller inte Topplista). ' : '') +
+        'Störst först — läs nerifrån för minst. Km/körning: minst 0,5 km.</div>';
     }
     body.innerHTML = h;
-    body.querySelectorAll('.tl-more').forEach(function (b) { b.onclick = function () { st.open[b.dataset.k] = !st.open[b.dataset.k]; draw(); }; });
   }
 
-  // ---------- bilvy: samma listor per bilnummer ----------
-  function drawBil(d) {
-    if (!d || (!d.cars && !d.workshop_cars)) return '<div class="tl-msg">Ingen bil har kört ' + esc(T.periodText()) + ' än.</div>';
-    var own = d.scope === 'own';
-    var h = '<div class="tl-info">' + (own
-      ? '🔒 Visar bara din bil' + (d.own ? ' (' + esc(d.own) + ', din senaste bil)' : '') + ': din placering bland ' + (d.cars || 0) + ' bilar ' + esc(T.periodText()) + '. Andra bilar visas inte.'
-      : (d.cars ? d.cars + ' bilar med pass ' + esc(T.periodText()) + '. ' : 'Inga pass ' + esc(T.periodText()) + ' än. ') +
-        (d.arkiv ? '📦 Äldre data från arkivet. ' : '') +
-        (d.demo ? 'Demokonto: bilarna visas som "Bil 1", "Bil 2" … ' : '') + 'Bilar du har kört är markerade.') + '</div>';
-    if (own && !d.own) return h + '<div class="tl-msg">Vi hittar ingen bil i dina pass än.</div>';
-    LISTS.forEach(function (L) {
-      var x = d.lists && d.lists[L.k];
-      if (!x || !x.rows || (!x.rows.length && !own)) return;
-      var open = !!st.open[L.k], rows = x.rows, show = open ? rows : rows.slice(0, 5);
-      h += '<div class="tl-card"><div class="tl-head"><span class="tl-title">' + esc(BIL_T[L.k] || L.t) + '</span>' +
-        '<span class="tl-me">' + (own && x.me ? 'plats ' + x.me.pos + ' av ' + x.n : x.n + ' bilar') + '</span></div>';
-      if (own && !rows.length) h += '<div class="tl-row"><span class="tl-who">Din bil finns inte med i den här listan.</span></div>';
-      show.forEach(function (r) {
-        var who = esc(r.id || '') + (r.modell ? ' <span class="tl-id">' + esc(r.modell) + '</span>' : '') + (r.du && !own ? ' <span class="tl-id">· du har kört</span>' : '');
-        h += '<div class="tl-row' + (r.du ? ' du' : '') + '"><span class="tl-pos">' + (r.pos <= 3 ? ['🥇', '🥈', '🥉'][r.pos - 1] : r.pos + '.') + '</span>' +
-          '<span class="tl-who">' + who + '</span><span class="tl-val">' + fmt(r.v, L.f) + '</span></div>';
-      });
-      if (rows.length > 5) h += '<button type="button" class="tl-more" data-k="' + L.k + '">' + (open ? 'Visa färre' : 'Visa alla ' + rows.length) + '</button>';
-      h += '</div>';
-    });
-    return h + '<div class="tl-foot">Räknas på bilnumret i passen och resorna, med samma regler som förarlistorna. Kr/mil kräver minst 1 mil, kr/timme minst 30 min. Verkstadstimmar räknas på bilen när ägaren har godkänt dem.</div>';
-  }
-
-  // ---------- egen period: kalender (samma utseende som Körpassdata) ----------
+  // ---------- egen period ----------
   var cal = { m: null, from: null, to: null };
   function openCal() {
+    if (st.view === 'rekord') return;
     var m = document.getElementById('tl-modal');
     if (!m) {
       m = document.createElement('div'); m.id = 'tl-modal'; m.className = 'pm-overlay';

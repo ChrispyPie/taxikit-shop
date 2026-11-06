@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=390"/>
+<title>Topplista / Rekord – mock v3</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#e8f1f8;--surface:#fff;--text:#1a365d;--text-soft:#4a5568;--muted:#718096;
+  --primary:#1a365d;--on-primary:#fff;--border:#cbd5e0;--border-soft:#d0e0ea;--du:#fef3c7;
+}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0f172a;color:var(--text)}
+.phone{width:390px;min-height:844px;margin:0 auto;background:var(--bg);overflow:hidden;position:relative}
+header{background:var(--bg);color:var(--primary);padding:0.8rem 1rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-soft)}
+header h1{font-size:1.1rem}
+.ex{background:#fefcbf;color:#975a16;font-size:11px;font-weight:700;text-align:center;padding:6px 10px;border-bottom:1px solid #f6e05e}
+.wrap{padding:0.75rem 0.75rem 1.2rem}
+.mode{display:flex;margin-bottom:0.65rem;border:2px solid var(--primary);border-radius:12px;overflow:hidden;background:var(--surface)}
+.mode button{flex:1;border:none;background:transparent;color:var(--primary);padding:0.55rem 0.4rem;font-size:0.95rem;font-weight:600}
+.mode button.on{background:var(--primary);color:var(--on-primary)}
+.who{display:flex;justify-content:center;gap:0.4rem;margin-bottom:0.65rem}
+.who .tab{padding:0.4rem 1.1rem;border:2px solid var(--primary);border-radius:20px;background:var(--surface);color:var(--primary);font-size:0.88rem;font-weight:500}
+.who .tab.on{background:var(--primary);color:var(--on-primary)}
+.period{display:flex;justify-content:center;gap:0.35rem;margin-bottom:0.55rem}
+.period .p{padding:0.35rem 0.85rem;border:2px solid var(--primary);border-radius:16px;background:var(--surface);color:var(--primary);font-size:0.8rem}
+.period .p.on{background:var(--primary);color:var(--on-primary);font-weight:600}
+.date{display:flex;align-items:center;justify-content:center;gap:0.35rem;margin-bottom:0.55rem}
+.date .b{width:38px;height:38px;border:2px solid var(--primary);border-radius:10px;background:var(--surface);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.date .d{min-width:120px;padding:0.5rem 0.9rem;border:2px solid var(--primary);border-radius:10px;background:var(--surface);color:var(--primary);text-align:center;font-weight:500;font-size:0.9rem}
+.sel-wrap{position:relative;margin-bottom:0.55rem}
+.sel{width:100%;appearance:none;background:var(--surface);border:2px solid var(--primary);border-radius:10px;padding:0.65rem 2.2rem 0.65rem 0.85rem;font-size:0.95rem;font-weight:600;color:var(--primary);text-align:left}
+.chev{position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--primary);font-size:1.1rem}
+.menu{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--surface);border:2px solid var(--primary);border-radius:10px;z-index:5;box-shadow:0 8px 24px rgba(26,54,93,.18);max-height:360px;overflow:auto}
+.menu.open{display:block}
+.menu .opt{padding:0.62rem 0.85rem;font-size:0.9rem;color:var(--text);border-top:1px solid var(--border-soft)}
+.menu .opt:first-child{border-top:none}
+.menu .opt.on{background:#ebf8ff;font-weight:700;color:var(--primary)}
+.menu .opt small{display:block;font-size:0.7rem;color:var(--muted);font-weight:400;margin-top:2px}
+.menu .sep{padding:0.4rem 0.85rem;font-size:0.68rem;font-weight:700;color:var(--muted);background:#f7fafc;border-top:1px solid var(--border-soft);text-transform:uppercase;letter-spacing:.03em}
+.info{font-size:0.78rem;color:var(--muted);text-align:center;margin:0 0 0.6rem;line-height:1.35}
+.card{background:var(--surface);border-radius:12px;padding:0.55rem 0.65rem}
+.head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:0.25rem}
+.title{font-weight:700;color:var(--primary);font-size:0.95rem}
+.me{font-size:0.75rem;color:var(--text-soft);white-space:nowrap}
+.row{display:flex;align-items:center;gap:8px;padding:7px 6px;border-top:1px solid var(--border-soft);font-size:0.92rem}
+.row.du{background:var(--du);border-radius:8px;font-weight:700;border-top-color:transparent;margin-top:2px}
+.pos{width:2rem;text-align:center;flex-shrink:0}
+.who2{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.val{font-variant-numeric:tabular-nums;white-space:nowrap}
+.when{font-size:0.7rem;color:var(--muted);font-weight:400;margin-left:4px}
+.foot{font-size:0.72rem;color:var(--muted);text-align:center;margin-top:0.7rem}
+.hint{font-size:0.72rem;color:var(--primary);background:#ebf8ff;border-radius:8px;padding:6px 8px;margin:0 0 0.55rem;text-align:center}
+</style>
+</head>
+<body>
+<div class="phone" id="phone"></div>
+<script>
+const view = new URLSearchParams(location.search).get('v') || 'rekord-manad';
+const isRekord = view.startsWith('rekord');
+const open = view.includes('open');
+const period = view.includes('dag') ? 'dag' : 'manad';
+const periodLabel = { dag:'dag', vecka:'vecka', manad:'månad', ar:'år' };
+
+// Exact same list set in BOTH modes:
+// 1) existing Topplistor LISTS from TaxiData/topplistor.js
+// 2) single-trip lists (also in Topplista = longest today/this week/month/year)
+const LISTS = [
+  {k:'inkort', t:'Mest inkört', kind:'sum'},
+  {k:'dricks', t:'Mest dricks', kind:'sum'},
+  {k:'krmil', t:'Bäst kr/mil', kind:'sum'},
+  {k:'krtimme', t:'Bäst kr/timme', kind:'sum'},
+  {k:'antal', t:'Flest körningar', kind:'sum'},
+  {k:'snitt', t:'Högst snitt per körning', kind:'sum'},
+  {k:'perskift', t:'Högst snitt per pass', kind:'sum'},
+  {k:'verkstad', t:'Flest verkstadstimmar', kind:'sum'},
+  {k:'langst', t:'Längsta körningen', kind:'trip'},
+  {k:'kort', t:'Kortaste körningen', kind:'trip'},
+  {k:'belopp', t:'Högsta enskilda beloppet', kind:'trip'},
+];
+const chosen = LISTS[0];
+const heading = isRekord ? '🏅 Rekordtavlan' : '🏆 Topplistor';
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));}
+
+function subFor(o){
+  if (isRekord) return o.kind==='trip' ? 'bästa enskilda körning sedan 2025' : 'bästa '+periodLabel[period]+' sedan 2025';
+  return o.kind==='trip' ? 'i vald period' : 'vald period';
+}
+function menuHtml(){
+  let h = '';
+  h += `<div class="sep">Samma listor som idag</div>`;
+  LISTS.filter(o=>o.kind==='sum').forEach((o,i)=>{ h += `<div class="opt${i===0?' on':''}">${esc(o.t)}<small>${esc(subFor(o))}</small></div>`; });
+  h += `<div class="sep">Enskilda körningar</div>`;
+  LISTS.filter(o=>o.kind==='trip').forEach(o=>{ h += `<div class="opt">${esc(o.t)}<small>${esc(subFor(o))}</small></div>`; });
+  return h;
+}
+
+function rowsRekordManad(){
+  return `
+    <div class="row"><span class="pos">🥇</span><span class="who2">Förare</span><span class="val">84 200 kr<span class="when">· jun -26</span></span></div>
+    <div class="row"><span class="pos">🥈</span><span class="who2">Förare</span><span class="val">79 100 kr<span class="when">· maj -26</span></span></div>
+    <div class="row du"><span class="pos">3</span><span class="who2">Du</span><span class="val">78 450 kr<span class="when">· sep -26</span></span></div>
+    <div class="row"><span class="pos">4</span><span class="who2">Förare</span><span class="val">71 800 kr<span class="when">· mar -26</span></span></div>
+    <div class="row"><span class="pos">5</span><span class="who2">Förare</span><span class="val">68 900 kr<span class="when">· okt -25</span></span></div>
+    <div class="row"><span class="pos">6</span><span class="who2">Förare</span><span class="val">65 400 kr<span class="when">· aug -25</span></span></div>
+    <div class="row"><span class="pos">7</span><span class="who2">Förare</span><span class="val">62 150 kr<span class="when">· jul -26</span></span></div>
+    <div class="row"><span class="pos">8</span><span class="who2">Förare</span><span class="val">58 700 kr<span class="when">· feb -26</span></span></div>`;
+}
+function rowsRekordDag(){
+  return `
+    <div class="row"><span class="pos">🥇</span><span class="who2">Förare</span><span class="val">9 840 kr<span class="when">· 14/6 -26</span></span></div>
+    <div class="row"><span class="pos">🥈</span><span class="who2">Förare</span><span class="val">9 210 kr<span class="when">· 3/5 -25</span></span></div>
+    <div class="row"><span class="pos">🥉</span><span class="who2">Förare</span><span class="val">8 760 kr<span class="when">· 22/9 -26</span></span></div>
+    <div class="row du"><span class="pos">4</span><span class="who2">Du</span><span class="val">8 450 kr<span class="when">· 11/8 -26</span></span></div>
+    <div class="row"><span class="pos">5</span><span class="who2">Förare</span><span class="val">8 100 kr<span class="when">· 2/3 -26</span></span></div>
+    <div class="row"><span class="pos">6</span><span class="who2">Förare</span><span class="val">7 890 kr<span class="when">· 19/10 -25</span></span></div>
+    <div class="row"><span class="pos">7</span><span class="who2">Förare</span><span class="val">7 650 kr<span class="when">· 7/7 -26</span></span></div>
+    <div class="row"><span class="pos">8</span><span class="who2">Förare</span><span class="val">7 420 kr<span class="when">· 28/4 -26</span></span></div>`;
+}
+function rowsTopp(){
+  return `
+    <div class="row"><span class="pos">🥇</span><span class="who2">Förare</span><span class="val">18 420 kr</span></div>
+    <div class="row"><span class="pos">🥈</span><span class="who2">Förare</span><span class="val">16 850 kr</span></div>
+    <div class="row du"><span class="pos">3</span><span class="who2">Du</span><span class="val">15 210 kr</span></div>
+    <div class="row"><span class="pos">4</span><span class="who2">Förare</span><span class="val">14 100 kr</span></div>
+    <div class="row"><span class="pos">5</span><span class="who2">Förare</span><span class="val">13 640 kr</span></div>
+    <div class="row"><span class="pos">6</span><span class="who2">Förare</span><span class="val">12 900 kr</span></div>
+    <div class="row"><span class="pos">7</span><span class="who2">Förare</span><span class="val">11 750 kr</span></div>
+    <div class="row"><span class="pos">8</span><span class="who2">Förare</span><span class="val">10 880 kr</span></div>`;
+}
+
+const perOn = (p) => period===p ? ' on' : '';
+const whoBlock = isRekord ? '' : `<div class="who"><div class="tab on">👤 Förare</div><div class="tab">🚕 Bil</div></div>`;
+const periodBlock = `<div class="period"><div class="p${perOn('dag')}">Dag</div><div class="p${perOn('vecka')}">Vecka</div><div class="p${perOn('manad')}">Månad</div><div class="p${perOn('ar')}">År</div></div>`;
+const dateBlock = isRekord ? '' : `<div class="date"><div class="b">‹</div><div class="d">Okt -26</div><div class="b">›</div><div class="b">»</div></div>`;
+const hint = isRekord
+  ? (period==='dag' ? 'Bästa dagen sedan jan 2025 — inte en vald dag.' : 'Bästa månaden sedan jan 2025 — inte en vald månad.')
+  : '';
+const info = isRekord
+  ? 'Samma listor i båda lägena. Andra syns utan namn. Bilnummer visas aldrig.'
+  : '21 förare med pass den här månaden. Samma listor som i Rekord (även längsta körningen m.m.).';
+const meLine = isRekord
+  ? (period==='dag' ? 'Du: plats 4 av 23 · 8 450 kr' : 'Du: plats 3 av 23 · 78 450 kr')
+  : 'Du: plats 3 av 21';
+const rows = !isRekord ? rowsTopp() : (period==='dag' ? rowsRekordDag() : rowsRekordManad());
+const foot = isRekord
+  ? 'Topplista = vald period. Rekord = bästa någonsin för den periodlängden.'
+  : 'Välj lista i rutan ovan — samma val i Rekord.';
+
+document.getElementById('phone').innerHTML = `
+  <header><h1>${heading}</h1><span style="font-size:0.8rem;opacity:.7">⋯</span></header>
+  <div class="ex">EXEMPELDATA — inte riktiga siffror. Inget är live.</div>
+  <div class="wrap">
+    <div class="mode"><button class="${isRekord?'':'on'}">Topplista</button><button class="${isRekord?'on':''}">Rekord</button></div>
+    ${whoBlock}${periodBlock}${dateBlock}
+    <div class="sel-wrap">
+      <button type="button" class="sel">${esc(chosen.t)}</button><span class="chev">▾</span>
+      <div class="menu${open?' open':''}">${menuHtml()}</div>
+    </div>
+    ${hint?`<div class="hint">${hint}</div>`:''}
+    <div class="info">${info}</div>
+    <div class="card">
+      <div class="head"><span class="title">${esc(chosen.t)}</span><span class="me">${meLine}</span></div>
+      ${rows}
+    </div>
+    <p class="foot">${foot}</p>
+  </div>`;
+</script>
+</body>
+</html>
