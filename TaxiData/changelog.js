@@ -15,8 +15,7 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  // Utkast: fyll i faktisk tid vid godkänd driftsättning.
-  { datum: '2026-11-06', id: '2026-11-06-bevakningar', tid: '', rader: [
+  { datum: '2026-11-06', id: '2026-11-06m', tid: '23:09', rader: [
     ['Nytt', 'Mina bevakningar på hemskärmen visar tåg, flyg och kalenderhändelser som en tidslinje med klockslag, nu-linje och lediga luckor. Välj dag eller växla till Lista. Tryck på ett block för att öppna det, eller på ⋯ för att sluta bevaka.'],
     ['Nytt', 'I Kalender kan du slå på Visa mina bevakningar för att se dina tåg och flyg som rader och prickar. Valet sparas på telefonen.']
   ] },
