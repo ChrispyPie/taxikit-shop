@@ -26,13 +26,14 @@
   var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
   var MONL = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
   var WD = ['Sön', 'Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör'];
-  var STATUS = { pending: 'Väntar', approved: 'Godkänd', rejected: 'Nekad' };
+  // Samma statusord överallt (arende-status.js): Ny / Pågår / Väntar på svar / Klar
+  var STATUS = { pending: 'Ny', approved: 'Klar · godkänd', rejected: 'Klar · nekad' };
   var ISTATUS = { ny: 'Ny', pagar: 'Pågår', klar: 'Klar' };
   var SUPPLY = [['kvitto', '🧾', 'Kvittorullar'], ['spolar', '💧', 'Spolarvätska'], ['rengoring', '🧽', 'Rengöring'], ['annat', '✏️', 'Annat']];
   var MTYPES = [['service', '🔧', 'Service'], ['dack_sommar', '☀️', 'Däck sommar'], ['dack_vinter', '❄️', 'Däck vinter'],
     ['bromsar', '🛑', 'Bromsar'], ['besiktning', '📋', 'Besiktning'], ['annat', '✏️', 'Annat']];
   var TABS = [['fel', '🚨', 'Fel'], ['behov', '🧴', 'Behövs'], ['underhall', '🗓️', 'Underhåll'], ['uppg', '📋', 'Uppgifter'], ['timmar', '⏱️', 'Timmar']];
-  var TSTATUS = { ny: 'Ny', bokad: 'Bokad', klar: 'Klar' };
+  var TSTATUS = { ny: 'Väntar på svar', bokad: 'Pågår · tid bokad', klar: 'Klar' };
   var NTYPES = [['bil_stop', '🛑 Bilen står'], ['bil_fault', '⚠️ Nytt fel'], ['bil_supply', '🧴 Något behövs'], ['bil_suggest', '💡 Förslag på underhåll'],
     ['bil_maint', '🔧 Underhåll snart/försenat'], ['bil_task_reply', '📅 Förare har bokat tid/svarat'], ['bil_task_done', '✅ Uppgift klar']];
   var ERR = {
@@ -1135,7 +1136,7 @@
     list.forEach(function (x) {
       var editing = st.form && st.form.id === x.id, q = x.status === 'pending' && x.waiting_on === 'driver', ms = x.msgs || [];
       h += '<div class="vk-card vk-item' + (editing ? ' editing' : '') + (q ? ' q' : '') + '"><div class="vk-ihead"><span class="vk-when">' + esc(span(x.start, x.end)) + '</span>' +
-        (q ? '<span class="vk-chip q">Fråga till dig</span>' : '<span class="vk-chip ' + x.status + '">' + (x.status === 'pending' && x.waiting_on === 'owner' ? 'Svar skickat' : STATUS[x.status]) + '</span>') + '</div>' +
+        (q ? '<span class="vk-chip q">Väntar på svar · fråga till dig</span>' : '<span class="vk-chip ' + x.status + '">' + (x.status === 'pending' && x.waiting_on === 'owner' ? 'Pågår · svar skickat' : STATUS[x.status]) + '</span>') + '</div>' +
         '<div class="vk-imeta">' + esc(x.car) + ' · ' + dur(x.minutes) + ' · ' + kr(x.kr) + (x.status === 'pending' ? ' (preliminärt)' : '') + '</div>' +
         (x.comment ? '<div class="vk-icom">💬 ' + esc(x.comment) + '</div>' : '') +
         (x.issue_id ? '<div class="vk-icom">🔗 ' + esc(issueLabel(x.issue_id)) + '</div>' : '') +

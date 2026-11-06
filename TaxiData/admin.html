@@ -160,9 +160,11 @@
 
   <script src="serverstatus.js?v=20261026tm1"></script>
   <script src="demo.js?v=20261029j"></script>
-  <script src="verkstad-admin.js?v=20261030sj"></script>
+  <script src="verkstad-admin.js?v=20261106ik1"></script>
   <script src="profilbild.js?v=zdm1"></script>
-  <script src="onskemal-admin.js?v=20261029k"></script>
+  <script src="onskemal-admin.js?v=20261106ik1"></script>
+  <script src="arende-status.js?v=20261106ik2"></script>
+  <script src="arenden-admin.js?v=20261106ik2"></script>
   <script>
     const APP_VERSION = '1.0.26';
     console.log('Admin version:', APP_VERSION);
@@ -172,6 +174,7 @@
     // serverStatus: true = vyn visar serverstatus-lampan (vyer vars data hämtas från servern).
     // Planerat: en kommande vy 'Topplistor' beror också på serverdatan – lägg då till serverStatus: true på den.
     const menu = [
+      { id: 'arenden', icon: '📥', label: 'Ärenden' },   // gemensam ärendelista (arenden-admin.js), 2026-11-06
       { id: 'akeridata', icon: '📊', label: 'Åkeridata', serverStatus: true },
       { id: 'bilar', icon: '🚕', label: 'Bilar' },
       { id: 'verkstad', icon: '🛠️', label: 'Anmälningar & ärenden' },
@@ -233,7 +236,7 @@
       return isOwner() || AKERI_EXTRA_ROLES.includes(getMyCategory());
     }
 
-    const COMPANY_VIEWS = ['akeridata', 'bilar', 'verkstad', 'onskemal'];   // zonguide flyttad till sadmin.html (bara S admin). onskemal: ägaren skriver till Christian
+    const COMPANY_VIEWS = ['arenden', 'akeridata', 'bilar', 'verkstad', 'onskemal'];   // zonguide flyttad till sadmin.html (bara S admin). onskemal: ägaren skriver till Christian
 
     function isSuperAdmin() {
       return getMyCategory() === 'superadmin';
@@ -434,9 +437,14 @@
       if (location.hash === '#bilar' && canSeeAkeridata()) { history.replaceState(null, '', location.pathname); openMenu('bilar'); return; }
       // admin.html#verkstad öppnar Bil & verkstad (verkstadstimmar) direkt (länk från förarappen)
       if (location.hash === '#verkstad' && canSeeAkeridata()) { history.replaceState(null, '', location.pathname); openMenu('verkstad'); return; }
+      // admin.html#arende=issue:12 öppnar ett ärende i Ärenden (länk från klockan i förarappen)
+      const arm = /^#arende=(issue|wh|task|sjuk|wish)(?::|%3A)(\d+)$/.exec(location.hash);
+      if (arm && canSeeAkeridata()) { history.replaceState(null, '', location.pathname); ARENDEN_ADMIN.openCase(arm[1], arm[2]); openMenu('arenden'); return; }
       render();
       // Antal verkstadstider som väntar på beslut visas på rutan
       if (canSeeAkeridata()) VERKSTAD_ADMIN.count().then(() => { if (!path.length) render(); });
+      // Antal ärenden som behöver svar visas på Ärenden-rutan
+      if (canSeeAkeridata()) ARENDEN_ADMIN.count().then(() => { if (!path.length) render(); });
     }
 
     function saveState() {
@@ -568,7 +576,7 @@
         content.innerHTML = `<div class="grid">${menu.filter(m => !COMPANY_VIEWS.includes(m.id) || canSeeAkeridata()).map(m => `
           <div class="icon" onclick="${m.id === 'forarapp' ? "location.href='index.html'" : "openMenu('" + m.id + "')"}">
             <div class="emoji">${m.icon}</div>
-            <div class="label">${m.label}</div>${m.id === 'verkstad' ? VERKSTAD_ADMIN.badge() : ''}
+            <div class="label">${m.label}</div>${m.id === 'verkstad' ? VERKSTAD_ADMIN.badge() : ''}${m.id === 'arenden' && window.ARENDEN_ADMIN ? ARENDEN_ADMIN.badge() : ''}
           </div>
         `).join('')}</div>`;
       } else if (path[0].id === 'akeridata') {
@@ -580,6 +588,10 @@
         if (!canSeeAkeridata()) content.innerHTML = '<div class="section"><p style="padding:16px;">Ingen behörighet</p></div>';
         else if (editingCar) renderEditCar(content);
         else renderCars(content);
+      } else if (path[0].id === 'arenden') {
+        title.textContent = 'Ärenden';
+        if (!canSeeAkeridata()) content.innerHTML = '<div class="section"><p style="padding:16px;">Ingen behörighet</p></div>';
+        else ARENDEN_ADMIN.render(content);
       } else if (path[0].id === 'verkstad') {
         title.textContent = 'Anmälningar & ärenden';
         if (!canSeeAkeridata()) content.innerHTML = '<div class="section"><p style="padding:16px;">Ingen behörighet</p></div>';
@@ -2177,11 +2189,13 @@ ${renderBildtypPicker(c)}
       selectedDay = null;
       selectedCar = null;
       if (id === 'verkstad') { VERKSTAD_ADMIN.load(); return; }
+      if (id === 'arenden') { render(); if (canSeeAkeridata()) ARENDEN_ADMIN.load(); return; }
       if (id === 'onskemal') { if (canSeeAkeridata()) { ONSKEMAL_ADMIN.load(); return; } }
       render();
     }
 
     function goBack() {
+      if (path.length && path[0].id === 'arenden' && window.ARENDEN_ADMIN && ARENDEN_ADMIN.back()) return;
       if (selectedCar) {
         selectedCar = null;
       } else if (selectedDay) {

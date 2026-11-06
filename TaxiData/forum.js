@@ -9,7 +9,8 @@
   var COMPLAINT_SYSTEM = 'Roxx';
   var RULE_KEY = 'forum_rule_hidden';
   var RULES_VERSION = 1;
-  var STATUS = [['ny', 'Ny'], ['pagar', 'Pågår'], ['planerad', 'Planerad'], ['klar', 'Klar']];
+  // Samma statusord överallt (arende-status.js): Ny / Pågår / Väntar på svar / Klar
+  var STATUS = [['ny', 'Ny'], ['pagar', 'Pågår'], ['planerad', 'Pågår · planerad'], ['klar', 'Klar']];
   var ERR = {
     via_master: 'Du är inloggad med huvudlösenordet. Bara föraren själv kan skriva i forumet.',
     demo_read_only: 'Det här är ett demokonto. Du kan titta runt men inte ändra något.',

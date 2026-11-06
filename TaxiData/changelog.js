@@ -15,6 +15,15 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-06', id: '2026-11-06c', tid: '19:39', rader: [
+    ['Nytt', 'Inkorg: tryck på profilikonen uppe till höger och välj Inkorg. Där ser du dina ärenden, till exempel felanmälan, verkstadstid och uppgifter, och svaren på dem. Ärenden där någon väntar på ditt svar är markerade med "Behöver ditt svar".'],
+    ['Nytt', 'Klockan visar en kort notis när ägaren svarar på ett av dina ärenden. Tryck på den så öppnas svaret i Inkorgen. När du har läst svaret försvinner både notisen och pricken.'],
+    ['Förbättrat', 'Samma statusord överallt: Ny, Pågår, Väntar på svar och Klar. Klara ärenden är ihopfällda under "Visa klara", så att listan blir kortare. Inget tas bort.'],
+    ['Nytt', 'Admin › Ärenden: en gemensam lista med alla ärenden i åkeriet. Nya och olösta ligger först. Tryck på ett ärende för att läsa det, svara och ändra status.', 'agare']
+  ] },
+  { datum: '2026-11-06', id: '2026-11-06b', tid: '18:48', rader: [
+    ['Nytt', 'Profil: menyn Profil öppnar en riktig profilsida. Där syns bil, forumstatistik, galleri och gästbok. Tryck på Redigera profil för frivilliga fält (hemmazon, favoritzon, pass, språk, bio, hobbyer, behörigheter, Uber/Bolt, tipset, startår) och välj om varje fält syns för alla eller bara för ditt åkeri. Personuppgifter och lösenord ligger bakom Redigera profil. Antal trådar och svar går att trycka på. Skicka meddelande kommer snart.']
+  ] },
   { datum: '2026-11-06', id: '2026-11-06a', tid: '17:35', rader: [
     ['Nytt', 'Forum: klassisk layout med sektioner (Hjälp & guider, Frågor & svar, Allmänt, Önskemål & förslag, Buggar, Mitt åkeri, Admin). Önskemål och Buggar har status Ny / Pågår / Planerad / Klar. I Frågor & svar kan du markera svar som Löst.']
   ] },
