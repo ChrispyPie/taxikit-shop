@@ -1,6 +1,7 @@
-# Inkorg v4 – utkast, inte live
+# Inkorg v4 – godkänd driftsättning 2026-11-07
 
-PR #85, `feature/inkorg-steg1`, separat worktree. **Ingen merge och inga produktionsmigreringar. Christian måste säga kör.**
+PR #85, `feature/inkorg-steg1`, separat worktree. **Christian sade kör 2026-11-07 16:17 (Stockholm/CET).**
+Produktionsmigreringarna applicerades och rollverifierades före merge. Merge/deploy och exakt undo dokumenteras i [GO-LIVE-20261107.md](GO-LIVE-20261107.md).
 Historisk beskrivning: [6 november](README-20261106.md). Driftsättning/återställning: [UNDO.md](UNDO.md).
 
 ## Byggt
@@ -82,7 +83,7 @@ Tio mobilbilder i `/workspace/taxidata-cleanup/screenshots/inkorg-v4/`, inte inc
 `10-kalenderval.png`, `06-admin-bokad-tid.png`, `08-avboj-orsak.png`, `02-meddelande-formular.png`.
 Browserproven kör en ny isolerad headless-profil med verkliga lokala HTML/JS-filer, mockade RPC:er och blockerad extern trafik, inte en riktig förarinloggning.
 
-## Avgränsningar / kvar före live
+## Avgränsningar / verifieringsgränser
 
 - Godkännande, produktions-/stagingmigrering och test med riktiga testroller återstår. PGlite + mockade browserprov är inte verifiering av en driftsatt Supabase/PostgREST/Edge-miljö.
 - Bokningar och nya meddelanden har olästa-markering i Inkorg (uppdateras vid öppning och pollning), men inga nya mejl-/pushleveranser byggs här.
@@ -93,7 +94,7 @@ Browserproven kör en ny isolerad headless-profil med verkliga lokala HTML/JS-fi
 
 ## V4-migrationsnotering
 
-Den **oapplicerade** v2-migrationen har justerats, inte applicerats eller skrivits över i databasen. Samma undo stänger hela nya RPC-flödet och bevarar alla rader och meddelanden.
+V2-migrationen justerades före första applicering och applicerades vid godkänd driftsättning 2026-11-07. Inga äldre produktionsmigrationer skrevs över. Samma undo stänger hela nya RPC-flödet och bevarar alla rader och meddelanden.
 Typ används som rubrik på servern. `cars` returnerar endast ID och bilnummer för sessionens åkeri. Den privata `resolve_car`-hjälparen nekar klienternas direktanrop och verifierar bilens company_id.
 Både Meddelande och Bokad tid kräver `car_choice`: ett ID från åkeriets bilregister eller exakt `none` (= Nej). Tomt/ogiltigt val och annan åkeris bil nekas. Inskickade fria bilnummer ignoreras; numret härleds från den verifierade bilen.
 Nya trådar/bokningar sparar car_id och bilnummer som historisk text. Om själva bilregisterposten tas bort senare sätts bara länken till null, medan historikens bilnummer bevaras. Inga sådana rader har ändrats nu.

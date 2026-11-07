@@ -4,13 +4,14 @@ Den tidigare versionens återställningsnotering är bevarad i [UNDO-20261106.md
 
 ## Status
 
-Utkast i PR. **Inget i denna ändring är applicerat i produktionsdatabasen eller mergat.**
+**Kör godkänt av Christian 2026-11-07 16:17 (Stockholm/CET).** Produktionsmigrationerna är applicerade och rollverifierade. Merge/deploy och kopierbara revert-kommandon dokumenteras i [GO-LIVE-20261107.md](GO-LIVE-20261107.md).
+Ny go-live-backup: `backup/pre-inkorg-merge-20261107` vid `5f0fed3c` (dåvarande origin/main).
 Backupbranch: `backup/pre-inkorg-20261107` vid `96bd944977d23341ade4b41d31571089cfb82c4e`.
 Extra backup före v2: `backup/pre-inkorg-v2-20261107` vid `e7391c128530fb6fa62563998f5c7cbbe5c773bd`.
 Ingen force-push behövs. Inga rader, filer i lagring eller historiska meddelanden raderas av migreringen.
 Bilärende 21 har inte lästs eller ändrats.
 
-## Före ett eventuellt kör
+## Driftsättningsordning (godkänd 2026-11-07)
 
 1. Christian godkänner den större ändringen och granskar särskilt adminbehörigheterna.
 2. Ta ny backup av funktionsdefinitionerna om de ändrats sedan detta utkast skapades.
@@ -90,11 +91,11 @@ Testa efter kör med riktiga testkonton utan att skriva personuppgifter i loggar
 ägarens adminlänk, nekat annat åkeri, ingen privat förare-till-förare-sändning även från gammal cache och telefonval över åkeri-/bolagsgräns.
 Verifiera att `inbox_private` inte är exponerat i Data API och att klientroller saknar tabell-/sekvensgrants. Kör Supabase advisors på staging efter applicering.
 Gamla klienter kan inte skapa/svara på privata direktmeddelanden efter grantändringen; cache-bustar kräver omladdning.
-Ingen tjänst, Edge-funktion, kö eller notifieringsdata raderas eller deployas av detta utkast.
+Ingen tjänst, Edge-funktion, kö eller notifieringsdata raderas eller deployas av dessa migrationer.
 
-## V4 inom det fortfarande oapplicerade utkastet
+## V4 applicerad vid godkänt kör
 
-`20261107135140_inkorg_v2_bookings_contacts.sql` är uppdaterad före första applicering. Ingen produktionsmigrering är körd.
+`20261107135140_inkorg_v2_bookings_contacts.sql` uppdaterades före första applicering. Båda produktionsmigrationerna är nu körda, i ordning. Verktygets historikversioner: `20261107152056` (steg1) och `20261107152102` (v2, inklusive v3/v4).
 Den har nu fleet-validerad `car_choice` (ID från åkeriets bilar eller `none` för Nej), car_id-länkar med bevarade bilnummer i historiken, samt vanliga trådmeddelanden för avböjsorsaken (högst 2000 tecken).
 Tidigare fria bilnummer/`car_unspecified` ersätts av detta kontrakt. En äldre cachead v2/v3-klient måste laddas om och kan inte kringgå bilkontrollen genom att skicka ett fritt nummer.
 Undo-filen med samma versionsnummer gäller fortfarande och återkallar även hjälparens execute-rättigheter; alla nya/äldre rader och nya länkkolumner lämnas kvar, med RLS och utan klientgrants.
