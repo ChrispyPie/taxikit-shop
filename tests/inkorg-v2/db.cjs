@@ -10,7 +10,8 @@ const deny=(who,action,data={},code)=>denied('select mailbox_v2($1,$2,$3::jsonb)
 (async()=>{
  await sql('tests/inkorg/fixtures.sql');await sql('tests/inkorg/sjuk-report-access.sql');await sql('tests/inkorg/certificate-access.sql');
  await sql('supabase/migrations/20261106f_inkorg_arenden.sql');await sql('supabase/migrations/20261107074022_inkorg_steg1.sql');
- await db.exec(`alter table drivers add column phone text;
+ await db.exec(`alter table drivers add column phone text;alter table cars add column company_id text;
+ insert into cars(id,bilnummer,company_id) values(1,'25','one'),(2,'7','one'),(3,'999','two');
  create function public.save_my_profile(p_token text,p_data jsonb) returns void language plpgsql as $$begin if p_data->>'phone'='invalid' then raise exception 'invalid_phone' using errcode='22023';end if;update public.drivers set phone=p_data->>'phone' where id=p_token;end$$;
  create function private.forum_name(id text) returns text language sql as $$select 'Test'::text$$;
  insert into drivers(id,first_name,last_name,category,company,phone) values
@@ -49,22 +50,23 @@ const deny=(who,action,data={},code)=>denied('select mailbox_v2($1,$2,$3::jsonb)
  await deny('driver','contacts_save',{visibility:'all'},'22023');
  await deny('invalid','contacts_get',{},'28000');
  await deny('driver','recipients',{admin:true},'42501');
- let t=await call('driver','create',{subject:'Testärende',body:'Syntetiskt bilfel',car_number:'25',driver_id:'peer'});
- let got=await call('owner','get',{admin:true,thread_id:t.id});ok(got.driver_id==='driver');ok(got.messages.length===1);
+ let t=await call('driver','create',{subject:'Testärende',body:'Syntetiskt bilfel',car_choice:'1',car_number:'999',driver_id:'peer'});
+ let got=await call('owner','get',{admin:true,thread_id:t.id});ok(got.driver_id==='driver');ok(got.car_number==='25');ok(got.messages.length===1);
  await deny('peer','get',{thread_id:t.id},'P0002');await deny('otheradmin','get',{admin:true,thread_id:t.id},'P0002');
  await deny('peer','reply',{thread_id:t.id,body:'Intrång'},'P0002');
  ok((await call('driver','list')).length===1);ok((await call('owner','list')).length===0);ok((await call('admin','list',{admin:true})).length===1);
  await call('admin','reply',{admin:true,thread_id:t.id,body:'Testsvaret'});ok((await call('driver','get',{thread_id:t.id})).messages.length===2);
- for(const car of ['1234','a','-1'])await deny('driver','create',{subject:'X',body:'X',car_number:car},'22023');
+ for(const car of ['', '3','9999','-1'])await deny('driver','create',{subject:'X',body:'X',car_choice:car},'22023');
+ ok((await call('driver','cars')).length===2);ok((await call('samebolag','cars')).length===1);ok((await call('driver','get',{thread_id:t.id})).car_id===1);
  ok((await call('peer','timeline',{driver_id:'driver'})).length===0);
  const date=new Date(Date.now()+86400000*2).toISOString().slice(0,10);
- let book={thread_id:t.id,date,time:'12:30',kind:'service',title:'Testbokning',car_number:'25'};
+ let book={thread_id:t.id,date,time:'12:30',kind:'service',title:'Testbokning',car_choice:'1'};
  const threadsBefore=await scalar('select count(*) from inbox_private.threads');
- for(const extra of [{car_number:''},{car_number:'',car_unspecified:false},{car_number:'',car_unspecified:'true'},{car_number:'25',car_unspecified:true}])await deny('driver','book',Object.assign({},book,extra),'22023');
+ for(const extra of [{car_choice:''},{car_choice:null},{car_choice:'3'},{car_choice:'9999'}])await deny('driver','book',Object.assign({},book,extra),'22023');
  ok(await scalar('select count(*) from inbox_private.threads')===threadsBefore);
  await deny('driver','book',Object.assign({},book,{body:'x'.repeat(2001)}),'22023');
- await call('driver','book',Object.assign({},book,{kind:'Serviceförslag med en enda rubrik',title:'Ignorerad gammal rubrik',car_number:'',car_unspecified:true,body:'Syntetiskt meddelande i bokningen'}));
- let v3=(await call('driver','get',{thread_id:t.id}));ok(v3.bookings[0].title===v3.bookings[0].kind);ok(v3.bookings[0].car_number===null);ok(v3.messages.some(m=>m.body==='Syntetiskt meddelande i bokningen'&&m.role==='driver'));
+ await call('driver','book',Object.assign({},book,{kind:'Serviceförslag med en enda rubrik',title:'Ignorerad gammal rubrik',car_choice:'none',body:'Syntetiskt meddelande i bokningen'}));
+ let v3=(await call('driver','get',{thread_id:t.id}));ok(v3.bookings[0].title===v3.bookings[0].kind);ok(v3.bookings[0].car_number===null);ok(v3.bookings[0].car_id===null);ok(v3.messages.some(m=>m.body==='Syntetiskt meddelande i bokningen'&&m.role==='driver'));
  await call('driver','book',book);let thread=await call('admin','get',{admin:true,thread_id:t.id}),b=thread.bookings[thread.bookings.length-1];ok(b.status==='pending_admin');
  ok((await call('driver','timeline')).find(x=>x.id===b.id).status==='pending_admin');
  await deny('driver','decide',{booking_id:b.id,decision:'accepted'},'42501');
@@ -72,20 +74,23 @@ const deny=(who,action,data={},code)=>denied('select mailbox_v2($1,$2,$3::jsonb)
  await call('admin','decide',{admin:true,booking_id:b.id,decision:'accepted'});
  ok((await call('driver','timeline')).find(x=>x.id===b.id).status==='accepted');
  await deny('admin','decide',{admin:true,booking_id:b.id,decision:'declined',reason:'Test'},'42501');
- let booked=await call('admin','book',{admin:true,driver_id:'driver',car_unspecified:true,date,time:'14:30',kind:'besiktning',title:'Adminbokning',body:'Syntetiskt meddelande från admin'});
+ let booked=await call('admin','book',{admin:true,driver_id:'driver',car_choice:'none',date,time:'14:30',kind:'besiktning',title:'Adminbokning',body:'Syntetiskt meddelande från admin'});
  b=(await call('driver','get',{thread_id:booked.id})).bookings[0];ok((await call('driver','get',{thread_id:booked.id})).messages.some(m=>m.role==='admin'&&m.body==='Syntetiskt meddelande från admin'));ok(b.status==='pending_driver');ok((await call('driver','get',{thread_id:booked.id})).subject==='besiktning');
  await deny('admin','decide',{admin:true,booking_id:b.id,decision:'accepted'},'42501');
- for(const reason of ['', '   ', '\t\n', 'x'.repeat(501)])await deny('driver','decide',{booking_id:b.id,decision:'declined',reason},'22023');
+ for(const reason of ['', '   ', '\t\n', 'x'.repeat(2001)])await deny('driver','decide',{booking_id:b.id,decision:'declined',reason},'22023');
  await call('driver','decide',{booking_id:b.id,decision:'declined',reason:'Tiden passar inte (test)'});
+ ok((await call('driver','get',{thread_id:booked.id})).messages.some(m=>m.body==='Tiden passar inte (test)'&&m.role==='driver'));
  ok(!(await call('driver','timeline')).some(x=>x.id===b.id));ok((await call('admin','get',{admin:true,thread_id:booked.id})).bookings[0].reason.length>0);
  for(const data of [{date:'2000-01-01',time:'12:00'},{date,time:'25:00'},{date:'bad',time:'12:00'},{date:'2099-01-01',time:'12:00'},{date:'2027-02-30',time:'12:00'},{date:'2027-03-28',time:'02:30'}])await deny('driver','book',Object.assign({},book,data));
  await deny('admin','book',{admin:true,driver_id:'samebolag',date,time:'12:00',kind:'service',title:'Fel åkeri'},'22023');
- const ownbook=await call('admin','book',{admin:true,driver_id:'owner',car_number:'25',date,time:'16:30',kind:'service',title:'Egen tid'});
+ await call('driver','book',book);let longBooking=(await call('admin','get',{admin:true,thread_id:t.id})).bookings.at(-1);await call('admin','decide',{admin:true,booking_id:longBooking.id,decision:'declined',reason:'x'.repeat(2000)});
+ ok((await call('driver','get',{thread_id:t.id})).messages.at(-1).body.length===2000);
+ const ownbook=await call('admin','book',{admin:true,driver_id:'owner',car_choice:'1',date,time:'16:30',kind:'service',title:'Egen tid'});
  let ownthread=await call('owner','get',{admin:true,thread_id:ownbook.id});ok(ownthread.is_driver);await call('owner','decide',{admin:true,booking_id:ownthread.bookings[0].id,decision:'accepted'});
  ok((await call('owner','list')).length===0);
  // Legacy participants can read, but neither public nor underlying DM send RPC can be called by clients.
  await db.exec('set role anon');ok((await scalar('select conversation_get($1,$2)',['driver',old])).id===old);
- await denied(`select conversation_reply('driver',$1,'Nytt')`,[old],'42501');await denied(`select messaging_private.message_send('driver','peer','Nytt')`,[],'42501');
+ await denied(`select conversation_reply('driver',$1,'Nytt')`,[old],'42501');await denied(`select inbox_private.resolve_car('one','1')`,[],'42501');await denied(`select messaging_private.message_send('driver','peer','Nytt')`,[],'42501');
  for(const table of ['threads','messages','bookings','contacts','operator_companies','bolag'])await denied('select * from inbox_private.'+table,[],'42501');
  ok((await call('driver','list')).length===2);await db.exec('reset role;set role authenticated');
  await denied('select * from inbox_private.contacts',[],'42501');await denied(`select conversation_create('driver','peer','X','X')`,[],'42501');ok((await call('driver','list')).length===2);await db.exec('reset role');

@@ -92,6 +92,11 @@ Verifiera att `inbox_private` inte är exponerat i Data API och att klientroller
 Gamla klienter kan inte skapa/svara på privata direktmeddelanden efter grantändringen; cache-bustar kräver omladdning.
 Ingen tjänst, Edge-funktion, kö eller notifieringsdata raderas eller deployas av detta utkast.
 
-## V3 inom det fortfarande oapplicerade utkastet
+## V4 inom det fortfarande oapplicerade utkastet
 
-`20261107135140_inkorg_v2_bookings_contacts.sql` har uppdaterats före första applicering: gemensam Typ/rubrik, valfritt bokningsmeddelande och obligatorisk bil eller aktivt Ej angivet. Ingen ny produktionsmigrering har körts. Undo-filen med samma versionsnummer gäller fortfarande: RPC-grants återkallas, alla nya/äldre rader bevaras. Synlighetsvärdena owner/company/bolag ändras inte av de nya etiketterna Ägare / Åkeriet / Alla (inom bolagsnamnet).
+`20261107135140_inkorg_v2_bookings_contacts.sql` är uppdaterad före första applicering. Ingen produktionsmigrering är körd.
+Den har nu fleet-validerad `car_choice` (ID från åkeriets bilar eller `none` för Nej), car_id-länkar med bevarade bilnummer i historiken, samt vanliga trådmeddelanden för avböjsorsaken (högst 2000 tecken).
+Tidigare fria bilnummer/`car_unspecified` ersätts av detta kontrakt. En äldre cachead v2/v3-klient måste laddas om och kan inte kringgå bilkontrollen genom att skicka ett fritt nummer.
+Undo-filen med samma versionsnummer gäller fortfarande och återkallar även hjälparens execute-rättigheter; alla nya/äldre rader och nya länkkolumner lämnas kvar, med RLS och utan klientgrants.
+Om en bilregisterpost tas bort i framtiden får FK-länken bli null men historikens bilnummer behålls. Detta utkast tar inte bort eller ändrar några bilrader.
+Synlighetsvärdena owner/company/bolag är fortfarande oförändrade.

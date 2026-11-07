@@ -6,7 +6,7 @@ grant usage on schema inbox_private to anon, authenticated;
 create table if not exists inbox_private.threads (
  id bigint generated always as identity primary key, company_id text not null, driver_id text not null references public.drivers(id),
  subject text not null check(char_length(btrim(subject)) between 1 and 120),
- car_number text check(car_number ~ '^[0-9]{1,3}$'), created_by text not null references public.drivers(id),
+ car_number text check(char_length(car_number) between 1 and 80), car_id bigint references public.cars(id) on delete set null, created_by text not null references public.drivers(id),
  created_at timestamptz not null default clock_timestamp(), updated_at timestamptz not null default clock_timestamp()
 );
 create table if not exists inbox_private.messages (
@@ -21,10 +21,10 @@ create table if not exists inbox_private.reads (
 create table if not exists inbox_private.bookings (
  id bigint generated always as identity primary key, thread_id bigint not null references inbox_private.threads(id),
  kind text not null check(char_length(btrim(kind)) between 1 and 120), title text not null check(char_length(btrim(title)) between 1 and 120),
- starts_at timestamptz not null, car_number text check(car_number ~ '^[0-9]{1,3}$'),
+ starts_at timestamptz not null, car_number text check(char_length(car_number) between 1 and 80), car_id bigint references public.cars(id) on delete set null,
  status text not null check(status in ('pending_driver','pending_admin','accepted','declined')),
  proposer_role text not null check(proposer_role in ('driver','admin')), proposed_by text not null references public.drivers(id),
- created_at timestamptz not null default clock_timestamp(), decided_by text references public.drivers(id), decided_at timestamptz, reason text check(char_length(reason)<=500)
+ created_at timestamptz not null default clock_timestamp(), decided_by text references public.drivers(id), decided_at timestamptz, reason text check(char_length(reason)<=2000)
 );
 -- Explicit taxi-company mapping, not 'all app users'. Existing åkerier are Taxi Göteborg.
 -- New åkerier must be assigned explicitly; absent mappings never grant cross-åkeri contact access.
@@ -54,11 +54,24 @@ alter table inbox_private.operator_companies enable row level security;
 revoke all on all tables in schema inbox_private from public,anon,authenticated;
 revoke all on all sequences in schema inbox_private from public,anon,authenticated;
 
+-- Resolve the active car choice against the actor's fleet, never a free-text number.
+create or replace function inbox_private.resolve_car(p_company text,p_choice text,out car_id bigint,out car_number text)
+returns record language plpgsql security invoker set search_path='' as $$
+begin
+ if p_choice='none' then car_id:=null;car_number:=null;return;end if;
+ if coalesce(p_choice,'') !~ '^[0-9]{1,18}$' then raise exception 'need_car_choice' using errcode='22023'; end if;
+ select c.id,btrim(c.bilnummer) into car_id,car_number from public.cars c where c.id=p_choice::bigint and c.company_id=p_company and char_length(btrim(c.bilnummer)) between 1 and 80;
+ if not found then raise exception 'bad_car_choice' using errcode='22023';end if;
+end $$;
+revoke all on function inbox_private.resolve_car(text,text) from public,anon,authenticated;
+create index if not exists mb_threads_car on inbox_private.threads(car_id);
+create index if not exists mb_bookings_car on inbox_private.bookings(car_id);
+
 -- The only client entry point in this unexposed schema. No authorization from user_metadata.
 create or replace function inbox_private.dispatch(p_token text,p_action text,p_data jsonb default '{}'::jsonb)
 returns jsonb language plpgsql security definer set search_path='' as $$
 declare a record; t inbox_private.threads; b inbox_private.bookings; v_admin boolean:=coalesce((p_data->>'admin')::boolean,false);
- v_driver text; v_body text; v_title text; v_car text; v_kind text; v_role text; v_at timestamptz; v_result jsonb;
+ v_car_id bigint; v_driver text; v_body text; v_title text; v_car text; v_kind text; v_role text; v_at timestamptz; v_result jsonb;
  v_phone text; v_visibility text; v_cars text[]; v_same boolean; v_same_bolag boolean; v_company_label text; v_contact inbox_private.contacts; v_id bigint;
 begin
  select * into a from private.bil_actor(p_token);
@@ -94,6 +107,8 @@ begin
    -- Existing required contact validation and the visibility change commit atomically.
    if p_action='profile_save' then perform public.save_my_profile(p_token,p_data->'profile'); end if;
    return inbox_private.dispatch(p_token,'contacts_get','{}');
+ elsif p_action='cars' then
+   return coalesce((select jsonb_agg(jsonb_build_object('id',c.id,'number',btrim(c.bilnummer)) order by c.bilnummer,c.id) from public.cars c where c.company_id=a.company_id and char_length(btrim(c.bilnummer)) between 1 and 80),'[]');
  elsif p_action='recipients' then
    if not v_admin then raise exception 'forbidden' using errcode='42501'; end if;
    return coalesce((select jsonb_agg(jsonb_build_object('id',d.id,'name',private.bil_driver_name(d.id)) order by d.id)
@@ -114,11 +129,10 @@ begin
    v_driver:=case when v_admin then p_data->>'driver_id' else a.driver_id end;
    if not exists(select 1 from public.drivers d where d.id=v_driver and d.activated and private.actor_company(d.id)=a.company_id and d.category in ('standard','semester','admin','agare','superadmin')) then raise exception 'bad_recipient' using errcode='22023'; end if;
    v_title:=case when p_action='book' then btrim(coalesce(p_data->>'kind','')) else btrim(coalesce(p_data->>'subject','')) end;
-   v_car:=nullif(btrim(p_data->>'car_number'),'');
+   select chosen.car_id,chosen.car_number into v_car_id,v_car from inbox_private.resolve_car(a.company_id,p_data->>'car_choice') chosen;
    if char_length(v_title) not between 1 and 120 then raise exception 'bad_subject' using errcode='22023'; end if;
-   if v_car is not null and v_car !~ '^[0-9]{1,3}$' then raise exception 'bad_car_number' using errcode='22023'; end if;
    if (select count(*) from inbox_private.threads where created_by=a.driver_id and created_at>clock_timestamp()-interval '1 day')>=100 then raise exception 'too_many' using errcode='54000'; end if;
-   insert into inbox_private.threads(company_id,driver_id,subject,car_number,created_by) values(a.company_id,v_driver,v_title,v_car,a.driver_id) returning * into t;
+   insert into inbox_private.threads(company_id,driver_id,subject,car_number,car_id,created_by) values(a.company_id,v_driver,v_title,v_car,v_car_id,a.driver_id) returning * into t;
    if p_action='create' then
      v_body:=btrim(coalesce(p_data->>'body',''));
      if char_length(v_body) not between 1 and 2000 then raise exception 'bad_text' using errcode='22023'; end if;
@@ -136,7 +150,7 @@ begin
  end if;
  if p_action='get' then
    insert into inbox_private.reads(thread_id,driver_id,seen_at) values(t.id,a.driver_id,clock_timestamp()) on conflict(thread_id,driver_id) do update set seen_at=excluded.seen_at;
-   return jsonb_build_object('id',t.id,'subject',t.subject,'car_number',t.car_number,'driver_id',case when v_admin then t.driver_id end,'is_driver',t.driver_id=a.driver_id,
+   return jsonb_build_object('id',t.id,'subject',t.subject,'car_number',t.car_number,'car_id',t.car_id,'driver_id',case when v_admin then t.driver_id end,'is_driver',t.driver_id=a.driver_id,
      'messages',coalesce((select jsonb_agg(jsonb_build_object('id',m.id,'body',m.body,'role',m.sender_role,'mine',m.sender_id=a.driver_id,'at',m.created_at) order by m.created_at,m.id) from inbox_private.messages m where m.thread_id=t.id),'[]'),
      'bookings',coalesce((select jsonb_agg(to_jsonb(bk) - 'proposed_by' - 'decided_by' order by bk.created_at,bk.id) from inbox_private.bookings bk where bk.thread_id=t.id),'[]'));
  elsif p_action='reply' then
@@ -145,20 +159,19 @@ begin
    if (select count(*) from inbox_private.messages where sender_id=a.driver_id and created_at>clock_timestamp()-interval '1 day')>=200 then raise exception 'too_many' using errcode='54000'; end if;
    insert into inbox_private.messages(thread_id,sender_id,sender_role,body) values(t.id,a.driver_id,v_role,v_body);
  elsif p_action='book' then
-   v_kind:=btrim(coalesce(p_data->>'kind',''));v_title:=v_kind;v_car:=nullif(btrim(p_data->>'car_number'),'');
-   if (v_car is null and coalesce(p_data->'car_unspecified','false'::jsonb)<>'true'::jsonb) or (v_car is not null and p_data->'car_unspecified'='true'::jsonb) then raise exception 'need_car_number' using errcode='22023'; end if;
+   v_kind:=btrim(coalesce(p_data->>'kind',''));v_title:=v_kind;
+   select chosen.car_id,chosen.car_number into v_car_id,v_car from inbox_private.resolve_car(a.company_id,p_data->>'car_choice') chosen;
    v_body:=btrim(coalesce(p_data->>'body',''));
    if char_length(v_body)>2000 then raise exception 'bad_text' using errcode='22023'; end if;
    if char_length(v_title) not between 1 and 120 or char_length(v_kind) not between 1 and 120 then raise exception 'bad_subject' using errcode='22023'; end if;
-   if v_car is not null and v_car !~ '^[0-9]{1,3}$' then raise exception 'bad_car_number' using errcode='22023'; end if;
    if coalesce(p_data->>'date','') !~ '^\d{4}-\d{2}-\d{2}$' or coalesce(p_data->>'time','') !~ '^\d{2}:\d{2}$' then raise exception 'bad_date' using errcode='22023'; end if;
    begin
      v_at:=((p_data->>'date')||' '||(p_data->>'time'))::timestamp at time zone 'Europe/Stockholm';
    exception when datetime_field_overflow or invalid_datetime_format then raise exception 'bad_date' using errcode='22023'; end;
    if v_at<=clock_timestamp() or v_at>clock_timestamp()+interval '2 years' or to_char(v_at at time zone 'Europe/Stockholm','YYYY-MM-DD HH24:MI')<>(p_data->>'date')||' '||(p_data->>'time') then raise exception 'bad_date' using errcode='22023'; end if;
    if (select count(*) from inbox_private.bookings where proposed_by=a.driver_id and created_at>clock_timestamp()-interval '1 day')>=100 then raise exception 'too_many' using errcode='54000'; end if;
-   insert into inbox_private.bookings(thread_id,kind,title,starts_at,car_number,status,proposer_role,proposed_by)
-     values(t.id,v_kind,v_title,v_at,v_car,case when v_admin then 'pending_driver' else 'pending_admin' end,v_role,a.driver_id);
+   insert into inbox_private.bookings(thread_id,kind,title,starts_at,car_number,car_id,status,proposer_role,proposed_by)
+     values(t.id,v_kind,v_title,v_at,v_car,v_car_id,case when v_admin then 'pending_driver' else 'pending_admin' end,v_role,a.driver_id);
    insert into inbox_private.messages(thread_id,sender_id,sender_role,body) values(t.id,a.driver_id,'system','Bokad tid föreslagen: '||v_title);
    if v_body<>'' then insert into inbox_private.messages(thread_id,sender_id,sender_role,body) values(t.id,a.driver_id,v_role,v_body); end if;
  elsif p_action='decide' then
@@ -167,9 +180,10 @@ begin
    if b.status not in ('pending_driver','pending_admin') or (v_admin and b.status<>'pending_admin') or (not v_admin and b.status<>'pending_driver') then raise exception 'forbidden' using errcode='42501'; end if;
    if coalesce(p_data->>'decision','') not in ('accepted','declined') then raise exception 'bad_status' using errcode='22023'; end if;
    v_body:=nullif(btrim(p_data->>'reason'),'');
-   if (p_data->>'decision'='declined' and (v_body is null or v_body !~ '[^[:space:]]')) or char_length(v_body)>500 then raise exception 'need_reason' using errcode='22023'; end if;
+   if (p_data->>'decision'='declined' and (v_body is null or v_body !~ '[^[:space:]]')) or char_length(v_body)>2000 then raise exception 'need_reason' using errcode='22023'; end if;
    update inbox_private.bookings set status=p_data->>'decision',decided_by=a.driver_id,decided_at=clock_timestamp(),reason=v_body where id=b.id;
-   insert into inbox_private.messages(thread_id,sender_id,sender_role,body) values(t.id,a.driver_id,'system',case when p_data->>'decision'='accepted' then 'Bokad tid godkänd: ' else 'Bokad tid avböjd: ' end||b.title||coalesce(' – '||v_body,''));
+   insert into inbox_private.messages(thread_id,sender_id,sender_role,body) values(t.id,a.driver_id,'system',case when p_data->>'decision'='accepted' then 'Bokad tid godkänd: ' else 'Bokad tid avböjd: ' end||b.title);
+   if p_data->>'decision'='declined' then insert into inbox_private.messages(thread_id,sender_id,sender_role,body) values(t.id,a.driver_id,v_role,v_body); end if;
  else raise exception 'bad_action' using errcode='22023'; end if;
  update inbox_private.threads set updated_at=clock_timestamp() where id=t.id;
  return jsonb_build_object('id',t.id);

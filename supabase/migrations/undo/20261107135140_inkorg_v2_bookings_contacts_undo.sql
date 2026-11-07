@@ -30,5 +30,6 @@ do $$ begin if to_regprocedure('public.set_car_issue_kind(text, bigint, text, te
 do $$ begin if to_regprocedure('public.set_car_issue_kind(text, bigint, text, text)') is not null then execute 'grant execute on function public.set_car_issue_kind(text, bigint, text, text) to authenticated'; end if; end $$;
 do $$ begin if to_regprocedure('public.set_car_issue_status(text, bigint, text, text)') is not null then execute 'grant execute on function public.set_car_issue_status(text, bigint, text, text) to anon'; end if; end $$;
 do $$ begin if to_regprocedure('public.set_car_issue_status(text, bigint, text, text)') is not null then execute 'grant execute on function public.set_car_issue_status(text, bigint, text, text) to authenticated'; end if; end $$;
+revoke all on function inbox_private.resolve_car(text,text) from public,anon,authenticated;
 -- Private tables and indexes stay, RLS and table revocations stay.
 commit;

@@ -1,4 +1,4 @@
-# Inkorg v3 – utkast, inte live
+# Inkorg v4 – utkast, inte live
 
 PR #85, `feature/inkorg-steg1`, separat worktree. **Ingen merge och inga produktionsmigreringar. Christian måste säga kör.**
 Historisk beskrivning: [6 november](README-20261106.md). Driftsättning/återställning: [UNDO.md](UNDO.md).
@@ -6,12 +6,12 @@ Historisk beskrivning: [6 november](README-20261106.md). Driftsättning/återst�
 ## Byggt
 
 - Förarens **Inkorg**: Alla, Meddelande, Sjuk, Verkstadstimmar. Kategoriikonerna ligger på en rad även vid 320 px; vald kategori blir rubrik över listan. Nytt ärende väljer mellan de tre formulären.
-- Meddelande går till åkeriets admin. Ingen mottagarväljare för föraren. Valfritt **Bilnummer**, vanlig inmatning med 1–3 siffror.
+- Meddelande går till åkeriets admin. Ingen mottagarväljare för föraren. **Bil nr:** är en väljare med åkeriets registrerade bilar och **Nej**. Ingen bil är förvald; ett aktivt val krävs även för Meddelande.
 - Samma tråd visar in- och utgående meddelanden, svar och tidsstämplad historik. Ingen privat förare-till-förare-sändning från profil eller RPC.
 - Äldre privata samtal går fortfarande att läsa, inte besvara. Äldre bilärenden/underhåll är arkiv; inga nya separata fel-/förbruknings-/underhållsformulär i Inkorg eller Bil & verkstad.
 - Sjuk/intyg och registrering av faktiskt arbetade verkstadstimmar återanvänder befintliga specialflöden.
-- **Bokad tid** i varje ny meddelandetråd: ett **Typ**-fält (blir bokningens rubrik), datum **ÅÅÅÅ-MM-DD**, tid, valfritt meddelande och **obligatoriskt bilnummer** (1–3 siffror) eller aktivt val **Ej angivet**. Svensk tidszon kontrolleras på servern. Datum är textfält med ISO-mönster, oberoende av iPhone/Androids regionala datumväljare.
-  Förarförslag väntar på admin; adminbokningar väntar på förarens svar. Avböj kräver motivering. Tom orsak ger röd text **Vänligen specificera orsak**, utan nätanrop; servern nekar också tom orsak. Beslut sparas, inte raderas.
+- **Bokad tid** i varje ny meddelandetråd: ett **Typ**-fält (blir bokningens rubrik), en **kalenderknapp** med svensk kalender, skrivskyddat datum **ÅÅÅÅ-MM-DD**, **24-timmarstid** och ett valfritt meddelande. **Bil nr:** väljs från åkeriets bilar eller **Nej**; inget alternativ är förvalt. Timme (00–23) och minut (00–59) är vanliga väljare utan regional AM/PM-klocka, även på iPhone/Android. Servern kontrollerar svensk tidszon och bilens tillhörighet.
+  Förarförslag väntar på admin; adminbokningar väntar på förarens svar. Avböj tar orsaken från **trådens vanliga svarsruta**. Inget extra orsaksfält eller instruktion visas före klicket. Tom ruta ger röd text **Vänligen specificera orsak**, utan nätanrop; servern nekar också tom orsak. Orsaken sparas som ett normalt meddelande och bokningsbeslut i samma transaktion (högst 2000 tecken). Beslut sparas, inte raderas.
 - **Mina bevakningar** visar väntande tider grå/streckade och godkända solida. Avböjda tider ligger kvar i ärendet, men inte i schemat.
   Bokningar har ingen påhittad varaktighet; de visas som korta markörer, inte arbetspass. De kan inte tas bort via Sluta bevaka.
 - **Admin › Ärenden** har Meddelande och Bokad tid, med chaufförsväljare begränsad till åkeriet. Vanlig admin hanterar allt där utom sekretess.
@@ -73,13 +73,13 @@ node tests/bevakningar/timeline.cjs
 # PYTHON=/sökväg/till/playwright-venv/bin/python npm test --prefix tests/meddelanden
 ```
 
-Resultat: **96 v2/v3 DB-assertioner**, **68 sekretess-/intyg-/ärendeassertioner**, **84 meddelande-/löneassertioner**,
-**26 tidslinjelogikassertioner**, **76 v2/v3 Playwright-assertioner** samt **25 + 23** befintliga bevaknings-/tidslinjeassertioner.
+Resultat: **105 v2/v3/v4 DB-assertioner**, **68 sekretess-/intyg-/ärendeassertioner**, **84 meddelande-/löneassertioner**,
+**26 tidslinjelogikassertioner**, **102 v2/v3/v4 Playwright-assertioner** samt **25 + 23** befintliga bevaknings-/tidslinjeassertioner.
 V2 provar även migrationens återkörning och undo med bevarade rader, bolagsgränser, standardsekretess, atomisk kontaktsparning, nekade direktgrants,
 båda förslagssidorna, avböj/motivering, sommartidslucka, arkiv, sena svar efter navigering och 320/390 px utan sidöverrinning.
 
-Nio mobilbilder i `/workspace/taxidata-cleanup/screenshots/inkorg-v3/`, inte incheckade. Bäst för granskning:
-`01-inkorg.png`, `05-kontaktinformation.png`, `06-admin-bokad-tid.png`, `08-avboj-orsak.png`, `09-bilnummer-kravs.png`.
+Tio mobilbilder i `/workspace/taxidata-cleanup/screenshots/inkorg-v4/`, inte incheckade. Bäst för granskning:
+`10-kalenderval.png`, `06-admin-bokad-tid.png`, `08-avboj-orsak.png`, `02-meddelande-formular.png`.
 Browserproven kör en ny isolerad headless-profil med verkliga lokala HTML/JS-filer, mockade RPC:er och blockerad extern trafik, inte en riktig förarinloggning.
 
 ## Avgränsningar / kvar före live
@@ -91,8 +91,15 @@ Browserproven kör en ny isolerad headless-profil med verkliga lokala HTML/JS-fi
 - Bokning har ingen sluttid eller avboknings-/ombokningsfunktion. Föreslå en ny tid i tråden efter avböj; redan fattat beslut bevaras.
 - Biltelefoner skapas från de bilnummer föraren lagt till; inga äldre fordons-/persondata masskopieras till nya kontaktlagret.
 
-## V3-migrationsnotering
+## V4-migrationsnotering
 
-Den **oapplicerade** v2-migrationen har justerats, inte applicerats eller skrivits över i databasen. Samma undo stänger hela nya RPC-flödet och bevarar alla rader, även frivilliga bokningsmeddelanden. Typ får högst 120 tecken och används som bokningsrubrik på servern; en separat inskickad rubrik ignoreras. Blank bil godtas bara med JSON-boolean `car_unspecified: true`; bilnummer och Ej angivet samtidigt nekas. Annars måste bilnumret vara 1–3 siffror. Det frivilliga bokningsmeddelandet sparas i samma transaktion och tråd.
+Den **oapplicerade** v2-migrationen har justerats, inte applicerats eller skrivits över i databasen. Samma undo stänger hela nya RPC-flödet och bevarar alla rader och meddelanden.
+Typ används som rubrik på servern. `cars` returnerar endast ID och bilnummer för sessionens åkeri. Den privata `resolve_car`-hjälparen nekar klienternas direktanrop och verifierar bilens company_id.
+Både Meddelande och Bokad tid kräver `car_choice`: ett ID från åkeriets bilregister eller exakt `none` (= Nej). Tomt/ogiltigt val och annan åkeris bil nekas. Inskickade fria bilnummer ignoreras; numret härleds från den verifierade bilen.
+Nya trådar/bokningar sparar car_id och bilnummer som historisk text. Om själva bilregisterposten tas bort senare sätts bara länken till null, medan historikens bilnummer bevaras. Inga sådana rader har ändrats nu.
+Profilens egna bilnummer/biltelefoner är fortfarande separata kontaktuppgifter och skapar inga poster i åkeriets bilregister.
 
-V3-browserprovet omfattar också iPhone 13- och Pixel 7-skärm-/UA-profiler i Chromium: ISO-datum går in och visas oförändrade, Typ blir rubrik och aktivt Ej angivet godtas. Detta är emulering, inte verifiering på fysiska iPhone-/Android-enheter eller i verklig Safari.
+Avböj sparar texten från vanliga svarsrutan som meddelande tillsammans med det radlåsta beslutet; inget separat orsaksfält finns. Ett osänt svar bevaras om användaren i stället accepterar tiden.
+
+Browserprovet väljer dagar i den riktiga kalenderdialogen och timmar/minuter i 24-timmarsväljarna, utan att skriva datum manuellt. Det omfattar iPhone 13- och Pixel 7-skärm-/UA-profiler i Chromium.
+Detta är emulering, inte verifiering på fysiska iPhone-/Android-enheter eller i verklig Safari. Datum och tid beror inte längre på deras regionala datum-/klockväljare.
