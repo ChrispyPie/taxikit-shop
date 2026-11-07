@@ -24,6 +24,7 @@
     if (m) {
       var fn = m[1]; t.calls.push({ fn: fn, args: a });
       if (t.fail === fn) return Promise.resolve(new Response('{}',{status:503}));
+      if (fn === 'mailbox_v2') return reply(a.p_action === 'contacts_get' ? {cars:[],phone:null,visibility:'owner'} : []);
       if (fn === 'watch_list') return reply(t.empty ? [] : t.watches);
       if (fn === 'train_watch_list') return reply(t.empty ? [] : t.rules);
       if (fn === 'watch_set') { t.watches = t.watches.filter(w => !(w.kind === a.p_kind && w.ident === a.p_ident)); return reply(t.watches); }

@@ -1,97 +1,92 @@
-# Inkorg – steg 1 (utkast, inte live)
+# Inkorg v2 – utkast, inte live
 
-Tidigare version: [historisk beskrivning 6 november](README-20261106.md) och [dess undo](UNDO-20261106.md).
+PR #85, `feature/inkorg-steg1`, separat worktree. **Ingen merge och inga produktionsmigreringar. Christian måste säga kör.**
+Historisk beskrivning: [6 november](README-20261106.md). Driftsättning/återställning: [UNDO.md](UNDO.md).
 
-Byggt i `feature/inkorg-steg1`, separat worktree. **Ingen merge eller produktionsändring.**
-Steg 2 (admin skapar ett ärende åt en vald förare, acceptera/avböja, grå/solid schemapost) ingår inte.
+## Byggt
 
-## Gränssnitt
+- Förarens **Inkorg**: Alla, Meddelande, Sjuk, Verkstadstimmar. Nytt ärende väljer mellan de tre formulären.
+- Meddelande går till åkeriets admin. Ingen mottagarväljare för föraren. Valfritt **Bilnummer**, vanlig inmatning med 1–3 siffror.
+- Samma tråd visar in- och utgående meddelanden, svar och tidsstämplad historik. Ingen privat förare-till-förare-sändning från profil eller RPC.
+- Äldre privata samtal går fortfarande att läsa, inte besvara. Äldre bilärenden/underhåll är arkiv; inga nya separata fel-/förbruknings-/underhållsformulär i Inkorg eller Bil & verkstad.
+- Sjuk/intyg och registrering av faktiskt arbetade verkstadstimmar återanvänder befintliga specialflöden.
+- **Bokad tid** i varje ny meddelandetråd: typ, rubrik, datum, tid och valfritt bilnummer. Svensk tidszon kontrolleras på servern.
+  Förarförslag väntar på admin; adminbokningar väntar på förarens svar. Avböj kräver motivering. Beslut sparas, inte raderas.
+- **Mina bevakningar** visar väntande tider grå/streckade och godkända solida. Avböjda tider ligger kvar i ärendet, men inte i schemat.
+  Bokningar har ingen påhittad varaktighet; de visas som korta markörer, inte arbetspass. De kan inte tas bort via Sluta bevaka.
+- **Admin › Ärenden** har Meddelande och Bokad tid, med chaufförsväljare begränsad till åkeriet. Vanlig admin hanterar allt där utom sekretess.
+- Ägare/superadmin får inga nya ärenden i den personliga inkorgen, men kan starta ett där och hamnar sedan i Admin › Ärenden.
+  En ägare som själv kör besvarar sina egna bokningar från adminpanelen. Gamla personliga samtal är fortfarande läsbara.
+- **Önskemål och idéer** finns bara som separat adminmeny, inte i Inkorg/Ärenden. `dev_wishes` ändras inte.
+- Enkel mobil UI, neutrala adminverktyg, befintlig swipe-back, tidsstämplar och inga kategori-/bilikoner i trådrubriken.
 
-- Ett menyval **Inkorg**, i stället för två separata menyval.
-- **Alla** blandar privata samtal och egna ärenden i senaste-aktivitet-ordning, både öppna och avslutade.
-- Filter: Meddelanden, Felanmälan, Förbrukning, Underhåll, Sjukanmälan, Önskemål, Verkstadstid och Uppgifter.
-  Kategorin kommer från servern; den gissas inte från rubriken.
-- Fler meddelanden och avslutade ärenden hämtas vid behov, utan att några poster raderas.
-- **Nytt ärende** öppnar en mobil dialog och sedan befintligt formulär/sparflöde.
-  Underhåll återanvänder förslagsformuläret för förare och planeringsformuläret för admin.
-- Privat meddelande startas från personens profil (befintlig mottagarförvald knapp). Svar skrivs direkt i tråden.
-- Ägare och superadmin har bara privata samtal i sin inkorg; deras ärenden går via **Admin › Ärenden**.
-  Vanlig admin har kvar sina egna ärenden i sin personliga inkorg och hanterar åkeriets vanliga ärenden i adminpanelen.
-- Adminlistan inkluderar även Underhåll under Alla, inte bara i en separat speciallista.
-- Befintlig swipe-back används. En ärendetråd har `‹ Ärenden`, inga kategoriikoner i rubriken,
-  neutral adminverktygsstil och befintlig tidsstämplad historik. Meddelanden visar också klockslag.
+## Telefon och bilar
 
-## Behörigheter och databas
+- Profilens **Lägg till bil** sparar flera bilnummer, 1–3 siffror. Dubbletter normaliseras. Biltelefon härleds på servern från den fasta serien och bilnumret utfyllt till tre siffror.
+- Biltelefonerna visas alltid för inloggade förare i samma åkeri (och superadmin), oberoende av privat telefonval. Klickbara `tel:`/`sms:`-länkar.
+- Det privata numret är **befintliga obligatoriska `drivers.phone` i Kontaktinformation/Personuppgifter**. Inget dubblerat privat telefonfält eller kopierat telefonvärde.
+- Synlighetsvalet ligger direkt efter det befintliga telefonfältet: **Ägaren / Åkeriet / Taxi Göteborg**. Standard: **Ägaren**.
+- Servervärden: `owner` / `company` / `bolag`. Ägare för rätt åkeri och superadmin får alltid se numret, liksom föraren själv.
+  Vanlig admin får inte automatiskt se privata kontakttelefoner.
+- `bolag` är samma taxibolag, **inte alla TaxiData-användare**. Separat explicit bolag–åkeri-koppling; nuvarande åkerier kopplas till Taxi Göteborg vid migreringen.
+  Framtida åkerier utan koppling ger ingen delning över åkerigränsen. Bolagsnamnet i valet hämtas från servern. Se UNDO för administration.
+- Kontaktsparning anropar befintlig `save_my_profile(text,jsonb)` med dess obligatoriska validering och sparar synligheten i **samma transaktion**.
+  Ett misslyckat telefonsparande kan inte lämna ändrad synlighet eller tvärtom. Huvudlösenordsinloggning får inte ändra profilens kontaktval/bilar.
 
-Migration: `supabase/migrations/20261107074022_inkorg_steg1.sql`.
-Filnamnet skapades med Supabase CLI och kolliderar inte med `20261107a/b/c`.
-Migrationen är **inte applicerad**. Ändringarna är funktionsdefinitioner och en ny privat rollhjälpare;
-nya tabellkolumner, tabellbehörigheter, datakopior och radändringar behövs inte.
+## Databas / säkerhet
 
-Viktig upptäckt vid läsning av produktionsdefinitionerna: vanlig `admin` ingick inte i
-`private.bil_admin_roles()`, och Admin › Ärenden var även dolt i HTML. Det räckte alltså inte att flytta menyknappar.
-Migrationen lägger till admin i **icke-sekretess**-bil/ärendeadministrationen. Det ger även rätt att använda
-befintliga bil- och underhållsverktyg. Åkeridata, Löner och superadminmenyn öppnas inte.
-`private.workshop_roles()` lämnas oförändrad: den används också av lönefunktioner.
-Verkstadstidens beslut/frågor får en separat adminbehörighet och explicit åkerikontroll.
+Applicera efter godkännande, i denna ordning (inte hela historiska migrationsmappen):
 
-Sekretess ligger kvar bakom serverkontroller:
+1. `supabase/migrations/20261107074022_inkorg_steg1.sql`
+2. `supabase/migrations/20261107135140_inkorg_v2_bookings_contacts.sql`
 
-- `private.sjuk_actor` och den nya centrala `private.sjuk_boss_roles()` avgör vilka som får vara sjuk-admin.
-  Just nu: ägare och **tillfälligt superadmin**. Vanlig admin kan bara läsa sin egen sjukperiod som förare.
-- `case_admin_list` skickar inte sjukanmälningar till vanlig admin, inte ens som tomma sammanfattningar.
-- `case_get` och intygs-Edge-funktionen går genom `sjuk_actor` / `sjuk_report_for`.
-- Individuella sjukperioder/intyg, sjuklistan och nya sjuk-pushar begränsas till rätt åkeri.
-  Vid granskningen saknade de äldre sjuk-hjälparna en konsekvent åkerigräns; utkastet täpper till det.
-- Enbart service-rollen kan anropa intygens interna list-/uppladdnings-RPC:er.
-  Edge-funktionen kontrollerar ändå förarens session innan den signerar länkar.
-- Läsbehörigheter kontrollerades endast via systemkatalogen: `sick_reports`, `sick_certs` och `sick_events`
-  ligger i privat schema utan SELECT för anon/authenticated. Bilärenden, underhåll, verkstadstid och case_reads
-  har RLS och inga direkta SELECT-grants till dessa roller. Inga intyg, personliga texter eller riktiga sessioner hämtades.
+Båda namnen skapades med CLI, utan kollision med `20261107a/b/c`. De är fortfarande **inte applicerade**.
 
-**Avstängning av superadmins tillfälliga sekretessåtkomst:** se [UNDO.md](UNDO.md).
+Första migrationen ger vanlig admin icke-sekretessbehörighet, åkeriavgränsar sjukflöden/intyg/push och centraliserar sekretess i `private.sjuk_boss_roles()`.
+`private.workshop_roles()` för lönefunktioner lämnas oförändrad. Önskemål tas ur de sammanslagna ärendelistorna, utan att ändra raderna.
 
-## Avgränsningar / beslut kvar
+V2 lägger till ett oexponerat `inbox_private`-schema med `threads`, `messages`, `reads`, `bookings`, `contacts`, `bolag`, `operator_companies`.
+Alla tabeller har RLS och saknar klienters tabell-/sekvensbehörigheter. Publika `mailbox_v2` är security invoker; en privat security-definer dispatcher med tom search_path
+verifierar aktiv session, roll, åkeri, ägarskap, motpart, datum, fältlängder och frekvens. Ingen tillit till klientens rollflagga eller user_metadata.
+Bokningsbeslut tar radlås och kan inte göras två gånger. Servern nekar fel åkeri, förarens rollförfalskning, bekräftelse av den egna förarsidans förslag och sommarluckor.
 
-- Önskemål är fortfarande den befintliga typen **Önskemål till Christian** (skapande för admin/ägare/superadmin).
-  Knappen återanvänder befintligt formulär på `admin.html#onskemal`.
-  Att ge alla förare en ny sorts önskemål till åkeriet kräver ett separat beslut och ändrat mottagar-/svarsflöde.
-- Uppgifter som redan finns visas i inkorgen. Ny uppgift åt en förare från admin är inte en ny funktion i denna PR.
-- Sjukintyg, uppgiftssvar och underhåll använder sina befintliga specialflöden, inte en ny generell texttråd.
-  Historik som inte tidigare lagrades (t.ex. varje äldre underhållsredigering) går inte att återskapa här.
-- Ändra-knappen för någon annans verkstadstid använder fortfarande det äldre personliga verkstadstidsformuläret;
-  fråge-/beslutsverktygen fungerar med den nya adminrollen, men själva redigeringsflödet är inte ombyggt i steg 1.
-- Ingen produktionsinloggning eller verklig meddelandesändning användes i testerna.
+Äldre direktmeddelandens skriv-RPC:er (även underliggande privata funktioner) får sina klientgrants återkallade.
+Äldre bilärendens normala skriv-RPC:er stängs också. Alla befintliga rader, foton och tabeller bevaras. Intyg använder fortfarande det befintliga skyddade Edge-flödet.
+Vanlig admin får inte ens sammanfattningar av andras sjukärenden. Tillfällig superadminåtkomst styrs **bara av `private.sjuk_boss_roles()`**; stäng av efter testning enligt UNDO.
 
-## Tester och bilder
+## Tester
 
-Alla testpersoner, fordon, texter och sessioner är syntetiska.
+Endast syntetiska personer, sessioner och texter. Inga live-meddelanden, kunduppgifter eller intyg hämtades. Bilärende 21 berörs inte.
 
 ```sh
-# Installera lokala testberoenden om de inte finns:
-npm install --prefix /tmp/inkorg-test --no-save @electric-sql/pglite@0.5.15
+# PGlite (lokal PostgreSQL-motor): npm install --prefix /tmp/inkorg-test --no-save @electric-sql/pglite@0.5.15
+NODE_PATH=/tmp/inkorg-test/node_modules node tests/inkorg-v2/db.cjs
 NODE_PATH=/tmp/inkorg-test/node_modules node tests/inkorg/db.cjs
 NODE_PATH=/tmp/inkorg-test/node_modules node tests/meddelanden/db.cjs
-# Pythonmiljö med playwright och separat installerad Chromium/Chrome:
-python tests/inkorg/browser.py
+node tests/bevakningar/logic.cjs
+# Separat Pythonmiljö med playwright och Chromium/Chrome:
+python tests/inkorg-v2/browser.py
+# Äldre UI-regressioner behöver tests/meddelanden/package.json installerat lokalt:
+node tests/bevakningar/browser.cjs
+node tests/bevakningar/timeline.cjs
+# Tidigare UI-testentrypoints delegerar nu till v2 (samma Pythonberoende):
+# PYTHON=/sökväg/till/playwright-venv/bin/python npm test --prefix tests/meddelanden
 ```
 
-På byggboxen användes befintlig PGlite och `/workspace/pwenv/bin/python`, med `/usr/bin/google-chrome`.
-Webbtestet startar en **egen headless-profil**, endast mot lokala produktionsfiler och mockade RPC:er.
-Det använder inte desktopwebbläsarens profil eller inloggningar och blockerar externa nätanrop.
+Resultat: **81 v2 DB-assertioner**, **68 sekretess-/intyg-/ärendeassertioner**, **84 meddelande-/löneassertioner**,
+**26 tidslinjelogikassertioner**, **48 v2 Playwright-assertioner** samt **25 + 23** befintliga bevaknings-/tidslinjeassertioner.
+V2 provar även migrationens återkörning och undo med bevarade rader, bolagsgränser, standardsekretess, atomisk kontaktsparning, nekade direktgrants,
+båda förslagssidorna, avböj/motivering, sommartidslucka, arkiv, sena svar efter navigering och 320/390 px utan sidöverrinning.
 
-Resultat:
+Sju mobilbilder i `/workspace/taxidata-cleanup/screenshots/inkorg-v2/`, inte incheckade. Bäst för granskning:
+`01-inkorg.png`, `03-trad-bokad-tid.png`, `04-tidslinje-gra-solid.png`, `05-kontaktinformation.png`, `06-admin-bokad-tid.png`.
+Browserproven kör en ny isolerad headless-profil med verkliga lokala HTML/JS-filer, mockade RPC:er och blockerad extern trafik, inte en riktig förarinloggning.
 
-- 68 databasassertioner: migrering, kategorier, egen/annan förare, åkerigräns,
-  admin/ägare/superadmin, intyg, avstängningsflagga och undo.
-- 84 befintliga databasassertioner för privata meddelanden, svarstrådar och lönebehörighet.
-- 46 Playwright-assertioner: blandad kronologi, filter, återanvända formulär, profilknapp,
-  svar i tråd, sena svar efter navigering, ägarinkorg och adminmeny; ingen horisontell överrinning vid 320/390 px.
-- JS syntaxkontroll och `git diff --check`.
+## Avgränsningar / kvar före live
 
-19 skärmbilder i `/workspace/taxidata-cleanup/screenshots/inkorg/` (inte incheckade):
-`01-profilmeny.png`, `02-alla.png`, `03-forbrukning.png`, `04-underhall.png`, `05-nytt-arende.png`,
-`06-form-felanmalan.png`, `07-form-forbrukning.png`, `08-form-underhall.png`, `09-form-verkstadstid.png`,
-`10-form-sjukanmalan.png`, `11-profil-meddelande.png`, `12-meddelandetrad.png`, `13-arendetrad.png`,
-`14-agare-inkorg.png`, `15-onskemal-befintligt-formular.png`, `16-admin-arenden.png`,
-`17-admin-verkstadstid.png`, `18-admin-meny.png`, `19-320px.png`.
+- Godkännande, produktions-/stagingmigrering och test med riktiga testroller återstår. PGlite + mockade browserprov är inte verifiering av en driftsatt Supabase/PostgREST/Edge-miljö.
+- Bokningar och nya meddelanden har olästa-markering i Inkorg (uppdateras vid öppning och pollning), men inga nya mejl-/pushleveranser byggs här.
+- Äldre privata samtal/bilärenden är arkiv och får inte nya bokningsknappar; nya ärenden startas som Meddelande.
+- Befintliga äldre Uppgifter under Bil & verkstad behålls; nya bokningar använder inte den tabellen eller dess tidigare schemalogik.
+- Bokning har ingen sluttid eller avboknings-/ombokningsfunktion. Föreslå en ny tid i tråden efter avböj; redan fattat beslut bevaras.
+- Biltelefoner skapas från de bilnummer föraren lagt till; inga äldre fordons-/persondata masskopieras till nya kontaktlagret.

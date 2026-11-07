@@ -1,0 +1,34 @@
+-- V2 undo preserves all new and old data. Restore UI by reverting the v2 commit.
+begin;
+revoke all on function public.mailbox_v2(text,text,jsonb) from anon,authenticated;
+revoke all on function inbox_private.dispatch(text,text,jsonb) from anon,authenticated;
+do $$ begin if to_regprocedure('public.car_issue_message(text, bigint, text)') is not null then execute 'grant execute on function public.car_issue_message(text, bigint, text) to anon'; end if; end $$;
+do $$ begin if to_regprocedure('public.car_issue_message(text, bigint, text)') is not null then execute 'grant execute on function public.car_issue_message(text, bigint, text) to authenticated'; end if; end $$;
+do $$ begin if to_regprocedure('public.conversation_create(text, text, text, text)') is not null then execute 'grant execute on function public.conversation_create(text, text, text, text) to anon'; end if; end $$;
+do $$ begin if to_regprocedure('public.conversation_create(text, text, text, text)') is not null then execute 'grant execute on function public.conversation_create(text, text, text, text) to authenticated'; end if; end $$;
+do $$ begin if to_regprocedure('messaging_private.conversation_create(text, text, text, text)') is not null then execute 'grant execute on function messaging_private.conversation_create(text, text, text, text) to anon'; end if; end $$;
+do $$ begin if to_regprocedure('messaging_private.conversation_create(text, text, text, text)') is not null then execute 'grant execute on function messaging_private.conversation_create(text, text, text, text) to authenticated'; end if; end $$;
+do $$ begin if to_regprocedure('public.conversation_reply(text, bigint, text)') is not null then execute 'grant execute on function public.conversation_reply(text, bigint, text) to anon'; end if; end $$;
+do $$ begin if to_regprocedure('public.conversation_reply(text, bigint, text)') is not null then execute 'grant execute on function public.conversation_reply(text, bigint, text) to authenticated'; end if; end $$;
+do $$ begin if to_regprocedure('messaging_private.conversation_reply(text, bigint, text)') is not null then execute 'grant execute on function messaging_private.conversation_reply(text, bigint, text) to anon'; end if; end $$;
+do $$ begin if to_regprocedure('messaging_private.conversation_reply(text, bigint, text)') is not null then execute 'grant execute on function messaging_private.conversation_reply(text, bigint, text) to authenticated'; end if; end $$;
+do $$ begin if to_regprocedure('public.delete_car_maintenance(text, bigint)') is not null then execute 'grant execute on function public.delete_car_maintenance(text, bigint) to anon'; end if; end $$;
+do $$ begin if to_regprocedure('public.delete_car_maintenance(text, bigint)') is not null then execute 'grant execute on function public.delete_car_maintenance(text, bigint) to authenticated'; end if; end $$;
+do $$ begin if to_regprocedure('public.done_car_maintenance(text, bigint, date, integer, numeric, text, boolean)') is not null then execute 'grant execute on function public.done_car_maintenance(text, bigint, date, integer, numeric, text, boolean) to anon'; end if; end $$;
+do $$ begin if to_regprocedure('public.done_car_maintenance(text, bigint, date, integer, numeric, text, boolean)') is not null then execute 'grant execute on function public.done_car_maintenance(text, bigint, date, integer, numeric, text, boolean) to authenticated'; end if; end $$;
+do $$ begin if to_regprocedure('public.message_send(text, text, text)') is not null then execute 'grant execute on function public.message_send(text, text, text) to anon'; end if; end $$;
+do $$ begin if to_regprocedure('public.message_send(text, text, text)') is not null then execute 'grant execute on function public.message_send(text, text, text) to authenticated'; end if; end $$;
+do $$ begin if to_regprocedure('messaging_private.message_send(text, text, text)') is not null then execute 'grant execute on function messaging_private.message_send(text, text, text) to anon'; end if; end $$;
+do $$ begin if to_regprocedure('messaging_private.message_send(text, text, text)') is not null then execute 'grant execute on function messaging_private.message_send(text, text, text) to authenticated'; end if; end $$;
+do $$ begin if to_regprocedure('public.move_car_issue_to_maint(text, bigint, text, text)') is not null then execute 'grant execute on function public.move_car_issue_to_maint(text, bigint, text, text) to anon'; end if; end $$;
+do $$ begin if to_regprocedure('public.move_car_issue_to_maint(text, bigint, text, text)') is not null then execute 'grant execute on function public.move_car_issue_to_maint(text, bigint, text, text) to authenticated'; end if; end $$;
+do $$ begin if to_regprocedure('public.save_car_issue(text, bigint, text, bigint, text, text, boolean, text)') is not null then execute 'grant execute on function public.save_car_issue(text, bigint, text, bigint, text, text, boolean, text) to anon'; end if; end $$;
+do $$ begin if to_regprocedure('public.save_car_issue(text, bigint, text, bigint, text, text, boolean, text)') is not null then execute 'grant execute on function public.save_car_issue(text, bigint, text, bigint, text, text, boolean, text) to authenticated'; end if; end $$;
+do $$ begin if to_regprocedure('public.save_car_maintenance(text, bigint, bigint, text, text, date, integer, integer, integer, text)') is not null then execute 'grant execute on function public.save_car_maintenance(text, bigint, bigint, text, text, date, integer, integer, integer, text) to anon'; end if; end $$;
+do $$ begin if to_regprocedure('public.save_car_maintenance(text, bigint, bigint, text, text, date, integer, integer, integer, text)') is not null then execute 'grant execute on function public.save_car_maintenance(text, bigint, bigint, text, text, date, integer, integer, integer, text) to authenticated'; end if; end $$;
+do $$ begin if to_regprocedure('public.set_car_issue_kind(text, bigint, text, text)') is not null then execute 'grant execute on function public.set_car_issue_kind(text, bigint, text, text) to anon'; end if; end $$;
+do $$ begin if to_regprocedure('public.set_car_issue_kind(text, bigint, text, text)') is not null then execute 'grant execute on function public.set_car_issue_kind(text, bigint, text, text) to authenticated'; end if; end $$;
+do $$ begin if to_regprocedure('public.set_car_issue_status(text, bigint, text, text)') is not null then execute 'grant execute on function public.set_car_issue_status(text, bigint, text, text) to anon'; end if; end $$;
+do $$ begin if to_regprocedure('public.set_car_issue_status(text, bigint, text, text)') is not null then execute 'grant execute on function public.set_car_issue_status(text, bigint, text, text) to authenticated'; end if; end $$;
+-- Private tables and indexes stay, RLS and table revocations stay.
+commit;

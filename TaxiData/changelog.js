@@ -17,8 +17,10 @@
 window.CHANGELOG = [
   // tid sätts först vid go-live efter Christians kör.
   { datum: '2026-11-07', id: '2026-11-07g', rader: [
-    ['Nytt', 'En gemensam inkorg för meddelanden och egna ärenden, med filter per typ och Nytt ärende. Meddelanden startas från personens profil.'],
-    ['Nytt', 'Admin kan hantera åkeriets vanliga ärenden. Sjukanmälan och läkarintyg är fortsatt privata. Ägarens ärenden finns bara under Admin › Ärenden.']
+    ['Nytt', 'Inkorg samlar Meddelande till admin, Sjuk och Verkstadstimmar. Bilnummer kan skrivas direkt i meddelandet. Äldre privata samtal och bilärenden finns kvar att läsa.'],
+    ['Nytt', 'Bokad tid i en meddelandetråd: förare och admin kan föreslå tider och motparten godkänner eller avböjer. Väntande tider visas grå i Mina bevakningar.'],
+    ['Nytt', 'Lägg till en eller flera bilar i profilen. Biltelefonerna visas för åkeriet. Vid din vanliga kontakttelefon väljer du Ägaren, Åkeriet eller Taxi Göteborg.'],
+    ['Förbättrat', 'Admin › Ärenden: Meddelande och Bokad tid till åkeriets chaufförer. Önskemål finns bara under Önskemål och idéer. Sjukanmälan och intyg är fortsatt skyddade.', 'admin']
   ]},
   { datum: '2026-11-07', id: '2026-11-07f', tid: '03:05', rader: [
     ['Nytt', 'Admin › Ärenden: Ändra finns nu på felanmälan, Behövs, underhåll, uppgifter och verkstadstid som väntar på beslut. Den öppnar samma formulär som i appen, och när du sparar eller trycker Avbryt kommer du tillbaka till ärendet.', 'admin']

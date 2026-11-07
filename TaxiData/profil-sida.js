@@ -264,7 +264,7 @@
     }
     var h = crumb([{ t: 'Hem', a: 'home' }, { t: d.mine ? 'Min profil' : (d.name || 'Profil') }]);
     if (st.flash) h += '<div class="ps-flash">' + esc(st.flash) + '</div>';
-    h += headHtml(d) + statsHtml(d);
+    h += headHtml(d) + statsHtml(d) + contactHtml(d);
     if (d.bio) h += '<div class="ps-card"><h3>Om mig</h3><div class="ps-bio">' + esc(d.bio) + '</div></div>';
     if (d.fun_tip) h += '<div class="ps-card"><h3>Bästa tipset för nya förare</h3><div class="ps-tip">' + esc(d.fun_tip) + '</div></div>';
     if (rows) h += '<div class="ps-card"><h3>Uppgifter</h3>' + rows + '</div>';
@@ -276,10 +276,19 @@
       '<button type="button" class="ps-btn ghost" data-a="guestbook">Öppna gästbok</button></div>';
     h += '<div class="ps-acts">';
     if (d.can_edit) h += '<button type="button" class="ok" data-a="edit">Redigera profil</button>';
-    if (!d.mine) h += '<button type="button" class="ghost" data-a="msg">Skicka meddelande</button>';
+
     h += '</div>';
     if (st.err) h += '<p class="ps-err">' + esc(st.err) + '</p>';
     return h;
+  }
+
+  function contactHtml(d) {
+    var c=d.contacts||{},h='<section class="ps-card"><h3>Kontakt</h3>';
+    function links(phone,label){return '<p>'+esc(label)+': <a href="tel:'+esc(phone)+'">'+esc(phone)+'</a> · <a href="sms:'+esc(phone)+'">SMS</a></p>';}
+    (c.cars||[]).forEach(function(car){h+=links(car.phone,'Bil '+car.number);});
+    if(c.phone)h+=links(c.phone,'Privat');
+    if(d.mine&&d.can_edit)h+='<button type="button" class="ps-btn" data-a="car-add">Lägg till bil</button><div id="ps-car-form" hidden><label for="ps-car-number">Bilnummer (1–3 siffror)</label><input id="ps-car-number" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}"><button type="button" class="ps-btn" data-a="car-save">Lägg till</button></div><p class="ps-note">Biltelefon visas alltid för åkeriet. Vem som får se ditt privata nummer väljer du i Kontaktinformation.</p>';
+    return h+'</section>';
   }
 
   function visSelect(field, cur) {
@@ -433,12 +442,17 @@
     st.driverId = driverId || null;
     st.err = null;
     root.innerHTML = '<div class="ps-card">Laddar…</div>';
+    var loading=root.firstElementChild, session=token(), target=st.driverId;
     try {
       var args = { p_token: token() };
       if (st.driverId) args.p_driver_id = st.driverId;
-      st.data = await rpc('profile_get', st.driverId ? { p_driver_id: st.driverId } : {});
+      var data = await rpc('profile_get', target ? { p_driver_id: target } : {});
+      var contacts = await MAILBOX.rpc('contacts_get', {driver_id: data.id});
+      if (!loading.isConnected || session!==token()) return;
+      data.contacts=contacts; st.data=data;
       paint();
     } catch (e) {
+      if (!loading.isConnected || session!==token()) return;
       if (fail(e)) return;
       root.innerHTML = '<div class="ps-card"><p class="ps-err">' + esc(errText(e)) + '</p></div>';
     }
@@ -509,7 +523,9 @@
     st.busy = true; st.err = null;
     var saveButton = root.querySelector('[data-a="save"]'); if (saveButton) saveButton.disabled = true;
     try {
+      var contacts=st.data.contacts;
       st.data = await rpc('profile_save', { p_data: data });
+      st.data.contacts=contacts;
       st.flash = 'Sparat ✓';
       st.busy = false;
       go('page');
@@ -654,6 +670,13 @@
       return;
     }
     if (a === 'page') { go('page'); return; }
+    if (a === 'car-add') { document.getElementById('ps-car-form').hidden=false; document.getElementById('ps-car-number').focus(); return; }
+    if (a === 'car-save') {
+      var input=document.getElementById('ps-car-number'), viewed=st.data, session=token(),number=input.value;
+      if(!/^[0-9]{1,3}$/.test(number)){toast('Bilnummer ska vara 1–3 siffror.');return;}
+      var cars=((st.data.contacts||{}).cars||[]).map(function(c){return c.number;});cars.push(number);
+      t.disabled=true;MAILBOX.rpc('contacts_save',{cars:cars}).then(function(c){if(input.isConnected&&st.data===viewed&&session===token()){st.data.contacts=c;paint();}}).catch(function(){if(input.isConnected){t.disabled=false;toast('Kunde inte lägga till bilen. Försök igen.');}});return;
+    }
     if (a === 'edit') { go('edit'); return; }
     if (a === 'personal') {
       if (typeof window.renderPersonalData === 'function') {
@@ -669,7 +692,7 @@
     if (a === 'gallery') { go('gallery'); loadGallery(); return; }
     if (a === 'guestbook') { go('guestbook'); loadGuestbook(); return; }
     if (a === 'msg') {
-      if (window.INKORG) INKORG.compose(st.data && st.data.id);
+      // Privata förare-till-förare-meddelanden är borttagna.
       return;
     }
     if (a === 'forum-threads') { st.view = 'forum'; st.forumKind = 'threads'; try { history.pushState({ view: 'profil', sub: 'forum' }, ''); } catch (e) {} loadForumList('threads'); return; }

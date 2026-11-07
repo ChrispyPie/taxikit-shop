@@ -99,16 +99,6 @@ begin
       from private.sick_reports s
      where v_sjuk and s.driver_id = a.driver_id
     union all
-    -- Önskemål (ägaren → Christian)
-    select 'wish', d.id, 'Önskemål', null, private.case_cut(d.body), d.status, private.case_st('wish', d.status),
-           case when d.reply is not null then 'owner' end, private.case_cut(d.reply), greatest(d.updated_at, d.created_at),
-           false,
-           case when d.reply is not null
-                 and d.updated_at > coalesce((select c.read_at from public.case_reads c where c.kind = 'wish' and c.case_id = d.id and c.driver_id = a.driver_id), '-infinity'::timestamptz)
-                then 1 else 0 end
-      from public.dev_wishes d
-     where d.author_id = a.driver_id and d.company_id = a.company_id
-    union all
     -- Only maintenance suggested by this driver, never other drivers' car data.
     select 'maint', m.id, private.bil_mtype_label(m.mtype, m.title), c.bilnummer,
            private.case_cut(m.note), m.status, case when m.status = 'klar' then 'klar' else 'pagar' end,
@@ -223,14 +213,6 @@ begin
            null, greatest(s.updated_at, s.created_at), (s.status = 'ny'), false
       from private.sick_reports s
      where v_sjuk and private.actor_company(s.driver_id) = a.company_id
-    union all
-    -- Önskemål (ägaren → Christian). Status och svar sätts av Christian via assistenten, inte här.
-    select 'wish', d.id, 'Önskemål', null, private.case_cut(d.body), d.status, private.case_st('wish', d.status),
-           private.bil_driver_name(d.author_id), d.author_id = a.driver_id,
-           case when d.reply is not null then 'owner' end, greatest(d.updated_at, d.created_at),
-           (d.status = 'ny' and d.author_id is distinct from a.driver_id and a.category = 'superadmin'), false
-      from public.dev_wishes d
-     where d.company_id = a.company_id
     union all
     select 'maint', m.id, private.bil_mtype_label(m.mtype, m.title), c.bilnummer,
            private.case_cut(m.note), m.status, case when m.status = 'klar' then 'klar' else 'pagar' end,
