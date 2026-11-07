@@ -1,4 +1,4 @@
-# Steg 2 – utkast, INTE driftsatt
+# PR #86 – godkänd för drift 2026-11-07
 
 Checkbox före varje rad i Admin › Ärenden och Meddelanden. Upp till 100 valda rader. Nåla fast, Ta bort nål och Markera som oläst är personliga inställningar som tidigare.
 
@@ -18,7 +18,7 @@ Sjukanmälan och intyg kan fortfarande läsas av behörig person. UI döljer än
 `private.mailbox_trash_roles()` delegerar till `private.sjuk_boss_roles()`. Ägare och tillfälligt superadmin får testa Papperskorg inom sitt åkeri. Tas superadmin bort centralt där försvinner även papperskorgsrätten. Ingen hårdkodning av Christians ID och ingen utökning av sjuksekretessen.
 
 ## Migration och undo
-Migration: `20261107191742_mailbox_bulk_preferences.sql`. **INTE applicerad i produktion.**
+Migration: `20261107191742_mailbox_bulk_preferences.sql`. Applicerad i produktion efter Christians kör 20:37 Stockholm (CET). Alla gamla källrader kontrolleras oförändrade med transaktionslokala fingeravtryck före/efter migreringen. Se GO-LIVE-dokumentet för verifierad drifttid.
 Undo: `supabase/migrations/undo/20261107191742_mailbox_bulk_preferences.sql` återställer steg-1-funktionen, tar bort den nya verkstadstriggern och bevarar metadata.
 UI undo: `git revert <step-2-commit>`.
 Redan ömsesidigt hårdraderat innehåll kan inte återställas av undo SQL; backup krävs.

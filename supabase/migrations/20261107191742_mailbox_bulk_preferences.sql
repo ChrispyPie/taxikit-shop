@@ -1,5 +1,27 @@
--- STEP 2 DRAFT ONLY. Do not apply until approved/tested. No underlying case/message/certificate deletion.
+-- PR #86, approved by Christian 2026-11-07. Preservation checks abort if source rows change. No underlying case/message/certificate deletion.
 begin;
+create temporary table pr86_preserve_before on commit drop as
+select 'inbox_private.threads'::text as source, count(*) as n, md5(coalesce(string_agg(md5(to_jsonb(x)::text),'' order by x.id),'')) as fingerprint from inbox_private.threads x
+union all
+select 'inbox_private.messages'::text as source, count(*) as n, md5(coalesce(string_agg(md5(to_jsonb(x)::text),'' order by x.id),'')) as fingerprint from inbox_private.messages x
+union all
+select 'inbox_private.bookings'::text as source, count(*) as n, md5(coalesce(string_agg(md5(to_jsonb(x)::text),'' order by x.id),'')) as fingerprint from inbox_private.bookings x
+union all
+select 'inbox_private.reads'::text as source, count(*) as n, md5(coalesce(string_agg(md5(to_jsonb(x)::text),'' order by x.thread_id,x.driver_id),'')) as fingerprint from inbox_private.reads x
+union all
+select 'public.car_issues'::text as source, count(*) as n, md5(coalesce(string_agg(md5(to_jsonb(x)::text),'' order by x.id),'')) as fingerprint from public.car_issues x
+union all
+select 'public.workshop_hours'::text as source, count(*) as n, md5(coalesce(string_agg(md5(to_jsonb(x)::text),'' order by x.id),'')) as fingerprint from public.workshop_hours x
+union all
+select 'public.workshop_messages'::text as source, count(*) as n, md5(coalesce(string_agg(md5(to_jsonb(x)::text),'' order by x.id),'')) as fingerprint from public.workshop_messages x
+union all
+select 'public.car_tasks'::text as source, count(*) as n, md5(coalesce(string_agg(md5(to_jsonb(x)::text),'' order by x.id),'')) as fingerprint from public.car_tasks x
+union all
+select 'public.car_maintenance'::text as source, count(*) as n, md5(coalesce(string_agg(md5(to_jsonb(x)::text),'' order by x.id),'')) as fingerprint from public.car_maintenance x
+union all
+select 'private.sick_reports'::text as source, count(*) as n, md5(coalesce(string_agg(md5(to_jsonb(x)::text),'' order by x.id),'')) as fingerprint from private.sick_reports x
+union all
+select 'private.sick_certs'::text as source, count(*) as n, md5(coalesce(string_agg(md5(to_jsonb(x)::text),'' order by x.id),'')) as fingerprint from private.sick_certs x;
 alter table inbox_private.unread_flags add column if not exists pinned boolean not null default false;
 alter table inbox_private.unread_flags add column if not exists hidden boolean not null default false;
 
@@ -235,4 +257,30 @@ begin
 end $$;
 revoke all on function inbox_private.workshop_mailbox_guard() from public,anon,authenticated;
 create or replace trigger mailbox_closed_workshop before insert on public.workshop_messages for each row execute function inbox_private.workshop_mailbox_guard();
+create temporary table pr86_preserve_after on commit drop as
+select 'inbox_private.threads'::text as source, count(*) as n, md5(coalesce(string_agg(md5(to_jsonb(x)::text),'' order by x.id),'')) as fingerprint from inbox_private.threads x
+union all
+select 'inbox_private.messages'::text as source, count(*) as n, md5(coalesce(string_agg(md5(to_jsonb(x)::text),'' order by x.id),'')) as fingerprint from inbox_private.messages x
+union all
+select 'inbox_private.bookings'::text as source, count(*) as n, md5(coalesce(string_agg(md5(to_jsonb(x)::text),'' order by x.id),'')) as fingerprint from inbox_private.bookings x
+union all
+select 'inbox_private.reads'::text as source, count(*) as n, md5(coalesce(string_agg(md5(to_jsonb(x)::text),'' order by x.thread_id,x.driver_id),'')) as fingerprint from inbox_private.reads x
+union all
+select 'public.car_issues'::text as source, count(*) as n, md5(coalesce(string_agg(md5(to_jsonb(x)::text),'' order by x.id),'')) as fingerprint from public.car_issues x
+union all
+select 'public.workshop_hours'::text as source, count(*) as n, md5(coalesce(string_agg(md5(to_jsonb(x)::text),'' order by x.id),'')) as fingerprint from public.workshop_hours x
+union all
+select 'public.workshop_messages'::text as source, count(*) as n, md5(coalesce(string_agg(md5(to_jsonb(x)::text),'' order by x.id),'')) as fingerprint from public.workshop_messages x
+union all
+select 'public.car_tasks'::text as source, count(*) as n, md5(coalesce(string_agg(md5(to_jsonb(x)::text),'' order by x.id),'')) as fingerprint from public.car_tasks x
+union all
+select 'public.car_maintenance'::text as source, count(*) as n, md5(coalesce(string_agg(md5(to_jsonb(x)::text),'' order by x.id),'')) as fingerprint from public.car_maintenance x
+union all
+select 'private.sick_reports'::text as source, count(*) as n, md5(coalesce(string_agg(md5(to_jsonb(x)::text),'' order by x.id),'')) as fingerprint from private.sick_reports x
+union all
+select 'private.sick_certs'::text as source, count(*) as n, md5(coalesce(string_agg(md5(to_jsonb(x)::text),'' order by x.id),'')) as fingerprint from private.sick_certs x;
+do $preserve$ begin
+ if exists(select * from pr86_preserve_before except select * from pr86_preserve_after) or exists(select * from pr86_preserve_after except select * from pr86_preserve_before) then raise exception 'PR86 preservation check failed'; end if;
+ if exists(select 1 from inbox_private.unread_flags where hidden or pinned) or exists(select 1 from inbox_private.party_deletions) then raise exception 'PR86 must not hide, pin, lock or trash any existing item on migration'; end if;
+end $preserve$;
 commit;
