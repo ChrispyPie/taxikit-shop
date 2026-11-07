@@ -123,7 +123,12 @@
   S.render = function (body, onChange) {
     st.body = body; st.onChange = onChange || null; st.form = null; st.decide = null; st.certs = {}; st.lon = {};
     if (!st.data) body.innerHTML = '<div class="tl-msg">Laddar…</div>'; else draw();
-    load();
+    return load();
+  };
+  // Återanvänd formuläret från Inkorg, efter att sjuk_get har kontrollerat behörighet.
+  S.newReport = function () {
+    if (!st.data || st.err || (st.data.mine || []).some(function(r){return !r.end;})) return;
+    st.form = { kind: 'ny', start: today(), comment: '' }; draw();
   };
   function act(p, okMsg) {
     if (st.busy) return Promise.resolve();

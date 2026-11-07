@@ -206,6 +206,7 @@
     var e = localStorage.getItem('bil_edit'); if (!e || !st.bil) return;
     localStorage.removeItem('bil_edit');
     var k = e.split(':')[0], id = +e.split(':')[1], x;
+    if (k === 'issue' || k === 'maint') { flashMsg = 'Äldre bilärende – bara läsning.'; return; }
     if (k === 'issue' && (x = (st.bil.issues || []).filter(function (i) { return i.id === id; })[0])) {
       st.tab = x.kind === 'fault' ? 'fel' : 'behov'; st.f = newIssue(x.kind, x);
     } else if (k === 'maint' && (x = (st.bil.maint || []).filter(function (m) { return m.id === id; })[0])) {
@@ -238,7 +239,7 @@
   };
 
   V.render = function (content) {
-    st.el = content; st.sjOn = false; st.form = null; st.f = null; st.mDone = null; st.tf = null; st.tr = null; window.VERKSTAD_LAST = null;
+    st.el = content; st.embedded = false; st.sjOn = false; st.form = null; st.f = null; st.mDone = null; st.tf = null; st.tr = null; window.VERKSTAD_LAST = null;
     content.innerHTML = '<div id="bv-root"><div id="bv-top"></div><div id="vk-body"><div class="tl-msg">Laddar…</div></div></div>';
     drawTop();
     return load();
@@ -247,14 +248,15 @@
 
   // Samma formulär och sparlogik, öppnade från Meddelanden/rapporter.
   V.newReport = function (tab) {
-    V.openTab(tab);
-    if (tab === 'fel' || tab === 'behov') st.f = newIssue(tab === 'fel' ? 'fault' : 'supply', null);
-    else if (tab === 'timmar') st.form = newForm(null);
+    if (tab !== 'timmar' && tab !== 'sjuk') { if(window.INKORG) INKORG.compose(); return; }
+    V.openTab(tab); st.embedded = true;
+    if (tab === 'timmar') st.form = newForm(null);
     draw();
   };
 
   function drawTop() {
     var top = document.getElementById('bv-top'); if (!top) return;
+    top.hidden = !!(st.embedded && st.form);
     top.style.display = editing() ? 'none' : '';
     var unread = st.bil ? +st.bil.unread || 0 : 0, tl = tabs();
     var open = st.bil ? (st.bil.tasks || []).filter(function (t) { return t.mine && t.status !== 'klar'; }).length : 0;
@@ -271,7 +273,7 @@
   }
 
   // Öppen anmälan/ärende (Ändra): visa bara formuläret, inga flikar eller bilkort
-  function editing() { return !!((st.f && st.f.id) || (st.tf && st.tf.id) || (st.form && st.form.id)); }
+  function editing() { return !!((st.embedded && st.form) || (st.f && st.f.id) || (st.tf && st.tf.id) || (st.form && st.form.id)); }
   V.closeEdit = function () {
     if (!editing() || !document.getElementById('vk-body')) return false;
     st.f = null; st.tf = null; st.form = null; draw(); window.scrollTo(0, 0); return true;
@@ -525,7 +527,7 @@
       return '<div class="vk-msg ' + (m.mine ? 'own' : 'boss') + '"><span class="w"><b>' + who + '</b> · ' + t + whoRole(m) + '</span>' + esc(m.body) + '</div>';
     }).join('') + '</div>';
   }
-  function canMsg(i) { return admin() ? !i.mine : i.mine; }
+  function canMsg(i) { return false; } // äldre bilärenden är läsarkiv
   function issueCard(i) {
     var c = carById(i.car_id), sup = SUPPLY.filter(function (s) { return s[0] === i.supply; })[0];
     var isNew = i.unread > 0 || i._new, thr = issueThread(i);
@@ -551,16 +553,6 @@
     if (i.photos && !ph) act.push('<button type="button" data-a="photos">📷 Visa foto</button>');
     if (canMsg(i) && !st.iopen[i.id] && !isNew) act.push('<button type="button" class="bv-send" data-a="msg">💬 ' + (admin() ? 'Skriv till föraren' : 'Skriv till ägaren') + '</button>');
     if (i.kind === 'fault' && i.status !== 'klar') act.push('<button type="button" data-a="hours">⏱️ Verkstadstid</button>');
-    if (admin()) {
-      if (i.status === 'ny') act.push('<button type="button" class="bv-pagar" data-a="pagar">Pågår</button>');
-      if (i.status !== 'klar') act.push('<button type="button" class="kal-ok" data-a="klar">✓ Klar</button>');
-      else act.push('<button type="button" data-a="ny">Öppna igen</button>');
-      if (i.status !== 'klar') act.push('<button type="button" class="bv-send" data-a="task">📋 Skicka som uppgift</button>');
-    }
-    var mayEdit = admin() || (i.mine && i.status === 'ny');
-    if (mayEdit && i.photos < 3 && i.status !== 'klar') act.push('<button type="button" data-a="addphoto">📷 +</button>');
-    if (mayEdit && i.status !== 'klar') act.push('<button type="button" data-a="edit">Ändra</button>');
-    if (mayEdit) act.push('<button type="button" class="vk-del" data-a="del">Ta bort</button>');
     if (act.length) h += '<div class="vk-iact bv-act" data-id="' + i.id + '">' + act.join('') + '</div>';
     return h + '</div>';
   }
@@ -569,8 +561,7 @@
     if (flashMsg) h += '<div id="vk-flash" class="vk-flash">' + esc(flashMsg) + '</div>';
     h += '<div class="vk-ltitle">' + (kind === 'fault' ? 'Felanmälan' : 'Behövs till bilen') + '</div>';
     if (kind === 'fault') h += carsCard();
-    if (st.f && (st.f.okind || st.f.kind) === kind) h += issueForm(st.f);
-    else h += '<button type="button" id="bv-new" class="vk-new">' + (kind === 'fault' ? '＋ Anmäl fel' : '＋ Något behövs') + '</button>';
+    h += '<p class="vk-note">Äldre bilärenden – bara läsning. Nya fel och behov skickas som Meddelande till admin.</p>';
     var all = (st.bil.issues || []).filter(function (i) { return i.kind === kind && (kind !== 'fault' || !st.car || i.car_id === st.car); });
     var open = all.filter(function (i) { return i.status !== 'klar'; }), done = all.filter(function (i) { return i.status === 'klar'; });
     if (kind === 'fault' && st.car) h += '<div class="bv-filter">Visar bil ' + esc((carById(st.car) || {}).bilnummer) + ' <button type="button" id="bv-allcars">Visa alla</button></div>';
@@ -582,9 +573,7 @@
       h += '<button type="button" class="ank-more" id="bv-done">' + (st.showDone ? 'Dölj klara' : 'Visa klara (' + done.length + ')' + (dn ? ' · 💬 ' + dn + ' nytt' : '')) + '</button>';
       if (st.showDone) done.forEach(function (i) { h += issueCard(i); });
     }
-    h += '<div class="tl-foot">' + (admin()
-      ? 'Du som ägare (och S admin) ser alla förares anmälningar. Varje förare ser bara sina egna. Du kan ändra status, skriva till föraren utan att ändra status eller skicka en anmälan vidare som uppgift till en förare. "Bilen står" hamnar alltid överst.'
-      : 'Bara du och ägaren ser dina anmälningar. Ägaren ändrar status (Ny → Pågår → Klar). Du kan ändra eller ta bort så länge den är Ny. Du och ägaren kan skriva till varandra på anmälan.') + '</div>';
+    h += '<div class="tl-foot">Historik och foton bevaras. Använd Inkorg › Meddelande för nya ärenden.</div>';
     body.innerHTML = h;
     bindCars(body);
     var nb = document.getElementById('bv-new'); if (nb) nb.onclick = function () { st.f = newIssue(kind, null); draw(); };
@@ -738,12 +727,6 @@
     if (st.mDone && st.mDone.id === m.id) return h + doneForm(m) + '</div>';
     var act = [], ph = st.photos['m' + m.id];
     if (m.photos && !ph) act.push('<button type="button" data-a="photos">📷 Visa foto (' + m.photos + ')</button>');
-    if (m.status === 'forslag' && m.mine && m.photos < 3) act.push('<button type="button" data-a="addphoto">📷 +</button>');
-    if (admin() && m.status !== 'klar') act.push('<button type="button" class="bv-send" data-a="task">📋 Skicka som uppgift</button>');
-    if (admin() && m.status === 'plan') act.push('<button type="button" class="kal-ok" data-a="done">✓ Klar</button>');
-    if (admin() && m.status === 'forslag') act.push('<button type="button" class="kal-ok" data-a="edit">Planera</button>');
-    if (admin() && m.status === 'plan') act.push('<button type="button" data-a="edit">Ändra</button>');
-    if (admin() && m.status !== 'klar' || (!admin() && m.status === 'forslag' && m.mine)) act.push('<button type="button" class="vk-del" data-a="del">Ta bort</button>');
     if (act.length) h += '<div class="vk-iact bm-act" data-id="' + m.id + '">' + act.join('') + '</div>';
     return h + '</div>';
   }
@@ -764,9 +747,7 @@
         '</span><button type="button" id="bv-setkm">Ange km</button></div>';
       h += '<div class="bv-filter">Visar bil ' + esc(c ? c.bilnummer : '') + ' <button type="button" id="bv-allcars">Visa alla</button></div>';
     } else h += '<div class="bv-filter">Tryck på en bil för att se den och ange mätarställning.</div>';
-    if (st.f && st.f.kind === 'maint') h += maintForm(st.f);
-    else h += admin() ? '<button type="button" id="bm-new" class="vk-new">＋ Planera underhåll</button>'
-      : '<button type="button" id="bm-sug" class="vk-new">💡 Föreslå underhåll (t.ex. dags för service)</button>';
+    h += '<p class="vk-note">Underhållsarkiv – bara läsning. Föreslå nya tider via Meddelande › Bokad tid.</p>';
     var all = (st.bil.maint || []).filter(function (m) { return !st.car || m.car_id === st.car; });
     var sug = all.filter(function (m) { return m.status === 'forslag'; });
     var plan = all.filter(function (m) { return m.status === 'plan'; }).sort(function (a, b) { return (b.level - a.level) || String(a.due_date || '9').localeCompare(String(b.due_date || '9')); });

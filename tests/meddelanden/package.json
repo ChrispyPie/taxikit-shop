@@ -1,1 +1,1 @@
-{"private":true,"scripts":{"test":"node db.cjs && node browser.cjs"},"devDependencies":{"@electric-sql/pglite":"0.5.15","puppeteer-core":"25.16.0"}}
+{"private":true,"scripts":{"test":"node db.cjs && node ../inkorg-v2/db.cjs && node browser.cjs"},"devDependencies":{"@electric-sql/pglite":"0.5.15","puppeteer-core":"25.16.0"}}

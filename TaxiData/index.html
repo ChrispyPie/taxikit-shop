@@ -8,7 +8,7 @@
   <script src="enhet.js?v=20261029d"></script>
   <script src="namn.js?v=20261028nm1"></script>
   <link rel="stylesheet" href="style.css?v=20261106n">
-  <link rel="stylesheet" href="mina-bevakningar.css?v=20261106m">
+  <link rel="stylesheet" href="mina-bevakningar.css?v=20261107inkorg2b">
   <link rel="stylesheet" href="tema.css?v=20261104sh1">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -109,8 +109,7 @@
   <div class="profile-menu" id="profile-menu">
       <div id="full-name" style="font-weight:600; border-bottom:1px solid var(--c-e2e8f0); cursor:default;"></div>
       <div id="menu-profile" data-badge="profile" onclick="openProfile()">Profil</div>
-      <div id="menu-inkorg" data-badge="inkorg" onclick="INKORG.show('messages')">✉️ Meddelanden</div>
-      <div id="menu-arenden" data-badge="cases" onclick="INKORG.show('cases')">📋 Ärenden</div>
+      <div id="menu-inkorg" data-badge="inkorg" onclick="INKORG.show()">📥 Inkorg</div>
       <div id="menu-om" onclick="document.getElementById('profile-menu').classList.remove('show'); openItem('om')">Om appen</div>
       <div onclick="logout()">Logga ut</div>
     </div>
@@ -155,23 +154,24 @@
   <script src="bevakning.js?v=20261028v"></script>
   <script src="tagnotis.js?v=20261029tn"></script>
   <script src="topplistor.js?v=20261106rekord7"></script>
-  <script src="sjuk.js?v=20261106ik1"></script>
-  <script src="verkstad.js?v=20261107f1"></script>
-  <script src="mina-bevakningar.js?v=20261106m"></script>
+  <script src="sjuk.js?v=20261107inkorg1"></script>
+  <script src="verkstad.js?v=20261107inkorg2b"></script>
+  <script src="mina-bevakningar.js?v=20261107inkorg2b"></script>
   <script src="kalender.js?v=20261106m"></script>
   <script src="hjalpbot.js?v=zzzda1"></script>
   <script src="profilbild.js?v=20261105kh1"></script>
   <script src="profil-sprak.js?v=20261107p1"></script>
-  <script src="profil-sida.js?v=20261107p1"></script>
+  <script src="profil-sida.js?v=20261107inkorg2b"></script>
   <script src="forum.js?v=20261106ik1"></script>
   <script src="om-data.js?v=20261106msg1"></script>
-  <script src="changelog.js?v=20261107f1"></script>
+  <script src="changelog.js?v=20261107inkorglive1"></script>
   <script src="om.js?v=20261106sc1"></script>
   <script src="lonekoll.js?v=20261028sp1"></script>
   <script src="prognos.js?v=20261104kt2"></script>
   <script src="prognos-notis.js?v=20261103pg2"></script>
-  <script src="arende-status.js?v=20261107sh1"></script>
-  <script src="inkorg.js?v=20261107kat2"></script>
+  <script src="arende-status.js?v=20261107inkorg1"></script>
+  <script src="mailbox-ui.js?v=20261107inkorg4"></script>
+  <script src="inkorg.js?v=20261107inkorg2b"></script>
   <script src="notis.js?v=20261106kp1"></script>
   <script src="swipe-back.js?v=20261106sb2"></script>
   <script>
@@ -587,6 +587,10 @@
       var d;
       try {
         d = await rpc('get_my_profile', { p_token: localStorage.getItem('taxi_session') || '' });
+        if (!((d && d.demo) || (window.DEMO && DEMO.on()))) {
+          var contacts = await MAILBOX.rpc('contacts_get', {});
+          d.phone_visibility = contacts.visibility; d.company_label = contacts.company_label;
+        }
       } catch (e) {
         if (e.code === '28000') { clearSession(); location.reload(); return; }
         content.innerHTML = '<div class="p-card"><p class="p-msg err">Kunde inte hämta profilen. Försök igen.</p></div>';
@@ -613,6 +617,7 @@
         '<p class="p-fid">Förar-ID <b>' + pEsc(d.id) + '</b></p>' +
         '<div class="p-row">' + pInput('p-first-name', 'Förnamn', d.first_name, { req: 1, ac: 'given-name' }) + pInput('p-last-name', 'Efternamn', d.last_name, { req: 1, ac: 'family-name' }) + '</div>' +
         pInput('p-phone', 'Telefon', d.phone, { req: 1, type: 'tel', im: 'tel', ac: 'tel' }) +
+        '<label for="p-phone-visibility">Visa privat telefon för</label><select id="p-phone-visibility" style="width:100%;min-height:44px;font:inherit;padding:10px;border:1px solid var(--border,#cbd5e0);border-radius:8px;background:var(--surface);color:inherit">' + [['owner','Ägare'],['company','Åkeriet'],['bolag','Alla (inom '+(d.company_label||'taxibolaget')+')']].map(function(v){return '<option value="'+v[0]+'"'+(d.phone_visibility===v[0]?' selected':'')+'>'+pEsc(v[1])+'</option>';}).join('')+'</select>' +
         pInput('p-email', 'E-post', d.email, { req: 1, type: 'email', im: 'email', ac: 'email' }) +
         pInput('p-address', 'Adress', d.address, { ac: 'street-address' }) +
         '<div class="p-row">' + pInput('p-postal', 'Postnummer', d.postal_code, { im: 'numeric', ac: 'postal-code' }) + pInput('p-city', 'Ort', d.city, { ac: 'address-level2' }) + '</div>' +
@@ -668,7 +673,7 @@
       var btn = document.getElementById('p-save');
       btn.disabled = true;
       try {
-        await rpc('save_my_profile', { p_token: localStorage.getItem('taxi_session') || '', p_data: data });
+        await MAILBOX.rpc('profile_save', {profile:data,visibility:document.getElementById('p-phone-visibility').value});
         ['p-phone', 'p-em-phone', 'p-email'].forEach(function (id) { document.getElementById(id).classList.remove('invalid'); });
         P_FIELDS.forEach(function (f) { document.getElementById(f[0]).value = data[f[1]]; });
         driverData.first_name = data.first_name;
