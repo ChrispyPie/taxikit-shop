@@ -23,7 +23,7 @@ window.CHANGELOG = [
     ['Nytt', 'Sjukanmälan: ärendet visar nu en historik med datum och tid – när den anmäldes, varje intyg som laddats upp och varje statusbyte, och vem som gjorde det.'],
     ['Ändrat', 'Ärenden › Adminverktyg: Godkänn, Avslå, Öppna igen och de andra knapparna ser likadana ut (ingen ifylld färg), så det inte ser ut som att ärendet redan är godkänt. Bara statusen har färg.', 'admin']
   ] },
-  { datum: '2026-11-07', id: '2026-11-07a', tid: '02:45', rader: [
+  { datum: '2026-11-07', id: '2026-11-07a', tid: '02:30', rader: [
     ['Nytt', 'Bil & verkstad: när admin eller ägare trycker Ändra på en anmälan finns nu Kategori under Bil. Där kan du byta mellan Felanmälan och Behövs. Bytet skrivs i ärendets tråd.', 'admin'],
     ['Ändrat', 'När du öppnar en anmälan eller ett ärende för att ändra den visas bara den. Flikarna och bilraden döljs. Avbryt, Spara, ‹ Ärenden eller svep bakåt tar dig tillbaka till listan.']
   ] },
