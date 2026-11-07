@@ -18,7 +18,7 @@
    return Promise.reject(new Error('demo_read_only'));
   }
   return A.rpc('mailbox_v2',{p_action:action,p_data:data||{}});},create:function(admin,name){
-  var U={},st={el:null,mode:'list',filter:'all',trash:false,canTrash:false,selected:[],flags:[],threads:[],cases:[],old:[],next:null,thread:null,legacy:null,recipients:[],cars:[],optionsPending:false,draft:{},busy:false,error:'',epoch:0,request:0,loaded:false};
+  var U={},st={el:null,mode:'list',filter:'all',trash:false,canTrash:false,selected:[],flags:[],threads:[],cases:[],old:[],next:null,thread:null,legacy:null,recipients:[],cars:[],optionsPending:false,draft:{},busy:false,error:'',epoch:0,request:0,refreshRequest:0,loaded:false};
   function rpc(action,data){return MAILBOX.rpc(action,Object.assign({},data,{admin:admin}));}
   function push(){try{history.pushState({view:admin?'admin':'inkorg',sub:'thread'},'');}catch(e){}}
   function go(mode){st.mode=mode;st.error='';push();paint();}
@@ -28,14 +28,15 @@
   function flagged(kind,id){return !!preference(kind,id).is_unread;}
   function hidden(kind,id){return !!preference(kind,id).hidden;}
  function owner(){return !admin&&['agare','superadmin'].indexOf(window.INKORG_ROLE)>=0;}
-  U.count=function(){return st.threads.filter(function(x){return !hidden('thread',x.id)&&(x.unread||flagged('thread',x.id));}).length+st.cases.filter(function(x){return !hidden(x.kind,x.id)&&(x.needs||x.unread>0||flagged(x.kind,x.id));}).length+st.old.filter(function(x){return !hidden('old-message',x.id)&&(x.unread||flagged('old-message',x.id));}).length;};
-  function badge(){if(!admin&&window.setBadge){setBadge('inkorg',U.count());setBadge('profbtn',U.count()>0||!!window.INKORG_NEEDS_PROFILE);}}
+  // Oläst är personligt. needs styr arbetsgrupper, aldrig läsprickar eller aktivitetsantal.
+  U.count=function(){return st.threads.filter(function(x){return !hidden('thread',x.id)&&(x.unread||flagged('thread',x.id));}).length+st.cases.filter(function(x){return !hidden(x.kind,x.id)&&(x.unread>0||flagged(x.kind,x.id));}).length+st.old.filter(function(x){return !hidden('old-message',x.id)&&(x.unread||flagged('old-message',x.id));}).length;};
+  function badge(){if(!admin)window.INKORG_HAS=U.count()>0;if(!admin&&window.setBadge){setBadge('inkorg',U.count());setBadge('profbtn',U.count()>0||!!window.INKORG_NEEDS_PROFILE);}}
   U.refresh=function(){
-   var epoch=st.epoch;
+   var epoch=st.epoch,refreshRequest=++st.refreshRequest;
    return Promise.all([rpc('list',{}),A.rpc(admin?'case_admin_list':'case_inbox',{p_klar_limit:5000}),admin?Promise.resolve({items:[]}):A.rpc('conversation_list',{}),rpc('item_flags',{}),rpc('mailbox_capabilities',{})]).then(function(d){
-    if(epoch!==st.epoch)return 0;
+    if(epoch!==st.epoch||refreshRequest!==st.refreshRequest)return U.count();
     st.canTrash=admin&&!!(d[4]&&d[4].can_trash);st.flags=d[3]||[];st.threads=d[0]||[];st.cases=(d[1].items||[]).filter(function(x){return x.kind!=='wish';});st.old=d[2].items||[];st.next=d[2].next;st.loaded=true;st.error='';badge();if(st.mode==='list')paint();return U.count();
-   }).catch(function(e){if(epoch!==st.epoch)return 0;st.loaded=true;st.error=err(e);if(st.mode==='list')paint();return 0;});
+   }).catch(function(e){if(epoch!==st.epoch||refreshRequest!==st.refreshRequest)return U.count();st.loaded=true;st.error=err(e);if(st.mode==='list')paint();return 0;});
   };
   U.moreOld=function(){if(!st.next||st.busy)return;var epoch=st.epoch;st.busy=true;A.rpc('conversation_list',{p_before:st.next}).then(function(d){if(epoch!==st.epoch)return;st.old=st.old.concat(d.items||[]);st.next=d.next;st.busy=false;if(st.mode==='list')paint();}).catch(function(e){if(epoch!==st.epoch)return;st.busy=false;st.error=err(e);if(st.mode==='list')paint();});};
   U.render=function(el){st.el=el;paint();if(st.mode==='list')U.refresh();};
@@ -55,13 +56,13 @@
   U.openThread=function(id){
    if(owner()){location.href='admin.html#message='+encodeURIComponent(id);return Promise.resolve();}
    st.mode='loading';st.thread=null;var request=++st.request;push();if(!admin&&window.openInbox)openInbox();else paint();var epoch=st.epoch;
-   return rpc('get',{thread_id:id}).then(function(d){if(epoch!==st.epoch||request!==st.request||st.mode!=='loading')return;st.thread=d;rpc('mark_read',{kind:'thread',id:id}).then(U.refresh).catch(function(){});st.mode='thread';paint();U.refresh();}).catch(function(e){if(epoch!==st.epoch||request!==st.request)return;st.error=err(e);st.mode='list';paint();});
+   return rpc('get',{thread_id:id}).then(async function(d){if(epoch!==st.epoch||request!==st.request||st.mode!=='loading')return;try{await rpc('mark_read',{kind:'thread',id:id});}catch(e){st.error=err(e);}if(epoch!==st.epoch||request!==st.request||st.mode!=='loading')return;st.thread=d;st.mode='thread';paint();return U.refresh();}).catch(function(e){if(epoch!==st.epoch||request!==st.request)return;st.error=err(e);st.mode='list';paint();});
   };
   U.openCase=function(kind,id){
    if(kind==='wish'){if(admin&&window.openMenu)openMenu('onskemal');else if(U.isAdmin())location.href='admin.html#onskemal';return;}
    st.mode='loading';var request=++st.request;push();if(!admin&&window.openInbox)openInbox();else paint();
    var epoch=st.epoch;
-   return Promise.all([A.rpc(kind==='old-message'?'conversation_get':'case_get',kind==='old-message'?{p_id:id}:{p_kind:kind,p_id:id}),rpc('item_lock',{kind:kind,id:id})]).then(function(result){var c=result[0];c.locked=!!(result[1]&&result[1].locked);if(epoch!==st.epoch||request!==st.request||st.mode!=='loading')return;st.legacy={kind:kind,data:c};rpc('mark_read',{kind:kind,id:id}).then(U.refresh).catch(function(){});st.mode='legacy';paint();if(kind!=='old-message')A.rpc('case_seen',{p_kind:kind,p_id:id}).catch(function(){});}).catch(function(e){if(epoch!==st.epoch||request!==st.request)return;st.error=err(e);st.mode='list';paint();});
+   return Promise.all([A.rpc(kind==='old-message'?'conversation_get':'case_get',kind==='old-message'?{p_id:id}:{p_kind:kind,p_id:id}),rpc('item_lock',{kind:kind,id:id})]).then(async function(result){var c=result[0];c.locked=!!(result[1]&&result[1].locked);if(epoch!==st.epoch||request!==st.request||st.mode!=='loading')return;try{await Promise.all([rpc('mark_read',{kind:kind,id:id}),kind==='old-message'?Promise.resolve():A.rpc('case_seen',{p_kind:kind,p_id:id})]);}catch(e){st.error=err(e);}if(epoch!==st.epoch||request!==st.request||st.mode!=='loading')return;st.legacy={kind:kind,data:c};st.mode='legacy';paint();return U.refresh();}).catch(function(e){if(epoch!==st.epoch||request!==st.request)return;st.error=err(e);st.mode='list';paint();});
   };
   U.tap=U.openCase;U.readConversation=function(id){return U.openCase('old-message',id);};
   function formField(label,id,type,required,max){var d=st.draft,v=d[id]||'';return '<label for="mx-'+id+'">'+label+'</label><input id="mx-'+id+'" data-mx="'+id+'" type="'+(type||'text')+'"'+(required?' required':'')+(max?' maxlength="'+max+'"':'')+' value="'+esc(v)+'">';}
@@ -109,7 +110,7 @@
    h+=admin?'<div class="mx-actions"><button onclick="'+name+'.compose()">Meddelande</button><button onclick="'+name+'.newBooking()">Bokad tid</button></div>':'<button class="mx-new" onclick="'+name+'.newCase()">＋ Nytt ärende</button>';
    if(owner())h+='<p class="ar-note">Alla dina ärenden hanteras i <a href="admin.html#arenden">Admin › Ärenden</a>.</p>';
    var all=st.threads.map(function(t){return {kind:'thread',id:t.id,at:t.at,title:t.subject,body:t.last_body||'',meta:t.name+(t.car_number?' · Bil '+t.car_number:'')+(t.locked?' · Tråden är stängd':''),unread:t.unread||flagged('thread',t.id),open:name+'.openThread('+t.id+')',cat:'message',group:threadGroup(t)};});
-   all=all.concat(st.cases.map(function(c){return {kind:c.kind,id:c.id,at:c.at,title:c.title,body:c.last_txt||c.txt||'',meta:(c.car?'Bil '+c.car+' · ':'')+(A.WORDS[c.st]||'')+(['sjuk','wh'].indexOf(c.kind)<0?' · Arkiv':''),unread:c.unread||c.needs||flagged(c.kind,c.id),open:name+'.openCase(\''+c.kind+'\','+c.id+')',cat:category(c),group:caseGroup(c)};}));
+   all=all.concat(st.cases.map(function(c){return {kind:c.kind,id:c.id,at:c.at,title:c.title,body:c.last_txt||c.txt||'',meta:(c.car?'Bil '+c.car+' · ':'')+(A.WORDS[c.st]||'')+(['sjuk','wh'].indexOf(c.kind)<0?' · Arkiv':''),unread:c.unread>0||flagged(c.kind,c.id),open:name+'.openCase(\''+c.kind+'\','+c.id+')',cat:category(c),group:caseGroup(c)};}));
    all=all.concat(st.old.map(function(c){return {kind:'old-message',id:c.id,at:c.at,title:c.subject,body:c.last_body,meta:'Äldre privat samtal · bara läsning',unread:c.unread||flagged('old-message',c.id),open:name+'.readConversation('+c.id+')',cat:'message',group:2};}));
    all=all.filter(function(x){return !preference(x.kind,x.id).permanent&&(st.trash?st.canTrash&&preference(x.kind,x.id).in_trash:!hidden(x.kind,x.id))&&(st.filter==='all'||st.filter===x.cat);}).sort(function(a,b){return Date.parse(b.at)-Date.parse(a.at);});
    h+='<p class="mx-error mx-server-error" role="alert">'+esc(st.error)+'</p>';
@@ -165,7 +166,7 @@
   U.has=function(k,id){return st.cases.some(function(x){return x.kind===k&&x.id===+id;});};
   U.isAdmin=function(){return ['admin','agare','superadmin'].indexOf(window.INKORG_ROLE)>=0;};
   U.badge=function(){var n=U.count();return n?'<span class="ar-badge">'+n+'</span>':'';};
-  U.logout=function(){st.epoch++;st.mode='list';st.trash=false;st.canTrash=false;st.selected=[];st.flags=[];st.threads=[];st.cases=[];st.old=[];st.thread=null;st.legacy=null;st.recipients=[];st.cars=[];st.optionsPending=false;st.draft={};st.el=null;st.busy=false;};
+  U.logout=function(){st.epoch++;st.mode='list';st.trash=false;st.canTrash=false;st.selected=[];st.flags=[];st.threads=[];st.cases=[];st.old=[];st.thread=null;st.legacy=null;st.recipients=[];st.cars=[];st.optionsPending=false;st.draft={};st.el=null;st.busy=false;if(!admin)window.INKORG_HAS=false;};
   U.load=U.refresh;U.needs=U.count;U.isOpen=function(){return st.mode!=='list';};
   return U;
  }};
