@@ -32,7 +32,10 @@ begin
  if v_admin and not a.is_admin then raise exception 'forbidden' using errcode='42501'; end if;
  if private.is_demo() then raise exception 'demo_read_only' using errcode='42501'; end if;
  v_role:=case when v_admin then 'admin' else 'driver' end;
- if p_action='mailbox_capabilities' then
+ if p_action='item_lock' then
+   perform inbox_private.dispatch(p_token,'preference_authorize',p_data);
+   return jsonb_build_object('locked',exists(select 1 from inbox_private.party_deletions d where d.company_id=a.company_id and d.kind=p_data->>'kind' and d.item_id=(p_data->>'id')::bigint and (d.owner_hidden or d.owner_permanent)));
+ elsif p_action='mailbox_capabilities' then
    return jsonb_build_object('can_trash',v_admin and a.category=any(private.mailbox_trash_roles()),'secret_hard_delete_enabled',private.mailbox_secret_hard_delete_enabled());
  elsif p_action='item_flags' then
    return coalesce((select jsonb_agg(jsonb_build_object('kind',k.kind,'id',k.item_id,'is_unread',coalesce(f.is_unread,false),'pinned',coalesce(f.pinned,false),
@@ -48,11 +51,12 @@ begin
      perform inbox_private.dispatch(p_token,case when p_data->>'operation'='unread' then 'mark_unread' else 'preference_authorize' end,jsonb_build_object('admin',v_admin,'kind',v_result->>'kind','id',v_result->>'id'));
      v_kind:=v_result->>'kind';v_id:=(v_result->>'id')::bigint;
      -- Serialize the two parties' deletion decisions, so either deletion order is safe.
-     if v_kind='thread' then select * into t from inbox_private.threads where id=v_id for update; end if;
+     if v_kind='thread' then select * into t from inbox_private.threads where id=v_id for update;
+     elsif v_kind='wh' then perform 1 from public.workshop_hours where id=v_id for update; end if;
      if p_data->>'operation' in ('restore','permanent') then
        if not exists(select 1 from inbox_private.party_deletions d where d.company_id=a.company_id and d.kind=v_kind and d.item_id=v_id and d.owner_hidden and not d.owner_permanent) then raise exception 'not_in_trash' using errcode='22023'; end if;
        update inbox_private.party_deletions set owner_hidden=p_data->>'operation'='permanent',owner_permanent=p_data->>'operation'='permanent' where company_id=a.company_id and kind=v_kind and item_id=v_id;
-     elsif p_data->>'operation'='hide' and v_admin and a.category=any(private.mailbox_trash_roles()) then
+     elsif p_data->>'operation'='hide' and v_admin then
        insert into inbox_private.party_deletions(company_id,kind,item_id,owner_hidden) values(a.company_id,v_kind,v_id,true)
        on conflict(company_id,kind,item_id) do update set owner_hidden=true;
      elsif p_data->>'operation' in ('pin','unpin','hide') then
@@ -132,6 +136,7 @@ begin
    return coalesce((select jsonb_agg(j order by at desc,id desc) from (
      select th.id,th.updated_at at,jsonb_build_object('id',th.id,'subject',th.subject,'car_number',th.car_number,'at',th.updated_at,
        'name',case when v_admin then private.bil_driver_name(th.driver_id) else 'Admin' end,
+       'locked',exists(select 1 from inbox_private.party_deletions d where d.company_id=th.company_id and d.kind='thread' and d.item_id=th.id and (d.owner_hidden or d.owner_permanent)),
        'booking_states',coalesce((select jsonb_agg(bk.status) from inbox_private.bookings bk where bk.thread_id=th.id),'[]'),
        'last_sender_role',(select m.sender_role from inbox_private.messages m where m.thread_id=th.id order by m.created_at desc,m.id desc limit 1),
        'decision_reply',exists(select 1 from inbox_private.messages m join inbox_private.bookings bk on bk.thread_id=m.thread_id and bk.status='declined' and bk.reason=m.body and m.created_at between bk.decided_at and bk.decided_at+interval '1 second' where m.thread_id=th.id and m.id=(select lm.id from inbox_private.messages lm where lm.thread_id=th.id order by lm.created_at desc,lm.id desc limit 1)),
@@ -162,9 +167,15 @@ begin
    select * into t from inbox_private.threads where id=v_id and company_id=a.company_id and (v_admin or (driver_id=a.driver_id and a.category not in ('agare','superadmin')));
    if not found then raise exception 'not_found' using errcode='P0002'; end if;
  end if;
+ -- Reply/book/decide all write messages: enforce read-only on the server, not just in UI.
+ select * into t from inbox_private.threads where id=t.id for update;
+ if not found then raise exception 'not_found' using errcode='P0002'; end if;
+ if p_action in ('reply','book','decide') and exists(select 1 from inbox_private.party_deletions d where d.company_id=t.company_id and d.kind='thread' and d.item_id=t.id and (d.owner_permanent or (not v_admin and d.owner_hidden))) then
+   raise exception 'thread_closed' using errcode='42501';
+ end if;
  if p_action='get' then
    insert into inbox_private.reads(thread_id,driver_id,seen_at) values(t.id,a.driver_id,clock_timestamp()) on conflict(thread_id,driver_id) do update set seen_at=excluded.seen_at;
-   return jsonb_build_object('id',t.id,'subject',t.subject,'car_number',t.car_number,'car_id',t.car_id,'driver_id',case when v_admin then t.driver_id end,'is_driver',t.driver_id=a.driver_id,
+   return jsonb_build_object('locked',exists(select 1 from inbox_private.party_deletions d where d.company_id=t.company_id and d.kind='thread' and d.item_id=t.id and (d.owner_hidden or d.owner_permanent)),'id',t.id,'subject',t.subject,'car_number',t.car_number,'car_id',t.car_id,'driver_id',case when v_admin then t.driver_id end,'is_driver',t.driver_id=a.driver_id,
      'messages',coalesce((select jsonb_agg(jsonb_build_object('id',m.id,'body',m.body,'role',m.sender_role,'mine',m.sender_id=a.driver_id,'at',m.created_at) order by m.created_at,m.id) from inbox_private.messages m where m.thread_id=t.id),'[]'),
      'bookings',coalesce((select jsonb_agg(to_jsonb(bk) - 'proposed_by' - 'decided_by' order by bk.created_at,bk.id) from inbox_private.bookings bk where bk.thread_id=t.id),'[]'));
  elsif p_action='reply' then
@@ -199,8 +210,29 @@ begin
    insert into inbox_private.messages(thread_id,sender_id,sender_role,body) values(t.id,a.driver_id,'system',case when p_data->>'decision'='accepted' then 'Bokad tid godkänd: ' else 'Bokad tid avböjd: ' end||b.title);
    if p_data->>'decision'='declined' then insert into inbox_private.messages(thread_id,sender_id,sender_role,body) values(t.id,a.driver_id,v_role,v_body); end if;
  else raise exception 'bad_action' using errcode='22023'; end if;
+ -- A new admin-side message resurrects the driver's ENTIRE existing history, never a copy.
+ if v_admin then
+   update inbox_private.unread_flags set hidden=false where driver_id=t.driver_id and kind='thread' and item_id=t.id;
+ end if;
  update inbox_private.threads set updated_at=clock_timestamp() where id=t.id;
  return jsonb_build_object('id',t.id);
 end $function$
 ;
+
+create or replace function inbox_private.workshop_mailbox_guard() returns trigger
+language plpgsql security definer set search_path='' as $$
+declare v_driver text;v_company text;
+begin
+ select w.driver_id into v_driver from public.workshop_hours w where w.id=new.hours_id for update;
+ v_company:=private.actor_company(v_driver);
+ if new.sender_role='driver' and exists(select 1 from inbox_private.party_deletions d where d.company_id=v_company and d.kind='wh' and d.item_id=new.hours_id and (d.owner_hidden or d.owner_permanent)) then
+   raise exception 'thread_closed' using errcode='42501';
+ end if;
+ if new.sender_role='owner' then
+   update inbox_private.unread_flags set hidden=false where driver_id=v_driver and kind='wh' and item_id=new.hours_id;
+ end if;
+ return new;
+end $$;
+revoke all on function inbox_private.workshop_mailbox_guard() from public,anon,authenticated;
+create or replace trigger mailbox_closed_workshop before insert on public.workshop_messages for each row execute function inbox_private.workshop_mailbox_guard();
 commit;

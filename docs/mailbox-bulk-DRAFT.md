@@ -1,22 +1,33 @@
 # Steg 2 – utkast, INTE driftsatt
 
-Checkbox före varje rad i Admin › Ärenden och Meddelanden. Upp till 100 valda rader per åtgärd.
-Nåla fast, Ta bort nål, Markera som oläst och Radera.
+Checkbox före varje rad i Admin › Ärenden och Meddelanden. Upp till 100 valda rader. Nåla fast, Ta bort nål och Markera som oläst är personliga inställningar som tidigare.
 
-## Radera enligt Christian 20:20
-- Förare: bara en privat dold-flagga. Ingen papperskorg/återställning i förarvyn.
-- Vanlig admin: privat dold-flagga, ingen papperskorg. Räknas inte som ägarens permanenta radering.
-- Ägare: Radera lägger ärendet i åkeriets Papperskorg under Admin › Ärenden. Där finns Återställ och Radera på riktigt.
-- Radera på riktigt tar bort det från ägarsidan, men föraren behåller sin kopia tills föraren också raderar.
-- När båda parter raderat en vanlig v2-meddelandetråd raderas trådens meddelanden, bokningar och läsmarkeringar atomiskt. Båda ordningarna stöds via radlås.
-- Äldre ärendetyper bevaras fysiskt tills deras beroenden granskats; båda sidors dold-flaggor gäller fortfarande. Inga bilärenden hårdraderas av detta utkast.
-- `private.mailbox_secret_hard_delete_enabled()` är uttryckligen **false**. Ingen hårdraderingskod finns för sjukuppgifter, intyg eller storage-filer. Att slå på flaggan ensamt aktiverar inte sådan radering; kräver separat granskad implementation.
+## Radera enligt Christian 20:29
+- **Användaren raderar:** tråden döljs bara för användaren. Ingen papperskorg. Admin ser fortfarande tråden. Ett nytt svar/meddelande från adminsidan tar bort användarens dold-flagga så hela den befintliga historiken visas igen, utan kopiering.
+- **Admin eller ägare raderar:** tråden flyttas till åkeriets gemensamma Papperskorg. Vanlig admin får lägga där men inte öppna papperskorgen. Användaren kan läsa hela tråden, men den är låst: ”Tråden är stängd”.
+- **Papperskorg:** bara ägare och tillfälligt superadmin. Återställ visar åter ärendet på adminsidan och låser upp det. Radera på riktigt döljer permanent på adminsidan; användaren behåller läsrätt, inte svarsrätt. Permanent radering kräver bekräftelse.
+- **Fysisk radering:** vanliga v2-trådar raderas helt först när användaren har raderat OCH ägaren permanent raderat från Papperskorg. Båda ordningarna stöds via radlås. Meddelanden, bokningar och läsmarkeringar raderas då atomiskt.
+- **RPC-spärr:** låsta användartrådar avvisar reply, book och decide på servern med `thread_closed` (42501), även om någon försöker kringgå UI. Permanent stängda trådar avvisar också nya adminmeddelanden.
+
+## Äldre ärenden och sekretess – gränser
+Äldre ärenden bevaras fysiskt tills deras beroenden granskats. Sidornas dold-/permanent-flaggor stöds. Låsstatus hämtas efter samma behörighetskontroll som öppning. Verkstadstid har dessutom ett servertrigger-skydd mot användarsvar medan tråden är låst; ett ägarsvar visar åter en användardold verkstadstråd. Övriga gamla bilärenden/privata samtal är redan läsarkiv.
+
+Sjukanmälan och intyg kan fortfarande läsas av behörig person. UI döljer ändringsknappar i en låst sjuktråd, men separata medicinska rapporterings-/intygsflöden spärras inte globalt: detta kräver separat beslut. `private.mailbox_secret_hard_delete_enabled()` är **false**, och ingen hårdraderingskod finns för sjukuppgifter, intyg eller storage-filer. Att slå på flaggan ensam aktiverar inte sådan radering. Bilärende 21 lämnas orört.
 
 ## Tillfällig superadmin
-`private.mailbox_trash_roles()` delegerar till `private.sjuk_boss_roles()`. Nu får ägare och tillfälligt superadmin testa papperskorgen i sitt åkeri. När superadmin tas bort centralt från sjuk_boss_roles försvinner även papperskorgsrätten. Ingen hårdkodning av Christians ID och ingen utökning av sjuksekretessen.
+`private.mailbox_trash_roles()` delegerar till `private.sjuk_boss_roles()`. Ägare och tillfälligt superadmin får testa Papperskorg inom sitt åkeri. Tas superadmin bort centralt där försvinner även papperskorgsrätten. Ingen hårdkodning av Christians ID och ingen utökning av sjuksekretessen.
 
-Migration: `20261107191742_mailbox_bulk_preferences.sql`. Ska INTE köras i produktion före godkännande.
-Undo SQL: `supabase/migrations/undo/20261107191742_mailbox_bulk_preferences.sql` återställer steg-1-funktionen och bevarar metadata. Redan ömsesidigt hårdraderat innehåll kan inte återställas av undo; kräver backup. Detta är ett viktigt beslut före kör.
+## Migration och undo
+Migration: `20261107191742_mailbox_bulk_preferences.sql`. **INTE applicerad i produktion.**
+Undo: `supabase/migrations/undo/20261107191742_mailbox_bulk_preferences.sql` återställer steg-1-funktionen, tar bort den nya verkstadstriggern och bevarar metadata.
 UI undo: `git revert <step-2-commit>`.
+Redan ömsesidigt hårdraderat innehåll kan inte återställas av undo SQL; backup krävs.
 
-Testa på iPhone: välj flera rader, filtrera, nåla fast/ta bort nål, markera oläst. Förare och vanlig admin ska inte se papperskorg. Ägare och tillfällig superadmin testar återställning och permanent radering. Motparten ska behålla innehållet fram till sin radering. Testa båda raderingsordningarna med påhittade trådar, aldrig riktiga sjukuppgifter.
+## Testa på iPhone före kör
+1. Användaren raderar → bara användarens rad försvinner. Admin svarar → hela historiken visas igen.
+2. Vanlig admin raderar → ärendet lämnar Ärenden, men vanlig admin ser ingen Papperskorg. Användaren kan läsa men inte svara/boka/besluta.
+3. Ägare/tillfällig superadmin återställer → användaren kan svara igen.
+4. Ägare raderar permanent → användaren kan fortfarande läsa, men inte svara. När användaren också raderar försvinner vanliga testtråden helt. Testa även omvänd ordning med påhittade trådar.
+5. Prova flerval, nålar, oläst och långa rubriker på liten skärm. Använd aldrig riktiga sjukuppgifter för raderingstest.
+
+Verifiering: syntetiska admin/förar-UI-tester och 159 isolerade PostgreSQL/PGlite-assertioner. Ingen riktig iPhone eller skärmbildsverifiering ännu.

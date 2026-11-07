@@ -1,5 +1,6 @@
 -- Restore step 1 dispatch. Keep metadata columns and values for reversible rollback.
 begin;
+drop trigger if exists mailbox_closed_workshop on public.workshop_messages;
 CREATE OR REPLACE FUNCTION inbox_private.dispatch(p_token text, p_action text, p_data jsonb DEFAULT '{}'::jsonb)
  RETURNS jsonb
  LANGUAGE plpgsql

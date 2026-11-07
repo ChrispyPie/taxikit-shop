@@ -136,6 +136,38 @@ const deny=(who,action,data={},code)=>denied('select mailbox_v2($1,$2,$3::jsonb)
  await ownerBulk('hide',[{kind:'sjuk',id:1}]);await ownerBulk('permanent',[{kind:'sjuk',id:1}]);ok((await scalar("select case_get('driver','sjuk',1)")).kind==='sjuk');
  await bulk('pin',[{kind:'old-message',id:old}]);ok((await call('driver','item_flags')).some(x=>x.kind==='old-message'&&x.pinned));
  ok((await scalar('select count(*) from inbox_private.messages'))===countBefore);
+ // Final rules: admin replies resurrect a driver-hidden history; admin trash locks writes.
+ const life=await call('driver','create',{subject:'Synthetic lifecycle',body:'Original complete history',car_choice:'none'}), li={kind:'thread',id:life.id};
+ await bulk('hide',[li]);ok((await call('driver','item_flags')).some(x=>x.id===li.id&&x.hidden));
+ await call('admin','reply',{admin:true,thread_id:li.id,body:'New admin answer'});
+ ok(!(await call('driver','item_flags')).find(x=>x.kind==='thread'&&x.id===li.id).hidden);
+ let history=await call('driver','get',{thread_id:li.id});ok(history.messages.length===2&&history.messages[0].body==='Original complete history'&&!history.locked);
+ await call('admin','book',{admin:true,thread_id:li.id,car_choice:'none',date,time:'18:45',kind:'Synthetic lock booking'});
+ const lockBid=(await call('driver','get',{thread_id:li.id})).bookings[0].id;
+ await call('admin','bulk_preferences',{admin:true,operation:'hide',items:[li]});
+ ok((await call('owner','item_flags',{admin:true})).some(x=>x.kind==='thread'&&x.id===li.id&&x.in_trash));
+ history=await call('driver','get',{thread_id:li.id});ok(history.locked&&history.messages[0].body==='Original complete history');
+ await deny('driver','reply',{thread_id:li.id,body:'Cannot reply while locked'},'42501');
+ await deny('driver','book',{thread_id:li.id,car_choice:'none',date,time:'19:00',kind:'Cannot book while locked'},'42501');
+ await deny('driver','decide',{booking_id:lockBid,decision:'accepted'},'42501');
+ await ownerBulk('restore',[li]);ok(!(await call('driver','get',{thread_id:li.id})).locked);
+ await call('driver','reply',{thread_id:li.id,body:'Unlocked reply'});ok((await call('driver','get',{thread_id:li.id})).messages.at(-1).body==='Unlocked reply');
+ await call('admin','bulk_preferences',{admin:true,operation:'hide',items:[li]});await ownerBulk('permanent',[li]);
+ ok((await call('driver','get',{thread_id:li.id})).locked);
+ await deny('driver','reply',{thread_id:li.id,body:'Permanently closed'},'42501');
+ await deny('admin','reply',{admin:true,thread_id:li.id,body:'Cannot reopen permanent'},'42501');
+ await deny('owner','bulk_preferences',{admin:true,operation:'restore',items:[li]},'22023');
+ // Legacy workshop replies are guarded at the storage boundary (including direct old RPC paths).
+ const wid=await scalar("insert into workshop_hours(driver_id,start_at,end_at,car_label) values('driver',now(),now()+interval '1 hour','25') returning id"), wi={kind:'wh',id:wid};
+ await bulk('hide',[wi]);
+ await db.query("insert into workshop_messages(hours_id,sender_id,sender_role,body) values($1,'admin','owner','Synthetic legacy admin reply')",[wid]);
+ ok(!(await call('driver','item_flags')).find(x=>x.kind==='wh'&&x.id===wid).hidden);
+ await call('admin','bulk_preferences',{admin:true,operation:'hide',items:[wi]});
+ ok((await call('driver','item_lock',{kind:'wh',id:wid})).locked);
+ await denied("insert into workshop_messages(hours_id,sender_id,sender_role,body) values($1,'driver','driver','Blocked old reply')",[wid],'42501');
+ await ownerBulk('restore',[wi]);ok(!(await call('driver','item_lock',{kind:'wh',id:wid})).locked);
+ await db.query("insert into workshop_messages(hours_id,sender_id,sender_role,body) values($1,'driver','driver','Unlocked old reply')",[wid]);
+ ok((await scalar('select count(*) from workshop_messages where hours_id=$1',[wid]))===2);
  // Both deletion orders and independent party retention, ordinary new threads only.
  const fresh=async()=>call('driver','create',{subject:'Synthetic mutual delete',body:'Synthetic payload',car_choice:'none'});
  let purge1=await fresh(),i1={kind:'thread',id:purge1.id};
