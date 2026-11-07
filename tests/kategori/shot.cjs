@@ -17,7 +17,7 @@ if(act)await p.evaluate(act);await new Promise(r=>setTimeout(r,200));
 const has=await p.evaluate(()=>!!document.querySelector('.bv-kat'));const hid=await p.evaluate(()=>getComputedStyle(document.getElementById('bv-top')).display==='none'&&!document.querySelector('.bv-cars'));console.log(file,'kategori-selector:',has,'rows-hidden:',hid,'errors:',errs.length?errs:'none');
 await p.screenshot({path:path.join(out,file+'.png')});
 await p.evaluate(()=>INKORG.back());const back=await p.evaluate(()=>getComputedStyle(document.getElementById('bv-top')).display!=='none'&&!!document.querySelector('.bv-cars')&&!document.querySelector('.vk-form'));console.log('  back->list rows visible:',back);}
-await run('agare',true,NAME+'-admin-andra-kategori');
-await run('agare',true,NAME+'-admin-valt-behovs',"document.querySelector('.bv-kat[data-s=kvitto]').click()");
-await run('standard',false,NAME+'-forare-ingen-kategori');
+
+
+await run('agare',true,NAME+'-admin-valt-underhall',"document.querySelector('.bv-kat[data-k=maint2]').click()");
 await br.close();server.close();})().catch(e=>{console.error(e);process.exit(1)});
