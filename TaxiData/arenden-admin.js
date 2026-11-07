@@ -110,6 +110,19 @@
         (d.status !== 'pagar' && d.status !== 'klar' ? btn('Pågår', "ARENDEN_ADMIN.act('pagar')") : '') +
         (d.status !== 'klar' ? btn(OK + ' Klar', "ARENDEN_ADMIN.act('klar')", 'ok') : btn('↩️ Öppna igen', "ARENDEN_ADMIN.act('ny')")) + '</div>' +
         '<div class="ar-note">Står det text i rutan när du ändrar status, skickas den med som kommentar.</div>';
+      if (d.status !== 'klar') {
+        // Ändra kategori (bara admin – servern kollar också). Samma val som i Bil & verkstad.
+        var cur = d.kind === 'fault' ? 'fault' : 'supply:' + d.supply;
+        var opt = function (v, t) { return '<option value="' + v + '"' + (v === cur ? ' selected' : '') + '>' + t + '</option>'; };
+        h += '<div class="ar-h" style="margin-top:12px">Ändra kategori</div>' +
+          '<select id="ara-kat" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border,#cbd5e0);font-size:16px;background:var(--surface,#fff);color:inherit">' +
+          opt('fault', '🚨 Felanmälan') + '<optgroup label="Behövs">' + opt('supply:kvitto', '🧾 Kvittorullar') + opt('supply:spolar', '💧 Spolarvätska') +
+          opt('supply:rengoring', '🧽 Rengöring') + opt('supply:annat', '✏️ Annat') + '</optgroup><optgroup label="Underhåll (blir förslag)">' +
+          opt('maint:service', '🔧 Service') + opt('maint:dack_sommar', '☀️ Däck sommar') + opt('maint:dack_vinter', '❄️ Däck vinter') +
+          opt('maint:bromsar', '🛑 Bromsar') + opt('maint:besiktning', '📋 Besiktning') + opt('maint:annat', '✏️ Annat') + '</optgroup></select>' +
+          '<div class="ar-btns">' + btn('Byt kategori', 'ARENDEN_ADMIN.kat()') + btn('✏️ Öppna i Bil & verkstad', "VERKSTAD_ADMIN.openApp('" + (d.kind === 'fault' ? 'fel' : 'behov') + "')") + '</div>' +
+          '<div class="ar-note">Bytet skrivs i tråden. Väljer du Underhåll flyttas anmälan dit som förslag och stängs här. Foton följer med. Är det Underhåll → Annat används texten i rutan som namn.</div>';
+      }
     } else if (k === 'wh') {
       h += ta('Fråga eller motivering till beslutet…');
       h += '<div class="ar-btns">' + btn('Fråga föraren', "ARENDEN_ADMIN.act('ask')", 'pri') + '</div>';
@@ -149,6 +162,29 @@
     A.mountCertificates(c, el);
   }
 
+  var KERR = { bad_car: 'Anmälan måste ha en bil från listan för att flyttas till Underhåll.', need_text: 'Skriv ett namn i rutan (för Annat) eller text i anmälan.',
+    not_editable: 'Bara admin kan byta kategori, och inte på en klar anmälan.' };
+  R.kat = function () {
+    var c = st.cur, sel = document.getElementById('ara-kat'); if (!c || st.busy || !sel) return;
+    var v = sel.value.split(':'), d = c.data || {}, ta = document.getElementById('ara-txt'), t = ta ? ta.value.trim() : '', p;
+    if (v[0] === 'maint') {
+      if (v[1] === 'annat' && !t) { alert('Skriv namnet på underhållet i rutan ovanför.'); if (ta) ta.focus(); return; }
+      if (!confirm('Flytta anmälan till Underhåll som förslag? Den stängs här.')) return;
+      p = A.rpc('move_car_issue_to_maint', { p_id: c.id, p_type: v[1], p_title: v[1] === 'annat' ? t.slice(0, 80) : null });
+    } else {
+      if (v[0] === d.kind && (v[0] === 'fault' || v[1] === d.supply)) return;
+      p = A.rpc('set_car_issue_kind', { p_id: c.id, p_kind: v[0], p_supply: v[1] || null });
+    }
+    st.busy = true; document.querySelectorAll('.ar-tools button,#ara-kat').forEach(function (b) { b.disabled = true; });
+    p.then(function () {
+      st.busy = false;
+      if (v[0] === 'maint') { st.open = null; st.cur = null; paint(); } else { st.cur = null; paintCase(); }
+      R.count(); if (window.showToast) showToast(v[0] === 'maint' ? 'Flyttad till Underhåll som förslag.' : 'Kategorin är ändrad.');
+    }).catch(function (e) {
+      st.busy = false; document.querySelectorAll('.ar-tools button,#ara-kat').forEach(function (b) { b.disabled = false; });
+      alert(KERR[e && e.message] || A.errText(e));
+    });
+  };
   R.act = function (a) {
     var c = st.cur; if (!c || st.busy) return;
     var ta = document.getElementById('ara-txt'), v = ta ? ta.value.trim() : '', p;
