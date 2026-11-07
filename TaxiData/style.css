@@ -748,3 +748,10 @@ html[data-theme="dark"] .pg-pop { background: #1a202c; color: #e2e8f0; border-co
 html[data-theme="dark"] .pg-pop-fly { background: #3b2a16; color: #fbd38d; border-color: #c05621; }
 .pg-pop-flyb { color: #c05621; font-size: 0.8rem; }
 html[data-theme="dark"] .pg-pop-flyb { color: #fbd38d; }
+
+/* Compact station quick picks and searchable native sheet. */
+.ank-station-quick{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.ank-station-quick button{min-height:44px}
+.ank-station-title{border:0;background:none;color:inherit;font:inherit;font-weight:700;padding:6px 0;min-height:44px;text-align:left}
+.ank-station-sheet{width:calc(100% - 24px);max-width:430px;max-height:85dvh;box-sizing:border-box;border:1px solid var(--border,#aab);border-radius:14px;background:var(--surface,#fff);color:var(--text);padding:14px}.ank-station-sheet::backdrop{background:#0006}
+.ank-station-sheet input{width:100%;min-height:44px;box-sizing:border-box;font:inherit;padding:8px;margin:6px 0 12px}.ank-station-results{max-height:55dvh;overflow:auto;display:flex;flex-direction:column;gap:4px}.ank-station-sheet button{min-height:44px;font:inherit}.ank-station-results button{text-align:left;padding:8px;background:var(--surface,#fff);color:inherit;border:1px solid var(--border,#aab);border-radius:8px}.ank-station-results small{float:right;color:var(--text-soft)}
+.ank-station-note{font-size:.82rem;color:var(--text-soft);margin:6px 0 12px}
