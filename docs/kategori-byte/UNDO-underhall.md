@@ -10,3 +10,6 @@ Backup-gren: `backup/pre-kategori-underhall-20261107`.
 ## Ta bort funktionen
     drop function if exists public.move_car_issue_to_maint(text, bigint, text, text);
     alter table public.car_maintenance drop column if exists from_issue_id;   -- först när inga flyttar behöver spåras
+
+## Merge
+PR #83 mergad till main: `41fa21d3`. Backup före merge: `backup/pre-kategori-underhall-merge-20261107` (06e016a2). Ångra koden: `git revert -m 1 41fa21d3`.
