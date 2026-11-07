@@ -378,7 +378,7 @@
       rpc('prognos_zones', {}),
       rpc('prognos_watch_list', {}),
       rpc('prognos_original', {}).catch(function () { return null; }),
-      (window.ANKOMSTER && ANKOMSTER.flightItems ? ANKOMSTER.flightItems(120000) : Promise.resolve(null)).catch(function () { return null; })
+      (window.ARRIVAL_DATA && ARRIVAL_DATA.flightItems ? ARRIVAL_DATA.flightItems(120000) : Promise.resolve(null)).catch(function () { return null; })
     ]).then(function (xs) {
       if (xs[6]) st.flights = xs[6];
       st.status = xs[0] || {};

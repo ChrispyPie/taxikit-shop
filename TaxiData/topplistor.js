@@ -400,4 +400,7 @@
     document.getElementById('tl-pm-sel').textContent = cal.from ? ddmm(cal.from) + '-' + yy(cal.from) + ' – ' + (cal.to ? ddmm(cal.to) + '-' + yy(cal.to) : 'välj sista dagen') : '';
     document.getElementById('tl-pm-ok').disabled = !cal.from;
   }
+
+ if(window.VIEW_STATE){var nav=VIEW_STATE.get('topplistor',{});if(nav.date&&!isNaN(new Date(nav.date)))st.date=new Date(nav.date);if(nav.from&&nav.to&&!isNaN(new Date(nav.from))&&!isNaN(new Date(nav.to))){st.range={from:new Date(nav.from),to:new Date(nav.to)};st.tab='period';}VIEW_STATE.bind('topplistor',function(){return {date:st.date.toISOString(),from:st.range?st.range.from.toISOString():null,to:st.range?st.range.to.toISOString():null};});}
+
 })();

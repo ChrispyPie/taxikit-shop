@@ -236,4 +236,7 @@
     };
     var rs = document.getElementById('lk-reset'); if (rs) rs.onclick = function () { saveSettings(DEF); st.showSet = false; draw(); };
   }
+
+ if(window.VIEW_STATE){var nav=VIEW_STATE.get('lonekoll',{});if(nav.month&&!isNaN(new Date(nav.month)))st.month=new Date(nav.month);VIEW_STATE.bind('lonekoll',function(){return {month:st.month?st.month.toISOString():null};});}
+
 })();

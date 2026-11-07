@@ -189,7 +189,7 @@
     st.el = content; st.open = null; st.form = null; st.comments = null;
     st.today = null; st.cur = null; st.data = null;
     content.innerHTML = '<div id="kal-body"><div class="tl-msg">Laddar…</div></div>';
-    st.cur = K._date ? parts(K._date).key : todayKey();
+    st.cur = K._date ? parts(K._date).key : (window.VIEW_STATE&&VIEW_STATE.get('kalender',{}).date)||todayKey();
     if (K._city) st.city = K._city;
     K._date = K._city = null;
     load(); loadWatches();
@@ -601,4 +601,7 @@
     el.querySelectorAll('.pm-day').forEach(function (b) { b.onclick = function () { cal.pick = b.dataset.k; drawCal(); }; });
     document.getElementById('kal-pm-sel').textContent = dayLabel(cal.pick);
   }
+
+ if(window.VIEW_STATE)VIEW_STATE.bind('kalender',function(){return {date:st.cur};});
+
 })();

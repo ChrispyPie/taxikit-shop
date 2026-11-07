@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-07', id: '2026-11-07k', tid: '', rader: [
+    ['Förbättrat', 'Verktygen laddas först när du öppnar dem. Efter en uppdatering kommer du tillbaka till samma vy.']
+  ]},
   { datum: '2026-11-07', id: '2026-11-07j', rader: [
     ['Nytt', 'Meddelanden: markera flera rader för att nåla fast, markera som oläst eller radera från din vy. Om admin svarar visas hela tråden igen.'],
     ['Nytt', 'Admin › Ärenden: raderade trådar hamnar i åkeriets papperskorg. Ägaren kan återställa eller radera permanent. Föraren kan läsa en stängd tråd, men inte svara förrän den återställs.', 'admin']
