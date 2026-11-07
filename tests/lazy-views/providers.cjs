@@ -1,0 +1,9 @@
+const {boot}=require('./dom.cjs'),assert=require('node:assert/strict');
+(async()=>{
+ const data={forar:'fixture',shifts:[{passnr:'1',start:'20261101 23:00:00',slut:'20261102 02:00:00'},{passnr:'1',start:'20261101 23:00:00',slut:'20261102 02:00:00'}],trips:[{kvittonr:'a',startdatum:'2026-11-01',starttid:'23:30:00'},{kvittonr:'b',startdatum:'2026-11-02',starttid:'01:30:00'},{kvittonr:'c',startdatum:'2026-11-02',starttid:'12:00:00'},{kvittonr:'other',forar:'other',startdatum:'2026-11-02',starttid:'12:00:00'}]};
+ let a=await boot({},'',{fixtures:{get_my_trip_data:data}});await a.w.openItem('kordata');await new Promise(r=>setTimeout(r,20));const from=new a.w.Date('2026-11-01T00:00:00'),to=new a.w.Date('2026-11-02T23:59:59');const old=JSON.parse(JSON.stringify(a.w.taxiPayData(from,to)));a.dom.window.close();
+ a=await boot({},'',{fixtures:{get_my_trip_data:data}});await a.w.LAZY.ensure('lonekoll');await a.w.taxiEnsureData();const wage=JSON.parse(JSON.stringify(a.w.taxiPayData(new a.w.Date('2026-11-01T00:00:00'),new a.w.Date('2026-11-02T23:59:59'))));assert.deepEqual(wage,old);assert.equal(wage.shifts.length,1);assert.equal(wage.trips.length,3);assert(!a.js.includes('script.js'));a.dom.window.close();
+ const nav={view:'kordata',kordata:{tab:'period',date:'2026-10-15T12:00:00.000Z',from:'2026-10-01T00:00:00.000Z',to:'2026-10-15T23:59:59.000Z'}},saved={};for(const[k,v]of Object.entries(nav))saved['taxi_view_state:fixture:'+k]=JSON.stringify(v);
+ a=await boot(saved);assert.equal(a.evaluate('currentTab'),'period');assert.equal(a.evaluate('currentDate.toISOString()'),'2026-10-15T12:00:00.000Z');assert.equal(a.evaluate('customRange.from.toISOString()'),'2026-10-01T00:00:00.000Z');a.dom.window.close();
+ console.log('PASS isolated wage adapter equals Kördata matching/dedupe (overnight, orphan, other driver); restored custom period/date.');
+})().catch(e=>{console.error(e);process.exitCode=1;});

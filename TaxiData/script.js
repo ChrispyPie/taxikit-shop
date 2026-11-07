@@ -1,5 +1,5 @@
-const TRIP_API_URL = 'https://lpfdryvukqmjlgenuzpb.supabase.co';
-const TRIP_API_KEY = 'sb_publishable_7LwIOZ5ygRvJqJKFxl4cNQ_LvrzrHrP';
+var TRIP_API_URL = 'https://lpfdryvukqmjlgenuzpb.supabase.co';
+var TRIP_API_KEY = 'sb_publishable_7LwIOZ5ygRvJqJKFxl4cNQ_LvrzrHrP';
 // Läge: 'driver' = Körpassdata (en förare), 'company' = Åkeridata (hela åkeriet).
 // Åkeridata-sidan sätter window.TAXI_MODE = 'company' innan den här filen laddas.
 const TAXI_MODE = window.TAXI_MODE || 'driver';
@@ -18,7 +18,9 @@ const TAB_KEY = COMPANY ? 'taxi_akeri_tab' : 'taxi_tab';
 let currentTab = localStorage.getItem(TAB_KEY) || 'dag';
 if (!['dag', 'vecka', 'manad', 'ar'].includes(currentTab)) currentTab = 'dag';
 let lastTab = currentTab;          // fliken att gå tillbaka till efter egen period
-let customRange = null;            // { from: Date, to: Date } när egen period är vald
+let customRange = null;
+if(window.VIEW_STATE){const nav=VIEW_STATE.get('kordata',{});if(nav.date&&!isNaN(new Date(nav.date)))currentDate=new Date(nav.date);if(['dag','vecka','manad','ar','period'].includes(nav.tab))currentTab=nav.tab;if(nav.from&&nav.to&&!isNaN(new Date(nav.from))&&!isNaN(new Date(nav.to)))customRange={from:new Date(nav.from),to:new Date(nav.to)};if(currentTab==='period'&&!customRange)currentTab='dag';VIEW_STATE.bind('kordata',()=>({date:currentDate.toISOString(),tab:currentTab,from:customRange?customRange.from.toISOString():null,to:customRange?customRange.to.toISOString():null}));}
+            // { from: Date, to: Date } när egen period är vald
 let currentDriver = localStorage.getItem('taxi_driver') || '';
 // Förare för rader utan förar-id: datasetets förare (servern skickar "forar" i svaret; demo får "Demoförare"), annars den inloggade.
 function defForar() { return (data && data.forar) || currentDriver || ''; }
@@ -80,6 +82,7 @@ function dataReusable() {
     dataSession === (localStorage.getItem('taxi_session') || '') && Date.now() - dataLoadedAt < DATA_REUSE_MS;
 }
 async function fetchTripData() {
+  if(!COMPANY&&window.PAY_DATA){const cached=PAY_DATA.snapshot();if(cached)return cached;}
   if (!COMPANY && !myTripApiMissing) {
     try { return await tripRpc('get_my_trip_data', { p_dataset: 'current' }, 20000); }
     catch (e) { if (e && e.message === 'HTTP 404') myTripApiMissing = true; else throw e; }
@@ -197,7 +200,7 @@ function matchDriver(rec) {
   return COMPANY || (rec.forar || defForar()) === viewDriver;
 }
 
-function goHome() {
+function tripGoHome() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   currentView = 'day';

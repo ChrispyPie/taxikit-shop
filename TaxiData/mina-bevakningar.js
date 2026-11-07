@@ -95,10 +95,10 @@
     return Promise.all([
       safe(rpc('watch_list', {}), 'bevakade ankomster', []),
       safe(rpc('train_watch_list', {}), 'tågnotiser', []),
-      safe(ANKOMSTER.watchItems('tag'), 'tågtider', []),
-      safe(ANKOMSTER.watchItems('flyg'), 'flygtider', []),
+      safe(ARRIVAL_DATA.watchItems('tag'), 'tågtider', []),
+      safe(ARRIVAL_DATA.watchItems('flyg'), 'flygtider', []),
       onlyTransport ? Promise.resolve([]) : safe(calendarEvents(errors), 'kalendern', []),
-      onlyTransport ? Promise.resolve([]) : safe(MAILBOX.rpc('timeline'), 'bokade tider', [])
+      onlyTransport ? Promise.resolve([]) : safe((window.DEMO&&DEMO.on()?Promise.resolve([]):rpc('mailbox_v2',{p_token:localStorage.getItem('taxi_session')||'',p_action:'timeline',p_data:{}})), 'bokade tider', [])
     ]).then(function (data) {
       if (session !== token()) throw new Error('session');
       var bookings = (data[5] || []).map(function (b) { return { id: 'booking-' + b.id, kind: 'booking', thread_id: b.thread_id, at: Date.parse(b.at), end: Date.parse(b.at), title: b.title, status: b.status === 'accepted' ? 'Bokad tid · Godkänd' : 'Bokad tid · Väntar på ' + (b.status === 'pending_admin' ? 'admin' : 'ditt svar'), pending: b.status !== 'accepted', rules: [] }; });
@@ -240,9 +240,12 @@
   }
   M.stop = function () { generation++; clearInterval(timer); timer = null; host = null; rows = []; busy = false; };
   M.render = function (el) {
-    M.stop(); selectedDay = parts(Date.now()).key; mode = localStorage.getItem('taxi_mb_view') === 'list' ? 'list' : 'timeline'; autoPosition = true; actionIndex = null; host = el; el.innerHTML = '<div class="mb"><p role="status">Laddar dina bevakningar…</p></div>'; refresh();
+    M.stop(); selectedDay = (window.VIEW_STATE&&VIEW_STATE.get('mina-bevakningar',{}).day)||parts(Date.now()).key; mode = localStorage.getItem('taxi_mb_view') === 'list' ? 'list' : 'timeline'; autoPosition = true; actionIndex = null; host = el; el.innerHTML = '<div class="mb"><p role="status">Laddar dina bevakningar…</p></div>'; refresh();
     timer = setInterval(function () { if (!host || !host.isConnected) M.stop(); else if (!document.hidden && !busy && actionIndex === null) refresh(); }, 60000);
   };
   // Ren logik för tester med syntetiska data.
   M.normalize = normalize; M.inWindow = inWindow; M.timelineLayout = timelineLayout; M.daySegments = daySegments;
+
+ if(window.VIEW_STATE)VIEW_STATE.bind('mina-bevakningar',function(){return {day:selectedDay};});
+
 })();

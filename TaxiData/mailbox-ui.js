@@ -30,7 +30,7 @@
  function owner(){return !admin&&['agare','superadmin'].indexOf(window.INKORG_ROLE)>=0;}
   // Oläst är personligt. needs styr arbetsgrupper, aldrig läsprickar eller aktivitetsantal.
   U.count=function(){return st.threads.filter(function(x){return !hidden('thread',x.id)&&(x.unread||flagged('thread',x.id));}).length+st.cases.filter(function(x){return !hidden(x.kind,x.id)&&(x.unread>0||flagged(x.kind,x.id));}).length+st.old.filter(function(x){return !hidden('old-message',x.id)&&(x.unread||flagged('old-message',x.id));}).length;};
-  function badge(){if(!admin)window.INKORG_HAS=U.count()>0;if(!admin&&window.setBadge){setBadge('inkorg',U.count());setBadge('profbtn',U.count()>0||!!window.INKORG_NEEDS_PROFILE);}}
+  function badge(){if(window.LAZY)LAZY.unreadChanged();if(!admin)window.INKORG_HAS=U.count()>0;if(!admin&&window.setBadge){setBadge('inkorg',U.count());setBadge('profbtn',U.count()>0||!!window.INKORG_NEEDS_PROFILE);}}
   var refreshPending=null;
   U.refresh=function(force){
    if(!force&&refreshPending)return refreshPending;
@@ -45,7 +45,8 @@
    }).catch(function(e){if(epoch!==st.epoch||refreshRequest!==st.refreshRequest)return U.count();st.loaded=true;st.error=err(e);if(st.mode==='list')paint();return 0;});
   };
   U.moreOld=function(){if(!st.next||st.busy)return;var epoch=st.epoch;st.busy=true;A.rpc('conversation_list',{p_before:st.next}).then(function(d){if(epoch!==st.epoch)return;st.old=st.old.concat(d.items||[]);st.next=d.next;st.busy=false;if(st.mode==='list')paint();}).catch(function(e){if(epoch!==st.epoch)return;st.busy=false;st.error=err(e);if(st.mode==='list')paint();});};
-  U.render=function(el){st.el=el;paint();if(st.mode==='list')U.refresh();};
+  var navRestored=false;
+  U.render=function(el){st.el=el;if(!navRestored&&window.VIEW_STATE){navRestored=true;var n=VIEW_STATE.get(admin?'admin-mailbox':'inkorg',{});if(FILTERS.some(function(f){return f[0]===n.filter;}))st.filter=n.filter;paint();if(n.thread)return U.openThread(n.thread);if(n.kind&&n.id)return U.openCase(n.kind,n.id);}paint();if(st.mode==='list')U.refresh();};
   U.back=function(){var dialog=st.el&&st.el.querySelector('dialog[open]');if(dialog){dialog.close();return true;}if(st.mode!=='list'){st.request++;st.mode='list';st.thread=null;st.legacy=null;paint();U.refresh();return true;}return false;};
   U.select=function(f){st.request++;st.filter=f;st.selected=[];st.mode='list';paint();};
   U.show=function(){st.mode='list';st.filter='all';st.trash=false;st.selected=[];if(!admin&&window.openInbox)openInbox();else paint();};
@@ -147,7 +148,7 @@
    else h+='<p class="ar-note">Äldre bilärende – bara läsning. Skapa ett Meddelande om något nytt behövs.</p>';
    return h+'<p class="mx-error mx-server-error" role="alert">'+esc(st.error)+'</p>';
   }
-  function paint(){if(!st.el||!st.el.isConnected)return;
+  function paint(){if(window.VIEW_STATE&&['list','thread','legacy'].indexOf(st.mode)>=0)VIEW_STATE.save(admin?'admin-mailbox':'inkorg',{filter:st.filter,thread:st.mode==='thread'&&st.thread?st.thread.id:null,kind:st.mode==='legacy'&&st.legacy?st.legacy.kind:null,id:st.mode==='legacy'&&st.legacy?st.legacy.data.id||st.legacy.data.data&&st.legacy.data.data.id:null});if(!st.el||!st.el.isConnected)return;
    st.el.innerHTML='<div class="mx">'+(st.mode==='list'?listHtml():st.mode==='compose'?composeHtml(false):st.mode==='booking'?composeHtml(true):st.mode==='thread'&&st.thread?threadHtml():st.mode==='legacy'&&st.legacy?legacyHtml():st.mode==='report'?back()+'<div id="mx-report"></div>':back()+'<p>Laddar…</p>')+'</div>';
    var f=st.el.querySelector('#mx-form');if(f){f.querySelectorAll('[data-mx]').forEach(function(e){e.oninput=e.onchange=function(){st.draft[e.dataset.mx]=e.value;if(e.dataset.mx==='car_choice'){var error=f.querySelector('#mx-car-error');if(error)error.textContent='';}if(e.dataset.mx==='hour'||e.dataset.mx==='minute'){var h=f.querySelector('#mx-hour').value,m=f.querySelector('#mx-minute').value;st.draft.time=h&&m?h+':'+m:'';}};});f.onsubmit=function(e){e.preventDefault();submit(st.mode==='booking'?'book':'create',st.draft);};}
    var reply=st.el.querySelector('#mx-reply');if(reply)reply.onsubmit=function(e){e.preventDefault();submit('reply',{thread_id:st.thread.id,body:st.el.querySelector('#mx-reply-body').value});};
@@ -163,7 +164,8 @@
    var args={p_id:c.id};if(action==='ask'||action==='reply')args.p_body=txt;else {args.p_status=action;args.p_comment=txt||null;}
    var epoch=st.epoch,request=st.request;st.busy=true;A.rpc(rpcName,args).then(function(){if(epoch!==st.epoch)return;st.busy=false;if(request===st.request)U.openCase(c.kind,c.id);}).catch(function(e){if(epoch!==st.epoch)return;st.busy=false;if(request===st.request){st.error=err(e);paint();}});
   };
-  U.report=function(tab){
+  U.report=async function(tab){
+   if(window.LAZY)await LAZY.ensure('verkstad');
    if(tab!=='sjuk'&&tab!=='timmar'){U.compose();return;}
    go('report');var target=st.el&&st.el.querySelector('#mx-report');if(!target)return;
    if(tab==='sjuk'){Promise.resolve(SJUK.render(target)).then(function(){if(target.isConnected&&SJUK.newReport)SJUK.newReport();});}
@@ -172,7 +174,7 @@
   U.has=function(k,id){return st.cases.some(function(x){return x.kind===k&&x.id===+id;});};
   U.isAdmin=function(){return ['admin','agare','superadmin'].indexOf(window.INKORG_ROLE)>=0;};
   U.badge=function(){var n=U.count();return n?'<span class="ar-badge">'+n+'</span>':'';};
-  U.logout=function(){st.epoch++;st.mode='list';st.trash=false;st.canTrash=false;st.selected=[];st.flags=[];st.threads=[];st.cases=[];st.old=[];st.thread=null;st.legacy=null;st.recipients=[];st.cars=[];st.optionsPending=false;st.draft={};st.el=null;st.busy=false;if(!admin)window.INKORG_HAS=false;};
+  U.logout=function(){navRestored=false;st.epoch++;st.mode='list';st.trash=false;st.canTrash=false;st.selected=[];st.flags=[];st.threads=[];st.cases=[];st.old=[];st.thread=null;st.legacy=null;st.recipients=[];st.cars=[];st.optionsPending=false;st.draft={};st.el=null;st.busy=false;if(!admin)window.INKORG_HAS=false;};
   U.load=U.refresh;U.needs=U.count;U.isOpen=function(){return st.mode!=='list';};
   return U;
  }};

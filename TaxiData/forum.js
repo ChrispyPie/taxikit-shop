@@ -316,6 +316,7 @@
   }
 
   function paint() {
+    if(window.VIEW_STATE)VIEW_STATE.save('forum',{view:st.view,section:st.section&&st.section.id,thread:st.thread&&st.thread.id});
     if (st.view === 'gate') drawGate();
     else if (st.view === 'home') drawHome();
     else if (st.view === 'section') drawSection();
@@ -461,6 +462,7 @@
         openEditor(pre);
       } else if (F._post) {
         var pid = F._post; F._post = null; goThread(pid);
+      } else if(F._section){var sid=F._section;F._section=null;goSection(sid);
       }
     }).catch(function (e) { if (!fail(e)) { st.err = errText(e); paint(); } });
   }
@@ -486,6 +488,7 @@
   }
 
   F.render = function (content) {
+    var nav=window.VIEW_STATE&&VIEW_STATE.get('forum',{});if(nav&&!F._post&&!F._section){F._post=nav.thread||null;F._section=nav.thread?null:nav.section;}
     root = content;
     content.onclick = onClick;
     var pre = F._pre; F._pre = null;

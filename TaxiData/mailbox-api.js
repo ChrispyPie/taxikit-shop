@@ -1,0 +1,2 @@
+/* Shared profile contact RPC only. No inbox renderer, lists, listeners or polling. */
+(function(){'use strict';if(window.MAILBOX)return;window.MAILBOX={rpc:function(action,data){if(window.DEMO&&DEMO.on()){if(action==='contacts_get')return Promise.resolve({cars:[],phone:null,visibility:'owner',company_label:'Taxi Göteborg'});return Promise.reject(new Error('demo_read_only'));}return rpc('mailbox_v2',{p_token:localStorage.getItem('taxi_session')||'',p_action:action,p_data:data||{}});}};})();

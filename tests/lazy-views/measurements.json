@@ -1,0 +1,38 @@
+{
+  "before": {
+    "js_files": 32,
+    "js_decoded_bytes": 928458,
+    "js_gzip_bytes": 297679,
+    "html_bytes": 57032,
+    "startup_rpc_requests": [
+      "get_my_features",
+      "get_me",
+      "mailbox_v2",
+      "case_inbox",
+      "conversation_list",
+      "mailbox_v2",
+      "mailbox_v2",
+      "profilbild",
+      "bil_badge",
+      "forum_classic_badge",
+      "changelog_seen_get",
+      "prognos_new_count",
+      "notis_feed"
+    ],
+    "offline_dom_errors": [],
+    "modeled_js_transfer_seconds_at_1_6mbps": 1.488
+  },
+  "after": {
+    "js_files": 9,
+    "js_decoded_bytes": 36999,
+    "js_gzip_bytes": 15062,
+    "html_bytes": 54679,
+    "startup_rpc_requests": [
+      "get_my_features",
+      "get_me",
+      "shell_badge_counts"
+    ],
+    "offline_dom_errors": [],
+    "modeled_js_transfer_seconds_at_1_6mbps": 0.075
+  }
+}
