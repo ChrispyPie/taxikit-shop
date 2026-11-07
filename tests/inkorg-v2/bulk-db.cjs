@@ -109,8 +109,21 @@ const deny=(who,action,data={},code)=>denied('select mailbox_v2($1,$2,$3::jsonb)
  await bulk('unread');f=await call('driver','item_flags');ok(f.some(x=>x.id===t.id&&x.pinned&&x.is_unread));
  await bulk('hide');f=await call('driver','item_flags');ok(f.some(x=>x.id===t.id&&x.hidden&&x.pinned&&x.is_unread));
  ok((await call('admin','list',{admin:true})).some(x=>x.id===t.id));
- await bulk('restore');ok((await call('driver','item_flags')).some(x=>x.id===t.id&&!x.hidden&&x.pinned));
+ await deny('driver','bulk_preferences',{operation:'restore',items:[item]},'42501');
+ await deny('admin','bulk_preferences',{admin:true,operation:'restore',items:[item]},'42501');
+ ok(!(await call('driver','mailbox_capabilities')).can_trash);
+ ok(!(await call('admin','mailbox_capabilities',{admin:true})).can_trash);
+ ok((await call('owner','mailbox_capabilities',{admin:true})).can_trash);
+ ok(!(await call('super','mailbox_capabilities',{admin:true})).can_trash);
+ await db.exec(`create or replace function private.sjuk_boss_roles() returns text[] language sql immutable set search_path='' as $$select array['agare','superadmin']::text[]$$`);
+ ok((await call('super','mailbox_capabilities',{admin:true})).can_trash);
+ await db.exec(`create or replace function private.sjuk_boss_roles() returns text[] language sql immutable set search_path='' as $$select array['agare']::text[]$$`);
+ ok(!(await call('super','mailbox_capabilities',{admin:true})).can_trash);
+ ok(!(await call('owner','mailbox_capabilities',{admin:true})).secret_hard_delete_enabled);
  await bulk('unpin');ok((await call('driver','item_flags')).some(x=>x.id===t.id&&!x.pinned));
+ const ownerBulk=(operation,items=[item])=>call('owner','bulk_preferences',{admin:true,operation,items});
+ await ownerBulk('hide');ok((await call('owner','item_flags',{admin:true})).some(x=>x.id===t.id&&x.in_trash));
+ await ownerBulk('restore');ok(!(await call('owner','item_flags',{admin:true})).find(x=>x.id===t.id).hidden);
  await deny('peer','bulk_preferences',{operation:'hide',items:[item]},'P0002');
  await deny('otheradmin','bulk_preferences',{admin:true,operation:'pin',items:[item]},'P0002');
  await deny('driver','bulk_preferences',{operation:'pin',items:[]},'22023');
@@ -120,9 +133,22 @@ const deny=(who,action,data={},code)=>denied('select mailbox_v2($1,$2,$3::jsonb)
  ok(!(await call('driver','item_flags')).find(x=>x.id===t.id).pinned);
  await deny('admin','bulk_preferences',{admin:true,operation:'hide',items:[{kind:'sjuk',id:1}]},'42501');
  await bulk('hide',[{kind:'sjuk',id:1}]);ok((await scalar("select case_get('driver','sjuk',1)")).kind==='sjuk');
- await bulk('restore',[{kind:'sjuk',id:1}]);
+ await ownerBulk('hide',[{kind:'sjuk',id:1}]);await ownerBulk('permanent',[{kind:'sjuk',id:1}]);ok((await scalar("select case_get('driver','sjuk',1)")).kind==='sjuk');
  await bulk('pin',[{kind:'old-message',id:old}]);ok((await call('driver','item_flags')).some(x=>x.kind==='old-message'&&x.pinned));
  ok((await scalar('select count(*) from inbox_private.messages'))===countBefore);
+ // Both deletion orders and independent party retention, ordinary new threads only.
+ const fresh=async()=>call('driver','create',{subject:'Synthetic mutual delete',body:'Synthetic payload',car_choice:'none'});
+ let purge1=await fresh(),i1={kind:'thread',id:purge1.id};
+ await ownerBulk('hide',[i1]);await ownerBulk('permanent',[i1]);
+ ok((await call('driver','get',{thread_id:i1.id})).id===i1.id);
+ ok((await call('owner','item_flags',{admin:true})).some(x=>x.id===i1.id&&x.permanent));
+ await bulk('hide',[i1]);ok((await scalar('select count(*) from inbox_private.threads where id=$1',[i1.id]))===0);
+ let purge2=await fresh(),i2={kind:'thread',id:purge2.id};
+ await bulk('hide',[i2]);ok((await call('owner','get',{admin:true,thread_id:i2.id})).id===i2.id);
+ await ownerBulk('hide',[i2]);await ownerBulk('permanent',[i2]);ok((await scalar('select count(*) from inbox_private.threads where id=$1',[i2.id]))===0);
+ // Nonowner admin hide does not count as owner permanent deletion.
+ let keep=await fresh(),ki={kind:'thread',id:keep.id};
+ await call('admin','bulk_preferences',{admin:true,operation:'hide',items:[ki]});await bulk('hide',[ki]);ok((await scalar('select count(*) from inbox_private.threads where id=$1',[ki.id]))===1);
  await db.exec('set role anon');await denied('select * from inbox_private.unread_flags',[],'42501');await db.exec('reset role');
  await sql('supabase/migrations/undo/20261107191742_mailbox_bulk_preferences.sql');
  ok((await call('driver','unread_flags')).some(x=>x.id===t.id));

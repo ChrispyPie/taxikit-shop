@@ -11,12 +11,13 @@
  window.MAILBOX={rpc:function(action,data){
   // Demo får aldrig läsa verkliga kontakter/trådar via den nya serverfunktionen.
   if(window.DEMO&&DEMO.on()){
+   if(action==='mailbox_capabilities')return Promise.resolve({can_trash:false});
    if(action==='contacts_get')return Promise.resolve({cars:[],phone:null,visibility:'owner',company_label:'Taxi Göteborg'});
    if(['list','timeline','recipients','cars','unread_flags','item_flags'].indexOf(action)>=0)return Promise.resolve([]);
    return Promise.reject(new Error('demo_read_only'));
   }
   return A.rpc('mailbox_v2',{p_action:action,p_data:data||{}});},create:function(admin,name){
-  var U={},st={el:null,mode:'list',filter:'all',trash:false,selected:[],flags:[],threads:[],cases:[],old:[],next:null,thread:null,legacy:null,recipients:[],cars:[],optionsPending:false,draft:{},busy:false,error:'',epoch:0,request:0,loaded:false};
+  var U={},st={el:null,mode:'list',filter:'all',trash:false,canTrash:false,selected:[],flags:[],threads:[],cases:[],old:[],next:null,thread:null,legacy:null,recipients:[],cars:[],optionsPending:false,draft:{},busy:false,error:'',epoch:0,request:0,loaded:false};
   function rpc(action,data){return MAILBOX.rpc(action,Object.assign({},data,{admin:admin}));}
   function push(){try{history.pushState({view:admin?'admin':'inkorg',sub:'thread'},'');}catch(e){}}
   function go(mode){st.mode=mode;st.error='';push();paint();}
@@ -30,9 +31,9 @@
   function badge(){if(!admin&&window.setBadge){setBadge('inkorg',U.count());setBadge('profbtn',U.count()>0||!!window.INKORG_NEEDS_PROFILE);}}
   U.refresh=function(){
    var epoch=st.epoch;
-   return Promise.all([rpc('list',{}),A.rpc(admin?'case_admin_list':'case_inbox',{p_klar_limit:5000}),admin?Promise.resolve({items:[]}):A.rpc('conversation_list',{}),rpc('item_flags',{})]).then(function(d){
+   return Promise.all([rpc('list',{}),A.rpc(admin?'case_admin_list':'case_inbox',{p_klar_limit:5000}),admin?Promise.resolve({items:[]}):A.rpc('conversation_list',{}),rpc('item_flags',{}),rpc('mailbox_capabilities',{})]).then(function(d){
     if(epoch!==st.epoch)return 0;
-    st.flags=d[3]||[];st.threads=d[0]||[];st.cases=(d[1].items||[]).filter(function(x){return x.kind!=='wish';});st.old=d[2].items||[];st.next=d[2].next;st.loaded=true;st.error='';badge();if(st.mode==='list')paint();return U.count();
+    st.canTrash=admin&&!!(d[4]&&d[4].can_trash);st.flags=d[3]||[];st.threads=d[0]||[];st.cases=(d[1].items||[]).filter(function(x){return x.kind!=='wish';});st.old=d[2].items||[];st.next=d[2].next;st.loaded=true;st.error='';badge();if(st.mode==='list')paint();return U.count();
    }).catch(function(e){if(epoch!==st.epoch)return 0;st.loaded=true;st.error=err(e);if(st.mode==='list')paint();return 0;});
   };
   U.moreOld=function(){if(!st.next||st.busy)return;var epoch=st.epoch;st.busy=true;A.rpc('conversation_list',{p_before:st.next}).then(function(d){if(epoch!==st.epoch)return;st.old=st.old.concat(d.items||[]);st.next=d.next;st.busy=false;if(st.mode==='list')paint();}).catch(function(e){if(epoch!==st.epoch)return;st.busy=false;st.error=err(e);if(st.mode==='list')paint();});};
@@ -96,22 +97,22 @@
   function unreadButton(kind,id){return '<button type="button" onclick="'+name+'.markUnread(\''+kind+'\','+id+')">Markera som oläst</button>';}
   U.markUnread=function(kind,id){if(st.busy)return;st.busy=true;rpc('mark_unread',{kind:kind,id:id}).then(function(){st.busy=false;st.mode='list';st.thread=null;st.legacy=null;return U.refresh();}).catch(function(e){st.busy=false;st.error=err(e);paint();});};
   U.toggleSelection=function(kind,id,on){var key=kind+':'+id;st.selected=st.selected.filter(function(x){return x!==key;});if(on&&st.selected.length<100)st.selected.push(key);paint();};
-  U.trash=function(on){st.trash=on;st.selected=[];paint();};
-  U.bulk=function(operation){if(st.busy||!st.selected.length)return;st.busy=true;var items=st.selected.map(function(key){var p=key.split(':');return {kind:p[0],id:+p[1]};});rpc('bulk_preferences',{operation:operation,items:items}).then(function(){st.busy=false;st.selected=[];return U.refresh();}).catch(function(e){st.busy=false;st.error=err(e);paint();});};
+  U.trash=function(on){if(!st.canTrash)return;st.trash=on;st.selected=[];paint();};
+  U.bulk=function(operation){if(st.busy||!st.selected.length)return;if((operation==='restore'||operation==='permanent')&&!st.canTrash)return;if(operation==='permanent'&&!window.confirm('Radera permanent från ägarsidan? Om föraren också har raderat tas vanliga meddelandetrådar bort helt. Det kan inte ångras.'))return;st.busy=true;var items=st.selected.map(function(key){var p=key.split(':');return {kind:p[0],id:+p[1]};});rpc('bulk_preferences',{operation:operation,items:items}).then(function(){st.busy=false;st.selected=[];return U.refresh();}).catch(function(e){st.busy=false;st.error=err(e);paint();});};
   function listHtml(){
    var filters=admin?ADMIN_FILTERS:FILTERS;
    var h='<div class="mx-filters" role="group" aria-label="'+(admin?'Ärenden':'Meddelanden')+'">'+filters.map(function(x){return '<button aria-label="'+x[1]+'" title="'+x[1]+'" aria-pressed="'+(st.filter===x[0])+'" onclick="'+name+'.select(\''+x[0]+'\')"><span aria-hidden="true">'+x[2]+'</span></button>';}).join('')+'</div>';
    h+='<h2 class="mx-category-heading">'+esc((filters.find(function(x){return x[0]===st.filter;})||filters[0])[1])+'</h2>';
-   h+='<button class="mx-trash-toggle" onclick="'+name+'.trash('+(!st.trash)+')">'+(st.trash?'Tillbaka till listan':'Papperskorg')+'</button>';
-   if(st.trash)h+='<h3>Papperskorg</h3><p class="ar-note">Bara dolt för dig. Inget meddelande, ärende eller intyg raderas. Markera och välj Återställ.</p>';
+   if(st.canTrash)h+='<button class="mx-trash-toggle" onclick="'+name+'.trash('+(!st.trash)+')">'+(st.trash?'Tillbaka till listan':'Papperskorg')+'</button>';
+   if(st.trash)h+='<h3>Papperskorg</h3><p class="ar-note">Åkeriets papperskorg. Återställ eller radera permanent från ägarsidan. Motparten behåller sin kopia tills båda har raderat. Sjukuppgifter och intyg raderas aldrig här.</p>';
    h+=admin?'<div class="mx-actions"><button onclick="'+name+'.compose()">Meddelande</button><button onclick="'+name+'.newBooking()">Bokad tid</button></div>':'<button class="mx-new" onclick="'+name+'.newCase()">＋ Nytt ärende</button>';
    if(owner())h+='<p class="ar-note">Alla dina ärenden hanteras i <a href="admin.html#arenden">Admin › Ärenden</a>.</p>';
    var all=st.threads.map(function(t){return {kind:'thread',id:t.id,at:t.at,title:t.subject,body:t.last_body||'',meta:t.name+(t.car_number?' · Bil '+t.car_number:''),unread:t.unread||flagged('thread',t.id),open:name+'.openThread('+t.id+')',cat:'message',group:threadGroup(t)};});
    all=all.concat(st.cases.map(function(c){return {kind:c.kind,id:c.id,at:c.at,title:c.title,body:c.last_txt||c.txt||'',meta:(c.car?'Bil '+c.car+' · ':'')+(A.WORDS[c.st]||'')+(['sjuk','wh'].indexOf(c.kind)<0?' · Arkiv':''),unread:c.unread||c.needs||flagged(c.kind,c.id),open:name+'.openCase(\''+c.kind+'\','+c.id+')',cat:category(c),group:caseGroup(c)};}));
    all=all.concat(st.old.map(function(c){return {kind:'old-message',id:c.id,at:c.at,title:c.subject,body:c.last_body,meta:'Äldre privat samtal · bara läsning',unread:c.unread||flagged('old-message',c.id),open:name+'.readConversation('+c.id+')',cat:'message',group:2};}));
-   all=all.filter(function(x){return hidden(x.kind,x.id)===st.trash&&(st.filter==='all'||st.filter===x.cat);}).sort(function(a,b){return Date.parse(b.at)-Date.parse(a.at);});
+   all=all.filter(function(x){return !preference(x.kind,x.id).permanent&&(st.trash?st.canTrash&&preference(x.kind,x.id).in_trash:!hidden(x.kind,x.id))&&(st.filter==='all'||st.filter===x.cat);}).sort(function(a,b){return Date.parse(b.at)-Date.parse(a.at);});
    h+='<p class="mx-error mx-server-error" role="alert">'+esc(st.error)+'</p>';
-   if(st.selected.length)h+='<div class="mx-bulk" role="group" aria-label="Valda rader"><b>'+st.selected.length+' valda</b>'+(st.trash?'<button onclick="'+name+'.bulk(\'restore\')">Återställ</button>':'<button onclick="'+name+'.bulk(\'pin\')">Nåla fast</button><button onclick="'+name+'.bulk(\'unpin\')">Ta bort nål</button><button onclick="'+name+'.bulk(\'unread\')">Markera som oläst</button><button onclick="'+name+'.bulk(\'hide\')">Radera</button>')+'</div>';
+   if(st.selected.length)h+='<div class="mx-bulk" role="group" aria-label="Valda rader"><b>'+st.selected.length+' valda</b>'+(st.trash?'<button onclick="'+name+'.bulk(\'restore\')">Återställ</button><button onclick="'+name+'.bulk(\'permanent\')">Radera på riktigt</button>':'<button onclick="'+name+'.bulk(\'pin\')">Nåla fast</button><button onclick="'+name+'.bulk(\'unpin\')">Ta bort nål</button><button onclick="'+name+'.bulk(\'unread\')">Markera som oläst</button><button onclick="'+name+'.bulk(\'hide\')">Radera</button>')+'</div>';
    function row(x){var key=x.kind+':'+x.id;return '<div class="mx-select-row"><label class="mx-row-check"><input type="checkbox" aria-label="Markera '+esc(x.title)+'" '+(st.selected.indexOf(key)>=0?'checked ':'')+'onchange="'+name+'.toggleSelection(\''+x.kind+'\','+x.id+',this.checked)"></label><button class="ar-row" onclick="'+x.open+'"><span class="ar-main"><span class="ar-t"><b>'+esc(x.title)+'</b>'+(x.unread?'<span class="ar-dot" aria-label="Oläst"></span>':'')+'</span><span class="ar-s">'+esc(x.body)+'</span><span class="ar-m">'+esc(x.meta)+' · '+esc(when(x.at))+'</span></span></button></div>';}
    var pinned=st.trash?[]:all.filter(function(x){return preference(x.kind,x.id).pinned;});
    if(pinned.length){h+='<section class="mx-case-group"><h3>📌 Fastnålade</h3><div class="ar-list">'+pinned.map(row).join('')+'</div></section>';all=all.filter(function(x){return !preference(x.kind,x.id).pinned;});}
@@ -162,7 +163,7 @@
   U.has=function(k,id){return st.cases.some(function(x){return x.kind===k&&x.id===+id;});};
   U.isAdmin=function(){return ['admin','agare','superadmin'].indexOf(window.INKORG_ROLE)>=0;};
   U.badge=function(){var n=U.count();return n?'<span class="ar-badge">'+n+'</span>':'';};
-  U.logout=function(){st.epoch++;st.mode='list';st.trash=false;st.selected=[];st.flags=[];st.threads=[];st.cases=[];st.old=[];st.thread=null;st.legacy=null;st.recipients=[];st.cars=[];st.optionsPending=false;st.draft={};st.el=null;st.busy=false;};
+  U.logout=function(){st.epoch++;st.mode='list';st.trash=false;st.canTrash=false;st.selected=[];st.flags=[];st.threads=[];st.cases=[];st.old=[];st.thread=null;st.legacy=null;st.recipients=[];st.cars=[];st.optionsPending=false;st.draft={};st.el=null;st.busy=false;};
   U.load=U.refresh;U.needs=U.count;U.isOpen=function(){return st.mode!=='list';};
   return U;
  }};

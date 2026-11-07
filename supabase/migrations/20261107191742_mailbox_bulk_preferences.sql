@@ -2,6 +2,20 @@
 begin;
 alter table inbox_private.unread_flags add column if not exists pinned boolean not null default false;
 alter table inbox_private.unread_flags add column if not exists hidden boolean not null default false;
+
+-- Temporary superadmin trash rights follow the SAME central switch as sickness boss rights.
+create or replace function private.mailbox_trash_roles() returns text[] language sql stable set search_path='' as $$select private.sjuk_boss_roles()$$;
+revoke all on function private.mailbox_trash_roles() from public,anon,authenticated;
+-- NEVER enable medical/file deletion merely to enable ordinary mailbox cleanup.
+create or replace function private.mailbox_secret_hard_delete_enabled() returns boolean language sql immutable set search_path='' as $$select false$$;
+revoke all on function private.mailbox_secret_hard_delete_enabled() from public,anon,authenticated;
+create table if not exists inbox_private.party_deletions (
+ company_id text not null,kind text not null,item_id bigint not null,
+ owner_hidden boolean not null default false,owner_permanent boolean not null default false,
+ primary key(company_id,kind,item_id)
+);
+alter table inbox_private.party_deletions enable row level security;
+revoke all on inbox_private.party_deletions from public,anon,authenticated;
 CREATE OR REPLACE FUNCTION inbox_private.dispatch(p_token text, p_action text, p_data jsonb DEFAULT '{}'::jsonb)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -18,19 +32,45 @@ begin
  if v_admin and not a.is_admin then raise exception 'forbidden' using errcode='42501'; end if;
  if private.is_demo() then raise exception 'demo_read_only' using errcode='42501'; end if;
  v_role:=case when v_admin then 'admin' else 'driver' end;
- if p_action='item_flags' then
-   return coalesce((select jsonb_agg(jsonb_build_object('kind',f.kind,'id',f.item_id,'is_unread',f.is_unread,'pinned',f.pinned,'hidden',f.hidden)) from inbox_private.unread_flags f where f.driver_id=a.driver_id and (f.is_unread or f.pinned or f.hidden)),'[]');
+ if p_action='mailbox_capabilities' then
+   return jsonb_build_object('can_trash',v_admin and a.category=any(private.mailbox_trash_roles()),'secret_hard_delete_enabled',private.mailbox_secret_hard_delete_enabled());
+ elsif p_action='item_flags' then
+   return coalesce((select jsonb_agg(jsonb_build_object('kind',k.kind,'id',k.item_id,'is_unread',coalesce(f.is_unread,false),'pinned',coalesce(f.pinned,false),
+     'hidden',coalesce(f.hidden,false) or coalesce(d.owner_hidden,false),'in_trash',coalesce(d.owner_hidden,false) and not coalesce(d.owner_permanent,false),'permanent',coalesce(d.owner_permanent,false)))
+     from (select kind,item_id from inbox_private.unread_flags where driver_id=a.driver_id union select kind,item_id from inbox_private.party_deletions where v_admin and company_id=a.company_id and (kind<>'sjuk' or a.category=any(private.sjuk_boss_roles()))) k
+     left join inbox_private.unread_flags f on f.driver_id=a.driver_id and f.kind=k.kind and f.item_id=k.item_id
+     left join inbox_private.party_deletions d on v_admin and d.company_id=a.company_id and d.kind=k.kind and d.item_id=k.item_id),'[]');
  elsif p_action='bulk_preferences' then
    if jsonb_typeof(p_data->'items') is distinct from 'array' or jsonb_array_length(p_data->'items') not between 1 and 100 then raise exception 'bad_selection' using errcode='22023'; end if;
-   if coalesce(p_data->>'operation','') not in ('pin','unpin','unread','hide','restore') then raise exception 'bad_action' using errcode='22023'; end if;
-   -- Each item uses the same authorization as opening. Atomic: a forbidden item aborts the whole batch.
+   if coalesce(p_data->>'operation','') not in ('pin','unpin','unread','hide','restore','permanent') then raise exception 'bad_action' using errcode='22023'; end if;
+   if p_data->>'operation' in ('restore','permanent') and not (v_admin and a.category=any(private.mailbox_trash_roles())) then raise exception 'forbidden' using errcode='42501'; end if;
    for v_result in select value from jsonb_array_elements(p_data->'items') loop
      perform inbox_private.dispatch(p_token,case when p_data->>'operation'='unread' then 'mark_unread' else 'preference_authorize' end,jsonb_build_object('admin',v_admin,'kind',v_result->>'kind','id',v_result->>'id'));
-     if p_data->>'operation'<>'unread' then
-       insert into inbox_private.unread_flags(driver_id,kind,item_id,pinned,hidden) values(a.driver_id,v_result->>'kind',(v_result->>'id')::bigint,p_data->>'operation'='pin',p_data->>'operation'='hide')
+     v_kind:=v_result->>'kind';v_id:=(v_result->>'id')::bigint;
+     -- Serialize the two parties' deletion decisions, so either deletion order is safe.
+     if v_kind='thread' then select * into t from inbox_private.threads where id=v_id for update; end if;
+     if p_data->>'operation' in ('restore','permanent') then
+       if not exists(select 1 from inbox_private.party_deletions d where d.company_id=a.company_id and d.kind=v_kind and d.item_id=v_id and d.owner_hidden and not d.owner_permanent) then raise exception 'not_in_trash' using errcode='22023'; end if;
+       update inbox_private.party_deletions set owner_hidden=p_data->>'operation'='permanent',owner_permanent=p_data->>'operation'='permanent' where company_id=a.company_id and kind=v_kind and item_id=v_id;
+     elsif p_data->>'operation'='hide' and v_admin and a.category=any(private.mailbox_trash_roles()) then
+       insert into inbox_private.party_deletions(company_id,kind,item_id,owner_hidden) values(a.company_id,v_kind,v_id,true)
+       on conflict(company_id,kind,item_id) do update set owner_hidden=true;
+     elsif p_data->>'operation' in ('pin','unpin','hide') then
+       insert into inbox_private.unread_flags(driver_id,kind,item_id,pinned,hidden) values(a.driver_id,v_kind,v_id,p_data->>'operation'='pin',p_data->>'operation'='hide')
        on conflict(driver_id,kind,item_id) do update set
          pinned=case when p_data->>'operation' in ('pin','unpin') then p_data->>'operation'='pin' else inbox_private.unread_flags.pinned end,
-         hidden=case when p_data->>'operation' in ('hide','restore') then p_data->>'operation'='hide' else inbox_private.unread_flags.hidden end;
+         hidden=case when p_data->>'operation'='hide' then true else inbox_private.unread_flags.hidden end;
+     end if;
+     -- Only ordinary v2 message threads can be purged. Both actual parties must have deleted.
+     -- Legacy case records (including sick reports/certificates/storage) are never hard-deleted here.
+     if v_kind='thread' and exists(select 1 from inbox_private.party_deletions d where d.company_id=t.company_id and d.kind='thread' and d.item_id=t.id and d.owner_permanent)
+       and exists(select 1 from inbox_private.unread_flags f where f.driver_id=t.driver_id and f.kind='thread' and f.item_id=t.id and f.hidden) then
+       delete from inbox_private.bookings where thread_id=t.id;
+       delete from inbox_private.messages where thread_id=t.id;
+       delete from inbox_private.reads where thread_id=t.id;
+       delete from inbox_private.threads where id=t.id;
+       delete from inbox_private.unread_flags where kind='thread' and item_id=t.id;
+       delete from inbox_private.party_deletions where company_id=t.company_id and kind='thread' and item_id=t.id;
      end if;
    end loop;
    return jsonb_build_object('ok',true);
