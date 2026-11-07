@@ -1,6 +1,6 @@
-# Ankomster: stationsval (utkast 2026-11-08)
+# Ankomster: stationsval (2026-11-08)
 
-Ingen produktionsändring eller databasändring ingår. Nyheter har förberedd rad med tom `tid`.
+Publicerad via PR #88 efter Christians godkännande. Se `PR88-GO-LIVE-20261108.md` för deployment-id, verifiering och konkret undo. Ingen databasändring. Nyheter-tid fylld vid publicering; checklistan nedan beskriver den ursprungliga releaseplanen.
 
 ## För Christian
 
