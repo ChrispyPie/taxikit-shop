@@ -94,6 +94,7 @@
   // Samma filter som servern (supabase/functions/bevakning/tagnotis.ts)
   function isFast(it) { return !!it.snabb || /snabbt[åa]g|x\s?2000|sj\s?3000/i.test(it.sub || ''); }
   T.matches = function (w, it) {
+    if(it&&it.station&&it.station!=='G')return false;
     if (!w || !it || it.key.charAt(0) !== 't') return false;
     if ((w.origins || []).length && w.origins.indexOf(it.group) < 0) return false;
     if (w.fast_only && !isFast(it)) return false;

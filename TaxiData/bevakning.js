@@ -195,6 +195,7 @@
       .catch(function () {}).then(function () { st.loading = false; repaint(); });
   }
   function toggle(key, item) {
+    if(item&&item.station&&item.station!=='G'){toast('Tågbevakningar gäller Göteborg C. Stationsvalet visar tider utan bevakning.');return;}
     var k = parseKey(key); if (!k || !token()) return;
     var on = !watchOf(key);
     var state = {};

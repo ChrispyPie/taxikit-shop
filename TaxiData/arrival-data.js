@@ -23,16 +23,17 @@
   }
 
   // ---------- tåg ----------
-  function trainItem(t) {
+  function trainItem(t, station) {
     var product = String(t.product || '');
     return {
+      station:station||'G',
       key: 't' + t.id + '|' + t.sched,
       no: 'Tåg ' + (t.id || ''),
       sub: product,
       from: t.other || (t.from && t.from[0]) || '',
       sched: d(t.sched), est: d(t.est), act: d(t.act),
       canceled: !!t.canceled,
-      info: trainLine(t),
+      info: trainLine(t,station),
       tid: t.id || '', schedRaw: t.sched || '',
       note: '',
       group: trainGroup(t),
@@ -45,13 +46,13 @@
   // Inkommande = inte ankommet och beräknad ankomst inom 10 min (och tåget har setts någonstans,
   // eller inom 5 min), eller senast sett vid Olskroken/Marieholm/Gubbero precis utanför Göteborg C.
   var NEAR_G = { G: 1, Or: 1, Gbm: 1, Gro: 1 };
-  function trainLine(t) {
+  function trainLine(t,station) {
     var tr = t.track && String(t.track).toLowerCase() !== 'x' ? ' spår ' + t.track : '';
     if (t.act) return 'Anlänt' + tr;
     if (t.canceled) return 'Inställt' + (tr ? ' · Spår ' + t.track : '');
     var arr = d(t.est) || d(t.sched), mins = arr ? (arr - Date.now()) / 60000 : 1e9;
     var seen = t.lastSeen && t.lastSeenTs ? d(t.lastSeenTs) : null;
-    if (NEAR_G[t.lastSeenSig] || (mins <= 10 && (seen || mins <= 5))) return 'Inkommande' + tr;
+    if (((!station||station==='G')&&NEAR_G[t.lastSeenSig]) || (mins <= 10 && (seen || mins <= 5))) return 'Inkommande' + tr;
     if (seen) return 'Senast sedd: ' + t.lastSeen + ' ' + hm(seen);
     if ((t.posChecked && mins > 30) || mins > 300) return 'Ej avgått';
     return tr ? 'Spår ' + t.track : '';
@@ -72,9 +73,15 @@
     }
     return '';
   }
-  function loadTrains() {
-    return getJson(TRAIN_URLS, false).then(function (j) {
-      return { updated: j.updated, items: (j.trains || []).filter(function (t) { return t.dir === 'ANK'; }).map(trainItem) };
+  function loadTrains(station) {
+    station=station||'G';
+    if(!/^[A-Za-zÅÄÖåäö.]{1,8}$/.test(station))return Promise.reject(new Error('Okänd station'));
+    var urls=station==='G'?TRAIN_URLS:[TRAIN_URLS[0]+'?station='+encodeURIComponent(station)];
+    return getJson(urls,false).then(function(j){
+      // An older/manual Vercel deployment may ignore station: never show Göteborg under another name.
+      if(station!=='G'&&j.stationSignature!==station)throw new Error('Stationsval kräver uppdaterad tågtjänst');
+      if(j.stationSignature&&j.stationSignature!==station)throw new Error('Fel station i svaret');
+      return {station:station,updated:j.updated,warning:!!j.error,items:(j.trains||[]).filter(function(t){return t.dir==='ANK';}).map(function(t){return trainItem(t,station);})};
     });
   }
   // Filterknappar överst på tågfliken: Alla | Stockholm | Köpenhamn | Oslo. Senaste val sparas.
@@ -127,5 +134,11 @@
 
  var cache={},pending={};
  function watchItems(kind){if(pending[kind])return pending[kind];var p=(kind==='tag'?loadTrains():loadFlights()).then(function(r){cache[kind]={at:Date.now(),items:r.items};return r.items;}).finally(function(){delete pending[kind];});pending[kind]=p;return p;}
- window.ARRIVAL_DATA={date:d,hm:hm,loadTrains:loadTrains,loadFlights:loadFlights,trainGroups:trainGroups,watchItems:watchItems,flightItems:function(age){return cache.flyg&&Date.now()-cache.flyg.at<(age||120000)?Promise.resolve(cache.flyg.items):watchItems('flyg').catch(function(){return cache.flyg?cache.flyg.items:[];});}};
+ var catalogPending=null;
+ function stationCatalog(force){
+   if(!force){try{var saved=JSON.parse(localStorage.getItem('taxi_train_stations_v1')||'null');if(saved&&Array.isArray(saved.stations)&&Date.now()-saved.at<24*3600*1000)return Promise.resolve(saved.stations);}catch(e){}}
+   if(catalogPending)return catalogPending;
+   catalogPending=getJson([TRAIN_URLS[0]+'?stations=1'],false).then(function(j){if(!Array.isArray(j.stations)||!j.stations.some(function(s){return s.id==='G';}))throw new Error('Stationslistan kunde inte hämtas');var rows=j.stations.filter(function(s){return typeof s.label==='string'&&/^[A-Za-zÅÄÖåäö.]{1,8}$/.test(s.id||'');});try{localStorage.setItem('taxi_train_stations_v1',JSON.stringify({at:Date.now(),stations:rows}));}catch(e){}return rows;}).finally(function(){catalogPending=null;});return catalogPending;
+ }
+ window.ARRIVAL_DATA={date:d,hm:hm,stationCatalog:stationCatalog,loadTrains:loadTrains,loadFlights:loadFlights,trainGroups:trainGroups,watchItems:watchItems,flightItems:function(age){return cache.flyg&&Date.now()-cache.flyg.at<(age||120000)?Promise.resolve(cache.flyg.items):watchItems('flyg').catch(function(){return cache.flyg?cache.flyg.items:[];});}};
 })();

@@ -21,14 +21,18 @@
     pastMoreMin: 180,            // "Visa tidigare" visar så här långt bakåt
     aheadHours: 16,
     sources: [
-      { id: 'tag', label: 'Tåg', icon: '🚆', place: 'Göteborg C', load: loadTrains, groups: trainGroups,
+      { id: 'tag', label: 'Tåg', icon: '🚆', place: 'Göteborg C', load: function(){return loadTrains(state.station);}, groups: trainGroups,
         summaryFilter: function (it) { return !!it.group; } },
       { id: 'flyg', label: 'Flyg', icon: '✈️', place: 'Landvetter', load: loadFlights }
       // { id: 'bat', label: 'Båt', icon: '⛴️', place: '…', load: loadBoats }
     ]
   };
 
-  var state = { tab: null, data: {}, err: {}, updated: {}, at: {}, showPast: false, timer: null, tick: null, el: null, loading: {} };
+  var initialNav=window.VIEW_STATE?VIEW_STATE.get('ankomster',{}):{};
+  var selected=/^[A-Za-zÅÄÖåäö.]{1,8}$/.test(initialNav.station||'')?initialNav.station:'G';
+  var stationList=TRAIN_STATIONS.slice();
+  function stationLabel(){var found=stationList.find(function(s){return s.id===state.station;});return found?found.label:state.station;}
+  var state = { station:selected,requests:{tag:0,flyg:0}, tab: null, data: {}, err: {}, updated: {}, at: {}, showPast: false, timer: null, tick: null, el: null, loading: {} };
 
   // ---------- hjälp ----------
   function esc(s) {
@@ -90,11 +94,12 @@
     var r = state.routes[key] || (state.routes[key] = {});
     if (r.loading || (quiet && r.at && Date.now() - r.at < 45000)) return;
     r.loading = true;
-    fetch(ROUTE_URL + '?route=' + encodeURIComponent(it.tid) + '&sched=' + encodeURIComponent(it.schedRaw), { cache: 'no-store' })
+    var station=state.station;
+    fetch(ROUTE_URL + '?station='+encodeURIComponent(station)+'&route=' + encodeURIComponent(it.tid) + '&sched=' + encodeURIComponent(it.schedRaw), { cache: 'no-store' })
       .then(function (x) { if (!x.ok) throw new Error(x.status); return x.json(); })
       .then(function (j) { r.data = j; r.err = false; r.at = Date.now(); })
       .catch(function () { r.err = true; })
-      .then(function () { r.loading = false; if (state.open[key]) paint(); });
+      .then(function () { r.loading = false; if (station===state.station&&state.open[key]) paint(); });
   }
   function delayTxt(sched, real) {
     if (!sched || !real) return '';
@@ -157,7 +162,7 @@
 
   function rowHtml(it) {
     var shown = when(it), changed = it.sched && shown && Math.abs(shown - it.sched) >= 60000;
-    var bev = window.BEVAKNING, watched = !!(bev && bev.isWatched(it.key));  // bevakning.js
+    var bev = window.BEVAKNING, watched = !!(bev && (!it.station||it.station==='G') && bev.isWatched(it.key));  // bevakning.js
     var cls = 'ank-row' + (it.canceled || it.removed ? ' canceled' : '') + (it.act ? ' arrived' : '') + (watched ? ' watched' : '');
     var star = bev && (watched || it.key[0] === 'f')
       ? '<button class="ank-star' + (watched ? ' on' : '') + '" data-bev-star aria-label="' + (watched ? 'Sluta bevaka' : 'Bevaka') + '">' + (watched ? '⭐' : '☆') + '</button>' : '';
@@ -232,12 +237,14 @@
     var html = '<div class="tabs ank-tabs">' + A.sources.map(function (x) {
       return '<button class="tab' + (x.id === s.id ? ' active' : '') + '" data-ank-tab="' + x.id + '">' + x.icon + ' ' + esc(x.label) + '</button>';
     }).join('') + '</div>';
+    if(s.id==='tag')html+='<div class="ank-chips ank-station-quick" role="group" aria-label="Vanliga stationer">'+TRAIN_STATIONS.slice(0,4).concat(TRAIN_STATIONS.filter(function(x){return x.id==='P'||x.id==='A';})).map(function(st){return '<button class="ank-chip'+(st.id===state.station?' on':'')+'" data-ank-station="'+esc(st.id)+'" aria-pressed="'+(st.id===state.station)+'">'+esc(st.label)+'</button>';}).join('')+'</div>'+(state.station!=='G'?'<p class="ank-station-note">Tågbevakningar och tågnotiser gäller fortfarande Göteborg C.</p>':'');
     var upd = state.updated[s.id] ? d(state.updated[s.id]) : null;
     var stale = upd && now - upd > 15 * 60000;
-    html += '<div class="ank-head"><span><b>' + esc(s.place) + '</b>' + (upd ? ' · uppdaterad ' + hm(upd) : '') + '</span>' +
+    html += '<div class="ank-head"><span><b>' + (s.id==='tag'?'<button type="button" class="ank-station-title" data-ank-picker aria-haspopup="dialog">'+esc(stationLabel())+' ▾</button>':esc(s.place)) + '</b>' + (upd ? ' · uppdaterad ' + hm(upd) : '') + '</span>' +
             '<button class="ank-refresh" data-ank-refresh aria-label="Uppdatera">' + (state.loading[s.id] ? '…' : '↻') + '</button></div>';
     if (stale) html += '<div class="ank-warn">Datan är äldre än 15 minuter.</div>';
-    if (state.err[s.id]) html += '<div class="ank-warn">Kunde inte hämta nya tider' + (data ? ', visar senaste.' : '. Försöker igen strax.') + '</div>';
+    if(typeof state.err[s.id]==='string')html+='<div class="ank-warn">'+esc(state.err[s.id])+'</div>';
+    else if (state.err[s.id]) html += '<div class="ank-warn">Kunde inte hämta nya tider' + (data ? ', visar senaste.' : '. Försöker igen strax.') + '</div>';
 
     if (!data) {
       html += '<div class="ank-empty">' + (state.err[s.id] ? '' : 'Hämtar…') + '</div>';
@@ -248,7 +255,7 @@
         var ref = it.act ? it.act : (it.canceled ? it.sched : w);
         return it.key === state.watchHighlight || (ref >= from && w <= to);
       }).sort(function (a, b) { return when(a) - when(b); });
-      if (s.groups) {
+      if (s.groups && (s.id!=='tag'||state.station==='G')) {
         var act = activeGroup(s);
         html += '<div class="ank-chips tf">' + s.groups().map(function (g) {
           var n = g.id ? list.filter(function (it) { return it.group === g.id; }).length : list.length;
@@ -292,18 +299,34 @@
   }
 
   function load(id, quiet) {
-    var s = null; A.sources.forEach(function (x) { if (x.id === id) s = x; });
-    if (!s || state.loading[id]) return;
-    state.loading[id] = true; if (!quiet) paint();
-    s.load().then(function (r) {
-      state.data[id] = r.items; state.updated[id] = r.updated; state.at[id] = Date.now(); state.err[id] = false;
-      try { document.dispatchEvent(new CustomEvent('ankomster:data', { detail: { id: id } })); } catch (e) {}
-      if (id === 'tag') Object.keys(state.open).forEach(function (k) { fetchRoute(k, true); });
-    }).catch(function () { state.err[id] = true; })
-      .then(function () { state.loading[id] = false; if (state.tab === id) paint(); });
+    var s=null;A.sources.forEach(function(x){if(x.id===id)s=x;});if(!s||state.loading[id])return;
+    var request=++state.requests[id],station=state.station;state.loading[id]=true;if(!quiet)paint();
+    s.load().then(function(r){
+      if(request!==state.requests[id]||(id==='tag'&&station!==state.station))return;
+      state.data[id]=r.items;state.updated[id]=r.updated;state.at[id]=Date.now();state.err[id]=r.warning?'Visar senast sparade tider.':false;
+      try{document.dispatchEvent(new CustomEvent('ankomster:data',{detail:{id:id}}));}catch(e){}
+      if(id==='tag')Object.keys(state.open).forEach(function(k){fetchRoute(k,true);});
+    }).catch(function(e){if(request===state.requests[id])state.err[id]=e.message==='Stationsval kräver uppdaterad tågtjänst'?e.message:true;})
+    .then(function(){if(request!==state.requests[id])return;state.loading[id]=false;if(state.tab===id)paint();});
+  }
+  function selectStation(id){
+    if(!stationList.some(function(s){return s.id===id;}))return;
+    state.station=id;state.requests.tag++;state.loading.tag=false;state.data.tag=null;state.updated.tag=null;state.err.tag=false;state.open={};state.routes={};state.watchHighlight=null;state.showPast=false;localStorage.setItem('ank_tagfilter','');
+    if(window.VIEW_STATE)VIEW_STATE.save('ankomster',{past:false,station:state.station});
+    paint();load('tag',true);
+  }
+  function openStationPicker(){
+    var dialog=document.createElement('dialog');dialog.className='ank-station-sheet';dialog.setAttribute('aria-label','Välj station');dialog.innerHTML='<h3>Välj station</h3><label for="ank-station-search">Sök station</label><input id="ank-station-search" type="search" placeholder="Namn eller signatur" autocomplete="off"><div class="ank-station-results" role="status">Hämtar stationslistan…</div><button type="button" data-station-close>Stäng</button>';document.body.appendChild(dialog);dialog.showModal();
+    var search=dialog.querySelector('input'),box=dialog.querySelector('.ank-station-results');
+    function norm(s){return String(s).toLocaleLowerCase('sv').normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+    function draw(){var q=norm(search.value),rows=stationList.filter(function(s){return norm(s.label+' '+s.id).indexOf(q)>=0;});box.innerHTML=rows.length?rows.map(function(s){return '<button type="button" data-station-pick="'+esc(s.id)+'" aria-pressed="'+(s.id===state.station)+'">'+esc(s.label)+' <small>'+esc(s.id)+'</small></button>';}).join(''):'<p>Inga stationer hittades.</p>';}
+    search.oninput=draw;dialog.onclick=function(e){var b=e.target.closest('[data-station-pick]');if(b){selectStation(b.getAttribute('data-station-pick'));dialog.close();}if(e.target.closest('[data-station-close]'))dialog.close();};dialog.addEventListener('close',function(){dialog.remove();});
+    D.stationCatalog().then(function(rows){stationList=rows;if(dialog.isConnected)draw();if(state.el)paint();}).catch(function(){if(dialog.isConnected){box.innerHTML='<p>Stationslistan kunde inte hämtas. Försök igen senare.</p>';}});search.focus();
   }
 
   function onClick(e) {
+    if(e.target.closest('[data-ank-picker]')){openStationPicker();return;}
+    var station=e.target.closest('[data-ank-station]');if(station){selectStation(station.getAttribute('data-ank-station'));return;}
     var rr = !e.target.closest('button, a, input') && e.target.closest('[data-ank-route]');
     if (rr) { toggleRoute(rr.getAttribute('data-ank-route')); return; }
     var t = e.target.closest('[data-ank-tab]');
@@ -318,6 +341,7 @@
   function stop() {
     clearInterval(state.timer); clearInterval(state.tick); state.timer = state.tick = null;
     document.removeEventListener('visibilitychange', onVisible);
+    var picker=document.querySelector('dialog.ank-station-sheet');if(picker)picker.close();
     state.el = null;
   }
 
@@ -330,10 +354,12 @@
     el.innerHTML = ''; el.appendChild(state.el);
     var saved = localStorage.getItem('ank_tab');
     state.tab = A.sources.some(function (x) { return x.id === saved; }) ? saved : A.sources[0].id;
+    if(A._watchTarget&&A._watchTarget.charAt(0)==='t'&&state.station!=='G'){state.station='G';state.requests.tag++;state.loading.tag=false;state.data.tag=null;}
     state.watchHighlight = A._watchTarget || null; state.watchFocus = !!A._watchTarget;
     A._watchTarget = null;
     if (state.watchHighlight) state.showPast = true;
     paint();
+    D.stationCatalog().then(function(rows){stationList=rows;if(state.el)paint();}).catch(function(){});
     load(state.tab, true);
     state.timer = setInterval(function () { if (!document.hidden) load(state.tab, true); }, A.refreshMs);
     state.tick = setInterval(paint, 20000);  // flytta fram listan när tiden går
@@ -401,6 +427,6 @@
   };
   A.repaint = function () { if (state.el && state.el.isConnected) paint(); };
 
- if(window.VIEW_STATE){state.showPast=!!VIEW_STATE.get('ankomster',{}).past;VIEW_STATE.bind('ankomster',function(){return {past:state.showPast};});}
+ if(window.VIEW_STATE){state.showPast=!!VIEW_STATE.get('ankomster',{}).past;VIEW_STATE.bind('ankomster',function(){return {past:state.showPast,station:state.station};});}
 
 })();

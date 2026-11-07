@@ -1,4 +1,4 @@
-// Göteborg C tåg (Trafikverket TrainAnnouncement) som Vercel-funktion.
+// Valbar stations tåg (Trafikverket TrainAnnouncement) som Vercel-funktion.
 //
 // Alla användare läser samma svar från Vercels CDN. Svaret cachas i 60 s
 // (s-maxage=60) + 30 s stale-while-revalidate, så Trafikverket får ungefär
@@ -15,6 +15,8 @@
 
 const TV_URL = "https://api.trafikinfo.trafikverket.se/v2/data.json";
 const STATION = "G";
+const QUICK_STATIONS = new Map(require("../TaxiData/train-stations.js").map(s => [s.id, s.label]));
+const STATION_CACHE = new Map(), STATION_PENDING = new Map(), ROUTE_PENDING = new Map();
 const BACK_HOURS = clampInt(process.env.TRAIN_BACK_HOURS, 24, 1, 36);
 const AHEAD_HOURS = clampInt(process.env.TRAIN_AHEAD_HOURS, 16, 1, 24);
 const TV_TIMEOUT_MS = 12000;
@@ -44,7 +46,7 @@ const STATIONS = {
 
 // Senaste lyckade svar i den här (varma) instansen. Används om Trafikverket
 // svarar fel, så att användarna får lite äldre data i stället för inget.
-let lastGood = null;
+// Warm-instance caches are station-scoped; no station can inherit another station's stale board.
 
 function clampInt(raw, def, min, max) {
   const n = parseInt(raw, 10);
@@ -67,22 +69,32 @@ function hh(n) {
 }
 
 // Stationsnamn från Trafikverket TrainStation (signatur -> namn). Hämtas högst en gång per dygn
-// per varm instans; STATIONS ovan går före. Misslyckas hämtningen används STATIONS/signaturen.
+// per varm instans; officiella namn går före reservnamnen. Vid fel används reservnamn/signaturen.
 let TS_NAMES = null;
-let TS_AT = 0;
-async function loadStationNames(key) {
-  if (TS_NAMES && Date.now() - TS_AT < 24 * 3600 * 1000) return;
-  const q = '<QUERY objecttype="TrainStation" schemaversion="1.4">' +
-    "<INCLUDE>LocationSignature</INCLUDE><INCLUDE>AdvertisedLocationName</INCLUDE></QUERY>";
-  const json = await tvPost(key, q);
-  const map = {};
-  for (const block of ((json || {}).RESPONSE || {}).RESULT || []) {
-    for (const r of block.TrainStation || []) {
-      if (r && r.LocationSignature && r.AdvertisedLocationName) map[r.LocationSignature] = r.AdvertisedLocationName;
-    }
-  }
-  if (Object.keys(map).length > 100) { TS_NAMES = map; TS_AT = Date.now(); }
+let CATALOG=null,CATALOG_AT=0,CATALOG_PENDING=null,CATALOG_FAIL_AT=0;
+const CATALOG_TTL=24*3600*1000, CATALOG_STALE_MAX=7*24*3600*1000;
+function regionalStation(row){
+  if(row.Advertised!==true||row.Deleted===true||row.CountryCode!=="SE")return false;
+  const counties=(Array.isArray(row.CountyNo)?row.CountyNo:[row.CountyNo]).map(Number);
+  if(counties.includes(14))return true;
+  const point=String((row.Geometry||{}).WGS84||"").match(/^POINT\s*\(\s*([-\d.]+)\s+([-\d.]+)\s*\)$/i);
+  // North Halland = Kungsbacka/Varberg area (north of latitude 57.0). No guess when coordinates are missing.
+  return counties.includes(13)&&!!point&&Number(point[2])>=57.0;
 }
+async function loadCatalog(key){
+  if(CATALOG&&Date.now()-CATALOG_AT<CATALOG_TTL)return CATALOG;
+  if(Date.now()-CATALOG_FAIL_AT<60000){if(CATALOG&&Date.now()-CATALOG_AT<CATALOG_STALE_MAX)return CATALOG;throw new Error("station_catalog_unavailable");}
+  if(CATALOG_PENDING)return CATALOG_PENDING;
+  CATALOG_PENDING=(async()=>{try{
+    const q='<QUERY objecttype="TrainStation" namespace="rail.infrastructure" schemaversion="1.5"><FILTER><AND><EQ name="Advertised" value="true"/><EQ name="Deleted" value="false"/><EQ name="CountryCode" value="SE"/></AND></FILTER><INCLUDE>LocationSignature</INCLUDE><INCLUDE>AdvertisedLocationName</INCLUDE><INCLUDE>Advertised</INCLUDE><INCLUDE>Deleted</INCLUDE><INCLUDE>CountryCode</INCLUDE><INCLUDE>CountyNo</INCLUDE><INCLUDE>Geometry.WGS84</INCLUDE></QUERY>';
+    const json=await tvPost(key,q), all=[];for(const b of ((json||{}).RESPONSE||{}).RESULT||[])all.push(...(b.TrainStation||[]));
+    const list=new Map(),names={};for(const r of all){if(r.LocationSignature&&r.AdvertisedLocationName)names[r.LocationSignature]=r.AdvertisedLocationName;if(regionalStation(r)&&/^[A-Za-zÅÄÖåäö.]{1,8}$/.test(r.LocationSignature||'')&&r.AdvertisedLocationName)list.set(r.LocationSignature,{id:r.LocationSignature,label:r.AdvertisedLocationName});}
+    if(!list.has('G'))throw new Error('invalid_station_catalog');
+    CATALOG=Array.from(list.values()).sort((a,b)=>a.label.localeCompare(b.label,'sv'));CATALOG_AT=Date.now();TS_NAMES=names;return CATALOG;
+  }catch(e){CATALOG_FAIL_AT=Date.now();if(CATALOG&&Date.now()-CATALOG_AT<CATALOG_STALE_MAX)return CATALOG;throw e;}
+  finally{CATALOG_PENDING=null;}})();return CATALOG_PENDING;
+}
+async function loadStationNames(key){await loadCatalog(key);}
 
 function stationName(sig) {
   return (TS_NAMES && TS_NAMES[sig]) || STATIONS[sig] || sig || "";
@@ -221,11 +233,11 @@ function orIdents(idents) {
   return idents.map((i) => '<EQ name="AdvertisedTrainIdent" value="' + xmlAttr(i) + '" />').join("");
 }
 
-async function stationQuery(key) {
+async function stationQuery(key, station = STATION) {
   const q =
     '<QUERY objecttype="TrainAnnouncement" schemaversion="1.9" orderby="AdvertisedTimeAtLocation" limit="2000">' +
     "<FILTER><AND>" +
-    '<EQ name="LocationSignature" value="' + STATION + '" />' +
+    '<EQ name="LocationSignature" value="' + xmlAttr(station) + '" />' +
     '<EQ name="Advertised" value="true" />' +
     '<GT name="AdvertisedTimeAtLocation" value="$dateadd(-' + hh(BACK_HOURS) + ')" />' +
     '<LT name="AdvertisedTimeAtLocation" value="$dateadd(' + hh(AHEAD_HOURS) + ')" />' +
@@ -320,9 +332,9 @@ async function routesMap(key, trains) {
   return by;
 }
 
-async function buildTrains(key) {
+async function buildTrains(key, station = STATION) {
   await loadStationNames(key).catch(() => {});
-  const trains = await stationQuery(key);
+  const trains = await stationQuery(key, station);
   const [pos, routes] = await Promise.all([
     lastSeenMap(key, trains).catch(() => ({ best: {}, idents: [] })),
     routesMap(key, trains).catch(() => ({})),
@@ -367,13 +379,13 @@ async function buildTrains(key) {
   return Array.from(uniq.values());
 }
 
-// Stationslista för ETT tåg (på begäran när man trycker på raden): ?route=<tågnr>&sched=<ankomst G>.
+// Stationslista för ETT tåg (på begäran när man trycker på raden): ?station=<signatur>&route=<tågnr>&sched=<ankomst>.
 // En Trafikverket-fråga per tåg, cachad 45 s i CDN och 30 s i instansen.
 const ROUTE_CACHE = new Map();
 const CACHE_ROUTE = "public, s-maxage=45, stale-while-revalidate=30";
-async function routeFor(key, ident, schedIso) {
+async function routeFor(key, ident, schedIso, station = STATION) {
   const sched = Date.parse(schedIso);
-  const ck = ident + "|" + schedIso;
+  const ck = station + "|" + ident + "|" + schedIso;
   const hit = ROUTE_CACHE.get(ck);
   if (hit && Date.now() - hit.at < 30000) return hit.body;
   const now = Date.now();
@@ -390,7 +402,7 @@ async function routeFor(key, ident, schedIso) {
     "<INCLUDE>TimeAtLocation</INCLUDE><INCLUDE>TrackAtLocation</INCLUDE><INCLUDE>Canceled</INCLUDE>" +
     "<INCLUDE>Deviation</INCLUDE><INCLUDE>OtherInformation</INCLUDE><INCLUDE>Booking</INCLUDE></QUERY>";
   const rows = rowsOf(await tvPost(key, q));
-  // Bara den körning som ankommer G vid sched (±3 h) – inte gårdagens/morgondagens med samma nummer.
+  // Bara den körning som ankommer vald station vid sched (±3 h) – inte gårdagens/morgondagens med samma nummer.
   const lo = sched - 14 * 3600000, hi = sched + 3 * 3600000;
   const stops = new Map();
   let seen = null;
@@ -417,19 +429,19 @@ async function routeFor(key, ident, schedIso) {
     stops.set(sig, s);
   }
   let list = Array.from(stops.values()).sort((a, b) => a.t - b.t);
-  const gi = list.findIndex((s) => s.sig === STATION && s.arrSched);
+  const gi = list.findIndex((s) => s.sig === station && s.arrSched);
   if (gi >= 0) list = list.slice(0, gi + 1);
   list = list.map((s) => { const o = Object.assign({}, s); delete o.t; return o; });
   let reason = "", info = "";
   for (const r of rows) {
-    if ((r.LocationSignature || "") !== STATION) continue;
+    if ((r.LocationSignature || "") !== station) continue;
     const t = Date.parse(r.AdvertisedTimeAtLocation);
     if (!Number.isFinite(t) || Math.abs(t - sched) > 3 * 3600000) continue;
     const parts = reasonParts(r);
     if (parts.reason && !reason) reason = parts.reason;
     if (parts.info && !info) info = parts.info;
   }
-  const body = { id: ident, sched: schedIso, updated: new Date().toISOString(), error: null, stops: list, lastSeen: seen, reason, info };
+  const body = { station: (TS_NAMES&&TS_NAMES[station])||QUICK_STATIONS.get(station)||station, stationSignature: station, id: ident, sched: schedIso, updated: new Date().toISOString(), error: null, stops: list, lastSeen: seen, reason, info };
   ROUTE_CACHE.set(ck, { at: Date.now(), body });
   if (ROUTE_CACHE.size > 300) ROUTE_CACHE.delete(ROUTE_CACHE.keys().next().value);
   return body;
@@ -453,45 +465,50 @@ async function handler(req, res) {
   if (req.method !== "GET" && req.method !== "HEAD") {
     return send(res, 405, "no-store", { error: "method not allowed", trains: [] });
   }
-  const key = getKey();
-  if (!key) {
-    return send(res, 503, CACHE_ERR, { station: "Göteborg C", updated: null, error: "TRAFIKVERKET_API_KEY saknas", trains: [] });
-  }
   const url = new URL(req.url || "/", "http://x");
+  const station = url.searchParams.get("station") || STATION;
+  if (url.searchParams.getAll("station").length > 1 || !/^[A-Za-zÅÄÖåäö.]{1,8}$/.test(station))
+    return send(res,400,"no-store",{error:"Okänd station",trains:[]});
+  const key = getKey();
+  if (!key) return send(res,503,CACHE_ERR,{station:(TS_NAMES&&TS_NAMES[station])||QUICK_STATIONS.get(station)||station,stationSignature:station,updated:null,error:"TRAFIKVERKET_API_KEY saknas",trains:[]});
+  if(url.searchParams.get('stations')==='1'){
+    try{const stations=await loadCatalog(key);return send(res,200,'public, s-maxage=86400, stale-while-revalidate=3600',{updated:new Date(CATALOG_AT).toISOString(),stations,stale:Date.now()-CATALOG_AT>=CATALOG_TTL});}
+    catch(e){return send(res,503,CACHE_ERR,{error:'Stationslistan kunde inte hämtas',stations:[]});}
+  }
+  // Default G works during catalog outages; every other signature must be in the cached live advertised regional list.
+  if(station!=='G'){
+    let stations;try{stations=await loadCatalog(key);}catch(e){return send(res,503,CACHE_ERR,{error:'Stationslistan kunde inte hämtas',trains:[]});}
+    if(!stations.some(s=>s.id===station))return send(res,400,'no-store',{error:'Stationen finns inte i stationslistan',trains:[]});
+  }
   const routeId = url.searchParams.get("route");
   if (routeId !== null) {
     const sched = url.searchParams.get("sched") || "";
-    if (!/^\d{1,6}$/.test(routeId) || !Number.isFinite(Date.parse(sched))) {
-      return send(res, 400, "no-store", { error: "route/sched saknas eller fel", stops: [] });
-    }
+    if (!/^\d{1,6}$/.test(routeId) || !Number.isFinite(Date.parse(sched)))
+      return send(res,400,"no-store",{error:"route/sched saknas eller fel",stops:[]});
+    const rk=station+"|"+routeId+"|"+sched;
     try {
-      await loadStationNames(key).catch(() => {});
-      return send(res, 200, CACHE_ROUTE, await routeFor(key, routeId, sched));
-    } catch (e) {
-      const msg = (e && e.name === "AbortError") ? "Trafikverket timeout" : String((e && e.message) || e);
-      return send(res, 502, CACHE_ERR, { error: msg, stops: [] });
-    }
+      if(!ROUTE_PENDING.has(rk))ROUTE_PENDING.set(rk,(async()=>{await loadStationNames(key).catch(()=>{});return routeFor(key,routeId,sched,station);})().finally(()=>ROUTE_PENDING.delete(rk)));
+      return send(res,200,CACHE_ROUTE,await ROUTE_PENDING.get(rk));
+    } catch(e) {return send(res,502,CACHE_ERR,{error:e.name==="AbortError"?"Trafikverket timeout":"Kunde inte hämta stationslistan",stops:[]});}
   }
-  try {
-    const trains = await buildTrains(key);
-    const body = {
-      station: "Göteborg C",
-      updated: new Date().toISOString(),
-      error: null,
-      source: "live",
-      windowHours: { back: BACK_HOURS, ahead: AHEAD_HOURS },
-      trains,
-    };
-    lastGood = body;
-    return send(res, 200, CACHE_OK, body);
-  } catch (e) {
-    const msg = (e && e.name === "AbortError") ? "Trafikverket timeout" : String((e && e.message) || e);
-    if (lastGood) {
-      return send(res, 200, CACHE_ERR, Object.assign({}, lastGood, { error: msg, source: "stale" }));
+  const cached=STATION_CACHE.get(station), now=Date.now();
+  if(cached&&now-cached.at<cached.ttl)return send(res,cached.status,cached.status===200&&!cached.body.error?CACHE_OK:CACHE_ERR,cached.body);
+  if(!STATION_PENDING.has(station))STATION_PENDING.set(station,(async()=>{
+    try {
+      const trains=await buildTrains(key,station),body={station:(TS_NAMES&&TS_NAMES[station])||QUICK_STATIONS.get(station)||station,stationSignature:station,updated:new Date().toISOString(),error:null,source:"live",windowHours:{back:BACK_HOURS,ahead:AHEAD_HOURS},trains};
+      const value={at:Date.now(),ttl:60000,status:200,body,lastGood:body};STATION_CACHE.set(station,value);return value;
+    }catch(e){
+      // Never disclose upstream request/key material in an error response.
+      const msg=e.name==="AbortError"?"Trafikverket timeout":"Kunde inte hämta tågtider";
+      const prior=STATION_CACHE.get(station),good=prior&&prior.lastGood;
+      const usable=good&&Date.now()-Date.parse(good.updated)<15*60000;
+      const body=usable?Object.assign({},good,{error:msg,source:"stale"}):{station:(TS_NAMES&&TS_NAMES[station])||QUICK_STATIONS.get(station)||station,stationSignature:station,updated:null,error:msg,trains:[]};
+      const value={at:Date.now(),ttl:15000,status:usable?200:502,body,lastGood:good};STATION_CACHE.set(station,value);return value;
     }
-    return send(res, 502, CACHE_ERR, { station: "Göteborg C", updated: null, error: msg, trains: [] });
-  }
+  })().finally(()=>STATION_PENDING.delete(station)));
+  const result=await STATION_PENDING.get(station);
+  return send(res,result.status,result.status===200&&!result.body.error?CACHE_OK:CACHE_ERR,result.body);
 }
 
 module.exports = handler;
-module.exports._internal = { slimTrain, buildTrains, uniqueIdents, rowsOf, codesText, reasonParts };
+module.exports._internal = { slimTrain, buildTrains, uniqueIdents, rowsOf, codesText, reasonParts, routeFor, loadCatalog, regionalStation, QUICK_STATIONS };
