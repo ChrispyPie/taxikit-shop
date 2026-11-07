@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-07', id: '2026-11-07c', tid: '02:35', rader: [
+    ['Nytt', 'Bil & verkstad: under Kategori när du ändrar en anmälan finns nu också Underhåll. Välj typ av underhåll, så flyttas anmälan dit som förslag. Foton följer med och tråden finns kvar på den stängda anmälan.', 'admin']
+  ] },
   { datum: '2026-11-07', id: '2026-11-07b', tid: '02:33', rader: [
     ['Ändrat', 'Sjukanmälan: när du laddar upp ett läkarintyg som ägaren bett om går ärendet tillbaka till ägaren (Behöver ditt svar).'],
     ['Nytt', 'Sjukanmälan: ärendet visar nu en historik med datum och tid – när den anmäldes, varje intyg som laddats upp och varje statusbyte, och vem som gjorde det.'],
