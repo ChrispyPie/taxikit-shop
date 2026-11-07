@@ -85,7 +85,7 @@ Browserproven kör en ny isolerad headless-profil med verkliga lokala HTML/JS-fi
 
 ## Avgränsningar / verifieringsgränser
 
-- Godkännande, produktions-/stagingmigrering och test med riktiga testroller återstår. PGlite + mockade browserprov är inte verifiering av en driftsatt Supabase/PostgREST/Edge-miljö.
+- Godkännande, produktionsmigrering och produktions-RPC med isolerade syntetiska testroller är klara; se driftsättningsprotokollet. Befintliga personers inloggningar, fysisk mobil/Safari och signerade intyg genom hela Edge/Storage-flödet är inte provade.
 - Bokningar och nya meddelanden har olästa-markering i Inkorg (uppdateras vid öppning och pollning), men inga nya mejl-/pushleveranser byggs här.
 - Äldre privata samtal/bilärenden är arkiv och får inte nya bokningsknappar; nya ärenden startas som Meddelande.
 - Befintliga äldre Uppgifter under Bil & verkstad behålls; nya bokningar använder inte den tabellen eller dess tidigare schemalogik.

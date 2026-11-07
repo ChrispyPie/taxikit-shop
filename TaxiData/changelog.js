@@ -16,7 +16,7 @@
  */
 window.CHANGELOG = [
   // Christian godkände kör 2026-11-07; svensk go-live-tid.
-  { datum: '2026-11-07', id: '2026-11-07g', tid: '16:22', rader: [
+  { datum: '2026-11-07', id: '2026-11-07g', tid: '16:23', rader: [
     ['Nytt', 'Inkorg samlar Meddelande till admin, Sjuk och Verkstadstimmar. Kategoriikoner på en rad och rubrik för vald kategori. Äldre samtal och bilärenden finns kvar att läsa.'],
     ['Nytt', 'Bokad tid: ett Typ-fält blir rubriken, datum väljs i kalendern och visas ÅÅÅÅ-MM-DD, med tid i 24-timmarsformat. Ett frivilligt meddelande kan följa med. Välj åkeriets bil eller Nej. Avböj använder texten i den vanliga svarsrutan; tom ruta ger en röd varning. Väntande tider visas grå i Mina bevakningar.'],
     ['Nytt', 'Lägg till bilar i profilen. Biltelefonerna visas för åkeriet. Vid din vanliga kontakttelefon väljer du Ägare, Åkeriet eller Alla (inom Taxi Göteborg).'],
