@@ -22,6 +22,57 @@
     ['fun_tip', 'Bästa tipset'],
     ['taxi_start_year', 'Startår i taxi']
   ];
+  var MONTHS = ['januari','februari','mars','april','maj','juni','juli','augusti','september','oktober','november','december'];
+  var LEVELS = ['Modersmål','Flytande','Bra','Grundläggande'];
+  var LICENCES = ['AM','A1','A2','A','B','BE','C1','C1E','C','CE','D1','D1E','D','DE','Taxiförarlegitimation','Serviceresor'];
+  function option(value, label, selected) {
+    return '<option value="' + esc(value) + '"' + (String(value) === String(selected) ? ' selected' : '') + '>' + esc(label) + '</option>';
+  }
+  function languageName(code) {
+    var item = (window.PROFIL_SPRAK || []).find(function (x) { return x[0] === code; });
+    return item ? item[1] : code;
+  }
+  function languageCode(name) {
+    var n = name.trim().toLocaleLowerCase('sv');
+    var aliases = {svenska:'sv',engelska:'en',arabiska:'ar',persiska:'fa',farsi:'fa',somaliska:'so'};
+    if (aliases[n]) return aliases[n];
+    var item = (window.PROFIL_SPRAK || []).find(function (x) { return x[0] === n || x[1].toLocaleLowerCase('sv') === n; });
+    return item ? item[0] : name.trim();
+  }
+  function languageRows(text) {
+    if (!text) return [];
+    var pieces = String(text).split('\n');
+    if (pieces.length === 1 && /[,;]/.test(text)) {
+      var tentative = text.split(/[,;]/).map(function (x) { return x.trim(); });
+      if (tentative.every(function (x) { return languageCode(x) !== x || (window.PROFIL_SPRAK || []).some(function (r) { return r[0] === x; }); })) pieces = tentative;
+    }
+    return pieces.filter(Boolean).map(function (x) {
+      var m = x.match(/^(.*) \((Modersmål|Flytande|Bra|Grundläggande)\)$/);
+      return { code: languageCode(m ? m[1] : x), level: m ? m[2] : '' };
+    });
+  }
+  function languageOptions(selected, query) {
+    var q = (query || '').toLocaleLowerCase('sv');
+    var all = window.PROFIL_SPRAK || [];
+    var matches = all.filter(function (x) { return !q || (x[0] + ' ' + x[1]).toLocaleLowerCase('sv').indexOf(q) >= 0; });
+    // Bound mobile DOM size; the entire 7,910-language catalog is searchable.
+    var shown = matches.slice(0, 150);
+    if (selected && !shown.some(function (x) { return x[0] === selected; })) shown.unshift([selected, languageName(selected)]);
+    return option('', 'Välj språk' + (matches.length > 150 ? ' – sök för fler' : ''), selected) + shown.map(function (x) { return option(x[0], x[1], selected); }).join('');
+  }
+  function languageRow(row) {
+    return '<div class="ps-language"><input class="ps-language-search" aria-label="Sök bland alla språk" placeholder="Sök språk…">' +
+      '<select class="ps-language-name" aria-label="Språk">' + languageOptions(row.code) + '</select>' +
+      '<div class="ps-language-bottom"><select class="ps-language-level" aria-label="Språknivå">' + option('', 'Välj nivå', row.level) + LEVELS.map(function (x) { return option(x,x,row.level); }).join('') +
+      '</select><button type="button" data-a="lang-remove" aria-label="Ta bort språk">×</button></div></div>';
+  }
+  function permitsHtml(text) {
+    var values = String(text || '').split(/[,;\n]/).map(function (x) { return x.trim(); }).filter(Boolean);
+    var unknown = values.filter(function (x) { return !LICENCES.some(function (v) { return v.toLowerCase() === x.toLowerCase(); }); });
+    return '<div class="ps-permit-chips">' + LICENCES.map(function (x) {
+      return '<label><input type="checkbox" data-permit="' + esc(x) + '"' + (values.some(function (v) { return v.toLowerCase() === x.toLowerCase(); }) ? ' checked' : '') + '> ' + esc(x) + '</label>';
+    }).join('') + '</div><label for="ps-perm-legacy">Tidigare uppgifter / övrig erfarenhet</label><textarea id="ps-perm-legacy" maxlength="400">' + esc(unknown.join(', ')) + '</textarea>';
+  }
   var SHIFT = { dag: 'Dag', natt: 'Natt', extra: 'Extra' };
   var ERR = {
     via_master: 'Du är inloggad med huvudlösenordet. Bara föraren själv kan ändra profilen.',
@@ -34,6 +85,8 @@
     not_found: 'Profilen finns inte.',
     bad_kind: 'Ogiltig lista.',
     bad_year: 'Startåret ser inte rätt ut.',
+    bad_month: 'Välj en månad mellan januari och december.',
+    bad_zone: 'Zon måste vara ett heltal mellan 1 och 999.',
     bad_shift: 'Välj dag, natt eller extra.',
     bad_image: 'Det gick inte att läsa bilden. Försök med en annan bild.',
     too_big: 'Bilden är för stor. Försök med en annan bild.',
@@ -89,7 +142,7 @@
     '.ps-flash{background:var(--c-c6f6d5,#c6f6d5);color:var(--c-22543d,#22543d);padding:.45rem .6rem;border-radius:8px;margin-bottom:.5rem;font-size:.88rem}\n' +
     '.ps-err{color:var(--danger-text,#c53030);font-size:.9rem;margin:.3rem 0}\n' +
     '.ps-note{font-size:.82rem;color:var(--text-soft);margin:.2rem 0 .6rem;line-height:1.35}\n' +
-    '.ps-ph{opacity:.7;font-style:italic}';
+    '.ps-date,.ps-language-bottom{display:flex;gap:8px}.ps-date select{min-width:0}.ps-language{padding:10px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px}.ps-language select,.ps-language input{margin-bottom:6px}.ps-language-bottom select{flex:1;min-width:0}.ps-language-bottom button{width:42px;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:8px;font-size:1.4rem}.ps-permit-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}.ps-permit-chips label{display:flex;align-items:center;gap:5px;border:1px solid var(--border);border-radius:8px;padding:8px;margin:0}.ps-permit-chips input{width:auto}.ps-row .v{white-space:pre-line;overflow-wrap:anywhere;min-width:0}.ps-ph{opacity:.7;font-style:italic}';
   (function () { var s = document.createElement('style'); s.textContent = CSS; document.head.appendChild(s); })();
 
   var st = { view: 'page', driverId: null, data: null, gallery: null, guestbook: null, forumList: null, forumKind: null, err: null, flash: null, busy: false };
@@ -170,7 +223,7 @@
 
   function headHtml(d) {
     var years = d.years_taxi != null ? (' · ' + d.years_taxi + ' år i taxi') : '';
-    var start = d.taxi_start_year ? ('sedan ' + d.taxi_start_year) : '';
+    var start = d.taxi_start_year ? ('sedan ' + (d.taxi_start_month ? MONTHS[d.taxi_start_month - 1] + ' ' : '') + d.taxi_start_year) : '';
     return '<div class="ps-head">' + avatarHtml(d) +
       '<div><p class="ps-name">' + esc(d.name || 'Förare') + (d.id ? ' · ' + esc(d.id) : '') + '</p>' +
       (start || years ? '<p class="ps-meta">' + esc(start + years) + '</p>' : '') +
@@ -201,7 +254,7 @@
     rows += fieldRow('Hemmazon', d.home_zone);
     rows += fieldRow('Favoritzon', d.fav_zone);
     rows += fieldRow('Pass', d.shift ? (SHIFT[d.shift] || d.shift) : null);
-    rows += fieldRow('Språk', d.languages);
+    rows += fieldRow('Språk', languageRows(d.languages).map(function (x) { return languageName(x.code) + (x.level ? ' (' + x.level + ')' : ''); }).join(' · '));
     rows += fieldRow('Hobbyer', d.hobbies);
     rows += fieldRow('Behörigheter / erfarenhet', d.permits);
     if (d.also_uber_bolt === true) rows += fieldRow('Kör även', 'Uber / Bolt');
@@ -242,15 +295,21 @@
     var h = crumb([{ t: 'Hem', a: 'home' }, { t: 'Min profil', a: 'page' }, { t: 'Redigera' }]);
     if (st.flash) h += '<div class="ps-flash">' + esc(st.flash) + '</div>';
     h += '<div class="ps-card"><h3>Redigera profil</h3>' +
-      '<p class="ps-note">Namn visas alltid som förnamn och första bokstaven i efternamnet (t.ex. Christian P.). Hemmazon och favoritzon är område — aldrig en adress.</p>';
-    h += '<div class="ps-field"><label for="ps-year">Startår i taxi</label>' +
-      '<input id="ps-year" type="number" inputmode="numeric" min="1970" max="' + (new Date().getFullYear() + 1) + '" value="' + esc(d.taxi_start_year || '') + '">' +
+      '<p class="ps-note">Namn visas alltid som förnamn och första bokstaven i efternamnet (t.ex. Christian P.). Zoner är Taxi Göteborgs zonnummer (1–999), aldrig en adress.</p>';
+    var years = option('', 'År', d.taxi_start_year);
+    for (var y = new Date().getFullYear(); y >= 1970; y--) years += option(y, y, d.taxi_start_year);
+    if (d.taxi_start_year > new Date().getFullYear()) years += option(d.taxi_start_year, d.taxi_start_year, d.taxi_start_year);
+    h += '<div class="ps-field"><label for="ps-year">Start i taxi</label><div class="ps-date">' +
+      '<select id="ps-month" aria-label="Startmånad">' + option('', 'Månad (valfri)', d.taxi_start_month) + MONTHS.map(function (m,i) { return option(i+1,m,d.taxi_start_month); }).join('') + '</select>' +
+      '<select id="ps-year" aria-label="Startår">' + years + '</select></div>' +
       visSelect('taxi_start_year', vis) + '</div>';
-    h += '<div class="ps-field"><label for="ps-home">Hemmazon (område)</label>' +
-      '<input id="ps-home" maxlength="80" value="' + esc(d.home_zone || '') + '" placeholder="t.ex. Angereds centrum">' +
+    h += '<div class="ps-field"><label for="ps-home">Hemmazon</label>' +
+      (d.home_zone && !/^[1-9][0-9]{0,2}$/.test(d.home_zone) ? '<p class="ps-note">Tidigare värde: ' + esc(d.home_zone) + ' (behålls tills du ändrar zonen)</p>' : '') +
+      '<input id="ps-home" type="number" inputmode="numeric" min="1" max="999" step="1" value="' + esc(d.home_zone || '') + '" placeholder="(1–999)">' +
       visSelect('home_zone', vis) + '</div>';
-    h += '<div class="ps-field"><label for="ps-fav">Favoritzon (område)</label>' +
-      '<input id="ps-fav" maxlength="80" value="' + esc(d.fav_zone || '') + '" placeholder="t.ex. Landvetter">' +
+    h += '<div class="ps-field"><label for="ps-fav">Favoritzon</label>' +
+      (d.fav_zone && !/^[1-9][0-9]{0,2}$/.test(d.fav_zone) ? '<p class="ps-note">Tidigare värde: ' + esc(d.fav_zone) + ' (behålls tills du ändrar zonen)</p>' : '') +
+      '<input id="ps-fav" type="number" inputmode="numeric" min="1" max="999" step="1" value="' + esc(d.fav_zone || '') + '" placeholder="(1–999)">' +
       visSelect('fav_zone', vis) + '</div>';
     h += '<div class="ps-field"><label for="ps-shift">Pass</label>' +
       '<select id="ps-shift"><option value="">—</option>' +
@@ -258,8 +317,8 @@
       '<option value="natt"' + (d.shift === 'natt' ? ' selected' : '') + '>Natt</option>' +
       '<option value="extra"' + (d.shift === 'extra' ? ' selected' : '') + '>Extra</option></select>' +
       visSelect('shift', vis) + '</div>';
-    h += '<div class="ps-field"><label for="ps-lang">Språk</label>' +
-      '<input id="ps-lang" maxlength="200" value="' + esc(d.languages || '') + '" placeholder="t.ex. svenska, engelska, arabiska">' +
+    h += '<div class="ps-field"><label>Språk</label><div id="ps-languages">' + languageRows(d.languages).map(languageRow).join('') + '</div>' +
+      '<button type="button" class="ps-btn" data-a="lang-add">+ Lägg till språk</button><p class="ps-note">Sök bland alla språk. Namn utan svensk översättning visas på originalspråk/engelska.</p>' +
       visSelect('languages', vis) + '</div>';
     h += '<div class="ps-field"><label for="ps-bio">Om mig</label>' +
       '<textarea id="ps-bio" maxlength="500">' + esc(d.bio || '') + '</textarea>' +
@@ -267,8 +326,7 @@
     h += '<div class="ps-field"><label for="ps-hob">Hobbyer</label>' +
       '<input id="ps-hob" maxlength="300" value="' + esc(d.hobbies || '') + '">' +
       visSelect('hobbies', vis) + '</div>';
-    h += '<div class="ps-field"><label for="ps-perm">Behörigheter / erfarenhet</label>' +
-      '<textarea id="ps-perm" maxlength="400">' + esc(d.permits || '') + '</textarea>' +
+    h += '<div class="ps-field"><label>Behörigheter</label>' + permitsHtml(d.permits) +
       visSelect('permits', vis) + '</div>';
     h += '<label class="ps-chk"><input type="checkbox" id="ps-uber"' + (d.also_uber_bolt ? ' checked' : '') + '> Kör även Uber/Bolt</label>' +
       visSelect('also_uber_bolt', vis);
@@ -424,21 +482,32 @@
 
   async function saveEdit() {
     if (st.busy) return;
-    st.busy = true; st.err = null; paint();
     var year = document.getElementById('ps-year');
     var data = {
       taxi_start_year: year && year.value ? year.value : '',
-      home_zone: (document.getElementById('ps-home') || {}).value || '',
-      fav_zone: (document.getElementById('ps-fav') || {}).value || '',
+      taxi_start_month: document.getElementById('ps-month').value,
+      home_zone: document.getElementById('ps-home').value || (document.getElementById('ps-home').dataset.touched ? '' : (st.data.home_zone || '')),
+      fav_zone: document.getElementById('ps-fav').value || (document.getElementById('ps-fav').dataset.touched ? '' : (st.data.fav_zone || '')),
       shift: (document.getElementById('ps-shift') || {}).value || '',
-      languages: (document.getElementById('ps-lang') || {}).value || '',
+      languages: Array.from(root.querySelectorAll('.ps-language')).map(function (el) {
+        var code = el.querySelector('.ps-language-name').value, level = el.querySelector('.ps-language-level').value;
+        return code ? languageName(code) + (level ? ' (' + level + ')' : '') : '';
+      }).filter(Boolean).join('\n'),
       bio: (document.getElementById('ps-bio') || {}).value || '',
       hobbies: (document.getElementById('ps-hob') || {}).value || '',
-      permits: (document.getElementById('ps-perm') || {}).value || '',
+      permits: Array.from(root.querySelectorAll('[data-permit]:checked')).map(function (el) { return el.getAttribute('data-permit'); }).concat([document.getElementById('ps-perm-legacy').value.trim()]).filter(Boolean).join(', '),
       also_uber_bolt: !!(document.getElementById('ps-uber') || {}).checked,
       fun_tip: (document.getElementById('ps-tip') || {}).value || '',
       visibility: readVis()
     };
+    for (var zone of ['home_zone', 'fav_zone']) {
+      if (data[zone] && String(data[zone]) !== String(st.data[zone]) && !/^[1-9][0-9]{0,2}$/.test(data[zone])) { toast('Zon måste vara ett heltal mellan 1 och 999.'); return; }
+    }
+    if (data.taxi_start_month && !data.taxi_start_year) { toast('Välj år också.'); return; }
+    if (data.languages.length > 200 || data.permits.length > 400) { toast('För mycket text: språk får vara högst 200 tecken och behörigheter 400.'); return; }
+    // Keep the draft on failures; never repaint before collecting the form.
+    st.busy = true; st.err = null;
+    var saveButton = root.querySelector('[data-a="save"]'); if (saveButton) saveButton.disabled = true;
     try {
       st.data = await rpc('profile_save', { p_data: data });
       st.flash = 'Sparat ✓';
@@ -447,8 +516,8 @@
     } catch (e) {
       st.busy = false;
       if (fail(e)) return;
-      st.err = errText(e);
-      paint();
+      toast(errText(e));
+      if (saveButton) saveButton.disabled = false;
     }
   }
 
@@ -594,6 +663,8 @@
       }
       return;
     }
+    if (a === 'lang-add') { root.querySelector('#ps-languages').insertAdjacentHTML('beforeend', languageRow({code:'',level:''})); return; }
+    if (a === 'lang-remove') { t.closest('.ps-language').remove(); return; }
     if (a === 'save') { saveEdit(); return; }
     if (a === 'gallery') { go('gallery'); loadGallery(); return; }
     if (a === 'guestbook') { go('guestbook'); loadGuestbook(); return; }
@@ -634,6 +705,12 @@
     if (!root._psBound) {
       root.addEventListener('click', onClick);
       root.addEventListener('change', onChange);
+      root.addEventListener('input', function (e) {
+        if (e.target.id === 'ps-home' || e.target.id === 'ps-fav') e.target.dataset.touched = '1';
+        if (!e.target.matches('.ps-language-search')) return;
+        var select = e.target.closest('.ps-language').querySelector('.ps-language-name');
+        select.innerHTML = languageOptions(select.value, e.target.value);
+      });
       root._psBound = true;
     }
     return load(driverId || null);
