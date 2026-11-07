@@ -164,7 +164,7 @@
   <script src="profil-sida.js?v=20261107inkorg2b"></script>
   <script src="forum.js?v=20261106ik1"></script>
   <script src="om-data.js?v=20261106msg1"></script>
-  <script src="changelog.js?v=20261107inkorglive2"></script>
+  <script src="changelog.js?v=20261107menu1"></script>
   <script src="om.js?v=20261106sc1"></script>
   <script src="lonekoll.js?v=20261028sp1"></script>
   <script src="prognos.js?v=20261104kt2"></script>
@@ -182,7 +182,6 @@
     // Åkeridata: ägaren + tillfälligt S admin (samma som private.company_view_roles() på servern)
     var AKERI_ROLLER = ['agare', 'superadmin'];
     var menu = [
-      { id: MINA_BEVAKNINGAR.id, icon: MINA_BEVAKNINGAR.icon, label: MINA_BEVAKNINGAR.title, roles: ALLA },
       { id: 'kordata', icon: '🚗', label: 'Körpassdata', roles: ALLA },
       { id: LONEKOLL.id, icon: LONEKOLL.icon, label: LONEKOLL.title, roles: ALLA },
       // Namn och ikon för Ankomster ändras i ankomster.js (ANKOMSTER.title / icon)
@@ -193,8 +192,9 @@
       { id: TOPPLISTOR.id, icon: TOPPLISTOR.icon, label: TOPPLISTOR.title, roles: ALLA },
       // Kommunikation borttagen 2026-10-25 (tom platshållare): { id: 'kommunikation', icon: '💬', label: 'Kommunikation', roles: ALLA },
       { id: FORUM.id, icon: FORUM.icon, label: FORUM.title, roles: ALLA },
-      { id: OM.id, icon: OM.icon, label: OM.title, roles: ALLA },
+      { id: MINA_BEVAKNINGAR.id, icon: MINA_BEVAKNINGAR.icon, label: MINA_BEVAKNINGAR.title, roles: ALLA },
       { id: 'installningar', icon: '⚙️', label: 'Inställningar', roles: ALLA },
+      { id: OM.id, icon: OM.icon, label: OM.title, roles: ALLA },
       { id: 'admin', icon: '🔐', label: 'Admin', roles: ADMIN_ROLLER, submenu: [
         { id: 'akeridata', icon: '📊', label: 'Åkeridata', roles: AKERI_ROLLER },
         { id: 'chaufforer', icon: '👥', label: 'Chaufförer', roles: ADMIN_ROLLER }
