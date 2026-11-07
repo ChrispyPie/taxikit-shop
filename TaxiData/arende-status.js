@@ -144,7 +144,7 @@
     '.ar-reply{margin-top:12px}.ar-reply textarea{width:100%;min-height:74px;border-radius:10px;border:1px solid var(--border,#cbd5e0);padding:9px;font:inherit;box-sizing:border-box;background:var(--surface,#fff);color:inherit}' +
     '.ar-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.ar-btns button{flex:1 1 auto;padding:10px 12px;border-radius:10px;border:1px solid var(--border,#cbd5e0);background:var(--surface,#fff);color:inherit;font:inherit;font-size:.92em;cursor:pointer}' +
     '.ar-btns .pri{background:var(--primary,#0a3d62);border-color:var(--primary,#0a3d62);color:#fff}.ar-btns .ok{background:#dcf5e3;border-color:#9ad8ad;color:#1d6b38}' +
-    '.ar-tools{margin-top:12px;padding-top:10px;border-top:1px solid var(--border-soft,#e2e8f0)}.ar-tools .ar-h{margin-top:0}' +
+    '.ar-tools .ar-btns button,.ar-tools .ar-btns .ok,.ar-tools .ar-btns .pri{background:var(--surface,#fff);border-color:var(--border,#cbd5e0);color:inherit}.ar-tools{margin-top:12px;padding-top:10px;border-top:1px solid var(--border-soft,#e2e8f0)}.ar-tools .ar-h{margin-top:0}' +
     '.ar-card [data-ar-certs]{margin-top:14px}.ar-card [data-ar-certs] h3{font-size:.9em;margin:0 0 8px}' +
     '.ar-card .ar-cert-files{display:flex;gap:8px;flex-wrap:wrap}.ar-card .ar-cert-files button{min-height:44px;max-width:100%;padding:10px 12px;border:1px solid var(--border,#cbd5e0);border-radius:9px;background:var(--surface,#fff);color:inherit;font:inherit;font-size:.9em;cursor:pointer}.ar-cert-files button:disabled{opacity:.6}' +
     '.ar-note{font-size:.8em;color:var(--c-718096,#718096);margin-top:10px}' +
@@ -277,7 +277,15 @@
       meta.push('Från ' + esc(String(d.start || '').slice(5).split('-').reverse().join('/')) + (d.end ? ' till ' + esc(String(d.end).slice(5).split('-').reverse().join('/')) : ' · pågår'));
       if (viewer === 'owner' && d.name) meta.push(esc(fname(d.name)));
       if (d.certs) meta.push('📄 Intyg: ' + d.certs);
-      if (d.status_at) rows.push({ at: d.status_at, h: sys('Status: ' + A.label('sjuk', d.status), d.status_at, d.status_comment ? (d.status_by ? esc(fname(d.status_by)) + ': ' : '') + '"' + esc(d.status_comment) + '"' : '') });
+      // Historik med tid (2026-11-07, t1009u): anmäld, varje intyg och varje statusbyte – vem och när
+      var who = function (e) { return e.who ? ' – ' + esc(fname(e.who)) : ''; };
+      if (d.events && d.events.length) d.events.forEach(function (e) {
+        if (e.kind === 'created') rows.push({ at: e.at, h: sys('🤒 Sjukanmäld' + who(e), e.at) });
+        else if (e.kind === 'cert') rows.push({ at: e.at, h: sys('📄 Intyg uppladdat' + who(e), e.at) });
+        else if (e.from === 'intyg_begart' && e.to === 'ny' && e.self) rows.push({ at: e.at, h: sys('↩️ Intyg skickat – tillbaka till ägaren', e.at) });
+        else rows.push({ at: e.at, h: sys('Status: ' + A.label('sjuk', e.to) + who(e), e.at, e.comment ? '"' + esc(e.comment) + '"' : '') });
+      });
+      else if (d.status_at) rows.push({ at: d.status_at, h: sys('Status: ' + A.label('sjuk', d.status), d.status_at, d.status_comment ? (d.status_by ? esc(fname(d.status_by)) + ': ' : '') + '"' + esc(d.status_comment) + '"' : '') });
     } else if (c.kind === 'wish') {
       meta.push('Skrivet ' + esc(A.when(d.created_at)));
       if (viewer === 'owner' && d.author && !d.mine) meta.push('av ' + esc(fname(d.author)));
