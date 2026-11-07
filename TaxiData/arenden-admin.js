@@ -97,6 +97,8 @@
     el.innerHTML=h+'</div>';
   }
 
+  // Neutrala knappar, bara liten färgad ikon (t1010u). Färg bär bara ärendets status.
+  var OK = '<span style="color:#1d6b38;font-weight:700">✓</span>', NO = '<span style="color:#c53030;font-weight:700">✗</span>';
   function btn(label, fn, cls) { return '<button type="button"' + (cls ? ' class="' + cls + '"' : '') + ' onclick="' + fn + '">' + label + '</button>'; }
   function tools(c) {
     var d = c.data || {}, k = c.kind, h = '<div class="ar-tools"><div class="ar-h">Adminverktyg</div>';
@@ -106,20 +108,20 @@
       h += '<div class="ar-btns">' + (d.mine ? '' : btn('💬 Skicka svar', "ARENDEN_ADMIN.act('reply')", 'pri')) + '</div>';
       h += '<div class="ar-h" style="margin-top:12px">Ändra status</div><div class="ar-btns">' +
         (d.status !== 'pagar' && d.status !== 'klar' ? btn('Pågår', "ARENDEN_ADMIN.act('pagar')") : '') +
-        (d.status !== 'klar' ? btn('✓ Klar', "ARENDEN_ADMIN.act('klar')", 'ok') : btn('↩️ Öppna igen', "ARENDEN_ADMIN.act('ny')")) + '</div>' +
+        (d.status !== 'klar' ? btn(OK + ' Klar', "ARENDEN_ADMIN.act('klar')", 'ok') : btn('↩️ Öppna igen', "ARENDEN_ADMIN.act('ny')")) + '</div>' +
         '<div class="ar-note">Står det text i rutan när du ändrar status, skickas den med som kommentar.</div>';
     } else if (k === 'wh') {
       h += ta('Fråga eller motivering till beslutet…');
       h += '<div class="ar-btns">' + btn('Fråga föraren', "ARENDEN_ADMIN.act('ask')", 'pri') + '</div>';
       h += '<div class="ar-h" style="margin-top:12px">Beslut</div><div class="ar-btns">' +
-        (d.status !== 'approved' ? btn('✓ Godkänn (Klar)', "ARENDEN_ADMIN.act('approved')", 'ok') : '') +
-        (d.status !== 'rejected' ? btn('Neka (Klar)', "ARENDEN_ADMIN.act('rejected')") : '') + '</div>';
+        (d.status !== 'approved' ? btn(OK + ' Godkänn (Klar)', "ARENDEN_ADMIN.act('approved')", 'ok') : '') +
+        (d.status !== 'rejected' ? btn(NO + ' Neka (Klar)', "ARENDEN_ADMIN.act('rejected')") : '') + '</div>';
     } else if (k === 'sjuk') {
       h += ta('Kommentar till föraren (valfri)…');
       h += '<div class="ar-btns">' +
-        (d.status !== 'godkand' ? btn('✓ Godkänn (Klar)', "ARENDEN_ADMIN.act('godkand')", 'ok') : '') +
+        (d.status !== 'godkand' ? btn(OK + ' Godkänn (Klar)', "ARENDEN_ADMIN.act('godkand')", 'ok') : '') +
         (d.status !== 'intyg_begart' ? btn('📄 Begär läkarintyg', "ARENDEN_ADMIN.act('intyg_begart')") : '') +
-        (d.status !== 'avslagen' ? btn('Avslå (Klar)', "ARENDEN_ADMIN.act('avslagen')") : '') +
+        (d.status !== 'avslagen' ? btn(NO + ' Avslå (Klar)', "ARENDEN_ADMIN.act('avslagen')") : '') +
         (d.status !== 'ny' ? btn('↩️ Öppna igen', "ARENDEN_ADMIN.act('ny')") : '') + '</div>' +
         '<div class="ar-btns">' + btn('Sjuklön och intyg', "VERKSTAD_ADMIN.openApp('sjuk')") + '</div>' +
         '<div class="ar-note">Sjuklön och intyg hanteras i det befintliga sjukformuläret.</div>';
