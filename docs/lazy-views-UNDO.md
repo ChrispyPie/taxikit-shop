@@ -1,3 +1,5 @@
+> Uppdatering 2026-11-07: PR87 är nu mergad och publicerad. Aktuell verifiering och exakta undo-steg finns i `PR87-GO-LIVE-20261107.md`. Texten nedan är den historiska draft-rapporten före godkännandet.
+
 # Ladda verktyg vid behov – UTKAST, inte live
 
 Bas: `36477ce9`. Säkerhetskopia (pushad): `backup/pre-lazy-views-20261107`.
