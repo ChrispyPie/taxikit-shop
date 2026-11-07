@@ -1,7 +1,7 @@
 # Inkorg v4 – godkänd driftsättning 2026-11-07
 
 PR #85, `feature/inkorg-steg1`, separat worktree. **Christian sade kör 2026-11-07 16:17 (Stockholm/CET).**
-Produktionsmigreringarna applicerades och rollverifierades före merge. Merge/deploy och exakt undo dokumenteras i [GO-LIVE-20261107.md](GO-LIVE-20261107.md).
+Produktionsmigreringarna applicerades och rollverifierades före merge. PR #85 mergades 16:22:28 Stockholm/CET, merge `c46ec7e10cfaffd21d61b6828fe85c6c4507e792`. Merge/deploy och exakt undo dokumenteras i [GO-LIVE-20261107.md](GO-LIVE-20261107.md).
 Historisk beskrivning: [6 november](README-20261106.md). Driftsättning/återställning: [UNDO.md](UNDO.md).
 
 ## Byggt

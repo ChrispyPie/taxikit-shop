@@ -4,7 +4,7 @@ Den tidigare versionens återställningsnotering är bevarad i [UNDO-20261106.md
 
 ## Status
 
-**Kör godkänt av Christian 2026-11-07 16:17 (Stockholm/CET).** Produktionsmigrationerna är applicerade och rollverifierade. Merge/deploy och kopierbara revert-kommandon dokumenteras i [GO-LIVE-20261107.md](GO-LIVE-20261107.md).
+**Kör godkänt av Christian 2026-11-07 16:17 (Stockholm/CET).** Produktionsmigrationerna är applicerade och rollverifierade. PR #85 mergades 16:22:28 Stockholm/CET (`c46ec7e10cfaffd21d61b6828fe85c6c4507e792`). Kopierbara revert-kommandon och deploykontroll dokumenteras i [GO-LIVE-20261107.md](GO-LIVE-20261107.md).
 Ny go-live-backup: `backup/pre-inkorg-merge-20261107` vid `5f0fed3c` (dåvarande origin/main).
 Backupbranch: `backup/pre-inkorg-20261107` vid `96bd944977d23341ade4b41d31571089cfb82c4e`.
 Extra backup före v2: `backup/pre-inkorg-v2-20261107` vid `e7391c128530fb6fa62563998f5c7cbbe5c773bd`.
