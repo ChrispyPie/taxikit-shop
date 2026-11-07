@@ -14,8 +14,9 @@ await p.goto(base+'/TaxiData/index.html',{waitUntil:'networkidle0'});await p.wai
 await p.click('#profile-btn');await p.click('#menu-arenden');await p.evaluate(()=>INKORG.select('cases'));await p.evaluate(()=>INKORG.newCase());await p.evaluate(()=>INKORG.report('fel'));await p.waitForSelector('#bv-cancel');await p.click('#bv-cancel');
 await p.waitForSelector('[data-a="edit"]');await p.click('[data-a="edit"]');await p.waitForSelector('#bv-save');
 if(act)await p.evaluate(act);await new Promise(r=>setTimeout(r,200));
-const has=await p.evaluate(()=>!!document.querySelector('.bv-kat'));console.log(file,'kategori-selector:',has,'errors:',errs.length?errs:'none');
-await p.screenshot({path:path.join(out,file+'.png')});}
+const has=await p.evaluate(()=>!!document.querySelector('.bv-kat'));const hid=await p.evaluate(()=>getComputedStyle(document.getElementById('bv-top')).display==='none'&&!document.querySelector('.bv-cars'));console.log(file,'kategori-selector:',has,'rows-hidden:',hid,'errors:',errs.length?errs:'none');
+await p.screenshot({path:path.join(out,file+'.png')});
+await p.evaluate(()=>INKORG.back());const back=await p.evaluate(()=>getComputedStyle(document.getElementById('bv-top')).display!=='none'&&!!document.querySelector('.bv-cars')&&!document.querySelector('.vk-form'));console.log('  back->list rows visible:',back);}
 await run('agare',true,NAME+'-admin-andra-kategori');
 await run('agare',true,NAME+'-admin-valt-behovs',"document.querySelector('.bv-kat[data-s=kvitto]').click()");
 await run('standard',false,NAME+'-forare-ingen-kategori');

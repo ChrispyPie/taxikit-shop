@@ -1,5 +1,7 @@
 # Kategori-byte (2026-11-07) – ångra
 
+Även: öppen anmälan i Ändra-läge döljer flikar och bilrad (verkstad.js draw/closeEdit, inkorg.js I.back, index.html popstate). Ångras med samma revert.
+
 Inga befintliga rader ändrades (anmälan 21 lämnades orörd – det var ett test).
 
 Backup-gren: `backup/pre-kategori-byte-20261107` (main före ändringen).

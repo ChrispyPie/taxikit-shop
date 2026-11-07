@@ -239,6 +239,7 @@
 
   function drawTop() {
     var top = document.getElementById('bv-top'); if (!top) return;
+    top.style.display = editing() ? 'none' : '';
     var unread = st.bil ? +st.bil.unread || 0 : 0, tl = tabs();
     var open = st.bil ? (st.bil.tasks || []).filter(function (t) { return t.mine && t.status !== 'klar'; }).length : 0;
     var q = whQ(st.data), nf = issUnread('fault'), ns = issUnread('supply');
@@ -253,7 +254,22 @@
     document.getElementById('bv-bell').onclick = showNotices;
   }
 
+  // Öppen anmälan/ärende (Ändra): visa bara formuläret, inga flikar eller bilkort
+  function editing() { return !!((st.f && st.f.id) || (st.tf && st.tf.id) || (st.form && st.form.id)); }
+  V.closeEdit = function () {
+    if (!editing() || !document.getElementById('vk-body')) return false;
+    st.f = null; st.tf = null; st.form = null; draw(); window.scrollTo(0, 0); return true;
+  };
   function draw() {
+    var was = draw.ed, ed = editing(); draw.ed = ed;
+    draw0();
+    var body = document.getElementById('vk-body'); if (!body) return;
+    if (ed) {
+      Array.prototype.slice.call(body.children).forEach(function (c) { if (!c.classList.contains('vk-form') && c.id !== 'vk-flash') c.remove(); });
+      if (!was) window.scrollTo(0, 0);
+    }
+  }
+  function draw0() {
     var body = st.el && document.getElementById('vk-body'); if (!body) return;
     if (st.tab === 'sjuk' && !sjukOn()) { st.tab = 'fel'; st.wantSjuk = !window.TAXI_FEATURES; }
     drawTop();

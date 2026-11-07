@@ -38,6 +38,7 @@
     I.refresh(); I.loadMessages();
   };
   I.back = function () {
+    if (window.VERKSTAD && VERKSTAD.closeEdit && VERKSTAD.closeEdit()) return true;
     if (st.mode !== 'list') { st.mode = 'list'; st.msg = null; paint(); I.loadMessages(); return true; }
     if (st.open) { st.open = null; st.cur = null; paint(); I.refresh(); return true; }
     return false;
