@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-07', id: '2026-11-07d', tid: '03:02', rader: [
+    ['Förbättrat', 'Profil: välj år och månad för din taxistart. Hemmazon och favoritzon är nummer 1–999. Lägg till språk med nivå, välj körkortsbehörigheter och kryssa i Serviceresor. Dina synlighetsval finns kvar.']
+  ] },
   { datum: '2026-11-07', id: '2026-11-07c', tid: '02:35', rader: [
     ['Nytt', 'Bil & verkstad: under Kategori när du ändrar en anmälan finns nu också Underhåll. Välj typ av underhåll, så flyttas anmälan dit som förslag. Foton följer med och tråden finns kvar på den stängda anmälan.', 'admin']
   ] },
