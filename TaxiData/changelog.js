@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-07', id: '2026-11-07a', tid: '02:45', rader: [
+    ['Nytt', 'Bil & verkstad: när admin eller ägare trycker Ändra på en anmälan finns nu Kategori under Bil. Där kan du byta mellan Felanmälan och Behövs. Bytet skrivs i ärendets tråd.', 'admin']
+  ] },
   { datum: '2026-11-06', id: '2026-11-06n', tid: '23:15', rader: [
     ['Nytt', 'Ankomster: tryck på ett inställt eller borttaget tåg eller flyg för att se orsaken, till exempel banarbete. Finns ingen orsak står det så.']
   ] },

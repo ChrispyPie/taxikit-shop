@@ -313,11 +313,12 @@
     var cc = st.car || curCar(), lbl = !st.car && !cc ? curLabel() : '';
     return { kind: kind, id: i ? i.id : null, car: i ? i.car_id : cc, supply: i ? i.supply : null,
       other: i ? (!i.car_id && !!i.car) : !!lbl, label: i ? (i.car_id ? '' : (i.car || '')) : lbl,
-      body: i ? (i.body || '') : '', blocking: i ? !!i.blocking : false, files: [], msg: '' };
+      body: i ? (i.body || '') : '', blocking: i ? !!i.blocking : false, files: [], msg: '',
+      okind: i ? i.kind : kind, osupply: i ? i.supply : null };
   }
   function issueForm(f) {
     var h = '<div class="vk-card vk-form"><div class="vk-ftitle">' + (f.kind === 'fault' ? (f.id ? 'Ändra felanmälan' : 'Anmäl fel på bilen') : (f.id ? 'Ändra' : 'Något som behövs till bilen')) + '</div>';
-    if (f.kind === 'supply') {
+    if (f.kind === 'supply' && !(f.id && admin())) {
       h += '<div class="vk-field"><span class="vk-lbl">Vad behövs?</span><div class="ank-chips kal-chips bv-chips">' + SUPPLY.map(function (s) {
         return '<button type="button" class="ank-chip bv-sup' + (f.supply === s[0] ? ' on' : '') + '" data-s="' + s[0] + '">' + s[1] + ' ' + s[2] + '</button>';
       }).join('') + '</div></div>';
@@ -325,6 +326,14 @@
     h += '<div class="vk-field"><span class="vk-lbl">Bil</span><select id="bv-car">' + carOptions(f.other ? null : f.car, f.kind === 'supply', 'Allmänt / alla bilar', f.other ? 'on' : 'off') + '</select>' +
       (f.other ? '<input id="bv-carlbl" class="kal-input" style="margin-top:6px" maxlength="20" autocapitalize="characters" placeholder="Bilnummer, t.ex. A123" value="' + esc(f.label) + '">' +
         '<div class="vk-foot2">För bilar som inte finns i listan, t.ex. när du kör åt ett annat bolag.</div>' : '') + curHint(f) + '</div>';
+    if (f.id && admin()) {
+      // Kategori kan bara bytas av admin/ägare (servern kollar också)
+      h += '<div class="vk-field"><span class="vk-lbl">Kategori</span><div class="ank-chips kal-chips bv-chips">' +
+        '<button type="button" class="ank-chip bv-kat' + (f.kind === 'fault' ? ' on' : '') + '" data-k="fault">🚨 Felanmälan</button>' +
+        SUPPLY.map(function (s) {
+          return '<button type="button" class="ank-chip bv-kat' + (f.kind === 'supply' && f.supply === s[0] ? ' on' : '') + '" data-k="supply" data-s="' + s[0] + '">' + s[1] + ' ' + s[2] + '</button>';
+        }).join('') + '</div>' + (f.kind !== f.okind ? '<div class="vk-foot2">Byter till ' + (f.kind === 'fault' ? 'Felanmälan' : 'Behövs') + ' när du sparar.</div>' : '') + '</div>';
+    }
     var already = !f.other && f.car ? openFaults(f.car).filter(function (i) { return i.id !== f.id; }) : [];
     if (f.kind === 'fault' && already.length) {
       h += '<div class="vk-warn"><b>Redan anmält på bil ' + esc(carById(f.car) ? carById(f.car).bilnummer : '') + ':</b>' + already.map(function (i) {
@@ -369,6 +378,8 @@
   function bindIssueForm(body) {
     var f = st.f;
     body.querySelectorAll('.bv-sup').forEach(function (b) { b.onclick = function () { f.supply = b.dataset.s; draw(); }; });
+    body.querySelectorAll('.bv-kat').forEach(function (b) { b.onclick = function () {
+      f.kind = b.dataset.k; f.supply = f.kind === 'supply' ? b.dataset.s : null; if (f.kind === 'supply') f.blocking = false; draw(); }; });
     document.getElementById('bv-car').onchange = function (ev) {
       var v = ev.target.value; f.other = v === 'other'; f.car = v && v !== 'other' ? +v : null; draw();
       if (f.other) document.getElementById('bv-carlbl').focus();
@@ -390,14 +401,18 @@
     if (f.kind === 'supply' && f.supply === 'annat' && !f.body.trim()) { f.msg = ERR.need_text; draw(); return; }
     st.busy = true; f.msg = ''; draw();
     var savedId = null;
-    rpc('save_car_issue', { p_id: f.id, p_kind: f.kind, p_car_id: f.other ? null : f.car, p_car_label: lbl || null, p_supply: f.supply, p_body: f.body || null, p_blocking: f.blocking })
+    var kat = f.id && (f.kind !== f.okind || (f.kind === 'supply' && f.supply !== f.osupply));
+    // Byte av kategori: spara först i den gamla kategorin, byt sedan kind via set_car_issue_kind
+    rpc('save_car_issue', { p_id: f.id, p_kind: kat ? f.okind : f.kind, p_car_id: f.other ? null : f.car, p_car_label: lbl || null,
+      p_supply: kat ? f.osupply : f.supply, p_body: f.body || null, p_blocking: kat ? (f.okind === 'fault' && f.kind === 'fault' && f.blocking) : f.blocking })
+      .then(function (r) { return kat ? rpc('set_car_issue_kind', { p_id: f.id, p_kind: f.kind, p_supply: f.supply }) : r; })
       .then(function (r) {
         savedId = r.id;
         return uploadAll(f.files, 'issue_id', savedId);
       })
       .then(function (bad) {
         st.busy = false; st.f = null;
-        flash(f.id ? 'Ändringen är sparad.' : (f.kind === 'fault' ? (f.blocking ? 'Skickat! Ägaren har fått en notis.' : 'Felanmälan skickad. Tack!') : 'Skickat. Tack!') +
+        flash(f.id ? (kat ? 'Sparat. Kategorin är ändrad.' : 'Ändringen är sparad.') : (f.kind === 'fault' ? (f.blocking ? 'Skickat! Ägaren har fått en notis.' : 'Felanmälan skickad. Tack!') : 'Skickat. Tack!') +
           (bad ? ' (' + bad + ' foto kunde inte sparas)' : ''));
         return load();
       })
@@ -510,7 +525,7 @@
     if (flashMsg) h += '<div id="vk-flash" class="vk-flash">' + esc(flashMsg) + '</div>';
     h += '<div class="vk-ltitle">' + (kind === 'fault' ? 'Felanmälan' : 'Behövs till bilen') + '</div>';
     if (kind === 'fault') h += carsCard();
-    if (st.f && st.f.kind === kind) h += issueForm(st.f);
+    if (st.f && (st.f.okind || st.f.kind) === kind) h += issueForm(st.f);
     else h += '<button type="button" id="bv-new" class="vk-new">' + (kind === 'fault' ? '＋ Anmäl fel' : '＋ Något behövs') + '</button>';
     var all = (st.bil.issues || []).filter(function (i) { return i.kind === kind && (kind !== 'fault' || !st.car || i.car_id === st.car); });
     var open = all.filter(function (i) { return i.status !== 'klar'; }), done = all.filter(function (i) { return i.status === 'klar'; });
@@ -549,7 +564,7 @@
     body.querySelectorAll('.bv-msend').forEach(function (b) {
       b.onclick = function () { var i = all.filter(function (x) { return x.id === +b.dataset.id; })[0]; if (i) sendIssueMsg(i); };
     });
-    if (st.f && st.f.kind === kind) bindIssueForm(body);
+    if (st.f && (st.f.okind || st.f.kind) === kind) bindIssueForm(body);
     markSeen(open.concat(st.showDone ? done : []));
   }
   // Ärendet syns på skärmen = läst. Markeringen "Nytt svar" ligger kvar tills nästa laddning så man ser vad som var nytt.

@@ -1,0 +1,22 @@
+const puppeteer=require('/workspace/taxikit-shop/tests/meddelanden/node_modules/puppeteer-core'),fs=require('fs'),path=require('path'),http=require('http');
+const root=path.resolve(__dirname,'../..'),out='/workspace/taxidata-cleanup/screenshots/kategori',NAME=process.argv[2]||'01';fs.mkdirSync(out,{recursive:true});
+const fixtures=fs.readFileSync(path.join(__dirname,'../meddelanden/fixtures.js'),'utf8');
+const server=http.createServer((q,r)=>{let f=path.resolve(root,'.'+decodeURI(q.url.split('?')[0]));fs.readFile(f,(e,b)=>{if(e){r.writeHead(404);return r.end();}r.setHeader('Content-Type',f.endsWith('.js')?'application/javascript':f.endsWith('.css')?'text/css':'text/html');r.end(b);});});
+(async()=>{await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port;
+const br=await puppeteer.launch({executablePath:'/usr/bin/google-chrome',headless:true,args:['--no-sandbox']});
+async function run(role,adm,file,act){const p=await br.newPage();await p.setViewport({width:390,height:844,deviceScaleFactor:2,isMobile:true,hasTouch:true});
+const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.setRequestInterception(true);p.on('request',q=>q.url().startsWith(base)?q.continue():q.respond({status:200,contentType:'application/json',body:'{}'}));
+await p.evaluateOnNewDocument((role,fx,adm)=>{localStorage.clear();localStorage.setItem('taxi_session','synthetic');localStorage.setItem('taxi_driver','900001');localStorage.setItem('taxi_logged_in','1');window.TEST_ROLE=role;(0,eval)(fx);
+ MOCK.bil.is_admin=adm;MOCK.bil.is_owner=adm;MOCK.bil.issues=[{id:301,kind:'fault',car_id:1,car:'T-0001',body:'Bromsarna tjuter vid inbromsning. (exempel)',blocking:false,status:'ny',mine:true,photos:0,created_at:new Date().toISOString()}];
+ document.addEventListener('DOMContentLoaded',()=>{let b=document.createElement('div');b.textContent='TESTVY · påhittade exempel';b.style='text-align:center;background:#243c4b;color:#fde68a;font:11px system-ui;padding:4px;';document.body.prepend(b);});},role,fixtures,adm);
+await p.goto(base+'/TaxiData/index.html',{waitUntil:'networkidle0'});await p.waitForSelector('#app',{visible:true});
+await p.click('#profile-btn');await p.click('#menu-arenden');await p.evaluate(()=>INKORG.select('cases'));await p.evaluate(()=>INKORG.newCase());await p.evaluate(()=>INKORG.report('fel'));await p.waitForSelector('#bv-cancel');await p.click('#bv-cancel');
+await p.waitForSelector('[data-a="edit"]');await p.click('[data-a="edit"]');await p.waitForSelector('#bv-save');
+if(act)await p.evaluate(act);await new Promise(r=>setTimeout(r,200));
+const has=await p.evaluate(()=>!!document.querySelector('.bv-kat'));console.log(file,'kategori-selector:',has,'errors:',errs.length?errs:'none');
+await p.screenshot({path:path.join(out,file+'.png')});}
+await run('agare',true,NAME+'-admin-andra-kategori');
+await run('agare',true,NAME+'-admin-valt-behovs',"document.querySelector('.bv-kat[data-s=kvitto]').click()");
+await run('standard',false,NAME+'-forare-ingen-kategori');
+await br.close();server.close();})().catch(e=>{console.error(e);process.exit(1)});
