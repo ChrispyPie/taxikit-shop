@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
+  <script src="session-ready.js?v=20261107boot1"></script>
+  <style>.session-loading #login-screen,.session-loading #admin-app,.session-loading #app,.session-loading #dashboard-view{display:none!important}#session-status{display:none;text-align:center;padding:48px 16px}.session-loading #session-status{display:block}</style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaxiData</title>
@@ -73,6 +75,7 @@
   </style>
 </head>
 <body>
+  <div id="session-status" aria-live="polite"><p role="status">Kontrollerar inloggning…</p></div>
   <div id="login-screen">
     <div class="login-box">
       <h2>TaxiData</h2>
@@ -149,7 +152,7 @@
   <script src="serverstatus.js?v=20261026tm1"></script>
   <script src="badges.js?v=20261024x"></script>
   <script src="demo.js?v=am1q"></script>
-  <script src="script.js?v=20261105kh1"></script>
+  <script src="script.js?v=20261107boot1"></script>
   <script src="ankomster.js?v=20261106n"></script>
   <script src="bevakning.js?v=20261028v"></script>
   <script src="tagnotis.js?v=20261107arenden1"></script>
@@ -170,7 +173,7 @@
   <script src="prognos.js?v=20261104kt2"></script>
   <script src="prognos-notis.js?v=20261107arenden1"></script>
   <script src="arende-status.js?v=20261107inkorg1"></script>
-  <script src="mailbox-ui.js?v=20261107read1"></script>
+  <script src="mailbox-ui.js?v=20261107boot1"></script>
   <script src="inkorg.js?v=20261107arenden1"></script>
   <script src="notis.js?v=20261107arenden1"></script>
   <script src="swipe-back.js?v=20261106sb2"></script>
@@ -313,11 +316,11 @@
       try {
         // Funktionsflaggor (t611u): hämtas samtidigt som get_me. Fel/äldre server = inga flaggor.
         var featP = rpc('get_my_features', { p_token: localStorage.getItem('taxi_session') || '' }, 5000).catch(function () { return []; });
-        var me = await rpc('get_me', { p_token: localStorage.getItem('taxi_session') || '' }, 10000);
-        if (me) driverData = me;
-        var feats = await featP;
-        window.TAXI_FEATURES = (me && me.demo) || !Array.isArray(feats) ? [] : feats;
-        applyFeatures();
+        var me = await SESSION_READY.resolve(function(){return rpc('get_me', { p_token: localStorage.getItem('taxi_session') || '' }, 12000);});
+        if (me) {driverData = me; driverId = me.id; localStorage.setItem('taxi_driver',me.id);}
+        window.TAXI_FEATURES = [];
+        var featureSession = localStorage.getItem('taxi_session');
+        featP.then(function(feats){if(featureSession!==localStorage.getItem('taxi_session'))return;window.TAXI_FEATURES = (me && me.demo) || !Array.isArray(feats) ? [] : feats;applyFeatures();});
         // Demokonto: servern bestämmer vems data som visas och skickar då "Demoförare" som id och namn. Sparas så att alla sidor visar bannern.
         if (window.DEMO) {
           DEMO.set(me);
@@ -328,7 +331,7 @@
       } catch (e) {
         if (e.code === '28000') { clearSession(); var go = function () { location.reload(); };
           if (window.BEVAKNING && BEVAKNING.localOff) BEVAKNING.localOff().then(go, go); else go(); return false; }
-        return true;
+        SESSION_READY.fail(showMenu); return false;
       }
     }
 
@@ -364,9 +367,11 @@
     }
 
     async function showMenu() {
+      SESSION_READY.begin();
       driverId = localStorage.getItem('taxi_driver') || 'okänd';
       if (!(await loadDriverData())) return;
       document.getElementById('login-screen').style.display = 'none';
+      SESSION_READY.finish();
       if (window.NOTIS) NOTIS.start();
       if (window.INKORG) INKORG.start();
       updateProfileReminder();

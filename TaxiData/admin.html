@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
+  <script src="session-ready.js?v=20261107boot1"></script>
+  <style>.session-loading #login-screen,.session-loading #admin-app,.session-loading #app,.session-loading #dashboard-view{display:none!important}#session-status{display:none;text-align:center;padding:48px 16px}.session-loading #session-status{display:block}</style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="tema.js?v=20261026tm1"></script>
@@ -136,6 +138,7 @@
   </style>
 </head>
 <body>
+  <div id="session-status" aria-live="polite"><p role="status">Kontrollerar inloggning…</p></div>
   <div id="access-denied">
     <h2>Ingen behörighet</h2>
     <p>Du har inte tillgång till admin-panelen.</p>
@@ -164,7 +167,7 @@
   <script src="profilbild.js?v=zdm1"></script>
   <script src="onskemal-admin.js?v=20261106ik1"></script>
   <script src="arende-status.js?v=20261107inkorg1"></script>
-  <script src="mailbox-ui.js?v=20261107read1"></script>
+  <script src="mailbox-ui.js?v=20261107boot1"></script>
   <script src="arenden-admin.js?v=20261107inkorg2b"></script>
   <script src="swipe-back.js?v=20261106sb2"></script>
   <script>
@@ -221,9 +224,10 @@
     let logEntries = null;
     const lastLinks = {};   // aktiveringslänkar som skapats i den här sessionen (bara i minnet)
 
+    let authenticatedMe = null;
     function getMyCategory() {
-      const me = drivers[currentUserId];
-      return me ? me.category : '';
+      if (authenticatedMe && window.DEMO && DEMO.owner()) return 'agare';
+      return authenticatedMe ? authenticatedMe.category : '';
     }
 
     function isOwner() {
@@ -303,16 +307,19 @@
     // som kontrollerar inloggningen och behörigheten på servern.
     function getToken() { return localStorage.getItem('taxi_session') || ''; }
 
-    async function rpc(name, args = {}) {
+    async function rpc(name, args = {}, timeoutMs = 0) {
       // Ägar-demo: adminpanelen visar bara påhittade exempeluppgifter. Inga admin-anrop skickas,
       // och servern skulle ändå neka (demosessionen har bara förarbehörighet).
       if (window.DEMO && DEMO.owner() && name !== 'get_me' && name !== 'logout') return DEMO.fixture(name, args, currentUserId);
-      const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + name, {
+      const ctrl = timeoutMs ? new AbortController() : null;
+      const timer = ctrl ? setTimeout(() => ctrl.abort(), timeoutMs) : null;
+      let res, text;
+      try { res = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + name, {
         method: 'POST',
         headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ p_token: getToken(), ...args })
+        body: JSON.stringify({ p_token: getToken(), ...args }), signal: ctrl ? ctrl.signal : undefined
       });
-      const text = await res.text();
+      text = await res.text(); } finally { if (timer) clearTimeout(timer); }
       const body = text ? JSON.parse(text) : null;
       if (!res.ok) {
         const err = new Error((body && body.message) || ('HTTP ' + res.status));
@@ -400,42 +407,49 @@
           </div>`;
     }
 
+    let driversLoaded = false, driversPending = null, driversError = false;
     async function reloadDrivers() {
-      const rows = await rpc('admin_list_drivers');
+      if (driversPending) return driversPending;
+      driversPending = (async () => {
+      const rows = await rpc('admin_list_drivers', {}, 15000);
       drivers = {};
       extraIds = new Set();
       // registered === false: förar-id som bara finns i resdatan (inte upplagd ännu)
       if (Array.isArray(rows)) rows.forEach(r => { if (r.registered === false) extraIds.add(r.id); else drivers[r.id] = r; });
+      driversLoaded = true; driversError = false;
+      })();
+      try { return await driversPending; } catch(e) { driversError = true; throw e; } finally { driversPending = null; }
     }
 
     async function loadData() {
-      if (!currentUserId) {
-        location.href = 'index.html';
-        return;
-      }
       if (!getToken()) {
         location.href = 'index.html';
         return;
       }
-      // Måste föraren välja nytt lösenord? Då gäller det först (sköts i index.html)
+      const bootToken = getToken();
+      SESSION_READY.begin();
+      document.getElementById('access-denied').style.display = 'none';
       try {
-        const me = await rpc('get_me');
-        if (me && me.must_change_password) { location.href = 'index.html'; return; }
+        const me = await SESSION_READY.resolve(() => rpc('get_me', {}, 12000), m => ['admin','agare','superadmin'].includes(m.category) || !!m.demo);
+        if (bootToken !== getToken()) return loadData();
+        if (me.must_change_password) { location.href = 'index.html'; return; }
+        authenticatedMe = me; currentUserId = me.id;
         if (window.DEMO) { DEMO.set(me); DEMO.banner(); }
-      } catch (e) {}
+      } catch(e) {
+        if (e.code !== '28000') SESSION_READY.fail(loadData);
+        return;
+      }
+      // Only a successful server identity can deny access. No roster/history request gates login.
+      if (!hasAdminAccess()) {
+        document.getElementById('access-denied').style.display = 'block';
+        document.getElementById('admin-app').style.display = 'none';
+        SESSION_READY.finish(); return;
+      }
+      document.getElementById('admin-app').style.display = 'block';
+      SESSION_READY.finish();
       if (window.PROFILBILD) {
         const pm = document.getElementById('profile-menu');
         PROFILBILD.init({ button: document.getElementById('profile-btn'), menu: pm, before: pm.lastElementChild, itemStyle: 'padding:8px; cursor:pointer;' });
-      }
-      let denied = false;
-      try {
-        await reloadDrivers();
-      } catch (e) { console.error(e); denied = true; }
-
-      if (denied || !hasAdminAccess()) {
-        document.getElementById('access-denied').style.display = 'block';
-        document.getElementById('admin-app').style.display = 'none';
-        return;
       }
       // admin.html#bilar öppnar Bilar direkt (länk från Åkeridata)
       const mt = /^#message=(\d+)$/.exec(location.hash);
@@ -627,6 +641,11 @@
     }
 
     function renderChaufforer(content) {
+      if (!driversLoaded) {
+        content.innerHTML = driversError ? '<p>Kunde inte hämta chaufförerna. <button onclick="driversError=false;render()">Försök igen</button></p>' : '<p role="status">Hämtar chaufförer…</p>';
+        if (!driversError) reloadDrivers().then(() => { if (path[0] && path[0].id === 'chaufforer') render(); }).catch(() => { if (path[0] && path[0].id === 'chaufforer') render(); });
+        return;
+      }
       if (lastDrive === null && !renderChaufforer.asked) { renderChaufforer.asked = true; loadLastDrive(); }
       const ids = getAllDriverIds();
       const grouped = {};

@@ -104,15 +104,7 @@ function dashboardVisible() {
   const el = document.getElementById('dashboard-view');
   return !!el && !el.classList.contains('hidden');
 }
-// Förhämtning: när menyn visas (inloggad förare) hämtas förarens data i bakgrunden.
-// Inte för ägaren (hela åkeriets resor) och inte på Åkeridata-sidan.
-if (!COMPANY) setTimeout(function prefetch() {
-  if (!localStorage.getItem('taxi_session') || dataReusable() || loadPromise) return;
-  const cat = (window.driverData && window.driverData.category) || '';
-  if (!cat) { if (!prefetch.n) { prefetch.n = 1; setTimeout(prefetch, 1500); } return; }   // get_me har inte svarat än
-  if (cat === 'agare') return;
-  loadData().catch(() => {});
-}, 1200);
+// Reshistorik hämtas först när Körpassdata öppnas, inte automatiskt bakom huvudmenyn.
 
 async function loadDataNow(keepOld) {
   const sessionAtStart = localStorage.getItem('taxi_session') || '';
