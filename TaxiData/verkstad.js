@@ -348,7 +348,12 @@
         '<button type="button" class="ank-chip bv-kat' + (f.kind === 'fault' ? ' on' : '') + '" data-k="fault">🚨 Felanmälan</button>' +
         SUPPLY.map(function (s) {
           return '<button type="button" class="ank-chip bv-kat' + (f.kind === 'supply' && f.supply === s[0] ? ' on' : '') + '" data-k="supply" data-s="' + s[0] + '">' + s[1] + ' ' + s[2] + '</button>';
-        }).join('') + '</div>' + (f.kind !== f.okind ? '<div class="vk-foot2">Byter till ' + (f.kind === 'fault' ? 'Felanmälan' : 'Behövs') + ' när du sparar.</div>' : '') + '</div>';
+        }).join('') + (f.okind === 'fault' || f.car ? '<button type="button" class="ank-chip bv-kat' + (f.kind === 'maint2' ? ' on' : '') + '" data-k="maint2">🗓️ Underhåll</button>' : '') + '</div>' +
+        (f.kind === 'maint2' ? '<div class="vk-lbl" style="margin-top:8px">Vilket underhåll?</div><div class="ank-chips kal-chips bv-chips">' + MTYPES.map(function (t) {
+          return '<button type="button" class="ank-chip bv-mt' + (f.mtype === t[0] ? ' on' : '') + '" data-t="' + t[0] + '">' + t[1] + ' ' + t[2] + '</button>';
+        }).join('') + '</div>' + (f.mtype === 'annat' ? '<input id="bv-mtitle" class="kal-input" style="margin-top:6px" maxlength="80" placeholder="Namn, t.ex. byta torkarblad" value="' + esc(f.mtitle || '') + '">' : '') +
+          '<div class="vk-foot2">Anmälan flyttas till Underhåll som förslag när du sparar. Foton följer med, tråden finns kvar på den stängda anmälan.</div>' : '') +
+        (f.kind !== f.okind && f.kind !== 'maint2' ? '<div class="vk-foot2">Byter till ' + (f.kind === 'fault' ? 'Felanmälan' : 'Behövs') + ' när du sparar.</div>' : '') + '</div>';
     }
     var already = !f.other && f.car ? openFaults(f.car).filter(function (i) { return i.id !== f.id; }) : [];
     if (f.kind === 'fault' && already.length) {
@@ -395,7 +400,10 @@
     var f = st.f;
     body.querySelectorAll('.bv-sup').forEach(function (b) { b.onclick = function () { f.supply = b.dataset.s; draw(); }; });
     body.querySelectorAll('.bv-kat').forEach(function (b) { b.onclick = function () {
-      f.kind = b.dataset.k; f.supply = f.kind === 'supply' ? b.dataset.s : null; if (f.kind === 'supply') f.blocking = false; draw(); }; });
+      f.kind = b.dataset.k; f.supply = f.kind === 'supply' ? b.dataset.s : null; if (f.kind !== 'fault') f.blocking = false;
+      if (f.kind === 'maint2' && !f.mtype) f.mtype = 'service'; draw(); }; });
+    body.querySelectorAll('.bv-mt').forEach(function (b) { b.onclick = function () { f.mtype = b.dataset.t; draw(); }; });
+    var mt = document.getElementById('bv-mtitle'); if (mt) mt.oninput = function () { f.mtitle = mt.value; };
     document.getElementById('bv-car').onchange = function (ev) {
       var v = ev.target.value; f.other = v === 'other'; f.car = v && v !== 'other' ? +v : null; draw();
       if (f.other) document.getElementById('bv-carlbl').focus();
@@ -417,18 +425,21 @@
     if (f.kind === 'supply' && f.supply === 'annat' && !f.body.trim()) { f.msg = ERR.need_text; draw(); return; }
     st.busy = true; f.msg = ''; draw();
     var savedId = null;
-    var kat = f.id && (f.kind !== f.okind || (f.kind === 'supply' && f.supply !== f.osupply));
+    var mv = f.kind === 'maint2';
+    if (mv && !f.car) { f.msg = ERR.bad_car; draw(); return; }
+    if (mv && f.mtype === 'annat' && !(f.mtitle || '').trim()) { f.msg = 'Skriv vad det gäller.'; draw(); return; }
+    var kat = f.id && !mv && (f.kind !== f.okind || (f.kind === 'supply' && f.supply !== f.osupply));
     // Byte av kategori: spara först i den gamla kategorin, byt sedan kind via set_car_issue_kind
-    rpc('save_car_issue', { p_id: f.id, p_kind: kat ? f.okind : f.kind, p_car_id: f.other ? null : f.car, p_car_label: lbl || null,
-      p_supply: kat ? f.osupply : f.supply, p_body: f.body || null, p_blocking: kat ? (f.okind === 'fault' && f.kind === 'fault' && f.blocking) : f.blocking })
-      .then(function (r) { return kat ? rpc('set_car_issue_kind', { p_id: f.id, p_kind: f.kind, p_supply: f.supply }) : r; })
+    rpc('save_car_issue', { p_id: f.id, p_kind: (kat || mv) ? f.okind : f.kind, p_car_id: f.other ? null : f.car, p_car_label: lbl || null,
+      p_supply: (kat || mv) ? f.osupply : f.supply, p_body: f.body || null, p_blocking: (kat || mv) ? (f.okind === 'fault' && f.kind === 'fault' && f.blocking) : f.blocking })
+      .then(function (r) { if (mv) return rpc('move_car_issue_to_maint', { p_id: f.id, p_type: f.mtype, p_title: f.mtype === 'annat' ? f.mtitle : null }); return kat ? rpc('set_car_issue_kind', { p_id: f.id, p_kind: f.kind, p_supply: f.supply }) : r; })
       .then(function (r) {
         savedId = r.id;
         return uploadAll(f.files, 'issue_id', savedId);
       })
       .then(function (bad) {
         st.busy = false; st.f = null;
-        flash(f.id ? (kat ? 'Sparat. Kategorin är ändrad.' : 'Ändringen är sparad.') : (f.kind === 'fault' ? (f.blocking ? 'Skickat! Ägaren har fått en notis.' : 'Felanmälan skickad. Tack!') : 'Skickat. Tack!') +
+        flash(f.id ? (mv ? 'Flyttad till Underhåll som förslag.' : kat ? 'Sparat. Kategorin är ändrad.' : 'Ändringen är sparad.') : (f.kind === 'fault' ? (f.blocking ? 'Skickat! Ägaren har fått en notis.' : 'Felanmälan skickad. Tack!') : 'Skickat. Tack!') +
           (bad ? ' (' + bad + ' foto kunde inte sparas)' : ''));
         return load();
       })
