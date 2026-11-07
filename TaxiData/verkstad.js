@@ -199,7 +199,23 @@
     });
     var b = rpc('get_bil', {}).then(function (d) { st.bil = d; st.seenQ = {}; badge(d); })
       .catch(function (e) { if (fail(e)) return; st.bilErr = 'Kunde inte hämta bilarna. Försök igen.'; });
-    return Promise.all([a, b]).then(draw);
+    return Promise.all([a, b]).then(function () { openPendingEdit(); draw(); });
+  }
+  // Admin › Ärenden › Ändra: öppna rätt formulär direkt (bil_edit = "typ:id"), och gå tillbaka efteråt (ara_return)
+  function openPendingEdit() {
+    var e = localStorage.getItem('bil_edit'); if (!e || !st.bil) return;
+    localStorage.removeItem('bil_edit');
+    var k = e.split(':')[0], id = +e.split(':')[1], x;
+    if (k === 'issue' && (x = (st.bil.issues || []).filter(function (i) { return i.id === id; })[0])) {
+      st.tab = x.kind === 'fault' ? 'fel' : 'behov'; st.f = newIssue(x.kind, x);
+    } else if (k === 'maint' && (x = (st.bil.maint || []).filter(function (m) { return m.id === id; })[0])) {
+      st.tab = 'underhall'; st.f = newMaint(x, false); st.f.kind = 'maint';
+    } else if (k === 'task' && (x = (st.bil.tasks || []).filter(function (t) { return t.id === id; })[0])) {
+      st.tab = 'uppg'; st.tf = null; startTask({ task: x }); return;
+    } else if (k === 'wh' && (x = ((st.data && st.data.entries) || []).filter(function (w) { return w.id === id; })[0])) {
+      st.tab = 'timmar'; st.form = newForm(x);
+    } else { flashMsg = 'Det gick inte att öppna den för ändring här. Den kanske är klar eller hör till en annan förare.'; return; }
+    st.returning = localStorage.getItem('ara_return'); window.scrollTo(0, 0);
   }
   // Siffra på menyrutan: olästa bil-notiser (admin: annars antal bilar som står)
   function badge(d) {
@@ -262,6 +278,7 @@
   };
   function draw() {
     var was = draw.ed, ed = editing(); draw.ed = ed;
+    if (was && !ed && st.returning) { var r = st.returning; st.returning = null; localStorage.removeItem('ara_return'); location.href = 'admin.html#arende=' + r; return; }
     draw0();
     var body = document.getElementById('vk-body'); if (!body) return;
     if (ed) {

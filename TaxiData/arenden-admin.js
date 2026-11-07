@@ -89,7 +89,7 @@
     var b=st.bil;
     if(!b || b.error) { el.innerHTML=h+'<div class="ar-empty">'+(b?'Kunde inte hämta underhåll.':'Laddar underhåll…')+'</div></div>'; return; }
     var all=b.maint||[], open=all.filter(function(m){return m.status!=='klar';}), done=all.filter(function(m){return m.status==='klar';});
-    function rows(ms){return '<div class="ar-list">'+ms.map(function(m){return '<div class="ar-row"><span class="ar-ico">🔧</span><span class="ar-main"><b>'+esc(m.title||m.type||'Underhåll')+'</b><span class="ar-s">'+esc(m.car||m.car_label||'')+' · '+esc(m.status==='klar'?'Klar':m.status==='forslag'?'Förslag':m.level===2?'Försenat':'Planerat')+'</span></span></div>';}).join('')+'</div>';}
+    function rows(ms){return '<div class="ar-list">'+ms.map(function(m){return '<div class="ar-row"><span class="ar-ico">🔧</span><span class="ar-main"><b>'+esc(m.title||m.type||'Underhåll')+'</b><span class="ar-s">'+esc(m.car||m.car_label||'')+' · '+esc(m.status==='klar'?'Klar':m.status==='forslag'?'Förslag':m.level===2?'Försenat':'Planerat')+'</span></span>'+(m.status!=='klar'?'<button type="button" class="ar-more" style="flex:none;width:auto;margin:0;padding:6px 10px" onclick="ARENDEN_ADMIN.edit(\'maint\','+(+m.id)+',\'underhall\')">✏️ Ändra</button>':'')+'</div>';}).join('')+'</div>';}
     h+=rows(open);
     if(!open.length)h+='<p class="ar-empty">Inget öppet underhåll.</p>';
     if(done.length){h+='<button type="button" class="ar-more" onclick="ARENDEN_ADMIN.toggleDone()">'+(st.showDone?'Dölj klara':'Visa klara ('+done.length+')')+'</button>';if(st.showDone)h+=rows(done);}
@@ -100,6 +100,9 @@
   // Neutrala knappar, bara liten färgad ikon (t1010u). Färg bär bara ärendets status.
   var OK = '<span style="color:#1d6b38;font-weight:700">✓</span>', NO = '<span style="color:#c53030;font-weight:700">✗</span>';
   function btn(label, fn, cls) { return '<button type="button"' + (cls ? ' class="' + cls + '"' : '') + ' onclick="' + fn + '">' + label + '</button>'; }
+  // Ändra: öppna det vanliga formuläret i appen och kom tillbaka hit efteråt
+  R.edit = function (kind, id, tab) { localStorage.setItem('bil_edit', kind + ':' + id); localStorage.setItem('ara_return', (kind === 'maint' ? 'maint' : kind) + ':' + id); VERKSTAD_ADMIN.openApp(tab); };
+  function editBtn(kind, id, tab) { return btn('✏️ Ändra', "ARENDEN_ADMIN.edit('" + kind + "'," + (+id) + ",'" + tab + "')"); }
   function tools(c) {
     var d = c.data || {}, k = c.kind, h = '<div class="ar-tools"><div class="ar-h">Adminverktyg</div>';
     var ta = function (ph) { return '<div class="ar-reply" style="margin-top:0"><textarea id="ara-txt" maxlength="1000" placeholder="' + ph + '"></textarea></div>'; };
@@ -120,12 +123,12 @@
           opt('supply:rengoring', '🧽 Rengöring') + opt('supply:annat', '✏️ Annat') + '</optgroup><optgroup label="Underhåll (blir förslag)">' +
           opt('maint:service', '🔧 Service') + opt('maint:dack_sommar', '☀️ Däck sommar') + opt('maint:dack_vinter', '❄️ Däck vinter') +
           opt('maint:bromsar', '🛑 Bromsar') + opt('maint:besiktning', '📋 Besiktning') + opt('maint:annat', '✏️ Annat') + '</optgroup></select>' +
-          '<div class="ar-btns">' + btn('Byt kategori', 'ARENDEN_ADMIN.kat()') + btn('✏️ Öppna i Bil & verkstad', "VERKSTAD_ADMIN.openApp('" + (d.kind === 'fault' ? 'fel' : 'behov') + "')") + '</div>' +
+          '<div class="ar-btns">' + btn('Byt kategori', 'ARENDEN_ADMIN.kat()') + editBtn('issue', c.id, d.kind === 'fault' ? 'fel' : 'behov') + '</div>' +
           '<div class="ar-note">Bytet skrivs i tråden. Väljer du Underhåll flyttas anmälan dit som förslag och stängs här. Foton följer med. Är det Underhåll → Annat används texten i rutan som namn.</div>';
       }
     } else if (k === 'wh') {
       h += ta('Fråga eller motivering till beslutet…');
-      h += '<div class="ar-btns">' + btn('Fråga föraren', "ARENDEN_ADMIN.act('ask')", 'pri') + '</div>';
+      h += '<div class="ar-btns">' + btn('Fråga föraren', "ARENDEN_ADMIN.act('ask')", 'pri') + (d.status === 'pending' ? editBtn('wh', c.id, 'timmar') : '') + '</div>';
       h += '<div class="ar-h" style="margin-top:12px">Beslut</div><div class="ar-btns">' +
         (d.status !== 'approved' ? btn(OK + ' Godkänn (Klar)', "ARENDEN_ADMIN.act('approved')", 'ok') : '') +
         (d.status !== 'rejected' ? btn(NO + ' Neka (Klar)', "ARENDEN_ADMIN.act('rejected')") : '') + '</div>';
@@ -141,7 +144,7 @@
     } else if (k === 'wish') {
       h += '<div class="ar-note" style="margin-top:0">Önskemål till Christian. Status och svar sätts av Christian (via assistenten), inte här.</div>';
     } else if (k === 'task') {
-      h += '<div class="ar-btns">' + btn('Öppna uppgiften i appen', "VERKSTAD_ADMIN.openApp('uppg')", 'pri') + '</div>';
+      h += '<div class="ar-btns">' + (d.status !== 'klar' ? editBtn('task', c.id, 'uppg') : '') + btn('Öppna uppgiften i appen', "VERKSTAD_ADMIN.openApp('uppg')", 'pri') + '</div>';
     }
     return h + '</div>';
   }
@@ -208,4 +211,15 @@
       alert(A.errText(e));
     });
   };
+  // Tillbaka från Ändra i appen: öppna samma ärende igen
+  (function () {
+    var m = /#arende=(\w+):(\d+)/.exec(location.hash); if (!m) return;
+    try { history.replaceState(null, '', location.pathname); } catch (e) {}
+    var go = function () {
+      if (typeof window.openMenu !== 'function') return setTimeout(go, 200);
+      window.openMenu('arenden');
+      if (m[1] === 'maint') setTimeout(function () { R.type('maint'); }, 300); else setTimeout(function () { R.tap(m[1], +m[2]); }, 300);
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(go, 300); }); else setTimeout(go, 300);
+  })();
 })();

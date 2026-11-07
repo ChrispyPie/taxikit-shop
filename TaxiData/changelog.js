@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-07', id: '2026-11-07f', tid: '03:05', rader: [
+    ['Nytt', 'Admin › Ärenden: Ändra finns nu på felanmälan, Behövs, underhåll, uppgifter och verkstadstid som väntar på beslut. Den öppnar samma formulär som i appen, och när du sparar eller trycker Avbryt kommer du tillbaka till ärendet.', 'admin']
+  ] },
   { datum: '2026-11-07', id: '2026-11-07e', tid: '03:03', rader: [
     ['Nytt', 'Admin › Ärenden: på en öppen felanmälan eller Behövs finns nu Ändra kategori under Adminverktyg. Välj Felanmälan, Behövs eller Underhåll och tryck Byt kategori. Där finns också en knapp för att öppna anmälan i Bil & verkstad.', 'admin']
   ] },
