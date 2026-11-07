@@ -164,13 +164,13 @@
   <script src="profil-sida.js?v=20261107inkorg2b"></script>
   <script src="forum.js?v=20261106ik1"></script>
   <script src="om-data.js?v=20261106msg1"></script>
-  <script src="changelog.js?v=20261107inkorg2b"></script>
+  <script src="changelog.js?v=20261107inkorg3"></script>
   <script src="om.js?v=20261106sc1"></script>
   <script src="lonekoll.js?v=20261028sp1"></script>
   <script src="prognos.js?v=20261104kt2"></script>
   <script src="prognos-notis.js?v=20261103pg2"></script>
   <script src="arende-status.js?v=20261107inkorg1"></script>
-  <script src="mailbox-ui.js?v=20261107inkorg2b"></script>
+  <script src="mailbox-ui.js?v=20261107inkorg3"></script>
   <script src="inkorg.js?v=20261107inkorg2b"></script>
   <script src="notis.js?v=20261106kp1"></script>
   <script src="swipe-back.js?v=20261106sb2"></script>
@@ -617,7 +617,7 @@
         '<p class="p-fid">Förar-ID <b>' + pEsc(d.id) + '</b></p>' +
         '<div class="p-row">' + pInput('p-first-name', 'Förnamn', d.first_name, { req: 1, ac: 'given-name' }) + pInput('p-last-name', 'Efternamn', d.last_name, { req: 1, ac: 'family-name' }) + '</div>' +
         pInput('p-phone', 'Telefon', d.phone, { req: 1, type: 'tel', im: 'tel', ac: 'tel' }) +
-        '<label for="p-phone-visibility">Visa privat telefon för</label><select id="p-phone-visibility" style="width:100%;min-height:44px;font:inherit;padding:10px;border:1px solid var(--border,#cbd5e0);border-radius:8px;background:var(--surface);color:inherit">' + [['owner','Ägaren'],['company','Åkeriet'],['bolag',d.company_label||'Taxibolaget']].map(function(v){return '<option value="'+v[0]+'"'+(d.phone_visibility===v[0]?' selected':'')+'>'+pEsc(v[1])+'</option>';}).join('')+'</select>' +
+        '<label for="p-phone-visibility">Visa privat telefon för</label><select id="p-phone-visibility" style="width:100%;min-height:44px;font:inherit;padding:10px;border:1px solid var(--border,#cbd5e0);border-radius:8px;background:var(--surface);color:inherit">' + [['owner','Ägare'],['company','Åkeriet'],['bolag','Alla (inom '+(d.company_label||'taxibolaget')+')']].map(function(v){return '<option value="'+v[0]+'"'+(d.phone_visibility===v[0]?' selected':'')+'>'+pEsc(v[1])+'</option>';}).join('')+'</select>' +
         pInput('p-email', 'E-post', d.email, { req: 1, type: 'email', im: 'email', ac: 'email' }) +
         pInput('p-address', 'Adress', d.address, { ac: 'street-address' }) +
         '<div class="p-row">' + pInput('p-postal', 'Postnummer', d.postal_code, { im: 'numeric', ac: 'postal-code' }) + pInput('p-city', 'Ort', d.city, { ac: 'address-level2' }) + '</div>' +

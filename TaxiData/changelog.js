@@ -17,9 +17,9 @@
 window.CHANGELOG = [
   // tid sätts först vid go-live efter Christians kör.
   { datum: '2026-11-07', id: '2026-11-07g', rader: [
-    ['Nytt', 'Inkorg samlar Meddelande till admin, Sjuk och Verkstadstimmar. Bilnummer kan skrivas direkt i meddelandet. Äldre privata samtal och bilärenden finns kvar att läsa.'],
-    ['Nytt', 'Bokad tid i en meddelandetråd: förare och admin kan föreslå tider och motparten godkänner eller avböjer. Väntande tider visas grå i Mina bevakningar.'],
-    ['Nytt', 'Lägg till en eller flera bilar i profilen. Biltelefonerna visas för åkeriet. Vid din vanliga kontakttelefon väljer du Ägaren, Åkeriet eller Taxi Göteborg.'],
+    ['Nytt', 'Inkorg samlar Meddelande till admin, Sjuk och Verkstadstimmar. Kategoriikoner på en rad och rubrik för vald kategori. Äldre samtal och bilärenden finns kvar att läsa.'],
+    ['Nytt', 'Bokad tid: ett Typ-fält blir rubriken, datum skrivs ÅÅÅÅ-MM-DD och ett frivilligt meddelande kan följa med. Ange bilnummer eller välj uttryckligen Ej angivet. Motivering krävs för att avböja. Väntande tider visas grå i Mina bevakningar.'],
+    ['Nytt', 'Lägg till bilar i profilen. Biltelefonerna visas för åkeriet. Vid din vanliga kontakttelefon väljer du Ägare, Åkeriet eller Alla (inom Taxi Göteborg).'],
     ['Förbättrat', 'Admin › Ärenden: Meddelande och Bokad tid till åkeriets chaufförer. Önskemål finns bara under Önskemål och idéer. Sjukanmälan och intyg är fortsatt skyddade.', 'admin']
   ]},
   { datum: '2026-11-07', id: '2026-11-07f', tid: '03:05', rader: [

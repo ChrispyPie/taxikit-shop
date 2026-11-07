@@ -9,7 +9,7 @@ from functools import partial
 from playwright.sync_api import sync_playwright
 
 ROOT=Path(__file__).resolve().parents[2]
-OUT=Path(os.environ.get('SCREENSHOT_DIR','/workspace/taxidata-cleanup/screenshots/inkorg-v2'))
+OUT=Path(os.environ.get('SCREENSHOT_DIR','/workspace/taxidata-cleanup/screenshots/inkorg-v3'))
 OUT.mkdir(parents=True,exist_ok=True)
 FIXTURES=(ROOT/'tests/meddelanden/fixtures.js').read_text()+'\n'+(ROOT/'tests/inkorg/fixtures.js').read_text()+'\n'+(ROOT/'tests/inkorg-v2/fixtures.js').read_text()
 class Quiet(SimpleHTTPRequestHandler):
@@ -24,8 +24,10 @@ def check(condition):
     assert condition
     checks+=1
 
-def newpage(browser,role='standard',url='/TaxiData/index.html',width=390):
-    context=browser.new_context(viewport={'width':width,'height':844},device_scale_factor=2,is_mobile=True,has_touch=True,locale='sv-SE',timezone_id='Europe/Stockholm')
+def newpage(browser,role='standard',url='/TaxiData/index.html',width=390,device=None):
+    options=dict(viewport={'width':width,'height':844},device_scale_factor=2,is_mobile=True,has_touch=True,locale='sv-SE',timezone_id='Europe/Stockholm')
+    if device: options.update({k:v for k,v in pw.devices[device].items() if k!='default_browser_type'})
+    context=browser.new_context(**options)
     context.route('**/*',lambda route: route.continue_() if route.request.url.startswith(BASE) else route.fulfill(status=200,content_type='application/json',body='{}'))
     context.add_init_script("localStorage.clear();localStorage.setItem('taxi_session','synthetic-test-fixture');localStorage.setItem('taxi_driver','900001');localStorage.setItem('taxi_logged_in','1');window.TEST_ROLE="+repr(role)+';\n'+FIXTURES+"\ndocument.addEventListener('DOMContentLoaded',()=>{let b=document.createElement('div');b.textContent='TESTVY · påhittade exempel · mobil';b.style='text-align:center;background:#243c4b;color:#fde68a;font:11px system-ui;padding:4px';document.body.prepend(b);});")
     p=context.new_page()
@@ -43,9 +45,9 @@ try:
     br=pw.chromium.launch(headless=True,executable_path='/usr/bin/google-chrome',args=['--no-sandbox','--disable-gpu'])
     p=newpage(br)
     p.wait_for_selector('#app',state='visible');p.click('#profile-btn');p.click('#menu-inkorg');p.wait_for_selector('.mx-filters')
-    check(p.locator('.mx-filters button').all_text_contents()==['Alla','Meddelande','Sjuk','Verkstadstimmar'])
+    check(p.locator('.mx-filters button').evaluate_all("es=>es.map(e=>e.getAttribute('aria-label'))")==['Alla','Meddelande','Sjuk','Verkstadstimmar'])
     p.wait_for_function("document.querySelectorAll('.ar-row').length>5")
-    check('Önskemål' not in p.locator('#content').inner_text());shot(p,'01-inkorg')
+    check('Önskemål' not in p.locator('#content').inner_text());check(p.locator('.mx-category-heading').inner_text()=='Alla');check(p.locator('.mx-filters button').evaluate_all('es=>new Set(es.map(e=>e.getBoundingClientRect().top)).size===1'));p.get_by_role('button',name='Sjuk',exact=True).click();check(p.locator('.mx-category-heading').inner_text()=='Sjuk');p.get_by_role('button',name='Alla',exact=True).click();shot(p,'01-inkorg')
     p.get_by_role('button',name='＋ Nytt ärende',exact=True).click();p.wait_for_selector('dialog[open]')
     check(p.locator('dialog button').all_text_contents()==['Meddelande','Sjuk','Verkstadstimmar','Avbryt'])
     p.get_by_role('button',name='Meddelande',exact=True).last.click();p.wait_for_selector('#mx-form')
@@ -56,11 +58,11 @@ try:
     check(p.evaluate("V2.calls.filter(x=>x.action==='create').length") == 1)
     p.fill('#mx-reply-body','Syntetiskt svar');p.locator('#mx-reply button').click();p.wait_for_function("document.querySelectorAll('.mx-message').length===2")
     p.get_by_role('button',name='Bokad tid',exact=True).click();p.wait_for_selector('#mx-date')
-    p.fill('#mx-kind','service');p.fill('#mx-title','Mitt tidsförslag (test)');p.fill('#mx-date','2027-01-15');p.fill('#mx-time','10:30');p.locator('#mx-form button[type=submit]').click()
+    p.fill('#mx-kind','Mitt tidsförslag (test)');check(p.locator('#mx-title').count()==0);p.fill('#mx-body','Ett frivilligt meddelande till admin (test)');p.fill('#mx-date','2027-01-15');p.fill('#mx-time','10:30');p.locator('#mx-form button[type=submit]').click()
     p.wait_for_selector('.mx-booking.pending');check('admins svar' in p.locator('.mx-booking').inner_text())
     check(p.locator('.mx-booking button').count()==0)
     p.evaluate('INKORG.openThread(801)');p.wait_for_selector('#mx-reason-901');shot(p,'03-trad-bokad-tid')
-    p.get_by_role('button',name='Avböj',exact=True).click();p.wait_for_function("document.querySelector('.mx-error').textContent.includes('Skriv varför')")
+    before=p.evaluate("V2.calls.filter(x=>x.action==='decide').length");p.get_by_role('button',name='Avböj',exact=True).click();p.wait_for_function("document.querySelector('#mx-reason-error-901').textContent==='Vänligen specificera orsak'");check(p.evaluate("V2.calls.filter(x=>x.action==='decide').length")==before);shot(p,'08-avboj-orsak')
     p.fill('#mx-reason-901','Läkarbesök (syntetiskt test)');p.get_by_role('button',name='Avböj',exact=True).click();p.wait_for_function("document.querySelector('.mx-booking').textContent.includes('Avböjd')")
     check('Läkarbesök' in p.locator('.mx-booking').inner_text())
     # Restore a pending appointment to compare grey and solid markers in the same day.
@@ -83,7 +85,7 @@ try:
     check(p.locator('input[type=tel]').count()==0);check(p.locator('.ps-card a[href^="sms:"]').count()==4)
     p.locator('[data-a=edit]').click();p.locator('[data-a=personal]').click()
     p.wait_for_selector('#p-phone-visibility')
-    check(p.locator('#p-phone-visibility option').all_text_contents()==['Ägaren','Åkeriet','Taxi Göteborg'])
+    check(p.locator('#p-phone-visibility option').all_text_contents()==['Ägare','Åkeriet','Alla (inom Taxi Göteborg)'])
     check(p.input_value('#p-phone-visibility')=='owner');check(p.locator('input#p-phone').count()==1)
     p.select_option('#p-phone-visibility','bolag');shot(p,'05-kontaktinformation')
     p.locator('#p-save').click();p.wait_for_function("V2.calls.some(x=>x.action==='profile_save'&&x.data.visibility==='bolag')")
@@ -95,7 +97,7 @@ try:
     p.evaluate("VERKSTAD.openTab('underhall')");check(p.locator('#bm-new,#bm-sug,#bm-save').count()==0)
     # Stale response must not replace a newer navigation.
     p.evaluate("INKORG.show();window.originalRPC=ARENDE.rpc;ARENDE.rpc=(n,a)=>n==='mailbox_v2'&&a.p_action==='get'?new Promise(r=>window.delayed=r):originalRPC(n,a);INKORG.openThread(801);INKORG.select('sick');delayed(V2.threads[801])")
-    p.wait_for_timeout(80);check(p.locator('.mx-filters button[aria-pressed=true]').inner_text()=='Sjuk');p.evaluate('ARENDE.rpc=originalRPC')
+    p.wait_for_timeout(80);check(p.locator('.mx-filters button[aria-pressed=true]').get_attribute('aria-label')=='Sjuk');p.evaluate('ARENDE.rpc=originalRPC')
     a=newpage(br,'admin','/TaxiData/admin.html#arenden');a.wait_for_selector('.mx-actions')
     check(a.locator('.mx-actions').first.locator('button').all_text_contents()==['Meddelande','Bokad tid'])
     check('Sjukanmälan' not in a.locator('.ar-list').inner_text());check('Önskemål' not in a.locator('.ar-list').inner_text())
@@ -103,14 +105,16 @@ try:
     a.select_option('#mx-driver_id','900001');a.fill('#mx-subject','Adminmeddelande (test)');a.fill('#mx-body','Syntetisk fråga');a.locator('#mx-form button[type=submit]').click();a.wait_for_selector('#mx-reply')
     a.get_by_role('button',name='Bokad tid',exact=True).click();check(a.locator('#mx-driver_id').count()==0)
     a.evaluate('ARENDEN_ADMIN.back()');a.get_by_role('button',name='Bokad tid',exact=True).click();a.wait_for_selector('#mx-driver_id')
-    a.select_option('#mx-driver_id','900001');a.fill('#mx-kind','besiktning');a.fill('#mx-title','Boka besiktning (test)');a.fill('#mx-date','2027-01-20');a.fill('#mx-time','13:00');a.fill('#mx-car_number','25');shot(a,'06-admin-bokad-tid')
-    a.locator('#mx-form button[type=submit]').click();a.wait_for_selector('.mx-booking.pending');check('förarens svar' in a.locator('.mx-booking').inner_text())
+    a.select_option('#mx-driver_id','900001');a.fill('#mx-kind','Besiktning (test)');check(a.locator('#mx-title').count()==0);a.fill('#mx-body','Lämna bilen i god tid (syntetiskt exempel).');a.fill('#mx-date','2027-01-20');a.fill('#mx-time','13:00');check(a.locator('#mx-date').get_attribute('type')=='text');check(a.input_value('#mx-date')=='2027-01-20');before=a.evaluate("V2.calls.filter(x=>x.action==='book').length");a.locator('#mx-form button[type=submit]').click();check('Ange bilnummer' in a.locator('#mx-car-error').inner_text());check(a.evaluate("V2.calls.filter(x=>x.action==='book').length")==before);shot(a,'09-bilnummer-kravs');a.fill('#mx-car_number','x');a.locator('#mx-form button[type=submit]').click();check('1–3 siffror' in a.locator('#mx-car-error').inner_text());a.locator('#mx-car-unspecified').check();check(a.locator('#mx-car_number').is_disabled());check(a.locator('#mx-car-error').inner_text()=='');shot(a,'06-admin-bokad-tid')
+    a.locator('#mx-form button[type=submit]').click();a.wait_for_selector('.mx-booking.pending');check('förarens svar' in a.locator('.mx-booking').inner_text());check(a.locator('.mx-thread h2').inner_text()=='Besiktning (test)');check('Lämna bilen' in a.locator('.mx-history').inner_text());check('2027-01-20 13:00' in a.locator('.mx-booking').inner_text());check('Ej angivet' in a.locator('.mx-booking').inner_text())
     own=newpage(br,'agare');own.evaluate('INKORG.show()');own.wait_for_selector('.mx-filters');check(own.locator('.ar-list .ar-row').count()==2) # legacy personal conversations preserved
     check('Admin › Ärenden' in own.locator('#content').inner_text())
-    small=newpage(br,width=320);small.evaluate('INKORG.show()');small.wait_for_selector('.mx-filters');shot(small,'07-320px')
+    small=newpage(br,width=320);small.evaluate('INKORG.show()');small.wait_for_selector('.mx-filters');check(small.locator('.mx-filters button').evaluate_all('es=>new Set(es.map(e=>e.getBoundingClientRect().top)).size===1'));shot(small,'07-320px')
+    for device in ['iPhone 13','Pixel 7']:
+        mobile=newpage(br,'admin','/TaxiData/admin.html#arenden',device=device);mobile.wait_for_selector('.mx-actions');mobile.get_by_role('button',name='Bokad tid',exact=True).click();mobile.wait_for_selector('#mx-driver_id option[value="900001"]',state='attached');mobile.select_option('#mx-driver_id','900001');mobile.fill('#mx-kind','Mobilbokning (test)');mobile.fill('#mx-date','2027-02-15');mobile.fill('#mx-time','09:30');check(mobile.input_value('#mx-date')=='2027-02-15');check(mobile.locator('#mx-date').get_attribute('type')=='text');mobile.locator('#mx-car-unspecified').check();mobile.locator('#mx-form button[type=submit]').click();mobile.wait_for_selector('.mx-booking.pending');check('2027-02-15 09:30' in mobile.locator('.mx-booking').inner_text());check(mobile.locator('.mx-thread h2').inner_text()=='Mobilbokning (test)');mobile.context.close()
     check(not errors)
     check(p.evaluate("async()=>{DEMO.on=()=>true;return (await MAILBOX.rpc('contacts_get')).phone===null&&!(await MAILBOX.rpc('timeline')).length}"))
     check(p.evaluate("async()=>{try{await MAILBOX.rpc('create',{});return false}catch(e){return e.message==='demo_read_only'}}"))
-    br.close();print(f'{checks} browser assertions passed; seven mobile screenshots. Synthetic data only, no live writes.')
+    br.close();print(f'{checks} browser assertions passed; nine mobile screenshots. Synthetic data only, no live writes.')
 finally:
  server.shutdown()

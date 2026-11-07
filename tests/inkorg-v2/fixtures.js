@@ -29,9 +29,9 @@
   else if(action==='create'){t={id:next++,subject:d.subject,car_number:d.car_number,driver_id:d.driver_id||'900001',is_driver:true,messages:[{id:3,role:d.admin?'admin':'driver',mine:true,at:at,body:d.body}],bookings:[]};V2.threads[t.id]=t;out={id:t.id};}
   else if(action==='reply'){t.messages.push({id:next++,role:d.admin?'admin':'driver',mine:true,body:d.body,at:at});out={id:t.id};}
   else if(action==='book'){
-   if(!t){t={id:next++,subject:d.title,car_number:d.car_number,is_driver:true,driver_id:d.driver_id||'900001',messages:[],bookings:[]};V2.threads[t.id]=t;}
-   t.bookings.push({id:next++,title:d.title,kind:d.kind,starts_at:d.date+'T'+d.time+':00+01:00',car_number:d.car_number,status:d.admin?'pending_driver':'pending_admin',created_at:at});
-   t.messages.push({id:next++,role:'system',body:'Bokad tid föreslagen: '+d.title,at:at});out={id:t.id};
+   if(!t){t={id:next++,subject:d.kind,car_number:d.car_number,is_driver:true,driver_id:d.driver_id||'900001',messages:[],bookings:[]};V2.threads[t.id]=t;}
+   t.bookings.push({id:next++,title:d.kind,kind:d.kind,starts_at:d.date+'T'+d.time+':00+01:00',car_number:d.car_number,status:d.admin?'pending_driver':'pending_admin',created_at:at});
+   t.messages.push({id:next++,role:'system',body:'Bokad tid föreslagen: '+d.kind,at:at});if(d.body)t.messages.push({id:next++,role:d.admin?'admin':'driver',mine:true,body:d.body,at:at});out={id:t.id};
   } else if(action==='decide'){
    t=Object.values(V2.threads).find(t=>t.bookings.some(b=>b.id===d.booking_id));var b=t.bookings.find(b=>b.id===d.booking_id);
    if(d.decision==='declined'&&!d.reason.trim())return response({message:'need_reason'},400);

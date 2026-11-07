@@ -20,7 +20,7 @@ create table if not exists inbox_private.reads (
 );
 create table if not exists inbox_private.bookings (
  id bigint generated always as identity primary key, thread_id bigint not null references inbox_private.threads(id),
- kind text not null check(char_length(btrim(kind)) between 1 and 40), title text not null check(char_length(btrim(title)) between 1 and 120),
+ kind text not null check(char_length(btrim(kind)) between 1 and 120), title text not null check(char_length(btrim(title)) between 1 and 120),
  starts_at timestamptz not null, car_number text check(car_number ~ '^[0-9]{1,3}$'),
  status text not null check(status in ('pending_driver','pending_admin','accepted','declined')),
  proposer_role text not null check(proposer_role in ('driver','admin')), proposed_by text not null references public.drivers(id),
@@ -113,7 +113,7 @@ begin
  elsif p_action in ('create','book') and nullif(p_data->>'thread_id','') is null then
    v_driver:=case when v_admin then p_data->>'driver_id' else a.driver_id end;
    if not exists(select 1 from public.drivers d where d.id=v_driver and d.activated and private.actor_company(d.id)=a.company_id and d.category in ('standard','semester','admin','agare','superadmin')) then raise exception 'bad_recipient' using errcode='22023'; end if;
-   v_title:=btrim(coalesce(p_data->>'subject',p_data->>'title',''));
+   v_title:=case when p_action='book' then btrim(coalesce(p_data->>'kind','')) else btrim(coalesce(p_data->>'subject','')) end;
    v_car:=nullif(btrim(p_data->>'car_number'),'');
    if char_length(v_title) not between 1 and 120 then raise exception 'bad_subject' using errcode='22023'; end if;
    if v_car is not null and v_car !~ '^[0-9]{1,3}$' then raise exception 'bad_car_number' using errcode='22023'; end if;
@@ -145,23 +145,29 @@ begin
    if (select count(*) from inbox_private.messages where sender_id=a.driver_id and created_at>clock_timestamp()-interval '1 day')>=200 then raise exception 'too_many' using errcode='54000'; end if;
    insert into inbox_private.messages(thread_id,sender_id,sender_role,body) values(t.id,a.driver_id,v_role,v_body);
  elsif p_action='book' then
-   v_title:=btrim(coalesce(p_data->>'title',''));v_kind:=btrim(coalesce(p_data->>'kind',''));v_car:=nullif(btrim(p_data->>'car_number'),'');
-   if char_length(v_title) not between 1 and 120 or char_length(v_kind) not between 1 and 40 then raise exception 'bad_subject' using errcode='22023'; end if;
+   v_kind:=btrim(coalesce(p_data->>'kind',''));v_title:=v_kind;v_car:=nullif(btrim(p_data->>'car_number'),'');
+   if (v_car is null and coalesce(p_data->'car_unspecified','false'::jsonb)<>'true'::jsonb) or (v_car is not null and p_data->'car_unspecified'='true'::jsonb) then raise exception 'need_car_number' using errcode='22023'; end if;
+   v_body:=btrim(coalesce(p_data->>'body',''));
+   if char_length(v_body)>2000 then raise exception 'bad_text' using errcode='22023'; end if;
+   if char_length(v_title) not between 1 and 120 or char_length(v_kind) not between 1 and 120 then raise exception 'bad_subject' using errcode='22023'; end if;
    if v_car is not null and v_car !~ '^[0-9]{1,3}$' then raise exception 'bad_car_number' using errcode='22023'; end if;
    if coalesce(p_data->>'date','') !~ '^\d{4}-\d{2}-\d{2}$' or coalesce(p_data->>'time','') !~ '^\d{2}:\d{2}$' then raise exception 'bad_date' using errcode='22023'; end if;
-   v_at:=((p_data->>'date')||' '||(p_data->>'time'))::timestamp at time zone 'Europe/Stockholm';
+   begin
+     v_at:=((p_data->>'date')||' '||(p_data->>'time'))::timestamp at time zone 'Europe/Stockholm';
+   exception when datetime_field_overflow or invalid_datetime_format then raise exception 'bad_date' using errcode='22023'; end;
    if v_at<=clock_timestamp() or v_at>clock_timestamp()+interval '2 years' or to_char(v_at at time zone 'Europe/Stockholm','YYYY-MM-DD HH24:MI')<>(p_data->>'date')||' '||(p_data->>'time') then raise exception 'bad_date' using errcode='22023'; end if;
    if (select count(*) from inbox_private.bookings where proposed_by=a.driver_id and created_at>clock_timestamp()-interval '1 day')>=100 then raise exception 'too_many' using errcode='54000'; end if;
    insert into inbox_private.bookings(thread_id,kind,title,starts_at,car_number,status,proposer_role,proposed_by)
      values(t.id,v_kind,v_title,v_at,v_car,case when v_admin then 'pending_driver' else 'pending_admin' end,v_role,a.driver_id);
    insert into inbox_private.messages(thread_id,sender_id,sender_role,body) values(t.id,a.driver_id,'system','Bokad tid föreslagen: '||v_title);
+   if v_body<>'' then insert into inbox_private.messages(thread_id,sender_id,sender_role,body) values(t.id,a.driver_id,v_role,v_body); end if;
  elsif p_action='decide' then
    -- An owner who also drives answers their own invitation from Admin, not a second inbox.
    if v_admin and b.status='pending_driver' and t.driver_id=a.driver_id then v_admin:=false; end if;
    if b.status not in ('pending_driver','pending_admin') or (v_admin and b.status<>'pending_admin') or (not v_admin and b.status<>'pending_driver') then raise exception 'forbidden' using errcode='42501'; end if;
    if coalesce(p_data->>'decision','') not in ('accepted','declined') then raise exception 'bad_status' using errcode='22023'; end if;
    v_body:=nullif(btrim(p_data->>'reason'),'');
-   if (p_data->>'decision'='declined' and v_body is null) or char_length(v_body)>500 then raise exception 'need_reason' using errcode='22023'; end if;
+   if (p_data->>'decision'='declined' and (v_body is null or v_body !~ '[^[:space:]]')) or char_length(v_body)>500 then raise exception 'need_reason' using errcode='22023'; end if;
    update inbox_private.bookings set status=p_data->>'decision',decided_by=a.driver_id,decided_at=clock_timestamp(),reason=v_body where id=b.id;
    insert into inbox_private.messages(thread_id,sender_id,sender_role,body) values(t.id,a.driver_id,'system',case when p_data->>'decision'='accepted' then 'Bokad tid godkänd: ' else 'Bokad tid avböjd: ' end||b.title||coalesce(' – '||v_body,''));
  else raise exception 'bad_action' using errcode='22023'; end if;

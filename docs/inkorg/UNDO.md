@@ -91,3 +91,7 @@ Testa efter kör med riktiga testkonton utan att skriva personuppgifter i loggar
 Verifiera att `inbox_private` inte är exponerat i Data API och att klientroller saknar tabell-/sekvensgrants. Kör Supabase advisors på staging efter applicering.
 Gamla klienter kan inte skapa/svara på privata direktmeddelanden efter grantändringen; cache-bustar kräver omladdning.
 Ingen tjänst, Edge-funktion, kö eller notifieringsdata raderas eller deployas av detta utkast.
+
+## V3 inom det fortfarande oapplicerade utkastet
+
+`20261107135140_inkorg_v2_bookings_contacts.sql` har uppdaterats före första applicering: gemensam Typ/rubrik, valfritt bokningsmeddelande och obligatorisk bil eller aktivt Ej angivet. Ingen ny produktionsmigrering har körts. Undo-filen med samma versionsnummer gäller fortfarande: RPC-grants återkallas, alla nya/äldre rader bevaras. Synlighetsvärdena owner/company/bolag ändras inte av de nya etiketterna Ägare / Åkeriet / Alla (inom bolagsnamnet).
