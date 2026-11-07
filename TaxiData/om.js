@@ -165,7 +165,7 @@
     var d = window.OM_DATA || { faq: [], features: [] };
     var h = '<div class="vk-card"><div class="fo-title" style="font-weight:700;color:var(--primary);font-size:1.1rem;margin-bottom:.3rem">TaxiData</div>' +
       '<p style="margin:0 0 .5rem">' + esc(d.intro) + '</p>';
-    (d.features || []).forEach(function (f) { h += '<div class="om-feat"><span>' + esc(f[0]) + '</span><span><b>' + esc(f[1]) + '</b> – ' + esc(f[2]) + '</span></div>'; });
+    (d.features || []).forEach(function (f) { var label='<b>'+esc(f[1])+'</b>';if(f[3])label='<a href="#view='+esc(f[3])+'" data-om-view="'+esc(f[3])+'" style="color:inherit;text-decoration:none">'+label+'</a>';h += '<div class="om-feat"><span>' + esc(f[0]) + '</span><span>' + label + ' – ' + esc(f[2]) + '</span></div>'; });
     h += '</div>' + nyheter(false, shownMark) + '<div class="vk-card"><p style="margin:0 0 .5rem">' + esc(window.DEMO && DEMO.get && DEMO.get() && d.builder_demo ? d.builder_demo : d.builder) + '</p><p style="margin:0 0 .6rem">' + esc(d.report) + '</p>' +
       (window.FORUM ? '<div class="vk-iact"><button data-om="forum">💬 Gå till Forum</button></div>' : '') + '</div>' +
       '<div class="vk-card om-faq"><div class="vk-lbl">Vanliga frågor</div>';
@@ -185,6 +185,8 @@
       }).catch(function () {});
     }
     content.onclick = function (e) {
+      var tool=e.target.closest('[data-om-view]');
+      if(tool&&typeof window.openItem==='function'){e.preventDefault();window.openItem(tool.getAttribute('data-om-view'));return;}
       var n = e.target.closest('[data-om="nyh"]');
       if (n) {
         var box = document.getElementById('om-nyheter');
