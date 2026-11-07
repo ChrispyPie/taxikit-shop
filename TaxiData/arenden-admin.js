@@ -9,7 +9,7 @@
 (function () {
   var A = window.ARENDE, esc = A.esc;
   var R = window.ARENDEN_ADMIN = {};
-  var st = { data: null, err: null, filter: 'alla', showDone: false, open: null, cur: null, busy: false, el: null, klarLim: 300, type: 'all', bil: null };
+  var st = { data: null, err: null, filter: 'alla', showDone: false, open: null, cur: null, busy: false, el: null, klarLim: 300, type: 'all' };
 
   R.count = function () {
     return A.rpc('case_admin_list', { p_klar_limit: st.klarLim }).then(function (d) { st.data = d || { items: [] }; st.err = null; return R.needs(); })
@@ -17,7 +17,7 @@
   };
   R.needs = function () { return ((st.data && st.data.items) || []).filter(function (x) { return x.needs; }).length; };
   R.badge = function () { var n = R.needs(); return n ? '<span class="ar-badge" aria-label="' + n + ' behöver svar">' + n + '</span>' : ''; };
-  R.load = function () { Promise.all([R.count(), A.rpc('get_bil', {}).then(function(b){st.bil=b;}).catch(function(){st.bil={error:true};})]).then(function () { if (st.el && st.el.isConnected) R.render(st.el); }); };
+  R.load = function () { return R.count().then(function () { if (st.el && st.el.isConnected) R.render(st.el); }); };
   R.render = function (el) {
     if (el !== st.el) { el.innerHTML = '<div id="admin-cases-root"></div>'; st.el = el.querySelector('#admin-cases-root'); }
     if (st.open) return paintCase();
@@ -51,14 +51,13 @@
   function paint() {
     var el = st.el; if (!el) return;
     if (!st.data) {
-      el.innerHTML = '<div class="section" style="padding:16px">' + (st.err ? (st.err.message === 'forbidden' ? 'Ingen behörighet. Ärendelistan är för ägaren och S admin.' : 'Kunde inte hämta ärendena. Försök igen.') : 'Laddar…') + '</div>';
+      el.innerHTML = '<div class="section" style="padding:16px">' + (st.err ? (st.err.message === 'forbidden' ? 'Ingen behörighet. Ärendelistan är för admin och ägaren.' : 'Kunde inte hämta ärendena. Försök igen.') : 'Laddar…') + '</div>';
       return;
     }
     var items = (st.data.items || []).filter(function(x){ return st.type==='all' || x.kind===st.type; }), sp = A.split(items, st.filter), h = '<div style="padding:8px 12px 24px">';
     h += '<div class="ar-note" style="margin:0 2px 10px">Öppna ett ärende för att svara eller ta beslut. Löneunderlag finns under Löner.</div>';
     h += '<label for="ara-type" class="ar-note">Typ av ärende</label><select id="ara-type" style="width:100%;min-height:44px;padding:10px;margin:6px 0 12px;border:1px solid var(--border,#cbd5e0);border-radius:10px;background:var(--surface);color:inherit;font:inherit" onchange="ARENDEN_ADMIN.type(this.value)">' +
       [['all','Alla typer'],['issue','Behövs till bilen / Fel på bilen'],['maint','Underhåll'],['wh','Verkstadstid'],['task','Uppgifter'],['sjuk','Sjukanmälningar'],['wish','Önskemål till Christian']].map(function(t){ return '<option value="'+t[0]+'"'+(st.type===t[0]?' selected':'')+'>'+t[1]+'</option>'; }).join('') + '</select>';
-    if(st.type==='maint') { paintMaintenance(el,h); return; }
 
     h += A.filters(items, st.filter, 'ARENDEN_ADMIN.filter');
     if (!items.length) h += '<div class="ar-list"><div class="ar-empty">Inga ärenden just nu. 👍</div></div>';
@@ -83,18 +82,6 @@
     }
     if(st.type!=='all' && (st.data.klar_total||0)>(st.data.items||[]).filter(function(x){return x.st==='klar';}).length) h+='<button type="button" class="ar-more" onclick="ARENDEN_ADMIN.more()">Hämta fler avslutade ärenden</button>';
     el.innerHTML = h + '</div>';
-  }
-
-  function paintMaintenance(el,h) {
-    var b=st.bil;
-    if(!b || b.error) { el.innerHTML=h+'<div class="ar-empty">'+(b?'Kunde inte hämta underhåll.':'Laddar underhåll…')+'</div></div>'; return; }
-    var all=b.maint||[], open=all.filter(function(m){return m.status!=='klar';}), done=all.filter(function(m){return m.status==='klar';});
-    function rows(ms){return '<div class="ar-list">'+ms.map(function(m){return '<div class="ar-row"><span class="ar-ico">🔧</span><span class="ar-main"><b>'+esc(m.title||m.type||'Underhåll')+'</b><span class="ar-s">'+esc(m.car||m.car_label||'')+' · '+esc(m.status==='klar'?'Klar':m.status==='forslag'?'Förslag':m.level===2?'Försenat':'Planerat')+'</span></span>'+(m.status!=='klar'?'<button type="button" class="ar-more" style="flex:none;width:auto;margin:0;padding:6px 10px" onclick="ARENDEN_ADMIN.edit(\'maint\','+(+m.id)+',\'underhall\')">✏️ Ändra</button>':'')+'</div>';}).join('')+'</div>';}
-    h+=rows(open);
-    if(!open.length)h+='<p class="ar-empty">Inget öppet underhåll.</p>';
-    if(done.length){h+='<button type="button" class="ar-more" onclick="ARENDEN_ADMIN.toggleDone()">'+(st.showDone?'Dölj klara':'Visa klara ('+done.length+')')+'</button>';if(st.showDone)h+=rows(done);}
-    h+='<div class="ar-btns"><button type="button" class="pri" onclick="VERKSTAD_ADMIN.openApp(\'underhall\')">Hantera underhåll</button></div>';
-    el.innerHTML=h+'</div>';
   }
 
   // Neutrala knappar, bara liten färgad ikon (t1010u). Färg bär bara ärendets status.
@@ -141,6 +128,8 @@
         (d.status !== 'ny' ? btn('↩️ Öppna igen', "ARENDEN_ADMIN.act('ny')") : '') + '</div>' +
         '<div class="ar-btns">' + btn('Sjuklön och intyg', "VERKSTAD_ADMIN.openApp('sjuk')") + '</div>' +
         '<div class="ar-note">Sjuklön och intyg hanteras i det befintliga sjukformuläret.</div>';
+    } else if (k === 'maint') {
+      h += '<div class="ar-btns">' + (d.status !== 'klar' ? editBtn('maint', c.id, 'underhall') : '') + btn('Hantera underhåll', "VERKSTAD_ADMIN.openApp('underhall')") + '</div>';
     } else if (k === 'wish') {
       h += '<div class="ar-note" style="margin-top:0">Önskemål till Christian. Status och svar sätts av Christian (via assistenten), inte här.</div>';
     } else if (k === 'task') {
@@ -151,7 +140,7 @@
 
   function paintCase() {
     var el = st.el; if (!el) return;
-    var o = st.open, c = st.cur, back = '<button type="button" class="ar-back" onclick="ARENDEN_ADMIN.back()">‹ Alla ärenden</button>';
+    var o = st.open, c = st.cur, back = '<button type="button" class="ar-back" onclick="ARENDEN_ADMIN.back()">‹ Ärenden</button>';
     if (!c) {
       el.innerHTML = '<div style="padding:8px 12px 24px">' + back + '<div class="ar-empty">Laddar…</div></div>';
       A.rpc('case_get', { p_kind: o.kind, p_id: o.id }).then(function (r) {

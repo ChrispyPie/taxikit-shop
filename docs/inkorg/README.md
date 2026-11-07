@@ -1,75 +1,97 @@
-# Inkorg + Ärenden + samma statusord (2026-11-06)
+# Inkorg – steg 1 (utkast, inte live)
 
-Christians "kör" 6 nov 18:50 (t962u) på tre punkter + Inkorg och gemensam ärendelista.
-**Inte live.** Merga inte och kör inte SQL i prod förrän Christian sagt kör.
+Tidigare version: [historisk beskrivning 6 november](README-20261106.md) och [dess undo](UNDO-20261106.md).
 
-## Vad
-1. **Klara fälls ihop.** Bara öppna ärenden syns. Klara ligger under "Visa klara (N)".
-   Gäller Inkorgen, Admin › Ärenden (nytt), Bil-listorna och Admin › Anmälningar (som redan hade det; där stod det "åtgärdade", nu "klara"). Forumet hade redan "Visa klara".
-2. **Samma statusord överallt:** Ny · Pågår · Väntar på svar · Klar, plus filterchips per status.
-   Värdena i databasen ändras inte, bara orden (`arende-status.js` och `private.case_st`).
-3. **"Behöver ditt svar"** markeras med en orange etikett och en egen rubrik överst.
-4. **Inkorg (förare)** under 👤 uppe till höger: mina ärenden som trådar, olästa svar, "Behöver ditt svar".
-   Klockan 🔔 är kvar för notiser. När ägaren svarar på ett ärende får klockan en kort notis ("Nytt i Inkorgen") som öppnar tråden. Läser man svaret försvinner både pricken i Inkorgen och notisen.
-5. **Admin › Ärenden** (ny första ruta): gemensam lista för ägaren och S admin, inte en personlig inkorg.
-   Nya och olösta först, rubriker, tryck för att öppna ärendet separat med verktyg (svara, ändra status).
-   Önskemål (Berra → Christian) finns också med i listan. Status och svar på önskemål sätts av Christian, inte i appen.
-   Gamla Admin › Anmälningar & ärenden finns kvar som förut (flyttar senare till ett löneverktyg).
-6. **Inget göms för att det är gammalt.** Alla klara ärenden finns kvar (underlag), ihopfällda under "Visa klara (N)".
-   De hämtas i omgångar om 300 ("Visa fler klara") så att listan går snabbt. Gamla datum visar årtal.
+Byggt i `feature/inkorg-steg1`, separat worktree. **Ingen merge eller produktionsändring.**
+Steg 2 (admin skapar ett ärende åt en vald förare, acceptera/avböja, grå/solid schemapost) ingår inte.
 
-## Statusord, gammalt → nytt
-| Ärende | Gammalt (databas → gammalt ord) | Nytt ord |
-|---|---|---|
-| Felanmälan / Behövs till bilen | ny → Ny | Ny |
-| | pagar → Pågår | Pågår |
-| | klar → Klar (förare) / **Åtgärdad** (admin) | Klar |
-| Verkstadstid | pending → Väntar | Ny |
-| | pending + ägaren frågat → "Fråga till dig" / "Fråga · väntar på svar" | Väntar på svar |
-| | pending + föraren svarat → "Svar skickat" / "Nytt svar" | Pågår |
-| | approved → Godkänd | Klar · godkänd |
-| | rejected → Nekad | Klar · nekad |
-| Uppgift | ny → Ny | Väntar på svar (föraren ska boka/svara) |
-| | bokad → Bokad | Pågår · tid bokad |
-| | klar → Klar | Klar |
-| Sjukanmälan | ny → Väntar på ägaren | Ny |
-| | intyg_begart → Läkarintyg begärt | Väntar på svar · läkarintyg |
-| | godkand → Godkänd | Klar · godkänd |
-| | avslagen → Avslagen | Klar · avslagen |
-| Önskemål | ny → Ny | Ny |
-| | last → Läst | Pågår · läst |
-| | planerad → Planerad | Pågår · planerad |
-| | klar → Klar | Klar |
-| | inte_nu → Inte nu | Klar · inte nu |
-| Forum (Önskemål/Buggar) | ny / pagar / planerad / klar | Ny / Pågår / Pågår · planerad / Klar |
-| Underhåll (förslag/plan/klar) | oförändrat – det är planering, inte ärenden | – |
+## Gränssnitt
 
-## Filer
-- `TaxiData/arende-status.js` – statusord, filterchips, tråd-vy (delas)
-- `TaxiData/inkorg.js` – förarens Inkorg
-- `TaxiData/arenden-admin.js` – Admin › Ärenden
-- `TaxiData/index.html` – menyrad "📥 Inkorg", prick på 👤, bakåtknapp
-- `TaxiData/admin.html` – ny ruta "📥 Ärenden", länk `admin.html#arende=issue:12`
-- `TaxiData/notis.js` – ärendenotiser öppnar tråden
-- `TaxiData/verkstad.js`, `verkstad-admin.js`, `sjuk.js`, `onskemal-admin.js`, `forum.js` – bara statusorden
+- Ett menyval **Inkorg**, i stället för två separata menyval.
+- **Alla** blandar privata samtal och egna ärenden i senaste-aktivitet-ordning, både öppna och avslutade.
+- Filter: Meddelanden, Felanmälan, Förbrukning, Underhåll, Sjukanmälan, Önskemål, Verkstadstid och Uppgifter.
+  Kategorin kommer från servern; den gissas inte från rubriken.
+- Fler meddelanden och avslutade ärenden hämtas vid behov, utan att några poster raderas.
+- **Nytt ärende** öppnar en mobil dialog och sedan befintligt formulär/sparflöde.
+  Underhåll återanvänder förslagsformuläret för förare och planeringsformuläret för admin.
+- Privat meddelande startas från personens profil (befintlig mottagarförvald knapp). Svar skrivs direkt i tråden.
+- Ägare och superadmin har bara privata samtal i sin inkorg; deras ärenden går via **Admin › Ärenden**.
+  Vanlig admin har kvar sina egna ärenden i sin personliga inkorg och hanterar åkeriets vanliga ärenden i adminpanelen.
+- Adminlistan inkluderar även Underhåll under Alla, inte bara i en separat speciallista.
+- Befintlig swipe-back används. En ärendetråd har `‹ Ärenden`, inga kategoriikoner i rubriken,
+  neutral adminverktygsstil och befintlig tidsstämplad historik. Meddelanden visar också klockslag.
 
-## SQL (bara tillägg)
-- `supabase/migrations/20261106f_inkorg_arenden.sql`
-- Ångra: `supabase/migrations/undo/20261106f_inkorg_arenden_undo.sql` (se UNDO.md)
+## Behörigheter och databas
 
-Nytt: kolumnerna `event_notices.case_kind/case_id`, tabellen `case_reads`, triggern `aa_case_tag`,
-funktionerna `case_inbox`, `case_get`, `case_seen`, `case_admin_list`, `private.case_st`.
-`notis_feed` byts ut med samma signatur + två fält. Inga befintliga rader ändras.
-Svar och statusändringar går genom de gamla funktionerna (car_issue_message, set_car_issue_status,
-workshop_reply, workshop_ask, admin_workshop_decide, sjuk_decide).
+Migration: `supabase/migrations/20261107074022_inkorg_steg1.sql`.
+Filnamnet skapades med Supabase CLI och kolliderar inte med `20261107a/b/c`.
+Migrationen är **inte applicerad**. Ändringarna är funktionsdefinitioner och en ny privat rollhjälpare;
+nya tabellkolumner, tabellbehörigheter, datakopior och radändringar behövs inte.
 
-Testat lokalt i PGlite (Postgres 18) med stubbar: inkorg, tråd, läst-markering (tar bort klockans notis),
-behörighet (annat åkeri och förare nekas adminlistan), ångra, och att migrationen kan köras två gånger.
+Viktig upptäckt vid läsning av produktionsdefinitionerna: vanlig `admin` ingick inte i
+`private.bil_admin_roles()`, och Admin › Ärenden var även dolt i HTML. Det räckte alltså inte att flytta menyknappar.
+Migrationen lägger till admin i **icke-sekretess**-bil/ärendeadministrationen. Det ger även rätt att använda
+befintliga bil- och underhållsverktyg. Åkeridata, Löner och superadminmenyn öppnas inte.
+`private.workshop_roles()` lämnas oförändrad: den används också av lönefunktioner.
+Verkstadstidens beslut/frågor får en separat adminbehörighet och explicit åkerikontroll.
 
-## Gå live (när Christian sagt kör)
-1. Kör `20261106f_inkorg_arenden.sql` i Supabase.
-2. Merga PR:en (GitHub Pages).
-3. Nyheter-rad i `changelog.js`.
+Sekretess ligger kvar bakom serverkontroller:
 
-## Bilder (harness 390 px, påhittade exempel)
-`docs/inkorg/real/` och `/workspace/taxidata-cleanup/screenshots/inkorg/`
+- `private.sjuk_actor` och den nya centrala `private.sjuk_boss_roles()` avgör vilka som får vara sjuk-admin.
+  Just nu: ägare och **tillfälligt superadmin**. Vanlig admin kan bara läsa sin egen sjukperiod som förare.
+- `case_admin_list` skickar inte sjukanmälningar till vanlig admin, inte ens som tomma sammanfattningar.
+- `case_get` och intygs-Edge-funktionen går genom `sjuk_actor` / `sjuk_report_for`.
+- Individuella sjukperioder/intyg, sjuklistan och nya sjuk-pushar begränsas till rätt åkeri.
+  Vid granskningen saknade de äldre sjuk-hjälparna en konsekvent åkerigräns; utkastet täpper till det.
+- Enbart service-rollen kan anropa intygens interna list-/uppladdnings-RPC:er.
+  Edge-funktionen kontrollerar ändå förarens session innan den signerar länkar.
+- Läsbehörigheter kontrollerades endast via systemkatalogen: `sick_reports`, `sick_certs` och `sick_events`
+  ligger i privat schema utan SELECT för anon/authenticated. Bilärenden, underhåll, verkstadstid och case_reads
+  har RLS och inga direkta SELECT-grants till dessa roller. Inga intyg, personliga texter eller riktiga sessioner hämtades.
+
+**Avstängning av superadmins tillfälliga sekretessåtkomst:** se [UNDO.md](UNDO.md).
+
+## Avgränsningar / beslut kvar
+
+- Önskemål är fortfarande den befintliga typen **Önskemål till Christian** (skapande för admin/ägare/superadmin).
+  Knappen återanvänder befintligt formulär på `admin.html#onskemal`.
+  Att ge alla förare en ny sorts önskemål till åkeriet kräver ett separat beslut och ändrat mottagar-/svarsflöde.
+- Uppgifter som redan finns visas i inkorgen. Ny uppgift åt en förare från admin är inte en ny funktion i denna PR.
+- Sjukintyg, uppgiftssvar och underhåll använder sina befintliga specialflöden, inte en ny generell texttråd.
+  Historik som inte tidigare lagrades (t.ex. varje äldre underhållsredigering) går inte att återskapa här.
+- Ändra-knappen för någon annans verkstadstid använder fortfarande det äldre personliga verkstadstidsformuläret;
+  fråge-/beslutsverktygen fungerar med den nya adminrollen, men själva redigeringsflödet är inte ombyggt i steg 1.
+- Ingen produktionsinloggning eller verklig meddelandesändning användes i testerna.
+
+## Tester och bilder
+
+Alla testpersoner, fordon, texter och sessioner är syntetiska.
+
+```sh
+# Installera lokala testberoenden om de inte finns:
+npm install --prefix /tmp/inkorg-test --no-save @electric-sql/pglite@0.5.15
+NODE_PATH=/tmp/inkorg-test/node_modules node tests/inkorg/db.cjs
+NODE_PATH=/tmp/inkorg-test/node_modules node tests/meddelanden/db.cjs
+# Pythonmiljö med playwright och separat installerad Chromium/Chrome:
+python tests/inkorg/browser.py
+```
+
+På byggboxen användes befintlig PGlite och `/workspace/pwenv/bin/python`, med `/usr/bin/google-chrome`.
+Webbtestet startar en **egen headless-profil**, endast mot lokala produktionsfiler och mockade RPC:er.
+Det använder inte desktopwebbläsarens profil eller inloggningar och blockerar externa nätanrop.
+
+Resultat:
+
+- 68 databasassertioner: migrering, kategorier, egen/annan förare, åkerigräns,
+  admin/ägare/superadmin, intyg, avstängningsflagga och undo.
+- 84 befintliga databasassertioner för privata meddelanden, svarstrådar och lönebehörighet.
+- 46 Playwright-assertioner: blandad kronologi, filter, återanvända formulär, profilknapp,
+  svar i tråd, sena svar efter navigering, ägarinkorg och adminmeny; ingen horisontell överrinning vid 320/390 px.
+- JS syntaxkontroll och `git diff --check`.
+
+19 skärmbilder i `/workspace/taxidata-cleanup/screenshots/inkorg/` (inte incheckade):
+`01-profilmeny.png`, `02-alla.png`, `03-forbrukning.png`, `04-underhall.png`, `05-nytt-arende.png`,
+`06-form-felanmalan.png`, `07-form-forbrukning.png`, `08-form-underhall.png`, `09-form-verkstadstid.png`,
+`10-form-sjukanmalan.png`, `11-profil-meddelande.png`, `12-meddelandetrad.png`, `13-arendetrad.png`,
+`14-agare-inkorg.png`, `15-onskemal-befintligt-formular.png`, `16-admin-arenden.png`,
+`17-admin-verkstadstid.png`, `18-admin-meny.png`, `19-320px.png`.

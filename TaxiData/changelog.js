@@ -15,6 +15,11 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  // tid sätts först vid go-live efter Christians kör.
+  { datum: '2026-11-07', id: '2026-11-07g', rader: [
+    ['Nytt', 'En gemensam inkorg för meddelanden och egna ärenden, med filter per typ och Nytt ärende. Meddelanden startas från personens profil.'],
+    ['Nytt', 'Admin kan hantera åkeriets vanliga ärenden. Sjukanmälan och läkarintyg är fortsatt privata. Ägarens ärenden finns bara under Admin › Ärenden.']
+  ]},
   { datum: '2026-11-07', id: '2026-11-07f', tid: '03:05', rader: [
     ['Nytt', 'Admin › Ärenden: Ändra finns nu på felanmälan, Behövs, underhåll, uppgifter och verkstadstid som väntar på beslut. Den öppnar samma formulär som i appen, och när du sparar eller trycker Avbryt kommer du tillbaka till ärendet.', 'admin']
   ] },

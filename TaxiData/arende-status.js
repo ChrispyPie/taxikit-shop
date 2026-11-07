@@ -13,6 +13,7 @@
   A.st = function (kind, status, waiting) {
     switch (kind) {
       case 'issue': return status === 'ny' ? 'ny' : status === 'pagar' ? 'pagar' : 'klar';
+      case 'maint': return status === 'klar' ? 'klar' : 'pagar';
       case 'wh': return status === 'pending' ? (waiting === 'driver' ? 'vantar' : waiting === 'owner' ? 'pagar' : 'ny') : 'klar';
       case 'task': return status === 'ny' ? 'vantar' : status === 'bokad' ? 'pagar' : 'klar';
       case 'sjuk': return status === 'ny' ? 'ny' : status === 'intyg_begart' ? 'vantar' : 'klar';
@@ -24,6 +25,7 @@
   // Litet extra ord när det gamla ordet säger något mer (t.ex. Klar · nekad)
   A.detail = function (kind, status) {
     var d = {
+      maint: { forslag: 'förslag', plan: 'planerat' },
       wh: { approved: 'godkänd', rejected: 'nekad' },
       task: { bokad: 'tid bokad' },
       sjuk: { intyg_begart: 'läkarintyg', godkand: 'godkänd', avslagen: 'avslagen' },
@@ -44,7 +46,7 @@
 
   A.icon = function (it) {
     if (it.kind === 'issue') return it.title === 'Bilen står' ? '🛑' : it.title === 'Felanmälan' ? '⚠️' : '🧴';
-    return { wh: '⏱️', task: '📋', sjuk: '🤒', wish: '💡' }[it.kind] || '📄';
+    return { maint: '🔧', wh: '⏱️', task: '📋', sjuk: '🤒', wish: '💡' }[it.kind] || '📄';
   };
 
   // Filterchips: Alla (öppna) · Behöver ditt svar · Ny · Pågår · Väntar på svar · Klar
@@ -166,6 +168,7 @@
   A.title = function (c) {
     var d = c.data || {};
     if (c.kind === 'issue') return d.kind === 'fault' ? (d.blocking ? 'Bilen står' : 'Felanmälan') : (SUP[d.supply] || 'Behövs till bilen');
+    if (c.kind === 'maint') return d.label || d.title || 'Underhåll';
     if (c.kind === 'wh') return 'Verkstadstid';
     if (c.kind === 'task') return d.title || 'Uppgift';
     if (c.kind === 'sjuk') return 'Sjukanmälan';
@@ -175,7 +178,7 @@
   A.iconOf = function (c) {
     var d = c.data || {};
     if (c.kind === 'issue') return d.kind === 'fault' ? (d.blocking ? '🛑' : '⚠️') : '🧴';
-    return { wh: '⏱️', task: '📋', sjuk: '🤒', wish: '💡' }[c.kind] || '📄';
+    return { maint: '🔧', wh: '⏱️', task: '📋', sjuk: '🤒', wish: '💡' }[c.kind] || '📄';
   };
   function sys(t, at, extra) { return '<div class="ar-msg sys">' + t + (at ? ' · ' + esc(A.when(at)) : '') + (extra ? '<br>' + extra : '') + '</div>'; }
   function msg(who, at, body, me) { return '<div class="ar-msg' + (me ? ' me' : '') + '"><span class="w">' + who + ' · ' + esc(A.when(at)) + '</span>' + esc(body) + '</div>'; }
@@ -286,14 +289,21 @@
         else rows.push({ at: e.at, h: sys('Status: ' + A.label('sjuk', e.to) + who(e), e.at, e.comment ? '"' + esc(e.comment) + '"' : '') });
       });
       else if (d.status_at) rows.push({ at: d.status_at, h: sys('Status: ' + A.label('sjuk', d.status), d.status_at, d.status_comment ? (d.status_by ? esc(fname(d.status_by)) + ': ' : '') + '"' + esc(d.status_comment) + '"' : '') });
+    } else if (c.kind === 'maint') {
+      if (d.car) meta.push('Bil ' + esc(d.car));
+      meta.push('Skapad ' + esc(A.when(d.created_at)));
+      if (d.due_date) meta.push('Senast ' + esc(d.due_date));
+      if (d.due_km != null) meta.push('Vid ' + esc(d.due_km) + ' km');
+      if (d.done_date) meta.push('Klar ' + esc(d.done_date));
+      if (d.done_comment) rows.push({at:d.created_at,h:sys('Slutkommentar', null, esc(d.done_comment))});
     } else if (c.kind === 'wish') {
       meta.push('Skrivet ' + esc(A.when(d.created_at)));
       if (viewer === 'owner' && d.author && !d.mine) meta.push('av ' + esc(fname(d.author)));
       if (d.reply) rows.push({ at: d.updated_at, h: msg('Christian', d.updated_at, d.reply, false) });
     }
     rows.sort(function (a, b) { return new Date(a.at) - new Date(b.at); });
-    var body = c.kind === 'issue' ? d.body : c.kind === 'wh' ? d.comment : c.kind === 'task' ? d.instruction : c.kind === 'sjuk' ? d.comment : c.kind === 'wish' ? d.body : '';
-    h += '<div class="ar-card"><div class="ar-ct"><h2>' + A.iconOf(c) + ' ' + esc(A.title(c)) + '</h2>' + A.chip(c.st, A.detail(c.kind, raw)) + '</div>';
+    var body = c.kind === 'issue' ? d.body : c.kind === 'wh' ? d.comment : c.kind === 'task' ? d.instruction : c.kind === 'sjuk' ? d.comment : c.kind === 'wish' ? d.body : c.kind === 'maint' ? d.note : '';
+    h += '<div class="ar-card"><div class="ar-ct"><h2>' + esc(A.title(c)) + '</h2>' + A.chip(c.st, A.detail(c.kind, raw)) + '</div>';
     h += '<div class="ar-m">' + meta.join(' · ') + '</div>';
     if (body) h += '<div class="ar-body">' + esc(body) + '</div>';
     if (c.kind === 'sjuk' && d.certs) h += '<section data-ar-certs aria-label="Läkarintyg"><h3>Läkarintyg</h3><div class="ar-cert-files"></div><div class="ar-note" role="status">Hämtar intyg…</div></section>';

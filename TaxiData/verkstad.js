@@ -250,6 +250,7 @@
     V.openTab(tab);
     if (tab === 'fel' || tab === 'behov') st.f = newIssue(tab === 'fel' ? 'fault' : 'supply', null);
     else if (tab === 'timmar') st.form = newForm(null);
+    else if (tab === 'underhall') { st.f = newMaint(null, !(st.bil && st.bil.is_admin)); st.f.kind = 'maint'; }
     draw();
   };
 
