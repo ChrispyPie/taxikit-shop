@@ -15,6 +15,10 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-07', id: '2026-11-07i', rader: [
+    ['Förbättrat', 'Admin › Ärenden har kategorier och grupper: ohanterade eller väntar på svar, pågående och avslutade.', 'admin'],
+    ['Förbättrat', 'Inkorg heter nu Meddelanden. I en tråd kan du välja Markera som oläst för att påminna dig själv.']
+  ]},
   // Christian godkände kör 2026-11-07; svensk go-live-tid.
   { datum: '2026-11-07', id: '2026-11-07g', tid: '16:23', rader: [
     ['Nytt', 'Inkorg samlar Meddelande till admin, Sjuk och Verkstadstimmar. Kategoriikoner på en rad och rubrik för vald kategori. Äldre samtal och bilärenden finns kvar att läsa.'],

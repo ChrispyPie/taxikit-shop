@@ -573,7 +573,7 @@
       h += '<button type="button" class="ank-more" id="bv-done">' + (st.showDone ? 'Dölj klara' : 'Visa klara (' + done.length + ')' + (dn ? ' · 💬 ' + dn + ' nytt' : '')) + '</button>';
       if (st.showDone) done.forEach(function (i) { h += issueCard(i); });
     }
-    h += '<div class="tl-foot">Historik och foton bevaras. Använd Inkorg › Meddelande för nya ärenden.</div>';
+    h += '<div class="tl-foot">Historik och foton bevaras. Använd Meddelanden › Meddelande för nya ärenden.</div>';
     body.innerHTML = h;
     bindCars(body);
     var nb = document.getElementById('bv-new'); if (nb) nb.onclick = function () { st.f = newIssue(kind, null); draw(); };

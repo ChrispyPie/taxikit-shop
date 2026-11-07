@@ -4,6 +4,7 @@
  'use strict';
  var A=window.ARENDE,esc=A.esc;
  var FILTERS=[['all','Alla','📥'],['message','Meddelande','💬'],['sick','Sjuk','🤒'],['hours','Verkstadstimmar','⏱️']];
+ var ADMIN_FILTERS=[['all','Alla','📥'],['message','Meddelanden','💬'],['hours','Verkstadstimmar','⏱️'],['sick','Sjuk','🤒']];
  var STATUS={pending_driver:'Väntar på förarens svar',pending_admin:'Väntar på admins svar',accepted:'Godkänd',declined:'Avböjd'};
  function when(at){var p={};new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Stockholm',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(at)).forEach(function(x){p[x.type]=x.value;});return p.year+'-'+p.month+'-'+p.day+' '+p.hour+':'+p.minute;}
  function err(e){return {bad_car_number:'Bilnummer ska vara 1–3 siffror.',bad_date:'Välj ett giltigt datum och klockslag framåt i tiden (svensk tid).',need_reason:'Vänligen specificera orsak',need_car_choice:'Välj en bil på åkeriet eller Nej.',bad_car_choice:'Välj en bil på åkeriet eller Nej.',bad_visibility:'Välj vem som får se telefonnumret.',bad_subject:'Fyll i rubrik/typ (högst 120 tecken).',bad_text:'Skriv ett meddelande (högst 2000 tecken).',forbidden:'Du har inte behörighet till detta.',not_found:'Det här ärendet finns inte här.',demo_read_only:'Du kan bara läsa i demoläget.',too_many:'För många försök. Försök senare.'}[e&&e.message]||A.errText(e);}
@@ -11,24 +12,25 @@
   // Demo får aldrig läsa verkliga kontakter/trådar via den nya serverfunktionen.
   if(window.DEMO&&DEMO.on()){
    if(action==='contacts_get')return Promise.resolve({cars:[],phone:null,visibility:'owner',company_label:'Taxi Göteborg'});
-   if(['list','timeline','recipients','cars'].indexOf(action)>=0)return Promise.resolve([]);
+   if(['list','timeline','recipients','cars','unread_flags'].indexOf(action)>=0)return Promise.resolve([]);
    return Promise.reject(new Error('demo_read_only'));
   }
   return A.rpc('mailbox_v2',{p_action:action,p_data:data||{}});},create:function(admin,name){
-  var U={},st={el:null,mode:'list',filter:'all',threads:[],cases:[],old:[],next:null,thread:null,legacy:null,recipients:[],cars:[],optionsPending:false,draft:{},busy:false,error:'',epoch:0,request:0,loaded:false};
+  var U={},st={el:null,mode:'list',filter:'all',flags:[],threads:[],cases:[],old:[],next:null,thread:null,legacy:null,recipients:[],cars:[],optionsPending:false,draft:{},busy:false,error:'',epoch:0,request:0,loaded:false};
   function rpc(action,data){return MAILBOX.rpc(action,Object.assign({},data,{admin:admin}));}
   function push(){try{history.pushState({view:admin?'admin':'inkorg',sub:'thread'},'');}catch(e){}}
   function go(mode){st.mode=mode;st.error='';push();paint();}
-  function back(){return '<button class="ar-back" type="button" onclick="'+name+'.back()">‹ '+(admin?'Ärenden':'Inkorg')+'</button>';}
+  function back(){return '<button class="ar-back" type="button" onclick="'+name+'.back()">‹ '+(admin?'Ärenden':'Meddelanden')+'</button>';}
   function category(x){return x.kind==='sjuk'?'sick':x.kind==='wh'?'hours':'message';}
-  function owner(){return !admin&&['agare','superadmin'].indexOf(window.INKORG_ROLE)>=0;}
-  U.count=function(){return st.threads.filter(function(x){return x.unread;}).length+st.cases.filter(function(x){return x.needs||x.unread>0;}).length;};
+  function flagged(kind,id){return st.flags.some(function(f){return f.kind===kind&&+f.id===+id;});}
+ function owner(){return !admin&&['agare','superadmin'].indexOf(window.INKORG_ROLE)>=0;}
+  U.count=function(){return st.threads.filter(function(x){return x.unread||flagged('thread',x.id);}).length+st.cases.filter(function(x){return x.needs||x.unread>0||flagged(x.kind,x.id);}).length+st.old.filter(function(x){return x.unread||flagged('old-message',x.id);}).length;};
   function badge(){if(!admin&&window.setBadge){setBadge('inkorg',U.count());setBadge('profbtn',U.count()>0||!!window.INKORG_NEEDS_PROFILE);}}
   U.refresh=function(){
    var epoch=st.epoch;
-   return Promise.all([rpc('list',{}),A.rpc(admin?'case_admin_list':'case_inbox',{p_klar_limit:5000}),admin?Promise.resolve({items:[]}):A.rpc('conversation_list',{})]).then(function(d){
+   return Promise.all([rpc('list',{}),A.rpc(admin?'case_admin_list':'case_inbox',{p_klar_limit:5000}),admin?Promise.resolve({items:[]}):A.rpc('conversation_list',{}),rpc('unread_flags',{})]).then(function(d){
     if(epoch!==st.epoch)return 0;
-    st.threads=d[0]||[];st.cases=(d[1].items||[]).filter(function(x){return x.kind!=='wish';});st.old=d[2].items||[];st.next=d[2].next;st.loaded=true;st.error='';badge();if(st.mode==='list')paint();return U.count();
+    st.flags=d[3]||[];st.threads=d[0]||[];st.cases=(d[1].items||[]).filter(function(x){return x.kind!=='wish';});st.old=d[2].items||[];st.next=d[2].next;st.loaded=true;st.error='';badge();if(st.mode==='list')paint();return U.count();
    }).catch(function(e){if(epoch!==st.epoch)return 0;st.loaded=true;st.error=err(e);if(st.mode==='list')paint();return 0;});
   };
   U.moreOld=function(){if(!st.next||st.busy)return;var epoch=st.epoch;st.busy=true;A.rpc('conversation_list',{p_before:st.next}).then(function(d){if(epoch!==st.epoch)return;st.old=st.old.concat(d.items||[]);st.next=d.next;st.busy=false;if(st.mode==='list')paint();}).catch(function(e){if(epoch!==st.epoch)return;st.busy=false;st.error=err(e);if(st.mode==='list')paint();});};
@@ -49,13 +51,13 @@
   U.openThread=function(id){
    if(owner()){location.href='admin.html#message='+encodeURIComponent(id);return Promise.resolve();}
    st.mode='loading';st.thread=null;var request=++st.request;push();if(!admin&&window.openInbox)openInbox();else paint();var epoch=st.epoch;
-   return rpc('get',{thread_id:id}).then(function(d){if(epoch!==st.epoch||request!==st.request||st.mode!=='loading')return;st.thread=d;st.mode='thread';paint();U.refresh();}).catch(function(e){if(epoch!==st.epoch||request!==st.request)return;st.error=err(e);st.mode='list';paint();});
+   return rpc('get',{thread_id:id}).then(function(d){if(epoch!==st.epoch||request!==st.request||st.mode!=='loading')return;st.thread=d;rpc('mark_read',{kind:'thread',id:id}).then(U.refresh).catch(function(){});st.mode='thread';paint();U.refresh();}).catch(function(e){if(epoch!==st.epoch||request!==st.request)return;st.error=err(e);st.mode='list';paint();});
   };
   U.openCase=function(kind,id){
    if(kind==='wish'){if(admin&&window.openMenu)openMenu('onskemal');else if(U.isAdmin())location.href='admin.html#onskemal';return;}
    st.mode='loading';var request=++st.request;push();if(!admin&&window.openInbox)openInbox();else paint();
    var epoch=st.epoch;
-   return A.rpc(kind==='old-message'?'conversation_get':'case_get',kind==='old-message'?{p_id:id}:{p_kind:kind,p_id:id}).then(function(c){if(epoch!==st.epoch||request!==st.request||st.mode!=='loading')return;st.legacy={kind:kind,data:c};st.mode='legacy';paint();if(kind!=='old-message')A.rpc('case_seen',{p_kind:kind,p_id:id}).catch(function(){});}).catch(function(e){if(epoch!==st.epoch||request!==st.request)return;st.error=err(e);st.mode='list';paint();});
+   return A.rpc(kind==='old-message'?'conversation_get':'case_get',kind==='old-message'?{p_id:id}:{p_kind:kind,p_id:id}).then(function(c){if(epoch!==st.epoch||request!==st.request||st.mode!=='loading')return;st.legacy={kind:kind,data:c};rpc('mark_read',{kind:kind,id:id}).then(U.refresh).catch(function(){});st.mode='legacy';paint();if(kind!=='old-message')A.rpc('case_seen',{p_kind:kind,p_id:id}).catch(function(){});}).catch(function(e){if(epoch!==st.epoch||request!==st.request)return;st.error=err(e);st.mode='list';paint();});
   };
   U.tap=U.openCase;U.readConversation=function(id){return U.openCase('old-message',id);};
   function formField(label,id,type,required,max){var d=st.draft,v=d[id]||'';return '<label for="mx-'+id+'">'+label+'</label><input id="mx-'+id+'" data-mx="'+id+'" type="'+(type||'text')+'"'+(required?' required':'')+(max?' maxlength="'+max+'"':'')+' value="'+esc(v)+'">';}
@@ -81,15 +83,30 @@
     (book?'<label for="mx-body">Meddelande (valfritt)</label><textarea id="mx-body" data-mx="body" maxlength="2000" rows="4">'+esc(st.draft.body||'')+'</textarea>':'')+carField()+(!book&&!admin?'<p class="ar-note">Sjukanmälan och läkarintyg skickas under Sjuk, inte här.</p>':'')+(book?'<p class="ar-note">'+(admin?'Föraren måste godkänna tiden.':'Admin måste bekräfta ditt förslag.')+' Tiden visas grå i schemat tills den är godkänd.</p>':'')+
     '<p class="mx-error mx-server-error" role="alert">'+esc(st.error)+'</p><button type="submit"'+(st.busy?' disabled':'')+'>'+(st.busy?'Sparar…':book?'Föreslå tid':'Skicka')+'</button></form>';
   }
+  // Closed wins over legacy needs; a pending booking or unanswered human reply wins over other bookings.
+  function threadGroup(t){
+   var states=t.booking_states||[],waiting=t.last_sender_role===(admin?'driver':'admin')&&!t.decision_reply;
+   if(states.some(function(x){return x==='pending_driver'||x==='pending_admin';})||waiting)return 0;
+   if(states.length&&states.every(function(x){return x==='declined';}))return 2;
+   return 1;
+  }
+  function caseGroup(c){return c.st==='klar'?2:c.st==='ny'||c.st==='vantar'||c.needs?0:1;}
+  function unreadButton(kind,id){return '<button type="button" onclick="'+name+'.markUnread(\''+kind+'\','+id+')">Markera som oläst</button>';}
+  U.markUnread=function(kind,id){if(st.busy)return;st.busy=true;rpc('mark_unread',{kind:kind,id:id}).then(function(){st.busy=false;st.mode='list';st.thread=null;st.legacy=null;return U.refresh();}).catch(function(e){st.busy=false;st.error=err(e);paint();});};
   function listHtml(){
-   var h=admin?'<div class="mx-actions"><button onclick="'+name+'.compose()">Meddelande</button><button onclick="'+name+'.newBooking()">Bokad tid</button></div>':'<div class="mx-filters" role="group" aria-label="Inkorg">'+FILTERS.map(function(x){return '<button aria-label="'+x[1]+'" title="'+x[1]+'" aria-pressed="'+(st.filter===x[0])+'" onclick="'+name+'.select(\''+x[0]+'\')"><span aria-hidden="true">'+x[2]+'</span></button>';}).join('')+'</div><button class="mx-new" onclick="'+name+'.newCase()">＋ Nytt ärende</button>';
+   var filters=admin?ADMIN_FILTERS:FILTERS;
+   var h='<div class="mx-filters" role="group" aria-label="'+(admin?'Ärenden':'Meddelanden')+'">'+filters.map(function(x){return '<button aria-label="'+x[1]+'" title="'+x[1]+'" aria-pressed="'+(st.filter===x[0])+'" onclick="'+name+'.select(\''+x[0]+'\')"><span aria-hidden="true">'+x[2]+'</span></button>';}).join('')+'</div>';
+   h+='<h2 class="mx-category-heading">'+esc((filters.find(function(x){return x[0]===st.filter;})||filters[0])[1])+'</h2>';
+   h+=admin?'<div class="mx-actions"><button onclick="'+name+'.compose()">Meddelande</button><button onclick="'+name+'.newBooking()">Bokad tid</button></div>':'<button class="mx-new" onclick="'+name+'.newCase()">＋ Nytt ärende</button>';
    if(owner())h+='<p class="ar-note">Alla dina ärenden hanteras i <a href="admin.html#arenden">Admin › Ärenden</a>.</p>';
-   if(!admin)h+='<h2 class="mx-category-heading">'+esc((FILTERS.find(function(x){return x[0]===st.filter;})||FILTERS[0])[1])+'</h2>';
-   var all=st.threads.map(function(t){return {at:t.at,title:t.subject,body:t.last_body||'',meta:t.name+(t.car_number?' · Bil '+t.car_number:''),unread:t.unread,open:name+'.openThread('+t.id+')',cat:'message'};});
-   all=all.concat(st.cases.map(function(c){return {at:c.at,title:c.title,body:c.last_txt||c.txt||'',meta:(c.car?'Bil '+c.car+' · ':'')+(A.WORDS[c.st]||'')+(['sjuk','wh'].indexOf(c.kind)<0?' · Arkiv':''),unread:c.unread||c.needs,open:name+'.openCase(\''+c.kind+'\','+c.id+')',cat:category(c)};}));
-   all=all.concat(st.old.map(function(c){return {at:c.at,title:c.subject,body:c.last_body,meta:'Äldre privat samtal · bara läsning',unread:c.unread,open:name+'.readConversation('+c.id+')',cat:'message'};}));
-   all=all.filter(function(x){return admin||st.filter==='all'||st.filter===x.cat;}).sort(function(a,b){return Date.parse(b.at)-Date.parse(a.at);});
-   h+='<p class="mx-error mx-server-error" role="alert">'+esc(st.error)+'</p><div class="ar-list">'+all.map(function(x){return '<button class="ar-row" onclick="'+x.open+'"><span class="ar-main"><span class="ar-t"><b>'+esc(x.title)+'</b>'+(x.unread?'<span class="ar-dot" aria-label="Oläst"></span>':'')+'</span><span class="ar-s">'+esc(x.body)+'</span><span class="ar-m">'+esc(x.meta)+' · '+esc(when(x.at))+'</span></span></button>';}).join('')+'</div>';
+   var all=st.threads.map(function(t){return {at:t.at,title:t.subject,body:t.last_body||'',meta:t.name+(t.car_number?' · Bil '+t.car_number:''),unread:t.unread||flagged('thread',t.id),open:name+'.openThread('+t.id+')',cat:'message',group:threadGroup(t)};});
+   all=all.concat(st.cases.map(function(c){return {at:c.at,title:c.title,body:c.last_txt||c.txt||'',meta:(c.car?'Bil '+c.car+' · ':'')+(A.WORDS[c.st]||'')+(['sjuk','wh'].indexOf(c.kind)<0?' · Arkiv':''),unread:c.unread||c.needs||flagged(c.kind,c.id),open:name+'.openCase(\''+c.kind+'\','+c.id+')',cat:category(c),group:caseGroup(c)};}));
+   all=all.concat(st.old.map(function(c){return {at:c.at,title:c.subject,body:c.last_body,meta:'Äldre privat samtal · bara läsning',unread:c.unread||flagged('old-message',c.id),open:name+'.readConversation('+c.id+')',cat:'message',group:2};}));
+   all=all.filter(function(x){return st.filter==='all'||st.filter===x.cat;}).sort(function(a,b){return Date.parse(b.at)-Date.parse(a.at);});
+   h+='<p class="mx-error mx-server-error" role="alert">'+esc(st.error)+'</p>';
+   function row(x){return '<button class="ar-row" onclick="'+x.open+'"><span class="ar-main"><span class="ar-t"><b>'+esc(x.title)+'</b>'+(x.unread?'<span class="ar-dot" aria-label="Oläst"></span>':'')+'</span><span class="ar-s">'+esc(x.body)+'</span><span class="ar-m">'+esc(x.meta)+' · '+esc(when(x.at))+'</span></span></button>';}
+   if(admin){['Ohanterade / väntar på svar','Pågående','Avslutade'].forEach(function(label,i){var items=all.filter(function(x){return x.group===i;});if(items.length)h+='<section class="mx-case-group"><h3>'+label+'</h3><div class="ar-list">'+items.map(row).join('')+'</div></section>';});}
+   else h+='<div class="ar-list">'+all.map(row).join('')+'</div>';
    if(!all.length)h+='<p class="ar-empty">'+(st.loaded?'Inget här just nu.':'Laddar…')+'</p>';
    if(st.next)h+='<button onclick="'+name+'.moreOld()">Visa fler äldre samtal</button>';
    return h;
@@ -98,13 +115,13 @@
    return '<section class="mx-booking '+(b.status==='accepted'?'solid':'pending')+'"><h4>'+esc(b.title)+'</h4><p>'+(b.kind&&b.kind!==b.title?esc(b.kind)+' · ':'')+esc(when(b.starts_at))+(b.car_number?' · Bil '+esc(b.car_number):' · Bil: Nej')+'</p><p>'+esc(STATUS[b.status])+'</p><small>Föreslagen '+esc(when(b.created_at))+(b.decided_at?' · Beslut '+esc(when(b.decided_at)):'')+'</small>'+(b.reason?'<p>'+esc(b.reason)+'</p>':'')+(can?'<div class="mx-actions"><button onclick="'+name+'.decide('+b.id+',\'accepted\')">'+(admin&&b.status==='pending_admin'?'Bekräfta':'Acceptera')+'</button><button onclick="'+name+'.decide('+b.id+',\'declined\')">Avböj</button></div>':'')+'</section>';
   }
   function threadHtml(){var t=st.thread;
-   return back()+'<article class="mx-thread"><h2>'+esc(t.subject)+'</h2>'+(t.car_number?'<p>Bil '+esc(t.car_number)+'</p>':'')+'<button onclick="'+name+'.newBooking()">Bokad tid</button>'+
+   return back()+unreadButton('thread',t.id)+'<article class="mx-thread"><h2>'+esc(t.subject)+'</h2>'+(t.car_number?'<p>Bil '+esc(t.car_number)+'</p>':'')+'<button onclick="'+name+'.newBooking()">Bokad tid</button>'+
     '<div class="mx-history">'+t.messages.map(function(m){return '<div class="mx-message '+(m.mine?'mine':'')+'"><small>'+esc(m.role==='system'?'Historik':m.mine?'Du':m.role==='admin'?'Admin':'Föraren')+' · '+esc(when(m.at))+'</small><p>'+esc(m.body)+'</p></div>';}).join('')+'</div>'+(t.bookings||[]).map(bookingHtml).join('')+
     '<form id="mx-reply"><p id="mx-decline-error" class="mx-error" role="alert"></p><label for="mx-reply-body">Svara</label><textarea id="mx-reply-body" required maxlength="2000" rows="3"></textarea><button type="submit"'+(st.busy?' disabled':'')+'>Skicka svar</button></form><p class="mx-error mx-server-error" role="alert">'+esc(st.error)+'</p></article>';
   }
   function legacyHtml(){var c=st.legacy.data,k=st.legacy.kind,d=c.data||{};
-   if(k==='old-message')return back()+'<h2>'+esc(c.subject)+'</h2><p class="ar-note">Äldre privat samtal – bara läsning. Nya meddelanden går till admin.</p>'+c.messages.map(function(m){return '<div class="mx-message"><small>'+esc(when(m.at))+'</small><p>'+esc(m.body)+'</p></div>';}).join('');
-   var h=back()+A.view(c,admin?'owner':'driver');
+   if(k==='old-message')return back()+unreadButton(k,c.id)+'<h2>'+esc(c.subject)+'</h2><p class="ar-note">Äldre privat samtal – bara läsning. Nya meddelanden går till admin.</p>'+c.messages.map(function(m){return '<div class="mx-message"><small>'+esc(when(m.at))+'</small><p>'+esc(m.body)+'</p></div>';}).join('');
+   var h=back()+unreadButton(k,c.id)+A.view(c,admin?'owner':'driver');
    if(k==='wh')h+='<div class="mx-form"><label for="mx-legacy-text">'+(admin?'Fråga eller motivering':'Svara admin')+'</label><textarea id="mx-legacy-text" maxlength="1000"></textarea><div class="mx-actions">'+(admin?'<button onclick="'+name+'.legacyAct(\'ask\')">Fråga föraren</button><button onclick="'+name+'.legacyAct(\'approved\')">Godkänn</button><button onclick="'+name+'.legacyAct(\'rejected\')">Neka</button>':d.status==='pending'?'<button onclick="'+name+'.legacyAct(\'reply\')">Skicka svar</button>':'')+'</div></div>';
    else if(k==='sjuk')h+=admin?'<div class="mx-form"><label for="mx-legacy-text">Kommentar</label><textarea id="mx-legacy-text" maxlength="500"></textarea><div class="mx-actions">'+[['godkand','Godkänn'],['intyg_begart','Begär intyg'],['avslagen','Avslå']].map(function(x){return '<button onclick="'+name+'.legacyAct(\''+x[0]+'\')">'+x[1]+'</button>';}).join('')+'</div></div>':'<button onclick="'+name+'.report(\'sjuk\')">Öppna sjukanmälan och intyg</button>';
    else h+='<p class="ar-note">Äldre bilärende – bara läsning. Skapa ett Meddelande om något nytt behövs.</p>';
@@ -135,7 +152,7 @@
   U.has=function(k,id){return st.cases.some(function(x){return x.kind===k&&x.id===+id;});};
   U.isAdmin=function(){return ['admin','agare','superadmin'].indexOf(window.INKORG_ROLE)>=0;};
   U.badge=function(){var n=U.count();return n?'<span class="ar-badge">'+n+'</span>':'';};
-  U.logout=function(){st.epoch++;st.mode='list';st.threads=[];st.cases=[];st.old=[];st.thread=null;st.legacy=null;st.recipients=[];st.cars=[];st.optionsPending=false;st.draft={};st.el=null;st.busy=false;};
+  U.logout=function(){st.epoch++;st.mode='list';st.flags=[];st.threads=[];st.cases=[];st.old=[];st.thread=null;st.legacy=null;st.recipients=[];st.cars=[];st.optionsPending=false;st.draft={};st.el=null;st.busy=false;};
   U.load=U.refresh;U.needs=U.count;U.isOpen=function(){return st.mode!=='list';};
   return U;
  }};

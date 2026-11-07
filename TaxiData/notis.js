@@ -272,7 +272,7 @@
       // Svar/ändring på ett ärende: kort notis, hela svaret finns i tråden (Inkorgen eller Admin › Ärenden)
       var mine = INKORG.has(it.case_kind, it.case_id);
       var short = txt.replace(/\s+/g, ' ').trim(); if (short.length > 70) short = short.slice(0, 69) + '…';
-      return { ico: '📥', html: '<b>' + (mine ? 'Nytt i Inkorgen' : 'Nytt i Ärenden') + '</b> – ' + esc(short) };
+      return { ico: '📥', html: '<b>' + (mine ? 'Nytt i Meddelanden' : 'Nytt i Ärenden') + '</b> – ' + esc(short) };
     }
     return { ico: ico || iconOf(it), html: ttl ? '<b>' + esc(ttl) + '</b>' + (txt ? ' – ' + esc(txt) : '') : esc(txt) };
   }
