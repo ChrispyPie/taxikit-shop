@@ -1,10 +1,10 @@
 {
   "airport": "GOT",
-  "updated": "2026-11-08T21:55:23+01:00",
-  "arrivalsUpdated": "2026-11-08T21:55:30+01:00",
+  "updated": "2026-11-08T22:01:00+01:00",
+  "arrivalsUpdated": "2026-11-08T22:01:02+01:00",
   "departuresUpdated": "2026-11-08T21:31:11+01:00",
   "yesterdayUpdated": "2026-11-08T05:40:49+01:00",
-  "tomorrowUpdated": "2026-11-08T21:01:15+01:00",
+  "tomorrowUpdated": "2026-11-08T22:01:07+01:00",
   "error": null,
   "arrivals": [
     {
@@ -196,26 +196,6 @@
       "status": "DEL",
       "statusSv": "Borttagen",
       "sched": "2026-11-07T13:55:00Z",
-      "est": "",
-      "act": "",
-      "terminal": "T1",
-      "gate": "",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
-    },
-    {
-      "id": "FR3088",
-      "dir": "ANK",
-      "other": "Manchester",
-      "iata": "",
-      "airline": "Ryanair Ltd",
-      "status": "DEL",
-      "statusSv": "Borttagen",
-      "sched": "2026-11-07T09:00:00Z",
       "est": "",
       "act": "",
       "terminal": "T1",
@@ -1853,19 +1833,19 @@
       "other": "Gran Canaria",
       "iata": "",
       "airline": "Tui Fly Nordic",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 21:56",
       "sched": "2026-11-08T20:30:00Z",
       "est": "2026-11-08T20:58:00Z",
-      "act": "",
+      "act": "2026-11-08T20:56:00Z",
       "terminal": "T1",
       "gate": "13",
       "baggage": "4",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 21:58",
-      "reason": "Ankommer 21:58"
+      "rawStatus": "Landat 21:56",
+      "reason": "Landat 21:56"
     },
     {
       "id": "SK2051",
@@ -1876,7 +1856,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-11-08T22:25:00Z",
-      "est": "2026-11-08T22:24:00Z",
+      "est": "2026-11-08T22:26:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "19",
@@ -1884,8 +1864,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 23:24",
-      "reason": "Beräknad 23:24"
+      "rawStatus": "Ankommer 23:26",
+      "reason": "Ankommer 23:26"
     },
     {
       "id": "SK167",
@@ -1922,7 +1902,7 @@
       "gate": "23",
       "baggage": "1",
       "firstBag": "",
-      "firstBagEst": "",
+      "firstBagEst": "2026-11-08T21:16:13Z",
       "lastBag": "",
       "rawStatus": "Landat 21:51",
       "reason": "Landat 21:51"
@@ -2316,7 +2296,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-11-08T20:55:00Z",
-      "est": "2026-11-08T21:10:00Z",
+      "est": "2026-11-08T21:02:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "16",
@@ -2356,7 +2336,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-11-08T22:20:00Z",
-      "est": "2026-11-08T22:25:00Z",
+      "est": "2026-11-08T22:34:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "12",
@@ -3816,7 +3796,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-11-08T23:20:00Z",
-      "est": "2026-11-08T23:03:00Z",
+      "est": "2026-11-08T23:02:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "13",
@@ -3824,8 +3804,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 00:03",
-      "reason": "Ankommer 00:03"
+      "rawStatus": "Ankommer 00:02",
+      "reason": "Ankommer 00:02"
     }
   ],
   "departures": [
