@@ -1,8 +1,8 @@
 {
   "airport": "GOT",
-  "updated": "2026-11-08T19:25:25+01:00",
-  "arrivalsUpdated": "2026-11-08T19:25:32+01:00",
-  "departuresUpdated": "2026-11-08T18:30:54+01:00",
+  "updated": "2026-11-08T19:30:49+01:00",
+  "arrivalsUpdated": "2026-11-08T19:30:50+01:00",
+  "departuresUpdated": "2026-11-08T19:30:55+01:00",
   "yesterdayUpdated": "2026-11-08T05:40:49+01:00",
   "tomorrowUpdated": "2026-11-08T19:01:00+01:00",
   "error": null,
@@ -4970,26 +4970,6 @@
       "reason": "Startat 08:17"
     },
     {
-      "id": "LH821",
-      "dir": "AVG",
-      "other": "Frankfurt",
-      "iata": "",
-      "airline": "Lufthansa",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-11-07T05:45:00Z",
-      "est": "",
-      "act": "2026-11-07T05:52:48Z",
-      "terminal": "T1",
-      "gate": "15",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 06:59",
-      "reason": "Startat 06:59"
-    },
-    {
       "id": "FR090",
       "dir": "AVG",
       "other": "Malaga",
@@ -5148,26 +5128,6 @@
       "lastBag": "",
       "rawStatus": "Startat 13:26",
       "reason": "Startat 13:26"
-    },
-    {
-      "id": "SN2324",
-      "dir": "AVG",
-      "other": "Bryssel",
-      "iata": "",
-      "airline": "Brussels Airlines",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-11-07T06:00:00Z",
-      "est": "",
-      "act": "2026-11-07T06:06:23Z",
-      "terminal": "T1",
-      "gate": "24B",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 07:14",
-      "reason": "Startat 07:14"
     },
     {
       "id": "SK2050",
@@ -5635,19 +5595,19 @@
       "other": "London LHR",
       "iata": "",
       "airline": "British Airways",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-08T18:25:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-08T18:13:46Z",
       "terminal": "T1",
       "gate": "22",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Startat 19:22",
+      "reason": "Startat 19:22"
     },
     {
       "id": "AY868",
@@ -5666,8 +5626,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Gå till gate",
+      "reason": "Gå till gate"
     },
     {
       "id": "FR965",
@@ -5855,19 +5815,19 @@
       "other": "Frankfurt",
       "iata": "",
       "airline": "Lufthansa",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-08T17:40:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-08T17:30:00Z",
       "terminal": "T1",
       "gate": "16",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd",
-      "reason": "Gate stängd"
+      "rawStatus": "Startat 18:36",
+      "reason": "Startat 18:36"
     },
     {
       "id": "FR4011",
@@ -5886,8 +5846,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Gate stängd",
+      "reason": "Gate stängd"
     },
     {
       "id": "LX1227",
@@ -5946,8 +5906,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd",
-      "reason": "Gate stängd"
+      "rawStatus": "Startat 18:34",
+      "reason": "Startat 18:34"
     },
     {
       "id": "FR6094",
@@ -6106,8 +6066,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Gate stängd",
+      "reason": "Gate stängd"
     },
     {
       "id": "D82027",
@@ -6326,8 +6286,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Gate stängd",
+      "reason": "Gate stängd"
     },
     {
       "id": "SK443",
@@ -6386,8 +6346,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gå till gate",
-      "reason": "Gå till gate"
+      "rawStatus": "Gate stängd",
+      "reason": "Gate stängd"
     },
     {
       "id": "SK144",
@@ -6438,7 +6398,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-11-08T19:05:00Z",
-      "est": "",
+      "est": "2026-11-08T19:45:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "12",
@@ -6446,8 +6406,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Försenad till 20:45",
+      "reason": "Försenad till 20:45"
     },
     {
       "id": "LH2433",
