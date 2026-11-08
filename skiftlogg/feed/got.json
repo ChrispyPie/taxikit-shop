@@ -1,7 +1,7 @@
 {
   "airport": "GOT",
-  "updated": "2026-11-08T09:15:35+01:00",
-  "arrivalsUpdated": "2026-11-08T09:15:37+01:00",
+  "updated": "2026-11-08T09:20:34+01:00",
+  "arrivalsUpdated": "2026-11-08T09:20:36+01:00",
   "departuresUpdated": "2026-11-08T08:30:56+01:00",
   "yesterdayUpdated": "2026-11-08T05:40:49+01:00",
   "tomorrowUpdated": "2026-11-07T23:01:04+01:00",
@@ -146,26 +146,6 @@
       "lastBag": "2026-11-06T22:52:31Z",
       "rawStatus": "Landat 23:28 · Sista bagage",
       "reason": "Landat 23:28 · Sista bagage"
-    },
-    {
-      "id": "SK7680",
-      "dir": "ANK",
-      "other": "Fuerteventura",
-      "iata": "",
-      "airline": "SAS Scandinavian Airlines",
-      "status": "LAN",
-      "statusSv": "Landat 21:19",
-      "sched": "2026-11-06T20:45:00Z",
-      "est": "2026-11-06T20:17:00Z",
-      "act": "2026-11-06T20:19:00Z",
-      "terminal": "T1",
-      "gate": "20A",
-      "baggage": "3",
-      "firstBag": "2026-11-06T20:42:01Z",
-      "firstBagEst": "2026-11-06T20:45:24Z",
-      "lastBag": "2026-11-06T20:47:48Z",
-      "rawStatus": "Landat 21:19 · Sista bagage",
-      "reason": "Landat 21:19 · Sista bagage"
     },
     {
       "id": "SK448",
@@ -1853,19 +1833,19 @@
       "other": "Amsterdam",
       "iata": "",
       "airline": "KLM",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 09:17",
       "sched": "2026-11-08T08:30:00Z",
       "est": "2026-11-08T08:15:00Z",
-      "act": "",
+      "act": "2026-11-08T08:17:00Z",
       "terminal": "T1",
       "gate": "17",
       "baggage": "1",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 09:15",
-      "reason": "Ankommer 09:15"
+      "rawStatus": "Landat 09:17",
+      "reason": "Landat 09:17"
     },
     {
       "id": "FR966",
@@ -1916,7 +1896,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-11-08T09:55:00Z",
-      "est": "2026-11-08T09:45:00Z",
+      "est": "2026-11-08T09:38:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "13",
@@ -1924,8 +1904,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 10:45",
-      "reason": "Beräknad 10:45"
+      "rawStatus": "Beräknad 10:38",
+      "reason": "Beräknad 10:38"
     },
     {
       "id": "KL1231",
@@ -2522,7 +2502,7 @@
       "gate": "15",
       "baggage": "5",
       "firstBag": "",
-      "firstBagEst": "",
+      "firstBagEst": "2026-11-08T08:38:26Z",
       "lastBag": "",
       "rawStatus": "Landat 09:12",
       "reason": "Landat 09:12"
