@@ -1,8 +1,8 @@
 {
   "airport": "GOT",
-  "updated": "2026-11-08T15:25:25+01:00",
-  "arrivalsUpdated": "2026-11-08T15:25:28+01:00",
-  "departuresUpdated": "2026-11-08T14:30:53+01:00",
+  "updated": "2026-11-08T15:30:48+01:00",
+  "arrivalsUpdated": "2026-11-08T15:30:50+01:00",
+  "departuresUpdated": "2026-11-08T15:30:55+01:00",
   "yesterdayUpdated": "2026-11-08T05:40:49+01:00",
   "tomorrowUpdated": "2026-11-08T15:01:13+01:00",
   "error": null,
@@ -1841,11 +1841,11 @@
       "terminal": "T1",
       "gate": "21B",
       "baggage": "1",
-      "firstBag": "",
+      "firstBag": "2026-11-08T14:25:39Z",
       "firstBagEst": "2026-11-08T14:35:56Z",
-      "lastBag": "",
-      "rawStatus": "Landat 15:12",
-      "reason": "Landat 15:12"
+      "lastBag": "2026-11-08T14:28:09Z",
+      "rawStatus": "Landat 15:12 · Sista bagage",
+      "reason": "Landat 15:12 · Sista bagage"
     },
     {
       "id": "AF1452",
@@ -5666,8 +5666,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Boarding",
+      "reason": "Boarding"
     },
     {
       "id": "TK1800",
@@ -5815,19 +5815,19 @@
       "other": "Amsterdam",
       "iata": "",
       "airline": "KLM",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-08T13:35:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-08T13:34:14Z",
       "terminal": "T1",
       "gate": "19",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd",
-      "reason": "Gate stängd"
+      "rawStatus": "Startat 14:42",
+      "reason": "Startat 14:42"
     },
     {
       "id": "LH817",
@@ -5835,19 +5835,19 @@
       "other": "Frankfurt",
       "iata": "",
       "airline": "Lufthansa",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-08T13:40:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-08T13:43:32Z",
       "terminal": "T1",
       "gate": "15",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Boarding",
-      "reason": "Boarding"
+      "rawStatus": "Startat 14:53",
+      "reason": "Startat 14:53"
     },
     {
       "id": "LH2429",
@@ -6015,19 +6015,19 @@
       "other": "Zürich",
       "iata": "",
       "airline": "Swiss",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-08T13:45:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-08T13:40:42Z",
       "terminal": "T1",
       "gate": "13",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Omedelbar avgång",
-      "reason": "Omedelbar avgång"
+      "rawStatus": "Startat 14:51",
+      "reason": "Startat 14:51"
     },
     {
       "id": "KL1230",
@@ -6415,19 +6415,19 @@
       "other": "Köpenhamn",
       "iata": "",
       "airline": "SAS Scandinavian Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-08T14:30:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-08T14:26:59Z",
       "terminal": "T1",
       "gate": "16",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Gate stängd",
+      "reason": "Gate stängd"
     },
     {
       "id": "SK168",
@@ -6648,6 +6648,26 @@
       "lastBag": "",
       "rawStatus": "Startat 09:54",
       "reason": "Startat 09:54"
+    },
+    {
+      "id": "OJ812",
+      "dir": "AVG",
+      "other": "Visby",
+      "iata": "",
+      "airline": "Nyxair",
+      "status": "SCH",
+      "statusSv": "Planerad",
+      "sched": "2026-11-08T20:30:00Z",
+      "est": "2026-11-08T20:30:00Z",
+      "act": "",
+      "terminal": "T1",
+      "gate": "",
+      "baggage": "",
+      "firstBag": "",
+      "firstBagEst": "",
+      "lastBag": "",
+      "rawStatus": "",
+      "reason": ""
     }
   ]
 }
