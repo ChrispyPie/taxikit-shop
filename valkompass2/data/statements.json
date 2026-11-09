@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "s-01–s-20, s-23, s-24, s-26–s-30 och sc-01–sc-06 godkända av Christian 2026-11-09. s-21, s-22 och s-25 flyttade till values.json (v-09–v-11) 2026-11-09. s-31–s-35 godkända av Christian 2026-11-09. s-36 ligger i Djupdyk (approved: false).",
+  "status": "s-01–s-20, s-23, s-24, s-26–s-30 och sc-01–sc-06 godkända av Christian 2026-11-09. s-21, s-22 och s-25 flyttade till values.json (v-09–v-11) 2026-11-09. s-31–s-35 godkända av Christian 2026-11-09. s-36 ligger i Djupdyk (approved: false). s-37 (lämna EU) och s-38 (burka/niqab) godkända 2026-11-09; s-23 flyttad till Djupdyk; s-39 Djupdyk-utkast.",
   "note": "agreePole anger vilken pol på axeln ett 'Helt för' pekar mot: 'neg' eller 'pos' (se axes.json). Målet är hälften av varje. tier: 'core' = grundtestet (~30 st, alla får samma), 'deep' = Djupdyk-läget (valfritt, totalt 60–100 st). approved: godkänt av Christian. type: 'statement' (påstående, Helt emot..Helt för) eller 'scenario' (kort berättelse, 5-gradig skala mellan leftLabel och rightLabel; rightPole anger vilken axelpol högerändan pekar mot, så att sidan varierar och inget mönster syns). Scenarier räknas in i axelprofilen och i partimatchningen bara när partiet har en källbelagd position på frågan.",
   "statements": [
     {
@@ -209,7 +209,7 @@
       "agreePole": "pos",
       "text": "EU:s budget ska bli mindre, även om stödet till fattigare medlemsländer då minskar.",
       "note": "Mindre EU; kostnaden för andra länder nämns.",
-      "tier": "core",
+      "tier": "deep",
       "approved": true,
       "type": "statement"
     },
@@ -329,6 +329,36 @@
       "agreePole": "neg",
       "text": "Det ska vara tillåtet att bränna religiösa böcker som en politisk protest.",
       "note": "Yttrandefrihet (Y2). Djupdyk: alla partier sa 2023 nej till förbud, så frågan skiljer inte partierna åt.",
+      "tier": "deep",
+      "approved": false,
+      "type": "statement"
+    },
+    {
+      "id": "s-37",
+      "axis": "eu",
+      "agreePole": "pos",
+      "text": "Sverige ska lämna EU.",
+      "note": "Medlemskapet. Inget riksdagsparti driver utträde i dag: MP släppte kravet 2008, SD 2019 och V 2024. Ersätter s-23 i grundtestet.",
+      "tier": "core",
+      "approved": true,
+      "type": "statement"
+    },
+    {
+      "id": "s-38",
+      "axis": "varderingar",
+      "agreePole": "pos",
+      "text": "Heltäckande slöja som burka och niqab ska förbjudas på allmän plats.",
+      "note": "Religiösa symboler. Ingen statlig utredning finns; riksdagen avslog motioner om slöjförbud 2026-03-11 (KU28).",
+      "tier": "core",
+      "approved": true,
+      "type": "statement"
+    },
+    {
+      "id": "s-39",
+      "axis": "varderingar",
+      "agreePole": "pos",
+      "text": "Barn i förskolan och lågstadiet ska inte få bära slöja.",
+      "note": "Djupdyk-utkast. S saknar källa.",
       "tier": "deep",
       "approved": false,
       "type": "statement"
