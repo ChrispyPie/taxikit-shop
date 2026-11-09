@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "note": "Varje axel går från -2 (negPole) till +2 (posPole). Polerna beskriver riktning, inte rätt eller fel.",
+  "axes": [
+    { "id": "ekonomi",     "name": "Ekonomi",            "negPole": "Mer gemensamt och omfördelning", "posPole": "Mer marknad och lägre skatter" },
+    { "id": "migration",   "name": "Migration",          "negPole": "Öppnare migration",              "posPole": "Stramare migration" },
+    { "id": "lag",         "name": "Lag och ordning",    "negPole": "Förebygga och rehabilitera",     "posPole": "Hårdare straff och kontroll" },
+    { "id": "klimat",      "name": "Klimat och energi",  "negPole": "Klimatet först",                 "posPole": "Billig energi och tillväxt först" },
+    { "id": "varderingar", "name": "Värderingar",        "negPole": "Liberalt och individuellt",      "posPole": "Traditionellt och gemenskap" },
+    { "id": "eu",          "name": "EU",                 "negPole": "Mer samarbete i EU",             "posPole": "Mer makt till Sverige" },
+    { "id": "forsvar",     "name": "Försvar",            "negPole": "Välfärd före försvar",           "posPole": "Starkare försvar" }
+  ]
+}

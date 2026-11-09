@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "schema": {
+    "party": "Parti-id från parties.json, t.ex. 'm'",
+    "statementId": "Id från statements.json, t.ex. 's-01'",
+    "value": "Heltal -2..2: -2 Helt emot, -1 Delvis emot, 0 Neutral, 1 Delvis för, 2 Helt för",
+    "sourceType": "manifest | partiprogram | riksdagsvotering | mediakompass | annat",
+    "url": "Länk till källan",
+    "quote": "Kort ordagrant citat eller beskrivning av voteringen",
+    "date": "ÅÅÅÅ-MM-DD för källan",
+    "confidence": "hog | medel | lag",
+    "reviewedByParty": "false tills partiet själva har svarat och godkänt; visas då som 'Granskat av partiet'"
+  },
+  "positions": []
+}
