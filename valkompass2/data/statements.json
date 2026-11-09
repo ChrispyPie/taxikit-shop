@@ -1,37 +1,188 @@
 {
   "version": 1,
-  "status": "UTKAST – ej granskat av Christian",
-  "note": "agreePole anger vilken pol på axeln ett 'Helt för' pekar mot: 'neg' eller 'pos' (se axes.json). Målet är hälften av varje.",
+  "status": "s-01–s-10 godkända av Christian 2026-11-09; s-11–s-20 UTKAST",
+  "note": "agreePole anger vilken pol på axeln ett 'Helt för' pekar mot: 'neg' eller 'pos' (se axes.json). Målet är hälften av varje. tier: 'core' = grundtestet (~30 st, alla får samma), 'deep' = Djupdyk-läget (valfritt, totalt 60–100 st). approved: godkänt av Christian.",
   "statements": [
-    { "id": "s-01", "axis": "ekonomi", "agreePole": "neg",
+    {
+      "id": "s-01",
+      "axis": "ekonomi",
+      "agreePole": "neg",
       "text": "Det är viktigare att minska skillnaderna mellan rika och fattiga än att sänka skatterna.",
-      "note": "Prioritering mellan omfördelning och skattesänkningar; ingen siffra behövs." },
-    { "id": "s-02", "axis": "ekonomi", "agreePole": "pos",
+      "note": "Prioritering mellan omfördelning och skattesänkningar; ingen siffra behövs.",
+      "tier": "core",
+      "approved": true
+    },
+    {
+      "id": "s-02",
+      "axis": "ekonomi",
+      "agreePole": "pos",
       "text": "Privata företag ska få driva skolor och vårdcentraler och gå med vinst, om kvaliteten är god.",
-      "note": "Vinster i välfärden; villkoret om kvalitet gör att båda sidor kan svara ärligt." },
-    { "id": "s-03", "axis": "migration", "agreePole": "pos",
+      "note": "Vinster i välfärden; villkoret om kvalitet gör att båda sidor kan svara ärligt.",
+      "tier": "core",
+      "approved": true
+    },
+    {
+      "id": "s-03",
+      "axis": "migration",
+      "agreePole": "pos",
       "text": "Sverige ska ta emot färre asylsökande, även om det betyder att färre får skydd här.",
-      "note": "Nämner både vinsten och kostnaden, så att påståendet inte blir ensidigt." },
-    { "id": "s-04", "axis": "migration", "agreePole": "neg",
+      "note": "Nämner både vinsten och kostnaden, så att påståendet inte blir ensidigt.",
+      "tier": "core",
+      "approved": true
+    },
+    {
+      "id": "s-04",
+      "axis": "migration",
+      "agreePole": "neg",
       "text": "Den som har jobb och sköter sig ska få stanna i Sverige, även om asylskälen inte räckte.",
-      "note": "Kallas ofta spårbyte; ordet undviks så att ingen förkunskap behövs." },
-    { "id": "s-05", "axis": "lag", "agreePole": "pos",
+      "note": "Kallas ofta spårbyte; ordet undviks så att ingen förkunskap behövs.",
+      "tier": "core",
+      "approved": true
+    },
+    {
+      "id": "s-05",
+      "axis": "lag",
+      "agreePole": "pos",
       "text": "Straffen för grova våldsbrott ska bli längre, även om det kostar mer pengar till fängelser.",
-      "note": "Värderingsfråga om straff; kostnaden nämns för balans." },
-    { "id": "s-06", "axis": "lag", "agreePole": "neg",
+      "note": "Värderingsfråga om straff; kostnaden nämns för balans.",
+      "tier": "core",
+      "approved": true
+    },
+    {
+      "id": "s-06",
+      "axis": "lag",
+      "agreePole": "neg",
       "text": "Det är bättre att lägga pengar på att förebygga brott än på att låsa in fler.",
-      "note": "Prioritering; partier som vill båda får ett mittvärde." },
-    { "id": "s-07", "axis": "klimat", "agreePole": "neg",
+      "note": "Prioritering; partier som vill båda får ett mittvärde.",
+      "tier": "core",
+      "approved": true
+    },
+    {
+      "id": "s-07",
+      "axis": "klimat",
+      "agreePole": "neg",
       "text": "Sverige ska minska utsläppen snabbare än andra länder, även om bensin och el blir dyrare.",
-      "note": "Klimattakt mot kostnad för hushållen." },
-    { "id": "s-08", "axis": "varderingar", "agreePole": "pos",
+      "note": "Klimattakt mot kostnad för hushållen.",
+      "tier": "core",
+      "approved": true
+    },
+    {
+      "id": "s-08",
+      "axis": "varderingar",
+      "agreePole": "pos",
       "text": "Den som flyttar till Sverige ska förväntas anpassa sig till svenska normer och värderingar.",
-      "note": "Assimilation mot mångfald; handlar om förväntningar, inte om lagar." },
-    { "id": "s-09", "axis": "eu", "agreePole": "pos",
+      "note": "Assimilation mot mångfald; handlar om förväntningar, inte om lagar.",
+      "tier": "core",
+      "approved": true
+    },
+    {
+      "id": "s-09",
+      "axis": "eu",
+      "agreePole": "pos",
       "text": "Fler beslut som i dag tas i EU ska i stället tas av Sveriges riksdag.",
-      "note": "Suveränitet mot EU-samarbete; säger inget om att lämna EU." },
-    { "id": "s-10", "axis": "forsvar", "agreePole": "neg",
+      "note": "Suveränitet mot EU-samarbete; säger inget om att lämna EU.",
+      "tier": "core",
+      "approved": true
+    },
+    {
+      "id": "s-10",
+      "axis": "forsvar",
+      "agreePole": "neg",
       "text": "Sverige ska prioritera välfärden före att öka pengarna till försvaret.",
-      "note": "Prioritering i budgeten; ingen kunskap om dagens nivå krävs." }
-  ]
+      "note": "Prioritering i budgeten; ingen kunskap om dagens nivå krävs.",
+      "tier": "core",
+      "approved": true
+    },
+    {
+      "id": "s-11",
+      "axis": "ekonomi",
+      "agreePole": "neg",
+      "text": "Arbetslösa och sjuka ska få högre ersättning, även om det kräver högre skatter.",
+      "note": "Välfärdens nivå mot skattetrycket; kostnaden nämns.",
+      "tier": "core",
+      "approved": false
+    },
+    {
+      "id": "s-12",
+      "axis": "ekonomi",
+      "agreePole": "pos",
+      "text": "Företag ska själva få välja vilka som får gå vid uppsägningar, i stället för att följa turordning.",
+      "note": "Arbetsmarknad/anställningsskydd; 'turordning' förklaras i ordlistan.",
+      "tier": "core",
+      "approved": false
+    },
+    {
+      "id": "s-13",
+      "axis": "klimat",
+      "agreePole": "pos",
+      "text": "Sverige ska bygga ny kärnkraft, även om staten måste dela på kostnaden.",
+      "note": "Energi; kostnaden för staten nämns för balans.",
+      "tier": "core",
+      "approved": false
+    },
+    {
+      "id": "s-14",
+      "axis": "klimat",
+      "agreePole": "neg",
+      "text": "Mer skattepengar ska gå till tåg och kollektivtrafik i stället för till nya vägar.",
+      "note": "Prioritering i infrastrukturen.",
+      "tier": "core",
+      "approved": false
+    },
+    {
+      "id": "s-15",
+      "axis": "varderingar",
+      "agreePole": "neg",
+      "text": "Fler månader av föräldraledigheten ska vara reserverade för vardera föräldern.",
+      "note": "Jämställdhetspolitik mot familjens frihet att välja; 'reserverade månader' förklaras i ordlistan.",
+      "tier": "core",
+      "approved": false
+    },
+    {
+      "id": "s-16",
+      "axis": "varderingar",
+      "agreePole": "pos",
+      "text": "Skolan ska lägga mer fokus på ordning, disciplin och kunskap än i dag.",
+      "note": "Skola; traditionell kunskapssyn mot mer elevcentrerad.",
+      "tier": "core",
+      "approved": false
+    },
+    {
+      "id": "s-17",
+      "axis": "eu",
+      "agreePole": "neg",
+      "text": "Sverige ska byta kronan mot euron.",
+      "note": "EU-samarbete; tydlig sakfråga med tydliga partilinjer.",
+      "tier": "core",
+      "approved": false
+    },
+    {
+      "id": "s-18",
+      "axis": "forsvar",
+      "agreePole": "pos",
+      "text": "Sverige ska tillåta kärnvapen från allierade länder på svensk mark, även i fredstid.",
+      "note": "Försvar/Nato; källäget kan vara tunnare här, kontrollera vid positionering.",
+      "tier": "core",
+      "approved": false
+    },
+    {
+      "id": "s-19",
+      "axis": "migration",
+      "agreePole": "pos",
+      "text": "Det ska bli svårare att få svenskt medborgarskap, till exempel genom längre tid i landet.",
+      "note": "Medborgarskapskrav; exemplet gör det konkret utan siffror.",
+      "tier": "core",
+      "approved": false
+    },
+    {
+      "id": "s-20",
+      "axis": "lag",
+      "agreePole": "neg",
+      "text": "Unga som begår brott ska i första hand få vård och stöd, inte fängelse.",
+      "note": "Ungdomsbrott; förebygga mot straff.",
+      "tier": "core",
+      "approved": false
+    }
+  ],
+  "section": "politik – används för partimatchningen"
 }

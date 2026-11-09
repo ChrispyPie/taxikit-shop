@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "note": "Den politiska kompassen är separat från partimatchningen och påverkar aldrig matchningsprocenten.",
+  "axes": {
+    "x": {
+      "id": "econ",
+      "name": "Ekonomi",
+      "min": "Vänster (-2)",
+      "max": "Höger (+2)"
+    },
+    "y": {
+      "id": "auth",
+      "name": "Frihet–auktoritet",
+      "min": "Frihetlig (-2)",
+      "max": "Auktoritär (+2)"
+    }
+  },
+  "user": {
+    "fromValues": "x = snitt av econ-svaren i values.json (svar -2..2, teckenvänt om agreeDirection = left). y = snitt av auth-svaren (teckenvänt om agreeDirection = lib). Överhoppade frågor räknas inte.",
+    "fromPolitics": "Valfritt: samma mappning som för partierna, räknad på användarens svar på de politiska påståendena. Visas som en andra punkt så att man ser om ens allmänna värderingar och sakåsikter pekar åt samma håll."
+  },
+  "parties": {
+    "method": "Partierna har inga källor för de allmänna värderingsfrågorna. De placeras därför utifrån sina källbelagda positioner på de politiska påståendena (positions.json).",
+    "sign": "Bidrag = value om agreePole = pos, annars -value. Då pekar + alltid mot axelns posPole.",
+    "x": {
+      "axes": [
+        "ekonomi"
+      ],
+      "formula": "snitt av bidragen på ekonomi-påståendena",
+      "direction": "posPole (mer marknad) = höger (+)"
+    },
+    "y": {
+      "axes": [
+        "varderingar",
+        "lag",
+        "migration"
+      ],
+      "formula": "snitt av de tre axlarnas snitt (lika vikt per axel)",
+      "direction": "posPole (traditionellt / hårdare straff / stramare migration) = auktoritär (+)"
+    },
+    "excluded": {
+      "axes": [
+        "klimat",
+        "eu",
+        "forsvar"
+      ],
+      "why": "Passar inte tydligt på någon av de två kompassaxlarna."
+    },
+    "tiers": "Bara statements med tier 'core' används som standard, så att partiernas placering inte ändras när Djupdyk-frågor läggs till. Djupdyk kan räknas separat.",
+    "caveats": [
+      "Att räkna stramare migration som 'auktoritärt' är en förenkling och ska förklaras i appen.",
+      "Användaren mäts på allmänna värderingar, partierna på sakfrågor. Därför visas också användarens punkt från de politiska svaren."
+    ]
+  }
+}
