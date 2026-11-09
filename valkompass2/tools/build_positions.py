@@ -31,6 +31,7 @@ if __name__ == "__main__":
     cache = {}; errors = []
     for e in new:
         e.setdefault("reviewedByParty", False)
+        e.setdefault("accessed", __import__("datetime").date.today().isoformat())
         if e["value"] is None: continue
         err = check(e, cache)
         if err: errors.append((e["statementId"], err, e["url"]))
