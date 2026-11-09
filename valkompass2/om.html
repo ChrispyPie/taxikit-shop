@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Om testet – Valkompass 2.0</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <a class="skip" href="#om">Hoppa till innehållet</a>
+  <header class="top">
+    <a class="brand" href="./">Valkompass 2.0</a>
+    <nav aria-label="Huvudmeny"><a href="./">Till testet</a></nav>
+  </header>
+  <main id="om">
+    <section class="card">
+      <h1>Om testet</h1>
+      <p class="lead">Syftet är enkelt: hjälpa dig att se vad <strong>du</strong> tycker – inte vad vänner, flöden eller kommentarsfält har bestämt åt dig – och visa vad partierna faktiskt säger och röstar.</p>
+    </section>
+
+    <section class="card">
+      <h2>Så går testet till</h2>
+      <ol>
+        <li>Du gissar vilket parti du tror att du håller med mest (eller väljer "Vet inte"). Gissningen påverkar inte resultatet – den används bara för att visa om magkänslan stämde, och för att välja vilka frågor som kommer först.</li>
+        <li>Du svarar på politiska påståenden och några korta vardagsscenarier. Alla får samma frågor. De första tio är frågor där partiet du gissade på sticker ut mest; resten kommer i fast ordning.</li>
+        <li>Du svarar på ett separat värderingstest för den politiska kompassen. Det påverkar inte partimatchningen.</li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <h2>Så räknas matchningen</h2>
+      <p>Varje svar och varje partiposition ligger på en skala från −2 (Helt emot) till +2 (Helt för). För varje fråga räknas likheten som <strong>1 − |ditt svar − partiets svar| / 4</strong>. Samma svar ger 100 %, helt motsatta ger 0 %.</p>
+      <ul>
+        <li>Frågor du markerat som <strong>Viktig för mig</strong> räknas dubbelt.</li>
+        <li>Frågor du <strong>hoppat över</strong> räknas inte.</li>
+        <li>Om ett parti <strong>inte tagit ställning</strong> i en fråga (källa saknas) räknas frågan inte för just det partiet. Partiet får alltså varken plus eller minus. Det står i resultatet hur många sådana frågor det gäller.</li>
+        <li>Scenarierna räknas i matchningen bara när partierna har en källbelagd position. Just nu används de för din placering på axlarna och i kompassen.</li>
+      </ul>
+      <p>Vi testar automatiskt att varje parti som svarar med sina egna positioner får 100 % med sig självt och hamnar först.</p>
+    </section>
+
+    <section class="card" id="kompass">
+      <h2>Den politiska kompassen</h2>
+      <p>Kompassen har två axlar: <strong>vänster–höger</strong> i ekonomi och <strong>frihetlig–auktoritär</strong>. Din punkt ◆ kommer från värderingstestet. Partierna har inga svar på värderingsfrågorna, så de placeras utifrån sina källbelagda positioner: ekonomifrågorna ger vänster–höger, och snittet av värderings-, lag och ordnings- samt migrationsfrågorna ger frihetlig–auktoritär. Därför visas också en punkt ◯ räknad på samma sätt från dina egna politiska svar.</p>
+      <p>Att räkna stramare migration eller hårdare straff som "auktoritärt" är en förenkling. Se kompassen som en ungefärlig karta, inte en dom.</p>
+    </section>
+
+    <section class="card">
+      <h2>Neutralitet</h2>
+      <ul>
+        <li>Testet är inte knutet till något parti eller någon organisation.</li>
+        <li>Varje partiposition har en källa: partiprogram, valmanifest, officiella uttalanden eller hur partiet röstat i riksdagen. Citatet är kontrollerat ordagrant mot källan.</li>
+        <li>Varje position har en säkerhetsnivå: <span class="badge hög">hög</span> <span class="badge medel">medel</span> <span class="badge låg">låg</span>. Låg betyder att tolkningen är osäker, till exempel för att partiet inte sagt något direkt.</li>
+        <li>Påståendena är formulerade så att hälften pekar åt varje håll på varje område, så att det inte lönar sig att bara hålla med.</li>
+        <li>Partiernas ordning slumpas, och alla partier visas med samma vikt och färg.</li>
+        <li>"Granskat av partiet" visas bara när partiet självt har bekräftat sina positioner. Just nu är inga positioner granskade av partierna.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Källor och data</h2>
+      <p>Alla frågor och partipositioner finns öppet som JSON-filer: <a href="data/statements.json">påståenden</a>, <a href="data/positions.json">partipositioner med källor</a>, <a href="data/values.json">värderingsfrågor</a> och <a href="data/compass.json">kompassens regler</a>. Hittar du ett fel? Hör av dig, så rättar vi.</p>
+      <p>Integritet: inga konton, inga cookies för spårning och ingen statistik. Dina svar sparas bara i din egen webbläsare (localStorage) så att du kan fortsätta om du laddar om. Delar du ditt resultat ligger svaren i själva länken.</p>
+    </section>
+
+    <section class="card">
+      <h2>Kontakt</h2>
+      <p>Kontaktuppgifter kommer här. <span class="muted small">(TODO: lägg in e-post eller formulär.)</span></p>
+    </section>
+
+    <section class="card kofi">
+      <p><strong>Vill du stödja arbetet?</strong> Testet är gratis och utan reklam. Ett kaffe hjälper oss att hålla källorna uppdaterade.</p>
+      <!-- TODO: byt till Christians riktiga Ko-fi-sida när kontot finns (samma länk finns i js/app.js). -->
+      <a class="btn" href="https://ko-fi.com/TODO-valkompass" target="_blank" rel="noopener noreferrer">☕ Stöd via Ko-fi</a>
+      <p class="small muted">Testlänk – Ko-fi-kontot är inte skapat än (TODO).</p>
+    </section>
+  </main>
+</body>
+</html>
