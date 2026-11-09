@@ -5,9 +5,17 @@ import json, re, sys, subprocess, html
 from bs4 import BeautifulSoup
 
 def fetch(url):
-    r = subprocess.run(["curl","-sL","-A","Mozilla/5.0","-w","\n%{http_code}","--max-time","30",url],capture_output=True,text=True)
+    r = subprocess.run(["curl","-sL","-A","Mozilla/5.0","-w","\n%{http_code}","--max-time","30",url],capture_output=True,text=True,errors="replace")
     body, code = r.stdout.rsplit("\n",1)
     return int(code), body
+
+def pdftext(url):
+    import tempfile, os
+    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as t: path = t.name
+    subprocess.run(["curl","-sL","-A","Mozilla/5.0","--max-time","60","-o",path,url])
+    txt = subprocess.run(["pdftotext",path,"-"],capture_output=True,text=True).stdout
+    os.unlink(path)
+    return re.sub(r"-\n(?=[a-zåäö])","",txt)
 
 def norm(s):
     s = html.unescape(s).replace("\u00a0"," ").replace("’","'").replace("”",'"').replace("“",'"')
@@ -18,7 +26,10 @@ def check(entry, cache):
     if url not in cache: cache[url] = fetch(url)
     code, body = cache[url]
     if code != 200: return f"HTTP {code}"
-    text = norm(BeautifulSoup(body,"html.parser").get_text(" "))
+    if url.lower().endswith(".pdf"):
+        text = norm(pdftext(url))
+    else:
+        text = norm(BeautifulSoup(body,"html.parser").get_text(" "))
     if norm(entry["quote"]) not in text: return "citat hittades inte"
     if not entry.get("date"):
         m = re.search(r'"dateModified":"(\d{4}-\d{2}-\d{2})', body) or re.search(r'"datePublished":"(\d{4}-\d{2}-\d{2})', body)
