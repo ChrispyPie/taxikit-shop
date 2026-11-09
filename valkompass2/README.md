@@ -41,4 +41,5 @@ Ny version byggd från grunden. Gamla `valkompass/` och `valkompass-old/` är or
 - `build_positions.py positions.json nya.json` – lägger in ett partis positioner. Varje källa hämtas och citatet måste finnas ordagrant, annars stoppas inläggningen.
 - `omr.py <betänkande-URL>` – röster per parti för alla huvudvoteringar i ett betänkande (data.riksdagen.se).
 - `punkt.py <betänkande-URL> <del-av-namn>` – visar vad en viss votering gällde.
+- `quotes.py <betänkande-URL> [del-av-URL ...]` – visar den ordagranna raden "Utskottets förslag mot reservation …" för varje votering (används som citat).
 - `sanity.py` – kontrollerar att varje partis egna svar ger 100 % för just det partiet.
