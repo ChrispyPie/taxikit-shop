@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "Alla s-01–s-20 och sc-01–sc-06 godkända av Christian 2026-11-09",
+  "status": "s-01–s-20 och sc-01–sc-06 godkända av Christian 2026-11-09; s-21–s-30 UTKAST",
   "note": "agreePole anger vilken pol på axeln ett 'Helt för' pekar mot: 'neg' eller 'pos' (se axes.json). Målet är hälften av varje. tier: 'core' = grundtestet (~30 st, alla får samma), 'deep' = Djupdyk-läget (valfritt, totalt 60–100 st). approved: godkänt av Christian. type: 'statement' (påstående, Helt emot..Helt för) eller 'scenario' (kort berättelse, 5-gradig skala mellan leftLabel och rightLabel; rightPole anger vilken axelpol högerändan pekar mot, så att sidan varierar och inget mönster syns). Scenarier räknas in i axelprofilen och i partimatchningen bara när partiet har en källbelagd position på frågan.",
   "statements": [
     {
@@ -280,6 +280,106 @@
       "rightLabel": "Stöd och vård räcker",
       "rightPole": "neg",
       "note": "Ungdomsbrott; straff mot stöd."
+    },
+    {
+      "id": "s-21",
+      "axis": "varderingar",
+      "agreePole": "pos",
+      "text": "Staten ska ge stöd till familjer där en förälder väljer att vara hemma med små barn.",
+      "note": "Familjepolitik; hemmaförälder mot förskola och två inkomster.",
+      "tier": "core",
+      "approved": false,
+      "type": "statement"
+    },
+    {
+      "id": "s-22",
+      "axis": "varderingar",
+      "agreePole": "neg",
+      "text": "Det är bra att Sverige blir ett land med många olika kulturer och religioner.",
+      "note": "Mångfald mot gemensam kultur; handlar om värdering, inte om antal invandrare.",
+      "tier": "core",
+      "approved": false,
+      "type": "statement"
+    },
+    {
+      "id": "s-23",
+      "axis": "eu",
+      "agreePole": "pos",
+      "text": "EU:s budget ska bli mindre, även om stödet till fattigare medlemsländer då minskar.",
+      "note": "Mindre EU; kostnaden för andra länder nämns.",
+      "tier": "core",
+      "approved": false,
+      "type": "statement"
+    },
+    {
+      "id": "s-24",
+      "axis": "eu",
+      "agreePole": "neg",
+      "text": "EU ska få större makt att stoppa medlemsländer som bryter mot demokrati och rättsstat.",
+      "note": "Överstatlig makt för demokrati; mer EU-samarbete.",
+      "tier": "core",
+      "approved": false,
+      "type": "statement"
+    },
+    {
+      "id": "s-25",
+      "axis": "forsvar",
+      "agreePole": "pos",
+      "text": "Alla unga, både killar och tjejer, ska göra värnplikt.",
+      "note": "Allmän värnplikt; tydlig och konkret.",
+      "tier": "core",
+      "approved": false,
+      "type": "statement"
+    },
+    {
+      "id": "s-26",
+      "axis": "forsvar",
+      "agreePole": "neg",
+      "text": "Sverige ska satsa mer på diplomati och fredsarbete än på vapen.",
+      "note": "Prioritering fred/diplomati mot militär upprustning.",
+      "tier": "core",
+      "approved": false,
+      "type": "statement"
+    },
+    {
+      "id": "s-27",
+      "axis": "migration",
+      "agreePole": "neg",
+      "text": "Den som har fått skydd i Sverige ska kunna ta hit sin make eller maka och sina barn.",
+      "note": "Anhöriginvandring; konkret utan facktermer.",
+      "tier": "core",
+      "approved": false,
+      "type": "statement"
+    },
+    {
+      "id": "s-28",
+      "axis": "lag",
+      "agreePole": "pos",
+      "text": "Polisen ska få visitera personer i områden med mycket gängvåld, även utan misstanke om brott.",
+      "note": "Visitationszoner; ordet undviks, beskrivs konkret.",
+      "tier": "core",
+      "approved": false,
+      "type": "statement"
+    },
+    {
+      "id": "s-29",
+      "axis": "klimat",
+      "agreePole": "pos",
+      "text": "Skatten på bensin och diesel ska sänkas, även om utsläppen då kan öka.",
+      "note": "Drivmedelsskatt; följden för utsläppen nämns.",
+      "tier": "core",
+      "approved": false,
+      "type": "statement"
+    },
+    {
+      "id": "s-30",
+      "axis": "ekonomi",
+      "agreePole": "neg",
+      "text": "Fler hyresrätter ska byggas av kommunala bostadsbolag i stället för av privata företag.",
+      "note": "Bostad; offentligt mot privat byggande.",
+      "tier": "core",
+      "approved": false,
+      "type": "statement"
     }
   ],
   "section": "politik – används för partimatchningen"
