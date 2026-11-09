@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "s-01–s-10 godkända av Christian 2026-11-09; s-11–s-20 UTKAST",
+  "status": "s-01–s-20 godkända av Christian 2026-11-09; scenarier sc-01–sc-06 UTKAST",
   "note": "agreePole anger vilken pol på axeln ett 'Helt för' pekar mot: 'neg' eller 'pos' (se axes.json). Målet är hälften av varje. tier: 'core' = grundtestet (~30 st, alla får samma), 'deep' = Djupdyk-läget (valfritt, totalt 60–100 st). approved: godkänt av Christian. type: 'statement' (påstående, Helt emot..Helt för) eller 'scenario' (kort berättelse, 5-gradig skala mellan leftLabel och rightLabel; rightPole anger vilken axelpol högerändan pekar mot, så att sidan varierar och inget mönster syns). Scenarier räknas in i axelprofilen och i partimatchningen bara när partiet har en källbelagd position på frågan.",
   "statements": [
     {
@@ -110,7 +110,7 @@
       "text": "Arbetslösa och sjuka ska få högre ersättning, även om det kräver högre skatter.",
       "note": "Välfärdens nivå mot skattetrycket; kostnaden nämns.",
       "tier": "core",
-      "approved": false,
+      "approved": true,
       "type": "statement"
     },
     {
@@ -120,7 +120,7 @@
       "text": "Företag ska själva få välja vilka som får gå vid uppsägningar, i stället för att följa turordning.",
       "note": "Arbetsmarknad/anställningsskydd; 'turordning' förklaras i ordlistan.",
       "tier": "core",
-      "approved": false,
+      "approved": true,
       "type": "statement"
     },
     {
@@ -130,7 +130,7 @@
       "text": "Sverige ska bygga ny kärnkraft, även om staten måste dela på kostnaden.",
       "note": "Energi; kostnaden för staten nämns för balans.",
       "tier": "core",
-      "approved": false,
+      "approved": true,
       "type": "statement"
     },
     {
@@ -140,7 +140,7 @@
       "text": "Mer skattepengar ska gå till tåg och kollektivtrafik i stället för till nya vägar.",
       "note": "Prioritering i infrastrukturen.",
       "tier": "core",
-      "approved": false,
+      "approved": true,
       "type": "statement"
     },
     {
@@ -150,7 +150,7 @@
       "text": "Fler månader av föräldraledigheten ska vara reserverade för vardera föräldern.",
       "note": "Jämställdhetspolitik mot familjens frihet att välja; 'reserverade månader' förklaras i ordlistan.",
       "tier": "core",
-      "approved": false,
+      "approved": true,
       "type": "statement"
     },
     {
@@ -160,7 +160,7 @@
       "text": "Skolan ska lägga mer fokus på ordning, disciplin och kunskap än i dag.",
       "note": "Skola; traditionell kunskapssyn mot mer elevcentrerad.",
       "tier": "core",
-      "approved": false,
+      "approved": true,
       "type": "statement"
     },
     {
@@ -170,7 +170,7 @@
       "text": "Sverige ska byta kronan mot euron.",
       "note": "EU-samarbete; tydlig sakfråga med tydliga partilinjer.",
       "tier": "core",
-      "approved": false,
+      "approved": true,
       "type": "statement"
     },
     {
@@ -180,7 +180,7 @@
       "text": "Sverige ska tillåta kärnvapen från allierade länder på svensk mark, även i fredstid.",
       "note": "Försvar/Nato; källäget kan vara tunnare här, kontrollera vid positionering.",
       "tier": "core",
-      "approved": false,
+      "approved": true,
       "type": "statement"
     },
     {
@@ -190,7 +190,7 @@
       "text": "Det ska bli svårare att få svenskt medborgarskap, till exempel genom längre tid i landet.",
       "note": "Medborgarskapskrav; exemplet gör det konkret utan siffror.",
       "tier": "core",
-      "approved": false,
+      "approved": true,
       "type": "statement"
     },
     {
@@ -200,7 +200,7 @@
       "text": "Unga som begår brott ska i första hand få vård och stöd, inte fängelse.",
       "note": "Ungdomsbrott; förebygga mot straff.",
       "tier": "core",
-      "approved": false,
+      "approved": true,
       "type": "statement"
     },
     {
