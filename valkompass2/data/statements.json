@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "s-01–s-20, s-23, s-24, s-26–s-30 och sc-01–sc-06 godkända av Christian 2026-11-09. s-21, s-22 och s-25 flyttade till values.json (v-09–v-11) 2026-11-09. s-31–s-35 godkända av Christian 2026-11-09. s-36 ligger i Djupdyk (approved: false). s-37 (lämna EU) och s-38 (burka/niqab) godkända 2026-11-09; s-23 flyttad till Djupdyk; s-39 Djupdyk-utkast.",
+  "status": "s-01–s-20, s-23, s-24, s-26–s-30 och sc-01–sc-06 godkända av Christian 2026-11-09. s-21, s-22 och s-25 flyttade till values.json (v-09–v-11) 2026-11-09. s-31–s-35 godkända av Christian 2026-11-09. s-36 ligger i Djupdyk (approved: false). s-37 (lämna EU) och s-38 (burka/niqab) godkända 2026-11-09; s-23 flyttad till Djupdyk; s-39 Djupdyk-utkast. 2026-11-09 (2): s-07 omformulerad till K1 (eget 2045-mål), s-40 (straffbarhet 14), s-41 (republik) och s-42 (juridiskt kön från 16) godkända i grundtestet. s-43–s-46 Djupdyk-utkast. s-08 och s-30 flyttade till Djupdyk för balans (34 påståenden, 17/17).",
   "note": "agreePole anger vilken pol på axeln ett 'Helt för' pekar mot: 'neg' eller 'pos' (se axes.json). Målet är hälften av varje. tier: 'core' = grundtestet (~30 st, alla får samma), 'deep' = Djupdyk-läget (valfritt, totalt 60–100 st). approved: godkänt av Christian. type: 'statement' (påstående, Helt emot..Helt för) eller 'scenario' (kort berättelse, 5-gradig skala mellan leftLabel och rightLabel; rightPole anger vilken axelpol högerändan pekar mot, så att sidan varierar och inget mönster syns). Scenarier räknas in i axelprofilen och i partimatchningen bara när partiet har en källbelagd position på frågan.",
   "statements": [
     {
@@ -67,8 +67,8 @@
       "id": "s-07",
       "axis": "klimat",
       "agreePole": "neg",
-      "text": "Sverige ska minska utsläppen snabbare än andra länder, även om bensin och el blir dyrare.",
-      "note": "Klimattakt mot kostnad för hushållen.",
+      "text": "Sverige ska behålla sitt eget mål om nettonollutsläpp senast 2045, även om EU:s mål är 2050.",
+      "note": "Klimatmål (K1, ersätter tidigare s-07 om att minska utsläppen snabbare än andra länder). KD vill ha samma mål som EU, L vill sätta målen på EU-nivå; C (2040) och V (2035) vill ha strängare mål.",
       "tier": "core",
       "approved": true,
       "type": "statement"
@@ -78,8 +78,8 @@
       "axis": "varderingar",
       "agreePole": "pos",
       "text": "Den som flyttar till Sverige ska förväntas anpassa sig till svenska normer och värderingar.",
-      "note": "Assimilation mot mångfald; handlar om förväntningar, inte om lagar.",
-      "tier": "core",
+      "note": "Assimilation mot mångfald; handlar om förväntningar, inte om lagar. Flyttad till Djupdyk 2026-11-09: Svagast källäge i grundtestet: 3 av 8 partier saknas (C, V, MP) och spridning bara 1 bland övriga. Överlappar delvis värderingsfrågor om integration.",
+      "tier": "deep",
       "approved": true,
       "type": "statement"
     },
@@ -268,8 +268,8 @@
       "axis": "ekonomi",
       "agreePole": "neg",
       "text": "Fler hyresrätter ska byggas av kommunala bostadsbolag i stället för av privata företag.",
-      "note": "Bostad; offentligt mot privat byggande.",
-      "tier": "core",
+      "note": "Bostad; offentligt mot privat byggande. Flyttad till Djupdyk 2026-11-09: SD saknas och 3 källor är låg; ekonomi-axeln har kvar s-01, s-02, s-11, s-12.",
+      "tier": "deep",
       "approved": true,
       "type": "statement"
     },
@@ -359,6 +359,76 @@
       "agreePole": "pos",
       "text": "Barn i förskolan och lågstadiet ska inte få bära slöja.",
       "note": "Djupdyk-utkast. S saknar källa.",
+      "tier": "deep",
+      "approved": false,
+      "type": "statement"
+    },
+    {
+      "id": "s-40",
+      "axis": "lag",
+      "agreePole": "pos",
+      "text": "Barn som fyllt 14 år ska kunna dömas till fängelse för de allvarligaste brotten.",
+      "note": "Åldersgräns (A1). Riksdagen sänkte straffbarhetsåldern till 14 år för de allvarligaste brotten 2026-08-13 (JuU41); C, V och MP röstade nej.",
+      "tier": "core",
+      "approved": true,
+      "type": "statement"
+    },
+    {
+      "id": "s-41",
+      "axis": "varderingar",
+      "agreePole": "neg",
+      "text": "Sverige ska avskaffa kungahuset och bli en republik.",
+      "note": "Statsskick (M1). S har republik i partiprogrammet men driver inte frågan; V vill avskaffa monarkin; MP avstod i riksdagen.",
+      "tier": "core",
+      "approved": true,
+      "type": "statement"
+    },
+    {
+      "id": "s-42",
+      "axis": "varderingar",
+      "agreePole": "neg",
+      "text": "Det ska vara möjligt att byta juridiskt kön från 16 års ålder, utan diagnos.",
+      "note": "HBTQ (H1). Nuvarande lag från riksdagsbeslut 2024-04-17 (SoU22); SD och KD röstade nej, en avvikare var i S och M.",
+      "tier": "core",
+      "approved": true,
+      "type": "statement"
+    },
+    {
+      "id": "s-43",
+      "axis": "varderingar",
+      "agreePole": "pos",
+      "text": "Barn under 15 år ska inte få ha konton på sociala medier.",
+      "note": "Djupdyk-utkast (A2). Sex partier säger ja till en lagstadgad gräns; skiljer partierna lite.",
+      "tier": "deep",
+      "approved": false,
+      "type": "statement"
+    },
+    {
+      "id": "s-44",
+      "axis": "varderingar",
+      "agreePole": "neg",
+      "text": "Rösträttsåldern ska sänkas till 16 år.",
+      "note": "Djupdyk-utkast (A3). Riksdagen avslog motionerna i KU27 2025/26; V reserverade sig, MP avstod.",
+      "tier": "deep",
+      "approved": false,
+      "type": "statement"
+    },
+    {
+      "id": "s-45",
+      "axis": "varderingar",
+      "agreePole": "pos",
+      "text": "Staten ska bygga psykiatrihem för personer som behöver långvarig psykiatrisk vård, en modern sorts mentalsjukhus.",
+      "note": "Djupdyk-utkast (P1). SD:s förslag 2026; C emot. Övriga partier saknar källa.",
+      "tier": "deep",
+      "approved": false,
+      "type": "statement"
+    },
+    {
+      "id": "s-46",
+      "axis": "lag",
+      "agreePole": "pos",
+      "text": "Det högsta straffet för de grövsta ekonomiska brotten ska höjas från 6 till 10 års fängelse.",
+      "note": "Djupdyk-utkast (ekobrott). S-förslag; övriga partier saknar direkt källa.",
       "tier": "deep",
       "approved": false,
       "type": "statement"
