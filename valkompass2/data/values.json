@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "Alla v-01–v-08 godkända av Christian 2026-11-09",
+  "status": "v-01–v-08 godkända av Christian 2026-11-09. v-09–v-11 flyttade från s-21, s-22, s-25 2026-11-09 (godkänt av Christian); samma text som förut.",
   "section": "värderingar – används ENDAST för den politiska kompassen, inte för partimatchningen",
   "note": "axis: econ (x) eller auth (y). agreeDirection anger vart 'Helt för' flyttar användaren: left/right på econ, lib/auth på auth. tier: 'core' eller 'deep' (Djupdyk).",
   "statements": [
@@ -75,6 +75,36 @@
       "note": "Rättssäkerhet före kontroll.",
       "tier": "core",
       "approved": true
+    },
+    {
+      "id": "v-09",
+      "axis": "auth",
+      "agreeDirection": "auth",
+      "text": "Staten ska ge stöd till familjer där en förälder väljer att vara hemma med små barn.",
+      "note": "Familj: hemmaförälder och traditionell familj mot förskola och två inkomster. Tolkas som traditionellt/auktoritärt håll. Flyttad från s-21 2026-11-09 (Christians beslut).",
+      "tier": "core",
+      "approved": true,
+      "movedFrom": "s-21"
+    },
+    {
+      "id": "v-10",
+      "axis": "auth",
+      "agreeDirection": "lib",
+      "text": "Det är bra att Sverige blir ett land med många olika kulturer och religioner.",
+      "note": "Mångkultur mot gemensam nationell kultur. 'Helt för' = frihetligt/öppet håll. Flyttad från s-22 2026-11-09 (Christians beslut).",
+      "tier": "core",
+      "approved": true,
+      "movedFrom": "s-22"
+    },
+    {
+      "id": "v-11",
+      "axis": "auth",
+      "agreeDirection": "auth",
+      "text": "Alla unga, både killar och tjejer, ska göra värnplikt.",
+      "note": "Plikt för alla mot frivillighet. 'Helt för' = auktoritärt håll (mer statlig plikt). Flyttad från s-25 2026-11-09 (Christians beslut).",
+      "tier": "core",
+      "approved": true,
+      "movedFrom": "s-25"
     }
   ]
 }

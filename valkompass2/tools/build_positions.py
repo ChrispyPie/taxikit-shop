@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Verifierar och lägger in partipositioner i valkompass2/data/positions.json.
+Användning: build_positions.py positions.json ny.json [--merge]  (--merge = byt bara ut de parti+påstående som finns i ny.json).
 Varje källa hämtas, citatet måste finnas ordagrant (efter normalisering av blanksteg) och datum läses från sidan när möjligt."""
 import json, re, sys, subprocess, html
 from bs4 import BeautifulSoup
@@ -55,8 +56,13 @@ if __name__ == "__main__":
     if errors:
         for x in errors: print("FEL", *x)
         sys.exit(1)
-    party = new[0]["party"]
-    pos["positions"] = [p for p in pos["positions"] if p["party"] != party] + new
+    if "--merge" in sys.argv:
+        # Byt bara ut de (parti, påstående) som finns i den nya filen; övriga positioner lämnas orörda.
+        keys = {(e["party"], e["statementId"]) for e in new}
+        pos["positions"] = [p for p in pos["positions"] if (p["party"], p["statementId"]) not in keys] + new
+    else:
+        party = new[0]["party"]
+        pos["positions"] = [p for p in pos["positions"] if p["party"] != party] + new
     json.dump(pos, open(posfile,"w"), ensure_ascii=False, indent=2); open(posfile,"a").write("\n")
     from collections import Counter
-    print(party, len(new), Counter(e["confidence"] for e in new))
+    print(",".join(sorted({e["party"] for e in new})), len(new), Counter(e["confidence"] for e in new))
