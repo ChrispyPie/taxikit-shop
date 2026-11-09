@@ -33,6 +33,12 @@ def check(entry, cache):
     if norm(entry["quote"]) not in text: return "citat hittades inte"
     if not entry.get("date"):
         m = re.search(r'"dateModified":"(\d{4}-\d{2}-\d{2})', body) or re.search(r'"datePublished":"(\d{4}-\d{2}-\d{2})', body)
+        if not m:
+            mon = {"januari":1,"februari":2,"mars":3,"april":4,"maj":5,"juni":6,"juli":7,"augusti":8,"september":9,"oktober":10,"november":11,"december":12}
+            sv = re.search(r"(?:Uppdaterad|Publicerad|Senast uppdaterad)[:\s]+(\d{1,2}) (" + "|".join(mon) + r") (\d{4})", text)
+            if sv:
+                entry["date"] = f"{sv.group(3)}-{mon[sv.group(2)]:02d}-{int(sv.group(1)):02d}"
+                return None
         entry["date"] = m.group(1) if m else None
     return None
 
