@@ -18,6 +18,10 @@ Ny version byggd från grunden. Gamla `valkompass/` och `valkompass-old/` är or
 2. **Politisk kompass** (vänster–höger × frihetlig–auktoritär) – allmänna värderingsfrågor (`v-`) i `values.json`, inte knutna till svensk politik. Påverkar **aldrig** matchningsprocenten.
    Partierna placeras på kompassen utifrån sina positioner på de politiska påståendena: ekonomi → x; värderingar, lag och ordning, migration → y. Se `compass.json`.
 
+## Frågetyper (type)
+- `statement` – påstående, svar Helt emot … Helt för.
+- `scenario` – kort vardaglig berättelse (2–3 meningar). Man svarar på en 5-gradig skala mellan två tydliga ändar (`leftLabel`/`rightLabel`). `rightPole` visar vilken axelpol högerändan pekar mot; den varierar så att inget mönster syns. Räknas i partimatchningen bara när partiet har en källbelagd position.
+
 ## Nivåer (tier)
 - `core` – grundtestet, ~30 politiska påståenden plus kompassfrågorna. Alla får samma; de första 10 är där valt parti har sin tydligaste profil.
 - `deep` – framtida valfritt **Djupdyk**-läge med fler påståenden (totalt 60–100). Läggs till med `"tier": "deep"` utan att grundtestet eller kompassplaceringen ändras.
