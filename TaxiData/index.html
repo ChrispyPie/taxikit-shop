@@ -6,12 +6,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaxiData</title>
-  <script src="tema.js?v=20261026tm1"></script>
+  <script src="tema.js?v=20261110hl1"></script>
+  <script src="helskarm.js?v=20261110hl1"></script>
   <script src="enhet.js?v=20261029d"></script>
   <script src="delad-enhet.js?v=20261110de1"></script>
   <script src="namn.js?v=20261028nm1"></script>
-  <link rel="stylesheet" href="style.css?v=20261110pg5">
-  <link rel="stylesheet" href="tema.css?v=20261104sh1">
+  <link rel="stylesheet" href="style.css?v=20261110hl1">
+  <link rel="stylesheet" href="tema.css?v=20261110hl1">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -30,6 +31,7 @@
     .hl-prev.c2 { grid-template-columns: repeat(2, 1fr); } .hl-prev.c2 i { height: 12px; }
     .hl-prev.c3 { grid-template-columns: repeat(3, 1fr); }
     .hl-prev.cl { grid-template-columns: 1fr; } .hl-prev.cl i { height: 5px; }
+    .hl-prev.cf { grid-template-columns: repeat(4, 1fr); } .hl-prev.cf i { height: 7px; }
     .th-prev { margin-left: auto; width: 34px; height: 22px; border-radius: 5px; border: 1px solid var(--border); flex-shrink: 0; }
     .th-prev.tl { background: #e8f1f8; box-shadow: inset 0 -8px 0 #ffffff; }
     .th-prev.td { background: #0f1720; box-shadow: inset 0 -8px 0 #1a2430; }
@@ -156,7 +158,7 @@
   <script src="demo.js?v=am1q"></script>
   <script src="swipe-back.js?v=20261106sb2"></script>
   <script src="view-state.js?v=20261107lazy1"></script>
-  <script src="lazy-views.js?v=20261108stations1"></script>
+  <script src="lazy-views.js?v=20261110hl1"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -427,20 +429,24 @@
     }
 
     var toastTimer = null;
-    // Startskärm: 2 i bredd, 3 i bredd eller lista. Sparas i telefonen och gäller direkt.
+    // Startskärm: fyll bredd (osatt/auto på stor skärm), 2 i bredd, 3 i bredd eller lista. Sparas i telefonen.
     var HOME_LAYOUTS = [
+      { v: 'fyll', label: 'Fyll bredd (stor skärm)', prev: 'cf', n: 8 },
       { v: '2', label: 'Stora rutor (2 i bredd)', prev: 'c2', n: 4 },
       { v: '3', label: 'Mellan (3 i bredd)', prev: 'c3', n: 6 },
       { v: 'lista', label: 'Lista', prev: 'cl', n: 4 }
     ];
     function getHomeLayout() {
+      if (window.TEMA && TEMA.getLayout) return TEMA.getLayout();
       var v = null; try { v = localStorage.getItem('taxi_home_layout'); } catch (e) {}
       if (v === '2' || v === '3' || v === 'lista') return v;
-      return window.matchMedia('(max-width: 600px)').matches ? '3' : '';   // inget val: telefon = 3 i bredd
+      return 'fyll';
     }
     function setHomeLayout(v) {
+      if (window.TEMA && TEMA.setLayout) { TEMA.setLayout(v); return; }
       try { localStorage.setItem('taxi_home_layout', v); } catch (e) {}
-      document.documentElement.setAttribute('data-home', v);
+      if (v === '2' || v === '3' || v === 'lista') document.documentElement.setAttribute('data-home', v);
+      else document.documentElement.removeAttribute('data-home');
     }
     function renderHomeLayoutSetting(box) {
       var cur = getHomeLayout(), h = '<div class="section"><h3 style="margin-top:0">Startskärm</h3>' +

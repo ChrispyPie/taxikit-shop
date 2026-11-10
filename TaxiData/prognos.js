@@ -1123,54 +1123,11 @@
   function isLand() {
     return !!(window.matchMedia && window.matchMedia('(orientation: landscape) and (min-width: 640px)').matches);
   }
-  function fsElement() {
-    return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || null;
-  }
-  function requestLandFs() {
-    var el = document.documentElement;
-    var fn = el.requestFullscreen || el.webkitRequestFullscreen || el.webkitRequestFullScreen || el.msRequestFullscreen;
-    if (!fn) return Promise.resolve(false);
-    try {
-      return Promise.resolve(fn.call(el, { navigationUI: 'hide' })).then(function () { return true; }).catch(function () { return false; });
-    } catch (e) { return Promise.resolve(false); }
-  }
-  function exitLandFs() {
-    if (!fsElement()) return Promise.resolve();
-    var fn = document.exitFullscreen || document.webkitExitFullscreen || document.webkitCancelFullScreen || document.msExitFullscreen;
-    if (!fn) return Promise.resolve();
-    try { return Promise.resolve(fn.call(document)).catch(function () {}); } catch (e) { return Promise.resolve(); }
-  }
-  function syncLandFsBtn() {
-    var btn = document.querySelector('.pg-land-fs-btn');
-    if (!btn) return;
-    var on = !!st.landFs;
-    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-    btn.setAttribute('aria-label', on ? 'Avsluta helskärm' : 'Helskärm');
-    btn.title = on ? 'Avsluta helskärm' : 'Helskärm';
-    btn.classList.toggle('on', on);
-  }
-  function setLandFs(on) {
-    st.landFs = !!on;
-    document.body.classList.toggle('pg-land-fs', st.landFs);
-    syncLandFsBtn();
-    if (st.el && isLand()) settleLandLayout();
-  }
-  function toggleLandFs() {
-    if (st.landFs) {
-      exitLandFs().then(function () { setLandFs(false); });
-    } else {
-      setLandFs(true);
-      requestLandFs();
-    }
-  }
-  function onFsChange() {
-    var inFs = !!fsElement();
-    if (!inFs && st.landFs) setLandFs(false);
-    else if (inFs && !st.landFs) setLandFs(true);
-    else if (st.el && isLand()) settleLandLayout();
-  }
-  document.addEventListener('fullscreenchange', onFsChange);
-  document.addEventListener('webkitfullscreenchange', onFsChange);
+  // Helskärm styrs globalt av helskarm.js. I liggande prognos rullas rutnätet
+  // längst ner när helskärm slås på (samma beteende som tidigare).
+  P.onFullscreen = function (on) {
+    if (on && st.el && isLand()) settleLandLayout();
+  };
   function relayoutFly() {
     if (!st.el) return;
     if (flyLayTimer) cancelAnimationFrame(flyLayTimer);
@@ -1189,13 +1146,6 @@
   window.addEventListener('resize', relayoutFly);
   if (window.visualViewport) window.visualViewport.addEventListener('resize', relayoutFly);
   document.addEventListener('click', function (e) {
-    var fsBtn = e.target.closest && e.target.closest('[data-pg-land-fs]');
-    if (fsBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleLandFs();
-      return;
-    }
     var btn = e.target.closest && e.target.closest('[data-pg-fly]');
     if (btn) {
       e.preventDefault();
@@ -1236,7 +1186,7 @@
     var colg = '<colgroup><col class="pg-land-col-lab">';
     slotKeys.forEach(function () { colg += '<col class="pg-land-col-slot">'; });
     colg += '</colgroup>';
-    var html = '<div class="pg-land-shell"><button type="button" class="pg-land-fs-btn" data-pg-land-fs aria-pressed="false" aria-label="Helskärm" title="Helskärm">⛶</button>' +
+    var html = '<div class="pg-land-shell">' +
       '<div class="pg-scroll pg-scroll-land"><table class="pg-table pg-table-land' + (showFly ? ' pg-table-fly' : '') + '">' + colg + '<thead>';
     if (showFly) {
       html += '<tr class="pg-land-fly"><th class="pg-land-corner" scope="row">Flyg</th>';
@@ -1892,7 +1842,8 @@
         (st.zoneTab === FLIGHT_ZONE ? ' <span class="pg-n pg-c-saker pg-fly">1</span> försenat flyg' : '') + '</div>';
       body += renderZoneTabs();
       body += renderTimeline();
-      body += renderMorgonTeaser();
+      // Nedre Morgonprognos-teasern (renderMorgonTeaser) visas inte: den duplicerade
+      // fliken Morgon högst upp. Funktionen är kvar så att den enkelt kan slås på igen.
     }
 
     st._land = isLand();
@@ -1907,11 +1858,8 @@
     };
     bindPop(st.el);
     if (st._land) {
-      if (st.landFs) document.body.classList.add('pg-land-fs');
       settleLandLayout();
-      syncLandFsBtn();
     } else {
-      if (st.landFs) { exitLandFs(); setLandFs(false); }
       clearLandPin(st.el);
       fitDiagHead(st.el);
     }
@@ -2192,12 +2140,11 @@
   P.refresh = function () { if (onPage()) return refresh(); };
 
   P.stop = function () {
-    if (st.landFs) { exitLandFs(); setLandFs(false); }
+    // Lämna inte helskärm: den är global för appen och styrs av helskarm.js.
     clearTimeout(st._landSettle);
     if (st.el) clearLandPin(st.el);
     document.body.classList.remove('pg-open');
     document.body.classList.remove('pg-land');
-    document.body.classList.remove('pg-land-fs');
     document.body.classList.remove('pg-land-tablet');
     st.focus = null;   // lämnar Prognos -> markeringen från notisen är klar
     if (st.poll) { clearInterval(st.poll); st.poll = null; }

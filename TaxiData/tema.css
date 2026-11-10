@@ -202,3 +202,43 @@ html body header .profile-btn:focus-visible { outline: 2px solid var(--accent); 
 html body .hdr-right { display: flex; align-items: center; gap: 0.1rem; }
 /* Profilmenyn följer med den fasta headern */
 #profile-menu { position: fixed !important; top: calc(68px + env(safe-area-inset-top)) !important; }
+
+
+/* Helskärm-knapp (helskarm.js): i headern när den syns, annars flytande i hörnet. */
+.app-fs-btn {
+  width: 36px; height: 36px; min-width: 36px; min-height: 36px; padding: 0; margin: 0 0 0 4px;
+  border: none; background: none; box-shadow: none;
+  color: var(--primary);
+  font-size: 18px; line-height: 1; cursor: pointer;
+  border-radius: 10px;
+  flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.app-fs-btn:hover { background: none; color: var(--primary); }
+.app-fs-btn:active { background: rgba(127,127,127,0.18); transform: scale(0.94); }
+.app-fs-btn:focus-visible { outline: 2px solid var(--accent, #f5b301); outline-offset: 1px; }
+.app-fs-btn.on { color: var(--primary); }
+header .app-fs-btn { align-self: center; }
+.app-fs-btn-float {
+  position: fixed;
+  z-index: 80;
+  top: max(8px, env(safe-area-inset-top, 0px));
+  right: max(8px, env(safe-area-inset-right, 0px));
+  margin: 0;
+  border: 1px solid var(--c-cbd5e0, #cbd5e0);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface, #fff) 88%, transparent);
+  color: var(--text, #1a202c);
+  box-shadow: 0 1px 3px rgba(0,0,0,.12);
+}
+.app-fs-btn-float.on {
+  background: var(--primary);
+  color: var(--on-primary, #fff);
+  border-color: var(--primary);
+}
+html[data-theme="dark"] .app-fs-btn-float {
+  background: color-mix(in srgb, var(--surface, #1a202c) 88%, transparent);
+  color: #e2e8f0; border-color: #4a5568;
+}
+html[data-theme="dark"] .app-fs-btn-float.on { background: #2b6cb0; color: #fff; border-color: #63b3ed; }
