@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-10', id: '2026-11-10hl3', rader: [
+    ['Rättat', 'Headern tar mindre plats i sidled: ikonerna sitter tätare och marginalerna är mindre, så titeln (t.ex. Prognos) syns i sin helhet även med stor text på en smal skärm. Notispricken med antal ligger på klockikonen i stället för bredvid den. Helskärmsknappen ligger kvar bredvid hemknappen.']
+  ]},
   { datum: '2026-11-10', id: '2026-11-10hl2', rader: [
     ['Rättat', 'Helskärmsknappen (⛶) sitter nu bredvid hemknappen till vänster i headern, på både telefon och platta. Titeln i mitten krockar inte längre med klockan eller profilikonen, även med stor text på en smal skärm.']
   ]},
