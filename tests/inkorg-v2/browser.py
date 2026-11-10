@@ -87,7 +87,23 @@ try:
     check(p.locator('.mb-block-booking').count()==2);check(p.locator('.mb-block-booking .mb-block-menu').count()==0)
     check(p.locator('.mb-block-booking.pending').evaluate("e=>getComputedStyle(e).borderTopStyle")=='dashed');shot(p,'04-tidslinje-gra-solid')
     p.get_by_role('button',name='Lista',exact=True).click();check(p.locator('.mb-row-booking .mb-remove').count()==0)
-    p.locator('.mb-row-booking.pending .mb-open').first.click();p.wait_for_selector('#mx-reply-body');p.fill('#mx-reply-body','Osänt utkast (test)');p.get_by_role('button',name='Acceptera',exact=True).click();p.wait_for_selector('.mx-booking.solid');check(p.input_value('#mx-reply-body')=='Osänt utkast (test)')
+    p.locator('.mb-row-booking.pending .mb-open').first.click();p.wait_for_selector('#mx-reply-body');p.fill('#mx-reply-body','Osänt utkast (test)')
+    p.evaluate('''() => {
+      window.__mxReplySawEmpty = false;
+      const want = 'Osänt utkast (test)';
+      const note = () => {
+        const el = document.querySelector('#mx-reply-body');
+        if (!el || el.value !== want) window.__mxReplySawEmpty = true;
+      };
+      note();
+      const mo = new MutationObserver(note);
+      mo.observe(document.body, {childList:true, subtree:true, characterData:true});
+      const iv = setInterval(note, 16);
+      window.__mxReplyStop = () => { mo.disconnect(); clearInterval(iv); };
+    }''')
+    p.get_by_role('button',name='Acceptera',exact=True).click();p.wait_for_selector('.mx-booking.solid')
+    p.evaluate('window.__mxReplyStop && window.__mxReplyStop()')
+    check(p.input_value('#mx-reply-body')=='Osänt utkast (test)');check(p.evaluate('!window.__mxReplySawEmpty'))
     # Historical direct messages have no reply or booking UI.
     p.evaluate('INKORG.readConversation(701)');p.wait_for_function("document.body.textContent.includes('Äldre privat samtal – bara läsning')")
     check(p.locator('#mx-reply').count()==0);check(p.get_by_role('button',name='Bokad tid',exact=True).count()==0)

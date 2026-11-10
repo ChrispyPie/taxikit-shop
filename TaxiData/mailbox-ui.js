@@ -18,7 +18,7 @@
    return Promise.reject(new Error('demo_read_only'));
   }
   return A.rpc('mailbox_v2',{p_action:action,p_data:data||{}});},create:function(admin,name){
-  var U={},st={el:null,mode:'list',filter:'all',trash:false,canTrash:false,selected:[],flags:[],threads:[],cases:[],old:[],next:null,thread:null,legacy:null,recipients:[],cars:[],optionsPending:false,draft:{},busy:false,error:'',epoch:0,request:0,refreshRequest:0,loaded:false};
+  var U={},st={el:null,mode:'list',filter:'all',trash:false,canTrash:false,selected:[],flags:[],threads:[],cases:[],old:[],next:null,thread:null,legacy:null,recipients:[],cars:[],optionsPending:false,draft:{},replyDraft:'',busy:false,error:'',epoch:0,request:0,refreshRequest:0,loaded:false};
   function rpc(action,data){return MAILBOX.rpc(action,Object.assign({},data,{admin:admin}));}
   function push(){try{history.pushState({view:admin?'admin':'inkorg',sub:'thread'},'');}catch(e){}}
   function go(mode){st.mode=mode;st.error='';push();paint();}
@@ -47,7 +47,7 @@
   U.moreOld=function(){if(!st.next||st.busy)return;var epoch=st.epoch;st.busy=true;A.rpc('conversation_list',{p_before:st.next}).then(function(d){if(epoch!==st.epoch)return;st.old=st.old.concat(d.items||[]);st.next=d.next;st.busy=false;if(st.mode==='list')paint();}).catch(function(e){if(epoch!==st.epoch)return;st.busy=false;st.error=err(e);if(st.mode==='list')paint();});};
   var navRestored=false;
   U.render=function(el){st.el=el;if(!navRestored&&window.VIEW_STATE){navRestored=true;var n=VIEW_STATE.get(admin?'admin-mailbox':'inkorg',{});if(FILTERS.some(function(f){return f[0]===n.filter;}))st.filter=n.filter;paint();if(n.thread)return U.openThread(n.thread);if(n.kind&&n.id)return U.openCase(n.kind,n.id);}paint();if(st.mode==='list')U.refresh();};
-  U.back=function(){var dialog=st.el&&st.el.querySelector('dialog[open]');if(dialog){dialog.close();return true;}if(st.mode!=='list'){st.request++;st.mode='list';st.thread=null;st.legacy=null;paint();U.refresh();return true;}return false;};
+  U.back=function(){var dialog=st.el&&st.el.querySelector('dialog[open]');if(dialog){dialog.close();return true;}if(st.mode!=='list'){st.request++;st.mode='list';st.thread=null;st.legacy=null;st.replyDraft='';paint();U.refresh();return true;}return false;};
   U.select=function(f){st.request++;st.filter=f;st.selected=[];st.mode='list';paint();};
   U.show=function(){st.mode='list';st.filter='all';st.trash=false;st.selected=[];if(!admin&&window.openInbox)openInbox();else paint();};
   U.newCase=function(){
@@ -60,9 +60,11 @@
   U.newBooking=function(){st.draft={thread_id:st.mode==='thread'&&st.thread?st.thread.id:null,car_choice:''};go('booking');recipients();};
   function recipients(){var epoch=st.epoch;Promise.all([rpc('cars',{}),admin?rpc('recipients',{}):Promise.resolve([])]).then(function(d){if(epoch!==st.epoch)return;st.cars=d[0]||[];st.recipients=d[1]||[];if(st.mode==='compose'||st.mode==='booking'){if(st.el&&st.el.querySelector('dialog[open]'))st.optionsPending=true;else paint();}}).catch(function(e){if(epoch!==st.epoch)return;st.error=err(e);if(!st.el||!st.el.querySelector('dialog[open]'))paint();});}
 
+  function captureReply(){var box=st.el&&st.el.querySelector('#mx-reply-body');if(box)st.replyDraft=box.value;}
   U.openThread=function(id){
    if(owner()){location.href='admin.html#message='+encodeURIComponent(id);return Promise.resolve();}
-   st.mode='loading';st.thread=null;var request=++st.request;push();if(!admin&&window.openInbox)openInbox();else paint();var epoch=st.epoch;
+   var stay=st.mode==='thread'&&st.thread&&+st.thread.id===+id;if(!stay)st.replyDraft='';else captureReply();
+   st.mode='loading';if(!stay)st.thread=null;var request=++st.request;push();if(!stay){if(!admin&&window.openInbox)openInbox();else paint();}var epoch=st.epoch;
    return rpc('get',{thread_id:id}).then(async function(d){if(epoch!==st.epoch||request!==st.request||st.mode!=='loading')return;try{await rpc('mark_read',{kind:'thread',id:id});}catch(e){st.error=err(e);}if(epoch!==st.epoch||request!==st.request||st.mode!=='loading')return;st.thread=d;st.mode='thread';paint();return U.refresh(true);}).catch(function(e){if(epoch!==st.epoch||request!==st.request)return;st.error=err(e);st.mode='list';paint();});
   };
   U.openCase=function(kind,id){
@@ -137,7 +139,7 @@
   function threadHtml(){var t=st.thread;
    return back()+unreadButton('thread',t.id)+'<article class="mx-thread"><h2>'+esc(t.subject)+'</h2>'+(t.car_number?'<p>Bil '+esc(t.car_number)+'</p>':'')+(t.locked&&!admin?'':'<button onclick="'+name+'.newBooking()">Bokad tid</button>')+
     '<div class="mx-history">'+t.messages.map(function(m){return '<div class="mx-message '+(m.mine?'mine':'')+'"><small>'+esc(m.role==='system'?'Historik':m.mine?'Du':m.role==='admin'?'Admin':'Föraren')+' · '+esc(when(m.at))+'</small><p>'+esc(m.body)+'</p></div>';}).join('')+'</div>'+(t.bookings||[]).map(bookingHtml).join('')+
-    (t.locked&&!admin?'<p class="ar-note" role="status">Tråden är stängd. Du kan läsa hela tråden men inte svara.</p>':'<form id="mx-reply"><p id="mx-decline-error" class="mx-error" role="alert"></p><label for="mx-reply-body">Svara</label><textarea id="mx-reply-body" required maxlength="2000" rows="3"></textarea><button type="submit"'+(st.busy?' disabled':'')+'>Skicka svar</button></form>')+'<p class="mx-error mx-server-error" role="alert">'+esc(st.error)+'</p></article>';
+    (t.locked&&!admin?'<p class="ar-note" role="status">Tråden är stängd. Du kan läsa hela tråden men inte svara.</p>':'<form id="mx-reply"><p id="mx-decline-error" class="mx-error" role="alert"></p><label for="mx-reply-body">Svara</label><textarea id="mx-reply-body" required maxlength="2000" rows="3">'+esc(st.replyDraft||'')+'</textarea><button type="submit"'+(st.busy?' disabled':'')+'>Skicka svar</button></form>')+'<p class="mx-error mx-server-error" role="alert">'+esc(st.error)+'</p></article>';
   }
   function legacyHtml(){var c=st.legacy.data,k=st.legacy.kind,d=c.data||{};
    if(k==='old-message')return back()+unreadButton(k,c.id)+'<h2>'+esc(c.subject)+'</h2><p class="ar-note">Äldre privat samtal – bara läsning. Nya meddelanden går till admin.</p>'+c.messages.map(function(m){return '<div class="mx-message"><small>'+esc(when(m.at))+'</small><p>'+esc(m.body)+'</p></div>';}).join('');
@@ -148,14 +150,14 @@
    else h+='<p class="ar-note">Äldre bilärende – bara läsning. Skapa ett Meddelande om något nytt behövs.</p>';
    return h+'<p class="mx-error mx-server-error" role="alert">'+esc(st.error)+'</p>';
   }
-  function paint(){if(window.VIEW_STATE&&['list','thread','legacy'].indexOf(st.mode)>=0)VIEW_STATE.save(admin?'admin-mailbox':'inkorg',{filter:st.filter,thread:st.mode==='thread'&&st.thread?st.thread.id:null,kind:st.mode==='legacy'&&st.legacy?st.legacy.kind:null,id:st.mode==='legacy'&&st.legacy?st.legacy.data.id||st.legacy.data.data&&st.legacy.data.data.id:null});if(!st.el||!st.el.isConnected)return;
+  function paint(){captureReply();if(window.VIEW_STATE&&['list','thread','legacy'].indexOf(st.mode)>=0)VIEW_STATE.save(admin?'admin-mailbox':'inkorg',{filter:st.filter,thread:st.mode==='thread'&&st.thread?st.thread.id:null,kind:st.mode==='legacy'&&st.legacy?st.legacy.kind:null,id:st.mode==='legacy'&&st.legacy?st.legacy.data.id||st.legacy.data.data&&st.legacy.data.data.id:null});if(!st.el||!st.el.isConnected)return;
    st.el.innerHTML='<div class="mx">'+(st.mode==='list'?listHtml():st.mode==='compose'?composeHtml(false):st.mode==='booking'?composeHtml(true):st.mode==='thread'&&st.thread?threadHtml():st.mode==='legacy'&&st.legacy?legacyHtml():st.mode==='report'?back()+'<div id="mx-report"></div>':back()+'<p>Laddar…</p>')+'</div>';
    var f=st.el.querySelector('#mx-form');if(f){f.querySelectorAll('[data-mx]').forEach(function(e){e.oninput=e.onchange=function(){st.draft[e.dataset.mx]=e.value;if(e.dataset.mx==='car_choice'){var error=f.querySelector('#mx-car-error');if(error)error.textContent='';}if(e.dataset.mx==='hour'||e.dataset.mx==='minute'){var h=f.querySelector('#mx-hour').value,m=f.querySelector('#mx-minute').value;st.draft.time=h&&m?h+':'+m:'';}};});f.onsubmit=function(e){e.preventDefault();submit(st.mode==='booking'?'book':'create',st.draft);};}
-   var reply=st.el.querySelector('#mx-reply');if(reply)reply.onsubmit=function(e){e.preventDefault();submit('reply',{thread_id:st.thread.id,body:st.el.querySelector('#mx-reply-body').value});};
+   var reply=st.el.querySelector('#mx-reply');if(reply){var box=st.el.querySelector('#mx-reply-body');if(box)box.oninput=function(){st.replyDraft=box.value;};reply.onsubmit=function(e){e.preventDefault();submit('reply',{thread_id:st.thread.id,body:st.el.querySelector('#mx-reply-body').value});};}
    if(st.mode==='legacy'&&st.legacy.kind==='sjuk')A.mountCertificates(st.legacy.data,st.el);
   }
   function submit(action,data){if(st.busy)return;if(action==='book'||action==='create'){var ce=st.el.querySelector('#mx-car-error');if(!data.car_choice){if(ce)ce.textContent='Välj en bil på åkeriet eller Nej.';return;}if(ce)ce.textContent='';if(action==='book'&&!data.date){var error=st.el.querySelector('.mx-server-error');if(error)error.textContent='Välj datum i kalendern.';return;}}st.busy=true;st.error='';var epoch=st.epoch,request=st.request;var btn=st.el.querySelector('button[type="submit"]');if(btn)btn.disabled=true;
-   rpc(action,data).then(function(r){if(epoch!==st.epoch)return;if(request!==st.request){st.busy=false;return;}st.busy=false;if(owner()){location.href='admin.html#message='+r.id;return;}var draftReply=action==='decide'&&data.decision==='accepted'&&(st.el.querySelector('#mx-reply-body')||{}).value;var pending=U.openThread(r.id),afterRequest=st.request;if(draftReply)pending.then(function(){if(epoch===st.epoch&&afterRequest===st.request&&st.mode==='thread'){var box=st.el&&st.el.querySelector('#mx-reply-body');if(box)box.value=draftReply;}});}).catch(function(e){if(epoch!==st.epoch)return;if(request!==st.request){st.busy=false;return;}st.busy=false;st.error=err(e);var error=st.el&&st.el.querySelector('.mx-server-error');if(error)error.textContent=st.error;if(btn)btn.disabled=false;});
+   rpc(action,data).then(function(r){if(epoch!==st.epoch)return;if(request!==st.request){st.busy=false;return;}st.busy=false;if(owner()){location.href='admin.html#message='+r.id;return;}if(action==='reply'||(action==='decide'&&data.decision==='declined')){st.replyDraft='';var box=st.el&&st.el.querySelector('#mx-reply-body');if(box)box.value='';}else captureReply();U.openThread(r.id);}).catch(function(e){if(epoch!==st.epoch)return;if(request!==st.request){st.busy=false;return;}st.busy=false;st.error=err(e);var error=st.el&&st.el.querySelector('.mx-server-error');if(error)error.textContent=st.error;if(btn)btn.disabled=false;});
   }
   U.decide=function(id,decision){var reply=st.el.querySelector('#mx-reply-body'),error=st.el.querySelector('#mx-decline-error'),reason=reply?reply.value.trim():'';if(error)error.textContent='';if(decision==='declined'&&!reason){if(error)error.textContent='Vänligen specificera orsak';if(reply){reply.setAttribute('aria-invalid','true');reply.focus();}return;}if(reply)reply.removeAttribute('aria-invalid');submit('decide',{booking_id:id,decision:decision,reason:decision==='declined'?reason:''});};
 
@@ -174,7 +176,7 @@
   U.has=function(k,id){return st.cases.some(function(x){return x.kind===k&&x.id===+id;});};
   U.isAdmin=function(){return ['admin','agare','superadmin'].indexOf(window.INKORG_ROLE)>=0;};
   U.badge=function(){var n=U.count();return n?'<span class="ar-badge">'+n+'</span>':'';};
-  U.logout=function(){navRestored=false;st.epoch++;st.mode='list';st.trash=false;st.canTrash=false;st.selected=[];st.flags=[];st.threads=[];st.cases=[];st.old=[];st.thread=null;st.legacy=null;st.recipients=[];st.cars=[];st.optionsPending=false;st.draft={};st.el=null;st.busy=false;if(!admin)window.INKORG_HAS=false;};
+  U.logout=function(){navRestored=false;st.epoch++;st.mode='list';st.trash=false;st.canTrash=false;st.selected=[];st.flags=[];st.threads=[];st.cases=[];st.old=[];st.thread=null;st.legacy=null;st.recipients=[];st.cars=[];st.optionsPending=false;st.draft={};st.replyDraft='';st.el=null;st.busy=false;if(!admin)window.INKORG_HAS=false;};
   U.load=U.refresh;U.needs=U.count;U.isOpen=function(){return st.mode!=='list';};
   return U;
  }};
