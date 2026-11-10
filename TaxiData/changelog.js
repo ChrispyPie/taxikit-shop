@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-11', id: '2026-11-11kv1', rader: [
+    ['Nytt', 'Varje resa i Körpassdata och Åkeridata har en liten kvittoikon. Trycker du på ikonen eller på raden öppnas en kvittokopia i Taxi Göteborgs utseende, med de uppgifter som finns för just den resan. Plusknappen visar fortfarande den korta sammanfattningen.']
+  ]},
   { datum: '2026-11-10', id: '2026-11-10hl3', rader: [
     ['Rättat', 'Headern tar mindre plats i sidled: ikonerna sitter tätare och marginalerna är mindre, så titeln (t.ex. Prognos) syns i sin helhet även med stor text på en smal skärm. Notispricken med antal ligger på klockikonen i stället för bredvid den. Helskärmsknappen ligger kvar bredvid hemknappen.']
   ]},
