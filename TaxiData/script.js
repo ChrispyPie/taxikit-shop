@@ -347,6 +347,20 @@ function getShiftsInRange(start, end) {
   });
 }
 
+
+function shiftEntryHtml(s, shiftTrips, opt) {
+  opt = opt || {};
+  const dateLabel = opt.dateLabel == null ? '' : opt.dateLabel;
+  const who = opt.who || '';
+  const lazyId = opt.lazyId;
+  const tripsHtml = opt.tripsHtml != null ? opt.tripsHtml : (shiftTrips || []).map(t => tripEntryHtml(t, "shift")).join('');
+  const inkort = opt.inkort != null ? opt.inkort : (shiftTrips || []).filter(t => t.kredittyp !== '999').reduce((sum, t) => sum + parseAmount(t.belopp) * (t.kredittyp === '164' ? (1 - UBER_FEE) : 1), 0);
+  const lazyAttr = lazyId != null && !(typeof companyApi !== 'undefined' && companyApi.trips[lazyId]) ? ` data-lazy="${lazyId}"` : '';
+  const passAttr = ` data-passnr="${escHtml(s.passnr || '')}" data-forar="${escHtml(s.forar || defForar())}" data-start="${escHtml(s.start || '')}"`;
+  return `<div class="stat-row" data-key="shift:${escHtml(s.passnr)}|${escHtml(s.forar || defForar())}|${escHtml(s.start || '')}"${lazyAttr}${passAttr} onclick="PASSRAPPORT.openFromRow(this,event)"><span class="toggle" onclick="event.stopPropagation();toggleShift(this.parentNode)">+</span><span class="pr-ico" title="Passrapport" role="img" aria-label="Passrapport"></span><span class="label">${dateLabel}#${escHtml(s.passnr)}${who}</span><span class="value">${formatSEK(inkort)}</span></div>
+      <div class="shift-content">${tripsHtml}</div>`;
+}
+
 function getTripsForShift(shift) {
   if (!shift) return [];
   const shiftStart = parseShiftTime(shift.start);
@@ -678,8 +692,10 @@ function render() {
   html += akBreakdownHtml(P);
 
   if (currentTab === 'dag' && !COMPANY) {
-    // En förares dag: lista med alla körningar
-    if (allTrips.length) {
+    // Dagsvy: passrader med passrapport-ikon, resor under plustecknet (samma som övriga flikar).
+    if (shifts.length) {
+      html += `<div class="section">${shifts.map(s => shiftEntryHtml(s, getTripsForShift(s), { dateLabel: '' })).join('')}${looseTrips.length ? looseTripsRow(looseTrips) : ''}</div>`;
+    } else if (allTrips.length) {
       html += `<div class="section">${allTrips.map(t => tripEntryHtml(t, "day")).join('')}</div>`;
     }
   } else if (shifts.length) {
@@ -695,8 +711,7 @@ function render() {
       // Förare visas bara för ägaren; övriga ser bara bilen
       const who = COMPANY ? `<span class="shift-who">${escHtml(s.taxi || '?')}${isOwnerRole() ? ' · ' + escHtml(driverLabel(s.forar || defForar())) : ''}</span>` : '';
       const tripsHtml = shiftTrips.map(t => tripEntryHtml(t, "shift")).join('') + (lazyId != null && !companyApi.trips[lazyId] ? companyTripsPlaceholder(lazyId) : '');
-      return `<div class="stat-row" data-key="shift:${escHtml(s.passnr)}|${escHtml(s.forar || defForar())}|${escHtml(s.start || '')}"${lazyId != null && !companyApi.trips[lazyId] ? ` data-lazy="${lazyId}"` : ''} onclick="toggleShift(this)"><span class="toggle">+</span><span class="label">${dateLabel}#${escHtml(s.passnr)}${who}</span><span class="value">${formatSEK(shiftInkort)}</span></div>
-      <div class="shift-content">${tripsHtml}</div>`;
+      return shiftEntryHtml(s, shiftTrips, { dateLabel, who, lazyId, tripsHtml, inkort: shiftInkort });
     }).join('')}${looseTrips.length ? looseTripsRow(looseTrips) : ''}</div>`;
   } else if (looseTrips.length) {
     html += `<div class="section">${looseTripsRow(looseTrips)}</div>`;
