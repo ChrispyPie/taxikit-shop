@@ -245,7 +245,7 @@
     var html = '<div class="tabs ank-tabs">' + A.sources.map(function (x) {
       return '<button class="tab' + (x.id === s.id ? ' active' : '') + '" data-ank-tab="' + x.id + '">' + x.icon + ' ' + esc(x.label) + '</button>';
     }).join('') + '</div>';
-    if(s.id==='tag')html+='<div class="ank-station-picker"><span class="ank-station-picker-label" id="ank-station-picker-label">Station</span><button type="button" class="ank-station-title" data-ank-picker aria-haspopup="dialog" aria-labelledby="ank-station-picker-label">'+esc(stationLabel())+' ▾</button></div>'+(state.station!=='G'?'<p class="ank-station-note">Tågbevakningar och tågnotiser gäller fortfarande Göteborg C.</p>':'');
+    if(s.id==='tag')html+='<div class="ank-station-picker"><span class="ank-station-picker-label" id="ank-station-picker-label">Station</span><button type="button" class="ank-station-title" data-ank-picker aria-haspopup="dialog" aria-labelledby="ank-station-picker-label"><span class="ank-station-title-label">'+esc(stationLabel())+'</span><span class="ank-station-caret" aria-hidden="true"></span></button></div>'+(state.station!=='G'?'<p class="ank-station-note">Tågbevakningar och tågnotiser gäller fortfarande Göteborg C.</p>':'');
     var upd = state.updated[s.id] ? d(state.updated[s.id]) : null;
     var stale = upd && now - upd > 15 * 60000;
     html += '<div class="ank-head"><span>' + (s.id==='tag'?'':('<b>'+esc(s.place)+'</b>')) + (upd ? (s.id==='tag'?'':' ') + 'uppdaterad ' + hm(upd) : '') + '</span>' +
@@ -327,14 +327,14 @@
     var dialog=document.createElement('dialog');dialog.className='ank-station-sheet';dialog.setAttribute('aria-label','Välj station');dialog.innerHTML='<h3>Välj station</h3><label for="ank-station-search">Sök station</label><input id="ank-station-search" type="search" placeholder="Namn eller signatur" autocomplete="off"><div class="ank-station-results" role="status">Hämtar stationslistan…</div><button type="button" data-station-close>Stäng</button>';document.body.appendChild(dialog);dialog.showModal();
     var search=dialog.querySelector('input'),box=dialog.querySelector('.ank-station-results');
     function norm(s){return String(s).toLocaleLowerCase('sv').normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
-    function stationBtn(st){return '<button type="button" data-station-pick="'+esc(st.id)+'" aria-pressed="'+(st.id===state.station)+'">'+esc(st.label)+' <small>'+esc(st.id)+'</small></button>';}
+    function stationBtn(st,quick){var isQuick=quick||QUICK_STATIONS.indexOf(st.id)>=0;return '<button type="button" class="'+(isQuick?'ank-station-pick-quick':'')+'" data-station-pick="'+esc(st.id)+'" aria-pressed="'+(st.id===state.station)+'">'+esc(st.label)+' <small>'+esc(st.id)+'</small></button>';}
     function draw(){
       var q=norm(search.value).trim(),rows=stationList.filter(function(st){return !q||norm(st.label+' '+st.id).indexOf(q)>=0;});
       if(!rows.length){box.innerHTML='<p>Inga stationer hittades.</p>';return;}
       if(!q){
         var quick=QUICK_STATIONS.map(function(id){return stationList.find(function(st){return st.id===id;});}).filter(Boolean);
         var rest=stationList.filter(function(st){return QUICK_STATIONS.indexOf(st.id)<0;});
-        box.innerHTML='<div class="ank-station-quick-list" role="group" aria-label="Vanliga stationer">'+quick.map(stationBtn).join('')+'</div><hr class="ank-station-divider">'+rest.map(stationBtn).join('');
+        box.innerHTML='<div class="ank-station-quick-list" role="group" aria-label="Vanliga stationer">'+quick.map(function(st){return stationBtn(st,true);}).join('')+'</div><hr class="ank-station-divider">'+rest.map(stationBtn).join('');
         return;
       }
       box.innerHTML=rows.map(stationBtn).join('');
