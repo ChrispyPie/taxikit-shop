@@ -248,9 +248,8 @@
     var upd = state.at[s.id] ? new Date(state.at[s.id]) : (state.updated[s.id] ? d(state.updated[s.id]) : null);
     var stale = upd && now - upd > 15 * 60000;
     html += '<div class="ank-toolbar">';
-    if(s.id==='tag')html+='<div class="ank-station-picker"><span class="ank-station-picker-label" id="ank-station-picker-label">Station</span><button type="button" class="ank-station-title" data-ank-picker aria-haspopup="dialog" aria-labelledby="ank-station-picker-label"><span class="ank-station-title-label">'+esc(stationLabel())+'</span><span class="ank-station-caret" aria-hidden="true"></span></button></div>';
-    html += '<div class="ank-head"><span>' + (s.id==='tag'?'':('<b>'+esc(s.place)+'</b>')) + (upd ? (s.id==='tag'?'':' ') + 'uppdaterad ' + hms(upd) : '') + '</span>' +
-            '<button class="ank-refresh" data-ank-refresh aria-label="Uppdatera">' + (state.loading[s.id] ? '…' : '↻') + '</button></div></div>';
+    if(s.id==='tag')html+='<div class="ank-station-picker"><button type="button" class="ank-station-title" data-ank-picker aria-haspopup="dialog" aria-label="Station, '+esc(stationLabel())+'"><span class="ank-station-title-label">'+esc(stationLabel())+'</span><span class="ank-station-caret" aria-hidden="true"></span></button></div>';
+    html += '<div class="ank-head"><span>' + (s.id==='tag'?'':('<b>'+esc(s.place)+'</b>')) + (upd ? (s.id==='tag'?'':' ') + 'uppdaterad ' + hms(upd) : '') + '</span></div></div>';
     if(s.id==='tag'&&state.station!=='G')html+='<p class="ank-station-note">Bevakningar gäller fortfarande Göteborg C.</p>';
     if (stale) html += '<div class="ank-warn">Datan är äldre än 15 minuter.</div>';
     if(typeof state.err[s.id]==='string')html+='<div class="ank-warn">'+esc(state.err[s.id])+'</div>';
@@ -352,7 +351,6 @@
     if (rr) { toggleRoute(rr.getAttribute('data-ank-route')); return; }
     var t = e.target.closest('[data-ank-tab]');
     if (t) { state.watchHighlight = null; state.watchFocus = false; state.tab = t.getAttribute('data-ank-tab'); localStorage.setItem('ank_tab', state.tab); state.showPast = false; paint(); load(state.tab, true); return; }
-    if (e.target.closest('[data-ank-refresh]')) { load(state.tab); return; }
     if (e.target.closest('[data-ank-past]')) { state.showPast = !state.showPast; paint({ anchor: true }); return; }
     var g = e.target.closest('[data-ank-filter]');
     if (g) { localStorage.setItem('ank_tagfilter', g.getAttribute('data-ank-filter')); paint(); }

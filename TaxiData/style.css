@@ -191,10 +191,9 @@ main { max-width: 900px; margin: 1rem auto; padding: 0 1rem; }
 /* Ankomster (tåg/flyg) */
 .ank-tabs { margin-bottom: 0.6rem; }
 .ank-tabs .tab { padding: 0.45rem 1.1rem; font-size: 0.95rem; }
-.ank-toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 4px 10px; margin: 8px 2px 0.5rem; max-width: 100%; }
-.ank-head { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-soft); margin: 0 0 0 auto; flex: 0 0 auto; white-space: nowrap; }
-.ank-toolbar > .ank-head:only-child { flex: 1 1 auto; margin-left: 0; justify-content: space-between; }
-.ank-refresh { background: var(--surface); border: 1px solid var(--border); color: var(--primary); border-radius: 6px; width: 34px; height: 30px; font-size: 1rem; cursor: pointer; }
+.ank-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 8px 2px 0.5rem; max-width: 100%; }
+.ank-head { display: flex; align-items: center; font-size: 0.85rem; color: var(--text-soft); margin: 0; flex: 0 0 auto; white-space: nowrap; }
+.ank-toolbar > .ank-head:only-child { flex: 1 1 auto; }
 .ank-warn { background: var(--danger-bg); color: var(--danger-text); border: 1px solid var(--danger); border-radius: 8px; padding: 6px 10px; font-size: 0.85rem; margin-bottom: 0.5rem; }
 .ank-chips { display: flex; gap: 6px; margin-bottom: 0.5rem; }
 .ank-chip { border: 1px solid var(--primary); background: var(--surface); color: var(--primary); border-radius: 14px; padding: 4px 12px; font-size: 0.85rem; cursor: pointer; }
@@ -770,8 +769,7 @@ html[data-theme="dark"] .pg-pop-fly { background: #3b2a16; color: #fbd38d; borde
 html[data-theme="dark"] .pg-pop-flyb { color: #fbd38d; }
 
 /* Closed selector is compact (auto width, max ~60% on a phone). The open list may use the full width. */
-.ank-station-picker{display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin:0;flex:1 1 auto;min-width:8em;max-width:100%}
-.ank-station-picker-label{font-size:.72rem;font-weight:600;color:var(--text-soft,#4a5568)}
+.ank-station-picker{display:flex;align-items:center;margin:0;margin-right:auto;flex:0 1 auto;min-width:0;max-width:100%}
 .ank-station-title{display:inline-flex;align-items:center;gap:8px;max-width:100%;width:auto;min-width:0;min-height:36px;padding:5px 10px;border:1.5px solid var(--border,#8a96a3);background:var(--surface,#fff);color:var(--text);font:inherit;font-weight:600;text-align:left;border-radius:6px;box-shadow:none;cursor:pointer;line-height:1.2}
 .ank-station-title-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .ank-station-caret{flex:0 0 auto;width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid currentColor;opacity:.75}
