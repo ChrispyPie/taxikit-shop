@@ -1,8 +1,8 @@
 {
   "airport": "GOT",
-  "updated": "2026-11-10T12:05:26+01:00",
-  "arrivalsUpdated": "2026-11-10T12:05:27+01:00",
-  "departuresUpdated": "2026-11-10T11:10:50+01:00",
+  "updated": "2026-11-10T12:10:34+01:00",
+  "arrivalsUpdated": "2026-11-10T12:10:39+01:00",
+  "departuresUpdated": "2026-11-10T12:10:39+01:00",
   "yesterdayUpdated": "2026-11-10T05:01:10+01:00",
   "tomorrowUpdated": "2026-11-10T12:01:11+01:00",
   "error": null,
@@ -1762,7 +1762,7 @@
       "gate": "12",
       "baggage": "1",
       "firstBag": "",
-      "firstBagEst": "",
+      "firstBagEst": "2026-11-10T11:22:33Z",
       "lastBag": "",
       "rawStatus": "Landat 12:02",
       "reason": "Landat 12:02"
@@ -1881,7 +1881,7 @@
       "terminal": "T1",
       "gate": "17",
       "baggage": "5",
-      "firstBag": "",
+      "firstBag": "2026-11-10T11:09:45Z",
       "firstBagEst": "2026-11-10T11:18:23Z",
       "lastBag": "",
       "rawStatus": "Landat 11:58",
@@ -2524,8 +2524,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 14:58",
-      "reason": "Beräknad 14:58"
+      "rawStatus": "Beräknad 14:57",
+      "reason": "Beräknad 14:57"
     },
     {
       "id": "SK1444",
@@ -3749,26 +3749,6 @@
     }
   ],
   "departures": [
-    {
-      "id": "FR965",
-      "dir": "AVG",
-      "other": "London STN",
-      "iata": "",
-      "airline": "Ryanair Ltd",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-11-08T21:30:00Z",
-      "est": "",
-      "act": "2026-11-08T22:20:14Z",
-      "terminal": "T1",
-      "gate": "23",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Gate stängd",
-      "reason": "Gate stängd"
-    },
     {
       "id": "JTD283",
       "dir": "AVG",
@@ -5375,19 +5355,19 @@
       "other": "London LHR",
       "iata": "",
       "airline": "British Airways",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-10T10:40:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-10T10:40:06Z",
       "terminal": "T1",
       "gate": "22",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Boarding",
-      "reason": "Boarding"
+      "rawStatus": "Startat 11:48",
+      "reason": "Startat 11:48"
     },
     {
       "id": "BA793",
@@ -5455,19 +5435,19 @@
       "other": "Frankfurt",
       "iata": "",
       "airline": "Lufthansa",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-10T10:55:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-10T10:41:00Z",
       "terminal": "T1",
       "gate": "15",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gå till gate",
-      "reason": "Gå till gate"
+      "rawStatus": "Startat 11:55",
+      "reason": "Startat 11:55"
     },
     {
       "id": "KL1234",
@@ -5575,19 +5555,19 @@
       "other": "Amsterdam",
       "iata": "",
       "airline": "KLM",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-10T11:00:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-10T11:05:00Z",
       "terminal": "T1",
       "gate": "19",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Gate stängd",
+      "reason": "Gate stängd"
     },
     {
       "id": "AF1453",
@@ -5626,8 +5606,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Gate stängd",
+      "reason": "Gate stängd"
     },
     {
       "id": "FR090",
@@ -5646,8 +5626,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Gå till gate",
+      "reason": "Gå till gate"
     },
     {
       "id": "KL1236",
@@ -5806,8 +5786,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Gå till gate",
+      "reason": "Gå till gate"
     },
     {
       "id": "SK449",
@@ -6101,7 +6081,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "15",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6206,8 +6186,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd",
-      "reason": "Gate stängd"
+      "rawStatus": "Startat 11:16",
+      "reason": "Startat 11:16"
     },
     {
       "id": "SK1439",
