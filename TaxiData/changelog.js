@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-10', id: '2026-11-10fly', rader: [
+    ['Nytt', 'Du kan nu lägga fasta Bevakningar även för flyg till Landvetter, under Ankomster › Flyg. De syns på sidan Mina bevakningar som Bevakning (flyg).']
+  ]},
   { datum: '2026-11-10', id: '2026-11-10ref', rader: [
     ['Förbättrat', 'Ankomster: uppdatera-knappen är borttagen, listan uppdateras av sig själv. Stationsväljaren och klockan ryms oftare på samma rad; om klockan hamnar på raden under står den till vänster.']
   ]},
