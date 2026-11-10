@@ -65,6 +65,7 @@
     inAppAlert: true,
     flights: null,       // Landvetter-ankomster (för flygvarningen i 293)
     cellMap: {},         // data-pg-cell -> bokningar i rutan (förklaringsrutan)
+    flyMap: {},          // data-pg-fly -> ankomst (got.json / Ankomster)
     pendingPaint: false, // omritning väntar tills förklaringsrutan stängs
     kt: null,            // S admin-test kundtid: offsets per zon från servern (sadmin_kundtid_get), false = ej S admin
     ktRaw: []            // bokningarna som de kom från servern (testvyn flyttar bara visningen)
@@ -707,6 +708,30 @@
     return { list: all, ids: ids };
   }
 
+  function arrivalMs(f) { return +((f && (f.est || f.sched)) || 0) || 0; }
+  // GOT-ankomster i en 5-minutersrad. Beräknad tid om den finns, annars planerad. Inställda/borttagna hoppas över.
+  function flightsInSlot(slotMs) {
+    if (!st.flights || !st.flights.length || !slotMs) return [];
+    var to = slotMs + 5 * 60000, out = [];
+    st.flights.forEach(function (f) {
+      if (f.canceled || f.removed) return;
+      var t = arrivalMs(f);
+      if (t >= slotMs && t < to) out.push(f);
+    });
+    out.sort(function (a, b) { return arrivalMs(a) - arrivalMs(b); });
+    return out;
+  }
+  function flyChipHtml(list) {
+    if (!list.length) return '';
+    st.flyMap = st.flyMap || {};
+    return '<div class="pg-fly-list">' + list.map(function (f) {
+      var key = f.key || ('f' + (f.no || '') + '|' + (f.sched && f.sched.toISOString ? f.sched.toISOString() : f.sched));
+      st.flyMap[key] = f;
+      var label = (f.no || 'Flyg') + (f.from ? ' från ' + f.from : '');
+      return '<button type="button" class="pg-fly-chip" data-pg-fly="' + esc(key) + '" aria-label="' + esc(label) + '">✈ ' + esc(f.no || '') + '</button>';
+    }).join('') + '</div>';
+  }
+
   // Lättbegriplig förklaring till säker/trolig/osäker för en bokning
   function bookingWhy(b) {
     var est = Date.parse(b.estimated_at), obs = Date.parse(b.observed_at || b.first_seen);
@@ -819,6 +844,43 @@
     if (st.pendingPaint) { st.pendingPaint = false; paint(); }
   }
   function popOpen() { return !!(pop.cell && (pop.held || pop.pinned)); }
+
+  var flyUi = { ov: null, key: null };
+  function flyOverlay() {
+    if (flyUi.ov) return flyUi.ov;
+    var ov = document.createElement('div');
+    ov.className = 'pg-fly-overlay';
+    ov.hidden = true;
+    ov.setAttribute('role', 'presentation');
+    ov.innerHTML = '<div class="pg-fly-sheet" role="dialog" aria-modal="true" aria-label="Flyguppgifter"><div class="pg-fly-sheet-h"><b>Ankomst</b><button type="button" class="pg-fly-x" data-pg-fly-close aria-label="Stäng">✕</button></div><div class="pg-fly-body"></div></div>';
+    ov.addEventListener('click', function (e) {
+      if (e.target === ov || e.target.closest('[data-pg-fly-close]')) hideFlySheet();
+    });
+    document.body.appendChild(ov);
+    flyUi.ov = ov;
+    return ov;
+  }
+  function hideFlySheet() {
+    if (flyUi.ov) flyUi.ov.hidden = true;
+    flyUi.key = null;
+  }
+  function showFlySheet(key) {
+    var it = st.flyMap && st.flyMap[key];
+    if (!it) return false;
+    hidePop();
+    var ov = flyOverlay();
+    var body = ov.querySelector('.pg-fly-body');
+    var html = (window.ARRIVAL_DATA && ARRIVAL_DATA.flightDetailHtml)
+      ? ARRIVAL_DATA.flightDetailHtml(it)
+      : ('<div class="pg-fly-card"><b>' + esc(it.no || '') + '</b></div>');
+    body.innerHTML = html;
+    ov.hidden = false;
+    flyUi.key = key;
+    var close = ov.querySelector('[data-pg-fly-close]');
+    if (close) setTimeout(function () { try { close.focus(); } catch (e) {} }, 30);
+    return true;
+  }
+  function flySheetOpen() { return !!(flyUi.ov && !flyUi.ov.hidden); }
   function bindPop(root) {
     if (root._pgPop) return;
     root._pgPop = true;
@@ -875,6 +937,7 @@
       if (cell && pop.cell === cell && !pop.held) hidePop();
     });
     root.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && flySheetOpen()) { hideFlySheet(); return; }
       if (e.key === 'Escape' && popOpen()) { hidePop(); return; }
       var cell = e.target.closest && e.target.closest('[data-pg-cell]');
       if (!cell || (e.key !== 'Enter' && e.key !== ' ')) return;
@@ -885,11 +948,24 @@
   }
   // Tryck utanför eller rulla → stäng en fäst ruta
   document.addEventListener('pointerdown', function (e) {
+    if (flySheetOpen()) {
+      if (e.target.closest && (e.target.closest('.pg-fly-sheet') || e.target.closest('[data-pg-fly]'))) return;
+      hideFlySheet();
+      return;
+    }
     if (!pop.pinned || !pop.cell) return;
     if (pop.el && pop.el.contains(e.target)) return;
     if (e.target.closest && e.target.closest('[data-pg-cell]')) return;
     hidePop();
   }, true);
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest && e.target.closest('[data-pg-fly]');
+    if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    showFlySheet(btn.getAttribute('data-pg-fly'));
+  }, true);
+
   // Rulla i själva rutan stänger inte (t873u), bara rullning av sidan/schemat
   window.addEventListener('scroll', function (e) {
     if (!pop.pinned) return;
@@ -924,8 +1000,10 @@
       });
     });
     st.cellMap = {};
+    st.flyMap = {};
+    var showFly = String(zoneId) === FLIGHT_ZONE;
 
-    var html = '<div class="pg-scroll pg-scroll-fit"><table class="pg-table pg-table-fit pg-table-diag"><thead><tr>' +
+    var html = '<div class="pg-scroll pg-scroll-fit"><table class="pg-table pg-table-fit pg-table-diag' + (showFly ? ' pg-table-fly' : '') + '"><thead><tr>' +
       '<th class="pg-th-time">Tid</th>';
     // t352u: summa per spalt = antal visade bokningar i spalten (samma räkning som cellerna)
     var tot = {};
@@ -941,12 +1019,21 @@
       html += '<th class="' + cls + '" title="' + esc(full) + '" aria-label="' + esc(full) + '"><span class="pg-th-rot" aria-hidden="true">' +
         esc(meta.head) + ' <span class="pg-th-sum' + (n ? '' : ' pg-th-sum0') + '">' + n + '</span></span></th>';
     });
-    // Tom reservkolumn så sista diagonala rubriken inte klipps i högerkant
-    html += '<th class="pg-th-spacer" aria-hidden="true"></th>';
+    if (showFly) {
+      html += '<th class="pg-th-fly" title="Ankomster till Landvetter i den här tiden" aria-label="Flyg"><span class="pg-th-rot" aria-hidden="true">Flyg</span></th>';
+    } else {
+      html += '<th class="pg-th-spacer" aria-hidden="true"></th>';
+    }
     html += '</tr></thead><tbody>';
     if (hasSnart) rows.unshift('snart');
+    var goutAt = Date.now() + 10 * 60000, goutPlaced = false;
+    var colN = 1 + cats.length + 1;
     rows.forEach(function (d) {
       var slot = d === 'snart' ? 'snart' : d.getTime();
+      if (!goutPlaced && d !== 'snart' && slot >= goutAt) {
+        html += '<tr class="pg-tr-gout"><td class="pg-td-gout" colspan="' + colN + '">— 10 min: går ut —</td></tr>';
+        goutPlaced = true;
+      }
       var rowTxt = d === 'snart' ? 'Snart' : p2(d.getHours()) + ':' + p2(d.getMinutes());
       html += '<tr' + (d === 'snart' ? ' class="pg-tr-snart"' : '') + '><td class="pg-td-time"' +
         (d === 'snart' ? ' title="Tiden har passerat men bokningen finns kvar i prognosen – kan komma när som helst"' : '') + '>' + rowTxt + '</td>';
@@ -969,7 +1056,12 @@
         }
         html += '<td class="' + tdCls + '"' + (isF ? ' id="pg-focus-cell"' : '') + attrs + '>' + countCell(sum) + '</td>';
       });
-      html += '<td class="pg-td-spacer" aria-hidden="true"></td>';
+      if (showFly) {
+        var flies = d === 'snart' ? [] : flightsInSlot(slot);
+        html += '<td class="pg-td-fly">' + flyChipHtml(flies) + '</td>';
+      } else {
+        html += '<td class="pg-td-spacer" aria-hidden="true"></td>';
+      }
       html += '</tr>';
     });
     html += '</tbody></table></div>';
@@ -1268,9 +1360,7 @@
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
   }
 
-  // Rubrikraden blir exakt så hög som det längsta 45°-namnet kräver (t346u), och alla namn
-  // startar 5 px ovanför första raden mitt i sin spalt (t349u). Reserven till höger växer så
-  // att sista namnet inte klipps.
+  // Rubrikraden blir så hög som det längsta lodräta namnet kräver, så inget klipps.
   function fitDiagHead(root) {
     var fit = function () {
       var table = root.querySelector('.pg-table-diag');
