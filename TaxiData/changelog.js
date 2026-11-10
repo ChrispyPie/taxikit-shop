@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-10', id: '2026-11-10ank2', rader: [
+    ['Fixat', 'Ankomster: den orange raden för senast sedd station syns tydligt även i ljust tema.']
+  ]},
   { datum: '2026-11-10', id: '2026-11-10ank', rader: [
     ['Förbättrat', 'Ankomster: välj station i en tydligare lista högst upp. Vanliga stationer ligger först, därefter alla andra. Du kan rulla eller börja skriva (även å, ä och ö) så filtreras listan med en gång.'],
     ['Förbättrat', 'I den utfällda stationslistan för ett tåg syns senast sedd plats med orange markering, fullt stationsnamn och klockslag. Passerade stationer får blå bock.']

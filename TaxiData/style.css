@@ -213,6 +213,24 @@ main { max-width: 900px; margin: 1rem auto; padding: 0 1rem; }
 .ank-st.now .ank-st-dot, .ank-st.here .ank-st-dot { background: var(--c-e8890c); border-color: var(--c-e8890c); opacity: 1; color: #fff; font-size: 0.55rem; }
 .ank-st.here .ank-st-name { color: var(--c-b5650a); }
 .ank-st-here { color: var(--c-b5650a); }
+/* Light theme: last-seen row must be clearly highlighted (WCAG AA). Dark theme stays as the rules above. */
+html:not([data-theme="dark"]) .ank-st.here {
+  background: var(--c-fff4e5, #fff4e5);
+  border-radius: 8px;
+  margin: 0 -4px 2px;
+  padding: 3px 4px 6px;
+}
+html:not([data-theme="dark"]) .ank-st.here .ank-st-dot {
+  background: var(--c-c05621, #c05621);
+  border-color: var(--c-c05621, #c05621);
+  color: #fff;
+  opacity: 1;
+}
+html:not([data-theme="dark"]) .ank-st.here .ank-st-name,
+html:not([data-theme="dark"]) .ank-st-here {
+  color: var(--c-9c4221, #9c4221);
+  font-weight: 700;
+}
 .ank-st.canceled .ank-st-name { text-decoration: line-through; color: var(--danger); }
 .ank-st-name { flex: 1; min-width: 0; padding-top: 1px; }
 .ank-st-time { white-space: nowrap; text-align: right; padding-top: 1px; }
