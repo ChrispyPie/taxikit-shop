@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-11', id: '2026-11-11pr1', rader: [
+    ['Nytt', 'Varje körpass i Inkört har en liten passrapport-ikon. Trycker du på ikonen eller på passraden öppnas en kopia av körpassrapporten, som en termoremsa, med Taxi Göteborgs logo och de uppgifter som finns för just det passet. Plusknappen visar fortfarande resorna i passet.']
+  ]},
   { datum: '2026-11-11', id: '2026-11-11kv1', rader: [
     ['Nytt', 'Varje resa i Körpassdata och Åkeridata har en liten kvittoikon. Trycker du på ikonen eller på raden öppnas en kvittokopia i Taxi Göteborgs utseende, med de uppgifter som finns för just den resan. Plusknappen visar fortfarande den korta sammanfattningen.']
   ]},
