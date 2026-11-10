@@ -30,12 +30,13 @@ global.fetch=async(url,opts)=>{
   let rows=[];
   if(xml.includes('TimeAtLocation desc')||xml.includes('$dateadd(-06:00:00)')){
     rows=[{AdvertisedTrainIdent:'3001',LocationSignature:'Sur',ActivityType:'Avgang',TimeAtLocation:lastSeenTs}];
+  }else if(xml.includes('changeid="0"')||(xml.includes('name="LocationSignature"')&&!xml.includes('includedeletedobjects'))){
+    assert(xml.includes('changeid="0"'),'full station query should send changeid=0');
+    rows=boardRows();
   }else if(xml.includes('changeid=')){
     assert(xml.includes('includedeletedobjects="true"'));
-    assert(xml.includes('changeid="'+changeId+'"')||xml.includes('changeid="100"')||xml.includes('changeid="200"'));
+    assert(xml.includes('changeid="100"')||xml.includes('changeid="200"')||xml.includes('changeid="'+changeId+'"'));
     rows=patchRows||[];
-  }else if(xml.includes('name="LocationSignature"')){
-    rows=boardRows();
   }else{
     // full route rebuild (should not happen on delta)
     rows=[];
@@ -53,6 +54,7 @@ function request(url){
   assert.equal(full.status,200);
   assert.match(String(full.headers['cache-control']||''), /s-maxage=60/);
   assert.equal(full.body.trains.length,2);
+  assert(calls.some(x=>x.includes('objecttype="TrainAnnouncement"')&&x.includes('changeid="0"')&&!x.includes('includedeletedobjects')),'full fetch asks for LASTCHANGEID with changeid=0');
   const fullRouteCalls=calls.filter(x=>x.includes('$dateadd(-12:00:00)')).length;
   assert(fullRouteCalls>=1,'full list still rebuilds routes');
   const beforeDelta=calls.length;

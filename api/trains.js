@@ -297,8 +297,10 @@ function orIdents(idents) {
 }
 
 function stationAnnouncementQuery(station, changeId) {
-  const extra = 'orderby="AdvertisedTimeAtLocation" limit="2000"' +
-    (changeId ? ' changeid="' + xmlAttr(changeId) + '" includedeletedobjects="true"' : "");
+  // changeid="0" on a full fetch is what makes Trafikverket return INFO.LASTCHANGEID.
+  const incremental = !!(changeId && changeId !== "0");
+  const extra = 'orderby="AdvertisedTimeAtLocation" limit="2000" changeid="' + xmlAttr(incremental ? changeId : "0") + '"' +
+    (incremental ? ' includedeletedobjects="true"' : "");
   return (
     '<QUERY objecttype="TrainAnnouncement" namespace="rail.trafficinfo" schemaversion="1.9" ' + extra + ">" +
     "<FILTER><AND>" +
