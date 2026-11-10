@@ -748,6 +748,8 @@
   // Callout-etiketter i flygspalten: ikonerna stannar i sin tidrad, numren flyttas åt sidan
   // och upp/ner i grannrader så de inte överlappar, med en tunn linje till rätt plan.
   function layoutFlyCallouts(root) {
+    var land = root && root.querySelector('.pg-table-land.pg-table-fly');
+    if (land) { layoutLandCallouts(root, land); return; }
     var table = root && root.querySelector('.pg-table-fly');
     var scroll = table && (table.closest('.pg-scroll') || table.parentNode);
     if (!table || !scroll) return;
@@ -1118,18 +1120,86 @@
     hidePop();
   }, true);
   var flyLayTimer = 0;
+  function isLand() {
+    return !!(window.matchMedia && window.matchMedia('(orientation: landscape) and (min-width: 640px)').matches);
+  }
+  function fsElement() {
+    return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || null;
+  }
+  function requestLandFs() {
+    var el = document.documentElement;
+    var fn = el.requestFullscreen || el.webkitRequestFullscreen || el.webkitRequestFullScreen || el.msRequestFullscreen;
+    if (!fn) return Promise.resolve(false);
+    try {
+      return Promise.resolve(fn.call(el, { navigationUI: 'hide' })).then(function () { return true; }).catch(function () { return false; });
+    } catch (e) { return Promise.resolve(false); }
+  }
+  function exitLandFs() {
+    if (!fsElement()) return Promise.resolve();
+    var fn = document.exitFullscreen || document.webkitExitFullscreen || document.webkitCancelFullScreen || document.msExitFullscreen;
+    if (!fn) return Promise.resolve();
+    try { return Promise.resolve(fn.call(document)).catch(function () {}); } catch (e) { return Promise.resolve(); }
+  }
+  function syncLandFsBtn() {
+    var btn = document.querySelector('.pg-land-fs-btn');
+    if (!btn) return;
+    var on = !!st.landFs;
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.setAttribute('aria-label', on ? 'Avsluta helskärm' : 'Helskärm');
+    btn.title = on ? 'Avsluta helskärm' : 'Helskärm';
+    btn.classList.toggle('on', on);
+  }
+  function setLandFs(on) {
+    st.landFs = !!on;
+    document.body.classList.toggle('pg-land-fs', st.landFs);
+    syncLandFsBtn();
+    if (st.el && isLand()) {
+      fitLandCols(st.el);
+      layoutFlyCallouts(st.el);
+    }
+  }
+  function toggleLandFs() {
+    if (st.landFs) {
+      exitLandFs().then(function () { setLandFs(false); });
+    } else {
+      setLandFs(true);
+      requestLandFs();
+    }
+  }
+  function onFsChange() {
+    var inFs = !!fsElement();
+    if (!inFs && st.landFs) setLandFs(false);
+    else if (inFs && !st.landFs) setLandFs(true);
+    else if (st.el && isLand()) { fitLandCols(st.el); layoutFlyCallouts(st.el); }
+  }
+  document.addEventListener('fullscreenchange', onFsChange);
+  document.addEventListener('webkitfullscreenchange', onFsChange);
   function relayoutFly() {
     if (!st.el) return;
     if (flyLayTimer) cancelAnimationFrame(flyLayTimer);
     flyLayTimer = requestAnimationFrame(function () {
       flyLayTimer = 0;
-      fitDiagHead(st.el);
+      var landNow = isLand();
+      if (landNow !== st._land) {
+        st._land = landNow;
+        paint();
+        return;
+      }
+      if (landNow) fitLandCols(st.el);
+      else fitDiagHead(st.el);
       layoutFlyCallouts(st.el);
     });
   }
   window.addEventListener('resize', relayoutFly);
   if (window.visualViewport) window.visualViewport.addEventListener('resize', relayoutFly);
   document.addEventListener('click', function (e) {
+    var fsBtn = e.target.closest && e.target.closest('[data-pg-land-fs]');
+    if (fsBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleLandFs();
+      return;
+    }
     var btn = e.target.closest && e.target.closest('[data-pg-fly]');
     if (btn) {
       e.preventDefault();
@@ -1150,6 +1220,258 @@
     if (pop.el && e.target && e.target !== document && pop.el.contains(e.target)) return;
     hidePop();
   }, true);
+
+  function renderLandTimeline(zoneId, focusSlot, cats, rows, bySlot, showFly, tot) {
+    var goutAt = Date.now() + 10 * 60000, goutSlot = null;
+    rows.forEach(function (d) {
+      if (goutSlot != null || d === 'snart') return;
+      if (d.getTime() >= goutAt) goutSlot = d.getTime();
+    });
+    var slotKeys = rows.map(function (d) { return d === 'snart' ? 'snart' : d.getTime(); });
+    var flyBySlot = {};
+    if (showFly) {
+      slotKeys.forEach(function (slot) {
+        if (slot === 'snart') return;
+        var flies = flightsInSlot(slot);
+        rememberFlights(flies);
+        flyBySlot[slot] = flies.map(flyKeyOf);
+      });
+    }
+    var colg = '<colgroup><col class="pg-land-col-lab">';
+    slotKeys.forEach(function () { colg += '<col class="pg-land-col-slot">'; });
+    colg += '</colgroup>';
+    var html = '<div class="pg-land-shell"><button type="button" class="pg-land-fs-btn" data-pg-land-fs aria-pressed="false" aria-label="Helskärm" title="Helskärm">⛶</button>' +
+      '<div class="pg-scroll pg-scroll-land"><table class="pg-table pg-table-land' + (showFly ? ' pg-table-fly' : '') + '">' + colg + '<thead>';
+    if (showFly) {
+      html += '<tr class="pg-land-fly"><th class="pg-land-corner" scope="row">Flyg</th>';
+      html += '<th class="pg-land-fly-band" colspan="' + slotKeys.length + '"><div class="pg-fly-layer"></div>' +
+        (goutSlot != null ? '<span class="pg-land-gout-lab" aria-hidden="true">10 min: går ut</span>' : '') +
+        '</th></tr>';
+    }
+    html += '<tr class="pg-land-time"><th class="pg-land-corner" scope="row">Tid</th>';
+    rows.forEach(function (d, i) {
+      var slot = slotKeys[i];
+      var txt = d === 'snart' ? 'Snart' : p2(d.getHours()) + ':' + p2(d.getMinutes());
+      var keys = (flyBySlot[slot] || []);
+      var cls = 'pg-land-slot' + (d === 'snart' ? ' pg-land-snart' : '') + (slot === goutSlot ? ' pg-land-gout' : '');
+      var attrs = ' class="' + cls + '"' + (d === 'snart' ? ' title="Tiden har passerat men bokningen finns kvar i prognosen – kan komma när som helst"' : '');
+      if (keys.length) attrs += ' data-pg-fly-slot="' + esc(keys.join('||')) + '"';
+      html += '<th' + attrs + '>' + esc(txt) + '</th>';
+    });
+    html += '</tr></thead><tbody>';
+    cats.forEach(function (k) {
+      var meta = CAT_META[k] || { head: k, label: k, child: false };
+      var n = tot[k] || 0;
+      var full = (meta.label || meta.head) + ': ' + n + ' bokning' + (n === 1 ? '' : 'ar') + ' närmaste 2 h';
+      var labCls = 'pg-land-lab' + (meta.child ? ' pg-th-child' : '');
+      html += '<tr' + (meta.child ? ' class="pg-land-tr-child"' : '') + '><th class="' + labCls + '" title="' + esc(full) + '" aria-label="' + esc(full) + '">' +
+        '<span class="pg-land-lab-txt">' + esc(meta.head) + '</span>' +
+        ' <span class="pg-th-sum' + (n ? '' : ' pg-th-sum0') + '">' + n + '</span></th>';
+      rows.forEach(function (d, i) {
+        var slot = slotKeys[i];
+        var key = slot + '|' + k, list = bySlot[key];
+        var sum = cellSummary(list);
+        var tdCls = 'pg-td-cell' + (meta.child ? ' pg-td-child' : '') + (slot === goutSlot ? ' pg-land-gout' : '') + (d === 'snart' ? ' pg-land-snart' : '');
+        var isF = focusSlot && focusSlot === key;
+        if (isF) tdCls += ' pg-focus';
+        var rowTxt = d === 'snart' ? 'Snart' : p2(d.getHours()) + ':' + p2(d.getMinutes());
+        var attrs = '';
+        if (sum) {
+          var fly = d === 'snart' ? null : cellFlights(zoneId, list);
+          st.cellMap[key] = { rowTxt: rowTxt, cat: k, list: list, flight: fly };
+          sum.addon = !meta.child && list.some(function (b) { return addonsOf(b).length > 0; });
+          sum.flight = !!fly;
+          attrs = ' data-pg-cell="' + esc(key) + '" tabindex="0" aria-label="' + esc(rowTxt + ', ' + (meta.label || k) + ': ' + sum.n + ' st, ' + sum.tip +
+            (sum.addon ? ', med tillval' : '') + (fly ? ', ' + FLIGHT_TXT : '') + '. Håll för förklaring.') + '"';
+        }
+        html += '<td class="' + tdCls + '"' + (isF ? ' id="pg-focus-cell"' : '') + attrs + '>' + countCell(sum) + '</td>';
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table></div></div>';
+    return html;
+  }
+
+  function fitLandCols(root) {
+    var table = root && root.querySelector('.pg-table-land');
+    if (!table) return;
+    var scroll = table.closest('.pg-scroll-land') || table.parentNode;
+    var header = document.querySelector('#app header, header');
+    var headerBottom = header ? header.getBoundingClientRect().bottom : 52;
+    var desired = headerBottom + 4;
+    var curTop = scroll.getBoundingClientRect().top;
+    if (curTop - desired > 8) {
+      window.scrollTo(0, Math.max(0, (window.scrollY || 0) + curTop - desired));
+    }
+    var top = scroll.getBoundingClientRect().top;
+    var availH = Math.floor((window.innerHeight || 0) - top - 4);
+    scroll.style.maxHeight = Math.max(140, availH) + 'px';
+    var probe = document.createElement('span');
+    probe.style.cssText = 'position:absolute;visibility:hidden;left:-999px;top:0;white-space:nowrap;font:inherit';
+    scroll.appendChild(probe);
+    var labW = 0;
+    table.querySelectorAll('.pg-land-lab').forEach(function (el) {
+      probe.style.fontSize = getComputedStyle(el).fontSize;
+      probe.style.fontWeight = getComputedStyle(el).fontWeight;
+      probe.style.fontFamily = getComputedStyle(el).fontFamily;
+      probe.textContent = ((el.querySelector('.pg-land-lab-txt') || el).textContent || '').trim() + ' 00';
+      if (probe.offsetWidth + 18 > labW) labW = probe.offsetWidth + 18;
+    });
+    var corner = table.querySelector('.pg-land-corner');
+    if (corner) {
+      probe.style.fontSize = getComputedStyle(corner).fontSize;
+      probe.style.fontWeight = getComputedStyle(corner).fontWeight;
+      probe.textContent = (corner.textContent || '').trim();
+      if (probe.offsetWidth + 16 > labW) labW = probe.offsetWidth + 16;
+    }
+    if (labW < 56) labW = 56;
+    if (labW > 120) labW = 120;
+    var slotEl = table.querySelector('.pg-land-time .pg-land-slot');
+    var nSlot = table.querySelectorAll('.pg-land-time .pg-land-slot').length || 1;
+    var minSlot = 28;
+    if (slotEl) {
+      var scs = getComputedStyle(slotEl);
+      probe.style.fontSize = scs.fontSize;
+      probe.style.fontFamily = scs.fontFamily;
+      probe.style.fontWeight = scs.fontWeight;
+      probe.style.fontVariantNumeric = 'tabular-nums';
+      probe.textContent = '00:00';
+      minSlot = Math.max(28, Math.ceil(probe.offsetWidth + 8));
+      probe.textContent = 'Snart';
+      if (probe.offsetWidth + 8 > minSlot) minSlot = Math.ceil(probe.offsetWidth + 8);
+    }
+    if (probe.parentNode) probe.parentNode.removeChild(probe);
+    var avail = Math.floor(scroll.clientWidth || table.clientWidth);
+    var rest = avail - labW;
+    var slotW = Math.max(minSlot, Math.floor(rest / nSlot));
+    table.style.setProperty('--pg-land-lab-w', labW + 'px');
+    table.style.setProperty('--pg-land-slot-w', slotW + 'px');
+    table.style.width = (labW + slotW * nSlot) + 'px';
+    var cols = table.querySelectorAll('col');
+    if (cols[0]) cols[0].style.width = labW + 'px';
+    for (var i = 1; i < cols.length; i++) cols[i].style.width = slotW + 'px';
+    var goutLab = table.querySelector('.pg-land-fly-band .pg-land-gout-lab');
+    var goutTh = table.querySelector('.pg-land-time .pg-land-gout');
+    var band = table.querySelector('.pg-land-fly-band');
+    if (goutLab && goutTh && band) {
+      var br = band.getBoundingClientRect();
+      var gr = goutTh.getBoundingClientRect();
+      goutLab.style.left = Math.max(0, Math.round(gr.left - br.left + 3)) + 'px';
+      goutLab.style.top = '2px';
+    }
+  }
+
+  function layoutLandCallouts(root, table) {
+    var band = table.querySelector('.pg-land-fly-band');
+    var scroll = table.closest('.pg-scroll') || table.parentNode;
+    var layerHost = band || scroll;
+    var layer = layerHost.querySelector('.pg-fly-layer');
+    if (!layer) {
+      layer = document.createElement('div');
+      layer.className = 'pg-fly-layer';
+      layerHost.appendChild(layer);
+    }
+    var slots = table.querySelectorAll('.pg-land-time .pg-land-slot[data-pg-fly-slot]');
+    if (!band || !slots.length) { layer.innerHTML = ''; return; }
+    var origin = band.getBoundingClientRect();
+    layer.style.left = '0';
+    layer.style.top = '0';
+    layer.style.width = band.offsetWidth + 'px';
+    layer.style.height = band.offsetHeight + 'px';
+    var pad = 2;
+    var bounds = { x: pad, y: pad, w: Math.max(24, origin.width - pad * 2), h: Math.max(24, origin.height - pad * 2) };
+    var iconW = 15, iconH = 16, iconStep = 10;
+    var items = [], iconRects = [];
+    for (var c = 0; c < slots.length; c++) {
+      var th = slots[c];
+      var keys = (th.getAttribute('data-pg-fly-slot') || '').split('||').filter(Boolean);
+      if (!keys.length) continue;
+      var sl = th.getBoundingClientRect();
+      var cx = sl.left - origin.left + sl.width / 2;
+      var yIcon = bounds.y + bounds.h - iconH - 1;
+      var x0 = cx - ((keys.length - 1) * iconStep) / 2 - iconW / 2;
+      for (var j = 0; j < keys.length; j++) {
+        var key = keys[j];
+        var f = st.flyMap && st.flyMap[key];
+        var rec = { x: x0 + j * iconStep, y: yIcon, w: iconW, h: iconH };
+        iconRects.push(rec);
+        items.push({
+          key: key, no: (f && f.no) || '', from: (f && f.from) || '',
+          ix: rec.x + rec.w / 2, iy: rec.y + rec.h / 2, ir: rec
+        });
+      }
+    }
+    if (!items.length) { layer.innerHTML = ''; return; }
+    layer.innerHTML = '<span class="pg-fly-lab" style="visibility:hidden;position:absolute;left:-999px;top:0"></span>';
+    var probe = layer.firstChild;
+    items.forEach(function (it) {
+      probe.textContent = it.no || 'FLY';
+      it.lw = Math.ceil(probe.offsetWidth) || 28;
+      it.lh = Math.ceil(probe.offsetHeight) || 11;
+    });
+    var placed = [];
+    items.forEach(function (it) {
+      var w = it.lw, h = it.lh;
+      var best = null, bestScore = Infinity;
+      var xs = [];
+      xs.push(it.ix + it.ir.w / 2 + 5);
+      xs.push(it.ix - w - it.ir.w / 2 - 5);
+      xs.push(it.ix - w / 2);
+      for (var x = bounds.x; x <= bounds.x + bounds.w - w + 0.1; x += 4) xs.push(x);
+      var ys = [];
+      var yAbove = it.ir.y - 4 - h;
+      ys.push(yAbove);
+      var step = Math.max(8, Math.round(h * 0.75));
+      for (var k = 1; k <= 10; k++) {
+        ys.push(yAbove - k * step);
+        ys.push(yAbove + k * step);
+      }
+      for (var a = 0; a < xs.length; a++) {
+        var x = xs[a];
+        for (var b = 0; b < ys.length; b++) {
+          var y = ys[b];
+          if (x < bounds.x - 0.5 || y < bounds.y - 0.5 || x + w > bounds.x + bounds.w + 0.5 || y + h > bounds.y + bounds.h + 0.5) continue;
+          var rec = { x: x, y: y, w: w, h: h };
+          var ok = true, p;
+          for (p = 0; p < placed.length; p++) if (flyRectHits(rec, placed[p], 3)) { ok = false; break; }
+          if (!ok) continue;
+          for (p = 0; p < iconRects.length; p++) if (flyRectHits(rec, iconRects[p], 3)) { ok = false; break; }
+          if (!ok) continue;
+          var dx = (x + w / 2) - it.ix, dy = (y + h / 2) - it.iy;
+          var dist = Math.sqrt(dx * dx + dy * dy);
+          var score = dist + (dy > 0 ? 18 : 0) + (dist < 8 ? 20 : 0);
+          if (score < bestScore) { bestScore = score; best = rec; }
+        }
+      }
+      if (!best) {
+        best = {
+          x: Math.min(bounds.x + bounds.w - w, Math.max(bounds.x, it.ix - w / 2)),
+          y: Math.min(bounds.y + bounds.h - h, Math.max(bounds.y, it.ir.y - h - 4)),
+          w: w, h: h
+        };
+        var guard = 0;
+        while (guard++ < 40) {
+          var clash = placed.some(function (p) { return flyRectHits(best, p, 3); }) ||
+            iconRects.some(function (p) { return flyRectHits(best, p, 3); });
+          if (!clash) break;
+          best.x += 6;
+          if (best.x + w > bounds.x + bounds.w) { best.x = bounds.x; best.y = Math.max(bounds.y, best.y - h - 2); }
+        }
+      }
+      placed.push(best);
+      it.lab = best;
+    });
+    var svg = '<svg class="pg-fly-svg" width="' + band.offsetWidth + '" height="' + band.offsetHeight + '" aria-hidden="true">';
+    var labs = '', icos = '';
+    items.forEach(function (it, i) {
+      var end = flyClosestOnRect(it.ix, it.iy, it.lab);
+      svg += '<line class="pg-fly-leader" x1="' + it.ix.toFixed(1) + '" y1="' + it.iy.toFixed(1) + '" x2="' + end.x.toFixed(1) + '" y2="' + end.y.toFixed(1) + '"/>';
+      var aria = (it.no || 'Flyg') + (it.from ? ' från ' + it.from : '');
+      icos += '<button type="button" class="pg-fly-chip" data-pg-fly="' + esc(it.key) + '" aria-label="' + esc(aria) + '" style="left:' + it.ir.x + 'px;top:' + it.ir.y + 'px;width:' + it.ir.w + 'px;height:' + it.ir.h + 'px;z-index:' + (i + 1) + '"><span class="pg-fly-ico" aria-hidden="true">✈</span></button>';
+      labs += '<button type="button" class="pg-fly-lab" data-pg-fly="' + esc(it.key) + '" aria-label="' + esc(aria) + '" style="left:' + it.lab.x + 'px;top:' + it.lab.y + 'px">' + esc(it.no) + '</button>';
+    });
+    layer.innerHTML = svg + '</svg>' + icos + labs;
+  }
 
   function renderCarTimeline(zoneId, focusSlot) {
     var cats = loadCats().filter(function (k) { return ALL_CAT_KEYS.indexOf(k) >= 0; });
@@ -1181,17 +1503,19 @@
     st.flyMap = {};
     var showFly = String(zoneId) === FLIGHT_ZONE;
 
-    var colg = '<colgroup><col class="pg-col-time">';
-    cats.forEach(function () { colg += '<col class="pg-col-cat">'; });
-    colg += (showFly ? '<col class="pg-col-fly">' : '<col class="pg-col-spacer">') + '</colgroup>';
-    var html = '<div class="pg-scroll pg-scroll-fit"><table class="pg-table pg-table-fit pg-table-diag' + (showFly ? ' pg-table-fly' : '') + '">' + colg + '<thead><tr>' +
-      '<th class="pg-th-time">Tid</th>';
     // t352u: summa per spalt = antal visade bokningar i spalten (samma räkning som cellerna)
     var tot = {};
     Object.keys(bySlot).forEach(function (key) {
       var k = key.split('|')[1];
       tot[k] = (tot[k] || 0) + bySlot[key].length;
     });
+    if (hasSnart) rows.unshift('snart');
+    if (isLand()) return renderLandTimeline(zoneId, focusSlot, cats, rows, bySlot, showFly, tot);
+    var colg = '<colgroup><col class="pg-col-time">';
+    cats.forEach(function () { colg += '<col class="pg-col-cat">'; });
+    colg += (showFly ? '<col class="pg-col-fly">' : '<col class="pg-col-spacer">') + '</colgroup>';
+    var html = '<div class="pg-scroll pg-scroll-fit"><table class="pg-table pg-table-fit pg-table-diag' + (showFly ? ' pg-table-fly' : '') + '">' + colg + '<thead><tr>' +
+      '<th class="pg-th-time">Tid</th>';
     cats.forEach(function (k) {
       var meta = CAT_META[k] || { head: k, label: k, child: false };
       var n = tot[k] || 0;
@@ -1207,7 +1531,6 @@
       html += '<th class="pg-th-spacer" aria-hidden="true"></th>';
     }
     html += '</tr></thead><tbody>';
-    if (hasSnart) rows.unshift('snart');
     var goutAt = Date.now() + 10 * 60000, goutPlaced = false;
     var colN = 1 + cats.length + 1;
     rows.forEach(function (d) {
@@ -1513,7 +1836,9 @@
       body += renderMorgonTeaser();
     }
 
+    st._land = isLand();
     document.body.classList.add('pg-open');
+    document.body.classList.toggle('pg-land', !!st._land);
     st.el.innerHTML = '<div class="pg">' + tabs + body + '</div>';
     bind(st.el);
     var ktb = st.el.querySelector('#pg-kt-btn');
@@ -1522,7 +1847,14 @@
       st.bookings = ktApply(st.ktRaw); paint();
     };
     bindPop(st.el);
-    fitDiagHead(st.el);
+    if (st._land) {
+      if (st.landFs) document.body.classList.add('pg-land-fs');
+      fitLandCols(st.el);
+      syncLandFsBtn();
+    } else {
+      if (st.landFs) { exitLandFs(); setLandFs(false); }
+      fitDiagHead(st.el);
+    }
     layoutFlyCallouts(st.el);
     fitTabs(st.el);
     // Notis -> rulla fram den markerade förbokningen en gång
@@ -1800,7 +2132,10 @@
   P.refresh = function () { if (onPage()) return refresh(); };
 
   P.stop = function () {
+    if (st.landFs) { exitLandFs(); setLandFs(false); }
     document.body.classList.remove('pg-open');
+    document.body.classList.remove('pg-land');
+    document.body.classList.remove('pg-land-fs');
     st.focus = null;   // lämnar Prognos -> markeringen från notisen är klar
     if (st.poll) { clearInterval(st.poll); st.poll = null; }
     if (badge.viewing) { badge.viewing = false; markSeen(); }  // lämnar Prognos → nollställ
