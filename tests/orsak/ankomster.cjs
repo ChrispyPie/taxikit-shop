@@ -9,7 +9,7 @@ const windowObj = {
   addEventListener(t, f) { listeners.push([t, f]); },
   removeEventListener() {},
 };
-windowObj.ARRIVAL_DATA={loadTrains(){return Promise.resolve({items:[]});},loadFlights(){return Promise.resolve({items:[]});},trainGroups(){return [];},stationCatalog(){return Promise.resolve([]);},date(v){return v?new Date(v):null},hm(){return ''}};
+windowObj.ARRIVAL_DATA={loadTrains(){return Promise.resolve({items:[]});},loadTrainDelta(){return Promise.resolve({items:[],removed:[]});},mergeTrainDeltas(items){return items||[];},loadFlights(){return Promise.resolve({items:[]});},trainGroups(){return [];},stationCatalog(){return Promise.resolve([]);},date(v){return v?new Date(v):null},hm(){return ''}};
 windowObj.TRAIN_STATIONS=[{id:'G',label:'Göteborg C'}];
 const ctx = {
   window: windowObj,
