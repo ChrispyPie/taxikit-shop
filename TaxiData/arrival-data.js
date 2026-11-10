@@ -168,6 +168,8 @@
       iata: f.iata || '',
       sched: d(f.sched), est: d(f.est), act: d(f.act) || (st === 'LAN' ? d(f.est) || d(f.sched) : null),
       lastBag: d(f.lastBag),
+      firstBag: d(f.firstBag),
+      firstBagEst: d(f.firstBagEst),
       canceled: st === 'CAN',
       removed: st === 'DEL',
       special: special || '',
@@ -193,5 +195,39 @@
    if(catalogPending)return catalogPending;
    catalogPending=getJson([TRAIN_URLS[0]+'?stations=1'],false).then(function(j){if(!Array.isArray(j.stations)||!j.stations.some(function(s){return s.id==='G';}))throw new Error('Stationslistan kunde inte hämtas');var rows=j.stations.filter(function(s){return typeof s.label==='string'&&/^[A-Za-zÅÄÖåäö.]{1,8}$/.test(s.id||'');});try{localStorage.setItem('taxi_train_stations_v1',JSON.stringify({at:Date.now(),stations:rows}));}catch(e){}return rows;}).finally(function(){catalogPending=null;});return catalogPending;
  }
- window.ARRIVAL_DATA={date:d,hm:hm,hms:hms,stationCatalog:stationCatalog,loadTrains:loadTrains,loadTrainDelta:loadTrainDelta,mergeTrainDeltas:mergeTrainDeltas,loadFlights:loadFlights,trainGroups:trainGroups,watchItems:watchItems,flightItems:function(age){return cache.flyg&&Date.now()-cache.flyg.at<(age||120000)?Promise.resolve(cache.flyg.items):watchItems('flyg').catch(function(){return cache.flyg?cache.flyg.items:[];});}};
+ 
+  function escTxt(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  // Gemensamt flygkort (Ankomster-fält) för t.ex. prognosens infobox.
+  function flightDetailHtml(it) {
+    if (!it) return '';
+    function row(lab, val) {
+      if (!val) return '';
+      return '<div class="pg-fly-kv"><dt>' + escTxt(lab) + '</dt><dd>' + escTxt(val) + '</dd></div>';
+    }
+    var h = '<div class="pg-fly-card"><div class="pg-fly-card-h">✈️ ' + escTxt(it.no || 'Flyg') +
+      (it.from ? ' · ' + escTxt(it.from) : '') + '</div><dl class="pg-fly-dl">';
+    h += row('Flygnummer', it.no);
+    h += row('Bolag', it.sub);
+    h += row('Från', it.from);
+    h += row('Planerad', hm(d(it.sched) || it.sched));
+    if (it.est) h += row('Beräknad', hm(d(it.est) || it.est));
+    if (it.act) h += row('Landat', hm(d(it.act) || it.act));
+    if (it.info) h += row('Status', it.info);
+    var info = String(it.info || '');
+    var fb = it.firstBag ? hm(d(it.firstBag) || it.firstBag) : '';
+    var fbe = it.firstBagEst ? hm(d(it.firstBagEst) || it.firstBagEst) : '';
+    var lb = it.lastBag ? hm(d(it.lastBag) || it.lastBag) : '';
+    if (fb && info.indexOf(fb) < 0) h += row('Första väskan', fb);
+    else if (!fb && fbe && info.indexOf(fbe) < 0) h += row('Väskor beräknas', fbe);
+    if (lb && info.indexOf(lb) < 0) h += row('Sista väskan', lb);
+    var remark = String(it.reason || '').trim();
+    if (remark && remark !== String(it.info || '').trim()) h += row('Anmärkning', remark);
+    return h + '</dl></div>';
+  }
+
+window.ARRIVAL_DATA={date:d,hm:hm,hms:hms,stationCatalog:stationCatalog,loadTrains:loadTrains,loadTrainDelta:loadTrainDelta,mergeTrainDeltas:mergeTrainDeltas,loadFlights:loadFlights,trainGroups:trainGroups,watchItems:watchItems,flightDetailHtml:flightDetailHtml,flightItems:function(age){return cache.flyg&&Date.now()-cache.flyg.at<(age||120000)?Promise.resolve(cache.flyg.items):watchItems('flyg').catch(function(){return cache.flyg?cache.flyg.items:[];});}};
 })();

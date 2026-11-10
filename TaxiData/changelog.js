@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-10', id: '2026-11-10pg', rader: [
+    ['Nytt', 'Prognos på Landvetter visar en linje vid 10 min (då bokningarna går ut) och en flygspalt med ankomster till Landvetter i varje tid. Tryck på ett flyg för mer uppgifter. Kolumnrubrikerna står lodrätt så spalterna får plats även på en smal skärm.']
+  ]},
   { datum: '2026-11-10', id: '2026-11-10fly', rader: [
     ['Nytt', 'Du kan nu lägga fasta Bevakningar även för flyg till Landvetter, under Ankomster › Flyg. De syns på sidan Mina bevakningar som Bevakning (flyg).']
   ]},
