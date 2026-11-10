@@ -176,9 +176,16 @@ html body header {
   z-index: 60; /* under menyer/popups/modaler (100+) */
   background: var(--bg);
   padding-top: max(0.8rem, env(safe-area-inset-top));
+  display: grid;
+  grid-template-columns: minmax(112px, 1fr) minmax(0, auto) minmax(112px, 1fr);
+  align-items: center;
+  column-gap: 4px;
 }
 html body header > button,
-html body header .profile-btn {
+html body header .hdr-left button,
+html body header .hdr-right button,
+html body header .profile-btn,
+html body header .app-fs-btn {
   background: none;
   border: none;
   box-shadow: none;
@@ -194,22 +201,54 @@ html body header .profile-btn {
   font-size: calc(20px * var(--font-scale, 1));
 }
 html body header > button:hover,
-html body header .profile-btn:hover { background: none; color: var(--primary); }
+html body header .hdr-left button:hover,
+html body header .hdr-right button:hover,
+html body header .profile-btn:hover,
+html body header .app-fs-btn:hover { background: none; color: var(--primary); }
 html body header > button:active,
-html body header .profile-btn:active { background: rgba(127,127,127,0.18); transform: scale(0.94); }
+html body header .hdr-left button:active,
+html body header .hdr-right button:active,
+html body header .profile-btn:active,
+html body header .app-fs-btn:active { background: rgba(127,127,127,0.18); transform: scale(0.94); }
 html body header > button:focus-visible,
-html body header .profile-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-html body .hdr-right { display: flex; align-items: center; gap: 0.1rem; }
+html body header .hdr-left button:focus-visible,
+html body header .hdr-right button:focus-visible,
+html body header .profile-btn:focus-visible,
+html body header .app-fs-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+html body .hdr-left,
+html body .hdr-right {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+  min-width: 0;
+  z-index: 1; /* ikoner klickbara även om titeln är lång */
+}
+html body .hdr-left { justify-content: flex-start; }
+html body .hdr-right { justify-content: flex-end; }
+/* Titel i mitten, aldrig över ikonerna: lika flex på sidorna + ellipsis. */
+html body header h1 {
+  position: relative;
+  left: auto;
+  transform: none;
+  flex: 0 1 auto;
+  max-width: 100%;
+  margin: 0;
+  min-width: 0;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 /* Profilmenyn följer med den fasta headern */
 #profile-menu { position: fixed !important; top: calc(68px + env(safe-area-inset-top)) !important; }
 
 
-/* Helskärm-knapp (helskarm.js): i headern när den syns, annars flytande i hörnet. */
+/* Helskärm-knapp (helskarm.js): till höger om hemknappen i .hdr-left. Flytande bara utan header (inloggning). */
 .app-fs-btn {
-  width: 36px; height: 36px; min-width: 36px; min-height: 36px; padding: 0; margin: 0 0 0 4px;
+  width: 44px; height: 44px; min-width: 44px; min-height: 44px; padding: 0.3rem; margin: 0;
   border: none; background: none; box-shadow: none;
   color: var(--primary);
-  font-size: 18px; line-height: 1; cursor: pointer;
+  font-size: calc(18px * var(--font-scale, 1)); line-height: 1; cursor: pointer;
   border-radius: 10px;
   flex-shrink: 0;
   display: inline-flex; align-items: center; justify-content: center;
@@ -223,8 +262,9 @@ header .app-fs-btn { align-self: center; }
 .app-fs-btn-float {
   position: fixed;
   z-index: 80;
-  top: max(8px, env(safe-area-inset-top, 0px));
   right: max(8px, env(safe-area-inset-right, 0px));
+  bottom: max(8px, env(safe-area-inset-bottom, 0px));
+  top: auto;
   margin: 0;
   border: 1px solid var(--c-cbd5e0, #cbd5e0);
   border-radius: 8px;
