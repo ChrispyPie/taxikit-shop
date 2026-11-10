@@ -8,6 +8,7 @@
   <title>TaxiData</title>
   <script src="tema.js?v=20261026tm1"></script>
   <script src="enhet.js?v=20261029d"></script>
+  <script src="delad-enhet.js?v=20261110de1"></script>
   <script src="namn.js?v=20261028nm1"></script>
   <link rel="stylesheet" href="style.css?v=20261110pg4">
   <link rel="stylesheet" href="tema.css?v=20261104sh1">
@@ -71,6 +72,8 @@
     .p-note { font-size: 0.85rem; color: var(--text-soft); margin-bottom: 10px; }
     .p-note.warn { color: var(--danger-text); font-weight: 600; }
     .app-toast { position: fixed; left: 12px; right: 12px; top: 12px; z-index: 300; background: var(--toast-bad); color: white; padding: 12px 14px; border-radius: 10px; font-weight: 600; box-shadow: 0 4px 14px rgba(0,0,0,0.25); text-align: center; }
+    .login-notice { margin: 0 0 12px; padding: 10px 12px; border-radius: 8px; background: var(--ok-bg, #edf2f7); color: var(--text); border: 1px solid var(--border, #cbd5e0); font-weight: 600; text-align: center; }
+    html[data-theme="dark"] .login-notice { background: #1a2330; color: #e2e8f0; border-color: #4a5568; }
   </style>
 </head>
 <body>
@@ -81,6 +84,7 @@
       <input type="text" id="driver-id" placeholder="Förar-ID" inputmode="numeric" autocomplete="username" autocapitalize="off" autocorrect="off" autofocus>
       <input type="password" id="password" placeholder="Lösenord" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false">
       <button onclick="checkPassword()">Logga in</button>
+      <p id="login-notice" class="login-notice" role="status" style="display:none;"></p>
       <p id="login-error" style="color:var(--c-c53030); display:none; margin-top:8px;"></p>
       <p style="margin-top:14px; text-align:center;"><a href="#" id="forgot-link" onclick="showForgot(true); return false;" style="color:var(--primary);">Glömt lösenord?</a></p>
       <p class="p-note" style="margin-top:14px; text-align:center;">Inloggningar och ändringar loggas med IP-adress och enhet för säkerhetens skull. Loggen sparas i 13 månader.</p>
@@ -225,6 +229,7 @@
       if (window.DEMO) DEMO.clear();
       if (window.NOTIS) NOTIS.logout();
       if (window.INKORG) INKORG.logout();
+      if (window.DELAD) DELAD.onClearSession();
     }
 
     function showLoginError(msg) {
@@ -283,6 +288,7 @@
         localStorage.setItem('taxi_session', r.token);
         localStorage.setItem('taxi_logged_in', '1');
         localStorage.setItem('taxi_driver', r.driver.id);
+        if (window.DELAD) DELAD.markLogin();
         location.reload();
       } catch (e) {
         showLoginError('Kunde inte kontrollera lösenordet. Försök igen.');
@@ -348,6 +354,7 @@
       driverId = localStorage.getItem('taxi_driver') || 'okänd';
       if (!(await loadDriverData())) return;
       document.getElementById('login-screen').style.display = 'none';
+      if (window.DELAD) DELAD.start();
       SESSION_READY.finish();
       LAZY.refreshBadges();
       updateProfileReminder();
@@ -842,10 +849,11 @@
       } else if (current === 'installningar') {
         title.textContent = 'Inställningar';
         content.onclick = null;
-        content.innerHTML = '<div id="home-layout-set"></div><div id="theme-set"></div><div id="text-size-set"></div><div id="hb-set"></div>';
+        content.innerHTML = '<div id="home-layout-set"></div><div id="theme-set"></div><div id="text-size-set"></div><div id="delad-enhet-set"></div><div id="hb-set"></div>';
         renderHomeLayoutSetting(document.getElementById('home-layout-set'));
         renderThemeSetting(document.getElementById('theme-set'));
         renderTextSizeSetting(document.getElementById('text-size-set'));
+        if (window.DELAD) DELAD.renderSettings(document.getElementById('delad-enhet-set'));
         if (window.HJALPBOT) window.HJALPBOT.renderSettings(document.getElementById('hb-set'));
       } else if (current) {
         title.textContent = current;
