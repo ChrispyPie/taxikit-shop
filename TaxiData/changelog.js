@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-10', id: '2026-11-10row', rader: [
+    ['Förbättrat', 'Ankomster: stationsväljaren och klockan för senast uppdaterad står på samma rad när det får plats, annars hamnar klockan på raden under.']
+  ]},
   { datum: '2026-11-10', id: '2026-11-10bev', rader: [
     ['Förbättrat', 'De fasta tågbevakningarna heter nu Bevakningar. Du hittar dem under Mina bevakningar på Ankomster › Tåg, och tåg som passar en bevakning syns också på sidan Mina bevakningar.']
   ]},

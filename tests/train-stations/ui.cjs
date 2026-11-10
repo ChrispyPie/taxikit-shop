@@ -10,6 +10,9 @@ const assert=require('node:assert/strict'),{boot}=require('../lazy-views/dom.cjs
  assert(upd1,'uppdaterad shows HH:MM:SS');
  assert.equal(w.document.querySelectorAll('[data-ank-station]').length,0,'quick-pick row removed');
  assert(w.document.querySelector('.ank-station-picker-label').textContent.includes('Station'));
+ const bar=w.document.querySelector('.ank-toolbar');
+ assert(bar && bar.querySelector('.ank-station-picker') && bar.querySelector('.ank-head'),'picker and uppdaterad share a wrapping toolbar');
+
  assert.equal(w.document.querySelector('[data-ank-picker] .ank-station-title-label').textContent.trim(),'Göteborg C');
  assert(w.document.querySelector('[data-ank-picker] .ank-station-caret'));
  w.document.querySelector('[data-ank-picker]').click();await pause();
