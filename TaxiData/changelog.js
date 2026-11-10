@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-10', id: '2026-11-10ref', rader: [
+    ['Förbättrat', 'Ankomster: uppdatera-knappen är borttagen, listan uppdateras av sig själv. Stationsväljaren och klockan ryms oftare på samma rad; om klockan hamnar på raden under står den till vänster.']
+  ]},
   { datum: '2026-11-10', id: '2026-11-10row', rader: [
     ['Förbättrat', 'Ankomster: stationsväljaren och klockan för senast uppdaterad står på samma rad när det får plats, annars hamnar klockan på raden under.']
   ]},
