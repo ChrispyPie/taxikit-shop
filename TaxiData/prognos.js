@@ -1153,10 +1153,7 @@
     st.landFs = !!on;
     document.body.classList.toggle('pg-land-fs', st.landFs);
     syncLandFsBtn();
-    if (st.el && isLand()) {
-      fitLandCols(st.el);
-      layoutFlyCallouts(st.el);
-    }
+    if (st.el && isLand()) settleLandLayout();
   }
   function toggleLandFs() {
     if (st.landFs) {
@@ -1170,7 +1167,7 @@
     var inFs = !!fsElement();
     if (!inFs && st.landFs) setLandFs(false);
     else if (inFs && !st.landFs) setLandFs(true);
-    else if (st.el && isLand()) { fitLandCols(st.el); layoutFlyCallouts(st.el); }
+    else if (st.el && isLand()) settleLandLayout();
   }
   document.addEventListener('fullscreenchange', onFsChange);
   document.addEventListener('webkitfullscreenchange', onFsChange);
@@ -1185,9 +1182,8 @@
         paint();
         return;
       }
-      if (landNow) fitLandCols(st.el);
-      else fitDiagHead(st.el);
-      layoutFlyCallouts(st.el);
+      if (landNow) settleLandLayout();
+      else { clearLandPin(st.el); fitDiagHead(st.el); layoutFlyCallouts(st.el); }
     });
   }
   window.addEventListener('resize', relayoutFly);
@@ -1244,9 +1240,7 @@
       '<div class="pg-scroll pg-scroll-land"><table class="pg-table pg-table-land' + (showFly ? ' pg-table-fly' : '') + '">' + colg + '<thead>';
     if (showFly) {
       html += '<tr class="pg-land-fly"><th class="pg-land-corner" scope="row">Flyg</th>';
-      html += '<th class="pg-land-fly-band" colspan="' + slotKeys.length + '"><div class="pg-fly-layer"></div>' +
-        (goutSlot != null ? '<span class="pg-land-gout-lab" aria-hidden="true">10 min: går ut</span>' : '') +
-        '</th></tr>';
+      html += '<th class="pg-land-fly-band" colspan="' + slotKeys.length + '"><div class="pg-fly-layer"></div></th></tr>';
     }
     html += '<tr class="pg-land-time"><th class="pg-land-corner" scope="row">Tid</th>';
     rows.forEach(function (d, i) {
@@ -1292,20 +1286,91 @@
     return html;
   }
 
+  function landHeaderBottom() {
+    var header = document.querySelector('#app header');
+    if (header && getComputedStyle(header).display !== 'none' && header.getBoundingClientRect().height > 0) {
+      return header.getBoundingClientRect().bottom;
+    }
+    return 0;
+  }
+
+  function clearLandPin(root) {
+    var pg = root && (root.querySelector ? root.querySelector('.pg') : null);
+    if (!pg && root && root.classList && root.classList.contains('pg')) pg = root;
+    if (!pg) return;
+    pg.style.paddingTop = '';
+    var spacer = pg.querySelector('.pg-land-spacer');
+    if (spacer && spacer.parentNode) spacer.parentNode.removeChild(spacer);
+    var scroll = pg.querySelector('.pg-scroll-land');
+    if (scroll) scroll.style.maxHeight = '';
+    document.body.classList.remove('pg-land-tablet');
+  }
+
+  function pinLandGrid(root) {
+    var pg = root && root.querySelector ? root.querySelector('.pg') : null;
+    if (!pg && root && root.classList && root.classList.contains('pg')) pg = root;
+    if (!pg) return;
+    var shell = pg.querySelector('.pg-land-shell');
+    if (!shell) return;
+    var spacer = pg.querySelector('.pg-land-spacer');
+    if (!spacer) {
+      spacer = document.createElement('div');
+      spacer.className = 'pg-land-spacer';
+      spacer.setAttribute('aria-hidden', 'true');
+      pg.insertBefore(spacer, pg.firstChild);
+    }
+    spacer.style.height = '0px';
+    var first = spacer.nextElementSibling;
+    var contentTop = first ? first.getBoundingClientRect().top : pg.getBoundingClientRect().top;
+    var contentH = shell.getBoundingClientRect().bottom - contentTop;
+    var main = document.querySelector('main');
+    var padB = 0;
+    try { if (main) padB = parseFloat(getComputedStyle(main).paddingBottom) || 0; } catch (e) {}
+    var avail = Math.max(0, Math.floor((window.innerHeight || 0) - landHeaderBottom() - padB - 2));
+    var extra = Math.max(0, avail - Math.ceil(contentH));
+    spacer.style.height = extra + 'px';
+    scrollLandToBottom();
+    var gap = Math.round((window.innerHeight || 0) - padB - shell.getBoundingClientRect().bottom);
+    if (gap > 1) {
+      spacer.style.height = (extra + gap) + 'px';
+      scrollLandToBottom();
+    }
+  }
+
+  function scrollLandToBottom() {
+    var se = document.scrollingElement || document.documentElement;
+    if (!se) return;
+    void se.offsetHeight;
+    var max = Math.max(0, (se.scrollHeight || 0) - (window.innerHeight || se.clientHeight || 0));
+    if (Math.abs((window.scrollY || se.scrollTop || 0) - max) > 1) window.scrollTo(0, max);
+  }
+
+  function settleLandLayout() {
+    if (!st.el || !isLand()) return;
+    var run = function () {
+      if (!st.el || !isLand()) return;
+      fitLandCols(st.el);
+      layoutFlyCallouts(st.el);
+      scrollLandToBottom();
+    };
+    run();
+    requestAnimationFrame(function () {
+      run();
+      requestAnimationFrame(function () {
+        run();
+        clearTimeout(st._landSettle);
+        st._landSettle = setTimeout(run, 100);
+      });
+    });
+  }
+
   function fitLandCols(root) {
     var table = root && root.querySelector('.pg-table-land');
     if (!table) return;
     var scroll = table.closest('.pg-scroll-land') || table.parentNode;
-    var header = document.querySelector('#app header, header');
-    var headerBottom = header ? header.getBoundingClientRect().bottom : 52;
-    var desired = headerBottom + 4;
-    var curTop = scroll.getBoundingClientRect().top;
-    if (curTop - desired > 8) {
-      window.scrollTo(0, Math.max(0, (window.scrollY || 0) + curTop - desired));
-    }
-    var top = scroll.getBoundingClientRect().top;
-    var availH = Math.floor((window.innerHeight || 0) - top - 4);
-    scroll.style.maxHeight = Math.max(140, availH) + 'px';
+    scroll.style.maxHeight = '';
+    var tablet = (window.innerWidth || 0) >= 1000 && (window.innerHeight || 0) >= 560;
+    document.body.classList.toggle('pg-land-tablet', tablet);
     var probe = document.createElement('span');
     probe.style.cssText = 'position:absolute;visibility:hidden;left:-999px;top:0;white-space:nowrap;font:inherit';
     scroll.appendChild(probe);
@@ -1341,6 +1406,7 @@
       if (probe.offsetWidth + 8 > minSlot) minSlot = Math.ceil(probe.offsetWidth + 8);
     }
     if (probe.parentNode) probe.parentNode.removeChild(probe);
+    if (tablet && minSlot < 36) minSlot = 36;
     var avail = Math.floor(scroll.clientWidth || table.clientWidth);
     var rest = avail - labW;
     var slotW = Math.max(minSlot, Math.floor(rest / nSlot));
@@ -1350,15 +1416,7 @@
     var cols = table.querySelectorAll('col');
     if (cols[0]) cols[0].style.width = labW + 'px';
     for (var i = 1; i < cols.length; i++) cols[i].style.width = slotW + 'px';
-    var goutLab = table.querySelector('.pg-land-fly-band .pg-land-gout-lab');
-    var goutTh = table.querySelector('.pg-land-time .pg-land-gout');
-    var band = table.querySelector('.pg-land-fly-band');
-    if (goutLab && goutTh && band) {
-      var br = band.getBoundingClientRect();
-      var gr = goutTh.getBoundingClientRect();
-      goutLab.style.left = Math.max(0, Math.round(gr.left - br.left + 3)) + 'px';
-      goutLab.style.top = '2px';
-    }
+    pinLandGrid(root);
   }
 
   function layoutLandCallouts(root, table) {
@@ -1532,15 +1590,16 @@
     }
     html += '</tr></thead><tbody>';
     var goutAt = Date.now() + 10 * 60000, goutPlaced = false;
-    var colN = 1 + cats.length + 1;
     rows.forEach(function (d) {
       var slot = d === 'snart' ? 'snart' : d.getTime();
+      var rowCls = [];
+      if (d === 'snart') rowCls.push('pg-tr-snart');
       if (!goutPlaced && d !== 'snart' && slot >= goutAt) {
-        html += '<tr class="pg-tr-gout"><td class="pg-td-gout" colspan="' + colN + '">— 10 min: går ut —</td></tr>';
+        rowCls.push('pg-tr-gout-line');
         goutPlaced = true;
       }
       var rowTxt = d === 'snart' ? 'Snart' : p2(d.getHours()) + ':' + p2(d.getMinutes());
-      html += '<tr' + (d === 'snart' ? ' class="pg-tr-snart"' : '') + '><td class="pg-td-time"' +
+      html += '<tr' + (rowCls.length ? ' class="' + rowCls.join(' ') + '"' : '') + '><td class="pg-td-time"' +
         (d === 'snart' ? ' title="Tiden har passerat men bokningen finns kvar i prognosen – kan komma när som helst"' : '') + '>' + rowTxt + '</td>';
       cats.forEach(function (k) {
         var meta = CAT_META[k] || {};
@@ -1849,10 +1908,11 @@
     bindPop(st.el);
     if (st._land) {
       if (st.landFs) document.body.classList.add('pg-land-fs');
-      fitLandCols(st.el);
+      settleLandLayout();
       syncLandFsBtn();
     } else {
       if (st.landFs) { exitLandFs(); setLandFs(false); }
+      clearLandPin(st.el);
       fitDiagHead(st.el);
     }
     layoutFlyCallouts(st.el);
@@ -2133,9 +2193,12 @@
 
   P.stop = function () {
     if (st.landFs) { exitLandFs(); setLandFs(false); }
+    clearTimeout(st._landSettle);
+    if (st.el) clearLandPin(st.el);
     document.body.classList.remove('pg-open');
     document.body.classList.remove('pg-land');
     document.body.classList.remove('pg-land-fs');
+    document.body.classList.remove('pg-land-tablet');
     st.focus = null;   // lämnar Prognos -> markeringen från notisen är klar
     if (st.poll) { clearInterval(st.poll); st.poll = null; }
     if (badge.viewing) { badge.viewing = false; markSeen(); }  // lämnar Prognos → nollställ

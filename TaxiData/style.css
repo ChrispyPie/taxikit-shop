@@ -836,15 +836,11 @@ html[data-theme="dark"] .pg-fly-lab { background: var(--surface, #1a202c); color
   border-radius: 10px; padding: 10px 12px; font: inherit; cursor: pointer; min-height: 44px;
 }
 .pg-fly-pick-item:focus-visible { outline: 2px solid var(--accent, #f5b301); }
-.pg-tr-gout td {
-  text-align: center; font-weight: 800; font-size: 0.72rem; letter-spacing: 0.01em;
-  color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, var(--surface-soft));
-  border-top: 2px solid var(--primary); border-bottom: 2px solid var(--primary);
-  padding: 5px 4px !important; white-space: nowrap;
+.pg-table-diag tbody tr.pg-tr-gout-line td {
+  box-shadow: inset 0 2px 0 var(--primary);
 }
-html[data-theme="dark"] .pg-tr-gout td {
-  color: #bee3f8; background: color-mix(in srgb, #2a4365 70%, #1a202c);
-  border-top-color: #63b3ed; border-bottom-color: #63b3ed;
+html[data-theme="dark"] .pg-table-diag tbody tr.pg-tr-gout-line td {
+  box-shadow: inset 0 2px 0 #63b3ed;
 }
 .pg-fly-overlay {
   position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,.45);
@@ -904,7 +900,13 @@ html[data-theme="dark"] .pg-fly-sheet { background: #1a202c; color: #e2e8f0; }
 }
 
 /* Prognos landskap: transponerat schema (tider upptill, kategorier till vänster). */
-body.pg-land main { margin-top: 0.2rem; margin-bottom: 0.2rem; }
+body.pg-land main {
+  margin: 0 auto;
+  max-width: none;
+  width: 100%;
+  padding-bottom: 0;
+}
+body.pg-land #content { padding: 4px 4px 0; }
 body.pg-land .pg { gap: 0.25rem; }
 body.pg-land .pg-legend { margin: 0 0 2px; }
 body.pg-land .pg-kt { margin: 0 0 2px; padding: 3px 8px; }
@@ -929,19 +931,21 @@ html[data-theme="dark"] .pg-land-fs-btn {
 }
 html[data-theme="dark"] .pg-land-fs-btn.on { background: #2b6cb0; color: #fff; border-color: #63b3ed; }
 body.pg-land-fs #app header,
-body.pg-land-fs .profile-menu,
-body.pg-land-fs .pg > :not(.pg-land-shell) { display: none !important; }
-body.pg-land-fs main { margin: 0; padding: 2px !important; }
-body.pg-land-fs .pg { gap: 0; }
+body.pg-land-fs .profile-menu { display: none !important; }
+body.pg-land-fs main { margin: 0; padding: 2px !important; max-width: none; width: 100%; }
+body.pg-land-fs #content { padding: 2px 2px 0 !important; }
+body.pg-land-fs .pg { gap: 0.25rem; }
 body.pg-land-fs .pg-land-fs-btn { top: 6px; right: 6px; }
+.pg-land-spacer { height: 0; flex-shrink: 0; pointer-events: none; }
+body.pg-land .pg { display: flex; flex-direction: column; }
 .pg-scroll-land {
   position: relative;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: visible;
   -webkit-overflow-scrolling: touch;
   border: 1px solid var(--border-soft);
   border-radius: 10px;
   background: var(--surface);
-  max-height: 70dvh;
 }
 .pg-table-land {
   border-collapse: separate;
@@ -1039,22 +1043,23 @@ html[data-theme="dark"] .pg-table-land .pg-land-slot.pg-land-gout,
 html[data-theme="dark"] .pg-table-land td.pg-land-gout {
   box-shadow: inset 2px 0 0 #63b3ed;
 }
-.pg-land-fly-band .pg-land-gout-lab {
-  position: absolute;
-  top: 2px;
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  font-size: 0.5rem;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-  color: var(--primary);
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 3;
-  line-height: 1.1;
-  background: transparent;
-  max-height: calc(var(--pg-land-fly-h, 4.2rem) - 4px);
-  overflow: hidden;
-}
-html[data-theme="dark"] .pg-land-gout-lab { color: #bee3f8; }
 .pg-table-land .pg-fly-lab { background: var(--surface); }
+
+/* Liggande platta: lite större typ och rader, men fast höjd (inte utdragna för att fylla skärmen). */
+body.pg-land-tablet .pg-table-land { font-size: 0.88rem; }
+body.pg-land-tablet .pg-table-land .pg-land-lab,
+body.pg-land-tablet .pg-table-land .pg-land-corner { font-size: 0.82rem; }
+body.pg-land-tablet .pg-table-land .pg-land-time th {
+  font-size: 0.74rem;
+  height: 1.75rem;
+  max-height: 1.75rem;
+}
+body.pg-land-tablet .pg-table-land tbody th,
+body.pg-land-tablet .pg-table-land tbody td {
+  height: 2.15rem;
+  max-height: 2.15rem;
+}
+body.pg-land-tablet .pg-table-land .pg-land-fly th {
+  height: var(--pg-land-fly-h, 4.8rem);
+  max-height: var(--pg-land-fly-h, 4.8rem);
+}

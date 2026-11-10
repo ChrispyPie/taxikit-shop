@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-10', id: '2026-11-10pg5', rader: [
+    ['Förbättrat', 'Prognos i liggande läge sitter längst ner på skärmen, så du kan rulla upp till zoner och filter. Helskärm öppnas längst ner med schemat i fokus. Texten "10 min: går ut" är borttagen i både liggande och stående läge; en linje räcker. I helskärm döljs appens toppmeny, men zoner och filter når du genom att rulla upp.']
+  ]},
   { datum: '2026-11-10', id: '2026-11-10de1', rader: [
     ['Nytt', 'På Inställningar finns Delad enhet, av som standard. På en platta som flera delar kan du slå på den: när timkörningen har registrerat att ditt pass är slut loggas du ut automatiskt, med meddelandet "Passet är avslutat – du har loggats ut". Din egen telefon påverkas inte.']
   ]},
