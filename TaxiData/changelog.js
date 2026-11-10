@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-10', id: '2026-11-10hl2', rader: [
+    ['Rättat', 'Helskärmsknappen (⛶) sitter nu bredvid hemknappen till vänster i headern, på både telefon och platta. Titeln i mitten krockar inte längre med klockan eller profilikonen, även med stor text på en smal skärm.']
+  ]},
   { datum: '2026-11-10', id: '2026-11-10hl1', rader: [
     ['Nytt', 'På Inställningar finns ett nytt val för startsidan: Fyll bredd (stor skärm). Det är samma läge som när inget val var sparat, med mindre ikoner som radas upp så att de fyller bredden utan att man behöver skrolla i sidled. Det valet är förvalt tills du väljer något annat.'],
     ['Ändrat', 'Prognos (Schema): den dubbla Morgonprognos-raden längst ner är borttagen. Fliken Morgon högst upp fungerar som förut.'],

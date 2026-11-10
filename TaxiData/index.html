@@ -7,12 +7,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaxiData</title>
   <script src="tema.js?v=20261110hl1"></script>
-  <script src="helskarm.js?v=20261110hl1"></script>
+  <script src="helskarm.js?v=20261110hl2"></script>
   <script src="enhet.js?v=20261029d"></script>
   <script src="delad-enhet.js?v=20261110de1"></script>
   <script src="namn.js?v=20261028nm1"></script>
   <link rel="stylesheet" href="style.css?v=20261110hl1">
-  <link rel="stylesheet" href="tema.css?v=20261110hl1">
+  <link rel="stylesheet" href="tema.css?v=20261110hl2">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -38,7 +38,6 @@
     .th-prev.ta { background: linear-gradient(135deg, #e8f1f8 50%, #0f1720 50%); }
     .ts-prev { margin-left: auto; width: 40px; text-align: center; font-weight: 600; color: var(--text); flex-shrink: 0; line-height: 1; }
     header { display: flex; align-items: center; justify-content: space-between; }
-    header h1 { position: absolute; left: 50%; transform: translateX(-50%); }
     .profile-btn { background: var(--primary-bg); color: white; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: calc(18px * var(--font-scale, 1)); cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .profile-menu { position: absolute; right: 16px; top: 56px; background: var(--surface); border: 1px solid var(--c-cbd5e0); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: none; z-index: 100; min-width: 180px; }
     .profile-menu.show { display: block; }
@@ -104,7 +103,9 @@
 
   <div id="app" style="display:none;">
     <header>
-      <button onclick="goHome()" style="font-size:calc(20px * var(--font-scale, 1));">🏠</button>
+      <div class="hdr-left">
+        <button onclick="goHome()" style="font-size:calc(20px * var(--font-scale, 1));" aria-label="Hem">🏠</button>
+      </div>
       <h1 id="title">TaxiData</h1>
       <div class="hdr-right">
         <button class="profile-btn notis-btn" id="notis-btn" data-badge="notiser" onclick="NOTIS.toggle()" aria-label="Notiser">🔔</button>
@@ -124,7 +125,9 @@
 
   <div id="dashboard-view" class="hidden">
     <header>
-      <button onclick="goHome()" style="font-size:calc(20px * var(--font-scale, 1));" aria-label="Hem">🏠</button>
+      <div class="hdr-left">
+        <button onclick="goHome()" style="font-size:calc(20px * var(--font-scale, 1));" aria-label="Hem">🏠</button>
+      </div>
       <h1>Körpassdata</h1>
       <div class="hdr-right">
         <span id="driver-label"></span><!-- bara ägarens förarväljare, inget förarnummer -->
@@ -158,7 +161,7 @@
   <script src="demo.js?v=am1q"></script>
   <script src="swipe-back.js?v=20261106sb2"></script>
   <script src="view-state.js?v=20261107lazy1"></script>
-  <script src="lazy-views.js?v=20261110hl1"></script>
+  <script src="lazy-views.js?v=20261110hl2"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.

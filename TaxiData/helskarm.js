@@ -113,13 +113,49 @@
     return btn;
   }
 
+  function ensureHeaderSlots(h) {
+    var left = h.querySelector('.hdr-left');
+    if (!left) {
+      left = document.createElement('div');
+      left.className = 'hdr-left';
+      h.insertBefore(left, h.firstChild);
+      var n = left.nextElementSibling;
+      while (n && n.tagName === 'BUTTON') {
+        var next = n.nextElementSibling;
+        left.appendChild(n);
+        n = next;
+      }
+    }
+    var right = h.querySelector('.hdr-right');
+    if (!right) {
+      right = document.createElement('div');
+      right.className = 'hdr-right';
+      h.appendChild(right);
+      Array.prototype.slice.call(h.children).forEach(function (el) {
+        if (el === left || el === right) return;
+        if (el.tagName === 'H1') return;
+        if (el.tagName === 'BUTTON' || (el.classList && el.classList.contains('profile-btn'))) {
+          right.appendChild(el);
+        }
+      });
+    }
+    return left;
+  }
+
   function place() {
     if (!document.body) return;
     ensure();
     var h = visibleHeader();
-    var host = h ? (h.querySelector('.hdr-right') || h) : document.body;
-    if (btn.parentNode !== host) host.appendChild(btn);
-    btn.classList.toggle('app-fs-btn-float', !h);
+    if (!h) {
+      if (btn.parentNode !== document.body) document.body.appendChild(btn);
+      btn.classList.add('app-fs-btn-float');
+      return;
+    }
+    var left = ensureHeaderSlots(h);
+    // Alltid till höger om hemknappen, i vänstergruppen — samma på telefon och platta.
+    if (btn.parentNode !== left) left.appendChild(btn);
+    else if (left.lastElementChild !== btn) left.appendChild(btn);
+    btn.classList.remove('app-fs-btn-float');
   }
 
   function sync() {
