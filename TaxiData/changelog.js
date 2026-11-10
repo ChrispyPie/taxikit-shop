@@ -15,6 +15,11 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-10', id: '2026-11-10hl1', rader: [
+    ['Nytt', 'På Inställningar finns ett nytt val för startsidan: Fyll bredd (stor skärm). Det är samma läge som när inget val var sparat, med mindre ikoner som radas upp så att de fyller bredden utan att man behöver skrolla i sidled. Det valet är förvalt tills du väljer något annat.'],
+    ['Ändrat', 'Prognos (Schema): den dubbla Morgonprognos-raden längst ner är borttagen. Fliken Morgon högst upp fungerar som förut.'],
+    ['Förbättrat', 'Helskärm finns nu på alla sidor via en knapp (⛶), också när du redan är i helskärm. Du kan byta sida i appen utan att lämna läget, och knappen för att gå ur syns alltid. Chromes adressrad döljs. I Prognos rullas vyn fortfarande längst ner när helskärm slås på.']
+  ]},
   { datum: '2026-11-10', id: '2026-11-10pg5', rader: [
     ['Förbättrat', 'Prognos i liggande läge sitter längst ner på skärmen, så du kan rulla upp till zoner och filter. Helskärm öppnas längst ner med schemat i fokus. Texten "10 min: går ut" är borttagen i både liggande och stående läge; en linje räcker. I helskärm döljs appens toppmeny, men zoner och filter når du genom att rulla upp.']
   ]},

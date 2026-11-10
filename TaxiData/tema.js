@@ -2,11 +2,13 @@
    före stilmallarna, så att rätt färger och storlek gäller redan vid första målningen (ingen vit blixt).
    localStorage: taxi_theme = 'light' | 'dark' | 'auto' (standard auto = följ telefonen)
                  taxi_text_size = '90' | '100' | '115' | '130' (procent, standard 100)
-                 taxi_home_layout = '2' | '3' | 'lista' (Startskärm, gäller även adminmenyn) */
+                 taxi_home_layout = 'fyll' | '2' | '3' | 'lista' (Startskärm, gäller även adminmenyn).
+   Utan sparat val, eller 'fyll': samma som tidigare osatt läge (auto-fill på stor skärm, 3 i bredd på telefon). */
 (function () {
   var root = document.documentElement;
   var mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
-  var THEMES = ['light', 'dark', 'auto'], SIZES = ['90', '100', '115', '130'], LAYOUTS = ['2', '3', 'lista'];
+  var THEMES = ['light', 'dark', 'auto'], SIZES = ['90', '100', '115', '130'];
+  var LAYOUT_FIXED = ['2', '3', 'lista'], LAYOUTS = ['fyll', '2', '3', 'lista'];
   var META = { light: '#ffffff', dark: '#0f1720' };
   function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function put(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -25,9 +27,14 @@
     setMeta(META[r]);
   }
   function applySize() { root.style.setProperty('--font-scale', String(parseInt(getSize(), 10) / 100)); }
+  function getLayout() {
+    var v = get('taxi_home_layout');
+    return LAYOUT_FIXED.indexOf(v) >= 0 ? v : 'fyll';
+  }
   function applyLayout() {
     var v = get('taxi_home_layout');
-    if (LAYOUTS.indexOf(v) >= 0) root.setAttribute('data-home', v); else root.removeAttribute('data-home');
+    if (LAYOUT_FIXED.indexOf(v) >= 0) root.setAttribute('data-home', v);
+    else root.removeAttribute('data-home');
   }
   function applyAll() { applyTheme(); applySize(); applyLayout(); }
   applyAll();
@@ -43,8 +50,14 @@
   document.addEventListener('DOMContentLoaded', applyTheme);
   window.TEMA = {
     getTheme: getTheme, getSize: getSize, resolved: resolved,
+    getLayout: getLayout,
     setTheme: function (v) { if (THEMES.indexOf(v) < 0) return; put('taxi_theme', v); applyTheme(); },
     setSize: function (v) { v = String(v); if (SIZES.indexOf(v) < 0) return; put('taxi_text_size', v); applySize(); },
+    setLayout: function (v) {
+      if (LAYOUTS.indexOf(v) < 0) return;
+      put('taxi_home_layout', v);
+      applyLayout();
+    },
     applyLayout: applyLayout
   };
 })();
