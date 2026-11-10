@@ -724,16 +724,152 @@
   function flyKeyOf(f) {
     return f.key || ('f' + (f.no || '') + '|' + (f.sched && f.sched.toISOString ? f.sched.toISOString() : f.sched));
   }
-  function flyChipHtml(list) {
-    if (!list.length) return '';
+  function rememberFlights(list) {
     st.flyMap = st.flyMap || {};
-    return '<div class="pg-fly-list">' + list.map(function (f, i) {
-      var key = flyKeyOf(f);
-      st.flyMap[key] = f;
-      var label = (f.no || 'Flyg') + (f.from ? ' från ' + f.from : '');
-      return '<button type="button" class="pg-fly-chip" data-pg-fly="' + esc(key) + '" style="z-index:' + (i + 1) + '" aria-label="' + esc(label) + '">' +
-        '<span class="pg-fly-ico" aria-hidden="true">✈</span><span class="pg-fly-no">' + esc(f.no || '') + '</span></button>';
-    }).join('') + '</div>';
+    (list || []).forEach(function (f) { st.flyMap[flyKeyOf(f)] = f; });
+  }
+  function flyRectHits(a, b, pad) {
+    pad = pad || 2;
+    return !(a.x + a.w + pad <= b.x || b.x + b.w + pad <= a.x || a.y + a.h + pad <= b.y || b.y + b.h + pad <= a.y);
+  }
+  function flyClosestOnRect(px, py, r) {
+    var x = Math.max(r.x, Math.min(px, r.x + r.w));
+    var y = Math.max(r.y, Math.min(py, r.y + r.h));
+    if (x > r.x && x < r.x + r.w && y > r.y && y < r.y + r.h) {
+      var dl = x - r.x, dr = r.x + r.w - x, dt = y - r.y, db = r.y + r.h - y;
+      var m = Math.min(dl, dr, dt, db);
+      if (m === dl) x = r.x;
+      else if (m === dr) x = r.x + r.w;
+      else if (m === dt) y = r.y;
+      else y = r.y + r.h;
+    }
+    return { x: x, y: y };
+  }
+  // Callout-etiketter i flygspalten: ikonerna stannar i sin tidrad, numren flyttas åt sidan
+  // och upp/ner i grannrader så de inte överlappar, med en tunn linje till rätt plan.
+  function layoutFlyCallouts(root) {
+    var table = root && root.querySelector('.pg-table-fly');
+    var scroll = table && (table.closest('.pg-scroll') || table.parentNode);
+    if (!table || !scroll) return;
+    var layer = scroll.querySelector('.pg-fly-layer');
+    if (!layer) {
+      layer = document.createElement('div');
+      layer.className = 'pg-fly-layer';
+      scroll.appendChild(layer);
+    }
+    var cells = table.querySelectorAll('tbody td.pg-td-fly[data-pg-fly-slot]');
+    if (!cells.length) { layer.innerHTML = ''; return; }
+    var tR = table.getBoundingClientRect();
+    layer.style.left = table.offsetLeft + 'px';
+    layer.style.top = table.offsetTop + 'px';
+    layer.style.width = table.offsetWidth + 'px';
+    layer.style.height = table.offsetHeight + 'px';
+    var flyTd = cells[0];
+    var head = table.querySelector('thead');
+    if (!flyTd || !head) { layer.innerHTML = ''; return; }
+    var colR = flyTd.getBoundingClientRect();
+    var headR = head.getBoundingClientRect();
+    var pad = 2;
+    var bounds = {
+      x: colR.left - tR.left + pad,
+      y: headR.bottom - tR.top + 2,
+      w: Math.max(24, colR.width - pad * 2),
+      h: Math.max(24, tR.bottom - headR.bottom - 4)
+    };
+    var iconW = 15, iconH = 16, iconStep = 10;
+    var items = [];
+    var iconRects = [];
+    for (var c = 0; c < cells.length; c++) {
+      var td = cells[c];
+      var keys = (td.getAttribute('data-pg-fly-slot') || '').split('||').filter(Boolean);
+      if (!keys.length) continue;
+      var cellR = td.getBoundingClientRect();
+      var cy = cellR.top - tR.top + cellR.height / 2;
+      var x0 = colR.left - tR.left + 3;
+      for (var j = 0; j < keys.length; j++) {
+        var key = keys[j];
+        var f = st.flyMap && st.flyMap[key];
+        var no = (f && f.no) || '';
+        var rec = { x: x0 + j * iconStep, y: cy - iconH / 2, w: iconW, h: iconH };
+        iconRects.push(rec);
+        items.push({
+          key: key, no: no,
+          from: (f && f.from) || '',
+          ix: rec.x + rec.w / 2, iy: rec.y + rec.h / 2, ir: rec
+        });
+      }
+    }
+    if (!items.length) { layer.innerHTML = ''; return; }
+    layer.innerHTML = '<span class="pg-fly-lab" style="visibility:hidden;position:absolute;left:-999px;top:0"></span>';
+    var probe = layer.firstChild;
+    items.forEach(function (it) {
+      probe.textContent = it.no || 'FLY';
+      it.lw = Math.ceil(probe.offsetWidth) || 28;
+      it.lh = Math.ceil(probe.offsetHeight) || 11;
+    });
+    var placed = [];
+    items.forEach(function (it) {
+      var w = it.lw, h = it.lh;
+      var best = null, bestScore = Infinity;
+      var y0 = it.iy - h / 2;
+      var xs = [];
+      xs.push(it.ix + it.ir.w / 2 + 5);
+      xs.push(it.ix - it.ir.w / 2 - 5 - w);
+      for (var x = bounds.x; x <= bounds.x + bounds.w - w + 0.1; x += 3) xs.push(x);
+      var ys = [y0];
+      var step = Math.max(8, Math.round(h * 0.7));
+      for (var k = 1; k <= 18; k++) {
+        ys.push(y0 - k * step);
+        ys.push(y0 + k * step);
+      }
+      for (var a = 0; a < xs.length; a++) {
+        var x = xs[a];
+        for (var b = 0; b < ys.length; b++) {
+          var y = ys[b];
+          if (x < bounds.x - 0.5 || y < bounds.y - 0.5 || x + w > bounds.x + bounds.w + 0.5 || y + h > bounds.y + bounds.h + 0.5) continue;
+          var rec = { x: x, y: y, w: w, h: h };
+          var ok = true, p;
+          for (p = 0; p < placed.length; p++) if (flyRectHits(rec, placed[p], 3)) { ok = false; break; }
+          if (!ok) continue;
+          for (p = 0; p < iconRects.length; p++) if (flyRectHits(rec, iconRects[p], 3)) { ok = false; break; }
+          if (!ok) continue;
+          var dx = (x + w / 2) - it.ix, dy = (y + h / 2) - it.iy;
+          var dist = Math.sqrt(dx * dx + dy * dy);
+          var score = dist + (dist < 9 ? 24 : 0) + Math.abs(dy) * 0.12;
+          if (score < bestScore) { bestScore = score; best = rec; }
+        }
+      }
+      if (!best) {
+        best = {
+          x: Math.min(bounds.x + bounds.w - w, Math.max(bounds.x, it.ix + 8)),
+          y: Math.min(bounds.y + bounds.h - h, Math.max(bounds.y, y0)),
+          w: w, h: h
+        };
+        var guard = 0;
+        while (guard++ < 40) {
+          var clash = placed.some(function (p) { return flyRectHits(best, p, 3); }) ||
+            iconRects.some(function (p) { return flyRectHits(best, p, 3); });
+          if (!clash) break;
+          best.y += h + 2;
+          if (best.y + h > bounds.y + bounds.h) {
+            best.y = bounds.y;
+            best.x = Math.min(bounds.x + bounds.w - w, best.x + 6);
+          }
+        }
+      }
+      placed.push(best);
+      it.lab = best;
+    });
+    var svg = '<svg class="pg-fly-svg" width="' + table.offsetWidth + '" height="' + table.offsetHeight + '" aria-hidden="true">';
+    var labs = '', icos = '';
+    items.forEach(function (it, i) {
+      var end = flyClosestOnRect(it.ix, it.iy, it.lab);
+      svg += '<line class="pg-fly-leader" x1="' + it.ix.toFixed(1) + '" y1="' + it.iy.toFixed(1) + '" x2="' + end.x.toFixed(1) + '" y2="' + end.y.toFixed(1) + '"/>';
+      var aria = (it.no || 'Flyg') + (it.from ? ' från ' + it.from : '');
+      icos += '<button type="button" class="pg-fly-chip" data-pg-fly="' + esc(it.key) + '" aria-label="' + esc(aria) + '" style="left:' + it.ir.x + 'px;top:' + it.ir.y + 'px;width:' + it.ir.w + 'px;height:' + it.ir.h + 'px;z-index:' + (i + 1) + '"><span class="pg-fly-ico" aria-hidden="true">✈</span></button>';
+      labs += '<button type="button" class="pg-fly-lab" data-pg-fly="' + esc(it.key) + '" aria-label="' + esc(aria) + '" style="left:' + it.lab.x + 'px;top:' + it.lab.y + 'px">' + esc(it.no) + '</button>';
+    });
+    layer.innerHTML = svg + '</svg>' + icos + labs;
   }
 
   // Lättbegriplig förklaring till säker/trolig/osäker för en bokning
@@ -981,6 +1117,18 @@
     if (e.target.closest && e.target.closest('[data-pg-cell]')) return;
     hidePop();
   }, true);
+  var flyLayTimer = 0;
+  function relayoutFly() {
+    if (!st.el) return;
+    if (flyLayTimer) cancelAnimationFrame(flyLayTimer);
+    flyLayTimer = requestAnimationFrame(function () {
+      flyLayTimer = 0;
+      fitDiagHead(st.el);
+      layoutFlyCallouts(st.el);
+    });
+  }
+  window.addEventListener('resize', relayoutFly);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', relayoutFly);
   document.addEventListener('click', function (e) {
     var btn = e.target.closest && e.target.closest('[data-pg-fly]');
     if (btn) {
@@ -1033,7 +1181,10 @@
     st.flyMap = {};
     var showFly = String(zoneId) === FLIGHT_ZONE;
 
-    var html = '<div class="pg-scroll pg-scroll-fit"><table class="pg-table pg-table-fit pg-table-diag' + (showFly ? ' pg-table-fly' : '') + '"><thead><tr>' +
+    var colg = '<colgroup><col class="pg-col-time">';
+    cats.forEach(function () { colg += '<col class="pg-col-cat">'; });
+    colg += (showFly ? '<col class="pg-col-fly">' : '<col class="pg-col-spacer">') + '</colgroup>';
+    var html = '<div class="pg-scroll pg-scroll-fit"><table class="pg-table pg-table-fit pg-table-diag' + (showFly ? ' pg-table-fly' : '') + '">' + colg + '<thead><tr>' +
       '<th class="pg-th-time">Tid</th>';
     // t352u: summa per spalt = antal visade bokningar i spalten (samma räkning som cellerna)
     var tot = {};
@@ -1089,8 +1240,9 @@
       });
       if (showFly) {
         var flies = d === 'snart' ? [] : flightsInSlot(slot);
+        rememberFlights(flies);
         var flyKeys = flies.map(flyKeyOf);
-        html += '<td class="pg-td-fly"' + (flyKeys.length ? ' data-pg-fly-slot="' + esc(flyKeys.join('||')) + '"' : '') + '>' + flyChipHtml(flies) + '</td>';
+        html += '<td class="pg-td-fly"' + (flyKeys.length ? ' data-pg-fly-slot="' + esc(flyKeys.join('||')) + '"' : '') + '></td>';
       } else {
         html += '<td class="pg-td-spacer" aria-hidden="true"></td>';
       }
@@ -1361,6 +1513,7 @@
       body += renderMorgonTeaser();
     }
 
+    document.body.classList.add('pg-open');
     st.el.innerHTML = '<div class="pg">' + tabs + body + '</div>';
     bind(st.el);
     var ktb = st.el.querySelector('#pg-kt-btn');
@@ -1370,6 +1523,7 @@
     };
     bindPop(st.el);
     fitDiagHead(st.el);
+    layoutFlyCallouts(st.el);
     fitTabs(st.el);
     // Notis -> rulla fram den markerade förbokningen en gång
     var fc = st.focus && !st.focus.scrolled && st.el.querySelector('#pg-focus-cell');
@@ -1392,12 +1546,81 @@
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
   }
 
-  // Rubrikraden = antalsband + lodräta namn + lucka ner till första dataraden, så inget överlappar.
+  // Flattest angle from horizontal at which a label of width labelW fits in colW.
+  // Clamped 0°–90°. Flip preferFlat to false to keep headers vertical (90°) instead.
+  function pgHeadAngleDeg(labelW, colW) {
+    var preferFlat = true;
+    var pad = 4;
+    var room = Math.max(0, colW - pad);
+    var minFit = 0;
+    if (labelW > room && labelW > 0) {
+      minFit = Math.acos(Math.max(0, Math.min(1, room / labelW))) * 180 / Math.PI;
+    }
+    if (minFit < 0) minFit = 0;
+    if (minFit > 90) minFit = 90;
+    return preferFlat ? minFit : 90;
+  }
+
+  // Fluid columns: Tid as wide as HH:MM/Snart, Flyg just wide enough for icons+labels,
+  // leftover shared by category columns (minmax-like). Recomputed on resize/font change.
+  function fitFlyCols(root) {
+    var table = root && root.querySelector('.pg-table-diag');
+    if (!table) return;
+    var scroll = table.closest('.pg-scroll') || table.parentNode;
+    var avail = Math.floor((scroll && scroll.clientWidth) || table.clientWidth);
+    if (avail < 80) return;
+    var showFly = table.classList.contains('pg-table-fly');
+    var catCols = table.querySelectorAll('col.pg-col-cat');
+    var nCat = catCols.length || table.querySelectorAll('thead th.pg-th-cat').length;
+    if (!nCat) return;
+    var probe = document.createElement('span');
+    probe.style.cssText = 'position:absolute;visibility:hidden;left:-999px;top:0;white-space:nowrap';
+    var tidEl = table.querySelector('.pg-td-time, .pg-th-time');
+    if (tidEl) {
+      var tcs = getComputedStyle(tidEl);
+      probe.style.fontSize = tcs.fontSize;
+      probe.style.fontFamily = tcs.fontFamily;
+      probe.style.fontWeight = tcs.fontWeight;
+      probe.style.fontVariantNumeric = 'tabular-nums';
+    }
+    (scroll || table).appendChild(probe);
+    probe.textContent = '00:00';
+    var tidNeed = probe.offsetWidth;
+    probe.textContent = 'Snart';
+    if (probe.offsetWidth > tidNeed) tidNeed = probe.offsetWidth;
+    tidNeed = Math.ceil(tidNeed + 6);
+    var flyNeed = 0;
+    if (showFly) {
+      probe.style.fontSize = '0.55rem';
+      probe.style.fontWeight = '700';
+      probe.style.fontVariantNumeric = 'tabular-nums';
+      probe.textContent = 'KL1235';
+      flyNeed = Math.ceil(26 + probe.offsetWidth + 8);
+      if (flyNeed < 72) flyNeed = 72;
+      if (flyNeed > 128) flyNeed = 128;
+    }
+    var spacerNeed = showFly ? 0 : 8;
+    var catW = Math.floor((avail - tidNeed - flyNeed - spacerNeed) / nCat);
+    if (catW < 24) catW = 24;
+    table.style.setProperty('--pg-tid-w', tidNeed + 'px');
+    table.style.setProperty('--pg-cat-w', catW + 'px');
+    table.style.setProperty('--pg-fly-w', flyNeed + 'px');
+    table.style.setProperty('--pg-spacer-w', spacerNeed + 'px');
+    table.style.width = '100%';
+    var cols = table.querySelectorAll('col');
+    if (cols[0]) cols[0].style.width = tidNeed + 'px';
+    for (var i = 1; i <= nCat && i < cols.length; i++) cols[i].style.width = catW + 'px';
+    if (cols[nCat + 1]) cols[nCat + 1].style.width = (showFly ? flyNeed : spacerNeed) + 'px';
+    probe.parentNode.removeChild(probe);
+  }
+
+  // Rubrikraden = antalsband + namn i vald vinkel + lucka ner till första dataraden, så inget överlappar.
   function fitDiagHead(root) {
     var fit = function () {
       var table = root.querySelector('.pg-table-diag');
       var tr = table && table.querySelector('thead tr');
       if (!tr) return;
+      fitFlyCols(root);
       var labs = tr.querySelectorAll('.pg-th-rot');
       if (!labs.length) return;
       var cs = getComputedStyle(tr);
@@ -1406,6 +1629,34 @@
       if (slot) sumH = slot.getBoundingClientRect().height;
       if (!sumH) sumH = parseFloat(cs.getPropertyValue('--pg-sum-h')) || 22;
       var gap = parseFloat(cs.getPropertyValue('--pg-name-gap')) || 16;
+      var probe = document.createElement('span');
+      probe.style.cssText = 'position:absolute;visibility:hidden;left:-999px;top:0;white-space:nowrap';
+      var sample = tr.querySelector('.pg-th-cat .pg-th-rot') || labs[0];
+      var scs = getComputedStyle(sample);
+      probe.style.fontSize = scs.fontSize;
+      probe.style.fontFamily = scs.fontFamily;
+      probe.style.fontWeight = scs.fontWeight;
+      probe.style.letterSpacing = scs.letterSpacing;
+      tr.appendChild(probe);
+      var labelW = 0;
+      tr.querySelectorAll('th.pg-th-cat .pg-th-rot').forEach(function (el) {
+        probe.textContent = (el.textContent || '').trim();
+        if (probe.offsetWidth > labelW) labelW = probe.offsetWidth;
+      });
+      if (!labelW && labs[0]) {
+        probe.textContent = (labs[0].textContent || '').trim();
+        labelW = probe.offsetWidth;
+      }
+      probe.parentNode.removeChild(probe);
+      var minCol = Infinity;
+      tr.querySelectorAll('th.pg-th-cat').forEach(function (th) {
+        var w = th.getBoundingClientRect().width;
+        if (w > 0 && w < minCol) minCol = w;
+      });
+      if (!isFinite(minCol)) minCol = 40;
+      var ang = pgHeadAngleDeg(labelW, minCol);
+      tr.style.setProperty('--pg-head-ang', ang + 'deg');
+      table.style.setProperty('--pg-head-ang', ang + 'deg');
       var hNeed = 0, over = 0, scR = (table.closest('.pg-scroll') || table).getBoundingClientRect();
       labs.forEach(function (el) {
         var r = el.getBoundingClientRect();
@@ -1417,6 +1668,7 @@
         var cur = parseFloat(getComputedStyle(table.querySelector('.pg-th-spacer') || tr).width) || 12;
         table.style.setProperty('--pg-spacer-w', Math.min(48, Math.ceil(cur + over + 3)) + 'px');
       }
+      layoutFlyCallouts(root);
     };
     fit();
     if (window.requestAnimationFrame) requestAnimationFrame(function () { fit(); requestAnimationFrame(fit); });
@@ -1548,6 +1800,7 @@
   P.refresh = function () { if (onPage()) return refresh(); };
 
   P.stop = function () {
+    document.body.classList.remove('pg-open');
     st.focus = null;   // lämnar Prognos -> markeringen från notisen är klar
     if (st.poll) { clearInterval(st.poll); st.poll = null; }
     if (badge.viewing) { badge.viewing = false; markSeen(); }  // lämnar Prognos → nollställ

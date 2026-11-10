@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-10', id: '2026-11-10pg3', rader: [
+    ['Fixat', 'Prognos: flygikoner och flightnummer ligger som etiketter med tunna linjer ovanpå tabellen, så tidraderna håller samma höjd. Kolumnerna fyller skärmbredden, och kategorinamnen vrids bara så mycket att de ryms (så plant som möjligt). Sidmarginalen och Tid-kolumnen är smala så antalsbubblorna får mer plats.']
+  ]},
   { datum: '2026-11-10', id: '2026-11-10pg2', rader: [
     ['Fixat', 'Prognos: antalsbubblorna och de lodräta kolumnnamnen har egna ytor, så de inte längre krockar med varandra eller med raden Snart. Flygspalten visar planet ovanför numret, utan ram, och flera flyg i samma tid får överlappa lite så bolagskoden syns.']
   ]},
