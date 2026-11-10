@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-10', id: '2026-11-10de1', rader: [
+    ['Nytt', 'På Inställningar finns Delad enhet, av som standard. På en platta som flera delar kan du slå på den: när timkörningen har registrerat att ditt pass är slut loggas du ut automatiskt, med meddelandet "Passet är avslutat – du har loggats ut". Din egen telefon påverkas inte.']
+  ]},
   { datum: '2026-11-10', id: '2026-11-10pg4', rader: [
     ['Nytt', 'Prognos i liggande läge visar tiderna vågrätt upptill, med flygraden överst, och kategorierna som rader till vänster. Linjen vid 10 min står lodrätt. Flygikoner och flightnummer fungerar som i stående läge. En liten helskärmsknapp döljer menyn så bara schemat syns.']
   ]},
