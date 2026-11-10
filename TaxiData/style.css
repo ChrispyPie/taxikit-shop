@@ -132,7 +132,8 @@ body.pg-open main, main:has(.pg) { padding-left: 5px; padding-right: 5px; }
   font-size: 0.9rem;
 }
 .shift-trip .toggle { margin-right: 0.3rem; width: 0.6rem; }
-.shift-trip span:nth-child(2) { flex: 1; }
+.shift-trip .kv-nr { flex: 1; }
+.shift-trip span:nth-child(2) { flex: 0 0 auto; }
 .trip-detail {
   display: none;
   padding: 0.2rem 1rem 0.2rem 3.5rem;
@@ -1043,4 +1044,211 @@ body.pg-land-tablet .pg-table-land tbody td {
 body.pg-land-tablet .pg-table-land .pg-land-fly th {
   height: var(--pg-land-fly-h, 4.8rem);
   max-height: var(--pg-land-fly-h, 4.8rem);
+}
+
+/* —— Kvittokopia: gemensam miniatyr + modal (vit pappersyta även i mörkt tema) —— */
+.kv-ico {
+  display: inline-block;
+  width: 22px;
+  height: 30px;
+  flex-shrink: 0;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 38'><path fill='%23fff' stroke='%23b8b8b8' stroke-width='1' d='M2 1.1h24v29.4l-2.4-1.7-2.4 1.7-2.4-1.7-2.4 1.7-2.4-1.7-2.4 1.7-2.4-1.7-2.4 1.7-2.4-1.7-2.4 1.7z'/><rect x='8' y='3' width='12' height='6.4' fill='%23f0d000' stroke='%23111111' stroke-width='0.7'/><rect x='5' y='11.8' width='18' height='2.4' fill='%23a0a0a0'/><rect x='5' y='15.6' width='18' height='2.4' fill='%23b6b6b6'/><line x1='5' y1='20.2' x2='23' y2='20.2' stroke='%23777777' stroke-width='0.9' stroke-dasharray='1.3 1.15'/><line x1='5' y1='23.8' x2='23' y2='23.8' stroke='%231a1a1a' stroke-width='2.15'/><line x1='5' y1='27.2' x2='23' y2='27.2' stroke='%23777777' stroke-width='0.9' stroke-dasharray='1.3 1.15'/></svg>");
+  filter: drop-shadow(0 1px 1.4px rgba(0,0,0,.32));
+}
+.shift-trip .kv-nr,
+.stat-row .kv-nr { flex: 1; min-width: 0; }
+.shift-trip span.kv-ico { flex: 0 0 auto; }
+html body.kv-open { overflow: hidden; }
+.kv-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(0,0,0,.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(0.6rem, env(safe-area-inset-top)) 0.6rem max(0.6rem, env(safe-area-inset-bottom));
+}
+.kv-overlay[hidden] { display: none !important; }
+.kv-dialog {
+  width: min(380px, 100%);
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  background: transparent;
+}
+.kv-scroll {
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: calc(100dvh - 76px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  padding: 0.2rem 0.15rem 0.35rem;
+}
+.kv-actions {
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0.45rem 0 0.1rem;
+}
+.kv-close {
+  appearance: none;
+  border: 0;
+  border-radius: 8px;
+  background: #2a2a2a;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  padding: 0.55rem 1.6rem;
+  min-height: 44px;
+  cursor: pointer;
+}
+html[data-theme="light"] .kv-close,
+html:not([data-theme="dark"]) .kv-close { background: #1a1a1a; }
+.kv-visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0);
+  border: 0;
+}
+.kv-paper {
+  background: #fff;
+  color: #111;
+  width: min(340px, 100%);
+  margin: 0 auto;
+  padding: 0.7rem 1.05rem 1.1rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,.28), 0 8px 28px rgba(0,0,0,.18);
+  font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 11px;
+  line-height: 1.35;
+  color-scheme: light;
+}
+.kv-loading, .kv-err {
+  text-align: center;
+  padding: 2.2rem 1rem;
+  font-size: 0.95rem;
+  color: #333;
+}
+.kv-brand { text-align: center; padding: 0.15rem 0 0.15rem; }
+.kv-logo {
+  display: block;
+  width: 86px;
+  height: auto;
+  margin: 0 auto;
+}
+ .kv-phone {
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 0.08em;
+  margin: 0.15rem 0 0.35rem;
+  color: #111;
+  font-family: "Times New Roman", Times, "Noto Serif", serif;
+}
+.kv-h {
+  font-family: "Times New Roman", Times, "Noto Serif", serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #6a6a6a;
+  letter-spacing: 0.02em;
+  margin: 0.55rem 0 0.15rem;
+}
+.kv-nr {
+  font-family: "Times New Roman", Times, "Noto Serif", serif;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0.1rem 0 0.25rem;
+  color: #111;
+}
+.kv-pay {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  font-family: "Times New Roman", Times, "Noto Serif", serif;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0.1rem 0 0.15rem;
+  color: #111;
+}
+.kv-row, .kv-tx {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.7rem;
+  font-size: 12px;
+  color: #222;
+}
+.kv-k { color: #333; }
+.kv-v { text-align: right; font-variant-numeric: tabular-nums; }
+.kv-co {
+  margin: 0.55rem 0 0.15rem;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #222;
+}
+.kv-dots {
+  border-top: 1px dotted #888;
+  margin: 0.55rem 0 0.35rem;
+}
+.kv-fare {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 0.5fr) auto;
+  gap: 0.25rem;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.kv-fare-kr { text-align: right; min-width: 3.4rem; }
+.kv-tx { font-weight: 600; margin-top: 0.15rem; }
+.kv-sum {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: "Times New Roman", Times, "Noto Serif", serif;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0.15rem 0 0.1rem;
+  color: #111;
+}
+.kv-eur {
+  text-align: right;
+  font-size: 13px;
+  margin-bottom: 0.2rem;
+}
+.kv-moms { margin: 0.25rem 0; font-size: 12px; }
+.kv-moms-h, .kv-moms-r {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  text-align: right;
+  gap: 0.4rem;
+}
+.kv-moms-h { color: #555; margin-bottom: 0.1rem; }
+.kv-sign { margin-top: 1.1rem; text-align: center; }
+.kv-sign-brand {
+  font-family: "Times New Roman", Times, "Noto Serif", serif;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+.kv-sign-box {
+  border: 1px solid #222;
+  min-height: 3.2rem;
+  margin: 0 auto 0.35rem;
+  width: 78%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 0.15rem 0.3rem;
+  font-size: 11px;
+  color: #444;
+}
+.kv-sign-name, .kv-sign-date { font-size: 12px; color: #222; }
+@media (min-width: 700px) {
+  .kv-ico { width: 24px; height: 32px; }
 }

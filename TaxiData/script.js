@@ -436,8 +436,10 @@ function tripEntryHtml(t, kind) {
   const detClass = replaced ? "trip-detail trip-replaced-detail" : (kind === "day" ? "" : "trip-detail");
   const keyPref = kind === "day" ? "trip" : kind === "loose" ? "lt" : "st";
   const style = isBom && !replaced ? ' style="opacity:0.6;"' : "";
-  const click = kind === "day" ? "toggle(this)" : "toggleTrip(this, event)";
-  const row = `<div class="${rowClass}" data-key="${keyPref}:${escHtml(t.kvittonr)}|${escHtml(t.forar || defForar())}|${escHtml(t.startdatum || '')}" onclick="${click}"${style}><span class="toggle">+</span><span${kind === "day" ? ' class="label"' : ""}>${dd}${escHtml(t.kvittonr)}${isBom ? " (BOM)" : ""}</span><span${kind === "day" ? ' class="value"' : ""}>${formatSEK(parseAmount(t.belopp))}</span></div>`;
+  const click = "KVITTO.openFromRow(this,event)";
+  const tog = kind === "day" ? "toggle(this.parentNode)" : "toggleTrip(this.parentNode, event)";
+  const kvAttr = ` data-kvittonr="${escHtml(t.kvittonr)}" data-forar="${escHtml(t.forar || defForar())}" data-startdatum="${escHtml(t.startdatum || '')}"`;
+  const row = `<div class="${rowClass}" data-key="${keyPref}:${escHtml(t.kvittonr)}|${escHtml(t.forar || defForar())}|${escHtml(t.startdatum || '')}"${kvAttr} onclick="${click}"${style}><span class="toggle" onclick="event.stopPropagation();${tog}">+</span><span class="kv-ico" title="Kvittokopia" role="img" aria-label="Kvittokopia"></span><span${kind === "day" ? ' class="label kv-nr"' : ' class="kv-nr"'}>${dd}${escHtml(t.kvittonr)}${isBom ? " (BOM)" : ""}</span><span${kind === "day" ? ' class="value"' : ""}>${formatSEK(parseAmount(t.belopp))}</span></div>`;
   const details = kind === "day"
     ? tripDetailRows(t, replaced ? "trip-replaced-detail" : "")
     : `<div class="sub ${detClass}"><span>Start</span><span>${t.starttid || "00:00"} – zon ${t.startzon || "?"}</span></div>
