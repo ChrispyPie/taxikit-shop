@@ -721,14 +721,18 @@
     out.sort(function (a, b) { return arrivalMs(a) - arrivalMs(b); });
     return out;
   }
+  function flyKeyOf(f) {
+    return f.key || ('f' + (f.no || '') + '|' + (f.sched && f.sched.toISOString ? f.sched.toISOString() : f.sched));
+  }
   function flyChipHtml(list) {
     if (!list.length) return '';
     st.flyMap = st.flyMap || {};
-    return '<div class="pg-fly-list">' + list.map(function (f) {
-      var key = f.key || ('f' + (f.no || '') + '|' + (f.sched && f.sched.toISOString ? f.sched.toISOString() : f.sched));
+    return '<div class="pg-fly-list">' + list.map(function (f, i) {
+      var key = flyKeyOf(f);
       st.flyMap[key] = f;
       var label = (f.no || 'Flyg') + (f.from ? ' från ' + f.from : '');
-      return '<button type="button" class="pg-fly-chip" data-pg-fly="' + esc(key) + '" aria-label="' + esc(label) + '">✈ ' + esc(f.no || '') + '</button>';
+      return '<button type="button" class="pg-fly-chip" data-pg-fly="' + esc(key) + '" style="z-index:' + (i + 1) + '" aria-label="' + esc(label) + '">' +
+        '<span class="pg-fly-ico" aria-hidden="true">✈</span><span class="pg-fly-no">' + esc(f.no || '') + '</span></button>';
     }).join('') + '</div>';
   }
 
@@ -869,6 +873,7 @@
     if (!it) return false;
     hidePop();
     var ov = flyOverlay();
+    ov.querySelector('.pg-fly-sheet-h b').textContent = 'Ankomst';
     var body = ov.querySelector('.pg-fly-body');
     var html = (window.ARRIVAL_DATA && ARRIVAL_DATA.flightDetailHtml)
       ? ARRIVAL_DATA.flightDetailHtml(it)
@@ -881,6 +886,24 @@
     return true;
   }
   function flySheetOpen() { return !!(flyUi.ov && !flyUi.ov.hidden); }
+  function showFlyList(keys) {
+    var items = (keys || []).map(function (k) { return st.flyMap && st.flyMap[k]; }).filter(Boolean);
+    if (!items.length) return false;
+    if (items.length === 1) return showFlySheet(flyKeyOf(items[0]));
+    hidePop();
+    var ov = flyOverlay();
+    ov.querySelector('.pg-fly-sheet-h b').textContent = 'Välj flyg';
+    var body = ov.querySelector('.pg-fly-body');
+    body.innerHTML = '<div class="pg-fly-pick">' + items.map(function (f) {
+      var key = flyKeyOf(f);
+      var sub = [f.no, f.from].filter(Boolean).join(' · ');
+      return '<button type="button" class="pg-fly-pick-item" data-pg-fly="' + esc(key) + '"><span aria-hidden="true">✈</span><span>' + esc(sub) + '</span></button>';
+    }).join('') + '</div>';
+    ov.hidden = false;
+    flyUi.key = null;
+    flyUi.list = keys;
+    return true;
+  }
   function bindPop(root) {
     if (root._pgPop) return;
     root._pgPop = true;
@@ -960,10 +983,17 @@
   }, true);
   document.addEventListener('click', function (e) {
     var btn = e.target.closest && e.target.closest('[data-pg-fly]');
-    if (!btn) return;
+    if (btn) {
+      e.preventDefault();
+      e.stopPropagation();
+      showFlySheet(btn.getAttribute('data-pg-fly'));
+      return;
+    }
+    var slot = e.target.closest && e.target.closest('[data-pg-fly-slot]');
+    if (!slot) return;
     e.preventDefault();
     e.stopPropagation();
-    showFlySheet(btn.getAttribute('data-pg-fly'));
+    showFlyList((slot.getAttribute('data-pg-fly-slot') || '').split('||').filter(Boolean));
   }, true);
 
   // Rulla i själva rutan stänger inte (t873u), bara rullning av sidan/schemat
@@ -1016,8 +1046,9 @@
       var n = tot[k] || 0;
       var full = (meta.label || meta.head) + ': ' + n + ' bokning' + (n === 1 ? '' : 'ar') + ' närmaste 2 h';
       var cls = 'pg-th-cat' + (meta.child ? ' pg-th-child' : '');
-      html += '<th class="' + cls + '" title="' + esc(full) + '" aria-label="' + esc(full) + '"><span class="pg-th-rot" aria-hidden="true">' +
-        esc(meta.head) + ' <span class="pg-th-sum' + (n ? '' : ' pg-th-sum0') + '">' + n + '</span></span></th>';
+      html += '<th class="' + cls + '" title="' + esc(full) + '" aria-label="' + esc(full) + '">' +
+        '<span class="pg-th-sum-slot"><span class="pg-th-sum' + (n ? '' : ' pg-th-sum0') + '">' + n + '</span></span>' +
+        '<span class="pg-th-rot" aria-hidden="true">' + esc(meta.head) + '</span></th>';
     });
     if (showFly) {
       html += '<th class="pg-th-fly" title="Ankomster till Landvetter i den här tiden" aria-label="Flyg"><span class="pg-th-rot" aria-hidden="true">Flyg</span></th>';
@@ -1058,7 +1089,8 @@
       });
       if (showFly) {
         var flies = d === 'snart' ? [] : flightsInSlot(slot);
-        html += '<td class="pg-td-fly">' + flyChipHtml(flies) + '</td>';
+        var flyKeys = flies.map(flyKeyOf);
+        html += '<td class="pg-td-fly"' + (flyKeys.length ? ' data-pg-fly-slot="' + esc(flyKeys.join('||')) + '"' : '') + '>' + flyChipHtml(flies) + '</td>';
       } else {
         html += '<td class="pg-td-spacer" aria-hidden="true"></td>';
       }
@@ -1360,7 +1392,7 @@
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
   }
 
-  // Rubrikraden blir så hög som det längsta lodräta namnet kräver, så inget klipps.
+  // Rubrikraden = antalsband + lodräta namn + lucka ner till första dataraden, så inget överlappar.
   function fitDiagHead(root) {
     var fit = function () {
       var table = root.querySelector('.pg-table-diag');
@@ -1368,13 +1400,19 @@
       if (!tr) return;
       var labs = tr.querySelectorAll('.pg-th-rot');
       if (!labs.length) return;
+      var cs = getComputedStyle(tr);
+      var sumH = 0;
+      var slot = tr.querySelector('.pg-th-sum-slot');
+      if (slot) sumH = slot.getBoundingClientRect().height;
+      if (!sumH) sumH = parseFloat(cs.getPropertyValue('--pg-sum-h')) || 22;
+      var gap = parseFloat(cs.getPropertyValue('--pg-name-gap')) || 16;
       var hNeed = 0, over = 0, scR = (table.closest('.pg-scroll') || table).getBoundingClientRect();
       labs.forEach(function (el) {
         var r = el.getBoundingClientRect();
         if (r.height > hNeed) hNeed = r.height;
         if (r.right - scR.right > over) over = r.right - scR.right;
       });
-      if (hNeed > 0) tr.style.setProperty('--pg-head-h', Math.ceil(hNeed + 5 + 4) + 'px');
+      if (hNeed > 0) tr.style.setProperty('--pg-head-h', Math.ceil(sumH + hNeed + gap + 2) + 'px');
       if (over > 0) {
         var cur = parseFloat(getComputedStyle(table.querySelector('.pg-th-spacer') || tr).width) || 12;
         table.style.setProperty('--pg-spacer-w', Math.min(48, Math.ceil(cur + over + 3)) + 'px');
