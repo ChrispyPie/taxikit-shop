@@ -767,18 +767,25 @@ html[data-theme="dark"] .pg-pop-fly { background: #3b2a16; color: #fbd38d; borde
 .pg-pop-flyb { color: #c05621; font-size: 0.8rem; }
 html[data-theme="dark"] .pg-pop-flyb { color: #fbd38d; }
 
-/* Visible station selector and searchable sheet. Quick picks live at the top of the list. */
-.ank-station-picker{display:flex;flex-direction:column;align-items:stretch;gap:4px;margin:10px 0 12px;max-width:430px}
-.ank-station-picker-label{font-size:.8rem;font-weight:700;color:var(--text)}
-.ank-station-title{border:2px solid var(--border,#8a96a3);background:var(--surface,#fff);color:inherit;font:inherit;font-weight:700;padding:10px 12px;min-height:48px;width:100%;text-align:left;border-radius:10px;box-shadow:0 1px 0 #0001}
-.ank-station-sheet{display:flex;flex-direction:column;width:calc(100% - 24px);max-width:430px;max-height:85dvh;box-sizing:border-box;border:1px solid var(--border,#aab);border-radius:14px;background:var(--surface,#fff);color:var(--text);padding:14px}.ank-station-sheet::backdrop{background:#0006}
-.ank-station-sheet input{width:100%;min-height:48px;box-sizing:border-box;font:inherit;padding:10px;margin:6px 0 12px;border:2px solid var(--border,#8a96a3);border-radius:10px}
-.ank-station-results{flex:1;min-height:0;max-height:55dvh;overflow:auto;display:flex;flex-direction:column;gap:4px}.ank-station-sheet [data-station-close]{width:100%;margin-top:8px;flex-shrink:0}
-.ank-station-sheet button{min-height:44px;font:inherit}
-.ank-station-results button{text-align:left;padding:8px;background:var(--surface,#fff);color:inherit;border:1px solid var(--border,#aab);border-radius:8px}
-.ank-station-results small{float:right;color:var(--text-soft)}
-.ank-station-quick-list{display:flex;flex-direction:column;gap:4px}
-.ank-station-divider{border:0;border-top:1px solid var(--border,#aab);margin:8px 0}
+/* Closed selector is compact (auto width, max ~60% on a phone). The open list may use the full width. */
+.ank-station-picker{display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin:8px 0 10px;max-width:100%}
+.ank-station-picker-label{font-size:.72rem;font-weight:600;color:var(--text-soft,#4a5568)}
+.ank-station-title{display:inline-flex;align-items:center;gap:8px;max-width:60%;width:auto;min-width:0;min-height:36px;padding:5px 10px;border:1.5px solid var(--border,#8a96a3);background:var(--surface,#fff);color:var(--text);font:inherit;font-weight:600;text-align:left;border-radius:6px;box-shadow:none;cursor:pointer;line-height:1.2}
+.ank-station-title-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.ank-station-caret{flex:0 0 auto;width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid currentColor;opacity:.75}
+.ank-station-sheet{display:flex;flex-direction:column;width:calc(100% - 16px);max-width:none;max-height:85dvh;box-sizing:border-box;border:1px solid var(--border,#aab);border-radius:12px;background:var(--surface,#fff);color:var(--text);padding:10px 12px 12px}.ank-station-sheet::backdrop{background:#0006}
+.ank-station-sheet h3{font-size:1rem;margin:0 0 2px}
+.ank-station-sheet label{font-size:.75rem;color:var(--text-soft)}
+.ank-station-sheet input{width:100%;min-height:36px;box-sizing:border-box;font:inherit;font-size:.95rem;padding:6px 8px;margin:4px 0 8px;border:1px solid var(--border,#8a96a3);border-radius:6px;background:var(--surface,#fff);color:var(--text)}
+.ank-station-results{flex:1;min-height:0;max-height:none;overflow:auto;display:flex;flex-direction:column;gap:0;-webkit-overflow-scrolling:touch}
+.ank-station-sheet [data-station-close]{width:100%;margin-top:8px;flex-shrink:0;min-height:40px;font:inherit;border:1px solid var(--border,#aab);border-radius:8px;background:var(--surface-soft,#f0f5fa);color:inherit}
+.ank-station-results button{display:block;width:100%;box-sizing:border-box;text-align:left;padding:9px 6px;min-height:40px;font:inherit;font-weight:400;color:inherit;background:transparent;border:0;border-bottom:1px solid var(--border-soft,#d0e0ea);border-radius:0;cursor:pointer}
+.ank-station-results button:last-child{border-bottom:0}
+.ank-station-results button[aria-pressed="true"]{background:var(--surface-soft,#f0f5fa)}
+.ank-station-results small{float:right;color:var(--text-soft);font-weight:400}
+.ank-station-quick-list{display:flex;flex-direction:column;gap:0}
+.ank-station-quick-list button,.ank-station-results button.ank-station-pick-quick{font-weight:700}
+.ank-station-divider{border:0;border-top:1px solid var(--border,#aab);margin:2px 0}
 .ank-station-note{font-size:.82rem;color:var(--text-soft);margin:6px 0 12px}
 
 /* Ersatta kvitton: syns kvar, räknas inte, överstrukna och nedtonade. Alla suffix. */
