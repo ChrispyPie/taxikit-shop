@@ -245,7 +245,7 @@
     var html = '<div class="tabs ank-tabs">' + A.sources.map(function (x) {
       return '<button class="tab' + (x.id === s.id ? ' active' : '') + '" data-ank-tab="' + x.id + '">' + x.icon + ' ' + esc(x.label) + '</button>';
     }).join('') + '</div>';
-    if(s.id==='tag')html+='<div class="ank-station-picker"><span class="ank-station-picker-label" id="ank-station-picker-label">Station</span><button type="button" class="ank-station-title" data-ank-picker aria-haspopup="dialog" aria-labelledby="ank-station-picker-label"><span class="ank-station-title-label">'+esc(stationLabel())+'</span><span class="ank-station-caret" aria-hidden="true"></span></button></div>'+(state.station!=='G'?'<p class="ank-station-note">Tågbevakningar och tågnotiser gäller fortfarande Göteborg C.</p>':'');
+    if(s.id==='tag')html+='<div class="ank-station-picker"><span class="ank-station-picker-label" id="ank-station-picker-label">Station</span><button type="button" class="ank-station-title" data-ank-picker aria-haspopup="dialog" aria-labelledby="ank-station-picker-label"><span class="ank-station-title-label">'+esc(stationLabel())+'</span><span class="ank-station-caret" aria-hidden="true"></span></button></div>'+(state.station!=='G'?'<p class="ank-station-note">Bevakningar gäller fortfarande Göteborg C.</p>':'');
     var upd = state.at[s.id] ? new Date(state.at[s.id]) : (state.updated[s.id] ? d(state.updated[s.id]) : null);
     var stale = upd && now - upd > 15 * 60000;
     html += '<div class="ank-head"><span>' + (s.id==='tag'?'':('<b>'+esc(s.place)+'</b>')) + (upd ? (s.id==='tag'?'':' ') + 'uppdaterad ' + hms(upd) : '') + '</span>' +
@@ -289,7 +289,7 @@
     }
     keepActiveInView(el);
     if (window.BEVAKNING) BEVAKNING.decorate(el);  // bevakning: notisknapp + långtryck
-    if (window.TAGNOTIS) TAGNOTIS.decorate(el);    // Mina tågnotiser (tagnotis.js), bara på Tåg-fliken
+    if (window.TAGNOTIS) TAGNOTIS.decorate(el);    // Mina bevakningar (tagnotis.js), bara på Tåg-fliken
     if (state.watchHighlight) {
       var target = Array.from(el.querySelectorAll('[data-ank-key]')).find(function (r) { return r.getAttribute('data-ank-key') === state.watchHighlight; });
       if (target) {
