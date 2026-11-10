@@ -119,7 +119,7 @@
     '.lk-note{font-size:.8rem;color:var(--muted);margin:.4rem 2px}' +
     '.lk-btn{display:block;width:100%;padding:.65rem;border-radius:8px;border:2px solid var(--primary);background:var(--surface);color:var(--primary);font-size:1rem;margin-top:.5rem}' +
     '.lk-btn.primary{background:var(--primary);color:var(--on-primary,#fff)}' +
-    '.lk-set .gm-row input{width:96px}.lk-set .gm-row span.u{width:22px;color:var(--muted);font-size:.85rem}';
+    '.lk-set .gm-row input{width:96px}.lk-set .gm-row span.u{width:22px;color:var(--muted);font-size:.85rem}.lk-warn{font-size:.82rem;line-height:1.4;color:var(--text-soft,var(--muted));background:var(--surface-soft,#edf2f7);border-left:3px solid var(--accent,#3182ce);border-radius:10px;padding:.55rem .75rem;margin:0 0 .75rem}';
   function ensureCss() {
     if (document.getElementById('lk-css')) return;
     var s = document.createElement('style'); s.id = 'lk-css'; s.textContent = CSS; document.head.appendChild(s);
@@ -182,6 +182,7 @@
 
     var h = '';
     if (!d.own) h += '<div class="tl-info">Du tittar på förare ' + esc(d.driver) + ' (vald i Körpassdata).</div>';
+    h += '<div class="lk-warn" role="note">Obs: Rättade kvitton från Taxi Göteborg kommer in den 16:e varje månad. Fram till dess kan lönen här visa lite fel.</div>';
     h += '<div class="tl-card"><div class="lk-sub">Inkört hittills (pass som startar i ' + esc(MON[p.m]) + ')</div>' +
       '<div class="lk-big">' + kr(r.nettoInkl) + '</div>' +
       '<div class="lk-sub">' + d.shifts.length + ' pass · ' + x.antal + ' körningar · BOM ' + kr(x.bom) + ' borträknat</div>' +

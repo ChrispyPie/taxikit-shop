@@ -15,6 +15,10 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-10', id: '2026-11-10ersatta', rader: [
+    ['Nytt', 'När ett kvitto rättas (till exempel -02 eller -03) syns de äldre versionerna under kvittot, överstrukna och nedtonade.'],
+    ['Nytt', 'Lönekoll visar en påminnelse att rättade kvitton från Taxi Göteborg kommer in den 16:e varje månad, så lönen kan visa lite fel fram till dess.']
+  ]},
   { datum: '2026-11-08', id: '2026-11-08stations', tid: '00:34', rader: [
     ['Nytt', 'Ankomster: välj station för tågen, till exempel Mölndal, Gamlestaden eller Kungsbacka. Ditt stationsval sparas.']
   ]},
