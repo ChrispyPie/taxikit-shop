@@ -13,8 +13,10 @@
     function next(lastErr) {
       if (i >= urls.length) return Promise.reject(lastErr || new Error('ingen källa'));
       var u = urls[i++];
+      // t= cache-bust only for fallback feeds (GitHub raw / static JSON). The Vercel
+      // trains API has its own Cache-Control (s-maxage 60 / 10) so the CDN can absorb polls.
       if (bust) u += (u.indexOf('?') < 0 ? '?' : '&') + 't=' + Math.floor(Date.now() / 30000);
-      return fetch(u, { cache: 'no-store' }).then(function (r) {
+      return fetch(u, { cache: bust ? 'no-store' : 'default' }).then(function (r) {
         if (!r.ok) throw new Error(r.status);
         return r.json();
       }).catch(next);
@@ -35,6 +37,13 @@
       canceled: !!t.canceled,
       info: trainLine(t,station),
       tid: t.id || '', schedRaw: t.sched || '',
+      lastSeen: t.lastSeen || '',
+      lastSeenSig: t.lastSeenSig || '',
+      lastSeenTs: t.lastSeenTs || '',
+      lastSeenAct: t.lastSeenAct || '',
+      posChecked: !!t.posChecked,
+      track: t.track || '',
+      dir: t.dir || 'ANK',
       note: '',
       group: trainGroup(t),
       snabb: !!t.snabb,
@@ -73,16 +82,56 @@
     }
     return '';
   }
+  function trainsUrl(station, extra) {
+    var u=TRAIN_URLS[0], q=[];
+    if(station&&station!=='G')q.push('station='+encodeURIComponent(station));
+    if(extra)q.push(extra);
+    return q.length?u+((u.indexOf('?')<0)?'?':'&')+q.join('&'):u;
+  }
   function loadTrains(station) {
     station=station||'G';
     if(!/^[A-Za-zÅÄÖåäö.]{1,8}$/.test(station))return Promise.reject(new Error('Okänd station'));
-    var urls=station==='G'?TRAIN_URLS:[TRAIN_URLS[0]+'?station='+encodeURIComponent(station)];
+    var urls=station==='G'?TRAIN_URLS:[trainsUrl(station)];
     return getJson(urls,false).then(function(j){
       // An older/manual Vercel deployment may ignore station: never show Göteborg under another name.
       if(station!=='G'&&j.stationSignature!==station)throw new Error('Stationsval kräver uppdaterad tågtjänst');
       if(j.stationSignature&&j.stationSignature!==station)throw new Error('Fel station i svaret');
       return {station:station,updated:j.updated,warning:!!j.error,items:(j.trains||[]).filter(function(t){return t.dir==='ANK';}).map(function(t){return trainItem(t,station);})};
     });
+  }
+  function loadTrainDelta(station) {
+    station=station||'G';
+    if(!/^[A-Za-zÅÄÖåäö.]{1,8}$/.test(station))return Promise.reject(new Error('Okänd station'));
+    var u=trainsUrl(station,'delta=1');
+    return fetch(u,{cache:'default'}).then(function(r){
+      if(!r.ok)throw new Error(r.status);
+      return r.json();
+    }).then(function(j){
+      if(j.stationSignature&&j.stationSignature!==station)throw new Error('Fel station i svaret');
+      return {
+        station:station,updated:j.updated,warning:!!j.error,delta:true,
+        items:(j.trains||[]).filter(function(t){return !t.dir||t.dir==='ANK';}).map(function(t){return trainItem(t,station);}),
+        removed:j.removed||[]
+      };
+    });
+  }
+  function itemKeyFromRemoved(r,station){
+    if(!r)return '';
+    if(typeof r==='string'){
+      if(r.charAt(0)==='t')return r;
+      var parts=r.split('|');
+      return 't'+(parts[0]||'')+'|'+(parts.length>2?parts[2]:parts[1]||'');
+    }
+    return 't'+(r.id||'')+'|'+(r.sched||'');
+  }
+  function mergeTrainDeltas(items, delta) {
+    items=items||[];
+    delta=delta||{};
+    var by={};
+    items.forEach(function(it){if(it&&it.key)by[it.key]=it;});
+    (delta.removed||[]).forEach(function(r){delete by[itemKeyFromRemoved(r,delta.station)];});
+    (delta.items||[]).forEach(function(it){if(it&&it.key)by[it.key]=it;});
+    return Object.keys(by).map(function(k){return by[k];});
   }
   // Filterknappar överst på tågfliken: Alla | Stockholm | Köpenhamn | Oslo. Senaste val sparas.
   function trainGroups() {
@@ -140,5 +189,5 @@
    if(catalogPending)return catalogPending;
    catalogPending=getJson([TRAIN_URLS[0]+'?stations=1'],false).then(function(j){if(!Array.isArray(j.stations)||!j.stations.some(function(s){return s.id==='G';}))throw new Error('Stationslistan kunde inte hämtas');var rows=j.stations.filter(function(s){return typeof s.label==='string'&&/^[A-Za-zÅÄÖåäö.]{1,8}$/.test(s.id||'');});try{localStorage.setItem('taxi_train_stations_v1',JSON.stringify({at:Date.now(),stations:rows}));}catch(e){}return rows;}).finally(function(){catalogPending=null;});return catalogPending;
  }
- window.ARRIVAL_DATA={date:d,hm:hm,stationCatalog:stationCatalog,loadTrains:loadTrains,loadFlights:loadFlights,trainGroups:trainGroups,watchItems:watchItems,flightItems:function(age){return cache.flyg&&Date.now()-cache.flyg.at<(age||120000)?Promise.resolve(cache.flyg.items):watchItems('flyg').catch(function(){return cache.flyg?cache.flyg.items:[];});}};
+ window.ARRIVAL_DATA={date:d,hm:hm,stationCatalog:stationCatalog,loadTrains:loadTrains,loadTrainDelta:loadTrainDelta,mergeTrainDeltas:mergeTrainDeltas,loadFlights:loadFlights,trainGroups:trainGroups,watchItems:watchItems,flightItems:function(age){return cache.flyg&&Date.now()-cache.flyg.at<(age||120000)?Promise.resolve(cache.flyg.items):watchItems('flyg').catch(function(){return cache.flyg?cache.flyg.items:[];});}};
 })();

@@ -135,6 +135,69 @@ function rowsOf(payload) {
   return out;
 }
 
+function lastChangeIdOf(payload) {
+  const results = ((payload || {}).RESPONSE || {}).RESULT || [];
+  for (const block of results) {
+    const info = block.INFO || block.Info || {};
+    const id = info.LASTCHANGEID != null ? info.LASTCHANGEID : info.LastChangeId;
+    if (id != null && String(id) !== "") return String(id);
+  }
+  return "";
+}
+
+function rowDeleted(row) {
+  const d = row && (row.Deleted != null ? row.Deleted : row.deleted);
+  return d === true || d === "true" || d === "True";
+}
+
+function trainKey(f) {
+  return (f.id || "") + "|" + (f.dir || "") + "|" + (f.sched || "");
+}
+
+function trainFingerprint(f) {
+  return [f.est || "", f.act || "", f.canceled ? "1" : "0", f.track || "", f.lastSeenTs || "", f.lastSeenSig || "", f.reason || "", f.info || ""].join("\t");
+}
+
+function slimBoardRows(payload) {
+  const trains = [], removed = [];
+  for (const row of rowsOf(payload)) {
+    const t = slimTrain(row);
+    if (rowDeleted(row)) {
+      if (t.id && t.sched) removed.push(t);
+      continue;
+    }
+    trains.push(t);
+  }
+  return { trains, removed, changeId: lastChangeIdOf(payload) };
+}
+
+function attachLastSeen(trains, pos) {
+  const seen = (pos && pos.best) || {};
+  const checked = new Set((pos && pos.idents) || []);
+  for (const f of trains) {
+    const hit = seen[f.id];
+    const tArr = Date.parse(f.est || f.sched);
+    const okHit = hit && hit.sig && (!Number.isFinite(tArr) || Date.parse(hit.ts) > tArr - 8 * 3600 * 1000);
+    if (f.dir === "ANK" && checked.has(f.id)) f.posChecked = true;
+    if (okHit) {
+      f.lastSeen = stationName(hit.sig) || hit.sig;
+      f.lastSeenSig = hit.sig;
+      f.lastSeenTs = hit.ts;
+      f.lastSeenAct = hit.act;
+    }
+  }
+  return trains;
+}
+
+function cloneTrain(f) {
+  const o = {};
+  for (const k of Object.keys(f)) {
+    if (k === "stops") continue; // delta path never carries the heavy route list
+    o[k] = f[k];
+  }
+  return o;
+}
+
 function locSig(item) {
   if (typeof item === "string") return item;
   if (item && typeof item === "object") return item.LocationName || item.LocationSignature || "";
@@ -233,9 +296,11 @@ function orIdents(idents) {
   return idents.map((i) => '<EQ name="AdvertisedTrainIdent" value="' + xmlAttr(i) + '" />').join("");
 }
 
-async function stationQuery(key, station = STATION) {
-  const q =
-    '<QUERY objecttype="TrainAnnouncement" schemaversion="1.9" orderby="AdvertisedTimeAtLocation" limit="2000">' +
+function stationAnnouncementQuery(station, changeId) {
+  const extra = 'orderby="AdvertisedTimeAtLocation" limit="2000"' +
+    (changeId ? ' changeid="' + xmlAttr(changeId) + '" includedeletedobjects="true"' : "");
+  return (
+    '<QUERY objecttype="TrainAnnouncement" namespace="rail.trafficinfo" schemaversion="1.9" ' + extra + ">" +
     "<FILTER><AND>" +
     '<EQ name="LocationSignature" value="' + xmlAttr(station) + '" />' +
     '<EQ name="Advertised" value="true" />' +
@@ -248,8 +313,12 @@ async function stationQuery(key, station = STATION) {
     "<INCLUDE>TrackAtLocation</INCLUDE><INCLUDE>FromLocation</INCLUDE>" +
     "<INCLUDE>ToLocation</INCLUDE><INCLUDE>ProductInformation</INCLUDE>" +
     "<INCLUDE>TypeOfTraffic</INCLUDE>" +
-    "<INCLUDE>Deviation</INCLUDE><INCLUDE>OtherInformation</INCLUDE><INCLUDE>Booking</INCLUDE></QUERY>";
-  return rowsOf(await tvPost(key, q)).map(slimTrain);
+    "<INCLUDE>Deviation</INCLUDE><INCLUDE>OtherInformation</INCLUDE><INCLUDE>Booking</INCLUDE></QUERY>"
+  );
+}
+
+async function stationQuery(key, station = STATION, changeId) {
+  return slimBoardRows(await tvPost(key, stationAnnouncementQuery(station, changeId)));
 }
 
 // Senast sedd: tågets senaste faktiska händelse (TimeAtLocation) på någon driftplats,
@@ -273,7 +342,7 @@ async function lastSeenMap(key, trains) {
   const idents = positionIdents(trains);
   if (!idents.length) return { best: {}, idents };
   const q =
-    '<QUERY objecttype="TrainAnnouncement" schemaversion="1.9" orderby="TimeAtLocation desc" limit="10000">' +
+    '<QUERY objecttype="TrainAnnouncement" namespace="rail.trafficinfo" schemaversion="1.9" orderby="TimeAtLocation desc" limit="10000">' +
     '<FILTER><AND><GT name="TimeAtLocation" value="$dateadd(-06:00:00)" />' +
     "<OR>" + orIdents(idents) + "</OR></AND></FILTER>" +
     "<INCLUDE>AdvertisedTrainIdent</INCLUDE><INCLUDE>LocationSignature</INCLUDE>" +
@@ -296,7 +365,7 @@ async function routesMap(key, trains) {
   const results = await Promise.all(
     batches.map((batch) => {
       const q =
-        '<QUERY objecttype="TrainAnnouncement" schemaversion="1.9" orderby="AdvertisedTimeAtLocation" limit="1500">' +
+        '<QUERY objecttype="TrainAnnouncement" namespace="rail.trafficinfo" schemaversion="1.9" orderby="AdvertisedTimeAtLocation" limit="1500">' +
         '<FILTER><AND><EQ name="Advertised" value="true" />' +
         '<GT name="AdvertisedTimeAtLocation" value="$dateadd(-12:00:00)" />' +
         '<LT name="AdvertisedTimeAtLocation" value="$dateadd(16:00:00)" />' +
@@ -334,7 +403,8 @@ async function routesMap(key, trains) {
 
 async function buildTrains(key, station = STATION) {
   await loadStationNames(key).catch(() => {});
-  const trains = await stationQuery(key, station);
+  const board = await stationQuery(key, station);
+  const trains = board.trains;
   const [pos, routes] = await Promise.all([
     lastSeenMap(key, trains).catch(() => ({ best: {}, idents: [] })),
     routesMap(key, trains).catch(() => ({})),
@@ -375,8 +445,102 @@ async function buildTrains(key, station = STATION) {
   }
   // Samma nyckel som merge_keep i Python-scriptet: (id, dir, sched).
   const uniq = new Map();
-  for (const f of trains) uniq.set(f.id + "|" + f.dir + "|" + f.sched, f);
+  for (const f of trains) uniq.set(trainKey(f), f);
+  const list = Array.from(uniq.values());
+  rememberDeltaState(station, list, board.changeId);
+  return list;
+}
+
+const CACHE_DELTA = "public, s-maxage=10, stale-while-revalidate=10";
+const DELTA_CACHE = new Map();
+const DELTA_PENDING = new Map();
+const DELTA_STATE = new Map();
+
+function rememberDeltaState(station, trains, changeId) {
+  const list = trains.map(cloneTrain);
+  const prev = DELTA_STATE.get(station);
+  DELTA_STATE.set(station, {
+    trains: list,
+    changeId: changeId || (prev && prev.changeId) || "",
+    fingerprints: new Map(list.map((f) => [trainKey(f), trainFingerprint(f)])),
+    at: Date.now(),
+  });
+}
+
+function seedDeltaState(station) {
+  if (DELTA_STATE.get(station)) return DELTA_STATE.get(station);
+  const cached = STATION_CACHE.get(station);
+  const body = cached && (cached.lastGood || cached.body);
+  if (body && Array.isArray(body.trains) && body.trains.length) {
+    rememberDeltaState(station, body.trains, "");
+    return DELTA_STATE.get(station);
+  }
+  return null;
+}
+
+function mergeBoard(prevTrains, incoming, removed) {
+  const uniq = new Map();
+  for (const f of prevTrains || []) uniq.set(trainKey(f), cloneTrain(f));
+  for (const f of removed || []) uniq.delete(trainKey(f));
+  for (const f of incoming || []) uniq.set(trainKey(f), cloneTrain(f));
   return Array.from(uniq.values());
+}
+
+function diffBoard(prev, next) {
+  const prevMap = new Map((prev || []).map((f) => [trainKey(f), f]));
+  const nextMap = new Map((next || []).map((f) => [trainKey(f), f]));
+  const changed = [];
+  const removed = [];
+  for (const [k, f] of nextMap) {
+    const before = prevMap.get(k);
+    if (!before || trainFingerprint(before) !== trainFingerprint(f)) changed.push(cloneTrain(f));
+  }
+  for (const k of prevMap.keys()) if (!nextMap.has(k)) {
+    const f = prevMap.get(k);
+    removed.push({ id: f.id, dir: f.dir, sched: f.sched });
+  }
+  return { changed, removed };
+}
+
+// Light board for near-live polls: station arrivals + last-seen only, never the full route rebuild.
+async function buildTrainsDelta(key, station = STATION) {
+  await loadStationNames(key).catch(() => {});
+  const prev = seedDeltaState(station);
+  let trains, changeId;
+  if (prev && prev.changeId) {
+    try {
+      const patch = await stationQuery(key, station, prev.changeId);
+      trains = mergeBoard(prev.trains, patch.trains, patch.removed);
+      changeId = patch.changeId || prev.changeId;
+    } catch (e) {
+      const board = await stationQuery(key, station);
+      trains = board.trains;
+      changeId = board.changeId;
+    }
+  } else {
+    const board = await stationQuery(key, station);
+    trains = board.trains;
+    changeId = board.changeId;
+  }
+  const pos = await lastSeenMap(key, trains).catch(() => ({ best: {}, idents: [] }));
+  attachLastSeen(trains, pos);
+  const uniq = new Map();
+  for (const f of trains) uniq.set(trainKey(f), f);
+  trains = Array.from(uniq.values());
+  const before = (prev && prev.trains) || [];
+  const diff = prev ? diffBoard(before, trains) : { changed: [], removed: [] };
+  rememberDeltaState(station, trains, changeId);
+  return {
+    station: (TS_NAMES && TS_NAMES[station]) || QUICK_STATIONS.get(station) || station,
+    stationSignature: station,
+    updated: new Date().toISOString(),
+    error: null,
+    source: "delta",
+    delta: true,
+    changeId: changeId || "",
+    trains: diff.changed,
+    removed: diff.removed,
+  };
 }
 
 // Stationslista för ETT tåg (på begäran när man trycker på raden): ?station=<signatur>&route=<tågnr>&sched=<ankomst>.
@@ -392,7 +556,7 @@ async function routeFor(key, ident, schedIso, station = STATION) {
   const back = Math.min(36, Math.max(1, Math.ceil((now - sched) / 3600000 + 12)));
   const ahead = Math.min(24, Math.max(1, Math.ceil((sched - now) / 3600000 + 2)));
   const q =
-    '<QUERY objecttype="TrainAnnouncement" schemaversion="1.9" orderby="AdvertisedTimeAtLocation" limit="1500">' +
+    '<QUERY objecttype="TrainAnnouncement" namespace="rail.trafficinfo" schemaversion="1.9" orderby="AdvertisedTimeAtLocation" limit="1500">' +
     '<FILTER><AND><EQ name="AdvertisedTrainIdent" value="' + xmlAttr(ident) + '" />' +
     '<GT name="AdvertisedTimeAtLocation" value="$dateadd(-' + hh(back) + ')" />' +
     '<LT name="AdvertisedTimeAtLocation" value="$dateadd(' + hh(ahead) + ')" />' +
@@ -491,6 +655,23 @@ async function handler(req, res) {
       return send(res,200,CACHE_ROUTE,await ROUTE_PENDING.get(rk));
     } catch(e) {return send(res,502,CACHE_ERR,{error:e.name==="AbortError"?"Trafikverket timeout":"Kunde inte hämta stationslistan",stops:[]});}
   }
+  const wantDelta = url.searchParams.get("delta") === "1" || url.searchParams.get("mode") === "delta";
+  if (wantDelta) {
+    const cached=DELTA_CACHE.get(station), now=Date.now();
+    if(cached&&now-cached.at<cached.ttl)return send(res,cached.status,cached.status===200&&!cached.body.error?CACHE_DELTA:CACHE_ERR,cached.body);
+    if(!DELTA_PENDING.has(station))DELTA_PENDING.set(station,(async()=>{
+      try {
+        const body=await buildTrainsDelta(key,station);
+        const value={at:Date.now(),ttl:10000,status:200,body};DELTA_CACHE.set(station,value);return value;
+      }catch(e){
+        const msg=e.name==="AbortError"?"Trafikverket timeout":"Kunde inte hämta tågtider";
+        const body={station:(TS_NAMES&&TS_NAMES[station])||QUICK_STATIONS.get(station)||station,stationSignature:station,updated:null,error:msg,delta:true,trains:[],removed:[]};
+        const value={at:Date.now(),ttl:5000,status:502,body};DELTA_CACHE.set(station,value);return value;
+      }
+    })().finally(()=>DELTA_PENDING.delete(station)));
+    const result=await DELTA_PENDING.get(station);
+    return send(res,result.status,result.status===200&&!result.body.error?CACHE_DELTA:CACHE_ERR,result.body);
+  }
   const cached=STATION_CACHE.get(station), now=Date.now();
   if(cached&&now-cached.at<cached.ttl)return send(res,cached.status,cached.status===200&&!cached.body.error?CACHE_OK:CACHE_ERR,cached.body);
   if(!STATION_PENDING.has(station))STATION_PENDING.set(station,(async()=>{
@@ -511,4 +692,4 @@ async function handler(req, res) {
 }
 
 module.exports = handler;
-module.exports._internal = { slimTrain, buildTrains, uniqueIdents, rowsOf, codesText, reasonParts, routeFor, loadCatalog, regionalStation, QUICK_STATIONS };
+module.exports._internal = { slimTrain, buildTrains, buildTrainsDelta, uniqueIdents, rowsOf, lastChangeIdOf, codesText, reasonParts, routeFor, loadCatalog, regionalStation, QUICK_STATIONS, trainKey, trainFingerprint, mergeBoard, diffBoard };

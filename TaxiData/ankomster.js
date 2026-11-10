@@ -16,7 +16,8 @@
     id: 'ankomster',
     title: 'Ankomster',
     icon: '🛬',
-    refreshMs: 60 * 1000,        // ny data varje minut
+    refreshMs: 60 * 1000,        // full lista ungefär varje minut
+    deltaMs: 15 * 1000,          // lätt delta medan vyn är synlig
     pastMin: 15,                 // visa ankomna så här länge efter ankomst
     pastMoreMin: 180,            // "Visa tidigare" visar så här långt bakåt
     aheadHours: 16,
@@ -354,10 +355,26 @@
     var g = e.target.closest('[data-ank-filter]');
     if (g) { localStorage.setItem('ank_tagfilter', g.getAttribute('data-ank-filter')); paint(); }
   }
-  function onVisible() { if (!document.hidden && state.el) load(state.tab, true); }
+  function loadDelta() {
+    if (document.hidden || !state.el || state.tab !== 'tag' || !state.data.tag || !D.loadTrainDelta) return;
+    var station = state.station;
+    D.loadTrainDelta(station).then(function (r) {
+      if (!state.el || station !== state.station || state.tab !== 'tag' || !r) return;
+      state.data.tag = D.mergeTrainDeltas(state.data.tag, r);
+      if (r.updated) state.updated.tag = r.updated;
+      if (r.warning) state.err.tag = 'Visar senast sparade tider.';
+      paint();
+    }).catch(function () {});
+  }
+  function onVisible() {
+    if (document.hidden || !state.el) return;
+    if (state.tab === 'tag') loadDelta();
+    else load(state.tab, true);
+  }
 
   function stop() {
-    clearInterval(state.timer); clearInterval(state.tick); state.timer = state.tick = null;
+    clearInterval(state.timer); clearInterval(state.tick); clearInterval(state.deltaTimer);
+    state.timer = state.tick = state.deltaTimer = null;
     document.removeEventListener('visibilitychange', onVisible);
     var picker=document.querySelector('dialog.ank-station-sheet');if(picker)picker.close();
     state.el = null;
@@ -380,6 +397,7 @@
     D.stationCatalog().then(function(rows){stationList=rows;if(state.el)paint();}).catch(function(){});
     load(state.tab, true);
     state.timer = setInterval(function () { if (!document.hidden) load(state.tab, true); }, A.refreshMs);
+    state.deltaTimer = setInterval(function () { if (!document.hidden) loadDelta(); }, A.deltaMs);
     state.tick = setInterval(paint, 20000);  // flytta fram listan när tiden går
     document.addEventListener('visibilitychange', onVisible);
   };
