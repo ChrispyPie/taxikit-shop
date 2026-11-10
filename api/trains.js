@@ -38,7 +38,7 @@ const STATIONS = {
   Or: "Olskroken", Alh: "Alingsås", "Äh": "Älvängen", Sts: "Stenungsund",
   Kac: "Kalmar C", Bsc: "Borås C", Sfl: "Säffle",
   // samma namn som den gamla flödesappen (skiftlogg/js/app-2.js) använder
-  "Än": "Älvängen", Ldo: "Lindome", Uv: "Uddevalla", Snu: "Stenungsund",
+  "Än": "Älvängen", Ndv: "Norsesund västra", Ldo: "Lindome", Uv: "Uddevalla", Snu: "Stenungsund",
   Vbc: "Varberg C", Smd: "Strömstad", Mst: "Mellerud", Ksc: "Karlstad C",
   "Dk.kh": "Köpenhamn H", "No.osl": "Oslo S", Khn: "Kristinehamn", T: "Töreboda",
   Hie: "Helsingör", Arb: "Arboga", Lkp: "Lidköping", Ed: "Ed",
@@ -86,9 +86,9 @@ async function loadCatalog(key){
   if(Date.now()-CATALOG_FAIL_AT<60000){if(CATALOG&&Date.now()-CATALOG_AT<CATALOG_STALE_MAX)return CATALOG;throw new Error("station_catalog_unavailable");}
   if(CATALOG_PENDING)return CATALOG_PENDING;
   CATALOG_PENDING=(async()=>{try{
-    const q='<QUERY objecttype="TrainStation" namespace="rail.infrastructure" schemaversion="1.5"><FILTER><AND><EQ name="Advertised" value="true"/><EQ name="Deleted" value="false"/><EQ name="CountryCode" value="SE"/></AND></FILTER><INCLUDE>LocationSignature</INCLUDE><INCLUDE>AdvertisedLocationName</INCLUDE><INCLUDE>Advertised</INCLUDE><INCLUDE>Deleted</INCLUDE><INCLUDE>CountryCode</INCLUDE><INCLUDE>CountyNo</INCLUDE><INCLUDE>Geometry.WGS84</INCLUDE></QUERY>';
+    const q='<QUERY objecttype="TrainStation" namespace="rail.infrastructure" schemaversion="1.5"><FILTER><AND><EQ name="Deleted" value="false"/><EQ name="CountryCode" value="SE"/></AND></FILTER><INCLUDE>LocationSignature</INCLUDE><INCLUDE>AdvertisedLocationName</INCLUDE><INCLUDE>OfficialLocationName</INCLUDE><INCLUDE>Advertised</INCLUDE><INCLUDE>Deleted</INCLUDE><INCLUDE>CountryCode</INCLUDE><INCLUDE>CountyNo</INCLUDE><INCLUDE>Geometry.WGS84</INCLUDE></QUERY>';
     const json=await tvPost(key,q), all=[];for(const b of ((json||{}).RESPONSE||{}).RESULT||[])all.push(...(b.TrainStation||[]));
-    const list=new Map(),names={};for(const r of all){if(r.LocationSignature&&r.AdvertisedLocationName)names[r.LocationSignature]=r.AdvertisedLocationName;if(regionalStation(r)&&/^[A-Za-zÅÄÖåäö.]{1,8}$/.test(r.LocationSignature||'')&&r.AdvertisedLocationName)list.set(r.LocationSignature,{id:r.LocationSignature,label:r.AdvertisedLocationName});}
+    const list=new Map(),names={};for(const r of all){const name=r.AdvertisedLocationName||r.OfficialLocationName;if(r.LocationSignature&&name)names[r.LocationSignature]=name;if(regionalStation(r)&&/^[A-Za-zÅÄÖåäö.]{1,8}$/.test(r.LocationSignature||'')&&r.AdvertisedLocationName)list.set(r.LocationSignature,{id:r.LocationSignature,label:r.AdvertisedLocationName});}
     if(!list.has('G'))throw new Error('invalid_station_catalog');
     CATALOG=Array.from(list.values()).sort((a,b)=>a.label.localeCompare(b.label,'sv'));CATALOG_AT=Date.now();TS_NAMES=names;return CATALOG;
   }catch(e){CATALOG_FAIL_AT=Date.now();if(CATALOG&&Date.now()-CATALOG_AT<CATALOG_STALE_MAX)return CATALOG;throw e;}
@@ -407,15 +407,15 @@ async function routeFor(key, ident, schedIso, station = STATION) {
   const stops = new Map();
   let seen = null;
   for (const r of rows) {
-    const t = Date.parse(r.AdvertisedTimeAtLocation);
+    const t = Date.parse(r.AdvertisedTimeAtLocation || r.TimeAtLocation);
     if (!Number.isFinite(t) || t < lo || t > hi) continue;
     const sig = r.LocationSignature || "";
     if (!sig) continue;
     if (r.TimeAtLocation && (!seen || Date.parse(r.TimeAtLocation) > Date.parse(seen.ts))) {
-      seen = { sig, name: stationName(sig), ts: r.TimeAtLocation, type: r.ActivityType || "" };
+      seen = { sig, name: stationName(sig) || sig, ts: r.TimeAtLocation, type: r.ActivityType || "" };
     }
-    if (!r.Advertised) continue;
-    const s = stops.get(sig) || { sig, name: stationName(sig), t, track: "", canceled: false };
+    if (!r.Advertised && !r.TimeAtLocation) continue;
+    const s = stops.get(sig) || { sig, name: stationName(sig) || sig, t, track: "", canceled: false };
     const arr = String(r.ActivityType || "").toLowerCase().startsWith("ank");
     const pre = arr ? "arr" : "dep";
     if (!s[pre + "Sched"] || t < Date.parse(s[pre + "Sched"])) {

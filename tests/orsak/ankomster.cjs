@@ -9,11 +9,14 @@ const windowObj = {
   addEventListener(t, f) { listeners.push([t, f]); },
   removeEventListener() {},
 };
+windowObj.ARRIVAL_DATA={loadTrains(){return Promise.resolve({items:[]});},loadFlights(){return Promise.resolve({items:[]});},trainGroups(){return [];},stationCatalog(){return Promise.resolve([]);},date(v){return v?new Date(v):null},hm(){return ''}};
+windowObj.TRAIN_STATIONS=[{id:'G',label:'Göteborg C'}];
 const ctx = {
   window: windowObj,
   document: { addEventListener() {}, removeEventListener() {}, querySelectorAll() { return []; }, querySelector() { return null; }, createElement() { return { style: {}, appendChild() {}, addEventListener() {}, className: '' }; } },
   localStorage: { getItem() { return null; }, setItem() {} },
   fetch() { return Promise.reject(new Error('no')); },
+  TRAIN_STATIONS: windowObj.TRAIN_STATIONS,
   console, Date, Math, Intl,
   setInterval() { return 0; }, clearInterval() {}, setTimeout() {}, clearTimeout() {},
   requestAnimationFrame(f) { try { f(); } catch (e) {} },

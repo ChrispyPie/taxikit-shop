@@ -749,11 +749,18 @@ html[data-theme="dark"] .pg-pop-fly { background: #3b2a16; color: #fbd38d; borde
 .pg-pop-flyb { color: #c05621; font-size: 0.8rem; }
 html[data-theme="dark"] .pg-pop-flyb { color: #fbd38d; }
 
-/* Compact station quick picks and searchable native sheet. */
-.ank-station-quick{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.ank-station-quick button{min-height:44px}
-.ank-station-title{border:0;background:none;color:inherit;font:inherit;font-weight:700;padding:6px 0;min-height:44px;text-align:left}
-.ank-station-sheet{width:calc(100% - 24px);max-width:430px;max-height:85dvh;box-sizing:border-box;border:1px solid var(--border,#aab);border-radius:14px;background:var(--surface,#fff);color:var(--text);padding:14px}.ank-station-sheet::backdrop{background:#0006}
-.ank-station-sheet input{width:100%;min-height:44px;box-sizing:border-box;font:inherit;padding:8px;margin:6px 0 12px}.ank-station-results{max-height:55dvh;overflow:auto;display:flex;flex-direction:column;gap:4px}.ank-station-sheet button{min-height:44px;font:inherit}.ank-station-results button{text-align:left;padding:8px;background:var(--surface,#fff);color:inherit;border:1px solid var(--border,#aab);border-radius:8px}.ank-station-results small{float:right;color:var(--text-soft)}
+/* Visible station selector and searchable sheet. Quick picks live at the top of the list. */
+.ank-station-picker{display:flex;flex-direction:column;align-items:stretch;gap:4px;margin:10px 0 12px;max-width:430px}
+.ank-station-picker-label{font-size:.8rem;font-weight:700;color:var(--text)}
+.ank-station-title{border:2px solid var(--border,#8a96a3);background:var(--surface,#fff);color:inherit;font:inherit;font-weight:700;padding:10px 12px;min-height:48px;width:100%;text-align:left;border-radius:10px;box-shadow:0 1px 0 #0001}
+.ank-station-sheet{display:flex;flex-direction:column;width:calc(100% - 24px);max-width:430px;max-height:85dvh;box-sizing:border-box;border:1px solid var(--border,#aab);border-radius:14px;background:var(--surface,#fff);color:var(--text);padding:14px}.ank-station-sheet::backdrop{background:#0006}
+.ank-station-sheet input{width:100%;min-height:48px;box-sizing:border-box;font:inherit;padding:10px;margin:6px 0 12px;border:2px solid var(--border,#8a96a3);border-radius:10px}
+.ank-station-results{flex:1;min-height:0;max-height:55dvh;overflow:auto;display:flex;flex-direction:column;gap:4px}.ank-station-sheet [data-station-close]{width:100%;margin-top:8px;flex-shrink:0}
+.ank-station-sheet button{min-height:44px;font:inherit}
+.ank-station-results button{text-align:left;padding:8px;background:var(--surface,#fff);color:inherit;border:1px solid var(--border,#aab);border-radius:8px}
+.ank-station-results small{float:right;color:var(--text-soft)}
+.ank-station-quick-list{display:flex;flex-direction:column;gap:4px}
+.ank-station-divider{border:0;border-top:1px solid var(--border,#aab);margin:8px 0}
 .ank-station-note{font-size:.82rem;color:var(--text-soft);margin:6px 0 12px}
 
 /* Ersatta kvitton: syns kvar, räknas inte, överstrukna och nedtonade. Alla suffix. */
