@@ -1,12 +1,12 @@
-/* Mina tågnotiser (t609u): fasta notiser för vissa tåg, t.ex. snabbtågen från Stockholm,
+/* Mina bevakningar (t609u): fasta bevakningar för vissa tåg, t.ex. snabbtågen från Stockholm,
  * bara under de tider föraren väljer (t.ex. 17:00–05:00 mån–fre, så inga notiser när man är ledig).
  *
- * - Visas som ett kort "🔔 Mina tågnotiser" på fliken Tåg i Ankomster (under notisknappen).
+ * - Visas som ett kort "🔔 Mina bevakningar" på fliken Tåg i Ankomster (under notisknappen).
  * - Snabbval "Snabbtåg från Stockholm" eller egen: varifrån, bara snabbtåg, tågnummer.
  * - Notis X min före ankomst, vid försening och om tåget ställs in.
  * - Sparas hos servern (train_watch_*), notiserna skickas av edge-funktionen "bevakning" som push,
  *   så de kommer även när appen är stängd. Kräver att notiser är påslagna på telefonen.
- * - Tåg som matchar en påslagen tågnotis får en liten 🔔 i listan.
+ * - Tåg som matchar en påslagen bevakning får en liten 🔔 i listan.
  */
 (function () {
   'use strict';
@@ -43,11 +43,11 @@
     lead_min: 20, notify_delay: true, delay_min: 10, notify_cancel: true, days: [1, 2, 3, 4, 5, 6, 7], from_min: 0, to_min: 0 };
   var ERR = {
     too_broad: 'Välj varifrån, bara snabbtåg eller tågnummer. Annars blir det notiser för alla tåg.',
-    too_many: 'Du kan ha högst 10 tågnotiser.',
+    too_many: 'Du kan ha högst 10 bevakningar.',
     bad_train_no: 'Tågnummer ska vara siffror, t.ex. 423, 541.',
     bad_days: 'Välj minst en dag.',
     nothing_to_send: 'Välj minst en sak att få notis om.',
-    not_found: 'Tågnotisen finns inte längre.'
+    not_found: 'Bevakningen finns inte längre.'
   };
   var st = { list: null, loading: false, err: false, open: localStorage.getItem('tn_open') === '1', busy: false };
   T._state = st;
@@ -107,11 +107,11 @@
     var l = st.list || [];
     var on = l.filter(function (w) { return w.enabled; }).length;
     var h = '<div class="tn-card" id="tn-card"><button class="tn-head" data-tn-toggle aria-expanded="' + st.open + '">' +
-      '<span>🔔 <b>Mina tågnotiser</b></span><span class="tn-count">' + (st.list ? (l.length ? on + ' på' : 'Ingen än') : '…') +
+      '<span>🔔 <b>Mina bevakningar</b></span><span class="tn-count">' + (st.list ? (l.length ? on + ' på' : 'Ingen än') : '…') +
       ' ' + (st.open ? '▴' : '▾') + '</span></button>';
     if (!st.open) return h + '</div>';
     h += '<div class="tn-body">';
-    if (st.err) h += '<div class="tn-note">Kunde inte hämta dina tågnotiser. Försök igen strax.</div>';
+    if (st.err) h += '<div class="tn-note">Kunde inte hämta dina bevakningar. Försök igen strax.</div>';
     l.forEach(function (w) {
       h += '<div class="tn-item' + (w.enabled ? '' : ' off') + '">' +
         '<button class="tn-switch' + (w.enabled ? ' on' : '') + '" role="switch" aria-checked="' + !!w.enabled + '" aria-label="' + esc(w.name) + ' på/av" data-tn-onoff="' + w.id + '"' + (st.busy ? ' disabled' : '') + '><span></span></button>' +
@@ -124,9 +124,9 @@
     if (!l.some(function (w) { return w.name === PRESET.name; })) {
       h += '<button class="tn-add main" data-tn-preset>+ Snabbtåg från Stockholm</button>';
     }
-    if (l.length < 10) h += '<button class="tn-add" data-tn-new>+ Egen tågnotis</button>';
+    if (l.length < 10) h += '<button class="tn-add" data-tn-new>+ Egen bevakning</button>';
     var push = window.BEVAKNING && BEVAKNING.pushState ? BEVAKNING.pushState() : 'unknown';
-    if (l.length && push !== 'on') h += '<div class="tn-note">⚠️ Notiser är inte påslagna på den här telefonen. Slå på dem med knappen ovan, annars kommer inga tågnotiser hit.</div>';
+    if (l.length && push !== 'on') h += '<div class="tn-note">⚠️ Notiser är inte påslagna på den här telefonen. Slå på dem med knappen ovan, annars kommer inga notiser från dina bevakningar hit.</div>';
     h += '<div class="tn-hint">Du får notis före ankomst, vid försening och om tåget ställs in, bara under tiderna du valt. Fungerar även när appen är stängd.</div>';
     return h + '</div></div>';
   }
@@ -139,7 +139,7 @@
     var after = el.querySelector('.bev-bar') || el.querySelector('.ank-head');
     var wrap = document.createElement('div'); wrap.innerHTML = cardHtml();
     if (after) after.parentNode.insertBefore(wrap.firstChild, after.nextSibling);
-    // 🔔 på tåg som matchar en påslagen tågnotis
+    // 🔔 på tåg som matchar en påslagen bevakning
     var on = (st.list || []).filter(function (w) { return w.enabled; });
     if (!on.length || !window.ANKOMSTER || !ANKOMSTER.item) return;
     var rows = el.querySelectorAll('[data-ank-key^="t"]');
@@ -147,7 +147,7 @@
       var it = ANKOMSTER.item(rows[i].getAttribute('data-ank-key'));
       if (it && on.some(function (w) { return T.matches(w, it); })) {
         var f = rows[i].querySelector('.ank-from');
-        if (f && !f.querySelector('.tn-bell')) { var b = document.createElement('span'); b.className = 'tn-bell'; b.title = 'Mina tågnotiser'; b.textContent = ' 🔔'; f.appendChild(b); }
+        if (f && !f.querySelector('.tn-bell')) { var b = document.createElement('span'); b.className = 'tn-bell'; b.title = 'Mina bevakningar'; b.textContent = ' 🔔'; f.appendChild(b); }
       }
     }
   };
@@ -173,8 +173,8 @@
   // ---------- redigera (eget lager ovanpå, så att Ankomsters uppdatering varje minut inte nollställer formuläret) ----------
   function sheetHtml(w, id) {
     var allDay = w.from_min === w.to_min;
-    var h = '<div class="tn-sheet" role="dialog" aria-modal="true" aria-label="Tågnotis"><form class="tn-form" novalidate>' +
-      '<div class="tn-sh-head"><b>' + (id ? 'Ändra tågnotis' : 'Ny tågnotis') + '</b><button type="button" class="tn-x" data-tn-close aria-label="Stäng">✕</button></div>' +
+    var h = '<div class="tn-sheet" role="dialog" aria-modal="true" aria-label="Bevakning"><form class="tn-form" novalidate>' +
+      '<div class="tn-sh-head"><b>' + (id ? 'Ändra bevakning' : 'Ny bevakning') + '</b><button type="button" class="tn-x" data-tn-close aria-label="Stäng">✕</button></div>' +
       '<label class="tn-lbl">Namn<input name="name" maxlength="40" value="' + esc(w.name) + '" placeholder="t.ex. Snabbtåg kväll"></label>' +
       '<div class="tn-lbl">Tåg från</div><div class="tn-chips">' + ORIGINS.map(function (o) {
         return '<label class="tn-chip"><input type="checkbox" name="o" value="' + o[0] + '"' + (w.origins.indexOf(o[0]) >= 0 ? ' checked' : '') + '><span>' + o[1] + '</span></label>';
@@ -210,7 +210,7 @@
     var mode = (f.querySelector('input[name="mode"]:checked') || {}).value;
     var from = mins(E.from.value), to = mins(E.to.value);
     if (mode === 'all') { from = 0; to = 0; } else if (from === to) { from = 0; to = 0; }
-    return { name: E.name.value.trim() || 'Tågnotis', enabled: base.enabled !== false, origins: all('o'), fast_only: E.fast.checked,
+    return { name: E.name.value.trim() || 'Bevakning', enabled: base.enabled !== false, origins: all('o'), fast_only: E.fast.checked,
       train_nos: (E.nos.value.match(/\d+/g) || []).slice(0, 20), lead_min: +E.lead.value, notify_delay: E.delay.checked,
       delay_min: +E.delayMin.value, notify_cancel: E.cancel.checked, days: all('d').map(Number), from_min: from, to_min: to };
   }
@@ -237,9 +237,9 @@
     sh.addEventListener('click', function (e) {
       if (e.target === sh || e.target.closest('[data-tn-close]')) { closeSheet(); return; }
       if (e.target.closest('[data-tn-del]')) {
-        if (!confirm('Ta bort tågnotisen "' + w.name + '"?')) return;
+        if (!confirm('Ta bort bevakningen "' + w.name + '"?')) return;
         if (window.DEMO && DEMO.on && DEMO.on()) { toast(DEMO.MSG); return; }
-        rpc('train_watch_delete', { p_id: +id }).then(function (l) { st.list = Array.isArray(l) ? l : st.list; closeSheet(); toast('Tågnotisen är borttagen.'); repaint(); })
+        rpc('train_watch_delete', { p_id: +id }).then(function (l) { st.list = Array.isArray(l) ? l : st.list; closeSheet(); toast('Bevakningen är borttagen.'); repaint(); })
           .catch(function (e2) { err.textContent = errText(e2); });
       }
     });
@@ -259,8 +259,8 @@
       save(id, d).then(function () {
         closeSheet(); st.open = true; localStorage.setItem('tn_open', '1');
         var push = window.BEVAKNING && BEVAKNING.pushState ? BEVAKNING.pushState() : 'unknown';
-        toast(push === 'on' ? 'Sparat. Du får tågnotiser ' + timeText(d) + ', ' + daysText(d.days) + '.'
-          : 'Sparat. Slå på notiser (🔔 Aktivera) för att få tågnotiserna.', 4500);
+        toast(push === 'on' ? 'Sparat. Du får notiser ' + timeText(d) + ', ' + daysText(d.days) + '.'
+          : 'Sparat. Slå på notiser (🔔 Aktivera) för att få notiser från bevakningarna.', 4500);
         repaint();
       }).catch(function (e2) { btn.disabled = false; if (e2 && e2.message !== 'demo') err.textContent = errText(e2); });
     });

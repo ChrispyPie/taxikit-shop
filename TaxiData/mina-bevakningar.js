@@ -94,7 +94,7 @@
     function safe(p, label, fallback) { return p.catch(function () { errors.push(label); return fallback; }); }
     return Promise.all([
       safe(rpc('watch_list', {}), 'bevakade ankomster', []),
-      safe(rpc('train_watch_list', {}), 'tågnotiser', []),
+      safe(rpc('train_watch_list', {}), 'bevakningar', []),
       safe(ARRIVAL_DATA.watchItems('tag'), 'tågtider', []),
       safe(ARRIVAL_DATA.watchItems('flyg'), 'flygtider', []),
       onlyTransport ? Promise.resolve([]) : safe(calendarEvents(errors), 'kalendern', []),
@@ -187,16 +187,16 @@
     var h = '<div class="mb"><div class="mb-view-toggle" role="group" aria-label="Visning"><button data-mb-view="timeline" aria-pressed="' + (mode === 'timeline') + '">Tidslinje</button><button data-mb-view="list" aria-pressed="' + (mode === 'list') + '">Lista</button></div><p class="mb-intro">Dina ankomster, kalenderhändelser och bokade tider, i tidsordning.</p><button type="button" class="mb-refresh" data-mb-refresh>↻ Uppdatera</button>';
     if (message) h += '<p role="status" class="mb-warning">' + esc(message) + '</p>';
     if (errors && errors.length) h += '<p role="status" class="mb-warning">Kunde inte hämta ' + esc(errors.join(', ')) + '. Listan kan vara ofullständig. Försök igen med Uppdatera.</p>';
-    if (!rows.length) h += '<div class="mb-empty"><div>📌</div><h3>' + (errors && errors.length ? 'Inget att visa just nu' : 'Inga bevakningar än') + '</h3><p>Bevaka ett flyg med ☆ eller håll fingret på ett tåg under Ankomster. I Kalender: öppna ett evenemang och välj en påminnelse.</p><button data-mb-source="ankomster">Öppna Ankomster</button><button data-mb-source="kalender">Öppna Kalender</button></div>';
+    if (!rows.length) h += '<div class="mb-empty"><div>📌</div><h3>' + (errors && errors.length ? 'Inget att visa just nu' : 'Inga bevakningar än') + '</h3><p>Bevaka ett flyg med ☆ eller håll fingret på ett tåg under Ankomster. Du kan också lägga till en bevakning under Ankomster › Tåg. I Kalender: öppna ett evenemang och välj en påminnelse.</p><button data-mb-source="ankomster">Öppna Ankomster</button><button data-mb-source="kalender">Öppna Kalender</button></div>';
     if (mode === 'timeline') h += timelineHtml();
     var day = '';
     (mode === 'list' ? rows : []).forEach(function (r, i) {
       var p = parts(r.at);
       if (p.key !== day) { h += '<h3 class="mb-day">' + esc(dayLabel(p.key)) + '</h3>'; day = p.key; }
-      h += '<article class="mb-row' + (r.kind === 'booking' ? ' mb-row-booking' : '') + (r.pending ? ' pending' : '') + '"><button class="mb-open" data-mb-open="' + i + '"><span class="mb-time">' + p.hm + '<small>' + icon(r) + '</small></span><span class="mb-text"><b>' + esc(r.title) + '</b><small>' + esc(r.status || 'Bevakas') + '</small>' + (r.rules.length ? '<small>Tågnotis: ' + esc(r.rules.map(function (w) { return w.name; }).join(', ')) + '</small>' : '') + '</span><span aria-hidden="true">›</span></button>' + (r.kind === 'booking' ? '' : '<button class="mb-remove" data-mb-remove="' + i + '"' + (busy ? ' disabled' : '') + ' aria-label="Sluta bevaka ' + esc(r.title) + '">Sluta bevaka</button>') + '</article>';
+      h += '<article class="mb-row' + (r.kind === 'booking' ? ' mb-row-booking' : '') + (r.pending ? ' pending' : '') + '"><button class="mb-open" data-mb-open="' + i + '"><span class="mb-time">' + p.hm + '<small>' + icon(r) + '</small></span><span class="mb-text"><b>' + esc(r.title) + '</b><small>' + esc(r.status || 'Bevakas') + '</small>' + (r.rules.length ? '<small>Bevakning (tåg): ' + esc(r.rules.map(function (w) { return w.name; }).join(', ')) + '</small>' : '') + '</span><span aria-hidden="true">›</span></button>' + (r.kind === 'booking' ? '' : '<button class="mb-remove" data-mb-remove="' + i + '"' + (busy ? ' disabled' : '') + ' aria-label="Sluta bevaka ' + esc(r.title) + '">Sluta bevaka</button>') + '</article>';
     });
     if (actionIndex !== null && rows[actionIndex]) h += '<div class="mb-action-shade"><section class="mb-action-sheet" role="dialog" aria-modal="true" aria-label="Bevakning"><b>' + esc(rows[actionIndex].title) + '</b><button data-mb-remove="' + actionIndex + '">Sluta bevaka</button><button data-mb-cancel>Avbryt</button></section></div>';
-    host.innerHTML = h + '<p class="mb-foot">Avslutade visas i högst 2 timmar. Ankomster kan tas bort tidigare av notistjänsten. Kalender: kommande året i dina städer. Tågnotiser visar tågen som finns i tidtabellen.</p></div>';
+    host.innerHTML = h + '<p class="mb-foot">Avslutade visas i högst 2 timmar. Ankomster kan tas bort tidigare av notistjänsten. Kalender: kommande året i dina städer. Bevakningar visar tågen som finns i tidtabellen.</p></div>';
     host.querySelectorAll('[data-mb-view]').forEach(function (b) { b.onclick = function () {
       mode = b.dataset.mbView; localStorage.setItem('taxi_mb_view', mode); autoPosition = true; actionIndex = null; draw(errors);
     }; });
@@ -222,7 +222,7 @@
     host.querySelectorAll('[data-mb-remove]').forEach(function (b) { b.onclick = function () {
       if (busy) return;
       var r = rows[+b.dataset.mbRemove], g = generation;
-      var text = r.rules.length ? 'Tåget ingår i en tågnotis. Stänga av hela tågnotisen (' + r.rules.map(function (w) { return w.name; }).join(', ') + ') och sluta bevaka tåget?' : 'Sluta bevaka ' + r.title + '?';
+      var text = r.rules.length ? 'Tåget ingår i en bevakning. Stänga av hela bevakningen (' + r.rules.map(function (w) { return w.name; }).join(', ') + ') och sluta bevaka tåget?' : 'Sluta bevaka ' + r.title + '?';
       if (!window.confirm(text)) return;
       busy = true; actionIndex = null; draw(errors);
       remove(r).then(function () { if (g === generation) refresh(); }).catch(function () { busy = false; if (g === generation) draw(errors, 'Kunde inte ta bort allt. Uppdatera och försök igen.'); }).finally(function () { busy = false; });
