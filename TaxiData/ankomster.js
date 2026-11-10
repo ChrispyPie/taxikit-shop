@@ -42,7 +42,7 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
-  var d=D.date,hm=D.hm;
+  var d=D.date,hm=D.hm,hms=D.hms||function(x){return x?x.toLocaleTimeString('sv-SE',{hour:'2-digit',minute:'2-digit',second:'2-digit',timeZone:'Europe/Stockholm'}):'';};
   function dayKey(x) { return x.toLocaleDateString('sv-SE', { timeZone: 'Europe/Stockholm' }); }
   function dayLabel(x) {
     var k = dayKey(x), now = new Date();
@@ -246,9 +246,9 @@
       return '<button class="tab' + (x.id === s.id ? ' active' : '') + '" data-ank-tab="' + x.id + '">' + x.icon + ' ' + esc(x.label) + '</button>';
     }).join('') + '</div>';
     if(s.id==='tag')html+='<div class="ank-station-picker"><span class="ank-station-picker-label" id="ank-station-picker-label">Station</span><button type="button" class="ank-station-title" data-ank-picker aria-haspopup="dialog" aria-labelledby="ank-station-picker-label"><span class="ank-station-title-label">'+esc(stationLabel())+'</span><span class="ank-station-caret" aria-hidden="true"></span></button></div>'+(state.station!=='G'?'<p class="ank-station-note">Tågbevakningar och tågnotiser gäller fortfarande Göteborg C.</p>':'');
-    var upd = state.updated[s.id] ? d(state.updated[s.id]) : null;
+    var upd = state.at[s.id] ? new Date(state.at[s.id]) : (state.updated[s.id] ? d(state.updated[s.id]) : null);
     var stale = upd && now - upd > 15 * 60000;
-    html += '<div class="ank-head"><span>' + (s.id==='tag'?'':('<b>'+esc(s.place)+'</b>')) + (upd ? (s.id==='tag'?'':' ') + 'uppdaterad ' + hm(upd) : '') + '</span>' +
+    html += '<div class="ank-head"><span>' + (s.id==='tag'?'':('<b>'+esc(s.place)+'</b>')) + (upd ? (s.id==='tag'?'':' ') + 'uppdaterad ' + hms(upd) : '') + '</span>' +
             '<button class="ank-refresh" data-ank-refresh aria-label="Uppdatera">' + (state.loading[s.id] ? '…' : '↻') + '</button></div>';
     if (stale) html += '<div class="ank-warn">Datan är äldre än 15 minuter.</div>';
     if(typeof state.err[s.id]==='string')html+='<div class="ank-warn">'+esc(state.err[s.id])+'</div>';
@@ -362,6 +362,7 @@
       if (!state.el || station !== state.station || state.tab !== 'tag' || !r) return;
       state.data.tag = D.mergeTrainDeltas(state.data.tag, r);
       if (r.updated) state.updated.tag = r.updated;
+      state.at.tag = Date.now(); // show receive time so "uppdaterad" ticks on each successful poll
       if (r.warning) state.err.tag = 'Visar senast sparade tider.';
       paint();
     }).catch(function () {});

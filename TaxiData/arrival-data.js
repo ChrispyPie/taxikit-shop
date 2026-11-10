@@ -8,6 +8,9 @@
   function hm(x) {
     return x ? x.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Stockholm' }) : '';
   }
+  function hms(x) {
+    return x ? x.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Stockholm' }) : '';
+  }
   function getJson(urls, bust) {
     var i = 0;
     function next(lastErr) {
@@ -189,5 +192,5 @@
    if(catalogPending)return catalogPending;
    catalogPending=getJson([TRAIN_URLS[0]+'?stations=1'],false).then(function(j){if(!Array.isArray(j.stations)||!j.stations.some(function(s){return s.id==='G';}))throw new Error('Stationslistan kunde inte hämtas');var rows=j.stations.filter(function(s){return typeof s.label==='string'&&/^[A-Za-zÅÄÖåäö.]{1,8}$/.test(s.id||'');});try{localStorage.setItem('taxi_train_stations_v1',JSON.stringify({at:Date.now(),stations:rows}));}catch(e){}return rows;}).finally(function(){catalogPending=null;});return catalogPending;
  }
- window.ARRIVAL_DATA={date:d,hm:hm,stationCatalog:stationCatalog,loadTrains:loadTrains,loadTrainDelta:loadTrainDelta,mergeTrainDeltas:mergeTrainDeltas,loadFlights:loadFlights,trainGroups:trainGroups,watchItems:watchItems,flightItems:function(age){return cache.flyg&&Date.now()-cache.flyg.at<(age||120000)?Promise.resolve(cache.flyg.items):watchItems('flyg').catch(function(){return cache.flyg?cache.flyg.items:[];});}};
+ window.ARRIVAL_DATA={date:d,hm:hm,hms:hms,stationCatalog:stationCatalog,loadTrains:loadTrains,loadTrainDelta:loadTrainDelta,mergeTrainDeltas:mergeTrainDeltas,loadFlights:loadFlights,trainGroups:trainGroups,watchItems:watchItems,flightItems:function(age){return cache.flyg&&Date.now()-cache.flyg.at<(age||120000)?Promise.resolve(cache.flyg.items):watchItems('flyg').catch(function(){return cache.flyg?cache.flyg.items:[];});}};
 })();

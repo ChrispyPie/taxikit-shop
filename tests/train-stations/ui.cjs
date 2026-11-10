@@ -6,6 +6,8 @@ const assert=require('node:assert/strict'),{boot}=require('../lazy-views/dom.cjs
  w.fetch=async(url,opts)=>{url=String(url);if(!url.includes('/api/trains'))return original(url,opts);urls.push(url);const params=new URL(url).searchParams,id=params.get('station')||'G';if(holdGas&&id==='Gas')await new Promise(r=>{resolveGas=r;});const data=params.has('stations')?{stations}:{stationSignature:id,updated:new Date().toISOString(),trains:[{id:'123',dir:'ANK',other:'Fixture '+id,sched,est},{id:'456',dir:'ANK',other:'Inställt fixture',sched,canceled:true}]};return {ok:true,status:200,json:async()=>data};};
  function pickStation(id){w.document.querySelector('[data-ank-picker]').click();}
  await w.openItem('ankomster');await pause();
+ const upd1=w.document.body.textContent.match(/uppdaterad (\d{2}:\d{2}:\d{2})/);
+ assert(upd1,'uppdaterad shows HH:MM:SS');
  assert.equal(w.document.querySelectorAll('[data-ank-station]').length,0,'quick-pick row removed');
  assert(w.document.querySelector('.ank-station-picker-label').textContent.includes('Station'));
  assert.equal(w.document.querySelector('[data-ank-picker] .ank-station-title-label').textContent.trim(),'Göteborg C');
