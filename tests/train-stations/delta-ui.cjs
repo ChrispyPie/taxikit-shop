@@ -35,7 +35,16 @@ const assert=require('node:assert/strict'),{boot}=require('../lazy-views/dom.cjs
  w.document.body.appendChild(el);
  w.ANKOMSTER.render(el);
  assert.equal(w.ANKOMSTER.deltaMs,15000);
- const id=w.ANKOMSTER/* no state export */;
+ await new Promise(r=>setTimeout(r,80));
+ const first=el.textContent.match(/uppdaterad (\d{2}:\d{2}:\d{2})/);
+ assert(first,'uppdaterad shows HH:MM:SS after load');
+ await new Promise(r=>setTimeout(r,1100));
+ Object.defineProperty(w.document,'hidden',{configurable:true,get:()=>false});
+ w.document.dispatchEvent(new w.Event('visibilitychange'));
+ await new Promise(r=>setTimeout(r,80));
+ const second=el.textContent.match(/uppdaterad (\d{2}:\d{2}:\d{2})/);
+ assert(second,'uppdaterad still HH:MM:SS after delta');
+ assert.notEqual(second[1],first[1],'uppdaterad refreshes on a successful delta poll');
  fetches.length=0;
  // Simulate visibility pause: hidden should not poll
  Object.defineProperty(w.document,'hidden',{configurable:true,get:()=>true});
