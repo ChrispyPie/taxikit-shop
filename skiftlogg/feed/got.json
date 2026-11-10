@@ -1,7 +1,7 @@
 {
   "airport": "GOT",
-  "updated": "2026-11-10T20:35:24+01:00",
-  "arrivalsUpdated": "2026-11-10T20:35:26+01:00",
+  "updated": "2026-11-10T20:40:37+01:00",
+  "arrivalsUpdated": "2026-11-10T20:40:39+01:00",
   "departuresUpdated": "2026-11-10T20:01:17+01:00",
   "yesterdayUpdated": "2026-11-10T05:01:10+01:00",
   "tomorrowUpdated": "2026-11-10T20:01:16+01:00",
@@ -96,26 +96,6 @@
       "status": "DEL",
       "statusSv": "Borttagen",
       "sched": "2026-11-09T21:00:00Z",
-      "est": "",
-      "act": "",
-      "terminal": "T1",
-      "gate": "",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
-    },
-    {
-      "id": "FR9662",
-      "dir": "ANK",
-      "other": "Rom FCO",
-      "iata": "",
-      "airline": "Ryanair Ltd",
-      "status": "DEL",
-      "statusSv": "Borttagen",
-      "sched": "2026-11-09T07:40:00Z",
       "est": "",
       "act": "",
       "terminal": "T1",
@@ -2104,8 +2084,8 @@
       "firstBag": "2026-11-10T19:30:02Z",
       "firstBagEst": "2026-11-10T19:25:05Z",
       "lastBag": "2026-11-10T19:34:31Z",
-      "rawStatus": "Första bagage · Landat 20:03",
-      "reason": "Första bagage · Landat 20:03"
+      "rawStatus": "Landat 20:03 · Sista bagage",
+      "reason": "Landat 20:03 · Sista bagage"
     },
     {
       "id": "AY867",
@@ -2121,11 +2101,11 @@
       "terminal": "T1",
       "gate": "19",
       "baggage": "1",
-      "firstBag": "",
+      "firstBag": "2026-11-10T19:36:23Z",
       "firstBagEst": "2026-11-10T19:38:30Z",
-      "lastBag": "",
-      "rawStatus": "Landat 20:19",
-      "reason": "Landat 20:19"
+      "lastBag": "2026-11-10T19:39:24Z",
+      "rawStatus": "Första bagage · Landat 20:19",
+      "reason": "Första bagage · Landat 20:19"
     },
     {
       "id": "SK169",
@@ -2136,7 +2116,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-11-10T20:30:00Z",
-      "est": "2026-11-10T20:33:00Z",
+      "est": "2026-11-10T20:25:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "16",
@@ -2144,8 +2124,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 21:33",
-      "reason": "Beräknad 21:33"
+      "rawStatus": "Ankommer 21:25",
+      "reason": "Ankommer 21:25"
     },
     {
       "id": "KL1239",
@@ -2483,9 +2463,9 @@
       "baggage": "5",
       "firstBag": "2026-11-10T19:34:42Z",
       "firstBagEst": "2026-11-10T19:47:13Z",
-      "lastBag": "",
-      "rawStatus": "Landat 20:22",
-      "reason": "Landat 20:22"
+      "lastBag": "2026-11-10T19:37:04Z",
+      "rawStatus": "Landat 20:22 · Sista bagage",
+      "reason": "Landat 20:22 · Sista bagage"
     },
     {
       "id": "SK2908",
@@ -2533,19 +2513,19 @@
       "other": "Teneriffa",
       "iata": "",
       "airline": "Tui Fly Nordic",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 20:37",
       "sched": "2026-11-10T19:50:00Z",
       "est": "2026-11-10T19:35:00Z",
-      "act": "",
+      "act": "2026-11-10T19:37:00Z",
       "terminal": "T1",
       "gate": "15",
       "baggage": "3",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 20:35",
-      "reason": "Ankommer 20:35"
+      "rawStatus": "Landat 20:37",
+      "reason": "Landat 20:37"
     },
     {
       "id": "FR9385",
