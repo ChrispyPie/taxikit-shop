@@ -755,3 +755,18 @@ html[data-theme="dark"] .pg-pop-flyb { color: #fbd38d; }
 .ank-station-sheet{width:calc(100% - 24px);max-width:430px;max-height:85dvh;box-sizing:border-box;border:1px solid var(--border,#aab);border-radius:14px;background:var(--surface,#fff);color:var(--text);padding:14px}.ank-station-sheet::backdrop{background:#0006}
 .ank-station-sheet input{width:100%;min-height:44px;box-sizing:border-box;font:inherit;padding:8px;margin:6px 0 12px}.ank-station-results{max-height:55dvh;overflow:auto;display:flex;flex-direction:column;gap:4px}.ank-station-sheet button{min-height:44px;font:inherit}.ank-station-results button{text-align:left;padding:8px;background:var(--surface,#fff);color:inherit;border:1px solid var(--border,#aab);border-radius:8px}.ank-station-results small{float:right;color:var(--text-soft)}
 .ank-station-note{font-size:.82rem;color:var(--text-soft);margin:6px 0 12px}
+
+/* Ersatta kvitton: syns kvar, räknas inte, överstrukna och nedtonade. Alla suffix. */
+.trip-replaced, .stat-row.trip-replaced, .sub.trip-replaced, .shift-trip.trip-replaced {
+  color: var(--text-soft, #718096);
+  opacity: 0.7;
+}
+.trip-replaced span, .trip-replaced .label, .trip-replaced .value {
+  text-decoration: line-through;
+  color: var(--muted, var(--text-soft, #718096));
+}
+.trip-replaced + .trip-detail, .trip-replaced .trip-detail, .sub.trip-detail.trip-replaced-detail {
+  color: var(--text-soft, #718096);
+  text-decoration: line-through;
+  opacity: 0.75;
+}

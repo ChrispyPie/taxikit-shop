@@ -118,6 +118,10 @@ async function loadDataNow(keepOld) {
     data = {};
     loadFailed = false;
     companyApi.cache.clear(); companyApi.failed = {}; companyApi.trips = {}; companyApi.tripsFailed = {};
+    try {
+      const repl = await tripRpc('get_replaced_trips', { p_dataset: 'current' }, 20000);
+      if (Array.isArray(repl)) data.replaced = repl;
+    } catch (e) { data.replaced = []; }
   } else try {
     // Resedata hämtas från servern (Supabase) och kräver inloggning.
     // Förare får bara sina egna resor; inga publika datafiler används.
@@ -133,6 +137,11 @@ async function loadDataNow(keepOld) {
     loadFailed = false;
     dataLoadedAt = Date.now();
     dataSession = sessionAtStart;
+    data.replaced = data.replaced || [];
+    try {
+      const repl = await tripRpc('get_replaced_trips', { p_dataset: 'current' }, 20000);
+      if (Array.isArray(repl)) data.replaced = repl;
+    } catch (e) { /* äldre server utan funktionen: visa bara gällande kvitton */ }
     archiveMergeInto(data);   // äldre år som redan hämtats i den här sessionen (bara i minnet)
     dedupData(data);
   } catch (e) {
@@ -408,6 +417,37 @@ function formatShiftDate(str) {
   const d = parts[0];
   return d.slice(6,8) + '/' + d.slice(4,6);
 }
+
+function replacedPool() {
+  return (data && data.replaced) || [];
+}
+function olderReceipts(t) {
+  const api = window.ReceiptVersions;
+  if (!api) return [];
+  return api.replacedVersionsFor(t, replacedPool(), defForar());
+}
+function tripEntryHtml(t, kind) {
+  const isBom = t.kredittyp === "999";
+  const replaced = !!t._replaced;
+  const dd = kind === "loose"
+    ? ((t.startdatum || "").slice(8, 10) + "/" + (t.startdatum || "").slice(5, 7) + " ")
+    : "";
+  const rowClass = (kind === "day" ? "stat-row" : "sub shift-trip") + (replaced ? " trip-replaced" : "");
+  const detClass = replaced ? "trip-detail trip-replaced-detail" : (kind === "day" ? "" : "trip-detail");
+  const keyPref = kind === "day" ? "trip" : kind === "loose" ? "lt" : "st";
+  const style = isBom && !replaced ? ' style="opacity:0.6;"' : "";
+  const click = kind === "day" ? "toggle(this)" : "toggleTrip(this, event)";
+  const row = `<div class="${rowClass}" data-key="${keyPref}:${escHtml(t.kvittonr)}|${escHtml(t.forar || defForar())}|${escHtml(t.startdatum || '')}" onclick="${click}"${style}><span class="toggle">+</span><span${kind === "day" ? ' class="label"' : ""}>${dd}${escHtml(t.kvittonr)}${isBom ? " (BOM)" : ""}</span><span${kind === "day" ? ' class="value"' : ""}>${formatSEK(parseAmount(t.belopp))}</span></div>`;
+  const details = kind === "day"
+    ? tripDetailRows(t, replaced ? "trip-replaced-detail" : "")
+    : `<div class="sub ${detClass}"><span>Start</span><span>${t.starttid || "00:00"} – zon ${t.startzon || "?"}</span></div>
+          <div class="sub ${detClass}"><span>Slut</span><span>${t.sluttid || "00:00"} – zon ${t.slutzon || "?"}</span></div>
+          <div class="sub ${detClass}"><span>Typ</span><span>${typeMap[t.kredittyp] || t.kredittyp || "?"}</span></div>
+          <div class="sub ${detClass}"><span>Dricks</span><span>${formatSEK(parseAmount(t.dricks))}</span></div>`;
+  const old = replaced ? [] : olderReceipts(t).map(r => tripEntryHtml(Object.assign({}, r, { _replaced: true }), kind)).join("");
+  return row + details + old;
+}
+
 function tripDetailRows(t, cls) {
   return `<div class="sub ${cls}"><span>Start</span><span>${t.starttid || '00:00'} – zon ${t.startzon || '?'}</span></div>
           <div class="sub ${cls}"><span>Slut</span><span>${t.sluttid || '00:00'} – zon ${t.slutzon || '?'}</span></div>
@@ -421,15 +461,7 @@ function looseTripsRow(list) {
   list = list.slice().sort((a, b) => ((b.startdatum || '') + (b.starttid || '')).localeCompare((a.startdatum || '') + (a.starttid || '')));
   const uber = list.filter(t => t.kredittyp === '164').reduce((sum, t) => sum + parseAmount(t.belopp), 0);
   const other = list.filter(t => t.kredittyp !== '999' && t.kredittyp !== '164').reduce((sum, t) => sum + parseAmount(t.belopp), 0);
-  const tripsHtml = list.map(t => {
-    const isBom = t.kredittyp === '999';
-    const dd = (t.startdatum || '').slice(8, 10) + '/' + (t.startdatum || '').slice(5, 7);
-    return `<div class="sub shift-trip" data-key="lt:${escHtml(t.kvittonr)}|${escHtml(t.forar || defForar())}|${escHtml(t.startdatum || '')}" onclick="toggleTrip(this, event)" style="${isBom ? 'opacity:0.6;' : ''}"><span class="toggle">+</span><span>${dd} ${escHtml(t.kvittonr)}${isBom ? ' (BOM)' : ''}</span><span>${formatSEK(parseAmount(t.belopp))}</span></div>
-          <div class="sub trip-detail"><span>Start</span><span>${t.starttid || '00:00'} – zon ${t.startzon || '?'}</span></div>
-          <div class="sub trip-detail"><span>Slut</span><span>${t.sluttid || '00:00'} – zon ${t.slutzon || '?'}</span></div>
-          <div class="sub trip-detail"><span>Typ</span><span>${typeMap[t.kredittyp] || t.kredittyp || '?'}</span></div>
-          <div class="sub trip-detail"><span>Dricks</span><span>${formatSEK(parseAmount(t.dricks))}</span></div>`;
-  }).join('');
+  const tripsHtml = list.map(t => tripEntryHtml(t, "loose")).join('');
   return `<div class="stat-row" data-key="loose" onclick="toggleShift(this)"><span class="toggle">+</span><span class="label">Resor utan pass (${list.length} st)</span><span class="value">${formatSEK(other + uber * (1 - UBER_FEE))}</span></div>
       <div class="shift-content">${tripsHtml}</div>`;
 }
@@ -646,11 +678,7 @@ function render() {
   if (currentTab === 'dag' && !COMPANY) {
     // En förares dag: lista med alla körningar
     if (allTrips.length) {
-      html += `<div class="section">${allTrips.map(t => {
-        const isBom = t.kredittyp === '999';
-        return `<div class="stat-row" data-key="trip:${escHtml(t.kvittonr)}|${escHtml(t.forar || defForar())}|${escHtml(t.startdatum || '')}" onclick="toggle(this)" style="${isBom ? 'opacity:0.6;' : ''}"><span class="toggle">+</span><span class="label">${escHtml(t.kvittonr)}${isBom ? ' (BOM)' : ''}</span><span class="value">${formatSEK(parseAmount(t.belopp))}</span></div>
-        ${tripDetailRows(t, '')}`;
-      }).join('')}</div>`;
+      html += `<div class="section">${allTrips.map(t => tripEntryHtml(t, "day")).join('')}</div>`;
     }
   } else if (shifts.length) {
     // Lista med skift (för hela åkeriet även på dagsfliken: ett skift per förare och bil)
@@ -664,14 +692,7 @@ function render() {
       const dateLabel = (COMPANY && currentTab === 'dag') ? '' : formatShiftDate(s.start) + ' ';
       // Förare visas bara för ägaren; övriga ser bara bilen
       const who = COMPANY ? `<span class="shift-who">${escHtml(s.taxi || '?')}${isOwnerRole() ? ' · ' + escHtml(driverLabel(s.forar || defForar())) : ''}</span>` : '';
-      const tripsHtml = shiftTrips.map(t => {
-        const isBom = t.kredittyp === '999';
-        return `<div class="sub shift-trip" data-key="st:${escHtml(t.kvittonr)}|${escHtml(t.forar || defForar())}|${escHtml(t.startdatum || '')}" onclick="toggleTrip(this, event)" style="${isBom ? 'opacity:0.6;' : ''}"><span class="toggle">+</span><span>${escHtml(t.kvittonr)}${isBom ? ' (BOM)' : ''}</span><span>${formatSEK(parseAmount(t.belopp))}</span></div>
-          <div class="sub trip-detail"><span>Start</span><span>${t.starttid || '00:00'} – zon ${t.startzon || '?'}</span></div>
-          <div class="sub trip-detail"><span>Slut</span><span>${t.sluttid || '00:00'} – zon ${t.slutzon || '?'}</span></div>
-          <div class="sub trip-detail"><span>Typ</span><span>${typeMap[t.kredittyp] || t.kredittyp || '?'}</span></div>
-          <div class="sub trip-detail"><span>Dricks</span><span>${formatSEK(parseAmount(t.dricks))}</span></div>`;
-      }).join('') + (lazyId != null && !companyApi.trips[lazyId] ? companyTripsPlaceholder(lazyId) : '');
+      const tripsHtml = shiftTrips.map(t => tripEntryHtml(t, "shift")).join('') + (lazyId != null && !companyApi.trips[lazyId] ? companyTripsPlaceholder(lazyId) : '');
       return `<div class="stat-row" data-key="shift:${escHtml(s.passnr)}|${escHtml(s.forar || defForar())}|${escHtml(s.start || '')}"${lazyId != null && !companyApi.trips[lazyId] ? ` data-lazy="${lazyId}"` : ''} onclick="toggleShift(this)"><span class="toggle">+</span><span class="label">${dateLabel}#${escHtml(s.passnr)}${who}</span><span class="value">${formatSEK(shiftInkort)}</span></div>
       <div class="shift-content">${tripsHtml}</div>`;
     }).join('')}${looseTrips.length ? looseTripsRow(looseTrips) : ''}</div>`;
@@ -1018,6 +1039,7 @@ function archiveMergeInto(d) {
     const a = archive.chunks[k];
     d.trips = (d.trips || []).concat(a.trips);
     d.shifts = (d.shifts || []).concat(a.shifts);
+    if (a.replaced && a.replaced.length) d.replaced = (d.replaced || []).concat(a.replaced);
   });
 }
 function dedupData(d) {
@@ -1066,11 +1088,22 @@ async function archiveFetch(k) {
     try { r = await tripRpc('get_trip_archive', args, 30000); }
     catch (e1) { await new Promise(res => setTimeout(res, 1200)); r = await tripRpc('get_trip_archive', args, 30000); }
     const mark = x => Object.assign({}, x, { _arkiv: k });
-    const a = { trips: ((r && r.trips) || []).map(mark), shifts: ((r && r.shifts) || []).map(mark) };
+    const a = { trips: ((r && r.trips) || []).map(mark), shifts: ((r && r.shifts) || []).map(mark), replaced: [] };
+    if (!archive.replacedLoaded) {
+      try {
+        const repl = await tripRpc('get_replaced_trips', { p_dataset: 'arkiv' }, 20000);
+        archive.replacedAll = Array.isArray(repl) ? repl.map(mark) : [];
+      } catch (e) { archive.replacedAll = []; }
+      archive.replacedLoaded = true;
+    }
+    a.replaced = archive.replacedAll || [];
     archive.chunks[k] = a;
     if (data && !loadFailed) {
       data.trips = (data.trips || []).concat(a.trips);
       data.shifts = (data.shifts || []).concat(a.shifts);
+      if (a.replaced.length && !(data.replaced || []).some(x => x._arkivRepl)) {
+        data.replaced = (data.replaced || []).concat(a.replaced.map(x => Object.assign({}, x, { _arkivRepl: true })));
+      }
       dedupData(data);
       tripsByDriver = null; orphanTrips = null;
       if (a.trips.length || a.shifts.length) archive.refreshPicker = true;
