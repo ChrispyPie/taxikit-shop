@@ -291,6 +291,7 @@
     keepActiveInView(el);
     if (window.BEVAKNING) BEVAKNING.decorate(el);  // bevakning: notisknapp + långtryck
     if (window.TAGNOTIS) TAGNOTIS.decorate(el);    // Mina bevakningar (tagnotis.js), bara på Tåg-fliken
+    if (window.FLYGNOTIS) FLYGNOTIS.decorate(el);  // Mina bevakningar (flygnotis.js), bara på Flyg-fliken
     if (state.watchHighlight) {
       var target = Array.from(el.querySelectorAll('[data-ank-key]')).find(function (r) { return r.getAttribute('data-ank-key') === state.watchHighlight; });
       if (target) {

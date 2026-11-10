@@ -2,13 +2,14 @@
 //  - action "vapid": publik VAPID-nyckel (skapas första gången och sparas i Supabase Vault, privata nyckeln lämnar aldrig servern)
 //  - action "test":  skickar en testnotis till förarens egna enheter (kräver inloggning, token)
 //  - action "tick":  körs av pg_cron varje minut NÄR det finns aktiva bevakningar eller tågnotiser (kräver x-tick-key)
-// Mina tågnotiser (fasta notiser för t.ex. snabbtågen från Stockholm, inom förarens tider): se tagnotis.ts
+// Fasta Bevakningar för tåg (tagnotis.ts) och flyg (flygnotis.ts).
 // Flygdata: samma cache som appen (skiftlogg/feed/got.json, uppdateras ca var 5:e minut från Swedavia).
 // Tågdata: samma Vercel-funktion som appen (/api/trains, CDN-cache 60 s) – ingen extra last på Trafikverket.
 import webpush from "npm:web-push@3.6.7";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { notisKey, notisUrl, saveNotice } from "./notis.ts";
 import { decide, sentMap, type SentState, type TrainWatch } from "./tagnotis.ts";
+import { decide as decideFlights, sentMap as flightSentMap, type FlightWatch } from "./flygnotis.ts";
 
 // Hur länge en bevakning ligger kvar efter sista händelsen (tåg ankommit / sista väskan ute). EN konstant.
 const AFTER_MIN = 30;
@@ -127,8 +128,7 @@ function capOf(sched: number, est: number) { return Math.max(sched, est || 0) + 
 
 async function tickFlights(watches: Watch[]) {
   if (!watches.length) return 0;
-  const j = await getJson(FLIGHT_URLS);
-  const list = (j.arrivals || []) as Record<string, string>[];
+  const list = (await loadFlights()) as Record<string, string>[];
   let n = 0;
   for (const w of watches) {
     const f = findItem(list, w);
@@ -253,6 +253,30 @@ async function tickTrainWatches() {
   return todo.length;
 }
 
+// Flyglistan hämtas högst en gång per tick (delas av tillfälliga bevakningar och flyg-Bevakningar)
+let flightCache: Promise<Record<string, unknown>[]> | null = null;
+function loadFlights() {
+  if (!flightCache) {
+    flightCache = getJson(FLIGHT_URLS).then((j) => (j.arrivals || []) as Record<string, unknown>[]);
+    flightCache.catch(() => {});
+  }
+  return flightCache;
+}
+
+async function tickFlightWatches() {
+  const { data, error } = await sb.rpc("fw_svc_active");
+  if (error || !data) return 0;
+  const d = data as { watches: FlightWatch[]; sent: { driver_id: string; ident: string; sched: string; state: SentState }[] };
+  if (!d.watches?.length) return 0;
+  const list = await loadFlights();
+  const todo = decideFlights(d.watches, list, flightSentMap(d.sent), Date.now());
+  for (const o of todo) {
+    await sb.rpc("fw_svc_mark", { p_driver: o.driver, p_ident: o.ident, p_sched: o.sched, p_state: o.state });
+    await sendTo(o.driver, o.msg);
+  }
+  return todo.length;
+}
+
 Deno.serve(async (req) => {
   const h = headers(req.headers.get("origin") || "");
   const out = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: h });
@@ -277,9 +301,11 @@ Deno.serve(async (req) => {
       const [fl, tr] = await Promise.all([sb.rpc("bev_svc_active", { p_kind: "flyg" }), sb.rpc("bev_svc_active", { p_kind: "tag" })]);
       const res: Record<string, unknown> = {};
       trainCache = null;
+      flightCache = null;
       try { res.flyg = await tickFlights((fl.data || []) as Watch[]); } catch (e) { res.flygErr = String(e).slice(0, 100); }
       try { res.tag = await tickTrains((tr.data || []) as Watch[]); } catch (e) { res.tagErr = String(e).slice(0, 100); }
       try { res.tagnotis = await tickTrainWatches(); } catch (e) { res.tagnotisErr = String(e).slice(0, 100); }
+      try { res.flygnotis = await tickFlightWatches(); } catch (e) { res.flygnotisErr = String(e).slice(0, 100); }
       return out(res);
     }
     return out({ error: "bad_action" }, 400);

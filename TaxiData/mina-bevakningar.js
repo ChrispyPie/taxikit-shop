@@ -37,8 +37,8 @@
     return (m >= f && ds.indexOf(d) >= 0) || (m < t && ds.indexOf(d === 1 ? 7 : d - 1) >= 0);
   }
   function arrival(w, it, rules) {
-    var s = w ? w.state || {} : {}, at = +(it && (it.act || it.est || it.sched)) || Date.parse(s.est || w.sched);
-    var kind = w ? w.kind : 'tag', key = it ? it.key : (kind === 'flyg' ? 'f' : 't') + w.ident + '|' + w.sched;
+    var s = w ? w.state || {} : {}, at = +(it && (it.act || it.est || it.sched)) || Date.parse(s.est || (w && w.sched));
+    var kind = w ? w.kind : (it && String(it.key || '').charAt(0) === 'f' ? 'flyg' : 'tag'), key = it ? it.key : (kind === 'flyg' ? 'f' : 't') + w.ident + '|' + w.sched;
     var info = [];
     if ((it && it.canceled) || s.canceled) info.push('Inställt');
     if (it && it.removed) info.push('Borttagen');
@@ -53,21 +53,29 @@
       title: (it ? it.no : (kind === 'flyg' ? 'Flyg ' : 'Tåg ') + w.ident) + ' · ' + ((it && it.from) || (w && w.label) || 'Okänd startplats'),
       status: info.join(' · '), watch: w || null, rules: rules || [] };
   }
-  function normalize(watches, rules, trains, flights, events, now) {
+  function normalize(watches, rules, trains, flights, events, now, flightRules) {
+    flightRules = flightRules || [];
     var out = [], used = {};
     watches.forEach(function (w) {
       if (Date.parse(w.expires_at) <= now) return;
       var list = w.kind === 'flyg' ? flights : trains;
       var it = list.find(function (x) { return x.key.charAt(0) === (w.kind === 'flyg' ? 'f' : 't') && x.key.split('|')[0].slice(1) === String(w.ident) && Math.abs(+x.sched - Date.parse(w.sched)) < 60000; });
       var r = arrival(w, it);
-      // Regeln visas också, så Sluta bevaka kan förklara om tåget har flera källor.
+      // Regeln visas också, så Sluta bevaka kan förklara om tåget eller flyget har flera källor.
       if (it && w.kind === 'tag') r.rules = rules.filter(function (q) { return q.enabled && TAGNOTIS.matches(q, it) && inWindow(q, r.at); });
+      if (it && w.kind === 'flyg' && window.FLYGNOTIS) r.rules = flightRules.filter(function (q) { return q.enabled && FLYGNOTIS.matches(q, it) && inWindow(q, r.at); });
       out.push(r); used[r.key] = true;
     });
     trains.forEach(function (it) {
       if (used[it.key]) return;
       var at = +(it.act || it.est || it.sched);
       var matches = rules.filter(function (w) { return w.enabled && TAGNOTIS.matches(w, it) && inWindow(w, at); });
+      if (matches.length) out.push(arrival(null, it, matches));
+    });
+    flights.forEach(function (it) {
+      if (used[it.key] || !window.FLYGNOTIS) return;
+      var at = +(it.act || it.est || it.sched);
+      var matches = flightRules.filter(function (w) { return w.enabled && FLYGNOTIS.matches(w, it) && inWindow(w, at); });
       if (matches.length) out.push(arrival(null, it, matches));
     });
     events.forEach(function (e) {
@@ -98,11 +106,12 @@
       safe(ARRIVAL_DATA.watchItems('tag'), 'tågtider', []),
       safe(ARRIVAL_DATA.watchItems('flyg'), 'flygtider', []),
       onlyTransport ? Promise.resolve([]) : safe(calendarEvents(errors), 'kalendern', []),
-      onlyTransport ? Promise.resolve([]) : safe((window.DEMO&&DEMO.on()?Promise.resolve([]):rpc('mailbox_v2',{p_token:localStorage.getItem('taxi_session')||'',p_action:'timeline',p_data:{}})), 'bokade tider', [])
+      onlyTransport ? Promise.resolve([]) : safe((window.DEMO&&DEMO.on()?Promise.resolve([]):rpc('mailbox_v2',{p_token:localStorage.getItem('taxi_session')||'',p_action:'timeline',p_data:{}})), 'bokade tider', []),
+      safe(rpc('flight_watch_list', {}), 'flygbevakningar', [])
     ]).then(function (data) {
       if (session !== token()) throw new Error('session');
       var bookings = (data[5] || []).map(function (b) { return { id: 'booking-' + b.id, kind: 'booking', thread_id: b.thread_id, at: Date.parse(b.at), end: Date.parse(b.at), title: b.title, status: b.status === 'accepted' ? 'Bokad tid · Godkänd' : 'Bokad tid · Väntar på ' + (b.status === 'pending_admin' ? 'admin' : 'ditt svar'), pending: b.status !== 'accepted', rules: [] }; });
-      return { rows: normalize(data[0], data[1], data[2], data[3], data[4], Date.now()).concat(bookings).sort(function (a,b) { return a.at-b.at; }), errors: errors };
+      return { rows: normalize(data[0], data[1], data[2], data[3], data[4], Date.now(), data[6]).concat(bookings).sort(function (a,b) { return a.at-b.at; }), errors: errors };
     });
   };
   M.open = function (r) {
@@ -119,11 +128,15 @@
     if (r.kind === 'event') (r.event.subs || []).forEach(function (s) {
       work.push(rpc('set_event_subscription', { p_event_id: r.event.id, p_on: false, p_kind: s.kind, p_offset_min: s.offset, p_channel: s.channel || 'inapp' }));
     });
-    (r.rules || []).forEach(function (w) { work.push(rpc('train_watch_save', { p_id: w.id, p_data: Object.assign({}, w, { enabled: false }) })); });
+    (r.rules || []).forEach(function (w) {
+      var fn = r.kind === 'flyg' ? 'flight_watch_save' : 'train_watch_save';
+      work.push(rpc(fn, { p_id: w.id, p_data: Object.assign({}, w, { enabled: false }) }));
+    });
     return Promise.all(work).then(function () {
       if (session !== token()) return;
       if (window.BEVAKNING) BEVAKNING._state.loadedAt = 0;
       if (window.TAGNOTIS) TAGNOTIS._state.list = null;
+      if (window.FLYGNOTIS) FLYGNOTIS._state.list = null;
     });
   }
   var PX = 1.5, selectedDay = null, mode = 'timeline', autoPosition = true, actionIndex = null;
@@ -187,16 +200,16 @@
     var h = '<div class="mb"><div class="mb-view-toggle" role="group" aria-label="Visning"><button data-mb-view="timeline" aria-pressed="' + (mode === 'timeline') + '">Tidslinje</button><button data-mb-view="list" aria-pressed="' + (mode === 'list') + '">Lista</button></div><p class="mb-intro">Dina ankomster, kalenderhändelser och bokade tider, i tidsordning.</p><button type="button" class="mb-refresh" data-mb-refresh>↻ Uppdatera</button>';
     if (message) h += '<p role="status" class="mb-warning">' + esc(message) + '</p>';
     if (errors && errors.length) h += '<p role="status" class="mb-warning">Kunde inte hämta ' + esc(errors.join(', ')) + '. Listan kan vara ofullständig. Försök igen med Uppdatera.</p>';
-    if (!rows.length) h += '<div class="mb-empty"><div>📌</div><h3>' + (errors && errors.length ? 'Inget att visa just nu' : 'Inga bevakningar än') + '</h3><p>Bevaka ett flyg med ☆ eller håll fingret på ett tåg under Ankomster. Du kan också lägga till en bevakning under Ankomster › Tåg. I Kalender: öppna ett evenemang och välj en påminnelse.</p><button data-mb-source="ankomster">Öppna Ankomster</button><button data-mb-source="kalender">Öppna Kalender</button></div>';
+    if (!rows.length) h += '<div class="mb-empty"><div>📌</div><h3>' + (errors && errors.length ? 'Inget att visa just nu' : 'Inga bevakningar än') + '</h3><p>Bevaka ett flyg med ☆ eller håll fingret på ett tåg under Ankomster. Du kan också lägga till en bevakning under Ankomster › Tåg eller Ankomster › Flyg. I Kalender: öppna ett evenemang och välj en påminnelse.</p><button data-mb-source="ankomster">Öppna Ankomster</button><button data-mb-source="kalender">Öppna Kalender</button></div>';
     if (mode === 'timeline') h += timelineHtml();
     var day = '';
     (mode === 'list' ? rows : []).forEach(function (r, i) {
       var p = parts(r.at);
       if (p.key !== day) { h += '<h3 class="mb-day">' + esc(dayLabel(p.key)) + '</h3>'; day = p.key; }
-      h += '<article class="mb-row' + (r.kind === 'booking' ? ' mb-row-booking' : '') + (r.pending ? ' pending' : '') + '"><button class="mb-open" data-mb-open="' + i + '"><span class="mb-time">' + p.hm + '<small>' + icon(r) + '</small></span><span class="mb-text"><b>' + esc(r.title) + '</b><small>' + esc(r.status || 'Bevakas') + '</small>' + (r.rules.length ? '<small>Bevakning (tåg): ' + esc(r.rules.map(function (w) { return w.name; }).join(', ')) + '</small>' : '') + '</span><span aria-hidden="true">›</span></button>' + (r.kind === 'booking' ? '' : '<button class="mb-remove" data-mb-remove="' + i + '"' + (busy ? ' disabled' : '') + ' aria-label="Sluta bevaka ' + esc(r.title) + '">Sluta bevaka</button>') + '</article>';
+      h += '<article class="mb-row' + (r.kind === 'booking' ? ' mb-row-booking' : '') + (r.pending ? ' pending' : '') + '"><button class="mb-open" data-mb-open="' + i + '"><span class="mb-time">' + p.hm + '<small>' + icon(r) + '</small></span><span class="mb-text"><b>' + esc(r.title) + '</b><small>' + esc(r.status || 'Bevakas') + '</small>' + (r.rules.length ? '<small>Bevakning (' + (r.kind === 'flyg' ? 'flyg' : 'tåg') + '): ' + esc(r.rules.map(function (w) { return w.name; }).join(', ')) + '</small>' : '') + '</span><span aria-hidden="true">›</span></button>' + (r.kind === 'booking' ? '' : '<button class="mb-remove" data-mb-remove="' + i + '"' + (busy ? ' disabled' : '') + ' aria-label="Sluta bevaka ' + esc(r.title) + '">Sluta bevaka</button>') + '</article>';
     });
     if (actionIndex !== null && rows[actionIndex]) h += '<div class="mb-action-shade"><section class="mb-action-sheet" role="dialog" aria-modal="true" aria-label="Bevakning"><b>' + esc(rows[actionIndex].title) + '</b><button data-mb-remove="' + actionIndex + '">Sluta bevaka</button><button data-mb-cancel>Avbryt</button></section></div>';
-    host.innerHTML = h + '<p class="mb-foot">Avslutade visas i högst 2 timmar. Ankomster kan tas bort tidigare av notistjänsten. Kalender: kommande året i dina städer. Bevakningar visar tågen som finns i tidtabellen.</p></div>';
+    host.innerHTML = h + '<p class="mb-foot">Avslutade visas i högst 2 timmar. Ankomster kan tas bort tidigare av notistjänsten. Kalender: kommande året i dina städer. Bevakningar visar tåg och flyg som finns i tidtabellen.</p></div>';
     host.querySelectorAll('[data-mb-view]').forEach(function (b) { b.onclick = function () {
       mode = b.dataset.mbView; localStorage.setItem('taxi_mb_view', mode); autoPosition = true; actionIndex = null; draw(errors);
     }; });
@@ -222,7 +235,8 @@
     host.querySelectorAll('[data-mb-remove]').forEach(function (b) { b.onclick = function () {
       if (busy) return;
       var r = rows[+b.dataset.mbRemove], g = generation;
-      var text = r.rules.length ? 'Tåget ingår i en bevakning. Stänga av hela bevakningen (' + r.rules.map(function (w) { return w.name; }).join(', ') + ') och sluta bevaka tåget?' : 'Sluta bevaka ' + r.title + '?';
+      var verb = r.kind === 'flyg' ? 'Flyget' : 'Tåget', obj = r.kind === 'flyg' ? 'flyget' : 'tåget';
+      var text = r.rules.length ? verb + ' ingår i en bevakning. Stänga av hela bevakningen (' + r.rules.map(function (w) { return w.name; }).join(', ') + ') och sluta bevaka ' + obj + '?' : 'Sluta bevaka ' + r.title + '?';
       if (!window.confirm(text)) return;
       busy = true; actionIndex = null; draw(errors);
       remove(r).then(function () { if (g === generation) refresh(); }).catch(function () { busy = false; if (g === generation) draw(errors, 'Kunde inte ta bort allt. Uppdatera och försök igen.'); }).finally(function () { busy = false; });

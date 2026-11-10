@@ -101,7 +101,7 @@ Deno.test("tick: tågnotis markeras och skickas, tåglistan hämtas en gång", a
   const r = await handler!(new Request("http://x/", { method: "POST", headers: { "x-tick-key": "k" }, body: JSON.stringify({ action: "tick" }) }));
   const j = await r.json();
   globalThis.fetch = realFetch;
-  eq(j, { flyg: 0, tag: 0, tagnotis: 1 }, "tick-svar");
+  eq(j, { flyg: 0, tag: 0, tagnotis: 1, flygnotis: 0 }, "tick-svar");
   eq(trainFetches, 1, "tåglistan hämtad en gång");
   const calls = g.__calls as { fn: string; args: Record<string, unknown> }[];
   const mark = calls.find((c) => c.fn === "tw_svc_mark")!;
@@ -114,5 +114,5 @@ Deno.test("tick: tågnotis markeras och skickas, tåglistan hämtas en gång", a
   // utan SQL (tw_svc_active saknas) → inga tågnotiser, inget fel
   g.__rpc = (fn: string, a: Record<string, unknown>) => fn === "bev_svc_secret" ? (a.p_name === "BEVAKNING_TICK_KEY" ? "k" : "v") : fn === "bev_svc_active" ? [] : null;
   const r2 = await (await handler!(new Request("http://x/", { method: "POST", headers: { "x-tick-key": "k" }, body: JSON.stringify({ action: "tick" }) }))).json();
-  eq(r2, { flyg: 0, tag: 0, tagnotis: 0 }, "utan SQL");
+  eq(r2, { flyg: 0, tag: 0, tagnotis: 0, flygnotis: 0 }, "utan SQL");
 });
