@@ -31,6 +31,7 @@
   var initialNav=window.VIEW_STATE?VIEW_STATE.get('ankomster',{}):{};
   var selected=/^[A-Za-zÅÄÖåäö.]{1,8}$/.test(initialNav.station||'')?initialNav.station:'G';
   var stationList=TRAIN_STATIONS.slice();
+  var QUICK_STATIONS=['G','Mdn','Gas','Kb','P','A'];
   function stationLabel(){var found=stationList.find(function(s){return s.id===state.station;});return found?found.label:state.station;}
   var state = { station:selected,requests:{tag:0,flyg:0}, tab: null, data: {}, err: {}, updated: {}, at: {}, showPast: false, timer: null, tick: null, el: null, loading: {} };
 
@@ -134,28 +135,34 @@
     if (!r.data) return '<div class="ank-route">' + head + '<div class="ank-st-hint">' + (r.err ? 'Kunde inte hämta stationslistan.' : 'Hämtar stationslista…') + '</div></div>';
     var stops = r.data.stops || [], seen = r.data.lastSeen;
     if (!stops.length) return '<div class="ank-route">' + head + '<div class="ank-st-hint">Ingen stationslista hos Trafikverket.</div></div>';
+    if (seen && seen.sig && !stops.some(function (s) { return s.sig === seen.sig; })) {
+      var seenTime = d(seen.ts), entry = { sig: seen.sig, name: seen.name || seen.sig, arrAct: seen.ts, depAct: seen.ts };
+      var insertAt = stops.findIndex(function (s) {
+        var t = d(s.arrAct) || d(s.depAct) || d(s.arrSched) || d(s.depSched);
+        return seenTime && t && t > seenTime;
+      });
+      stops = stops.slice();
+      if (insertAt < 0) stops.push(entry); else stops.splice(insertAt, 0, entry);
+    }
     var lastPassed = -1;
     stops.forEach(function (s, i) { if (s.arrAct || s.depAct) lastPassed = i; });
     var g = stops[stops.length - 1], arrived = !!(g && g.arrAct);
     var seenIdx = -1;
     if (seen) stops.forEach(function (s, i) { if (s.sig === seen.sig) seenIdx = i; });
-    var atStation = seenIdx >= 0 && seenIdx === lastPassed && stops[seenIdx].arrAct && !stops[seenIdx].depAct && seenIdx < stops.length - 1;
     var html = '<div class="ank-route">' + head;
     stops.forEach(function (s, i) {
       var sch = d(s.arrSched) || d(s.depSched), real = d(s.arrAct) || d(s.depAct), est = d(s.arrEst) || d(s.depEst);
       if (i === 0) { sch = d(s.depSched) || sch; real = d(s.depAct) || real; est = d(s.depEst) || est; }
-      var passed = i <= lastPassed, now = atStation && i === seenIdx;
-      var cls = 'ank-st' + (passed ? ' passed' : '') + (now ? ' now' : '') + (s.canceled ? ' canceled' : '') + (i === stops.length - 1 ? ' last' : '');
+      var isHere = !arrived && seenIdx >= 0 && i === seenIdx;
+      var passed = isHere ? false : (seenIdx >= 0 ? i < seenIdx : i <= lastPassed);
+      var cls = 'ank-st' + (passed ? ' passed' : '') + (isHere ? ' here' : '') + (s.canceled ? ' canceled' : '') + (i === stops.length - 1 ? ' last' : '');
+      var seenHm = isHere ? hm(d(seen.ts) || real) : '';
       var right = real ? hm(real) : (est ? hm(est) : '');
-      html += '<div class="' + cls + '"><div class="ank-st-dot">' + (passed && !now ? '✓' : '') + '</div>' +
-        '<div class="ank-st-name">' + esc(s.name || s.sig) + (now ? ' <b class="ank-st-here">här nu</b>' : '') + '</div>' +
-        '<div class="ank-st-time"><span class="ank-st-plan' + (right && right !== hm(sch) ? ' old' : '') + '">' + hm(sch) + '</span>' +
+      html += '<div class="' + cls + '"' + (isHere ? ' data-ank-here="1"' : '') + '><div class="ank-st-dot">' + (passed ? '✓' : (isHere ? '●' : '')) + '</div>' +
+        '<div class="ank-st-name">' + esc(s.name || s.sig) + (isHere && seenHm ? ' ' + seenHm : '') + '</div>' +
+        '<div class="ank-st-time">' + (isHere ? '' : ('<span class="ank-st-plan' + (right && right !== hm(sch) ? ' old' : '') + '">' + hm(sch) + '</span>' +
         (right && right !== hm(sch) ? ' <span class="ank-st-real' + (real ? '' : ' est') + '">' + right + '</span>' : '') +
-        delayTxt(sch, real || est) + '</div></div>';
-      if (!arrived && !atStation && i === lastPassed && i < stops.length - 1) {
-        html += '<div class="ank-st here"><div class="ank-st-dot">●</div><div class="ank-st-name"><b class="ank-st-here">Här nu</b>' +
-          (seen && seen.sig !== s.sig ? ' · ' + esc(seen.name || seen.sig) + ' ' + hm(d(seen.ts)) : '') + '</div><div class="ank-st-time"></div></div>';
-      }
+        delayTxt(sch, real || est))) + '</div></div>';
     });
     return html + '</div>';
   }
@@ -237,10 +244,10 @@
     var html = '<div class="tabs ank-tabs">' + A.sources.map(function (x) {
       return '<button class="tab' + (x.id === s.id ? ' active' : '') + '" data-ank-tab="' + x.id + '">' + x.icon + ' ' + esc(x.label) + '</button>';
     }).join('') + '</div>';
-    if(s.id==='tag')html+='<div class="ank-chips ank-station-quick" role="group" aria-label="Vanliga stationer">'+TRAIN_STATIONS.slice(0,4).concat(TRAIN_STATIONS.filter(function(x){return x.id==='P'||x.id==='A';})).map(function(st){return '<button class="ank-chip'+(st.id===state.station?' on':'')+'" data-ank-station="'+esc(st.id)+'" aria-pressed="'+(st.id===state.station)+'">'+esc(st.label)+'</button>';}).join('')+'</div>'+(state.station!=='G'?'<p class="ank-station-note">Tågbevakningar och tågnotiser gäller fortfarande Göteborg C.</p>':'');
+    if(s.id==='tag')html+='<div class="ank-station-picker"><span class="ank-station-picker-label" id="ank-station-picker-label">Station</span><button type="button" class="ank-station-title" data-ank-picker aria-haspopup="dialog" aria-labelledby="ank-station-picker-label">'+esc(stationLabel())+' ▾</button></div>'+(state.station!=='G'?'<p class="ank-station-note">Tågbevakningar och tågnotiser gäller fortfarande Göteborg C.</p>':'');
     var upd = state.updated[s.id] ? d(state.updated[s.id]) : null;
     var stale = upd && now - upd > 15 * 60000;
-    html += '<div class="ank-head"><span><b>' + (s.id==='tag'?'<button type="button" class="ank-station-title" data-ank-picker aria-haspopup="dialog">'+esc(stationLabel())+' ▾</button>':esc(s.place)) + '</b>' + (upd ? ' · uppdaterad ' + hm(upd) : '') + '</span>' +
+    html += '<div class="ank-head"><span>' + (s.id==='tag'?'':('<b>'+esc(s.place)+'</b>')) + (upd ? (s.id==='tag'?'':' ') + 'uppdaterad ' + hm(upd) : '') + '</span>' +
             '<button class="ank-refresh" data-ank-refresh aria-label="Uppdatera">' + (state.loading[s.id] ? '…' : '↻') + '</button></div>';
     if (stale) html += '<div class="ank-warn">Datan är äldre än 15 minuter.</div>';
     if(typeof state.err[s.id]==='string')html+='<div class="ank-warn">'+esc(state.err[s.id])+'</div>';
@@ -319,7 +326,18 @@
     var dialog=document.createElement('dialog');dialog.className='ank-station-sheet';dialog.setAttribute('aria-label','Välj station');dialog.innerHTML='<h3>Välj station</h3><label for="ank-station-search">Sök station</label><input id="ank-station-search" type="search" placeholder="Namn eller signatur" autocomplete="off"><div class="ank-station-results" role="status">Hämtar stationslistan…</div><button type="button" data-station-close>Stäng</button>';document.body.appendChild(dialog);dialog.showModal();
     var search=dialog.querySelector('input'),box=dialog.querySelector('.ank-station-results');
     function norm(s){return String(s).toLocaleLowerCase('sv').normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
-    function draw(){var q=norm(search.value),rows=stationList.filter(function(s){return norm(s.label+' '+s.id).indexOf(q)>=0;});box.innerHTML=rows.length?rows.map(function(s){return '<button type="button" data-station-pick="'+esc(s.id)+'" aria-pressed="'+(s.id===state.station)+'">'+esc(s.label)+' <small>'+esc(s.id)+'</small></button>';}).join(''):'<p>Inga stationer hittades.</p>';}
+    function stationBtn(st){return '<button type="button" data-station-pick="'+esc(st.id)+'" aria-pressed="'+(st.id===state.station)+'">'+esc(st.label)+' <small>'+esc(st.id)+'</small></button>';}
+    function draw(){
+      var q=norm(search.value).trim(),rows=stationList.filter(function(st){return !q||norm(st.label+' '+st.id).indexOf(q)>=0;});
+      if(!rows.length){box.innerHTML='<p>Inga stationer hittades.</p>';return;}
+      if(!q){
+        var quick=QUICK_STATIONS.map(function(id){return stationList.find(function(st){return st.id===id;});}).filter(Boolean);
+        var rest=stationList.filter(function(st){return QUICK_STATIONS.indexOf(st.id)<0;});
+        box.innerHTML='<div class="ank-station-quick-list" role="group" aria-label="Vanliga stationer">'+quick.map(stationBtn).join('')+'</div><hr class="ank-station-divider">'+rest.map(stationBtn).join('');
+        return;
+      }
+      box.innerHTML=rows.map(stationBtn).join('');
+    }
     search.oninput=draw;dialog.onclick=function(e){var b=e.target.closest('[data-station-pick]');if(b){selectStation(b.getAttribute('data-station-pick'));dialog.close();}if(e.target.closest('[data-station-close]'))dialog.close();};dialog.addEventListener('close',function(){dialog.remove();});
     D.stationCatalog().then(function(rows){stationList=rows;if(dialog.isConnected)draw();if(state.el)paint();}).catch(function(){if(dialog.isConnected){box.innerHTML='<p>Stationslistan kunde inte hämtas. Försök igen senare.</p>';}});search.focus();
   }

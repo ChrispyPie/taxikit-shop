@@ -4,7 +4,7 @@ Publicerad via PR #88 efter Christians godkännande. Se `PR88-GO-LIVE-20261108.m
 
 ## För Christian
 
-- Sex snabbval överst: Göteborg C **G**, Mölndal **Mdn**, Gamlestaden **Gas**, Kungsbacka **Kb**, Partille **P**, Alingsås **A**.
+- Vanliga stationer (Göteborg C **G**, Mölndal **Mdn**, Gamlestaden **Gas**, Kungsbacka **Kb**, Partille **P**, Alingsås **A**) ligger först i stationsväljaren, sedan en avdelare och därefter alla stationer.
 - Tryck på stationsnamnet med pil för den sökbara stationslistan. Även signaturer och sökning utan svenska accenter fungerar.
 - Listan kommer från Trafikverket `TrainStation`, inte en manuellt begränsad lista. `Advertised=true`, `Deleted=false`, `CountryCode=SE`.
 - Hela Västra Götaland (`CountyNo=14`) och norra Halland (`CountyNo=13`, WGS84-latitud **>=57.0**, dvs Kungsbacka/Varbergområdet). Hallandsstation utan koordinater tas inte med. Söder om Varbergområdet, exempelvis Halmstad, ingår inte. Ingen stationsgissning utifrån namnet.

@@ -2,8 +2,8 @@ const assert=require('node:assert/strict');
 process.env.TRAFIKVERKET_API_KEY='synthetic-not-a-real-key';
 const handler=require('../../api/trains.js');let calls=[],failBoard=false,clock=Date.now();const realNow=Date.now;Date.now=()=>clock;
 const row=(id,label,county=14,lat=57.5,extra={})=>({LocationSignature:id,AdvertisedLocationName:label,Advertised:true,Deleted:false,CountryCode:'SE',CountyNo:[county],Geometry:{WGS84:`POINT (12 ${lat})`},...extra});
-const stations=[row('G','Göteborg C'),row('Mdn','Mölndal'),row('Gas','Gamlestaden'),row('Kb','Kungsbacka',13),row('P','Partille'),row('A','Alingsås'),row('Yb','Ytterby'),row('Vbc','Varberg',13,57.1),row('Hd','Halmstad',13,56.67),row('M','Malmö C',12),row('Sve','Säve',14,57.8,{Advertised:false}),row('Old','Borttagen',14,57.5,{Deleted:true}),row('No','Ingen geometri',13,0,{Geometry:{}})];
-global.fetch=async(url,opts)=>{const xml=opts.body;calls.push(xml);await new Promise(r=>setTimeout(r,2));let block;if(xml.includes('objecttype="TrainStation"')){assert(xml.includes('namespace="rail.infrastructure"'));assert(xml.includes('name="Advertised" value="true"'));block={TrainStation:stations};}else{if(failBoard)throw new Error('upstream synthetic-not-a-real-key');block={TrainAnnouncement:[]};}return {ok:true,text:async()=>JSON.stringify({RESPONSE:{RESULT:[block]}})};};
+const stations=[row('G','Göteborg C'),row('Mdn','Mölndal'),row('Gas','Gamlestaden'),row('Kb','Kungsbacka',13),row('P','Partille'),row('A','Alingsås'),row('Yb','Ytterby'),row('Vbc','Varberg',13,57.1),row('Hd','Halmstad',13,56.67),row('M','Malmö C',12),row('Sve','Säve',14,57.8,{Advertised:false,OfficialLocationName:'Säve'}),row('Ndv','',14,57.8,{Advertised:false,OfficialLocationName:'Norsesund västra'}),row('Old','Borttagen',14,57.5,{Deleted:true}),row('No','Ingen geometri',13,0,{Geometry:{}})];
+global.fetch=async(url,opts)=>{const xml=opts.body;calls.push(xml);await new Promise(r=>setTimeout(r,2));let block;if(xml.includes('objecttype="TrainStation"')){assert(xml.includes('namespace="rail.infrastructure"'));assert(xml.includes('OfficialLocationName'));assert(!xml.includes('name="Advertised" value="true"'));block={TrainStation:stations};}else{if(failBoard)throw new Error('upstream synthetic-not-a-real-key');block={TrainAnnouncement:[]};}return {ok:true,text:async()=>JSON.stringify({RESPONSE:{RESULT:[block]}})};};
 const request=url=>new Promise((resolve,reject)=>{const res={setHeader(){},end(text){resolve({status:this.statusCode,body:JSON.parse(text)})}};handler({method:'GET',url},res).catch(reject);});
 (async()=>{
  let x=await request('/api/trains?station=%22%3E');assert.equal(x.status,400);assert.equal(calls.length,0);
@@ -17,6 +17,18 @@ const request=url=>new Promise((resolve,reject)=>{const res={setHeader(){},end(t
  failBoard=false;const t=new Date().toISOString(),early=new Date(Date.parse(t)-60000).toISOString(),later=new Date(Date.parse(t)+60000).toISOString();
  global.fetch=async()=>({ok:true,text:async()=>JSON.stringify({RESPONSE:{RESULT:[{TrainAnnouncement:[{LocationSignature:'G',Advertised:true,ActivityType:'Avgang',AdvertisedTimeAtLocation:early},{LocationSignature:'Kb',Advertised:true,ActivityType:'Ankomst',AdvertisedTimeAtLocation:t},{LocationSignature:'Vbc',Advertised:true,ActivityType:'Ankomst',AdvertisedTimeAtLocation:later}]}]}})});
  const route=await handler._internal.routeFor('fixture','123',t,'Kb');assert.deepEqual(route.stops.map(s=>s.sig),['G','Kb']);
+ // Intermediate unadvertised last-seen locations belong in the stop list with official names.
+ const mid=new Date(Date.parse(t)-30000).toISOString();
+ global.fetch=async()=>({ok:true,text:async()=>JSON.stringify({RESPONSE:{RESULT:[{TrainAnnouncement:[
+  {LocationSignature:'G',Advertised:true,ActivityType:'Avgang',AdvertisedTimeAtLocation:early,TimeAtLocation:early},
+  {LocationSignature:'Ndv',Advertised:false,ActivityType:'Avgang',TimeAtLocation:mid},
+  {LocationSignature:'Kb',Advertised:true,ActivityType:'Ankomst',AdvertisedTimeAtLocation:t}
+ ]}]}})});
+ const route2=await handler._internal.routeFor('fixture','124',t,'Kb');
+ assert.deepEqual(route2.stops.map(s=>s.sig),['G','Ndv','Kb']);
+ assert.equal(route2.stops.find(s=>s.sig==='Ndv').name,'Norsesund västra');
+ assert.equal(route2.lastSeen.sig,'Ndv');
+ assert.equal(route2.lastSeen.name,'Norsesund västra');
  clock+=25*3600000;global.fetch=async()=>{throw new Error('catalog outage');};x=await request('/api/trains?stations=1');assert.equal(x.status,200);assert.equal(x.body.stale,true,'last-good catalog during temporary outage');clock+=8*24*3600000;x=await request('/api/trains?station=Kb');assert.equal(x.status,503,'expired catalog fails closed');
  console.log('PASS catalog region/advertised/coordinates, whitelist/injection, 8-way dedupe, station cache/stale isolation, route truncation');
 })().catch(e=>{console.error(e);process.exitCode=1;}).finally(()=>{Date.now=realNow;});
