@@ -31,7 +31,7 @@ window.OM_DATA = {
     { q: 'Varför syns inte passet jag kör just nu?',
       a: 'Ett pass syns först när det är avslutat. Servern har inte sluttid, arbetad tid och antal resor förrän passet är slut.' },
     { q: 'Varför har ett kvitto -02 i slutet, och var tog -01 vägen?',
-      a: 'Ett kvitto som slutar på -02 är en rättad version av samma kvitto (-01). Appen räknar bara den senaste versionen, så att resan inte räknas två gånger.' },
+      a: 'Ett kvitto som slutar på -02 (eller -03, -04 …) är en rättad version av samma kvitto. Appen räknar bara den senaste versionen, så att resan inte räknas två gånger. De äldre versionerna ligger kvar under kvittot, överstrukna och nedtonade.' },
     { q: 'Vem ser mitt namn i Topplistor?',
       a: 'Andra förare ser bara placering och värde, inte namn. Din egen rad visas som "Du". Bara ägaren ser namn.' },
     { q: 'Vem ser mina felanmälningar?',
