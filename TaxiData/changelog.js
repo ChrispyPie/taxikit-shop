@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-10', id: '2026-11-10pg2', rader: [
+    ['Fixat', 'Prognos: antalsbubblorna och de lodräta kolumnnamnen har egna ytor, så de inte längre krockar med varandra eller med raden Snart. Flygspalten visar planet ovanför numret, utan ram, och flera flyg i samma tid får överlappa lite så bolagskoden syns.']
+  ]},
   { datum: '2026-11-10', id: '2026-11-10pg', rader: [
     ['Nytt', 'Prognos på Landvetter visar en linje vid 10 min (då bokningarna går ut) och en flygspalt med ankomster till Landvetter i varje tid. Tryck på ett flyg för mer uppgifter. Kolumnrubrikerna står lodrätt så spalterna får plats även på en smal skärm.']
   ]},
