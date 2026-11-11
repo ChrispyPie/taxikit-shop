@@ -116,7 +116,7 @@
     var on = isOn();
     box.innerHTML = '<div class="section"><h3 style="margin-top:0">Animationer</h3>' +
       '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">' +
-      'När en bevakning slår till flyger en kort figur över skärmen: flygplan, tåg eller båt. Påverkar inte ljudet.</p>' +
+      'När en bevakning slår till flyger en kort figur över skärmen: flygplan, tåg eller båt. När det regnar eller snöar kan några droppar eller flingor synas. Påverkar inte ljudet.</p>' +
       '<div class="hl-opts" role="radiogroup" aria-label="Animationer">' +
         '<label class="hl-opt' + (!on ? ' on' : '') + '"><input type="radio" name="animationer" value="0"' + (!on ? ' checked' : '') + '><span>Av</span></label>' +
         '<label class="hl-opt' + (on ? ' on' : '') + '"><input type="radio" name="animationer" value="1"' + (on ? ' checked' : '') + '><span>På</span></label>' +
@@ -152,6 +152,7 @@
     play: play,
     renderSettings: renderSettings,
     reduceMotion: reduceMotion,
+    layer: ensureLayer,
     key: KEY,
     durationMs: DURATION_MS
   };
