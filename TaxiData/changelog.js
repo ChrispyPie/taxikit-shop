@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-11', id: '2026-11-11delad3', tid: '18:30', rader: [
+    ['Rättat', 'På en delad platta märks sessionen redan när du loggar in. Öppnar du appen igen loggas du ut om passet har avslutats, även om skärmen varit av.']
+  ]},
   { datum: '2026-11-11', id: '2026-11-11bubble1', tid: '12:35', rader: [
     ['Förbättrat', 'Pratbubblan från hjälpboten stängs när du trycker på den eller på figuren. Kommentarer och reaktioner försvinner efter ungefär åtta sekunder. Tips och Berra är som tidigare.']
   ]},

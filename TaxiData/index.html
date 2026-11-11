@@ -9,7 +9,7 @@
   <script src="tema.js?v=20261110hl1"></script>
   <script src="helskarm.js?v=20261111pwa1"></script>
   <script src="enhet.js?v=20261029d"></script>
-  <script src="delad-enhet.js?v=20261111delad2"></script>
+  <script src="delad-enhet.js?v=20261111delad3"></script>
   <script src="bevakning-ljud.js?v=20261111anim1"></script>
   <script src="animationer.js?v=20261111tyst1"></script>
   <script src="animationer-vader.js?v=20261111tyst1"></script>
@@ -202,7 +202,7 @@
   <script src="hjalp.js?v=20261111bubble1"></script>
   <script src="hem-ordning.js?v=20261111nyheter1"></script>
   <script src="moduler.js?v=20261111nyheter1"></script>
-  <script src="lazy-views.js?v=20261111bubble1"></script>
+  <script src="lazy-views.js?v=20261111delad3"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -341,7 +341,9 @@
       var pw = document.getElementById('password').value;
       if (!id || !pw) { showLoginError('Fyll i förar-ID och lösenord'); return; }
       try {
-        var r = await rpc('login', { p_id: id, p_password: pw });
+        var deladOn = false;
+        try { deladOn = localStorage.getItem('taxi_delad_enhet') === '1'; } catch (e1) {}
+        var r = await rpc('login', { p_id: id, p_password: pw, p_delad: deladOn });
         if (!r || !r.ok) { showLoginError(loginErrors[r && r.error] || 'Inloggningen misslyckades'); return; }
         localStorage.setItem('taxi_session', r.token);
         localStorage.setItem('taxi_logged_in', '1');
