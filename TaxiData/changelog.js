@@ -15,6 +15,10 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-11', id: '2026-11-11pg6', tid: '08:45', rader: [
+    ['Förbättrat', 'Diagrammet i Prognos visas alltid, även när det inte finns några bokningar. Då ser du rutnätet med nollor och en liten text Inga bokningar just nu.'],
+    ['Rättat', 'I liggande läge på telefonen visas prognosens liggande rutnät även utan helskärm. När du vrider tillbaka till stående läge stängs helskärmen av. Helskärmsknappen används fortfarande för att gå in i helskärm.']
+  ]},
   { datum: '2026-11-11', id: '2026-11-11delad1', tid: '08:35', rader: [
     ['Rättat', 'På en delad platta loggas du ut när passet är slut, även om skärmen varit av. Om servern inte har uppdaterats på 1 timme loggas du också ut, även mitt i passet. Ett meddelande skickas till dina andra inloggade enheter, och den utloggade enheten visar ett rött meddelande på inloggningssidan.'],
     ['Nytt', 'På startsidan syns dina inloggade enheter, till exempel Telefon eller Platta, med senast använd. Tryck på en annan enhet för att logga ut den.']

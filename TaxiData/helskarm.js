@@ -180,10 +180,33 @@
     placeTimer = requestAnimationFrame(function () { placeTimer = 0; place(); });
   }
 
+  function isLandscape() {
+    try {
+      if (window.matchMedia && window.matchMedia('(orientation: landscape)').matches) return true;
+      if (window.matchMedia && window.matchMedia('(orientation: portrait)').matches) return false;
+    } catch (e) {}
+    try {
+      var t = window.screen && screen.orientation && screen.orientation.type;
+      if (t) return String(t).indexOf('landscape') === 0;
+    } catch (e2) {}
+    return (window.innerWidth || 0) > (window.innerHeight || 0);
+  }
+
+  // Vid vridning tillbaka till stående: lämna helskärm (exitFullscreen kräver ingen gest).
+  // Gå inte in i helskärm automatiskt vid liggande – det kräver en gest, använd ⛶.
+  var lastLand = isLandscape();
+  function onOrient() {
+    var land = isLandscape();
+    if (lastLand && !land && isOn()) exit();
+    lastLand = land;
+    schedulePlace();
+  }
+
   function boot() {
     ensure();
     place();
     sync();
+    lastLand = isLandscape();
     document.addEventListener('fullscreenchange', onFsChange);
     document.addEventListener('webkitfullscreenchange', onFsChange);
     document.addEventListener('MSFullscreenChange', onFsChange);
@@ -191,7 +214,19 @@
       var obs = new MutationObserver(schedulePlace);
       obs.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['style', 'class', 'hidden'] });
     }
-    window.addEventListener('resize', schedulePlace);
+    window.addEventListener('resize', onOrient);
+    try {
+      if (window.matchMedia) {
+        var mq = matchMedia('(orientation: portrait)');
+        if (mq.addEventListener) mq.addEventListener('change', onOrient);
+        else if (mq.addListener) mq.addListener(onOrient);
+      }
+    } catch (e) {}
+    try {
+      if (window.screen && screen.orientation && screen.orientation.addEventListener) {
+        screen.orientation.addEventListener('change', onOrient);
+      }
+    } catch (e2) {}
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
