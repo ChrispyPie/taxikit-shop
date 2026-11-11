@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-11', id: '2026-11-11hopp1', tid: '22:20', rader: [
+    ['Ändrat', 'Om hjälpboten just gått in i en ikon på startskärmen och du öppnar samma verktyg, hoppar den ut genom hemknappen (🏠) uppe till vänster och försvinner, ungefär en sekund. I övrigt syns den inte inne i verktygen. På startskärmen är den tillbaka som vanligt.']
+  ]},
   { datum: '2026-11-11', id: '2026-11-11pgbot1', tid: '22:15', rader: [
     ['Nytt', 'I Prognos, när du trycker på ett flyg på Landvetter, finns en stjärna i rutan med uppgifter. Den gör en tillfällig bevakning, samma som stjärnan på Ankomster.'],
     ['Ändrat', 'Hjälpboten och pratbubblorna syns bara på startskärmen, så de inte är i vägen i andra verktyg. Den kan fortfarande gå in i och ur ikonerna där. Går du in i ett verktyg den just tittat in i hoppar den ut på startskärmen när du kommer tillbaka. Laddstation och sminkbord syns bara på startskärmen. Berra är som tidigare.'],
