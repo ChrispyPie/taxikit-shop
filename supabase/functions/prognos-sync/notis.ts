@@ -9,10 +9,10 @@ export type NotisMsg = { title: string; body: string; tag: string };
 export type NotisTarget = { zone?: string; cat?: string; at?: string; id?: string };
 
 // Länken som pushen öppnar (sw.js notificationclick). Samma sidor som i notisflödet.
-//  flyg/tåg -> Ankomster på rätt flik, prognos -> Prognos på rätt zon (och förbokningen markerad)
+//  flyg/tåg/båt -> Ankomster på rätt flik, prognos -> Prognos på rätt zon (och förbokningen markerad)
 export function notisUrl(msg: NotisMsg, target?: NotisTarget | null): string {
   const kind = notisKind(msg.tag);
-  if (kind === "flyg" || kind === "tag") return "/TaxiData/?sida=ankomster&flik=" + kind;
+  if (kind === "flyg" || kind === "tag" || kind === "bat") return "/TaxiData/?sida=ankomster&flik=" + kind;
   if (kind === "prognos") {
     const q = new URLSearchParams({ sida: "prognos" });
     if (target?.zone) q.set("zon", target.zone);
@@ -33,6 +33,7 @@ export function notisKind(tag: string): string {
   tag = String(tag || "");
   if (tag.indexOf("flyg") === 0) return "flyg";
   if (tag.indexOf("tag") === 0) return "tag";
+  if (tag.indexOf("bat") === 0) return "bat";
   if (tag.indexOf("prognos") === 0) return "prognos";
   if (tag === "test") return "test";
   if (tag.indexOf("konto") === 0) return "konto";

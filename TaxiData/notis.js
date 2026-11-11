@@ -84,6 +84,7 @@
     tag = String(tag || '');
     if (tag.indexOf('flyg') === 0) return 'flyg';
     if (tag.indexOf('tag') === 0) return 'tag';
+    if (tag.indexOf('bat') === 0) return 'bat';
     if (tag.indexOf('prognos') === 0) return 'prognos';
     if (tag === 'test') return 'test';
     if (tag.indexOf('sjuk') === 0) return 'sjuk';
@@ -418,9 +419,9 @@
     if (k === 'nyheter') {
       open('om');
       setTimeout(function () { var el = document.getElementById('om-nyheter'); if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80);
-    } else if (k === 'flyg' || k === 'tag') {
+    } else if (k === 'flyg' || k === 'tag' || k === 'bat') {
       if (!window.ANKOMSTER) return;
-      try { localStorage.setItem('ank_tab', k); } catch (e) {}   // rätt flik: Flyg eller Tåg
+      try { localStorage.setItem('ank_tab', k); } catch (e) {}   // rätt flik: Flyg, Tåg eller Båt
       open(ANKOMSTER.id);
     } else if (k === 'prognos') {
       if (!window.PROGNOS) return;
