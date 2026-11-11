@@ -222,6 +222,9 @@
 
   function playFromMessage(msg, key) {
     var kind = kindOf(msg, key);
+    if (kind && kind !== 'test') {
+      try { document.dispatchEvent(new CustomEvent('bev-watch-fire', { detail: { kind: kind } })); } catch (e) {}
+    }
     if (kind) play(kind, false);
     return kind;
   }

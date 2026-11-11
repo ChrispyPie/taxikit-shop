@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-11', id: '2026-11-11anim1', tid: '09:05', rader: [
+    ['Nytt', 'När en bevakning slår till medan appen är öppen flyger en kort figur över skärmen: ett flygplan, ett tåg eller en båt. Du slår av eller på det under Inställningar, Animationer. Det påverkar inte ljudet.']
+  ]},
   { datum: '2026-11-11', id: '2026-11-11delad2', tid: '09:02', rader: [
     ['Rättat', 'Det röda meddelandet om automatisk utloggning visas när du loggar in igen på samma konto, inte på inloggningsskärmen. Nästa förare ser det inte.']
   ]},

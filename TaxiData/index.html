@@ -10,7 +10,8 @@
   <script src="helskarm.js?v=20261111pwa1"></script>
   <script src="enhet.js?v=20261029d"></script>
   <script src="delad-enhet.js?v=20261111delad2"></script>
-  <script src="bevakning-ljud.js?v=20261111bev1"></script>
+  <script src="bevakning-ljud.js?v=20261111anim1"></script>
+  <script src="animationer.js?v=20261111anim1"></script>
   <script src="namn.js?v=20261028nm1"></script>
   <link rel="stylesheet" href="style.css?v=20261111fly1">
   <link rel="stylesheet" href="tema.css?v=20261110hl3">
@@ -190,7 +191,7 @@
   <script src="demo.js?v=am1q"></script>
   <script src="swipe-back.js?v=20261106sb2"></script>
   <script src="view-state.js?v=20261107lazy1"></script>
-  <script src="lazy-views.js?v=20261111delad2"></script>
+  <script src="lazy-views.js?v=20261111anim1"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -896,10 +897,11 @@
       } else if (current === 'installningar') {
         title.textContent = 'Inställningar';
         content.onclick = null;
-        content.innerHTML = '<div id="home-layout-set"></div><div id="theme-set"></div><div id="text-size-set"></div><div id="delad-enhet-set"></div><div id="hb-set"></div>';
+        content.innerHTML = '<div id="home-layout-set"></div><div id="theme-set"></div><div id="text-size-set"></div><div id="animationer-set"></div><div id="delad-enhet-set"></div><div id="hb-set"></div>';
         renderHomeLayoutSetting(document.getElementById('home-layout-set'));
         renderThemeSetting(document.getElementById('theme-set'));
         renderTextSizeSetting(document.getElementById('text-size-set'));
+        if (window.ANIMATIONER) ANIMATIONER.renderSettings(document.getElementById('animationer-set'));
         if (window.DELAD) DELAD.renderSettings(document.getElementById('delad-enhet-set'));
         if (window.HJALPBOT) window.HJALPBOT.renderSettings(document.getElementById('hb-set'));
       } else if (current) {
