@@ -148,6 +148,7 @@
   B.isPermanent = function (it) { return !!findRoute(it); };
   B.loadRoutes = function (force) { return loadRoutes(force); };
   B.saveRoute = function (data, id) {
+    if (data && data.enabled !== false) ensurePush();
     return rpc('route_watch_save', { p_id: id == null ? null : id, p_data: data }).then(function (l) {
       B.routes = Array.isArray(l) ? l : []; routesAt = Date.now(); return B.routes;
     });
@@ -186,11 +187,13 @@
     return rpc('push_save', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth, p_ua: navigator.userAgent.slice(0, 200) })
       .then(function () { savedOnce = true; });
   }
-  function enable() {
-    if (!supported) return Promise.resolve();
-    if (window.DEMO && DEMO.on()) { toast(DEMO.MSG); return Promise.resolve(); }  // demokonton får inga notiser
+  function enable(opts) {
+    opts = opts || {};
+    if (!supported) return Promise.resolve(st.push);
+    if (st.push === 'on') return Promise.resolve(st.push);
+    if (window.DEMO && DEMO.on()) { if (!opts.silent) toast(DEMO.MSG); return Promise.resolve(st.push); }
     unlockAudio();
-    st.busy = true; repaint();
+    if (!opts.silent) { st.busy = true; repaint(); }
     return Notification.requestPermission().then(function (p) {
       if (p !== 'granted') { st.push = p === 'denied' ? 'denied' : 'off'; throw new Error('perm'); }
       return Promise.all([register().then(function () { return navigator.serviceWorker.ready; }), fn({ action: 'vapid' })]);
@@ -200,9 +203,15 @@
         return old || reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(x[1].key) });
       });
     }).then(function (sub) { savedOnce = false; return save(sub); })
-      .then(function () { st.push = 'on'; toast('Notiser är på 🔔 Tryck "Testa" för att höra hur det låter.'); })
-      .catch(function (e) { if (String(e && e.message) !== 'perm') toast('Det gick inte att slå på notiser. Försök igen.'); })
-      .then(function () { st.busy = false; repaint(); });
+      .then(function () { st.push = 'on'; if (!opts.silent) toast('Notiser är på. Du får en notis när något du bevakar händer.'); })
+      .catch(function (e) { if (!opts.silent && String(e && e.message) !== 'perm') toast('Det gick inte att slå på notiser. Försök igen.'); })
+      .then(function () { st.busy = false; if (!opts.silent) repaint(); return st.push; });
+  }
+  // Slå på push så fort något bevakas (tillfälligt eller fast). Kräver en användargest (stjärna/långtryck).
+  function ensurePush() {
+    if (!supported || st.push === 'on' || st.push === 'denied' || st.push === 'unsupported') return Promise.resolve(st.push);
+    if (window.DEMO && DEMO.on()) return Promise.resolve(st.push);
+    return enable({ silent: true });
   }
   function disable() {
     st.busy = true; repaint();
@@ -288,6 +297,7 @@
     var k = parseKey(key); if (!k || !token()) return;
     var existing = watchOf(key);
     var on = !existing;
+    if (on) ensurePush();
     var state = {};
     if (item && on) {
       if (k.kind === 'flyg') { state.landed = !!item.act; state.firstBag = /Första väskan/.test(item.info || ''); state.lastBag = !!(item.lastBag && item.act && item.lastBag >= item.act - 30 * 60000); }
@@ -302,7 +312,8 @@
         var what = k.kind === 'flyg' ? 'flyget landar, när bagaget rullar och när sista väskan är ute' : (k.kind === 'bat' ? 'båten ankommer' : 'tåget ankommer');
         var older = !on && window.TAGNOTIS && item && TAGNOTIS.matches && Array.isArray(TAGNOTIS._state && TAGNOTIS._state.list) &&
           TAGNOTIS._state.list.some(function (rule) { return rule && rule.enabled && TAGNOTIS.matches(rule, item); });
-        toast(on ? 'Tillfällig bevakning – du får en notis när ' + what + '.' + (st.push === 'on' ? '' : ' Slå på notiser ovanför listan.')
+        var pushHint = (st.push === 'denied') ? ' Tillåt notiser i webbläsaren för den här sidan.' : (st.push === 'unsupported' ? ' Den här webbläsaren kan inte ta emot notiser.' : '');
+        toast(on ? 'Tillfällig bevakning – du får en notis när ' + what + '.' + pushHint
                  : (older ? 'Tillfällig bevakning borttagen. Tåget kan fortfarande synas i Mina bevakningar om det ingår i en äldre bevakning.' : 'Bevakningen är borttagen.'));
         repaint();
       }).catch(function (e) {
@@ -348,23 +359,24 @@
     var now = Date.now();
     var tk = tabKind();
     var active = st.list.filter(function (w) { return Date.parse(w.expires_at) > now && (!tk || w.kind === tk); });
-    if (active.length) {
-      h += '<div class="bev-list"><b>Bevakar</b>' + active.map(function (w) {
+    var perm = (B.routes || []).filter(function (w) { return w && w.enabled !== false && (!tk || w.kind === tk); });
+    if (active.length || perm.length) {
+      h += '<div class="bev-list"><b>Bevakar</b>';
+      h += active.map(function (w) {
         var key = prefixOf(w.kind) + w.ident + '|' + w.sched;
         return '<span class="bev-chip">' + kindIcon(w.kind) + ' ' + esc(w.ident) + ' ' + hm(w.sched) +
           '<button data-bev-del="' + esc(key) + '" aria-label="Sluta bevaka">✕</button></span>';
-      }).join('') + '</div>';
+      }).join('');
+      h += perm.map(function (w) {
+        return '<span class="bev-chip perm" title="Fast bevakning">' + kindIcon(w.kind) + ' ' +
+          esc(w.label || w.route) + ' ' + esc(hhmm(w.sched_min)) + '</span>';
+      }).join('');
+      h += '</div>';
     }
     h += '<div id="bev-ljud-box" class="bev-ljud-box"></div>';
-    if (st.push === 'on') {
-      h += '<div class="bev-row"><span>🔔 Notiser på</span><span>' +
-        '<button class="bev-btn" data-bev-test' + (st.busy ? ' disabled' : '') + '>Testa</button>' +
-        '<button class="bev-btn ghost" data-bev-off' + (st.busy ? ' disabled' : '') + '>Stäng av</button></span></div>';
-    } else if (st.push === 'off' || st.push === 'unknown') {
-      h += '<button class="bev-btn main" data-bev-on' + (st.busy ? ' disabled' : '') + '>🔔 Aktivera notiser</button>';
-    } else if (st.push === 'denied') {
-      h += '<div class="bev-note">🔕 Notiser är blockerade för appen. Tillåt dem i webbläsarens inställningar för taxikit.shop.</div>';
-    } else {
+    if (st.push === 'denied') {
+      h += '<div class="bev-note">🔕 Notiser är blockerade. Tillåt dem i webbläsarens inställningar för taxikit.shop.</div>';
+    } else if (st.push === 'unsupported') {
       h += '<div class="bev-note">' + (isIos && !standalone
         ? '🔔 På iPhone: lägg först appen på hemskärmen (Dela ⬆️ → Lägg till på hemskärmen) och öppna den därifrån. Kräver iOS 16.4 eller senare.'
         : '🔕 Den här webbläsaren kan inte ta emot notiser.') + '</div>';
@@ -376,10 +388,9 @@
         'när tiden ändras eller om det ställs in. För tåg: när tåget ankommer. Det fungerar även när telefonen ligger i fickan. ' +
         'En tillfällig bevakning tas bort av sig själv en halvtimme efter sista händelsen (för flyg: sista väskan). ' +
         'Vill du ha samma tur varje dag håller du fingret på den i Mina bevakningar, så blir den fast (guld). ' +
-        'Ljudet (tåg, flyg, båt) slås på eller av ovanför listan. När du loggar ut stängs notiserna av på telefonen.</p>' +
-        '<p><b>Android:</b> tryck "Aktivera ljudsignal/notiser" och välj Tillåt. Kolla att notiser för Chrome inte är avstängda och att telefonen inte står på ljudlöst.</p>' +
-        '<p><b>iPhone:</b> öppna taxikit.shop/TaxiData i Safari, tryck Dela ⬆️ → "Lägg till på hemskärmen". Öppna appen från hemskärmen, ' +
-        'logga in och tryck "Aktivera ljudsignal/notiser". Kräver iOS 16.4 eller senare.</p>' +
+        'När du bevakar något slås notiserna på automatiskt. Ljudet (tåg, flyg, båt) slås på eller av ovanför listan. När du loggar ut stängs notiserna av på telefonen.</p>' +
+        '<p><b>Android:</b> när du bevakar något första gången frågar telefonen om notiser. Välj Tillåt. Kolla att notiser för Chrome inte är avstängda och att telefonen inte står på ljudlöst.</p>' +
+        '<p><b>iPhone:</b> öppna taxikit.shop/TaxiData i Safari, tryck Dela ⬆️ → "Lägg till på hemskärmen". Öppna appen från hemskärmen och logga in. När du bevakar något frågar telefonen om notiser. Kräver iOS 16.4 eller senare.</p>' +
         '<p>Flygtider uppdateras ungefär var 5:e minut, tåg varje minut.</p></div>';
     }
     return h + '</div>';
@@ -417,9 +428,6 @@
       if (s) { var r = s.closest('[data-ank-key]'); var k = r.getAttribute('data-ank-key'); toggle(k, ANKOMSTER.item ? ANKOMSTER.item(k) : null); return; }
       var d = e.target.closest('[data-bev-del]');
       if (d) { toggle(d.getAttribute('data-bev-del'), null); return; }
-      if (e.target.closest('[data-bev-on]')) { enable(); return; }
-      if (e.target.closest('[data-bev-off]')) { disable(); return; }
-      if (e.target.closest('[data-bev-test]')) { test(); return; }
       if (e.target.closest('[data-bev-help]')) { st.help = !st.help; repaint(); }
     }, true);
   }
@@ -467,6 +475,7 @@
   B.pushState = function () { return st.push; };
   B.checkPush = function () { return checkPush(); };
   B.enablePush = function () { return enable(); };
+  B.ensurePush = ensurePush;
   B.testPush = function () { return test(); };
   B._state = st;
 })();

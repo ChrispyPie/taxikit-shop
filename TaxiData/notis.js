@@ -28,6 +28,12 @@
     '.np-head button{background:none;border:none;color:var(--primary);font-size:.9rem;font-weight:600;padding:.35rem .4rem;cursor:pointer}' +
     '.np-head button:disabled{color:var(--text-soft);opacity:.6;cursor:default}' +
     '#np-close{font-size:1.25rem;color:var(--text)}' +
+    '.np-cats{display:flex;flex-wrap:nowrap;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;' +
+      'padding:.35rem .6rem .4rem;border-bottom:1px solid var(--border);scrollbar-width:thin}' +
+    '.np-cat{flex:none;border:1px solid var(--border);background:var(--surface);color:var(--text-soft);border-radius:999px;' +
+      'padding:3px 9px;min-height:28px;font:inherit;font-size:calc(12px * var(--font-scale, 1));line-height:1.2;cursor:pointer;white-space:nowrap}' +
+    '.np-cat.on{background:var(--surface-soft,var(--surface));color:var(--text);border-color:var(--primary);font-weight:600}' +
+    '.np-cat:focus-visible{outline:2px solid var(--primary);outline-offset:2px}' +
     '#np-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:.4rem .5rem 1rem}' +
     '.np-item{display:flex;gap:.65rem;align-items:flex-start;width:100%;text-align:left;background:var(--surface);color:var(--text);border:1px solid var(--border);' +
       'border-radius:10px;padding:.65rem .7rem;margin:.35rem 0;font:inherit;cursor:pointer}' +
@@ -277,16 +283,81 @@
     return { ico: ico || iconOf(it), html: ttl ? '<b>' + esc(ttl) + '</b>' + (txt ? ' – ' + esc(txt) : '') : esc(txt) };
   }
 
+
+  var LS_CATS = 'taxi_notis_cats';
+  var CAT_ORDER = [
+    { id: 'tag', label: 'Tåg' },
+    { id: 'flyg', label: 'Flyg' },
+    { id: 'bat', label: 'Båt' },
+    { id: 'event', label: 'Evenemang' },
+    { id: 'nyheter', label: 'Uppdateringar' },
+    { id: 'prognos', label: 'Prognos' },
+    { id: 'forum', label: 'Forum' },
+    { id: 'bil', label: 'Bil' },
+    { id: 'meddelanden', label: 'Meddelanden' },
+    { id: 'sjuk', label: 'Sjuk' },
+    { id: 'test', label: 'Test' },
+    { id: 'other', label: 'Övrigt' }
+  ];
+  function catOf(it) {
+    if (!it) return 'other';
+    if (it.case_kind && it.case_id) return 'meddelanden';
+    var k = String(it.kind || '');
+    if (k === 'tag') return 'tag';
+    if (k === 'flyg') return 'flyg';
+    if (k === 'bat') return 'bat';
+    if (k === 'reminder' || k === 'event' || k.indexOf('kal') === 0) return 'event';
+    if (k === 'nyheter') return 'nyheter';
+    if (k === 'prognos') return 'prognos';
+    if (k.indexOf('forum') === 0) return 'forum';
+    if (k.indexOf('bil') === 0) return 'bil';
+    if (k === 'sjuk') return 'sjuk';
+    if (k === 'test') return 'test';
+    return 'other';
+  }
+  function catsOff() {
+    try {
+      var v = JSON.parse(localStorage.getItem(LS_CATS) || 'null');
+      if (v && Array.isArray(v.off)) return v.off.map(String);
+    } catch (e) {}
+    return [];
+  }
+  function setCatsOff(off) {
+    try { localStorage.setItem(LS_CATS, JSON.stringify({ off: off })); } catch (e) {}
+  }
+  function catOn(id) { return catsOff().indexOf(id) < 0; }
+  function visibleItems(items) {
+    items = items || [];
+    var off = catsOff();
+    if (!off.length) return items;
+    return items.filter(function (it) { return off.indexOf(catOf(it)) < 0; });
+  }
+  function paintCats(items) {
+    var box = document.getElementById('np-cats'); if (!box) return;
+    var present = {};
+    (items || []).forEach(function (it) { present[catOf(it)] = true; });
+    var cats = CAT_ORDER.filter(function (c) { return present[c.id]; });
+    if (!cats.length) { box.innerHTML = ''; box.hidden = true; return; }
+    box.hidden = false;
+    box.innerHTML = cats.map(function (c) {
+      var on = catOn(c.id);
+      return '<button type="button" class="np-cat' + (on ? ' on' : '') + '" data-np-cat="' + c.id + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(c.label) + '</button>';
+    }).join('');
+  }
+
   function paint() {
     var list = document.getElementById('np-list'); if (!list) return;
-    var items = allItems(), h = '';
+    var items = allItems(), shown = visibleItems(items), h = '';
+    paintCats(items);
     var all = document.getElementById('np-all'); if (all) all.disabled = !items.some(function (x) { return !x.read; });
     if (!items.length) {
       h = st.items === null && st.loading ? '<div class="np-msg">Laddar…</div>'
         : st.err ? '<div class="np-msg">Kunde inte hämta notiserna. Kontrollera nätet och försök igen.</div>'
         : '<div class="np-msg">Inga notiser än.<br>Här samlas notiser om bevakade flyg och tåg, Prognos, ' + esc(window.VERKSTAD ? VERKSTAD.title : 'Bil & verkstad') + ', Forum och Kalender.</div>';
+    } else if (!shown.length) {
+      h = '<div class="np-msg">Inga notiser i de valda kategorierna.</div>';
     } else {
-      items.forEach(function (it, i) {
+      shown.forEach(function (it, i) {
         var v = view(it);
         h += '<button type="button" class="np-item' + (it.read ? '' : ' unread') + '" data-i="' + i + '">' +
           '<span class="np-ico" aria-hidden="true">' + v.ico + '</span>' +
@@ -297,7 +368,7 @@
       h += '<div class="np-foot">Notiser sparas i 60 dagar.</div>';
     }
     list.innerHTML = h;
-    list._items = items;
+    list._items = shown;
   }
 
   function markRead(it) {
@@ -405,7 +476,9 @@
     var p = document.createElement('aside'); p.id = 'notis-panel';
     p.setAttribute('role', 'dialog'); p.setAttribute('aria-label', 'Notiser'); p.setAttribute('aria-hidden', 'true');
     p.innerHTML = '<div class="np-head"><h2>Notiser</h2><button type="button" id="np-all">Markera alla som lästa</button>' +
-      '<button type="button" id="np-close" aria-label="Stäng">✕</button></div><div id="np-list"></div>';
+      '<button type="button" id="np-close" aria-label="Stäng">✕</button></div>' +
+      '<div id="np-cats" class="np-cats" role="toolbar" aria-label="Filtrera notiser" hidden></div>' +
+      '<div id="np-list"></div>';
     document.body.appendChild(dim); document.body.appendChild(p);
     var edge = document.createElement('button'); edge.id = 'notis-edge'; edge.type = 'button';
     edge.setAttribute('aria-label', 'Öppna notiser'); edge.title = 'Notiser'; edge.textContent = '‹';
@@ -420,6 +493,13 @@
       markRead(it);
       closeForNav();
       go(it);
+    };
+    document.getElementById('np-cats').onclick = function (e) {
+      var b = e.target.closest('[data-np-cat]'); if (!b) return;
+      var id = b.getAttribute('data-np-cat'), off = catsOff(), i = off.indexOf(id);
+      if (i < 0) off.push(id); else off.splice(i, 1);
+      setCatsOff(off);
+      paint();
     };
   }
   function canOpen() {
@@ -451,6 +531,10 @@
     if (st.pushed) { st.pushed = false; st.skipPop = true; try { history.back(); } catch (e) { st.skipPop = false; } }
   };
   N.toggle = function () { if (st.open) N.close(); else N.open(); };
+  N.catOf = catOf;
+  N.visibleItems = visibleItems;
+  N.CAT_ORDER = CAT_ORDER;
+
   // Panelen stängs och appen går vidare till notisens sida: historikraden för panelen återanvänds.
   function closeForNav() {
     show(false);
