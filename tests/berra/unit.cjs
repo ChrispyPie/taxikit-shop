@@ -44,7 +44,7 @@ vm.runInContext(src, ctx);
 const B = ctx.window.BERRA;
 assert.ok(B && B.jokes && B.pickJoke && B.poke);
 const jokes = B.jokes();
-assert.ok(jokes.length >= 30, 'enough jokes: ' + jokes.length);
+assert.ok(jokes.length >= 190, 'enough jokes: ' + jokes.length);
 assert.equal(jokes.length, new Set(jokes).size, 'unique');
 jokes.forEach((j, i) => {
   assert.equal(typeof j, 'string');
@@ -66,6 +66,13 @@ for (let i = 0; i < 8; i++) {
   seen.add(a); seen.add(b);
 }
 assert.ok(seen.size >= 8);
+
+store._s = {};
+const bag = new Set();
+for (let i = 0; i < jokes.length; i++) bag.add(B.pickJoke());
+assert.equal(bag.size, jokes.length, 'all jokes before any repeat');
+assert.match(src, /td_berra_bag/);
+assert.match(src, /BUBBLE_MS = 30000/);
 
 assert.match(src, /td-berra-slot/);
 assert.ok(src.includes('.td-berra{position:relative'));

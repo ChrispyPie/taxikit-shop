@@ -6,9 +6,8 @@
   if (window.BERRA) return;
 
   var W = 48, H = 52, MARGIN = 10;
-  var KEY_LAST = 'td_berra_recent';
-  var RECENT = 8;
-  var BUBBLE_MS = 6500;
+  var KEY_BAG = 'td_berra_bag';
+  var BUBBLE_MS = 30000;
   var K = '#1a1a1a', SKIN = '#f6d2b3';
   var HAIR = '#e4c45a', HAIR_DARK = '#c9a84a';
   var SHIRT = '#6d7a88', PANTS = '#3d4550';
@@ -58,8 +57,205 @@
     'Berra frågar inte om highscore. Highscore frågar om Berra.',
     'När Berra blinkar till vänster lyssnar hela leden.',
     'Berra behöver ingen pausmeny. Världen väntar tills han är klar.',
-    'På Taxi Göteborg börjar nattskiftet när Berra sätter sig.'
-  ];
+    'På Taxi Göteborg börjar nattskiftet när Berra sätter sig.',
+    'När Berra kör mot Landvetter flyttar landningsbanan lite närmare.',
+    'Flygledningen på Landvetter väntar in Berra, inte tvärtom.',
+    'Bagaget går av sig självt när Berra står vid Landvetter.',
+    'Ett försenat flyg skyndar sig när det hör att Berra väntar.',
+    'Berra hämtar inte vid terminalen. Terminalen rullar fram.',
+    'På Landvetter räknas ankomsttid från när Berra är på plats.',
+    'När Berra tar en landningskörning landar planet i tid av respekt.',
+    'Berra behöver ingen skylt i hallen. Folk hittar honom ändå.',
+    'Dimman på Landvetter ber Berra om sikten innan den lägger sig.',
+    'Parkeringshuset vid Landvetter hittar en lucka när Berra rullar in.',
+    'Skylten Arrivals blinkar vänligt när den ser Berra.',
+    'Berra känner igen terminalsiffrorna. De känner igen honom tillbaka.',
+    'Flygbussen möter Berra vid hållplatsen, inte tvärtom.',
+    'När Berra står i ankomsthallen slår skärmarna om till rätt band.',
+    'En försening på Landvetter kortas ner när Berra är i hallen.',
+    'Berra hämtar i tid. Flyget anpassar sig efter det.',
+    'Berra blandar inte ihop terminaler. Terminalerna håller sig isär.',
+    'En lång resa slutar mjukt när Berra väntar vid dörren.',
+    'När det är fullt vid taxikön på Landvetter öppnas en lucka åt Berra.',
+    'Regnet i Göteborg faller snett för att inte träffa Berras ruta.',
+    'Halkan ber Berra om lov innan den sätter sig på vägen.',
+    'När Berra kör i blåst håller västvinden sig lite tystare.',
+    'Snön i Göteborg väntar med att lägga sig tills Berra har parkerat.',
+    'Dimman bakom Berra skingras av ren vana.',
+    'SMHI ringer Berra när de är osäkra på natten.',
+    'Isen på bron backar undan när Berra rullar ut.',
+    'Ett oväder runt Järntorget tar omvägen när Berra är i tjänst.',
+    'Berra sätter inte på torkarna. Regnet torkar sig självt.',
+    'Solen över Göteborg väntar med att gå upp tills Berra är klar.',
+    'Lövhalkan håller sig på sin kant när Berra svänger.',
+    'Vinden längs Avenyn håller andan när Berra passerar.',
+    'Frosten på rutan släpper när Berra tar i handtaget.',
+    'Berra kollar inte vädret. Vädret kollar när Berra kör ut.',
+    'Berra sätter inte på dimljusen. Dimman backar undan först.',
+    'Västvinden längs hamnen håller mössan på när Berra kör förbi.',
+    'En solig morgon väntar in att Berra har parkerat.',
+    'Regnrocken i bilen får vila. Skuren väntar ut Berra.',
+    'Tåget kan ställas in. Berras natt ställs inte in.',
+    'Berras kaffe behöver ingen mikro. Den är redan vaken.',
+    'När automaten på natten ser Berra kokar den en extra kopp.',
+    'Sockret rör om sig självt när Berra har bråttom.',
+    'En kall kopp blir varm bara Berra tittar på den.',
+    'Baristan på natten frågar Berra hur starkt. Svaret är ja.',
+    'Berras termos håller värmen av respekt, inte av isolering.',
+    'Berra spiller inte kaffe. Kaffet håller sig i muggen.',
+    'Automaten i garaget ger dubbel espresso när den ser Berra.',
+    'Berra rör om kaffet med blicken.',
+    'När bakjouren kokar kaffe står Berras kopp framme först.',
+    'Berras kopp är aldrig tom länge. Natten fyller på.',
+    'Mjölken skummar sig när Berra har fem minuter över.',
+    'Berra tar kaffet svart. Kaffet tackar för förtroendet.',
+    'En termos i storbilen håller tre pass. För Berra räcker en.',
+    'Kaffemaskinen på kontoret ramlar i kö när Berra är i närheten.',
+    'En kaffe i Berras mugg slutar aldrig att räcka hela ronden.',
+    'Höjden på en viadukt räknar efter när Berra kommer i storbil.',
+    'Berra bokar inte storbil. Storbilen bokar kvällen hos Berra.',
+    'En barnvagn, tre väskor och en rullstol. Berras storbil nickar bara.',
+    'När Berra parkerar en storbil blir rutan större.',
+    'Backkameran i storbilen ber Berra om råd.',
+    'En storbil i Berras tjänst svänger snävare än måttet tillåter.',
+    'Berra behöver ingen ramplista. Storbilen minns höjderna.',
+    'När Berra lastar en storbil går packningen rätt första gången.',
+    'En stol i storbilen fälls av sig själv när Berra nickar.',
+    'Höjdgränsen på huset läser om skylten när Berra kommer.',
+    'En storbil i rusning är i vägen. Med Berra är den en lösning.',
+    'När det är fullt i en vanlig bil räcker Berras storbil ändå till.',
+    'Storbilens dörrar håller upp sig när Berra har kunder med väskor.',
+    'Berra backar med speglarna i vila. Omvärlden backar först.',
+    'Kantstenen sänker sig en centimeter när Berra rampar.',
+    'Parkering på Heden ordnar en lucka åt Berras storbil.',
+    'En storbil med Berra tar kurvan nästan som en personbil.',
+    'Berra tar inte hjälp när han vänder. Vakterna tittar bara på.',
+    'Storbilen piper inte när Berra backar. Den litar på honom.',
+    'Barnstolen i storbilen sätter sig rätt innan Berra har bett om det.',
+    'När Berra öppnar bakluckan finns det alltid en lucka till.',
+    'På morgonmötet väntar tavlan in vad Berra har att säga.',
+    'Berra lämnar inte rapport. Rapporten lämnar sig hos Berra.',
+    'I garaget på Taxi Göteborg startar bilarna när Berra går förbi.',
+    'Trafikledningen frågar Berra vilken zon som gäller i natt.',
+    'När kontoret är stängt har Berra fortfarande nyckeln till natten.',
+    'En ny förare får kartan. Berra får en nick från chefen.',
+    'Berra stämplar inte in. Klockan stämplar in hos Berra.',
+    'Schemat på väggen rättar sig när Berra har kört klart.',
+    'Berra tar inte rast i personalrummet. Rummet tar rast.',
+    'En ny zon skickas först till Berra, sedan till kartan.',
+    'När någon frågar efter chefen på natten pekar de mot Berras bil.',
+    'Berra fyller inte i körjournalen. Journalen fyller i sig.',
+    'På Taxi Göteborg är "fråga Berra" ett godkänt arbetssätt.',
+    'Berra har ingen reservnyckel. Låset känner igen honom.',
+    'Morgonskiftet hälsar på det som är kvar av natten: Berra.',
+    'Berra lämnar bilen ren. Damm väntar till efter passet.',
+    'När typen är slut får andra höra det av Berra, inte av tavlan.',
+    'Chefen på dagen ringer trafikledningen. På natten ringer de Berra.',
+    'Ett schemahål på natten fylls när Berra säger att det går.',
+    'Berra har inget fack för nycklar. Nycklarna har ett fack för Berra.',
+    'När Berra råkar ut för lagg väntar servern på honom.',
+    'Laddningsskärmen skippar sig när Berra tittar på den.',
+    'Berra samlar inte loot. Lootet lägger sig i en hög bredvid honom.',
+    'Berra läser inte patch notes. Patchen läser Berra först.',
+    'När Berra tar fram handkontrollen ber knapparna om en stund.',
+    'Ett DLC väntar med att släppas tills Berra har tid.',
+    'Lagget i spelet ber Berra om ursäkt och rätar ut sig.',
+    'När Berra speedrunar tar klockan en omväg runt tiden.',
+    'En tutorial stänger sig när den ser att det är Berra.',
+    'Berra craftar inte. Recepten lägger sig i rätt ordning.',
+    'I lobbyn startar matchen när Berra sätter sig.',
+    'Berra använder inte fusk. Fuskkoderna tar ledigt den kvällen.',
+    'När texten är för liten zoomar skärmen in av respekt för Berra.',
+    'Berra slår inte på ljudet. Spelet sänker musiken åt honom.',
+    'En sidequest avslutar sig när Berra råkar gå förbi.',
+    'När laddningen når nittionio väntar den in Berra.',
+    'I ett strategispel ger motståndaren upp när de ser namnet Berra.',
+    'Ett achievement poppar upp i förväg när Berra sätter sig.',
+    'Berra behöver ingen walkthrough. Walkthroughen tar en kaffe.',
+    'När servern startar om ber den Berra att vänta, inte tvärtom.',
+    'En cutscene kortar sig när Berra redan förstått handlingen.',
+    'Berra stänger inte av skärmen. Skärmen vilar när han reser sig.',
+    'Lagkamraterna i chatten skriver bara att det är Berra.',
+    'Berra har inget inventory. Inventoryt har en hylla för Berra.',
+    'I ett co-op blir de andra biroller när Berra ansluter.',
+    'Berra bindar inte makro. Makrot antecknar efter Berra.',
+    'Berra spelar inte med mods. Moddarna är redan godkända.',
+    'Berra har ingen andra skärm. Den första räcker till.',
+    'När Avenyn töms efter stängning tar Berra sista vinkningen.',
+    'Nattbussen i Göteborg väntar in Berra vid hållplatsen.',
+    'Ett last call på Avenyn räcker tills Berra har fått kunden.',
+    'Vid Liseberg sent på natten lyser bara det Berra behöver se.',
+    'På Hisingen i otid känner gatorna igen Berras ljus.',
+    'När det är tomt vid Centralen har Berra redan varit där.',
+    'Berra tar sista körningen. Den sista körningen vet det redan.',
+    'Klockan fyra i Göteborg är det högtrafik i Berras kalender.',
+    'En nattöppen kiosk på Linné håller öppet tills Berra fått kaffe.',
+    'Efter sista ronden på Andra Lång vet Berra vägen hem.',
+    'Berra möter inte gryningen. Gryningen möter honom vid sista adressen.',
+    'När det är svart över älven räcker Berras ljus till båda broarna.',
+    'Kunder som vinkar klockan två vet redan att det blir Berra.',
+    'När nattvakten i garaget somnar har Berra redan rullat ut.',
+    'Berra äter inte nattmat. Korvkiosken håller typen varm till honom.',
+    'En tyst gata i Majorna håller tempot efter Berra.',
+    'Ett nattpass utan radio är tyst. Ett nattpass med Berra räcker.',
+    'Berra kör natt i Gårda när bara lastbilarna är vakna. Och han.',
+    'När skatterna gått ur Masthugget är Berras ljus det som syns.',
+    'Efter evenemang på Ullevi vet gatorna att Berra är i tjänst.',
+    'En tyst natt över Slottskogen släpper fram bara Berras bil.',
+    'Kön på Älvsborgsbron kortar sig när Berra är i den.',
+    'Tingstadstunneln håller ett fält ledigt åt Berra, av gammal vana.',
+    'En omledning i stan går den väg Berra redan valt.',
+    'Hisingsbron väntar med att öppna tills Berra är över.',
+    'Ett vägarbete flyttar konerna när Berra behöver utrymme.',
+    'På Oscarsleden rätar kurvan ut sig lite när Berra kommer.',
+    'Kön i Götatunneln andas ut när Berra har passerat.',
+    'Berra kör över älven. Älven håller sig stilla under bron.',
+    'En rondell i Lundby snurrar åt rätt håll när Berra går in.',
+    'Morgonkön till stan nickar tyst när Berra kör mot sängen.',
+    'När det är evenemangskö runt Korsvägen tar den en annan form runt Berra.',
+    'Ett tillfälligt körfält dyker upp när Berra behöver det.',
+    'Berra kör inte vilse i typen. Typen rättar sig efter honom.',
+    'På Södra Vägen håller tempot jämnt så fort Berra är med.',
+    'En buss vid hållplatsen väntar in att Berra har släppt av.',
+    'Skylten mot Mölndal behövs inte. Berra har redan svängt rätt.',
+    'När det är stopp vid Svingeln frågar kön Berra om nästa steg.',
+    'Parkeringen vid Svenska Mässan lämnar en lucka åt Berra.',
+    'Berra tar inte omvägen via Allén. Allén tar sig tid för Berra.',
+    'Kösystemet i stan räknar med en extra lucka när Berra är i tjänst.',
+    'När det är tätt vid Järntorget luckrar det upp sig kring Berra.',
+    'Berra kör inte mer än en fil. Filerna håller sig på sin kant.',
+    'En taxificka som ser full ut har alltid plats för Berra.',
+    'När GPS:en vill en annan väg ber den Berra om ursäkt och följer efter.',
+    'Berra tankar inte ofta. Bilen räcker längre när han kör.',
+    'En laddstolpe i stan blir ledig precis när Berra behöver den.',
+    'Berra tvättar inte bilen på natten. Smutsen väntar till morgonen.',
+    'När Berra stänger dörren låter det som att passet redan är klart.',
+    'Kunder glömmer inte saker hos Berra. Saker minns att följa med ut.',
+    'Berra hittar rätt portkod. Porten har hört att han är på väg.',
+    'En hiss i ett höghus väntar på bottenplan när Berra rullar fram.',
+    'Berra ringer inte på. Kunden är redan i dörren.',
+    'När Berra säger hej i backspegeln räcker det som kvitto på att allt är bra.',
+    'En tom tank i någon annans bil är ett problem. I Berras är den ett undantag.',
+    'Berra tar inte fel på namn. Namnen tar inte fel på Berra.',
+    'När adressen är en bakgata finns det ändå ljus nog för Berra.',
+    'Berra behöver ingen anteckning på sätet. Sätet minns vems väska det är.',
+    'En omväg för andra är för Berra bara en väg som också funkar.',
+    'När det är tyst i radion är det för att natten lyssnar på Berra.',
+    'Berra vinkar inte av kunder. De vinkar av sig själva, nöjda.',
+    'En lång körning blir kort i klockan när Berra håller i ratten.',
+    'Berra tappas inte bort i telefonväxeln. Växeln kopplar honom först.',
+    'Berra tar inte fel avfart vid Åbro. Avfarten väntar in honom.',
+    'I Kållered rätar cirkulationsplatsen ut sig ett snäpp för Berra.',
+    'När det är marknad på Heden känner berget av bilar igen Berras ruta.',
+    'Berra kör förbi typen utan att typen klagar. Den vet vem det är.',
+    'En nattdagg på huven torkar av sig när Berra startar.',
+    'Berra behöver ingen extra spegel. De han har räcker till hela leden.',
+    'När en kund säger "det är runt här" har Berra redan stannat rätt.',
+    'Berra ber inte om kvitto i kaffekön. Kön ber om att få gå före honom, och får nej.',
+    'En stolpe med fel skylt rättar texten när Berra tittar upp.',
+    'Berra tar natten som den är. Natten tar Berra som han är.',
+    'När det är ljust igen har Berra redan lämnat stan i bättre skick.'
+  ]
 
   var el = {}, hideT = 0, lastAt = 0;
 
@@ -209,23 +405,33 @@
     el.bubble.style.setProperty('--tail-left', tailX + 'px');
   }
 
-  function readRecent() {
+  function bagKey() {
+    try { return KEY_BAG + '_' + (localStorage.getItem('taxi_driver') || 'x'); } catch (e) { return KEY_BAG; }
+  }
+  function shuffleAll() {
+    var a = [], i, j, tmp;
+    for (i = 0; i < JOKES.length; i++) a.push(i);
+    for (i = a.length - 1; i > 0; i--) {
+      j = Math.floor(Math.random() * (i + 1));
+      tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+  }
+  function loadBag() {
     try {
-      var v = JSON.parse(sessionStorage.getItem(KEY_LAST) || '[]');
-      return Array.isArray(v) ? v : [];
-    } catch (e) { return []; }
+      var v = JSON.parse(localStorage.getItem(bagKey()) || 'null');
+      if (v && v.n === JOKES.length && Array.isArray(v.left) && v.left.length) return v.left.slice();
+    } catch (e) {}
+    return shuffleAll();
   }
-  function writeRecent(a) {
-    try { sessionStorage.setItem(KEY_LAST, JSON.stringify(a.slice(0, RECENT))); } catch (e) {}
+  function saveBag(left) {
+    try { localStorage.setItem(bagKey(), JSON.stringify({ n: JOKES.length, left: left })); } catch (e) {}
   }
-
   function pickJoke() {
-    var recent = readRecent(), i, choices = [];
-    for (i = 0; i < JOKES.length; i++) if (recent.indexOf(i) < 0) choices.push(i);
-    if (!choices.length) { writeRecent([]); return pickJoke(); }
-    var ix = choices[Math.floor(Math.random() * choices.length)];
-    recent.unshift(ix);
-    writeRecent(recent);
+    var left = loadBag();
+    if (!left.length) left = shuffleAll();
+    var ix = left.pop();
+    saveBag(left);
     return JOKES[ix];
   }
 

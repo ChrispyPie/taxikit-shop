@@ -121,16 +121,17 @@ assert.equal(H.canStart(H.active(), { skipCap: true }), true);
 
 // Wired into the app
 assert.match(idx, /hjalpbot-hogtid\.js\?v=20261111hogtid1/);
-assert.match(idx, /hjalpbot\.js\?v=20261111hogtid1/);
+assert.match(idx, /hjalpbot\.js\?v=20261111poke1/);
 assert.match(bot, /HJALPBOT_HOGTID/);
 assert.match(bot, /previewHoliday/);
 assert.match(bot, /pageVisible/);
 assert.match(bot, /pauseStickyBubble/);
 assert.match(bot, /flushPendingTip/);
 assert.match(bot, /persist: true/);
-// Tip: count only when visible, no auto-timeout for sticky tips
+// Tip: count only when visible. Alla pratbubblor döljs efter högst 30 s.
 assert.match(bot, /sticky && pageVisible\(\) && opt\.tip && opt\.tip\.id/);
-assert.match(bot, /if \(!sticky\) state\.hideT = setTimeout\(hideBubble, BUBBLE_MS\)/);
+assert.match(bot, /BUBBLE_MS = 30000/);
+assert.match(bot, /state\.hideT = setTimeout\(hideBubble, ms\)/);
 assert.match(bot, /if \(!pageVisible\(\)\) return false;/);
 assert.doesNotMatch(bot, /if \(T\.markShown\) T\.markShown\(hit\.id\);\s*say\(hit\.text/);
 assert.match(bot, /visibilityState === 'visible'/);

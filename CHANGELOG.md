@@ -6,6 +6,10 @@ Samma innehåll som visas under **Om appen → Nyheter** i appen. Källan är `T
 
 ## 11 november 2026
 
+- **Nytt:** När du trycker på hjälpboten öppnas ingen ruta. Den gör en kort reaktion och kan säga något. Hjälp finns under frågetecknet.
+- **Förbättrat:** Pratbubblor från hjälpboten och Berra stannar tills du lämnar sidan, trycker igen eller trettio sekunder har gått.
+- **Förbättrat:** Berra har fått många nya skämt. Du hör alla innan något upprepas.
+
 - **Nytt:** Vid platser i Kalendern och vid stationer och flygplatser i Ankomster finns en liten länk till vägbeskrivning i Google Maps.
 
 - **Nytt:** Under Moduler finns Nyheter. Där läser du korta nyheter från Göteborg, och kan lägga till Politik, Sport, Sverige och Nöje. Tryck på en rad för att öppna artikeln hos källan.
