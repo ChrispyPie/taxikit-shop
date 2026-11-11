@@ -1,0 +1,86 @@
+/* Väder-sidan. Laddas bara när verktyget öppnas. */
+.vd {
+  margin: -16px;
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 56px);
+  max-height: calc(100dvh - 56px);
+  min-height: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: var(--bg, #0f1720);
+}
+.vd-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 8px 6px;
+  flex: 0 0 auto;
+}
+.vd-chip {
+  appearance: none;
+  border: 1px solid var(--border, #3a4a5c);
+  background: var(--surface, #1a2430);
+  color: var(--text, #e2e8f0);
+  border-radius: 16px;
+  padding: 5px 10px;
+  font: inherit;
+  font-size: calc(13px * var(--font-scale, 1));
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  min-height: 44px;
+}
+.vd-chip[aria-pressed="true"] {
+  background: var(--primary, #2b6cb0);
+  color: var(--on-primary, #fff);
+  border-color: var(--primary, #2b6cb0);
+}
+.vd-map {
+  flex: 1 1 auto;
+  min-height: 160px;
+  height: auto;
+  background: var(--surface-soft, #15202b);
+}
+
+.vd-meta {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: baseline;
+  padding: 4px 8px 6px;
+  font-size: 0.7rem;
+  color: var(--text-soft, #94a3b8);
+  line-height: 1.25;
+}
+.vd-time { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--text, #e2e8f0); }
+.vd-cred { text-align: right; }
+.vd-msg { padding: 12px; font-size: 0.9rem; color: var(--text-soft); }
+.vd-arrow {
+  width: 28px; height: 28px; margin-left: -14px; margin-top: -14px;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.vd-arrow i {
+  display: block; width: 0; height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 16px solid #1d4ed8;
+  filter: drop-shadow(0 0 1px #fff);
+}
+html[data-theme="dark"] .vd-arrow i { border-bottom-color: #93c5fd; }
+.vd-tlab {
+  font: 700 11px/1.1 system-ui, sans-serif;
+  color: #111;
+  background: rgba(255,255,255,.82);
+  border-radius: 8px;
+  padding: 2px 4px;
+  border: 1px solid rgba(0,0,0,.2);
+  white-space: nowrap;
+  pointer-events: none;
+}
+html[data-theme="dark"] .vd-tlab { color: #f8fafc; background: rgba(15,23,32,.82); border-color: rgba(255,255,255,.2); }
+.vd-map .leaflet-control-attribution { font-size: 9px; background: rgba(255,255,255,.7); }
+html[data-theme="dark"] .vd-map .leaflet-control-attribution { background: rgba(15,23,32,.75); color: #cbd5e0; }
+html[data-theme="dark"] .vd-map .leaflet-control-attribution a { color: #93c5fd; }
