@@ -11,6 +11,7 @@
     ],
     rules: [{ id: 77, name: 'Exempelnotis', enabled: true, origins: ['sthlm'], fast_only: true, train_nos: ['9992'], days: [1,2,3,4,5,6,7], from_min: 0, to_min: 0, lead_min: 20, notify_delay: true, delay_min: 10, notify_cancel: true }],
     flightRules: [{ id: 88, name: 'Exempelflyg', enabled: true, origins: [], airlines: [], flight_nos: ['TEST42'], days: [1,2,3,4,5,6,7], from_min: 0, to_min: 0, lead_min: 20, notify_delay: true, delay_min: 10, notify_cancel: true }],
+    routes: [{ id: 1, kind: 'tag', route: 'sthlm', label: 'Stockholm (exempel)', sched_min: 19 * 60, days: [1,2,3,4,5], enabled: true, lead_min: 20, notify_delay: true, delay_min: 10, notify_cancel: true }],
     trains: [
       { dir: 'ANK', id: '9991', sched: iso(20), est: iso(30), other: 'Exempelstad', track: '5' },
       { dir: 'ANK', id: '9992', sched: iso(60), other: 'Stockholm (exempel)', otherSig: 'Cst', product: 'Snabbtåg', snabb: true }
@@ -29,6 +30,8 @@
       if (fn === 'watch_list') return reply(t.empty ? [] : t.watches);
       if (fn === 'train_watch_list') return reply(t.empty ? [] : t.rules);
       if (fn === 'flight_watch_list') return reply(t.empty ? [] : t.flightRules);
+      if (fn === 'route_watch_list') return reply(t.empty ? [] : (t.routes || []));
+      if (fn === 'route_watch_save' || fn === 'route_watch_delete') return reply(t.routes || []);
       if (fn === 'watch_set') { t.watches = t.watches.filter(w => !(w.kind === a.p_kind && w.ident === a.p_ident)); return reply(t.watches); }
       if (fn === 'train_watch_save') { t.rules.find(w => w.id === a.p_id).enabled = a.p_data.enabled; return reply(t.rules); }
       if (fn === 'flight_watch_save') { t.flightRules.find(w => w.id === a.p_id).enabled = a.p_data.enabled; return reply(t.flightRules); }

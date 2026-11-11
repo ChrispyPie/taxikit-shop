@@ -392,6 +392,7 @@
       fired = false; key = row.getAttribute('data-ank-key'); sx = e.clientX; sy = e.clientY;
       row.classList.add('bev-press');
       clear();
+      // Långtryck på Ankomster är samma som ☆: bara tillfällig (silver). Fast/guld skapas inte här.
       timer = setTimeout(function () {
         fired = true; row.classList.remove('bev-press');
         try { if (navigator.vibrate) navigator.vibrate(30); } catch (x) {}

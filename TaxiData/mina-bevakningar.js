@@ -315,7 +315,7 @@
     (mode === 'list' ? rows : []).forEach(function (r, i) {
       var p = parts(r.at);
       if (p.key !== day) { h += '<h3 class="mb-day">' + esc(dayLabel(p.key)) + '</h3>'; day = p.key; }
-      var star = r.permanent ? '<span class="mb-star gold" title="Fast bevakning">⭐</span>' : (r.watch ? '<span class="mb-star" title="Tillfällig bevakning">⭐</span>' : '');
+      var star = r.permanent ? '<span class="mb-star gold" title="Fast bevakning">★</span>' : (r.watch ? '<span class="mb-star" title="Tillfällig bevakning">★</span>' : '');
       var extra = '';
       if (r.permanent && r.routeWatch) extra += '<small>Fast · ' + esc(daysText(r.routeWatch.days)) + ' ' + esc((window.BEVAKNING && BEVAKNING.hhmm) ? BEVAKNING.hhmm(r.routeWatch.sched_min) : '') + '</small>';
       else if (r.rules.length) extra += '<small>Äldre bevakning: ' + esc(r.rules.map(function (w) { return w.name; }).join(', ')) + '</small>';

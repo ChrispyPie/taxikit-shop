@@ -69,8 +69,8 @@ html[data-theme="dark"] .mb-st-arrived{color:#93c5fd}
 .mb-text b{font-size:14px;line-height:1.3}
 .mb-remove{min-height:28px;padding:4px 8px;margin:0 8px 6px auto;font-size:12px!important}
 .mb-view-toggle button{min-height:34px;padding:4px 10px;font-size:14px}
-.mb-star{font-size:14px;line-height:1;flex:none}
-.mb-star.gold{color:#e8b923;filter:none}
+.mb-star{font-size:16px;line-height:1;flex:none;color:#c5cdd6;-webkit-text-fill-color:#c5cdd6;font-family:"Segoe UI Symbol","Apple Symbols","Noto Sans Symbols 2",sans-serif;font-weight:700}
+.mb-star.gold{color:#e8b923;-webkit-text-fill-color:#e8b923;filter:none}
 .mb-gear-btn{flex:none;width:28px;height:28px;padding:0;margin:0;border:0;border-radius:7px;background:var(--surface-soft,#222e3b);color:inherit;font-size:14px;line-height:1}
 .mb-row.mb-press{outline:2px solid #e8b923}
 .mb-gear-lab{margin:0 0 10px;color:var(--muted,#94a3b8);font-size:13px}
