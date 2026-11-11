@@ -67,6 +67,11 @@ for (let i = 0; i < 8; i++) {
 }
 assert.ok(seen.size >= 8);
 
+assert.match(src, /td-berra-slot/);
+assert.ok(src.includes('.td-berra{position:relative'));
+assert.ok(!src.includes('.td-berra{position:fixed'));
+assert.doesNotMatch(src, /Inställningar|installningar/);
+
 const cl = fs.readFileSync(path.resolve(__dirname, '../../TaxiData/changelog.js'), 'utf8');
 assert.match(cl, /2026-11-11berra1/);
 assert.match(cl, /På startskärmen finns Berra/);
