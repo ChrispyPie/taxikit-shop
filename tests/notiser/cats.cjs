@@ -30,6 +30,7 @@ assert.equal(N.catOf({ kind: 'flyg' }), 'flyg');
 assert.equal(N.catOf({ kind: 'bat' }), 'bat');
 assert.equal(N.catOf({ kind: 'reminder' }), 'event');
 assert.equal(N.catOf({ kind: 'nyheter' }), 'nyheter');
+assert.equal(N.catOf({ kind: 'konto' }), 'konto');
 assert.equal(N.catOf({ kind: 'prognos' }), 'prognos');
 assert.equal(N.catOf({ kind: 'forum_reply' }), 'forum');
 assert.equal(N.catOf({ kind: 'bil_fault' }), 'bil');

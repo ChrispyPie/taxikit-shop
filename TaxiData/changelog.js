@@ -15,6 +15,10 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-11', id: '2026-11-11delad1', tid: '08:35', rader: [
+    ['Rättat', 'På en delad platta loggas du ut när passet är slut, även om skärmen varit av. Om servern inte har uppdaterats på 1 timme loggas du också ut, även mitt i passet. Ett meddelande skickas till dina andra inloggade enheter, och den utloggade enheten visar ett rött meddelande på inloggningssidan.'],
+    ['Nytt', 'På startsidan syns dina inloggade enheter, till exempel Telefon eller Platta, med senast använd. Tryck på en annan enhet för att logga ut den.']
+  ]},
   { datum: '2026-11-11', id: '2026-11-11bev3', tid: '08:15', rader: [
     ['Förbättrat', 'När du bevakar något slås notiserna på automatiskt. Du behöver inte en extra knapp på Ankomster.'],
     ['Nytt', 'I Notiser kan du filtrera med små knappar högst upp: Tåg, Flyg, Båt, Evenemang, Uppdateringar och andra typer som finns. Tryck för att visa eller dölja. Valet sparas i telefonen.'],

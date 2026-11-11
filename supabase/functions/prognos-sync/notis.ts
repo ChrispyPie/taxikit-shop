@@ -35,6 +35,7 @@ export function notisKind(tag: string): string {
   if (tag.indexOf("tag") === 0) return "tag";
   if (tag.indexOf("prognos") === 0) return "prognos";
   if (tag === "test") return "test";
+  if (tag.indexOf("konto") === 0) return "konto";
   return "push";
 }
 

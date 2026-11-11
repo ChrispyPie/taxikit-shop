@@ -1,28 +1,100 @@
-/* Delad enhet (Inställningar). Device-lokal, sparas i localStorage 'taxi_delad_enhet' (av som standard).
- * På delade plattor i bilen: minns inloggningstiden ('taxi_delad_login_at') och frågar servern
- * då och då (var 5:e minut och när appen blir synlig) om timkörningen har registrerat ett
- * avslutat pass vars sluttid är efter inloggningen. I så fall loggas föraren ut och meddelandet
- * "Passet är avslutat – du har loggats ut" visas. Ingen egen timer. Den egna telefonen (av) påverkas inte.
- * Ångra: ta bort anropen i index.html, den här filen, inställningsrutan och ev. RPC pass_ended_since. */
+/* Delad enhet (Inställningar) och inloggade enheter (startsidan).
+ * Delad enhet sparas i localStorage 'taxi_delad_enhet' (av som standard). På delade
+ * plattor märks sessionen på servern. Servern stänger den när passet är slut, eller
+ * om timkörningen inte har uppdaterats på 1 timme. På den utloggade enheten visas
+ * ett rött meddelande på inloggningssidan. Övriga inloggade enheter får en notis
+ * (push + Notiser). Startsidan visar inloggade enheter; du kan logga ut en annan.
+ * Ångra: ta bort anropen i index.html, den här filen, inställningsrutan, ev. RPC:er och cron. */
 (function () {
   var KEY = 'taxi_delad_enhet';
   var AT = 'taxi_delad_login_at';
-  var MSG = 'taxi_delad_msg';
-  var TEXT = 'Passet är avslutat – du har loggats ut';
+  var MSG = 'taxi_delad_logout';
   var INTERVAL_MS = 5 * 60 * 1000;
   var timer = null;
   var busy = false;
   var stopped = false;
+  var devicesBusy = false;
 
   function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function put(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   function del(k) { try { localStorage.removeItem(k); } catch (e) {} }
   function isOn() { return get(KEY) === '1'; }
   function loginAt() { return get(AT); }
+  function token() { return get('taxi_session') || ''; }
+
+  function formatKl(at) {
+    var d = at ? new Date(at) : new Date();
+    if (isNaN(d.getTime())) d = new Date();
+    try {
+      return new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Stockholm', hour: '2-digit', minute: '2-digit', hour12: false }).format(d);
+    } catch (e) {
+      return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+    }
+  }
+
+  function fallbackText(reason, at) {
+    var kl = formatKl(at);
+    var why = reason === 'stale' ? 'servern har inte uppdaterats på 1 timme'
+      : reason === 'remote' ? 'utloggad från annan enhet'
+      : 'passet avslutat';
+    return 'Du loggades ut automatiskt kl ' + kl + ' – ' + why;
+  }
+
+  function saveLogout(r) {
+    var text = (r && r.text) || fallbackText(r && r.reason, r && r.at);
+    try { localStorage.setItem(MSG, JSON.stringify({ reason: r && r.reason, at: r && r.at, text: text })); } catch (e) {}
+    try { sessionStorage.setItem(MSG, '1'); } catch (e2) {}
+  }
+
+  function loadLogout() {
+    try {
+      var raw = localStorage.getItem(MSG);
+      if (!raw) return null;
+      var o = JSON.parse(raw);
+      if (o && o.text) return o;
+    } catch (e) {}
+    return null;
+  }
+
+  function clearLogout() { del(MSG); try { sessionStorage.removeItem(MSG); } catch (e) {} }
+
+  function currentEndpoint(cb) {
+    if (!navigator.serviceWorker || !navigator.serviceWorker.ready) { cb(null); return; }
+    Promise.resolve(navigator.serviceWorker.ready)
+      .then(function (reg) { return reg.pushManager && reg.pushManager.getSubscription && reg.pushManager.getSubscription(); })
+      .then(function (sub) { cb(sub && sub.endpoint || null); })
+      .catch(function () { cb(null); });
+  }
+
+  function syncFlag(on) {
+    var t = token();
+    if (!t || typeof window.rpc !== 'function') return;
+    function send(endpoint) {
+      var args = { p_token: t, p_on: !!on };
+      if (endpoint) args.p_endpoint = endpoint;
+      Promise.resolve(window.rpc('session_set_delad_enhet', args))
+        .then(function () { reportDevice(); })
+        .catch(function (e) { if (on && e && e.code === '28000') signOutForPass(); });
+    }
+    if (!on) { send(null); return; }
+    currentEndpoint(send);
+  }
+
+  function reportDevice() {
+    var t = token();
+    if (!t || typeof window.rpc !== 'function') return;
+    var w = 0, h = 0;
+    try { w = screen.width || window.innerWidth || 0; h = screen.height || window.innerHeight || 0; } catch (e) {}
+    var ua = '';
+    try { ua = (navigator.userAgent || '').slice(0, 200); } catch (e2) {}
+    Promise.resolve(window.rpc('session_set_device', { p_token: t, p_ua: ua, p_width: w, p_height: h }))
+      .catch(function () {});
+  }
 
   function markLogin() {
-    if (!isOn()) { del(AT); return; }
+    if (!isOn()) { del(AT); syncFlag(false); reportDevice(); return; }
     put(AT, new Date().toISOString());
+    syncFlag(true);
   }
 
   function ensureLoginAt() {
@@ -34,21 +106,26 @@
     if (on) {
       put(KEY, '1');
       if (!loginAt()) markLogin();
+      else syncFlag(true);
       start();
     } else {
       del(KEY);
       del(AT);
+      syncFlag(false);
       stop();
     }
   }
 
   function showPendingMessage() {
-    var flag;
-    try { flag = sessionStorage.getItem(MSG); if (flag) sessionStorage.removeItem(MSG); } catch (e) { flag = null; }
-    if (!flag) return;
-    var el = document.getElementById('login-notice');
+    var rec = loadLogout();
+    var el = document.getElementById('login-delad-msg') || document.getElementById('login-notice');
     if (!el) return;
-    el.textContent = TEXT;
+    if (!rec || !rec.text) {
+      if (el.id === 'login-delad-msg') el.style.display = 'none';
+      return;
+    }
+    el.textContent = rec.text;
+    el.classList.add('delad-out');
     el.style.display = 'block';
   }
 
@@ -57,19 +134,19 @@
   }
 
   function shouldWatch() {
-    return isOn() && !!get('taxi_session') && !!loginAt() && !isDemo();
+    return isOn() && !!token() && !!loginAt() && !isDemo();
   }
 
   function signOutForPass() {
     if (stopped) return;
     stopped = true;
     stop();
-    try { sessionStorage.setItem(MSG, '1'); } catch (e) {}
-    if (typeof window.logout === 'function') {
-      Promise.resolve(window.logout()).catch(function () { hardExit(); });
-    } else {
-      hardExit();
-    }
+    var go = function () {
+      if (typeof window.logout === 'function') {
+        Promise.resolve(window.logout()).catch(function () { hardExit(); });
+      } else hardExit();
+    };
+    fetchReason().then(go, go);
   }
 
   function hardExit() {
@@ -81,18 +158,36 @@
     try { location.reload(); } catch (e) {}
   }
 
+  function fetchReason() {
+    var t = token();
+    if (!t || typeof window.rpc !== 'function') return Promise.resolve();
+    return Promise.resolve(window.rpc('session_delad_logout_reason', { p_token: t }))
+      .then(function (r) { if (r && r.ended) saveLogout(r); })
+      .catch(function () {});
+  }
+
+  function onInvalidSession() {
+    return fetchReason();
+  }
+
   function check() {
     if (!shouldWatch() || busy) return;
     var since = loginAt();
-    var token = get('taxi_session') || '';
-    if (!since || !token || typeof window.rpc !== 'function') return;
+    var t = token();
+    if (!since || !t || typeof window.rpc !== 'function') return;
     busy = true;
-    Promise.resolve(window.rpc('pass_ended_since', { p_token: token, p_since: since }))
+    Promise.resolve(window.rpc('pass_ended_since', { p_token: t, p_since: since }))
       .then(function (r) {
         busy = false;
-        if (r && r.ended === true) signOutForPass();
+        if (r && r.ended === true) {
+          saveLogout({ reason: 'pass', at: new Date().toISOString() });
+          signOutForPass();
+        }
       })
-      .catch(function () { busy = false; });
+      .catch(function (e) {
+        busy = false;
+        if (e && e.code === '28000') signOutForPass();
+      });
   }
 
   function onVis() {
@@ -101,9 +196,11 @@
 
   function start() {
     stopped = false;
-    if (!isOn() || !get('taxi_session')) return;
-    if (isDemo()) return;
+    if (!token()) return;
+    reportDevice();
+    if (!isOn() || isDemo()) return;
     ensureLoginAt();
+    syncFlag(true);
     if (timer) return;
     timer = setInterval(function () { check(); }, INTERVAL_MS);
     document.addEventListener('visibilitychange', onVis);
@@ -122,12 +219,97 @@
     stopped = false;
   }
 
+  function onLoginSuccess() {
+    clearLogout();
+  }
+
+  function seenLabel(iso) {
+    var d = iso ? new Date(iso) : null;
+    if (!d || isNaN(d.getTime())) return '';
+    var now = Date.now();
+    var diff = now - d.getTime();
+    if (diff < 2 * 60 * 1000) return 'nu';
+    if (diff < 60 * 60 * 1000) return 'för ' + Math.max(1, Math.round(diff / 60000)) + ' min sedan';
+    return 'kl ' + formatKl(d);
+  }
+
+  function esc(s) {
+    return String(s || '').replace(/[&<>"']/g, function (c) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+    });
+  }
+
+  function renderDevices(box) {
+    if (!box) return;
+    if (!token() || isDemo() || typeof window.rpc !== 'function') {
+      box.innerHTML = '';
+      return;
+    }
+    box.innerHTML = '<div class="home-devices-h">Inloggade enheter</div><div class="home-devices-row" role="list">Hämtar…</div>';
+    Promise.resolve(window.rpc('list_my_sessions', { p_token: token() }))
+      .then(function (r) {
+        var list = (r && r.devices) || [];
+        var row = '<div class="home-devices-h">Inloggade enheter</div>';
+        row += '<div class="home-devices-row" role="list">';
+        if (!list.length) {
+          row += '<div class="home-dev home-dev-this" role="listitem"><div class="home-dev-name">Denna enhet</div></div>';
+        } else {
+          list.forEach(function (d) {
+            var label = d.label || 'Enhet';
+            var meta = seenLabel(d.last_seen);
+            var cls = 'home-dev' + (d.current ? ' home-dev-this' : '');
+            var id = d.id || '';
+            if (d.current) {
+              row += '<div class="' + cls + '" role="listitem"><div class="home-dev-name">' + esc(label) + '</div>' +
+                '<div class="home-dev-meta">' + (meta ? esc(meta) + ' · ' : '') + 'denna enhet</div></div>';
+            } else {
+              row += '<button type="button" class="' + cls + '" role="listitem" data-dev="' + esc(id) + '" data-label="' + esc(label) + '">' +
+                '<div class="home-dev-name">' + esc(label) + '</div>' +
+                '<div class="home-dev-meta">' + esc(meta) + '</div></button>';
+            }
+          });
+        }
+        row += '</div><div class="home-dev-ask" hidden></div>';
+        box.innerHTML = row;
+        box.onclick = function (e) {
+          var btn = e.target && e.target.closest ? e.target.closest('[data-dev]') : null;
+          if (btn) askLogout(box, btn.getAttribute('data-dev'), btn.getAttribute('data-label'));
+        };
+      })
+      .catch(function () { box.innerHTML = ''; });
+  }
+
+  function askLogout(box, id, label) {
+    var ask = box.querySelector('.home-dev-ask');
+    if (!ask || !id) return;
+    ask.hidden = false;
+    ask.innerHTML = '<p>Logga ut ' + esc(label || 'enheten') + '?</p>' +
+      '<p class="home-dev-ask-note">Nästa gång den öppnas visas att den loggats ut härifrån.</p>' +
+      '<div class="home-dev-ask-btns">' +
+        '<button type="button" data-dev-cancel>Avbryt</button>' +
+        '<button type="button" class="home-dev-ask-go" data-dev-go="' + esc(id) + '">Logga ut</button>' +
+      '</div>';
+    ask.onclick = function (e) {
+      if (e.target.getAttribute('data-dev-cancel') !== null) { ask.hidden = true; ask.innerHTML = ''; return; }
+      var go = e.target.getAttribute('data-dev-go');
+      if (!go || devicesBusy) return;
+      devicesBusy = true;
+      Promise.resolve(window.rpc('logout_my_session', { p_token: token(), p_device_id: go }))
+        .then(function (r) {
+          devicesBusy = false;
+          ask.hidden = true;
+          if (r && r.ok) renderDevices(box);
+        })
+        .catch(function () { devicesBusy = false; ask.hidden = true; });
+    };
+  }
+
   function renderSettings(box) {
     if (!box) return;
     var on = isOn();
     box.innerHTML = '<div class="section"><h3 style="margin-top:0">Delad enhet</h3>' +
       '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">' +
-      'Slå på det här på en platta som flera förare delar, till exempel i bilen. När timkörningen har registrerat att ditt pass är slut loggas du ut automatiskt, så nästa förare inte kommer in på ditt konto. På din egen telefon ska det vara av.</p>' +
+      'Slå på det här på en platta som flera förare delar, till exempel i bilen. När ditt pass är slut loggas du ut automatiskt, även om skärmen varit av, så nästa förare inte kommer in på ditt konto. Om servern inte har uppdaterats på 1 timme loggas du också ut, även mitt i passet. På din egen telefon ska det vara av.</p>' +
       '<div class="hl-opts" role="radiogroup">' +
         '<label class="hl-opt' + (!on ? ' on' : '') + '"><input type="radio" name="delad-enhet" value="0"' + (!on ? ' checked' : '') + '><span>Av</span></label>' +
         '<label class="hl-opt' + (on ? ' on' : '') + '"><input type="radio" name="delad-enhet" value="1"' + (on ? ' checked' : '') + '><span>På</span></label>' +
@@ -146,8 +328,12 @@
     start: start,
     stop: stop,
     onClearSession: onClearSession,
+    onInvalidSession: onInvalidSession,
+    onLoginSuccess: onLoginSuccess,
     showPendingMessage: showPendingMessage,
     renderSettings: renderSettings,
+    renderDevices: renderDevices,
+    reportDevice: reportDevice,
     check: check
   };
 
