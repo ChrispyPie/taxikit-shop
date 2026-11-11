@@ -814,7 +814,15 @@ html[data-theme="dark"] .pg-pop-flyb { color: #fbd38d; }
   border-radius: 0; padding: 0; cursor: pointer; pointer-events: auto;
   line-height: 1; z-index: 2;
 }
-.pg-fly-ico { font-size: 0.82rem; line-height: 1; pointer-events: none; }
+.pg-fly-ico { font-size: 0.82rem; line-height: 1; pointer-events: none; display: inline-block;
+  /* Stående: lagret sitter utanför tabellen. ✈ pekar snett upp-höger; rotera så nosen pekar upp mot nu. */
+  transform: rotate(-45deg); }
+.pg-n.pg-fly::before { display: inline-block; transform: rotate(-45deg); }
+/* Liggande: tid rinner åt höger, nu-linjen är till vänster — nosen pekar vänster mot nu. */
+body.pg-land .pg-fly-ico,
+.pg-table-land .pg-fly-ico { transform: scaleX(-1); }
+body.pg-land .pg-n.pg-fly::before,
+.pg-table-land .pg-n.pg-fly::before { display: inline-block; transform: scaleX(-1); }
 .pg-fly-chip:focus-visible { outline: 2px solid var(--accent, #f5b301); outline-offset: 1px; }
 html[data-theme="dark"] .pg-fly-chip { background: transparent; color: #e2e8f0; }
 .pg-fly-layer { position: absolute; pointer-events: none; z-index: 6; overflow: visible; }
