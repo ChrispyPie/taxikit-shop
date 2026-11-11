@@ -177,12 +177,15 @@
     var g = gearSvg(currentOutfit());
     if (!g) return;
     try {
+      svg.style.overflow = 'hidden';
       var doc = new DOMParser().parseFromString('<svg xmlns="http://www.w3.org/2000/svg">' + g + '</svg>', 'image/svg+xml');
       if (doc.querySelector('parsererror')) throw new Error('gear');
       var node = doc.documentElement.firstElementChild;
       while (node) {
         var next = node.nextElementSibling;
-        svg.appendChild(document.importNode(node, true));
+        if (node.namespaceURI === 'http://www.w3.org/2000/svg') {
+          svg.appendChild(document.importNode(node, true));
+        }
         node = next;
       }
     } catch (e) {
@@ -446,13 +449,13 @@
     var s = document.createElement('style');
     s.id = 'hb-css';
     s.textContent =
-      '.hb-walker{position:fixed;left:0;top:0;width:56px;height:56px;z-index:45;pointer-events:none;will-change:transform;' +
+      '.hb-walker{position:fixed;left:0;top:0;width:56px;height:56px;z-index:45;pointer-events:none;will-change:transform;overflow:hidden;' +
       'transition:transform 3.2s cubic-bezier(.4,.1,.2,1)}' +
       '.hb-walker.snap{transition:none}' +
       '.hb-flip{width:100%;height:100%}' +
       '.hb-walker.hb-left .hb-flip{transform:scaleX(-1)}' +
       '.hb-btn{display:block;width:100%;height:100%;padding:0;border:0;background:none;cursor:pointer;pointer-events:auto;-webkit-tap-highlight-color:transparent}' +
-      '.hb-btn svg{width:56px;height:56px;display:block;animation:hb-bob 1.1s ease-in-out infinite alternate;transform-origin:50% 100%}' +
+      '.hb-btn svg{width:56px;height:56px;display:block;overflow:hidden;animation:hb-bob 1.1s ease-in-out infinite alternate;transform-origin:50% 100%}' +
       '.hb-walker.idle .hb-btn svg{animation-duration:2.2s}' +
       '.hb-walker.talking .hb-btn svg{animation:hb-talk .32s ease-in-out infinite alternate}' +
       '.hb-eyes,.hb-eye-r,.hb-eye-l{transform-box:fill-box;transform-origin:50% 50%;animation:hb-blink 4.6s infinite}' +
@@ -543,6 +546,8 @@
       if (hits(sx, sy, boxes)) return -1e6;
       var near = 80, cx = sx + SIZE / 2, cy = sy + SIZE / 2;
       near = Math.min(cx - b.minX, b.maxX + SIZE - cx, cy - b.minY, b.maxY + SIZE - cy, near);
+      var grid = document.querySelector('#app.is-home .grid');
+      var gridBottom = grid ? grid.getBoundingClientRect().bottom : 0;
       boxes.forEach(function (box) {
         var dx = 0, dy = 0;
         if (cx < box.l) dx = box.l - cx; else if (cx > box.r) dx = cx - box.r;
@@ -551,6 +556,8 @@
         if (d < near) near = d;
       });
       var val = near;
+      if (gridBottom && sy + SIZE < gridBottom + 8) val -= 140;
+      if (gridBottom && sy >= gridBottom + 6) val += 55;
       if (from) {
         var dist = Math.hypot(sx - from.x, sy - from.y);
         if (dist < 40) val -= 80;

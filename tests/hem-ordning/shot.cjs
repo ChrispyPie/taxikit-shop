@@ -13,7 +13,7 @@ function loadPuppeteer() {
 }
 const puppeteer = loadPuppeteer();
 const root = path.resolve(__dirname, '../..');
-const out = process.argv[2] || '/workspace/ordning-shots';
+const out = process.argv[2] || '/workspace/moduler-shots';
 fs.mkdirSync(out, { recursive: true });
 const core = fs.readFileSync(path.join(root, 'tests/meddelanden/fixtures.js'), 'utf8');
 const mime = f => f.endsWith('.js') ? 'application/javascript' : f.endsWith('.css') ? 'text/css' : 'text/html';
@@ -45,11 +45,12 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
       localStorage.setItem('taxi_logged_in', '1');
       localStorage.setItem('taxi_theme', theme);
       window.TEST_ROLE = 'standard';
-      var realFetch = window.fetch.bind(window);
       (0, eval)(core);
       var stub = window.fetch;
       window.fetch = function (url, opt) {
-        if (/home_tool_order_/.test(String(url))) return Promise.resolve(new Response(JSON.stringify({ ids: null }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+        if (/home_tool_order_/.test(String(url))) {
+          return Promise.resolve(new Response(JSON.stringify({ ids: null, hidden: null }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+        }
         return stub.apply(this, arguments);
       };
       document.addEventListener('DOMContentLoaded', () => {
@@ -66,49 +67,118 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
     return p;
   }
 
-  // default home, then edit, mid-drag, result
+  async function metrics(p) {
+    return p.evaluate(() => {
+      const header = document.querySelector('#app header');
+      const grid = document.querySelector('#app .grid');
+      const plus = document.querySelector('.td-slot-empty');
+      const bar = document.querySelector('.td-ordna-bar');
+      const pencil = document.querySelector('.td-wrench');
+      const hr = header.getBoundingClientRect();
+      const gr = grid.getBoundingClientRect();
+      const icons = [...grid.querySelectorAll('.icon[data-tool]')];
+      const last = icons[icons.length - 1];
+      const handlesVis = [...document.querySelectorAll('.td-handle')].filter(h => getComputedStyle(h).display !== 'none').length;
+      const pr = plus ? plus.getBoundingClientRect() : null;
+      const pb = pencil ? pencil.getBoundingClientRect() : null;
+      return {
+        gap: Math.round(gr.top - hr.bottom),
+        hasBar: !!bar,
+        pencil: !!(pencil && pb.width >= 40 && pb.height >= 40),
+        plusLast: !!(plus && plus === grid.lastElementChild),
+        plusH: pr ? Math.round(pr.height) : 0,
+        handlesVis,
+        iconCount: icons.length,
+        noOrdnaRow: !bar
+      };
+    });
+  }
+
+  // 412 dark 1.4 default home
   {
     const p = await openHome({ width: 412, height: 780, theme: 'dark', scale: '1.4' });
     ok('no pageerror', p._errs.length === 0, p._errs.join('|'));
-    ok('ordna btn', await p.$('button[data-ordna="edit"]'));
-    const first = await p.$eval('#app .grid .icon[data-tool]', el => el.getAttribute('data-tool'));
-    ok('default starts kordata or visible', !!first, first);
-    await p.click('button[data-ordna="edit"]');
-    await p.waitForSelector('.grid.td-ordna', { timeout: 5000 });
-    ok('wiggle on', await p.evaluate(() => document.querySelector('.grid.td-ordna') && HEM_ORDNING.isEditing()));
-    ok('handles', await p.evaluate(() => document.querySelectorAll('.td-handle').length >= 6));
-    await p.screenshot({ path: path.join(out, 'ordna-lage-412-scale14-dark.png') });
+    const m = await metrics(p);
+    ok('grid close under header', m.gap >= 0 && m.gap <= 16, 'gap=' + m.gap);
+    ok('no ordna row', m.noOrdnaRow);
+    ok('wrench 44 hit target', m.pencil);
+    ok('plus last', m.plusLast && m.plusH >= 44, JSON.stringify(m));
+    ok('handles hidden', m.handlesVis === 0, 'vis=' + m.handlesVis);
+    await p.screenshot({ path: path.join(out, 'hem-412-scale14-dark.png') });
 
-    // mid-drag: move Väder (or last) toward first via JS insert + class
-    const mid = await p.evaluate(() => {
-      const grid = document.querySelector('#app .grid');
-      const dest = grid.querySelector('[data-tool="kordata"]') || grid.querySelector('.icon');
-      const src = grid.querySelector('[data-tool="vader"]') || grid.querySelector('.icon:last-of-type');
-      if (!src || !dest || src === dest) return { ok: false };
-      src.classList.add('td-dragging');
-      dest.classList.add('td-over');
-      grid.insertBefore(src, dest);
-      return { ok: true, ids: [...grid.querySelectorAll('.icon[data-tool]')].map(e => e.getAttribute('data-tool')) };
+    // enter edit, remove a tool, screenshot with X
+    await p.click('.td-wrench');
+    await p.waitForSelector('.grid.td-ordna');
+    const editM = await p.evaluate(() => {
+      const ban = document.querySelector('.td-andringslage');
+      const cs = ban ? getComputedStyle(ban) : null;
+      return {
+        x: document.querySelectorAll('.grid.td-ordna .td-remove').length,
+        noXCore: !document.querySelector('.icon[data-tool="installningar"] .td-remove') && !document.querySelector('.icon[data-tool="om"] .td-remove'),
+        plusLast: document.querySelector('.td-slot-empty') === document.querySelector('#app .grid').lastElementChild,
+        banner: !!(cs && cs.display !== 'none' && /Ändringsläge/.test(ban.textContent)),
+        klar: !!document.querySelector('.td-andringslage [data-ordna="done"]'),
+        reset: !!document.querySelector('.td-andringslage [data-ordna="reset"]'),
+        wrenchHidden: !document.querySelector('.td-wrench') || getComputedStyle(document.querySelector('.td-wrench')).display === 'none'
+      };
     });
-    ok('mid-drag setup', mid.ok, JSON.stringify(mid));
-    await p.screenshot({ path: path.join(out, 'ordna-mitt-drag-412-scale14-dark.png') });
-    await p.evaluate(() => {
-      const grid = document.querySelector('#app .grid');
-      [...grid.querySelectorAll('.icon')].forEach(el => el.classList.remove('td-dragging', 'td-over'));
-    });
-    await p.click('button[data-ordna="done"]');
-    await p.waitForFunction(() => !document.querySelector('.grid.td-ordna'), { timeout: 5000 });
-    const after = await p.evaluate(() => [...document.querySelectorAll('#app .grid .icon[data-tool]')].map(e => e.getAttribute('data-tool')));
-    ok('result saved locally', after[0] === 'vader' || after[0] !== 'kordata' || true, after.join(','));
-    await p.screenshot({ path: path.join(out, 'ordna-klart-412-scale14-dark.png') });
+    ok('x badges on removable', editM.x >= 6, 'x=' + editM.x);
+    ok('no x on core', editM.noXCore);
+    ok('plus last in ordna', editM.plusLast);
+    ok('banner + klar + aterstall', editM.banner && editM.klar && editM.reset, JSON.stringify(editM));
+    await p.screenshot({ path: path.join(out, 'ordna-kryss-412-scale14-dark.png') });
+
+    // remove Väder
+    await p.click('.icon[data-tool="vader"] .td-remove');
+    await p.waitForFunction(() => !document.querySelector('.icon[data-tool="vader"]') && document.querySelector('.td-slot-empty'));
+    // still editing after re-render
+    if (!(await p.$('.grid.td-ordna'))) {
+      await p.click('.td-wrench');
+      await p.waitForSelector('.grid.td-ordna');
+    }
+    await p.click('.td-slot-empty');
+    await p.waitForSelector('#td-add-panel.open');
+    const list = await p.evaluate(() => [...document.querySelectorAll('#td-add-panel [data-add-id]')].map(e => e.getAttribute('data-add-id')));
+    ok('plus list has vader', list.includes('vader'), list.join(','));
+    await p.screenshot({ path: path.join(out, 'plus-lista-412-scale14-dark.png') });
     await p.close();
   }
 
+  // 412 light 1.25
+  {
+    const p = await openHome({ width: 412, height: 780, theme: 'light', scale: '1.25' });
+    const m = await metrics(p);
+    ok('light gap', m.gap >= 0 && m.gap <= 16, 'gap=' + m.gap);
+    ok('light plus last', m.plusLast);
+    await p.screenshot({ path: path.join(out, 'hem-412-scale125-light.png') });
+    await p.click('.td-wrench');
+    await p.waitForSelector('.grid.td-ordna');
+    await p.screenshot({ path: path.join(out, 'ordna-kryss-412-scale125-light.png') });
+    await p.close();
+  }
+
+  // 412 dark 1.25
+  {
+    const p = await openHome({ width: 412, height: 780, theme: 'dark', scale: '1.25' });
+    await p.screenshot({ path: path.join(out, 'hem-412-scale125-dark.png') });
+    await p.close();
+  }
+
+  // tablet both themes
   {
     const p = await openHome({ width: 1024, height: 600, theme: 'dark', scale: '1' });
-    await p.click('button[data-ordna="edit"]');
+    const m = await metrics(p);
+    ok('tablet gap', m.gap >= 0 && m.gap <= 20, 'gap=' + m.gap);
+    ok('tablet plus last', m.plusLast);
+    await p.screenshot({ path: path.join(out, 'hem-1024x600-dark.png') });
+    await p.click('.td-wrench');
     await p.waitForSelector('.grid.td-ordna');
-    await p.screenshot({ path: path.join(out, 'ordna-lage-1024x600-landskap.png') });
+    await p.screenshot({ path: path.join(out, 'ordna-kryss-1024x600-dark.png') });
+    await p.close();
+  }
+  {
+    const p = await openHome({ width: 1024, height: 600, theme: 'light', scale: '1' });
+    await p.screenshot({ path: path.join(out, 'hem-1024x600-light.png') });
     await p.close();
   }
 
