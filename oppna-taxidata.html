@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Öppnar TaxiData</title>
+<style>
+  body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    font-family: system-ui, -apple-system, sans-serif; background: #111; color: #f4f4f2; text-align: center; padding: 24px; }
+  p { margin: 0 0 12px; font-size: 1rem; }
+  a { color: #f6c200; }
+</style>
+</head>
+<body>
+<p>Öppnar TaxiData i webbläsaren…</p>
+<p id="fb" hidden><a href="/TaxiData/">Öppna TaxiData</a></p>
+<script>
+(function () {
+  var fallback = document.getElementById('fb');
+  var raw = '';
+  try { raw = new URLSearchParams(location.search).get('u') || ''; } catch (e) {}
+  var href = '/TaxiData/';
+  try {
+    var t = new URL(raw, location.origin);
+    if (t.origin === location.origin && t.pathname.indexOf('/TaxiData/') === 0) href = t.href;
+  } catch (e) {}
+  try { location.replace(href); } catch (e2) {}
+  if (fallback) { fallback.hidden = false; fallback.querySelector('a').href = href; }
+})();
+</script>
+</body>
+</html>
