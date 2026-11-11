@@ -95,7 +95,7 @@
       'Här byter du tema, textstorlek och hur startskärmen ser ut.',
       'Animationer styr korta rörelser i appen. Det påverkar inte ljudet.',
       'Valen sparas på den här enheten.',
-      'Här väljer du också om hjälpboten ska synas. Tryck på figuren för en kort reaktion. Hjälp finns under frågetecknet.'
+      'Här väljer du också om hjälpboten ska synas. Tryck på figuren för en kort reaktion. Finns en pratbubbla stängs den vid tryck. Hjälp finns under frågetecknet.'
     ],
     om: [
       'Här står vad som är nytt i appen, överst i listan.',
