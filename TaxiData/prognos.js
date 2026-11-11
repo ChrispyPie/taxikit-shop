@@ -49,6 +49,7 @@
     el: null,
     status: null,
     bookings: [],
+    bookingsReady: false,
     morgon: null,
     orig: null,
     zones: [],
@@ -387,7 +388,7 @@
       if (xs[6]) st.flights = xs[6];
       st.status = xs[0] || {};
       st.ktRaw = xs[1] || [];
-      st.bookings = ktApply(st.ktRaw);
+      st.bookings = ktApply(st.ktRaw); st.bookingsReady = true;
       st.morgon = xs[2];
       st.zones = xs[3] || [];
       st.orig = xs[5] || null;
@@ -1981,7 +1982,7 @@
     var ktb = st.el.querySelector('#pg-kt-btn');
     if (ktb) ktb.onclick = function () {
       localStorage.setItem(LS_KT, ktOn() ? '0' : '1');
-      st.bookings = ktApply(st.ktRaw); paint();
+      st.bookings = ktApply(st.ktRaw); st.bookingsReady = true; paint();
     };
     bindPop(st.el);
     if (st._land) {
@@ -2223,6 +2224,9 @@
     if (!token()) return;
     badge.seenP = rpc('prognos_seen_set', {}).catch(function () {});
   }
+
+  P.cachedBookings = function () { return st.bookingsReady ? (st.bookings || []) : null; };
+  P.cachedProblem = function () { return st.err ? { kind: 'error', source: 'prognos', message: String(st.err) } : null; };
   P.refreshBadge = function (force) {
     if (!token() || onPage()) return;
     if (!force && Date.now() - badge.at < 30000) return;

@@ -345,7 +345,7 @@
     if (window.TOPPLISTOR && c === window.TOPPLISTOR.id) return 'topplistor';
     if (window.VERKSTAD && c === window.VERKSTAD.id) return 'verkstad';
     if (!c) return 'hem';
-    return 'annat';
+    return c;
   }
 
   // ---------- vad boten säger (bara riktiga siffror) ----------
@@ -426,7 +426,7 @@
   }
 
   // ---------- DOM ----------
-  var el = {}, state = { page: undefined, lastComment: +(sessionStorage.getItem('hb_last') || 0), timer: null, pendingFor: null, hideT: null, panel: false, forceOutfit: null, atHome: false };
+  var el = {}, state = { page: undefined, lastComment: +(sessionStorage.getItem('hb_last') || 0), timer: null, pendingFor: null, hideT: null, panel: false, forceOutfit: null, atHome: false, visiting: false, bubbleTool: null };
 
   function css() {
     var s = document.createElement('style');
@@ -495,9 +495,14 @@
       '@keyframes hb-polish{from{transform:rotate(-22deg)}to{transform:rotate(18deg)}}' +
       '.hb-walker.hb-at-home.hb-act-robot .hb-btn svg{animation:hb-chargebob 1.4s ease-in-out infinite alternate}' +
       '@keyframes hb-chargebob{from{transform:translateY(0)}to{transform:translateY(-1px)}}' +
+      '.hb-walker.hb-enter .hb-btn{transition:transform .45s ease,opacity .45s ease;transform:scale(.18);opacity:0}' +
+      '.hb-walker.hb-enter-preview .hb-btn{transition:none;transform:scale(.45);opacity:.8}' +
+      '.hb-bubble.hb-tap{pointer-events:auto;cursor:pointer}' +
+      '.hb-walker.hb-marvin .hb-btn svg{animation:hb-marvin-sigh 2.6s ease-in-out;transform-origin:50% 90%}' +
+      '@keyframes hb-marvin-sigh{0%{transform:translateY(0) rotate(0)}20%{transform:translateY(2px) rotate(4deg)}55%{transform:translateY(5px) rotate(8deg)}100%{transform:translateY(2px) rotate(3deg)}}' +
       '@media (prefers-reduced-motion: reduce){.hb-walker{transition:none!important}' +
       '.hb-flip,.hb-btn svg,.hb-eyes,.hb-eye-r,.hb-eye-l,.hb-walker.waving .hb-arm,.hb-walker.waving .hb-hair,.hb-walker.talking .hb-btn svg,' +
-      '.hb-batt-fill,.hb-shine,.hb-walker.hb-at-home .hb-arm,.hb-walker.hb-at-home .hb-btn svg,.hb-walker.hb-walk .hb-btn svg{animation:none!important}' +
+      '.hb-batt-fill,.hb-shine,.hb-walker.hb-at-home .hb-arm,.hb-walker.hb-at-home .hb-btn svg,.hb-walker.hb-walk .hb-btn svg,.hb-walker.hb-marvin .hb-btn svg{animation:none!important}' +
       '.hb-bubble{transition:none}}';
     document.head.appendChild(s);
   }
@@ -507,7 +512,7 @@
   var CELL = 8;
   var ST_W = 120, ST_H = 72;
   var wanderTimer = 0, pos = { x: 8, y: 200 }, reduceMotion = false;
-  var walkGen = 0, nextVisitAt = 0, firstVisit = true;
+  var walkGen = 0, nextVisitAt = 0, nextIconAt = 0, firstVisit = true;
 
   function prefersReduce() {
     try { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
@@ -677,7 +682,13 @@
       var p = extra || pad;
       out.push({ l: r.left - p, t: r.top - p, r: r.right + p, b: r.bottom + p });
     }
-    document.querySelectorAll('#app.is-home .grid .icon .emoji, #app.is-home .grid .td-slot-plus').forEach(function (n) { add(n, pad); });
+    document.querySelectorAll('#app.is-home .grid .icon .emoji, #app.is-home .grid .td-slot-plus').forEach(function (n) {
+      if (opts && opts.ignoreTool) {
+        var ic = n.closest && n.closest('.icon');
+        if (ic && ic.getAttribute('data-tool') === opts.ignoreTool) return;
+      }
+      add(n, pad);
+    });
     var h = document.querySelector('#app header');
     if (h) {
       var r = h.getBoundingClientRect();
@@ -806,13 +817,14 @@
     walkGen += 1;
     clearTimeout(wanderTimer);
     if (el.walker) {
-      el.walker.classList.remove('hb-walk', 'hb-at-home', 'hb-act-robot', 'hb-act-diva', 'hb-act-chauffor');
+      el.walker.classList.remove('hb-walk', 'hb-at-home', 'hb-act-robot', 'hb-act-diva', 'hb-act-chauffor', 'hb-enter', 'hb-enter-preview', 'hb-marvin');
     }
     if (el.station) el.station.classList.remove('hb-on');
     state.atHome = false;
+    state.visiting = false;
   }
 
-  function walkPath(pts, onDone) {
+  function walkPath(pts, onDone, walkOpt) {
     var gen = ++walkGen;
     if (!pts || !pts.length) { if (onDone) onDone(); return; }
     function go(i) {
@@ -823,7 +835,7 @@
         return;
       }
       // paus ibland mitt i en gång
-      if (i > 0 && i < pts.length - 1 && Math.random() < 0.18) {
+      if (!walkOpt || !walkOpt.noPause) if (i > 0 && i < pts.length - 1 && Math.random() < 0.18) {
         if (el.walker) el.walker.classList.remove('hb-walk');
         el.walker.classList.add('idle');
         wanderTimer = setTimeout(function () {
@@ -930,6 +942,60 @@
     walkPath(path, arriveHome);
   }
 
+
+  function iconNode(tool) {
+    return document.querySelector('#app.is-home .grid .icon[data-tool="' + tool + '"] .emoji');
+  }
+  function visibleTools() {
+    var out = [];
+    document.querySelectorAll('#app.is-home .grid .icon[data-tool]').forEach(function (n) {
+      var id = n.getAttribute('data-tool');
+      if (id && id !== 'installningar' && id !== 'om' && n.getBoundingClientRect().width > 8) out.push(id);
+    });
+    return out;
+  }
+  function tryIconVisit() {
+    if (!scenarioAnimOn() || !canWalk() || charId() === 'off') {
+      nextIconAt = Date.now() + 120000;
+      return false;
+    }
+    var ids = visibleTools(), i, hit = null, tool = null, order = ids.slice();
+    order.sort(function () { return Math.random() - 0.5; });
+    for (i = 0; i < order.length; i++) {
+      hit = pickScenario('home', order[i]);
+      if (hit && iconNode(order[i])) { tool = order[i]; break; }
+    }
+    nextIconAt = Date.now() + 150000 + Math.random() * 120000;
+    if (!tool || !hit) return false;
+    visitIcon(tool, hit);
+    return true;
+  }
+  function visitIcon(tool, hit) {
+    var node = iconNode(tool);
+    if (!node || !el.walker) return false;
+    var r = node.getBoundingClientRect();
+    var dest = { x: r.left + r.width / 2 - SIZE / 2, y: r.top + r.height / 2 - SIZE / 2 };
+    var path = findPath(pos, dest, { ignoreTool: tool });
+    state.visiting = true;
+    clearTimeout(wanderTimer);
+    walkPath(path, function () {
+      if (!el.walker) { state.visiting = false; return; }
+      el.walker.classList.add('hb-enter');
+      wanderTimer = setTimeout(function () {
+        if (!el.walker) { state.visiting = false; return; }
+        el.walker.classList.remove('hb-enter');
+        var out = nearestWalkable(dest.x, dest.y + Math.max(36, r.height + 8), obstacleRects());
+        walkPath(findPath(pos, out, { ignoreTool: tool }), function () {
+          state.visiting = false;
+          if (hit && window.HJALPBOT_SCENARIER && HJALPBOT_SCENARIER.mark && hit.scenario) HJALPBOT_SCENARIER.mark(hit.scenario);
+          if (hit && hit.text) say(hit.text, { tool: tool, mood: hit.mood });
+          else scheduleWander();
+        }, { noPause: true });
+      }, 2600);
+    }, { noPause: true });
+    return true;
+  }
+
   function scheduleWander() {
     clearTimeout(wanderTimer);
     if (!el.walker || el.walker.style.display === 'none' || document.hidden) return;
@@ -942,15 +1008,18 @@
       el.walker.classList.remove('hb-walk');
       return;
     }
-    if (state.panel || state.atHome) return;
+    if (state.panel || state.atHome || state.visiting) return;
     if (!nextVisitAt) scheduleNextVisit();
+    if (!nextIconAt) nextIconAt = Date.now() + 70000 + Math.random() * 50000;
     var pause = 1800 + Math.random() * 2200;
     wanderTimer = setTimeout(function () {
-      if (!el.walker || el.walker.style.display === 'none' || state.panel || state.atHome) return;
+      if (!el.walker || el.walker.style.display === 'none' || state.panel || state.atHome || state.visiting) return;
       if (Date.now() >= nextVisitAt && paintStation()) {
         goToStation();
         return;
       }
+      if (Date.now() >= nextIconAt && tryIconVisit()) return;
+      maybeRandomComment();
       var next = pickWalkTarget(pos);
       var path = findPath(pos, next);
       walkPath(path, function () {
@@ -987,6 +1056,13 @@
     [el.walker, el.bubble, el.panel].forEach(function (x) { document.body.appendChild(x); });
     ensureStation();
     el.btn.addEventListener('click', function () { wave(); state.panel ? closePanel() : openPanel(); });
+    el.bubble.addEventListener('click', function () {
+      var id = state.bubbleTool;
+      if (!id) return;
+      hideBubble();
+      if (typeof window.openItem === 'function') window.openItem(id);
+    });
+
     el.panel.addEventListener('click', onPanel);
     window.addEventListener('resize', onResize);
     document.addEventListener('visibilitychange', function () {
@@ -1009,18 +1085,32 @@
     el.walker.classList.remove('waving'); void el.walker.offsetWidth; el.walker.classList.add('waving');
     setTimeout(function () { el.walker.classList.remove('waving'); }, 1500);
   }
-  function say(text) {
+  function say(text, opt) {
     if (!text || charId() === 'off' || !el.walker || el.walker.style.display === 'none' || state.panel) return;
+    opt = opt || {};
     clearTimeout(state.hideT);
     el.bubble.textContent = text;
+    state.bubbleTool = opt.tool || null;
+    if (state.bubbleTool) el.bubble.classList.add('hb-tap');
+    else el.bubble.classList.remove('hb-tap');
     el.bubble.classList.add('show');
+    if (opt.mood === 'marvin' && el.walker) {
+      el.walker.classList.remove('hb-marvin');
+      void el.walker.offsetWidth;
+      el.walker.classList.add('hb-marvin');
+    }
     placeChrome();
     el.walker.classList.add('talking', 'idle');
     state.lastComment = Date.now(); sessionStorage.setItem('hb_last', String(state.lastComment));
     setTimeout(function () { el.walker.classList.remove('talking'); }, 2200);
     state.hideT = setTimeout(hideBubble, BUBBLE_MS);
   }
-  function hideBubble() { if (el.bubble) el.bubble.classList.remove('show'); scheduleWander(); }
+  function hideBubble() {
+    if (el.bubble) { el.bubble.classList.remove('show', 'hb-tap'); }
+    state.bubbleTool = null;
+    if (el.walker) el.walker.classList.remove('hb-marvin');
+    if (!state.visiting) scheduleWander();
+  }
 
   // Verkstadstimmar: förarens egna siffror från serverns svar (window.VERKSTAD_LAST)
   var MONL = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
@@ -1050,9 +1140,39 @@
   }
 
   // ---------- spontana kommentarer ----------
+  function scenarioAnimOn() {
+    try { return !!(window.ANIMATIONER && ANIMATIONER.isOn && ANIMATIONER.isOn()); } catch (e) { return false; }
+  }
+  function pickScenario(ctx, tool, extra) {
+    var S = window.HJALPBOT_SCENARIER;
+    if (!S || !S.pick) return null;
+    extra = extra || {};
+    return S.pick({ context: ctx, tool: tool, char: charId(), clock: extra.clock, skipCooldown: extra.skipCooldown, skipChance: extra.skipChance });
+  }
+  function speakScenario(hit, delay) {
+    if (!hit || !hit.text) return false;
+    function go() {
+      if (window.HJALPBOT_SCENARIER && HJALPBOT_SCENARIER.mark && hit.scenario) HJALPBOT_SCENARIER.mark(hit.scenario);
+      say(hit.text, { tool: hit.tool, mood: hit.mood });
+    }
+    if (delay) setTimeout(go, delay);
+    else go();
+    return true;
+  }
   function maybeComment(p) {
+    if (!scenarioAnimOn()) return;
     var last = +(sessionStorage.getItem('hb_last') || 0);
     if (Date.now() - last < COMMENT_GAP_MS) return;
+    if (p && p !== 'hem') {
+      var hit = pickScenario('page', p);
+      if (hit) {
+        state.pendingFor = p;
+        setTimeout(function () {
+          if (page() === p && state.pendingFor === p) { state.pendingFor = null; speakScenario(hit); }
+        }, 1200);
+        return;
+      }
+    }
     if (Math.random() > COMMENT_CHANCE) return;
     state.pendingFor = p;
     if (p === 'hem') setTimeout(function () { if (page() === 'hem' && state.pendingFor === 'hem') { state.pendingFor = null; say(hemComment()); } }, 1200);
@@ -1061,6 +1181,20 @@
     else if (p === 'topplistor') setTimeout(fireTopp, 1500);
     else if (p === 'verkstad') setTimeout(fireVerkstad, 1500);
     else if (p === 'profil' && window.HB_PROFILE && Date.now() - window.HB_PROFILE.at < 3000) setTimeout(fireProfil, 800);
+  }
+  function maybeTimeComment() {
+    if (!scenarioAnimOn() || document.hidden || charId() !== 'robot') return;
+    if (state.panel || !el.walker || el.walker.style.display === 'none') return;
+    var hit = pickScenario('time');
+    if (hit) speakScenario(hit);
+  }
+  function maybeRandomComment() {
+    if (!scenarioAnimOn() || document.hidden) return;
+    if (state.panel || state.visiting || !el.walker || el.walker.style.display === 'none') return;
+    var last = +(sessionStorage.getItem('hb_last') || 0);
+    if (Date.now() - last < COMMENT_GAP_MS * 3) return;
+    var hit = pickScenario('random');
+    if (hit) speakScenario(hit);
   }
   function fireKordata() { if (state.pendingFor === 'kordata' && page() === 'kordata') { state.pendingFor = null; say(kordataComment()); } }
   function fireProfil() { if (state.pendingFor === 'profil' && page() === 'profil') { state.pendingFor = null; say(profilComment()); } }
@@ -1093,6 +1227,8 @@
       state.page = p;
       hideBubble(); if (state.panel) closePanel();
       if (on && !document.hidden) { maybeComment(p); }
+    } else if (on && !document.hidden) {
+      maybeTimeComment();
     }
   }
 
@@ -1202,6 +1338,43 @@
       stopWalk();
       setPos(stand.x, stand.y, 0);
       arriveHome();
+      return true;
+    },
+    pickScenario: function (ctx, tool, extra) { return pickScenario(ctx, tool, extra || { skipCooldown: true, skipChance: true }); },
+    previewSay: function (text, tool, mood) {
+      show(true);
+      say(text, { tool: tool, mood: mood });
+      return true;
+    },
+    previewMarvin: function (text) {
+      show(true);
+      if (charId() !== 'robot') {
+        try { localStorage.setItem(driverKey(), 'robot'); } catch (e) {}
+        drawChar();
+      }
+      say(text || 'Hjärna stor som en planet, och de låter mig visa taxibokningar.', { mood: 'marvin' });
+      return true;
+    },
+    previewVisit: function (tool, phase, text) {
+      show(true);
+      tool = tool || 'kordata';
+      var node = iconNode(tool);
+      if (!node) return false;
+      var r = node.getBoundingClientRect();
+      var dest = { x: r.left + r.width / 2 - SIZE / 2, y: r.top + r.height / 2 - SIZE / 2 };
+      stopWalk();
+      hideBubble();
+      state.visiting = true;
+      if (phase === 'in') {
+        setPos(dest.x, dest.y, 0);
+        el.walker.classList.add('hb-enter-preview');
+        return true;
+      }
+      el.walker.classList.remove('hb-enter', 'hb-enter-preview');
+      var out = nearestWalkable(dest.x, dest.y + Math.max(36, r.height + 8), obstacleRects());
+      setPos(out.x, out.y, 0);
+      state.visiting = false;
+      say(text || 'Bip! En kommentar.', { tool: tool });
       return true;
     },
     previewAisle: function () {

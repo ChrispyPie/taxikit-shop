@@ -755,14 +755,17 @@ window.taxiStats = function (tab) {
     : tab === 'ar' ? [new Date(now.getFullYear(), 0, 1), new Date(now.getFullYear(), 11, 31, 23, 59, 59)] : [startOfDay(now), endOfDay(now)];
   const shifts = getShiftsInRange(range[0], range[1], tab === 'dag');
   let trips = [];
-  shifts.forEach(s => { trips = trips.concat(getTripsForShift(s)); });
+  let totalMinutes = 0;
+  shifts.forEach(s => { trips = trips.concat(getTripsForShift(s)); totalMinutes += parseTime(s.tid); });
   trips = trips.concat(getOrphanTripsInRange(range[0], range[1]));
   trips = trips.filter(t => t.kredittyp !== '999');
   const inkort = ['160', '283', '163', '1', '161', '185'].reduce((a, c) => a + sumByType(trips, c), 0)
     + sumByType(trips, '164') * (1 - UBER_FEE);
   const goal = goals[tab] || goals.dag;
+  const totalKm = shifts.reduce((sum, sh) => sum + (parseFloat(String(sh.km || '0').replace(',', '.')) || 0), 0);
   return { tab, inkort: Math.round(inkort), goal, diff: Math.round(inkort - goal), antal: trips.length,
-           skift: shifts.length, own: viewDriver === currentDriver, viewing: currentTab, viewingCurrent: isCurrentPeriod() };
+           skift: shifts.length, own: viewDriver === currentDriver, viewing: currentTab, viewingCurrent: isCurrentPeriod(),
+           km: Math.round(totalKm * 10) / 10, minutes: totalMinutes, mil: Math.round(totalKm / 10), hours: Math.round(totalMinutes / 60) };
 };
 // Lönekoll läser förarens pass och resor (inklusive BOM) för en period härifrån, bara läsning.
 // Pass väljs på passets startdatum, resor utan pass på resans eget datum (som Inkört ovan).

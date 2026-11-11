@@ -427,6 +427,31 @@
 
   // För hjälpboten: nästa ankomst (inte inställd, inte redan ankommen) och lite fakta. Bara verklig data.
   A.current = function () { return state.el ? state.tab : null; };
+  A.cachedItems = function (id) { return (id && state.data[id]) ? state.data[id] : null; };
+  A.cachedSummary = function (id) {
+    var src = null; A.sources.forEach(function (x) { if (x.id === id) src = x; });
+    var items = id && state.data[id];
+    if (!src || !items) return null;
+    var now = Date.now(), filt = src.summaryFilter || null;
+    var up = items.filter(function (it) {
+      var w = when(it); return w && !it.act && !it.removed && w >= now - 60000 && w <= now + 6 * 3600000 && (!filt || filt(it));
+    }).sort(function (a, b) { return when(a) - when(b); });
+    var live = up.filter(function (it) { return !it.canceled && !it.special && !it.removed; });
+    var delayed = live.filter(function (it) { return it.est && it.sched && it.est - it.sched >= 5 * 60000; });
+    return { source: src, next: live[0] || null, after: live[1] || null, canceled: up.length - live.length,
+             delayed: delayed.length, worst: delayed.sort(function (a, b) { return (b.est - b.sched) - (a.est - a.sched); })[0] || null,
+             inHour: live.filter(function (it) { return when(it) <= now + 3600000; }).length };
+  };
+  A.cachedProblem = function () {
+    var id, v;
+    for (id in state.err) {
+      v = state.err[id];
+      if (!v) continue;
+      return { kind: (typeof v === 'string' && /senast sparade|senaste/i.test(v)) ? 'stale' : 'error', source: 'ankomster', message: typeof v === 'string' ? v : '' };
+    }
+    return null;
+  };
+
   A.summary = function (id) {
     var s = null; A.sources.forEach(function (x) { if (x.id === id) s = x; });
     if (!s) return Promise.resolve(null);
