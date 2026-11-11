@@ -15,6 +15,12 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-11', id: '2026-11-11pr2', rader: [
+    ['Rättat', 'Passrapporten öppnas när du trycker på den lilla rems-ikonen. Plusknappen och resten av raden fäller ut passet som förut. Samma sak för resor och kvittokopian.'],
+    ['Rättat', 'I dagsvyn syns även körpass som började kvällen innan och pågick in på den dagen.'],
+    ['Rättat', 'Passrapporten gick inte att öppna. Det är lagat, och Stäng-knappen sitter kvar på rapporten.'],
+    ['Förbättrat', 'I Körpassdata går raderna närmare kanten på telefonen, så att pass och resor får mer plats.']
+  ]},
   { datum: '2026-11-11', id: '2026-11-11pr1', rader: [
     ['Nytt', 'Varje körpass i Inkört har en liten passrapport-ikon. Trycker du på ikonen eller på passraden öppnas en kopia av körpassrapporten, som en termoremsa, med Taxi Göteborgs logo och de uppgifter som finns för just det passet. Plusknappen visar fortfarande resorna i passet.']
   ]},

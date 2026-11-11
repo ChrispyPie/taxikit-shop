@@ -261,12 +261,17 @@ function parseAmount(str) {
   return parseFloat((str || '0').replace(/\s/g, '').replace(',', '.')) || 0;
 }
 
+function shiftStampParts(str) {
+  const s = String(str || '').replace(/\u00a0/g, ' ').trim();
+  const parts = s.split(/\s+/);
+  return { date: parts[0] || '', time: parts[1] || '' };
+}
+
 function parseShiftTime(str) {
-  const parts = (str || '').split(' ');
-  if (parts.length < 2) return null;
-  const d = parts[0];
-  const t = parts[1].replace(/ /g, '');
-  return new Date(d.slice(0,4) + '-' + d.slice(4,6) + '-' + d.slice(6,8) + 'T' + t);
+  const p = shiftStampParts(str);
+  if (!p.date || p.date.length < 8 || !p.time) return null;
+  const d = new Date(p.date.slice(0,4) + '-' + p.date.slice(4,6) + '-' + p.date.slice(6,8) + 'T' + p.time);
+  return isNaN(d) ? null : d;
 }
 
 function getWeekStart(date) {
@@ -339,11 +344,16 @@ function getRange() {
   return [startOfDay(currentDate), endOfDay(currentDate)];
 }
 
-function getShiftsInRange(start, end) {
+function getShiftsInRange(start, end, overlap) {
   return (data.shifts || []).filter(s => {
     if (!matchDriver(s)) return false;
     const shiftStart = parseShiftTime(s.start);
-    return shiftStart && shiftStart >= start && shiftStart <= end;
+    if (!shiftStart) return false;
+    if (overlap) {
+      const shiftEnd = parseShiftTime(s.slut) || shiftStart;
+      return shiftStart <= end && shiftEnd >= start;
+    }
+    return shiftStart >= start && shiftStart <= end;
   });
 }
 
@@ -357,7 +367,7 @@ function shiftEntryHtml(s, shiftTrips, opt) {
   const inkort = opt.inkort != null ? opt.inkort : (shiftTrips || []).filter(t => t.kredittyp !== '999').reduce((sum, t) => sum + parseAmount(t.belopp) * (t.kredittyp === '164' ? (1 - UBER_FEE) : 1), 0);
   const lazyAttr = lazyId != null && !(typeof companyApi !== 'undefined' && companyApi.trips[lazyId]) ? ` data-lazy="${lazyId}"` : '';
   const passAttr = ` data-passnr="${escHtml(s.passnr || '')}" data-forar="${escHtml(s.forar || defForar())}" data-start="${escHtml(s.start || '')}"`;
-  return `<div class="stat-row" data-key="shift:${escHtml(s.passnr)}|${escHtml(s.forar || defForar())}|${escHtml(s.start || '')}"${lazyAttr}${passAttr} onclick="PASSRAPPORT.openFromRow(this,event)"><span class="toggle" onclick="event.stopPropagation();toggleShift(this.parentNode)">+</span><span class="pr-ico" title="Passrapport" role="img" aria-label="Passrapport"></span><span class="label">${dateLabel}#${escHtml(s.passnr)}${who}</span><span class="value">${formatSEK(inkort)}</span></div>
+  return `<div class="stat-row" data-key="shift:${escHtml(s.passnr)}|${escHtml(s.forar || defForar())}|${escHtml(s.start || '')}"${lazyAttr}${passAttr} onclick="toggleShift(this)"><span class="toggle" onclick="event.stopPropagation();toggleShift(this.parentNode)">+</span><button type="button" class="pr-ico" title="Passrapport" aria-label="Passrapport" onclick="event.stopPropagation();PASSRAPPORT.openFromRow(this.closest('.stat-row'),event)"></button><span class="label">${dateLabel}#${escHtml(s.passnr)}${who}</span><span class="value">${formatSEK(inkort)}</span></div>
       <div class="shift-content">${tripsHtml}</div>`;
 }
 
@@ -426,9 +436,8 @@ function formatTime(minutes) {
 }
 
 function formatShiftDate(str) {
-  const parts = (str || '').split(' ');
-  if (!parts[0] || parts[0].length < 8) return '';
-  const d = parts[0];
+  const d = shiftStampParts(str).date;
+  if (!d || d.length < 8) return '';
   return d.slice(6,8) + '/' + d.slice(4,6);
 }
 
@@ -450,10 +459,10 @@ function tripEntryHtml(t, kind) {
   const detClass = replaced ? "trip-detail trip-replaced-detail" : (kind === "day" ? "" : "trip-detail");
   const keyPref = kind === "day" ? "trip" : kind === "loose" ? "lt" : "st";
   const style = isBom && !replaced ? ' style="opacity:0.6;"' : "";
-  const click = "KVITTO.openFromRow(this,event)";
+  const rowClick = kind === "day" ? "toggle(this)" : "toggleTrip(this, event)";
   const tog = kind === "day" ? "toggle(this.parentNode)" : "toggleTrip(this.parentNode, event)";
   const kvAttr = ` data-kvittonr="${escHtml(t.kvittonr)}" data-forar="${escHtml(t.forar || defForar())}" data-startdatum="${escHtml(t.startdatum || '')}"`;
-  const row = `<div class="${rowClass}" data-key="${keyPref}:${escHtml(t.kvittonr)}|${escHtml(t.forar || defForar())}|${escHtml(t.startdatum || '')}"${kvAttr} onclick="${click}"${style}><span class="toggle" onclick="event.stopPropagation();${tog}">+</span><span class="kv-ico" title="Kvittokopia" role="img" aria-label="Kvittokopia"></span><span${kind === "day" ? ' class="label kv-nr"' : ' class="kv-nr"'}>${dd}${escHtml(t.kvittonr)}${isBom ? " (BOM)" : ""}</span><span${kind === "day" ? ' class="value"' : ""}>${formatSEK(parseAmount(t.belopp))}</span></div>`;
+  const row = `<div class="${rowClass}" data-key="${keyPref}:${escHtml(t.kvittonr)}|${escHtml(t.forar || defForar())}|${escHtml(t.startdatum || '')}"${kvAttr} onclick="${rowClick}"${style}><span class="toggle" onclick="event.stopPropagation();${tog}">+</span><button type="button" class="kv-ico" title="Kvittokopia" aria-label="Kvittokopia" onclick="event.stopPropagation();KVITTO.openFromRow(this.closest('.stat-row, .shift-trip'),event)"></button><span${kind === "day" ? ' class="label kv-nr"' : ' class="kv-nr"'}>${dd}${escHtml(t.kvittonr)}${isBom ? " (BOM)" : ""}</span><span${kind === "day" ? ' class="value"' : ""}>${formatSEK(parseAmount(t.belopp))}</span></div>`;
   const details = kind === "day"
     ? tripDetailRows(t, replaced ? "trip-replaced-detail" : "")
     : `<div class="sub ${detClass}"><span>Start</span><span>${t.starttid || "00:00"} – zon ${t.startzon || "?"}</span></div>
@@ -550,7 +559,7 @@ function render() {
   }
   // Data visas nu (från servern eller reservvägen get_trip_data): ta alltid bort nedtoningen.
   { const d = document.getElementById('dashboard'); d.style.opacity = ''; d.setAttribute('aria-busy', 'false'); }
-  let shifts = getShiftsInRange(rangeStart, rangeEnd);
+  let shifts = getShiftsInRange(rangeStart, rangeEnd, currentTab === 'dag');
   if (P) shifts = P.shifts.slice();
   shifts.sort((a, b) => (b.start || '').localeCompare(a.start || ''));
 
@@ -624,8 +633,8 @@ function render() {
       <div class="sub"><span>Inkört/skift</span><span>${formatSEK(inkortPerSkift)}</span></div>`;
   } else if (!isTodayNow && shifts.length) {
     const s = shifts[0];
-    const startTid = (s.start || '').split(' ')[1] || '00:00';
-    const slutTid = (s.slut || '').split(' ')[1] || '00:00';
+    const startTid = shiftStampParts(s.start).time || '00:00';
+    const slutTid = shiftStampParts(s.slut).time || '00:00';
     timmarSubs = `
       <div class="sub"><span>Start</span><span>${startTid}</span></div>
       <div class="sub"><span>Slut</span><span>${slutTid}</span></div>
@@ -744,7 +753,7 @@ window.taxiStats = function (tab) {
   const range = tab === 'vecka' ? [getWeekStart(now), getWeekEnd(now)]
     : tab === 'manad' ? [getMonthStart(now), getMonthEnd(now)]
     : tab === 'ar' ? [new Date(now.getFullYear(), 0, 1), new Date(now.getFullYear(), 11, 31, 23, 59, 59)] : [startOfDay(now), endOfDay(now)];
-  const shifts = getShiftsInRange(range[0], range[1]);
+  const shifts = getShiftsInRange(range[0], range[1], tab === 'dag');
   let trips = [];
   shifts.forEach(s => { trips = trips.concat(getTripsForShift(s)); });
   trips = trips.concat(getOrphanTripsInRange(range[0], range[1]));
