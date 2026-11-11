@@ -236,12 +236,16 @@
   window.addEventListener('load', function () { keepActiveInView(document); });
 
 
-  // Scroll-ankare: behåll samma rad på samma skärmposition när listan växer uppåt
-  // (Visa tidigare). Safari saknar CSS overflow-anchor, så vi gör det manuellt.
+  // Scroll-ankare: behåll samma rad på samma skärmposition när listan ritas om
+  // (uppdatering, delta, tick och Visa tidigare). Chrome kan annars hoppa till
+  // listans slut när innerHTML byts, särskilt på en kort platta (t.ex. 1024×600).
+  // Safari saknar CSS overflow-anchor, så vi gör det manuellt. overflow-anchor:
+  // none på .ank hindrar Chrome från att flytta scroll själv under bytet.
   function headerBottom() {
     var h = document.querySelector('header');
     return h ? h.getBoundingClientRect().bottom : 0;
   }
+  function scrollY() { return window.scrollY || window.pageYOffset || 0; }
   function captureAnchor(root) {
     if (!root) return null;
     var cut = headerBottom() + 2;
@@ -249,26 +253,32 @@
     for (var i = 0; i < rows.length; i++) {
       var r = rows[i].getBoundingClientRect();
       if (r.bottom > cut + 4) {
-        return { key: rows[i].getAttribute('data-ank-key'), top: r.top };
+        return { key: rows[i].getAttribute('data-ank-key'), top: r.top, y: scrollY() };
       }
     }
-    return null;
+    return { key: null, top: 0, y: scrollY() };
   }
   function restoreAnchor(root, a) {
-    if (!a || !a.key || !root) return;
+    if (!a || !root) return;
     var neo = null, rows = root.querySelectorAll('[data-ank-key]');
-    for (var i = 0; i < rows.length; i++) {
-      if (rows[i].getAttribute('data-ank-key') === a.key) { neo = rows[i]; break; }
+    if (a.key) {
+      for (var i = 0; i < rows.length; i++) {
+        if (rows[i].getAttribute('data-ank-key') === a.key) { neo = rows[i]; break; }
+      }
     }
-    if (!neo) return;
-    var dy = neo.getBoundingClientRect().top - a.top;
-    if (Math.abs(dy) >= 1) window.scrollBy(0, dy);
+    if (neo) {
+      var dy = neo.getBoundingClientRect().top - a.top;
+      if (Math.abs(dy) >= 1) window.scrollBy(0, dy);
+      return;
+    }
+    if (a.y != null && Math.abs(scrollY() - a.y) >= 1) window.scrollTo(0, a.y);
   }
 
   function paint(opts) {
     var el = state.el; if (!el || !el.isConnected) return stop();
     opts = opts || {};
-    var anchor = opts.anchor ? captureAnchor(el) : null;
+    var reset = !!opts.reset;
+    var anchor = reset ? null : captureAnchor(el);
     var s = src(), data = state.data[s.id], now = Date.now();
     var html = '<div class="tabs ank-tabs">' + A.sources.map(function (x) {
       return '<button class="tab' + (x.id === s.id ? ' active' : '') + '" data-ank-tab="' + x.id + '">' + x.icon + ' ' + esc(x.label) + '</button>';
@@ -311,13 +321,15 @@
       });
     }
     el.innerHTML = html;
-    if (anchor) {
+    keepActiveInView(el);
+    if (window.BEVAKNING) BEVAKNING.decorate(el);  // bevakning: notisknapp, stjärnor, ljud
+    if (reset) {
+      if (scrollY() > 0) window.scrollTo(0, 0);
+    } else if (anchor) {
       restoreAnchor(el, anchor);
       // iOS Safari layoutar ibland en frame senare
       requestAnimationFrame(function () { restoreAnchor(el, anchor); });
     }
-    keepActiveInView(el);
-    if (window.BEVAKNING) BEVAKNING.decorate(el);  // bevakning: notisknapp, stjärnor, ljud
     if (state.watchHighlight) {
       var target = Array.from(el.querySelectorAll('[data-ank-key]')).find(function (r) { return r.getAttribute('data-ank-key') === state.watchHighlight; });
       if (target) {
@@ -349,7 +361,7 @@
     if(!stationList.some(function(s){return s.id===id;}))return;
     state.station=id;state.requests.tag++;state.loading.tag=false;state.data.tag=null;state.updated.tag=null;state.err.tag=false;state.open={};state.routes={};state.watchHighlight=null;state.showPast=false;localStorage.setItem('ank_tagfilter','');
     if(window.VIEW_STATE)VIEW_STATE.save('ankomster',{past:false,station:state.station});
-    paint();load('tag',true);
+    paint({reset:true});load('tag',true);
   }
   function openStationPicker(){
     var dialog=document.createElement('dialog');dialog.className='ank-station-sheet';dialog.setAttribute('aria-label','Välj station');dialog.innerHTML='<h3>Välj station</h3><label for="ank-station-search">Sök station</label><input id="ank-station-search" type="search" placeholder="Namn eller signatur" autocomplete="off"><div class="ank-station-results" role="status">Hämtar stationslistan…</div><button type="button" data-station-close>Stäng</button>';document.body.appendChild(dialog);dialog.showModal();
@@ -377,8 +389,8 @@
     var rr = !e.target.closest('button, a, input') && e.target.closest('[data-ank-route]');
     if (rr) { toggleRoute(rr.getAttribute('data-ank-route')); return; }
     var t = e.target.closest('[data-ank-tab]');
-    if (t) { state.watchHighlight = null; state.watchFocus = false; state.tab = t.getAttribute('data-ank-tab'); localStorage.setItem('ank_tab', state.tab); state.showPast = false; paint(); load(state.tab, true); return; }
-    if (e.target.closest('[data-ank-past]')) { state.showPast = !state.showPast; paint({ anchor: true }); return; }
+    if (t) { state.watchHighlight = null; state.watchFocus = false; state.tab = t.getAttribute('data-ank-tab'); localStorage.setItem('ank_tab', state.tab); state.showPast = false; paint({reset:true}); load(state.tab, true); return; }
+    if (e.target.closest('[data-ank-past]')) { state.showPast = !state.showPast; paint(); return; }
     var g = e.target.closest('[data-ank-filter]');
     if (g) { localStorage.setItem('ank_tagfilter', g.getAttribute('data-ank-filter')); paint(); }
   }

@@ -1115,11 +1115,44 @@
     ov.setAttribute('role', 'presentation');
     ov.innerHTML = '<div class="pg-fly-sheet" role="dialog" aria-modal="true" aria-label="Flyguppgifter"><div class="pg-fly-sheet-h"><b>Ankomst</b><button type="button" class="pg-fly-x" data-pg-fly-close aria-label="Stäng">✕</button></div><div class="pg-fly-body"></div></div>';
     ov.addEventListener('click', function (e) {
+      var s = e.target.closest && e.target.closest('[data-bev-star]');
+      if (s) {
+        e.preventDefault();
+        e.stopPropagation();
+        var row = s.closest('[data-ank-key]');
+        var k = (row && row.getAttribute('data-ank-key')) || flyUi.key;
+        var it = k && st.flyMap && st.flyMap[k];
+        if (k && window.BEVAKNING && BEVAKNING.toggleWatch) BEVAKNING.toggleWatch(k, it);
+        return;
+      }
       if (e.target === ov || e.target.closest('[data-pg-fly-close]')) hideFlySheet();
     });
     document.body.appendChild(ov);
+    if (!flyUi._watchEv) {
+      flyUi._watchEv = true;
+      document.addEventListener('bev-watches-changed', function () {
+        if (!flySheetOpen() || !flyUi.key || !flyUi.ov) return;
+        var it = st.flyMap && st.flyMap[flyUi.key];
+        if (it) paintFlyWatch(flyUi.ov, it);
+      });
+    }
     flyUi.ov = ov;
     return ov;
+  }
+  function paintFlyWatch(ov, it) {
+    if (!ov || !it) return;
+    var card = ov.querySelector('.pg-fly-card');
+    if (card && it.key) card.setAttribute('data-ank-key', it.key);
+    var head = ov.querySelector('.pg-fly-card-h') || ov.querySelector('.pg-fly-sheet-h');
+    if (!head) return;
+    var oldStar = head.querySelector('[data-bev-star]');
+    if (oldStar) oldStar.remove();
+    if (!(window.BEVAKNING && BEVAKNING.starHtml)) return;
+    var html = BEVAKNING.starHtml(it);
+    if (!html) return;
+    var close = head.querySelector('[data-pg-fly-close]');
+    if (close) close.insertAdjacentHTML('beforebegin', html);
+    else head.insertAdjacentHTML('beforeend', html);
   }
   function hideFlySheet() {
     if (flyUi.ov) flyUi.ov.hidden = true;
@@ -1136,8 +1169,10 @@
       ? ARRIVAL_DATA.flightDetailHtml(it)
       : ('<div class="pg-fly-card"><b>' + esc(it.no || '') + '</b></div>');
     body.innerHTML = html;
+    paintFlyWatch(ov, it);
     ov.hidden = false;
     flyUi.key = key;
+    if (window.BEVAKNING && BEVAKNING.refreshWatches) BEVAKNING.refreshWatches();
     var close = ov.querySelector('[data-pg-fly-close]');
     if (close) setTimeout(function () { try { close.focus(); } catch (e) {} }, 30);
     return true;

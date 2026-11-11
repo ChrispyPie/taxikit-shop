@@ -438,7 +438,7 @@
   }
 
   // ---------- DOM ----------
-  var el = {}, state = { page: undefined, lastComment: +(sessionStorage.getItem('hb_last') || 0), timer: null, pendingFor: null, hideT: null, panel: false, forceOutfit: null, atHome: false, visiting: false, guiding: false, bubbleTool: null };
+  var el = {}, state = { page: undefined, lastComment: +(sessionStorage.getItem('hb_last') || 0), timer: null, pendingFor: null, hideT: null, panel: false, forceOutfit: null, atHome: false, visiting: false, visitTool: null, hopOut: null, preview: false, guiding: false, bubbleTool: null };
 
   function css() {
     var s = document.createElement('style');
@@ -1074,16 +1074,18 @@
     var dest = { x: r.left + r.width / 2 - SIZE / 2, y: r.top + r.height / 2 - SIZE / 2 };
     var path = findPath(pos, dest, { ignoreTool: tool });
     state.visiting = true;
+    state.visitTool = tool;
     clearTimeout(wanderTimer);
     walkPath(path, function () {
-      if (!el.walker) { state.visiting = false; return; }
+      if (!el.walker) { state.visiting = false; state.visitTool = null; return; }
       el.walker.classList.add('hb-enter');
       wanderTimer = setTimeout(function () {
-        if (!el.walker) { state.visiting = false; return; }
+        if (!el.walker) { state.visiting = false; state.visitTool = null; return; }
         el.walker.classList.remove('hb-enter');
         var out = nearestWalkable(dest.x, dest.y + Math.max(36, r.height + 8), obstacleRects());
         walkPath(findPath(pos, out, { ignoreTool: tool }), function () {
           state.visiting = false;
+          state.visitTool = null;
           if (hit && window.HJALPBOT_SCENARIER && HJALPBOT_SCENARIER.mark && hit.scenario) HJALPBOT_SCENARIER.mark(hit.scenario);
           if (hit && hit.text) say(hit.text, { tool: tool, mood: hit.mood });
           else scheduleWander();
@@ -1337,7 +1339,42 @@
     return line(k, { h: V.dur(s.pending_min), n: s.pending_n, ah: V.dur(s.approved_month_min), akr: V.kr(s.approved_month_kr), m: MONL[new Date().getMonth()] });
   }
 
-  function show(on) {
+  function hopOutOf(tool) {
+    var node = iconNode(tool);
+    if (!node || !el.walker) return false;
+    var r = node.getBoundingClientRect();
+    var dest = { x: r.left + r.width / 2 - SIZE / 2, y: r.top + r.height / 2 - SIZE / 2 };
+    stopWalk();
+    hideBubble();
+    state.visiting = true;
+    state.visitTool = tool;
+    setPos(dest.x, dest.y, 0);
+    el.walker.classList.add('hb-enter');
+    void el.walker.offsetWidth;
+    function finish(out) {
+      state.visiting = false;
+      state.visitTool = null;
+      if (out) setPos(out.x, out.y, 0);
+      scheduleWander();
+    }
+    if (reduceMotion || !canWalk()) {
+      el.walker.classList.remove('hb-enter');
+      finish(nearestWalkable(dest.x, dest.y + Math.max(36, r.height + 8), obstacleRects()));
+      return true;
+    }
+    requestAnimationFrame(function () {
+      if (!el.walker) { state.visiting = false; state.visitTool = null; return; }
+      el.walker.classList.remove('hb-enter');
+      wanderTimer = setTimeout(function () {
+        if (!el.walker) { state.visiting = false; state.visitTool = null; return; }
+        var out = nearestWalkable(dest.x, dest.y + Math.max(36, r.height + 8), obstacleRects());
+        walkPath(findPath(pos, out, { ignoreTool: tool }), function () { finish(); }, { noPause: true });
+      }, 450);
+    });
+    return true;
+  }
+  function show(on, opts) {
+    opts = opts || {};
     var was = el.walker && el.walker.style.display !== 'none';
     if (el.walker) el.walker.style.display = on ? '' : 'none';
     if (el.station) el.station.style.display = on ? '' : 'none';
@@ -1345,6 +1382,7 @@
     else if (!was) {
       ensureStation();
       paintStation();
+      if (opts.fromTool && hopOutOf(opts.fromTool)) return;
       var startAt = nearestWalkable((pickSpot(null) || pos).x, (pickSpot(null) || pos).y, obstacleRects());
       setPos(startAt.x, startAt.y, 0);
       scheduleWander();
@@ -1466,19 +1504,35 @@
 
   function tick() {
     if (!el.walker) return;
-    var p = page(), on = !!p && charId() !== 'off';
-    if ((el.walker.style.display !== 'none') !== on) show(on);
+    var p = page();
+    var on = charId() !== 'off' && (!!state.preview || p === 'hem');
+    var wasOn = el.walker.style.display !== 'none';
+    if (wasOn && !on && p && p !== 'hem') {
+      if (state.visiting && state.visitTool && state.visitTool === p) state.hopOut = p;
+    }
+    if (wasOn !== on) {
+      if (on && p === 'hem' && state.hopOut) {
+        var from = state.hopOut;
+        state.hopOut = null;
+        show(true, { fromTool: from });
+      } else {
+        show(on);
+        if (!on && window.HJALPBOT_HOGTID && HJALPBOT_HOGTID.stop) {
+          try { HJALPBOT_HOGTID.stop(); } catch (e) {}
+        }
+      }
+    }
     if (p !== state.page) {
       state.page = p;
       hideBubble(); if (state.panel) closePanel();
-      if (on && pageVisible()) {
-        if (p === 'hem' && maybeTip()) { /* tipset tar den här visningen */ }
+      if (on && pageVisible() && p === 'hem') {
+        if (maybeTip()) { /* tipset tar den här visningen */ }
         else maybeComment(p);
         if (window.HJALPBOT_HOGTID && HJALPBOT_HOGTID.maybePlay) HJALPBOT_HOGTID.maybePlay();
       }
-    } else if (on && pageVisible()) {
+    } else if (on && pageVisible() && p === 'hem') {
       maybeTimeComment();
-      if (p === 'hem') maybeTipQuiet();
+      maybeTipQuiet();
       if (window.HJALPBOT_HOGTID && HJALPBOT_HOGTID.maybePlay) HJALPBOT_HOGTID.maybePlay();
     }
   }
@@ -1558,7 +1612,7 @@
     renderSettings: function (content) {
       var c = charId();
       content.innerHTML = '<div class="section"><h3 style="margin-top:0">Hjälpbot</h3>' +
-        '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">En liten figur på skärmen som kan kommentera dina siffror. Tryck på den så gör den en kort reaktion. Finns en pratbubbla stängs den vid tryck. Hjälp finns under frågetecknet uppe till höger.</p>' +
+        '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">En liten figur på startskärmen som kan kommentera dina siffror. Den visas bara där, inte inne i andra verktyg. Tryck på den så gör den en kort reaktion. Finns en pratbubbla stängs den vid tryck. Hjälp finns under frågetecknet uppe till höger.</p>' +
         '<div class="hb-pick">' + charButtons('hb-pickbtn') + '<button class="hb-pickbtn' + (c === 'off' ? ' on' : '') + '" data-hb-char="off"><div style="height:56px;display:flex;align-items:center;justify-content:center;font-size:1.6rem">🚫</div>Av</button></div></div>';
       content.onclick = function (e) {
         var t = e.target.closest('[data-hb-char]'); if (!t) return;
@@ -1578,6 +1632,7 @@
     },
     currentOutfit: currentOutfit,
     previewStation: function (id) {
+      state.preview = true;
       if (id && CHARS[id]) {
         try { localStorage.setItem(driverKey(), id); } catch (e) {}
       }
@@ -1594,11 +1649,13 @@
     },
     pickScenario: function (ctx, tool, extra) { return pickScenario(ctx, tool, extra || { skipCooldown: true, skipChance: true }); },
     previewSay: function (text, tool, mood) {
+      state.preview = true;
       show(true);
       say(text, { tool: tool, mood: mood });
       return true;
     },
     previewMarvin: function (text) {
+      state.preview = true;
       show(true);
       if (charId() !== 'robot') {
         try { localStorage.setItem(driverKey(), 'robot'); } catch (e) {}
@@ -1608,6 +1665,7 @@
       return true;
     },
     previewVisit: function (tool, phase, text) {
+      state.preview = true;
       show(true);
       tool = tool || 'kordata';
       var node = iconNode(tool);
@@ -1630,6 +1688,7 @@
       return true;
     },
     previewAisle: function () {
+      state.preview = true;
       show(true);
       ensureStation();
       paintStation();
@@ -1691,6 +1750,7 @@
       return true;
     };
     window.HJALPBOT.previewHoliday = function (id, opts) {
+      state.preview = true;
       opts = opts || {};
       var H = window.HJALPBOT_HOGTID, list, day, i, y, m, d;
       if (!H) return false;
@@ -1724,6 +1784,7 @@
       return day;
     };
     window.HJALPBOT.previewTip = function (id) {
+      state.preview = true;
       var T = window.HJALPBOT_TIPS, hit, list, i;
       if (!T) return false;
       list = T.all ? T.all() : [];
