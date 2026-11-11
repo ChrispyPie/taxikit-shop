@@ -156,12 +156,23 @@
         '<path d="M35.8 27 l2 -0.9" stroke="#fff" stroke-width="0.8" opacity="0.7"/>' +
         '</g>';
     }
+    try {
+      if (window.HJALPBOT_HOGTID && HJALPBOT_HOGTID.gearSvg) return HJALPBOT_HOGTID.gearSvg(outfit) || '';
+    } catch (e) {}
     return '';
   }
   function currentOutfit() {
     if (state && state.forceOutfit != null) return state.forceOutfit;
     try {
       if (!window.ANIMATIONER || !window.ANIMATIONER.isOn()) return '';
+      var H = window.HJALPBOT_HOGTID, day, ho;
+      if (H && H.active) {
+        day = H.active();
+        if (day && H.outfitFor) {
+          ho = H.outfitFor(charId(), day);
+          if (ho) return ho;
+        }
+      }
       var V = window.ANIMATIONER_VADER;
       if (!V) return '';
       var snap = V.readCache ? V.readCache() : null;
@@ -178,7 +189,7 @@
     if (!g) return;
     if (outfit === 'sun' && svg.querySelector('.hb-shades')) return;
     try {
-      svg.style.overflow = 'hidden';
+      svg.style.overflow = /lucia|pepparkaka|stjarngosse|halloween/.test(outfit) ? 'visible' : 'hidden';
       var doc = new DOMParser().parseFromString('<svg xmlns="http://www.w3.org/2000/svg">' + g + '</svg>', 'image/svg+xml');
       if (doc.querySelector('parsererror')) throw new Error('gear');
       var node = doc.documentElement.firstElementChild;
@@ -1072,8 +1083,17 @@
     el.panel.addEventListener('click', onPanel);
     window.addEventListener('resize', onResize);
     document.addEventListener('visibilitychange', function () {
-      if (document.hidden) { stopWalk(); clearTimeout(wanderTimer); }
-      else if (el.walker && el.walker.style.display !== 'none') scheduleWander();
+      if (!pageVisible()) {
+        stopWalk();
+        clearTimeout(wanderTimer);
+        pauseStickyBubble();
+      } else {
+        resumeStickyBubble();
+        flushPendingTip();
+        if (el.walker && el.walker.style.display !== 'none') scheduleWander();
+        drawChar();
+      }
+      if (window.HJALPBOT_HOGTID && HJALPBOT_HOGTID.onVisibility) HJALPBOT_HOGTID.onVisibility();
     });
     drawChar();
     paintStation();
@@ -1091,13 +1111,22 @@
     el.walker.classList.remove('waving'); void el.walker.offsetWidth; el.walker.classList.add('waving');
     setTimeout(function () { el.walker.classList.remove('waving'); }, 1500);
   }
+  function pageVisible() {
+    try { return document.visibilityState === 'visible'; } catch (e) { return true; }
+  }
   function say(text, opt) {
     if (!text || charId() === 'off' || !el.walker || el.walker.style.display === 'none' || state.panel) return;
     opt = opt || {};
+    var sticky = !!(opt.persist || opt.tip);
+    if (sticky && !pageVisible() && !opt.force) {
+      state.pausedTip = { text: text, tip: opt.tip || null, tool: opt.tool || null, marked: !!opt.alreadyCounted };
+      return;
+    }
     clearTimeout(state.hideT);
     el.bubble.textContent = text;
     state.bubbleTool = opt.tool || null;
     state.bubbleTip = opt.tip || null;
+    state.stickyBubble = sticky;
     if (state.bubbleTool || state.bubbleTip) el.bubble.classList.add('hb-tap');
     else el.bubble.classList.remove('hb-tap');
     el.bubble.classList.add('show');
@@ -1110,14 +1139,38 @@
     el.walker.classList.add('talking', 'idle');
     state.lastComment = Date.now(); sessionStorage.setItem('hb_last', String(state.lastComment));
     setTimeout(function () { el.walker.classList.remove('talking'); }, 2200);
-    state.hideT = setTimeout(hideBubble, BUBBLE_MS);
+    if (sticky && pageVisible() && opt.tip && opt.tip.id && !opt.alreadyCounted && !opt.skipCount) {
+      try { if (window.HJALPBOT_TIPS && HJALPBOT_TIPS.markShown) HJALPBOT_TIPS.markShown(opt.tip.id); } catch (e) {}
+      state.tipCounted = true;
+    } else {
+      state.tipCounted = !!opt.alreadyCounted;
+    }
+    if (!sticky) state.hideT = setTimeout(hideBubble, BUBBLE_MS);
+    else state.hideT = null;
   }
   function hideBubble() {
+    clearTimeout(state.hideT);
     if (el.bubble) { el.bubble.classList.remove('show', 'hb-tap'); }
     state.bubbleTool = null;
     state.bubbleTip = null;
+    state.stickyBubble = false;
+    state.tipCounted = false;
+    state.pausedTip = null;
     if (el.walker) el.walker.classList.remove('hb-marvin');
     if (!state.visiting) scheduleWander();
+  }
+  function pauseStickyBubble() {
+    if (!state.stickyBubble && !state.bubbleTip) return;
+    if (!el.bubble || !el.bubble.classList.contains('show')) return;
+    state.pausedTip = { text: el.bubble.textContent, tip: state.bubbleTip, tool: state.bubbleTool, marked: !!state.tipCounted };
+    clearTimeout(state.hideT);
+    el.bubble.classList.remove('show', 'hb-tap');
+  }
+  function resumeStickyBubble() {
+    if (!state.pausedTip || !pageVisible()) return;
+    var p = state.pausedTip;
+    state.pausedTip = null;
+    say(p.text, { tip: p.tip, tool: p.tool, persist: true, alreadyCounted: p.marked });
   }
 
   // Verkstadstimmar: förarens egna siffror från serverns svar (window.VERKSTAD_LAST)
@@ -1167,8 +1220,22 @@
     else go();
     return true;
   }
+  function flushPendingTip() {
+    if (!state.pendingTip || !state.pendingTipHit) return;
+    if (page() !== 'hem' || charId() === 'off' || state.panel) {
+      state.pendingTip = false;
+      state.pendingTipHit = null;
+      return;
+    }
+    if (!pageVisible()) return;
+    var hit = state.pendingTipHit;
+    state.pendingTip = false;
+    state.pendingTipHit = null;
+    say(hit.text, { tip: hit.tip, persist: true });
+  }
   function maybeTip() {
     if (charId() === 'off' || !el.walker || el.walker.style.display === 'none' || state.panel) return false;
+    if (!pageVisible()) return false;
     var T = window.HJALPBOT_TIPS, last, hit;
     if (!T || !T.pick) return false;
     last = +(sessionStorage.getItem('hb_last') || 0);
@@ -1176,12 +1243,8 @@
     hit = T.pick({ char: charId() });
     if (!hit) return false;
     state.pendingTip = true;
-    setTimeout(function () {
-      if (!state.pendingTip || page() !== 'hem' || charId() === 'off') { state.pendingTip = false; return; }
-      state.pendingTip = false;
-      if (T.markShown) T.markShown(hit.id);
-      say(hit.text, { tip: hit.tip });
-    }, 1600);
+    state.pendingTipHit = hit;
+    setTimeout(flushPendingTip, 1600);
     return true;
   }
   function maybeTipQuiet() {
@@ -1257,13 +1320,15 @@
     if (p !== state.page) {
       state.page = p;
       hideBubble(); if (state.panel) closePanel();
-      if (on && !document.hidden) {
+      if (on && pageVisible()) {
         if (p === 'hem' && maybeTip()) { /* tipset tar den här visningen */ }
         else maybeComment(p);
+        if (window.HJALPBOT_HOGTID && HJALPBOT_HOGTID.maybePlay) HJALPBOT_HOGTID.maybePlay();
       }
-    } else if (on && !document.hidden) {
+    } else if (on && pageVisible()) {
       maybeTimeComment();
       if (p === 'hem') maybeTipQuiet();
+      if (window.HJALPBOT_HOGTID && HJALPBOT_HOGTID.maybePlay) HJALPBOT_HOGTID.maybePlay();
     }
   }
 
@@ -1281,7 +1346,7 @@
     }).join('');
   }
   function openPanel() {
-    state.panel = true; clearTimeout(wanderTimer); el.walker.classList.add('idle'); hideBubble2();
+    state.panel = true; clearTimeout(wanderTimer); el.walker.classList.add('idle'); hideBubble();
     var c = charId();
     el.panel.innerHTML = '<div class="hb-ph"><span>' + esc(CHARS[c].name) + '</span><button class="hb-x" data-hb-close aria-label="Stäng">✕</button></div>' +
       '<div class="hb-say" id="hb-say">' + esc(line('hello')) + '</div>' +
@@ -1354,7 +1419,7 @@
     chars: CHARS,
     lines: L,
     previewOutfit: function (outfit) {
-      var ok = { cold: 1, rain: 1, snow: 1, sun: 1 };
+      var ok = { cold: 1, rain: 1, snow: 1, sun: 1, lucia: 1, pepparkaka: 1, stjarngosse: 1, 'halloween-robot': 1, 'halloween-diva': 1, 'halloween-chauffor': 1 };
       state.forceOutfit = ok[outfit] ? outfit : '';
       drawChar();
       return state.forceOutfit;
@@ -1444,10 +1509,17 @@
       if (el.walker && el.walker.style.display !== 'none') clearInterval(boot);
     }, 200);
     setTimeout(function () { clearInterval(boot); }, 8000);
+    setTimeout(function () {
+      if (window.HJALPBOT_HOGTID && HJALPBOT_HOGTID.maybePlay) HJALPBOT_HOGTID.maybePlay();
+    }, 800);
     document.addEventListener('animationer-change', function () {
       drawChar();
       if (!canWalk()) { stopWalk(); var park = nearestWalkable(pos.x, pos.y, obstacleRects()); setPos(park.x, park.y, 0); }
       else if (el.walker && el.walker.style.display !== 'none') scheduleWander();
+      if (window.HJALPBOT_HOGTID) {
+        if (!animOn()) { if (HJALPBOT_HOGTID.stop) HJALPBOT_HOGTID.stop(); }
+        else if (HJALPBOT_HOGTID.maybePlay) HJALPBOT_HOGTID.maybePlay();
+      }
     });
     document.addEventListener('animationer-vader', function () { drawChar(); });
     window.HJALPBOT.walkTo = function (node, done) {
@@ -1463,6 +1535,39 @@
         scheduleWander();
       }, { noPause: true });
       return true;
+    };
+    window.HJALPBOT.previewHoliday = function (id, opts) {
+      opts = opts || {};
+      var H = window.HJALPBOT_HOGTID, list, day, i, y, m, d;
+      if (!H) return false;
+      list = H.all ? H.all() : [];
+      day = null;
+      if (id) for (i = 0; i < list.length; i++) if (list[i].id === id) day = list[i];
+      if (!day) day = H.active && H.active();
+      if (!day) return false;
+      if (H.setTestDate && day.month && day.day) {
+        y = String((H.today && H.today().year) || new Date().getFullYear());
+        m = (day.month < 10 ? '0' : '') + day.month;
+        d = (day.day < 10 ? '0' : '') + day.day;
+        H.setTestDate(y + '-' + m + '-' + d);
+      }
+      show(true);
+      if (day.outfits && day.outfits[charId()]) {
+        state.forceOutfit = day.outfits[charId()];
+        drawChar();
+      }
+      if (H.play) {
+        H.play(day, {
+          force: true,
+          skipCap: true,
+          progress: opts.progress != null ? opts.progress : (day.mode === 'tag' ? 0.58 : null)
+        });
+      }
+      if (day.mode !== 'tag') {
+        var line = H.lineFor ? H.lineFor(day, charId() === 'off' ? 'robot' : charId()) : null;
+        if (line) say(line, { persist: true, skipCount: true, force: true });
+      }
+      return day;
     };
     window.HJALPBOT.previewTip = function (id) {
       var T = window.HJALPBOT_TIPS, hit, list, i;
