@@ -16,10 +16,17 @@
     hem: [
       'Här öppnar du verktygen. En röd prick betyder att något nytt väntar.',
       'Tryck på den lilla skiftnyckeln vid verktygen för att flytta ikonerna. Dra en ikon till en ny plats och tryck Klar.',
-      'I ordningsläget tar du bort ett verktyg med krysset. Plusknappen längst ner lägger tillbaka det.',
-      'Inställningar, Om appen och Admin går inte att ta bort.',
-      'Återställ sätter tillbaka standardordningen och alla verktyg. Valen sparas på ditt konto.',
+      'Tryck länge på en ikon för en meny med Modulinfo, Flytta, Hjälp och Avinstallera. Inställningar, Om appen och Admin går inte att ta bort.',
+      'Rutan Moduler längst ner öppnar en lista där du kan installera verktyg igen.',
+      'I ordningsläget kan du också ta bort ett verktyg med krysset. Återställ sätter tillbaka standardordningen och alla verktyg. Valen sparas på ditt konto.',
       'Inloggade enheter visar telefoner som är inne på ditt konto just nu.'
+    ],
+    moduler: [
+      'Här ser du alla verktyg som hör till ditt konto.',
+      'Varje rad visar en bild, namnet och en kort beskrivning.',
+      'Installera lägger till verktyget på startskärmen. Installerad betyder att det redan finns där.',
+      'Inställningar, Om appen och Admin är alltid installerade och går inte att ta bort.',
+      'Från startskärmen kan du trycka länge på en ikon för Modulinfo, Flytta, Hjälp eller Avinstallera.'
     ],
     kordata: [
       'Här ser du vad du kört in, per dag, vecka, månad eller år.',
@@ -248,7 +255,7 @@
 
   function fill() {
     ensurePanel();
-    var rows = linesFor(pageKey());
+    var rows = linesFor(el.forceKey || pageKey());
     el.body.innerHTML = rows.map(function (t) {
       return '<li>' + String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</li>';
     }).join('');
@@ -273,8 +280,13 @@
     el.panel.classList.add('open');
     el.btns.forEach(function (b) { if (b.isConnected) b.setAttribute('aria-expanded', 'true'); });
   }
+  function openFor(key) {
+    el.forceKey = key || null;
+    open();
+  }
   function close() {
     el.open = false;
+    el.forceKey = null;
     if (el.panel) el.panel.classList.remove('open');
     el.btns.forEach(function (b) { if (b.isConnected) b.setAttribute('aria-expanded', 'false'); });
   }
@@ -303,6 +315,7 @@
     pageKey: pageKey,
     linesFor: linesFor,
     open: open,
+    openFor: openFor,
     close: close,
     sync: sync,
     isOpen: function () { return !!el.open; }

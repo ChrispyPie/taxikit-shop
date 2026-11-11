@@ -196,9 +196,10 @@
   <script src="demo.js?v=am1q"></script>
   <script src="swipe-back.js?v=20261106sb2"></script>
   <script src="view-state.js?v=20261107lazy1"></script>
-  <script src="hjalp.js?v=20261111plus1"></script>
-  <script src="hem-ordning.js?v=20261111tryck1"></script>
-  <script src="lazy-views.js?v=20261111plus1"></script>
+  <script src="hjalp.js?v=20261111moduler1"></script>
+  <script src="hem-ordning.js?v=20261111moduler1"></script>
+  <script src="moduler.js?v=20261111moduler1"></script>
+  <script src="lazy-views.js?v=20261111moduler1"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -906,6 +907,10 @@
       } else if (current === VADER.id) {
         title.textContent = VADER.title;
         VADER.render(content);
+      } else if (current === 'moduler' && window.MODULER) {
+        title.textContent = MODULER.title || 'Moduler';
+        content.onclick = null;
+        MODULER.render(content);
       } else if (current === 'installningar') {
         title.textContent = 'Inställningar';
         content.onclick = null;
@@ -983,7 +988,7 @@
         if (window.initServerStatus) initServerStatus('server-status');
         
         if (typeof loadData === 'function') loadData().then(render);
-      } else if (id === ANKOMSTER.id || id === PROGNOS.id || id === TOPPLISTOR.id || id === VERKSTAD.id || id === KALENDER.id || id === FORUM.id || id === OM.id || id === LONEKOLL.id || id === MINA_BEVAKNINGAR.id || id === VADER.id) {
+      } else if (id === 'moduler' || id === ANKOMSTER.id || id === PROGNOS.id || id === TOPPLISTOR.id || id === VERKSTAD.id || id === KALENDER.id || id === FORUM.id || id === OM.id || id === LONEKOLL.id || id === MINA_BEVAKNINGAR.id || id === VADER.id) {
         document.getElementById('dashboard-view').classList.add('hidden');  // t.ex. "Om appen" från profilmenyn i Körpassdata
         document.getElementById('app').style.display = 'block';
         localStorage.setItem('taxi_view', id);

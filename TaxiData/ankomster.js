@@ -427,6 +427,9 @@
 
   // För hjälpboten: nästa ankomst (inte inställd, inte redan ankommen) och lite fakta. Bara verklig data.
   A.current = function () { return state.el ? state.tab : null; };
+  A.clearCache = function () {
+    state.data = {}; state.updated = {}; state.at = {}; state.err = {}; state.routes = {};
+  };
   A.cachedItems = function (id) { return (id && state.data[id]) ? state.data[id] : null; };
   A.cachedSummary = function (id) {
     var src = null; A.sources.forEach(function (x) { if (x.id === id) src = x; });

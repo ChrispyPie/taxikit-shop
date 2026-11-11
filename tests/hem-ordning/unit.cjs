@@ -39,7 +39,7 @@ assert.ok(!H.isCore('vader'));
 
 const help = fs.readFileSync(path.resolve(__dirname, '../../TaxiData/hjalp.js'), 'utf8');
 assert.match(help, /skiftnyckeln vid verktygen/);
-assert.match(help, /Plusknappen/);
+assert.match(help, /Rutan Moduler/);
 const hem = help.split('hem: [')[1].split('],')[0];
 assert.doesNotMatch(hem, /\bStig\b|\bhen\b/);
 assert.doesNotMatch(hem, /regn|snö|klädsel|outfit/i);

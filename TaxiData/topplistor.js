@@ -50,6 +50,7 @@
   if (!BY_K[st.metric]) st.metric = 'inkort';
   st.lastTab = st.tab;
   var cache = {};
+  T.clearCache = function () { cache = {}; window.TOPPLISTOR_LAST = null; };
   T.mode = function () { return st.mode; };
   T.view = function () { return st.view; };
 
