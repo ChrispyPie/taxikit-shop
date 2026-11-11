@@ -45,14 +45,15 @@
       'Båtarna kommer från Fredrikshamn (Danmarksterminalen i Masthugget) och Kiel (Tysklandsterminalen vid Majnabbe).',
       'Tryck på en rad för mer om just den ankomsten. På båtar finns en länk till vägbeskrivning.',
       'Du kan bevaka en ankomst och få en påminnelse.',
-      'Tiderna uppdateras från servern. Båttiderna kommer från Stena Lines tidtabell.'
+      'Tiderna uppdateras från servern. Båttiderna kommer från Stena Lines tidtabell.',
+      'Tiden "uppdaterad" är när uppgifterna senast hämtades från källan (Swedavia för flyg, Stena för båtar, Trafikverket för tåg), inte när du öppnade sidan.'
     ],
     prognos: [
       'Prognos visar hur resenärer kan röra sig kring tåg och flyg.',
       'På Landvetter syns planen i flygspalten. Tryck på ett plan för mer uppgifter. Stjärnan i rutan gör en tillfällig bevakning, samma som på Ankomster.',
       'Välj typ och tid för att se läget i området.',
       'Det är ett stöd när du planerar, inte en garanti för körningar.',
-      'Uppgifterna uppdateras från servern.'
+      'Uppgifterna uppdateras från servern. På Landvetter är tiden vid flyg när uppgifterna senast hämtades från Swedavia, inte när appen öppnades. Är flygdata mer än 30 minuter gammal syns det i texten.'
     ],
     vader: [
       'Kartan visar väder över Västsverige, med Göteborg i mitten.',

@@ -239,7 +239,7 @@
   }
 
  var cache={},pending={};
- function watchItems(kind){if(pending[kind])return pending[kind];var p=(kind==='tag'?loadTrains():kind==='bat'?loadBoats():loadFlights()).then(function(r){cache[kind]={at:Date.now(),items:r.items};return r.items;}).finally(function(){delete pending[kind];});pending[kind]=p;return p;}
+ function watchItems(kind){if(pending[kind])return pending[kind];var p=(kind==='tag'?loadTrains():kind==='bat'?loadBoats():loadFlights()).then(function(r){cache[kind]={at:Date.now(),items:r.items,updated:r.updated||null};return r.items;}).finally(function(){delete pending[kind];});pending[kind]=p;return p;}
  var catalogPending=null;
  function stationCatalog(force){
    if(!force){try{var saved=JSON.parse(localStorage.getItem('taxi_train_stations_v1')||'null');if(saved&&Array.isArray(saved.stations)&&Date.now()-saved.at<24*3600*1000)return Promise.resolve(saved.stations);}catch(e){}}
@@ -280,5 +280,11 @@
     return h + '</dl></div>';
   }
 
-window.ARRIVAL_DATA={date:d,hm:hm,hms:hms,trainLine:trainLine,stationCatalog:stationCatalog,loadTrains:loadTrains,loadTrainDelta:loadTrainDelta,mergeTrainDeltas:mergeTrainDeltas,loadFlights:loadFlights,loadBoats:loadBoats,trainGroups:trainGroups,boatGroups:boatGroups,watchItems:watchItems,flightDetailHtml:flightDetailHtml,flightItems:function(age){return cache.flyg&&Date.now()-cache.flyg.at<(age||120000)?Promise.resolve(cache.flyg.items):watchItems('flyg').catch(function(){return cache.flyg?cache.flyg.items:[];});}};
+function feedPack(c){return c?{items:c.items||[],updated:c.updated||null}:{items:[],updated:null};}
+  function flightFeed(age){
+    if(cache.flyg&&Date.now()-cache.flyg.at<(age||120000))return Promise.resolve(feedPack(cache.flyg));
+    return watchItems('flyg').then(function(){return feedPack(cache.flyg);}).catch(function(){return cache.flyg?feedPack(cache.flyg):{items:[],updated:null};});
+  }
+  function flightItems(age){return flightFeed(age).then(function(r){return r.items;});}
+window.ARRIVAL_DATA={date:d,hm:hm,hms:hms,trainLine:trainLine,stationCatalog:stationCatalog,loadTrains:loadTrains,loadTrainDelta:loadTrainDelta,mergeTrainDeltas:mergeTrainDeltas,loadFlights:loadFlights,loadBoats:loadBoats,trainGroups:trainGroups,boatGroups:boatGroups,watchItems:watchItems,flightDetailHtml:flightDetailHtml,flightFeed:flightFeed,flightItems:flightItems};
 })();
