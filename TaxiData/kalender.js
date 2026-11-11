@@ -184,6 +184,13 @@
     K._ev = +id || null; K._date = date || null; K._city = city || null;
     if (typeof window.openItem === 'function') window.openItem(K.id);
   };
+  K.cachedEvents = function () {
+    if (!st.data || !Array.isArray(st.data.events)) return null;
+    return {
+      events: st.data.events,
+      timezone: (st.data.city && st.data.city.timezone) || 'Europe/Stockholm'
+    };
+  };
   K.render = function (content) {
     st.watchSeq = (st.watchSeq || 0) + 1; st.watchRows = []; st.watchError = ''; st.watchLoading = false;
     st.el = content; st.open = null; st.form = null; st.comments = null;

@@ -31,7 +31,7 @@ const ids = S.all().map(x => x.id);
 ['vader-regn','kordata-over','kordata-42','prognos-landvetter','prognos-storbil','prognos-marvin',
  'ankomster-nasta','topplistor-etta','robot-dont-panic','robot-marvin-planet','robot-handduk',
  'robot-aybabtu-slump','robot-skyrim-servo','robot-42-slump','tid-leet','tid-pi','tid-404',
- 'tid-binar-01','tid-binar-10','tid-sekvens','tid-overflow','tid-1111'].forEach(id => {
+ 'tid-binar-01','tid-binar-10','tid-sekvens','tid-overflow','tid-1111','kalender-idag','kalender-vecka'].forEach(id => {
   assert.ok(ids.includes(id), 'missing ' + id);
 });
 
@@ -105,6 +105,90 @@ const randomIds = S.all().filter(x => (Array.isArray(x.context) ? x.context.incl
 assert.ok(randomIds.includes('robot-skyrim-servo'));
 assert.ok(randomIds.includes('robot-handduk'));
 assert.ok(randomIds.includes('robot-marvin-planet'));
+
+
+// Kalender: only cached events, skip if none, prefer big/today, per-character voices
+function isoStockholm(y, m, d, h, min) {
+  const pad = n => String(n).padStart(2, '0');
+  // Europe/Stockholm offset: CET +01 Nov–Mar, CEST +02 last Sun Mar–last Sun Oct (approx: month 3-10 handled loosely by Date)
+  return new Date(`${y}-${pad(m)}-${pad(d)}T${pad(h)}:${pad(min)}:00+01:00`).toISOString();
+}
+function ymdParts(d, zone) {
+  const f = new Intl.DateTimeFormat('sv-SE', { timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+  const o = {}; f.formatToParts(d).forEach(p => { o[p.type] = p.value; });
+  return { y: +o.year, m: +o.month, d: +o.day, key: o.year + '-' + o.month + '-' + o.day };
+}
+const zone = 'Europe/Stockholm';
+const nowP = ymdParts(new Date(), zone);
+function addDaysKey(key, n) {
+  const a = key.split('-');
+  const d = new Date(Date.UTC(+a[0], +a[1]-1, +a[2]+n));
+  const p2 = x => String(x).padStart(2,'0');
+  return d.getUTCFullYear() + '-' + p2(d.getUTCMonth()+1) + '-' + p2(d.getUTCDate());
+}
+function dowOf(key) {
+  const a = key.split('-');
+  return new Date(Date.UTC(+a[0], +a[1]-1, +a[2])).getUTCDay(); // 0 sun
+}
+
+windowObj.PROGNOS = { cachedBookings(){ return null; }, cachedProblem(){ return null; } };
+windowObj.ANKOMSTER = { cachedProblem(){ return null; } };
+windowObj.taxiStats = function () { return null; };
+windowObj.ANIMATIONER_VADER = { readCache(){ return null; } };
+windowObj.KALENDER = { cachedEvents(){ return null; } };
+let kal = S.pick({ context: 'home', tool: 'kalender', char: 'robot', skipCooldown: true, skipChance: true });
+assert.equal(kal, null, 'no cache -> skip');
+windowObj.KALENDER = { cachedEvents(){ return { events: [], timezone: zone }; } };
+kal = S.pick({ context: 'home', tool: 'kalender', char: 'robot', skipCooldown: true, skipChance: true });
+assert.equal(kal, null, 'empty -> skip');
+
+const tonight = isoStockholm(nowP.y, nowP.m, nowP.d, 19, 0);
+windowObj.KALENDER = { cachedEvents(){ return { events: [
+  { title: 'IFK Göteborg – AIK', venue: 'Gamla Ullevi', category: 'sport', starts_at: tonight, ends_at: isoStockholm(nowP.y, nowP.m, nowP.d, 21, 0) },
+  { title: 'Liten klubbkväll', venue: 'Något hörn', category: 'ovrigt', starts_at: tonight }
+], timezone: zone }; } };
+const kRobot = S.pick({ context: 'home', tool: 'kalender', char: 'robot', skipCooldown: true, skipChance: true });
+const kMan = S.pick({ context: 'home', tool: 'kalender', char: 'chauffor', skipCooldown: true, skipChance: true });
+const kDiva = S.pick({ context: 'home', tool: 'kalender', char: 'diva', skipCooldown: true, skipChance: true });
+assert.equal(kRobot && kRobot.id, 'kalender-idag');
+assert.match(kRobot.text, /IFK/);
+assert.match(kRobot.text, /Gamla Ullevi/);
+assert.match(kRobot.text, /ikväll 19:00/);
+assert.notEqual(kRobot.text, kMan.text);
+assert.notEqual(kRobot.text, kDiva.text);
+assert.match(kDiva.text, /😉/);
+const kPage = S.pick({ context: 'page', tool: 'kalender', char: 'robot', skipCooldown: true, skipChance: true });
+assert.equal(kPage && kPage.id, 'kalender-idag');
+
+// later this week: concert on Saturday (or Sunday if today is Saturday)
+let satKey = nowP.key;
+for (let i = 1; i <= 7; i++) {
+  const k = addDaysKey(nowP.key, i);
+  if (dowOf(k) === 6 || (dowOf(nowP.key) === 6 && dowOf(k) === 0)) { satKey = k; break; }
+}
+const sa = satKey.split('-');
+// only test weekend phrase when the event is still this week (Sun or before) and not today
+windowObj.KALENDER = { cachedEvents(){ return { events: [
+  { title: 'Stora konserten', venue: 'Scandinavium', category: 'konsert', starts_at: isoStockholm(+sa[0], +sa[1], +sa[2], 20, 0) }
+], timezone: zone }; } };
+const week = S.pick({ context: 'home', tool: 'kalender', char: 'robot', skipCooldown: true, skipChance: true });
+if (satKey > nowP.key && satKey <= addDaysKey(nowP.key, (dowOf(nowP.key)===0?0:7-dowOf(nowP.key)))) {
+  assert.equal(week && week.id, 'kalender-vecka', week && week.text);
+  assert.match(week.text, /Konsert på Scandinavium/);
+  if (dowOf(nowP.key) >= 1 && dowOf(nowP.key) <= 5 && dowOf(satKey) === 6) assert.match(week.text, /i helgen/);
+}
+
+// past-only events are skipped
+windowObj.KALENDER = { cachedEvents(){ return { events: [
+  { title: 'IFK', venue: 'Gamla Ullevi', category: 'sport', starts_at: isoStockholm(nowP.y, nowP.m, nowP.d, 1, 0), ends_at: isoStockholm(nowP.y, nowP.m, nowP.d, 2, 0) }
+], timezone: zone }; } };
+// if it's already after 02:00, should skip; if before 02:00 this still is "today" — only assert skip when ended
+const ended = Date.parse(isoStockholm(nowP.y, nowP.m, nowP.d, 2, 0)) < Date.now();
+if (ended) {
+  const past = S.pick({ context: 'home', tool: 'kalender', char: 'robot', skipCooldown: true, skipChance: true });
+  assert.equal(past, null, 'past events skipped');
+}
+
 
 console.log('UNIT_OK', ids.length, 'scenarios');
 process.exit(0);

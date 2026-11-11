@@ -103,6 +103,108 @@
     return null;
   }
 
+
+  function kalCache() {
+    try {
+      var K = window.KALENDER;
+      return (K && K.cachedEvents) ? K.cachedEvents() : null;
+    } catch (e) { return null; }
+  }
+  function kalParts(iso, zone) {
+    var f = new Intl.DateTimeFormat('sv-SE', {
+      timeZone: zone || 'Europe/Stockholm', year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', weekday: 'short', hourCycle: 'h23'
+    });
+    var o = {};
+    f.formatToParts(new Date(iso)).forEach(function (p) { o[p.type] = p.value; });
+    return { key: o.year + '-' + o.month + '-' + o.day, hm: o.hour + ':' + o.minute, wd: o.weekday };
+  }
+  function kalAddDay(key, n) {
+    var a = String(key).split('-');
+    var d = new Date(Date.UTC(+a[0], +a[1] - 1, +a[2] + (n || 0)));
+    var p2 = function (x) { return (x < 10 ? '0' : '') + x; };
+    return d.getUTCFullYear() + '-' + p2(d.getUTCMonth() + 1) + '-' + p2(d.getUTCDate());
+  }
+  function kalSunday(todayKey) {
+    var a = todayKey.split('-');
+    var dow = new Date(Date.UTC(+a[0], +a[1] - 1, +a[2])).getUTCDay();
+    var add = dow === 0 ? 0 : 7 - dow;
+    return kalAddDay(todayKey, add);
+  }
+  var KAL_BIG = /gamla ullevi|\bullevi\b|scandinavium|liseberg|svenska mässan|göteborgsoperan|frölundaborg|partille arena|valhallahallen|gothia arena/i;
+  var KAL_FOOTBALL = /\bifk\b|\bgais\b|örgryte|\bblåvitt\b|allsvenskan|fotboll/i;
+  function kalTeam(title) {
+    var m = String(title || '').match(/\b(IFK(?:\s+Göteborg)?|GAIS|Örgryte(?:\s+IS)?|Blåvitt)\b/i);
+    return m ? m[1] : null;
+  }
+  function kalScore(e, p, todayKey) {
+    var n = 0, hour = +p.hm.slice(0, 2);
+    if (p.key === todayKey) n += 100;
+    if (p.key === todayKey && hour >= 17) n += 20;
+    if (e.category === 'sport') n += 40;
+    else if (e.category === 'konsert') n += 35;
+    else if (e.category === 'massa') n += 20;
+    else if (e.category === 'teater') n += 15;
+    if (KAL_BIG.test(e.venue || '') || KAL_BIG.test(e.title || '')) n += 50;
+    if (KAL_FOOTBALL.test(e.title || '')) n += 30;
+    return n;
+  }
+  function kalWhen(p, todayKey, tomorrowKey, todayWd) {
+    var hour = +p.hm.slice(0, 2);
+    if (p.key === todayKey) return hour >= 17 ? 'ikväll ' + p.hm : 'idag ' + p.hm;
+    if (p.key === tomorrowKey) return 'i morgon ' + p.hm;
+    var isWeekend = /lör|sön/i.test(p.wd);
+    var todayWeekday = !/lör|sön/i.test(todayWd || '');
+    if (isWeekend && todayWeekday) return 'i helgen';
+    var namn = { mån: 'måndag', tis: 'tisdag', ons: 'onsdag', tor: 'torsdag', fre: 'fredag', lör: 'lördag', sön: 'söndag' };
+    var k = String(p.wd || '').replace('.', '').toLowerCase().slice(0, 3);
+    return namn[k] ? 'på ' + namn[k] : 'i veckan';
+  }
+  function kalWhat(e) {
+    var title = String(e.title || '').trim();
+    var venue = String(e.venue || '').trim();
+    var team = kalTeam(title);
+    if (team && venue) return team + ' spelar på ' + venue;
+    if (e.category === 'konsert' && venue) return 'Konsert på ' + venue;
+    if (title && venue) return title + ' på ' + venue;
+    return title || venue || 'Ett evenemang';
+  }
+  function pickKalEvent(onlyToday) {
+    var cache = kalCache(), list, zone, now, today, sunday, i, e, t, end, p, score, best = null;
+    if (!cache || !cache.events || !cache.events.length) return null;
+    list = cache.events;
+    zone = cache.timezone || 'Europe/Stockholm';
+    now = Date.now();
+    today = kalParts(now, zone);
+    sunday = kalSunday(today.key);
+    for (i = 0; i < list.length; i++) {
+      e = list[i];
+      if (!e || e.watchRow || e.is_suggestion) continue;
+      t = Date.parse(e.starts_at);
+      if (!isFinite(t)) continue;
+      end = e.ends_at ? Date.parse(e.ends_at) : t + 3 * 3600 * 1000;
+      if (!isFinite(end)) end = t;
+      if (end < now) continue;
+      p = kalParts(e.starts_at, zone);
+      if (p.key > sunday) continue;
+      if (onlyToday && p.key !== today.key) continue;
+      if (!onlyToday && p.key === today.key) continue;
+      score = kalScore(e, p, today.key);
+      if (!best || score > best.score) best = { e: e, p: p, score: score };
+    }
+    if (!best) return null;
+    var when = kalWhen(best.p, today.key, kalAddDay(today.key, 1), today.wd);
+    return {
+      what: kalWhat(best.e),
+      when: when,
+      title: best.e.title || '',
+      venue: best.e.venue || '',
+      cat: best.e.category || '',
+      idag: best.p.key === today.key,
+      helg: /helgen/.test(when)
+    };
+  }
+
   var SCENARIOS = [
     // ----- Väder (cachad SMHI-bild: kind, temp, symbol – ingen timme för "regn från ca 14") -----
     {
@@ -388,6 +490,26 @@
       chars: ['robot'],
       when: function () { return { hhmm: '11:11' }; },
       lines: { robot: '11:11. Spegelveck i klockan. Jag gör en systemönskan: fler kunder.' }
+    },
+
+    // ----- Kalender (bara redan laddad/cachad data; hoppas över om inga evenemang) -----
+    {
+      id: 'kalender-idag', tool: 'kalender', context: ['home', 'page'], priority: 82, cooldownMs: 20 * 60 * 1000,
+      when: function () { return pickKalEvent(true); },
+      lines: {
+        robot: function (a) { return 'Bip! ' + a.what + ' ' + a.when + '. Beräknad folksamling: hög.'; },
+        chauffor: function (a) { return a.what + ' ' + a.when + '! Bra kväll att ha taxametern varm – och skämten ljumma.'; },
+        diva: function (a) { return a.what + ' ' + a.when + '. Folket kommer ut… och någon ska hem med stil. 😉'; }
+      }
+    },
+    {
+      id: 'kalender-vecka', tool: 'kalender', context: ['home', 'page'], priority: 68, cooldownMs: 25 * 60 * 1000,
+      when: function () { return pickKalEvent(false); },
+      lines: {
+        robot: function (a) { return 'Bip! ' + a.what + ' ' + a.when + '. Jag har markerat det i kalendern.'; },
+        chauffor: function (a) { return a.what + ' ' + a.when + '. Packa tålamod, inte bara backspegeln.'; },
+        diva: function (a) { return a.what + ' ' + a.when + '. Det blir folk – och du kan skjutsa med stil. 😉'; }
+      }
     }
   ];
 

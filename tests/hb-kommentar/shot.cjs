@@ -127,11 +127,32 @@ async function openHome(br, base, { width, height, theme, scale, char }) {
   await d.screenshot({ path: path.join(out, 'diva-regn-412-scale14-light.png') });
   await d.close();
 
+  const kal = await openHome(br, base, { width: 412, height: 780, theme: 'dark', scale: '1.4', char: 'robot' });
+  const kalOut = await kal.evaluate(() => window.HJALPBOT.previewVisit('kalender', 'out', 'Bip! IFK spelar på Gamla Ullevi ikväll 19:00. Beräknad folksamling: hög.'));
+  ok('kalender visit out', !!kalOut);
+  const kalTxt = await kal.evaluate(() => {
+    const b = document.querySelector('.hb-bubble');
+    return b ? b.textContent : '';
+  });
+  ok('kalender line', /IFK/.test(kalTxt) && /Gamla Ullevi/.test(kalTxt), kalTxt);
+  await new Promise(r => setTimeout(r, 250));
+  await kal.screenshot({ path: path.join(out, 'kalender-idag-412-scale14-dark.png') });
+  await kal.close();
+
+  const kalW = await openHome(br, base, { width: 412, height: 780, theme: 'dark', scale: '1.4', char: 'chauffor' });
+  await kalW.evaluate(() => window.HJALPBOT.previewVisit('kalender', 'out', 'Konsert på Scandinavium i helgen. Packa tålamod, inte bara backspegeln.'));
+  await new Promise(r => setTimeout(r, 250));
+  await kalW.screenshot({ path: path.join(out, 'kalender-vecka-412-scale14-dark.png') });
+  await kalW.close();
+
   const t = await openHome(br, base, { width: 1024, height: 600, theme: 'dark', scale: '1', char: 'robot' });
   await t.evaluate(() => window.HJALPBOT.previewMarvin('Jag har räknat ut din prognos. Den deprimerade mig.'));
   await new Promise(r => setTimeout(r, 250));
   await t.screenshot({ path: path.join(out, 'marvin-1024x600-dark.png') });
   ok('tablet no pageerror', t._errs.length === 0, t._errs.join('|'));
+  await t.evaluate(() => window.HJALPBOT.previewVisit('kalender', 'out', 'Bip! IFK spelar på Gamla Ullevi ikväll 19:00. Beräknad folksamling: hög.'));
+  await new Promise(r => setTimeout(r, 250));
+  await t.screenshot({ path: path.join(out, 'kalender-idag-1024x600-dark.png') });
   await t.close();
 
   await br.close();
