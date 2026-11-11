@@ -1,6 +1,6 @@
 /* Hjälpboten: en liten animerad figur i förarappen.
  * Regelbaserad (ingen AI, inga betal-API:er). Den pratar bara om siffror som redan finns i appen.
- * Figurer: Robot, Chaufför, Cool och Taxi-Diva (egna SVG-teckningar). Valet sparas per förare i localStorage.
+ * Figurer: Robot, Chaufför och Taxi-Diva (egna SVG-teckningar). Valet sparas per förare i localStorage.
  * Byt namn/repliker här nedan. Inställning: Inställningar på hemskärmen eller tryck på boten.
  * 2026-11-11 botfix: laddas globalt, vandrar fritt utan list, kläder mer tåliga.
  */
@@ -12,7 +12,6 @@
   var CHARS = {
     robot: { name: 'Robot', svg: robotSvg },
     chauffor: { name: 'Chaufför', svg: chaufforSvg },
-    cool: { name: 'Cool', svg: coolSvg },
     diva: { name: 'Taxi-Diva', svg: divaSvg }
   };
   var DEFAULT_CHAR = 'robot';
@@ -53,41 +52,39 @@
       '<path d="M' + (l + 1) + ' ' + (top + 12.4) + ' Q' + cx + ' ' + (top + 17.5) + ' ' + (r - 1) + ' ' + (top + 12.4) + '" fill="#e0b000"/>';
   }
   function chaufforSvg() {
+    var LTH = '#1c1614', LTH2 = '#3a2a24', ZIP = '#c5c0b8';
     return '<svg viewBox="0 0 64 64" aria-hidden="true"><g stroke="' + K + '" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">' +
       '<rect x="21" y="54" width="9" height="6" rx="2" fill="' + K + '"/><rect x="34" y="54" width="9" height="6" rx="2" fill="' + K + '"/>' +
       '<path d="M19 60 h11 v3 h-11 z M34 60 h11 v3 h-11 z" fill="' + K + '"/>' +
-      '<path d="M46 44 L51 51" stroke-width="5.5"/><path d="M46 44 L51 51" stroke="' + Y + '" stroke-width="3.5"/><circle cx="51.5" cy="52" r="2.7" fill="' + SKIN + '"/>' +
-      '<path d="M17 47 q0 -8 8 -8 h14 q8 0 8 8 v9 h-30 z" fill="' + Y + '"/>' +
-      '<path d="M27 39 l5 7 5 -7 z" fill="#fff"/><path d="M27 39 l-3 2 6 7 z M37 39 l3 2 -6 7 z" fill="' + K + '"/>' +
-      '<path d="M31 41 h2 l1 9 -2 2 -2 -2 z" fill="' + T + '" stroke-width="1"/>' +
-      '<g class="hb-arm"><path d="M19 44 L11 35" stroke-width="5.5"/><path d="M19 44 L11 35" stroke="' + Y + '" stroke-width="3.5"/>' +
+      '<path d="M46 44 L51 51" stroke-width="5.5"/><path d="M46 44 L51 51" stroke="' + LTH + '" stroke-width="3.5"/><circle cx="51.5" cy="52" r="2.7" fill="' + SKIN + '"/>' +
+      '<path d="M17 47 q0 -8 8 -8 h14 q8 0 8 8 v9 h-30 z" fill="' + LTH + '"/>' +
+      '<path d="M26 39 l-3.5 3 6 9 z M38 39 l3.5 3 -6 9 z" fill="' + LTH2 + '"/>' +
+      '<path d="M32 40 v18" stroke="' + ZIP + '" stroke-width="1.2"/>' +
+      '<circle cx="32" cy="41.5" r="1.1" fill="' + ZIP + '" stroke="' + K + '" stroke-width="0.6"/>' +
+      '<rect x="23.5" y="45.5" width="5.4" height="4.2" rx="0.8" fill="' + Y + '"/>' +
+      '<path d="M24 45.9 h4.4" stroke="' + K + '" stroke-width="0.6"/>' +
+      '<g class="hb-arm"><path d="M19 44 L11 35" stroke-width="5.5"/><path d="M19 44 L11 35" stroke="' + LTH + '" stroke-width="3.5"/>' +
       '<path d="M7.5 33 q-1 -4 2 -5 q1 -2 3 0 q2 -1 2.5 1.5 q1.5 2 -1 4 q-3 2 -6.5 -0.5z" fill="' + SKIN + '"/></g>' +
-      '<path d="M19 26 q-1 -8 13 -9 q14 1 13 9 z" fill="#5a3825"/>' +
+      '<path d="M19 26 q-1 -8 13 -9 q14 1 13 9 z" fill="#2a2118"/>' +
       '<circle cx="32" cy="27.5" r="12.5" fill="' + SKIN + '"/>' +
+      '<path d="M22 33 q2 8 10 8 q8 0 10 -8" fill="' + SKIN + '"/>' +
       '<circle cx="19.6" cy="28" r="2.4" fill="' + SKIN + '"/><circle cx="44.4" cy="28" r="2.4" fill="' + SKIN + '"/>' +
       '<g class="hb-eyes" stroke="none"><circle cx="27" cy="28.5" r="2.2" fill="#134e4a"/><circle cx="37" cy="28.5" r="2.2" fill="#134e4a"/>' +
       '<circle cx="27.7" cy="27.8" r="0.7" fill="#fff"/><circle cx="37.7" cy="27.8" r="0.7" fill="#fff"/></g>' +
-      '<circle cx="24" cy="32.5" r="1.8" fill="#f4a6a0" stroke="none" opacity="0.7"/><circle cx="40" cy="32.5" r="1.8" fill="#f4a6a0" stroke="none" opacity="0.7"/>' +
-      '<path class="hb-mouth" d="M28.5 33 Q32 37.5 35.5 33 z" fill="#e05a5a"/>' +
+      '<path d="M24 35 q8 5 16 0" fill="none" stroke="#3a2a24" stroke-width="1.4" opacity="0.45"/>' +
+      '<path d="M25 33.5 q7 2.2 14 0" fill="none" stroke="#3a2a24" stroke-width="2.2" opacity="0.22"/>' +
+      '<path class="hb-mouth" d="M28.5 33.8 Q32 36 36.2 32.6" fill="none" stroke="#8a4a42" stroke-width="1.4"/>' +
+      '<g class="hb-shades">' +
+      '<path d="M23 26.4 h18" stroke="' + K + '" stroke-width="1.6"/>' +
+      '<path d="M21.5 27.2 Q19.8 28 19.8 29.2" fill="none" stroke="' + K + '" stroke-width="1.3"/>' +
+      '<path d="M42.5 27.2 Q44.2 28 44.2 29.2" fill="none" stroke="' + K + '" stroke-width="1.3"/>' +
+      '<ellipse cx="26.6" cy="28.6" rx="5.2" ry="3.5" fill="#15181e" stroke="' + K + '" stroke-width="1.3"/>' +
+      '<ellipse cx="37.4" cy="28.6" rx="5.2" ry="3.5" fill="#15181e" stroke="' + K + '" stroke-width="1.3"/>' +
+      '<path d="M31.8 28.2 h0.6" stroke="' + K + '" stroke-width="1.4"/>' +
+      '<path d="M23.8 27.4 l3.2 -1" stroke="#9aa3b2" stroke-width="0.8" opacity="0.75"/>' +
+      '<path d="M34.6 27.4 l3.2 -1" stroke="#9aa3b2" stroke-width="0.8" opacity="0.75"/>' +
+      '</g>' +
       capSvg(32, 6, 30) + '</g></svg>';
-  }
-  function coolSvg() {
-    return '<svg viewBox="0 0 64 64" aria-hidden="true"><g stroke="' + K + '" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">' +
-      '<rect x="21" y="54" width="9" height="6" rx="2" fill="#2b2b3a"/><rect x="34" y="54" width="9" height="6" rx="2" fill="#2b2b3a"/>' +
-      '<path d="M19 60 h11 v3 h-11 z M34 60 h11 v3 h-11 z" fill="#fff"/>' +
-      '<path d="M46 44 L51 51" stroke-width="5.5"/><path d="M46 44 L51 51" stroke="#2d2d2d" stroke-width="3.5"/><circle cx="51.5" cy="52" r="2.7" fill="' + SKIN + '"/>' +
-      '<path d="M17 47 q0 -8 8 -8 h14 q8 0 8 8 v9 h-30 z" fill="#2d2d2d"/>' +
-      '<path d="M27 39 l5 9 5 -9 z" fill="' + Y + '"/><path d="M26 39 l-4 3 7 8 z M38 39 l4 3 -7 8 z" fill="#3d3d3d"/>' +
-      '<path d="M20 52 h24" stroke="' + Y + '" stroke-width="1.2"/>' +
-      '<g class="hb-arm"><path d="M19 44 L11 35" stroke-width="5.5"/><path d="M19 44 L11 35" stroke="#2d2d2d" stroke-width="3.5"/>' +
-      '<path d="M7.5 33 q-1 -4 2 -5 q1 -2 3 0 q2 -1 2.5 1.5 q1.5 2 -1 4 q-3 2 -6.5 -0.5z" fill="' + SKIN + '"/></g>' +
-      '<circle cx="32" cy="27.5" r="12.5" fill="' + SKIN + '"/>' +
-      '<path d="M19.5 25 q-1 -12 12 -12 q9 0 12 5 q-4 -2 -8 0 q2 2 1 4 q-5 -4 -11 -1 q-4 1 -6 4 z" fill="#2a1d14"/>' +
-      '<circle cx="19.6" cy="28.5" r="2.4" fill="' + SKIN + '"/><circle cx="44.4" cy="28.5" r="2.4" fill="' + SKIN + '"/>' +
-      '<path d="M21 26 h22" stroke-width="1.6"/>' +
-      '<rect x="21.5" y="25" width="9" height="6" rx="2.6" fill="' + K + '"/><rect x="33.5" y="25" width="9" height="6" rx="2.6" fill="' + K + '"/>' +
-      '<g class="hb-eyes" stroke="#fff" stroke-width="1" opacity="0.85"><path d="M23.5 27 l2 -1"/><path d="M35.5 27 l2 -1"/></g>' +
-      '<path class="hb-mouth" d="M28.5 35 Q33 37 36.5 33.5" fill="none" stroke-width="1.6"/></g></svg>';
   }
   function divaSvg() {
     return '<svg viewBox="0 0 64 64" aria-hidden="true"><g stroke="' + K + '" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">' +
@@ -106,8 +103,10 @@
       '<g class="hb-eye-l"><circle cx="27" cy="28.6" r="2.1" fill="#134e4a" stroke="none"/><circle cx="27.7" cy="27.9" r="0.7" fill="#fff" stroke="none"/><path d="M24.6 27.4 l-1.3 -0.9" stroke-width="1"/></g>' +
       '<g class="hb-eye-r"><circle cx="37" cy="28.6" r="2.1" fill="#134e4a" stroke="none"/><circle cx="37.7" cy="27.9" r="0.7" fill="#fff" stroke="none"/><path d="M39.4 27.4 l1.3 -0.9" stroke-width="1"/></g>' +
       '<path d="M25 24.6 q2 -1.2 4 -0.3 M35 24.3 q2 -0.9 4 0.3" stroke="#6b2f15" stroke-width="1" fill="none"/>' +
-      '<circle cx="24.5" cy="32" r="1.6" fill="#f4a6a0" stroke="none" opacity="0.7"/><circle cx="39.5" cy="32" r="1.6" fill="#f4a6a0" stroke="none" opacity="0.7"/>' +
-      '<path class="hb-mouth" d="M28.5 33.5 Q32 36.8 35.5 33.5" fill="#d9534f" stroke-width="1.3"/>' +
+      '<circle cx="24.5" cy="32" r="1.8" fill="#f4a6a0" stroke="none" opacity="0.85"/><circle cx="39.5" cy="32" r="1.8" fill="#f4a6a0" stroke="none" opacity="0.85"/>' +
+      '<circle cx="19.6" cy="36.2" r="1.7" fill="none" stroke="#d4af37" stroke-width="1.3"/>' +
+      '<circle cx="44.4" cy="36.2" r="1.7" fill="none" stroke="#d4af37" stroke-width="1.3"/>' +
+      '<path class="hb-mouth" d="M28.2 33.4 Q32 37.2 35.8 33.4" fill="#c43b4a" stroke="#9a2a36" stroke-width="1.15"/>' +
       '<g transform="rotate(-14 32 12)">' + capSvg(32, 5, 24) + '</g></g></svg>';
   }
 
@@ -174,8 +173,10 @@
     if (!svg) return;
     var old = svg.querySelector('.hb-gear');
     if (old && old.parentNode) old.parentNode.removeChild(old);
-    var g = gearSvg(currentOutfit());
+    var outfit = currentOutfit();
+    var g = gearSvg(outfit);
     if (!g) return;
+    if (outfit === 'sun' && svg.querySelector('.hb-shades')) return;
     try {
       svg.style.overflow = 'hidden';
       var doc = new DOMParser().parseFromString('<svg xmlns="http://www.w3.org/2000/svg">' + g + '</svg>', 'image/svg+xml');
@@ -233,67 +234,38 @@
       vkNone: ['Bip! Inga verkstadstimmar registrerade. Tryck på knappen när bilen står på verkstan.']
     },
     chauffor: {
-      hello: ['Hej! Vad undrar du?', 'Hoppa in! Vad vill du veta?', 'Taxametern är av – fråga gratis!'],
-      hem: function (a) { return [a.hi + a.name + '! Ha ett bra pass idag.', a.hi + a.name + '! Kör försiktigt där ute.', a.hi + a.name + '! Tryck på mig om du undrar något.',
-        a.hi + '! Kolla gärna Ankomster innan du kör ut.']; },
-      needsProfile: function (a) { return [a.hi + a.name + '! Din profil saknar några uppgifter – tryck på 👤 uppe till höger.']; },
-      noTrips: function (a) { return ['Inga körningar ' + a.p + ' än. Lugn start – det kommer!', 'Tomt ' + a.p + ' hittills. Första körningen är alltid roligast.']; },
-      over: function (a) { return ['Snyggt jobbat, ' + a.diff + ' över målet ' + a.p + '!', 'Bra kört! ' + a.kr + ' inkört och ' + a.g + ' är slaget med ' + a.diff + '.',
-        a.antal + ' körningar och ' + a.diff + ' över målet. Starkt!']; },
-      near: function (a) { return ['Nästan där! Bara ' + a.rest + ' kvar till ' + a.g + '.', a.rest + ' kvar. En bra körning till så är det klart.']; },
-      under: function (a) { return [a.kr + ' ' + a.p + '. ' + a.rest + ' kvar till ' + a.g + ' – det fixar du.', a.antal + ' körningar hittills. ' + a.rest + ' kvar till målet, kämpa på!']; },
-      history: ['Kollar du gamla pass? Bra koll på läget.', 'Historiken ser du här. Idag är en ny dag!'],
-      next: function (a) { return ['Nästa ' + a.kind + ' ' + a.when + ': ' + a.no + ' från ' + a.from + a.late + '.', a.no + ' från ' + a.from + ' kommer ' + a.when + a.late + '. Kunder på ingång!']; },
-      none: function (a) { return ['Inga fler ' + a.kind + ' till ' + a.place + ' de närmaste timmarna.']; },
-      busy: function (a) { return [a.n + ' ankomster inom en timme. Det kan bli resenärer!']; },
-      late: function (a) { return [a.no + ' från ' + a.from + ' är ' + a.n + ' min sen. Hinner du ta en kaffe.']; },
-      canceled: function (a) { return [a.n + ' inställd' + (a.n === 1 ? '' : 'a') + ' just nu. Kolla listan innan du kör dit.']; },
-      missing: function (a) { return ['Du saknar ' + a.f + '. Fyll i, så är det klart.', 'Psst! ' + a.f + ' saknas i profilen.']; },
-      noEmergency: ['Tips: lägg in närmast anhörig. Frivilligt, men bra att ha.'],
-      tidy: ['Profilen ser bra ut. Allt ifyllt!', 'Allt ifyllt. Proffsigt!'],
-      idag: function (a) { return ['Idag har du kört in ' + a.kr + ' på ' + a.antal + ' körning' + (a.antal === 1 ? '' : 'ar') + ' (' + a.skift + ' skift). Bra jobbat!']; },
-      idagNone: ['Inga körningar registrerade idag än.'],
-      mal: ['Så här ser det ut:'],
-      losen: ['Enkelt fixat:'],
-      err: ['Jag kunde inte hämta det just nu. Försök igen strax.'],
-      top: function (a) { return ['Etta i "' + a.t + '" ' + a.p + ' med ' + a.v + '. Snyggt jobbat!', 'Du toppar "' + a.t + '" ' + a.p + '. Bra kört!']; },
-      rank: function (a) { return ['Du ligger ' + a.o + ' av ' + a.n + ' i "' + a.t + '" ' + a.p + ' (' + a.v + '). Fint!', 'Plats ' + a.pos + ' av ' + a.n + ' i "' + a.t + '". Det rullar på.']; },
-      rankNone: function (a) { return ['Inga pass ' + a.p + ' än, så du syns inte i listan. Nästa pass kanske?']; },
-      vkPending: function (a) { return [a.h + ' verkstadstid väntar på att ägaren tittar på den (' + a.n + ' st).', 'Du har ' + a.n + ' registrering' + (a.n === 1 ? '' : 'ar') + ' som väntar på beslut, ' + a.h + '.']; },
-      vkApproved: function (a) { return ['I ' + a.m + ' har du fått ' + a.ah + ' verkstadstid godkänd, det blir ' + a.akr + '.', 'Godkänt i ' + a.m + ': ' + a.ah + ' = ' + a.akr + '. Tack för att du tar hand om bilen!']; },
-      vkRejected: ['En verkstadstid blev nekad. Kolla ägarens kommentar i listan.'],
-      vkNone: ['Står bilen på verkstan? Registrera tiden här så får du betalt för den.']
+      hello: ['Hoppa in! Frågan är gratis – skämtet ingår.', 'Vad undrar du? Jag har ett svar och troligen ett pappaskämt.', 'Taxametern är av. Fråga på, jag kör båda vägarna: svar och dåliga vitsar.'],
+      hem: function (a) { return [a.hi + a.name + '! Ha ett bra pass. En taxi utan skämt är bara en bil.', a.hi + a.name + '! Kör försiktigt där ute. Och om någon frågar vägen: ja, jag tar den också.',
+        a.hi + a.name + '! Tryck på mig om du undrar något. Eller vill höra varför taxin tog med en stege.', a.hi + '! Kolla gärna Ankomster innan du kör ut. Bättre tidigt än att vinka åt fel tåg.']; },
+      needsProfile: function (a) { return [a.hi + a.name + '! Profilen saknar några uppgifter – tryck på 👤 uppe till höger. Utan profil är du som en taxi utan skylt.']; },
+      noTrips: function (a) { return ['Inga körningar ' + a.p + ' än. Motorn är varm, skämten också. Det kommer!', 'Tomt ' + a.p + ' hittills. Som en taxameter i rastläge. Första körningen väntar.']; },
+      over: function (a) { return ['Snyggt! ' + a.diff + ' över målet ' + a.p + '. Precis som min kaffekopp. Bra kört!', 'Bra kört! ' + a.kr + ' inkört och ' + a.g + ' är slaget med ' + a.diff + '. Solglasögonen stannar på. Av respekt.',
+        a.antal + ' körningar och ' + a.diff + ' över målet. Starkt – nästan lika starkt som mitt pappaskämt.']; },
+      near: function (a) { return ['Nästan där! Bara ' + a.rest + ' kvar till ' + a.g + '. Som att sakna en avfart – men du hinner.', a.rest + ' kvar. En bra körning till så är det klart. Jag håller ratt och tummar.']; },
+      under: function (a) { return [a.kr + ' ' + a.p + '. ' + a.rest + ' kvar till ' + a.g + '. Inga genvägar, bara vanliga vägar. Du fixar det.', a.antal + ' körningar hittills. ' + a.rest + ' kvar till målet. Som pappa sa: målet ligger framåt.']; },
+      history: ['Kollar du gamla pass? Bra. Bakrutan är till för att se bakåt, vindrutan för att köra.', 'Historiken ser du här. Idag är en ny dag – och ett nytt skämt, lova jag.'],
+      next: function (a) { return ['Nästa ' + a.kind + ' ' + a.when + ': ' + a.no + ' från ' + a.from + a.late + '. Kund på ingång, skämt på sparlåga.', a.no + ' från ' + a.from + ' kommer ' + a.when + a.late + '. Var där i tid. Punktlighet är min andra superkraft.']; },
+      none: function (a) { return ['Inga fler ' + a.kind + ' till ' + a.place + ' de närmaste timmarna. Dags för kaffe. Svart, som jackan.']; },
+      busy: function (a) { return [a.n + ' ankomster inom en timme. Det kan bli kö – som på korvkiosken, fast här är det kunder.']; },
+      late: function (a) { return [a.no + ' från ' + a.from + ' är ' + a.n + ' min sen. Hinner du ta en kaffe. Inte för varm, de brukar komma precis då.']; },
+      canceled: function (a) { return [a.n + ' inställd' + (a.n === 1 ? '' : 'a') + ' just nu. Kolla listan innan du kör dit. Bättre att veta än att vinka åt ett tåg som redan gått.']; },
+      missing: function (a) { return ['Du saknar ' + a.f + '. Fyll i – en taxi utan adress är bara en sightseeing.', 'Psst! ' + a.f + ' saknas i profilen. Jag säger inget till de andra.']; },
+      noEmergency: ['Tips: lägg in närmast anhörig. Frivilligt, precis som att skratta åt mina skämt.'],
+      tidy: ['Profilen ser bra ut. Allt ifyllt, som ett välstädat baksäte.', 'Allt ifyllt. Proffsigt. Jackan också, om jag får säga det själv.'],
+      idag: function (a) { return ['Idag har du kört in ' + a.kr + ' på ' + a.antal + ' körning' + (a.antal === 1 ? '' : 'ar') + ' (' + a.skift + ' skift). Bra jobbat. Skämtet kan vänta.']; },
+      idagNone: ['Inga körningar registrerade idag än. Motorn tickar. Jag också, inombords.'],
+      mal: ['Så här ser det ut, utan skämt den här gången:'],
+      losen: ['Enkelt fixat. Inte som att parkera vid Centralen en lördag:'],
+      err: ['Jag kunde inte hämta det just nu. Som när GPS:en tystnar. Försök igen strax.'],
+      top: function (a) { return ['Etta i "' + a.t + '" ' + a.p + ' med ' + a.v + '. Ska jag ta av solglasögonen? Nä. Snyggt jobbat!', 'Du toppar "' + a.t + '" ' + a.p + '. Bra kört. Jag hade en vits, men du vann redan.']; },
+      rank: function (a) { return ['Du ligger ' + a.o + ' av ' + a.n + ' i "' + a.t + '" ' + a.p + ' (' + a.v + '). Det rullar på.', 'Plats ' + a.pos + ' av ' + a.n + ' i "' + a.t + '". Lite mer gas, lite mindre pappaskämt från mig.']; },
+      rankNone: function (a) { return ['Inga pass ' + a.p + ' än, så du syns inte i listan. Som en taxi i dimma. Nästa pass, kompis.']; },
+      vkPending: function (a) { return [a.h + ' verkstadstid väntar på att ägaren tittar på den (' + a.n + ' st). Bilen vilar. Jag putsar och väntar.', 'Du har ' + a.n + ' registrering' + (a.n === 1 ? '' : 'ar') + ' som väntar på beslut, ' + a.h + '.']; },
+      vkApproved: function (a) { return ['I ' + a.m + ' har du fått ' + a.ah + ' verkstadstid godkänd, det blir ' + a.akr + '. Bilen mår bra.', 'Godkänt i ' + a.m + ': ' + a.ah + ' = ' + a.akr + '. Tack för att du tar hand om bilen!']; },
+      vkRejected: ['En verkstadstid blev nekad. Kolla ägarens kommentar i listan. Ibland säger verkstan nej, precis som min GPS.'],
+      vkNone: ['Står bilen på verkstan? Registrera tiden här så får du betalt för den. Annars blir det som att köra utan taxameter.']
     },
-    cool: {
-      hello: ['Yo. Vad behöver du?', 'Shoot. Jag har svar.', 'Lugnt. Fråga på.'],
-      hem: function (a) { return ['Yo' + a.name + '. Stan är din.', a.hi + a.name + '. Solglasögonen på, nu kör vi.', 'Lugnt' + a.name + '. Jag har koll, tryck om du undrar något.']; },
-      needsProfile: function (a) { return ['Yo' + a.name + ', profilen saknar grejer. 👤 uppe till höger. Ingen stress. Lite stress.']; },
-      noTrips: function (a) { return ['Noll körningar ' + a.p + '. Coola starter är också starter.', 'Inget än ' + a.p + '. Gatorna väntar på dig, chill.']; },
-      over: function (a) { return [a.diff + ' över målet ' + a.p + '. Inte illa. Inte illa alls.', 'Lugnt. ' + a.kr + ' inkört, ' + a.g + ' slaget med ' + a.diff + '. Som vanligt.', a.antal + ' körningar, ' + a.diff + ' över. Du gör det se lätt ut.']; },
-      near: function (a) { return [a.rest + ' kvar till ' + a.g + '. Easy.', 'Bara ' + a.rest + ' kvar. En körning till, sen är du legend.']; },
-      under: function (a) { return [a.kr + ' ' + a.p + '. ' + a.rest + ' kvar till ' + a.g + '. Inget du inte fixar.', a.rest + ' bort från målet. Chill, natten är ung.']; },
-      history: ['Gamla siffror. Respekt för historien.', 'Kollar arkivet? Smart drag.'],
-      next: function (a) { return ['Nästa ' + a.kind + ' ' + a.when + ': ' + a.no + ' från ' + a.from + a.late + '. Var där.', a.no + ' från ' + a.from + ' ' + a.when + a.late + '. Du vet vad som gäller.']; },
-      none: function (a) { return ['Inga fler ' + a.kind + ' till ' + a.place + ' på ett tag. Ta det lugnt.']; },
-      busy: function (a) { return [a.n + ' ankomster inom en timme. Showtime.']; },
-      late: function (a) { return [a.no + ' från ' + a.from + ' är ' + a.n + ' min sen. Coolt, mer tid för kaffe.']; },
-      canceled: function (a) { return [a.n + ' inställd' + (a.n === 1 ? '' : 'a') + '. Kolla listan, kör smart.']; },
-      missing: function (a) { return [a.f + ' saknas i profilen. Fixa det, så slipper vi prata om det.']; },
-      noEmergency: ['Närmast anhörig saknas. Frivilligt, men smart drag.'],
-      tidy: ['Profilen är clean. Gillar det.', 'Allt ifyllt. Stilrent.'],
-      idag: function (a) { return ['Idag: ' + a.kr + ' på ' + a.antal + ' körning' + (a.antal === 1 ? '' : 'ar') + ' (' + a.skift + ' skift). Lugnt.']; },
-      idagNone: ['Inget registrerat idag än. Lugnt, det kommer.'],
-      mal: ['Läget:'],
-      losen: ['Easy:'],
-      err: ['Hmm, fick inget svar. Testa igen strax.'],
-      top: function (a) { return ['Etta i "' + a.t + '". ' + a.v + '. Som väntat.', 'Plats 1 ' + a.p + '. Lugnt. Du vet hur man gör.']; },
-      rank: function (a) { return ['Plats ' + a.pos + ' av ' + a.n + ' i "' + a.t + '". ' + a.v + '. Chill, det finns tid kvar.', a.o + ' i "' + a.t + '". Inte illa. Inte illa alls.']; },
-      rankNone: function (a) { return ['Inga pass ' + a.p + '. Ibland är det coolt att vila.']; },
-      vkPending: function (a) { return [a.h + ' väntar på godkännande. Chill, det löser sig.', a.n + ' st i kön. Ägaren fixar det.']; },
-      vkApproved: function (a) { return [a.ah + ' godkänt i ' + a.m + '. ' + a.akr + '. Smooth.', a.akr + ' för verkstan i ' + a.m + '. Lugnt.']; },
-      vkRejected: ['En blev nekad. Kolla kommentaren, sen kör vi.'],
-      vkNone: ['Inga verkstadstimmar. Bilen mår bra, antar jag.']
-    },
+
     diva: {
       hello: ['Hej stjärna! Vad vill du veta? 😉', 'Fråga på, älskling – jag svarar med stil.', 'Ratten i ena handen, svaren i andra. Shoot!'],
       hem: function (a) { return [a.hi + a.name + '! Ska vi ta över stan tillsammans? 😉', a.hi + a.name + '… snyggt att se dig igen.',
@@ -344,7 +316,18 @@
   }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function driverKey() { return 'hb_char_' + (localStorage.getItem('taxi_driver') || 'x'); }
-  function charId() { var c = localStorage.getItem(driverKey()); return c === 'off' ? 'off' : (CHARS[c] ? c : DEFAULT_CHAR); }
+  function charId() {
+    var c;
+    try { c = localStorage.getItem(driverKey()); } catch (e) { c = ''; }
+    if (c === 'off') return 'off';
+    if (c === 'cool' || !CHARS[c]) {
+      if (c === 'cool') {
+        try { localStorage.setItem(driverKey(), DEFAULT_CHAR); } catch (e2) {}
+      }
+      return DEFAULT_CHAR;
+    }
+    return c;
+  }
   function firstName() { var d = window.driverData; if (!d || d.demo) return ''; return d.first_name ? String(d.first_name).split(' ')[0] : ''; }   // demo: inget namn
 
   // ---------- sida ----------
@@ -443,19 +426,19 @@
   }
 
   // ---------- DOM ----------
-  var el = {}, state = { page: undefined, lastComment: +(sessionStorage.getItem('hb_last') || 0), timer: null, pendingFor: null, hideT: null, panel: false, forceOutfit: null };
+  var el = {}, state = { page: undefined, lastComment: +(sessionStorage.getItem('hb_last') || 0), timer: null, pendingFor: null, hideT: null, panel: false, forceOutfit: null, atHome: false };
 
   function css() {
     var s = document.createElement('style');
     s.id = 'hb-css';
     s.textContent =
-      '.hb-walker{position:fixed;left:0;top:0;width:56px;height:56px;z-index:45;pointer-events:none;will-change:transform;overflow:hidden;' +
+      '.hb-walker{position:fixed;left:0;top:0;width:40px;height:40px;z-index:45;pointer-events:none;will-change:transform;overflow:visible;' +
       'transition:transform 3.2s cubic-bezier(.4,.1,.2,1)}' +
       '.hb-walker.snap{transition:none}' +
       '.hb-flip{width:100%;height:100%}' +
       '.hb-walker.hb-left .hb-flip{transform:scaleX(-1)}' +
       '.hb-btn{display:block;width:100%;height:100%;padding:0;border:0;background:none;cursor:pointer;pointer-events:auto;-webkit-tap-highlight-color:transparent}' +
-      '.hb-btn svg{width:56px;height:56px;display:block;overflow:hidden;animation:hb-bob 1.1s ease-in-out infinite alternate;transform-origin:50% 100%}' +
+      '.hb-btn svg{width:40px;height:40px;display:block;overflow:visible;animation:hb-bob 1.1s ease-in-out infinite alternate;transform-origin:50% 100%}' +
       '.hb-walker.idle .hb-btn svg{animation-duration:2.2s}' +
       '.hb-walker.talking .hb-btn svg{animation:hb-talk .32s ease-in-out infinite alternate}' +
       '.hb-eyes,.hb-eye-r,.hb-eye-l{transform-box:fill-box;transform-origin:50% 50%;animation:hb-blink 4.6s infinite}' +
@@ -492,14 +475,39 @@
       '.hb-pick button{border:2px solid var(--border);background:var(--surface);border-radius:12px;padding:6px;width:78px;cursor:pointer;color:var(--text);font-size:.8rem}' +
       '.hb-pick button.on{border-color:var(--primary);background:var(--surface-soft);font-weight:700}' +
       '.hb-pick svg{width:56px;height:56px;display:block;margin:0 auto 2px}' +
+      '.hb-walker.hb-walk{transition-timing-function:linear}' +
+      '.hb-walker.hb-walk .hb-btn svg{animation:hb-stride .36s ease-in-out infinite alternate}' +
+      '@keyframes hb-stride{from{transform:translateY(0)}to{transform:translateY(-3px)}}' +
+      '.hb-station{position:fixed;left:0;top:0;width:120px;height:72px;z-index:44;pointer-events:none!important;will-change:transform;overflow:visible}' +
+      '.hb-station svg{width:120px;height:72px;display:block;overflow:visible;pointer-events:none!important}' +
+      '.hb-station.hb-hidden{display:none}' +
+      '.hb-batt-fill{transform-box:fill-box;transform-origin:50% 100%}' +
+      '.hb-station.hb-on .hb-batt-fill{animation:hb-batt 2.2s ease-in-out infinite alternate}' +
+      '@keyframes hb-batt{from{transform:scaleY(.18)}to{transform:scaleY(1)}}' +
+      '.hb-shine{opacity:0}' +
+      '.hb-station.hb-on .hb-shine{animation:hb-shine 1.1s ease-in-out infinite}' +
+      '@keyframes hb-shine{0%,100%{opacity:0}45%,60%{opacity:1}}' +
+      '.hb-walker.hb-at-home{overflow:visible}' +
+      '.hb-walker.hb-at-home .hb-btn svg{overflow:visible}' +
+      '.hb-walker.hb-at-home.hb-act-diva .hb-arm{animation:hb-makeup .7s ease-in-out infinite alternate}' +
+      '@keyframes hb-makeup{from{transform:rotate(-8deg)}to{transform:rotate(28deg)}}' +
+      '.hb-walker.hb-at-home.hb-act-chauffor .hb-arm{animation:hb-polish .45s ease-in-out infinite alternate}' +
+      '@keyframes hb-polish{from{transform:rotate(-22deg)}to{transform:rotate(18deg)}}' +
+      '.hb-walker.hb-at-home.hb-act-robot .hb-btn svg{animation:hb-chargebob 1.4s ease-in-out infinite alternate}' +
+      '@keyframes hb-chargebob{from{transform:translateY(0)}to{transform:translateY(-1px)}}' +
       '@media (prefers-reduced-motion: reduce){.hb-walker{transition:none!important}' +
-      '.hb-flip,.hb-btn svg,.hb-eyes,.hb-eye-r,.hb-eye-l,.hb-walker.waving .hb-arm,.hb-walker.waving .hb-hair,.hb-walker.talking .hb-btn svg{animation:none!important}' +
+      '.hb-flip,.hb-btn svg,.hb-eyes,.hb-eye-r,.hb-eye-l,.hb-walker.waving .hb-arm,.hb-walker.waving .hb-hair,.hb-walker.talking .hb-btn svg,' +
+      '.hb-batt-fill,.hb-shine,.hb-walker.hb-at-home .hb-arm,.hb-walker.hb-at-home .hb-btn svg,.hb-walker.hb-walk .hb-btn svg{animation:none!important}' +
       '.hb-bubble{transition:none}}';
     document.head.appendChild(s);
   }
 
-  var SIZE = 56, MARGIN = 8, PAD_TOP = 8;
+  var SIZE = 40, MARGIN = 8, PAD_TOP = 8;
+  var WALK_SPEED = 40; // px/s, långsam gång
+  var CELL = 8;
+  var ST_W = 120, ST_H = 72;
   var wanderTimer = 0, pos = { x: 8, y: 200 }, reduceMotion = false;
+  var walkGen = 0, nextVisitAt = 0, firstVisit = true;
 
   function prefersReduce() {
     try { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
@@ -617,35 +625,345 @@
     el.bubble.style.bottom = 'auto';
     el.bubble.style.margin = '0';
   }
+
+  function animOn() {
+    try { return !!(window.ANIMATIONER && ANIMATIONER.isOn && ANIMATIONER.isOn()); } catch (e) { return true; }
+  }
+  function canWalk() { return !reduceMotion && animOn(); }
+
+  function stationSvg(id) {
+    var k = '#1a1a1a', y = Y, wood = '#c4a06a', wood2 = '#8a5a2b', metal = '#6b7280';
+    if (id === 'robot') {
+      return '<svg viewBox="0 0 120 72" aria-hidden="true">' +
+        '<rect x="18" y="52" width="84" height="10" rx="3" fill="#2a3340" stroke="' + k + '" stroke-width="1.4"/>' +
+        '<rect x="28" y="46" width="64" height="8" rx="2" fill="#3a4554" stroke="' + k + '" stroke-width="1.2"/>' +
+        '<rect x="86" y="18" width="16" height="28" rx="3" fill="#1a2430" stroke="' + k + '" stroke-width="1.3"/>' +
+        '<rect x="89" y="22" width="10" height="20" rx="1.5" fill="#0b1220" stroke="' + k + '" stroke-width="1"/>' +
+        '<rect class="hb-batt-fill" x="90" y="24" width="8" height="16" rx="1" fill="' + y + '"/>' +
+        '<rect x="92" y="15" width="4" height="4" rx="1" fill="' + metal + '" stroke="' + k + '" stroke-width="0.8"/>' +
+        '</svg>';
+    }
+    if (id === 'diva') {
+      return '<svg viewBox="0 0 120 72" aria-hidden="true">' +
+        '<ellipse cx="86" cy="26" rx="16" ry="20" fill="#dbeafe" stroke="' + k + '" stroke-width="1.4"/>' +
+        '<path d="M70 26 H62" stroke="' + k + '" stroke-width="1.4"/>' +
+        '<rect x="36" y="46" width="64" height="8" rx="2" fill="#f3e0c8" stroke="' + k + '" stroke-width="1.2"/>' +
+        '<rect x="44" y="54" width="6" height="12" fill="#e8c9a0" stroke="' + k + '" stroke-width="1"/>' +
+        '<rect x="86" y="54" width="6" height="12" fill="#e8c9a0" stroke="' + k + '" stroke-width="1"/>' +
+        '<rect x="50" y="40" width="6" height="8" rx="1" fill="#e11d48" stroke="' + k + '" stroke-width="0.9"/>' +
+        '<rect x="60" y="42" width="5" height="6" rx="1" fill="#f5c518" stroke="' + k + '" stroke-width="0.9"/>' +
+        '<circle cx="72" cy="44" r="3" fill="#f9a8d4" stroke="' + k + '" stroke-width="0.9"/>' +
+        '</svg>';
+    }
+    if (id === 'chauffor') {
+      return '<svg viewBox="0 0 120 72" aria-hidden="true">' +
+        '<path d="M38 48 h52 l8 10 h-68 z" fill="' + y + '" stroke="' + k + '" stroke-width="1.3"/>' +
+        '<path d="M50 48 l6 -12 h22 l8 12 z" fill="#7dd3fc" stroke="' + k + '" stroke-width="1.2"/>' +
+        '<rect x="68" y="32" width="12" height="6" rx="1" fill="' + y + '" stroke="' + k + '" stroke-width="1"/>' +
+        '<circle cx="50" cy="58" r="6" fill="' + k + '"/><circle cx="50" cy="58" r="2.4" fill="#9ca3af"/>' +
+        '<circle cx="86" cy="58" r="6" fill="' + k + '"/><circle cx="86" cy="58" r="2.4" fill="#9ca3af"/>' +
+        '<path class="hb-shine" d="M56 42 l6 -3" stroke="#fff" stroke-width="1.6" fill="none"/>' +
+        '</svg>';
+    }
+    return '';
+  }
+
+  function obstacleRects(opts) {
+    var out = [], pad = 6;
+    function add(node, extra) {
+      if (!node) return;
+      var r = node.getBoundingClientRect();
+      if (r.width < 4 || r.height < 4) return;
+      var p = extra || pad;
+      out.push({ l: r.left - p, t: r.top - p, r: r.right + p, b: r.bottom + p });
+    }
+    document.querySelectorAll('#app.is-home .grid .icon .emoji, #app.is-home .grid .td-slot-plus').forEach(function (n) { add(n, pad); });
+    var h = document.querySelector('#app header');
+    if (h) {
+      var r = h.getBoundingClientRect();
+      out.push({ l: 0, t: -20, r: window.innerWidth, b: Math.ceil(r.bottom) + 4 });
+    }
+    if (el.station && el.station.style.display !== 'none' && !el.station.classList.contains('hb-hidden') && !state.atHome && !(opts && opts.ignoreStation)) {
+      add(el.station, 4);
+    }
+    return out;
+  }
+  function overlaps(a, b) { return a.l < b.r && a.r > b.l && a.t < b.b && a.b > b.t; }
+  function blockedAt(x, y, obs) {
+    var vw = window.innerWidth, vh = window.innerHeight;
+    if (x < MARGIN || y < MARGIN || x + SIZE > vw - MARGIN || y + SIZE > vh - MARGIN) return true;
+    var box = { l: x, t: y, r: x + SIZE, b: y + SIZE }, i;
+    for (i = 0; i < obs.length; i++) if (overlaps(box, obs[i])) return true;
+    return false;
+  }
+  function nearestWalkable(x, y, obs) {
+    x = Math.round(x); y = Math.round(y);
+    if (!blockedAt(x, y, obs)) return { x: x, y: y };
+    var rad, a, nx, ny, best = null, bestD = 1e9, d;
+    for (rad = CELL; rad <= 160; rad += CELL) {
+      for (a = 0; a < 16; a++) {
+        nx = Math.round(x + Math.cos(a * Math.PI / 8) * rad);
+        ny = Math.round(y + Math.sin(a * Math.PI / 8) * rad);
+        if (blockedAt(nx, ny, obs)) continue;
+        d = Math.hypot(nx - x, ny - y);
+        if (d < bestD) { bestD = d; best = { x: nx, y: ny }; }
+      }
+      if (best && bestD <= rad) return best;
+    }
+    return best || { x: MARGIN, y: Math.max(headerBottom(), window.innerHeight - SIZE - MARGIN) };
+  }
+  function findPath(from, to, opts) {
+    var obs = obstacleRects(opts);
+    from = nearestWalkable(from.x, from.y, obs);
+    to = nearestWalkable(to.x, to.y, obs);
+    var key = function (x, y) { return Math.round(x / CELL) + ',' + Math.round(y / CELL); };
+    var q = [from], seen = {}, prev = {}, startK = key(from.x, from.y), goalK = key(to.x, to.y), i, cur, nx, ny, k, steps = 0;
+    seen[startK] = 1;
+    var dirs = [[CELL, 0], [-CELL, 0], [0, CELL], [0, -CELL], [CELL, CELL], [CELL, -CELL], [-CELL, CELL], [-CELL, -CELL]];
+    while (q.length && steps < 6000) {
+      cur = q.shift(); steps++;
+      k = key(cur.x, cur.y);
+      if (k === goalK) break;
+      for (i = 0; i < dirs.length; i++) {
+        nx = cur.x + dirs[i][0]; ny = cur.y + dirs[i][1];
+        if (blockedAt(nx, ny, obs)) continue;
+        var nk = key(nx, ny);
+        if (seen[nk]) continue;
+        seen[nk] = 1;
+        prev[nk] = cur;
+        q.push({ x: nx, y: ny });
+      }
+    }
+    var endK = key(to.x, to.y);
+    if (!seen[endK] && !seen[key(from.x, from.y)]) return [from, to];
+    if (!seen[endK]) {
+      // closest reached
+      var ck, bestK = startK, bd = 1e9, parts, dx, dy;
+      for (ck in seen) {
+        if (!Object.prototype.hasOwnProperty.call(seen, ck)) continue;
+        parts = ck.split(',');
+        dx = Number(parts[0]) * CELL - to.x; dy = Number(parts[1]) * CELL - to.y;
+        if (dx * dx + dy * dy < bd) { bd = dx * dx + dy * dy; bestK = ck; }
+      }
+      endK = bestK;
+      parts = bestK.split(',');
+      to = { x: Number(parts[0]) * CELL, y: Number(parts[1]) * CELL };
+    }
+    var path = [to], p = prev[endK];
+    while (p) { path.push(p); p = prev[key(p.x, p.y)]; }
+    path.reverse();
+    if (!path.length) path = [from, to];
+    // compress colinear
+    var out = [], a, b, c;
+    for (i = 0; i < path.length; i++) {
+      a = out[out.length - 2]; b = out[out.length - 1]; c = path[i];
+      if (a && b && (b.x - a.x) * (c.y - b.y) === (b.y - a.y) * (c.x - b.x)) out[out.length - 1] = c;
+      else out.push(c);
+    }
+    return out;
+  }
+  function pickWalkTarget(from) {
+    var obs = obstacleRects(), vw = window.innerWidth, vh = window.innerHeight, i, x, y, cand = [], b = bounds();
+    var spots = [
+      { x: MARGIN, y: headerBottom() + 8 },
+      { x: vw - SIZE - MARGIN, y: headerBottom() + 8 },
+      { x: MARGIN, y: vh - SIZE - MARGIN },
+      { x: vw - SIZE - MARGIN, y: vh - SIZE - MARGIN },
+      { x: MARGIN, y: (headerBottom() + vh) / 2 },
+      { x: vw - SIZE - MARGIN, y: (headerBottom() + vh) / 2 }
+    ];
+    // mid-aisle samples between first-row emojis
+    var em = document.querySelectorAll('#app.is-home .grid .icon .emoji');
+    for (i = 0; i < em.length; i++) {
+      var r = em[i].getBoundingClientRect();
+      spots.push({ x: r.left - SIZE - 8, y: r.bottom + 6 });
+      spots.push({ x: r.right + 8, y: r.bottom + 6 });
+      if (i + 1 < em.length) {
+        var n = em[i + 1].getBoundingClientRect();
+        spots.push({ x: (r.right + n.left) / 2 - SIZE / 2, y: Math.max(r.bottom, n.bottom) + 4 });
+        spots.push({ x: (r.right + n.left) / 2 - SIZE / 2, y: Math.min(r.top, n.top) - SIZE - 4 });
+      }
+    }
+    for (i = 0; i < 18; i++) {
+      spots.push({
+        x: MARGIN + Math.random() * Math.max(0, vw - SIZE - 2 * MARGIN),
+        y: headerBottom() + Math.random() * Math.max(0, vh - SIZE - MARGIN - headerBottom())
+      });
+    }
+    for (i = 0; i < spots.length; i++) {
+      var w = nearestWalkable(spots[i].x, spots[i].y, obs);
+      if (!w) continue;
+      var dist = from ? Math.hypot(w.x - from.x, w.y - from.y) : 80;
+      if (dist < 28) continue;
+      cand.push({ p: w, d: dist });
+    }
+    if (!cand.length) return nearestWalkable(b.minX, b.maxY, obs);
+    cand.sort(function (a, b) { return b.d - a.d; });
+    return cand[Math.floor(Math.random() * Math.min(6, cand.length))].p;
+  }
+
+  function stopWalk() {
+    walkGen += 1;
+    clearTimeout(wanderTimer);
+    if (el.walker) {
+      el.walker.classList.remove('hb-walk', 'hb-at-home', 'hb-act-robot', 'hb-act-diva', 'hb-act-chauffor');
+    }
+    if (el.station) el.station.classList.remove('hb-on');
+    state.atHome = false;
+  }
+
+  function walkPath(pts, onDone) {
+    var gen = ++walkGen;
+    if (!pts || !pts.length) { if (onDone) onDone(); return; }
+    function go(i) {
+      if (gen !== walkGen) return;
+      if (i >= pts.length) {
+        if (el.walker) el.walker.classList.remove('hb-walk');
+        if (onDone) onDone();
+        return;
+      }
+      // paus ibland mitt i en gång
+      if (i > 0 && i < pts.length - 1 && Math.random() < 0.18) {
+        if (el.walker) el.walker.classList.remove('hb-walk');
+        el.walker.classList.add('idle');
+        wanderTimer = setTimeout(function () {
+          if (el.walker) el.walker.classList.remove('idle');
+          go(i);
+        }, 700 + Math.random() * 1200);
+        return;
+      }
+      var p = pts[i];
+      var dist = Math.hypot(p.x - pos.x, p.y - pos.y);
+      var dur = Math.max(0.15, dist / WALK_SPEED);
+      if (el.walker) {
+        el.walker.classList.add('hb-walk');
+        el.walker.classList.remove('idle');
+        el.walker.style.transitionTimingFunction = 'linear';
+      }
+      setPos(p.x, p.y, dur, pos.x);
+      wanderTimer = setTimeout(function () { go(i + 1); }, dur * 1000 + 20);
+    }
+    go(0);
+  }
+
+  function stationRoom() {
+    if (!document.getElementById('app') || !document.getElementById('app').classList.contains('is-home')) return null;
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var grid = document.querySelector('#app.is-home .grid');
+    var dev = document.getElementById('home-devices');
+    var bottom = headerBottom();
+    if (grid) bottom = Math.max(bottom, grid.getBoundingClientRect().bottom);
+    if (dev) bottom = Math.max(bottom, dev.getBoundingClientRect().bottom);
+    var y = vh - ST_H - 10;
+    var x = Math.max(MARGIN, Math.min(vw - ST_W - MARGIN, vw - ST_W - 16));
+    if (y < bottom + 6) y = bottom + 8;
+    if (y + ST_H > vh - 2) return null;
+    // får inte täcka en ikon
+    var box = { l: x, t: y, r: x + ST_W, b: y + ST_H };
+    var obs = [];
+    document.querySelectorAll('#app.is-home .grid .icon .emoji, #app.is-home .grid .td-slot-plus').forEach(function (n) {
+      var r = n.getBoundingClientRect();
+      obs.push({ l: r.left - 4, t: r.top - 4, r: r.right + 4, b: r.bottom + 4 });
+    });
+    var i;
+    for (i = 0; i < obs.length; i++) if (overlaps(box, obs[i])) return null;
+    return { x: x, y: y };
+  }
+  function standAtStation(room, id) {
+    if (!room) return null;
+    var x = room.x + 8, y = room.y + ST_H - SIZE - 2;
+    if (id === 'diva') { x = room.x + 6; y = room.y + 20; }
+    if (id === 'chauffor') { x = room.x + 4; y = room.y + 16; }
+    if (id === 'robot') { x = room.x + 28; y = room.y + ST_H - SIZE - 2; }
+    return nearestWalkable(x, y, obstacleRects({ ignoreStation: true }));
+  }
+  function paintStation() {
+    if (!el.station) return;
+    var c = charId();
+    if (c === 'off') { el.station.classList.add('hb-hidden'); return; }
+    var room = stationRoom();
+    if (!room) { el.station.classList.add('hb-hidden'); return; }
+    el.station.classList.remove('hb-hidden');
+    el.station.setAttribute('data-station', c);
+    el.station.innerHTML = stationSvg(c);
+    el.station.style.transform = 'translate3d(' + Math.round(room.x) + 'px,' + Math.round(room.y) + 'px,0)';
+    el.station.style.display = '';
+    return room;
+  }
+  function ensureStation() {
+    if (el.station) return el.station;
+    var s = document.createElement('div');
+    s.className = 'hb-station hb-hidden';
+    s.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(s);
+    el.station = s;
+    return s;
+  }
+  function arriveHome() {
+    var c = charId();
+    state.atHome = true;
+    if (el.walker) {
+      el.walker.classList.remove('hb-walk');
+      el.walker.classList.add('idle', 'hb-at-home', 'hb-act-' + c);
+    }
+    if (el.station) el.station.classList.add('hb-on');
+    var stay = 8000 + Math.random() * 6000;
+    wanderTimer = setTimeout(function () {
+      if (el.walker) el.walker.classList.remove('hb-at-home', 'hb-act-robot', 'hb-act-diva', 'hb-act-chauffor');
+      if (el.station) el.station.classList.remove('hb-on');
+      state.atHome = false;
+      scheduleNextVisit();
+      scheduleWander();
+    }, stay);
+  }
+  function scheduleNextVisit() {
+    var ms = firstVisit ? (40000 + Math.random() * 50000) : (150000 + Math.random() * 120000);
+    firstVisit = false;
+    nextVisitAt = Date.now() + ms;
+  }
+  function goToStation() {
+    var room = paintStation();
+    if (!room) { scheduleNextVisit(); scheduleWander(); return; }
+    var stand = standAtStation(room, charId());
+    if (!stand) { scheduleNextVisit(); scheduleWander(); return; }
+    var path = findPath(pos, stand, { ignoreStation: true });
+    walkPath(path, arriveHome);
+  }
+
   function scheduleWander() {
     clearTimeout(wanderTimer);
     if (!el.walker || el.walker.style.display === 'none' || document.hidden) return;
-    if (reduceMotion) {
-      var park = pickSpot(pos);
+    ensureStation();
+    paintStation();
+    if (!canWalk()) {
+      var park = nearestWalkable(pos.x, pos.y, obstacleRects());
       setPos(park.x, park.y, 0, pos.x);
       el.walker.classList.add('idle');
+      el.walker.classList.remove('hb-walk');
       return;
     }
-    if (state.panel) return;
-    var pause = 2500 + Math.random() * 2500;
+    if (state.panel || state.atHome) return;
+    if (!nextVisitAt) scheduleNextVisit();
+    var pause = 1800 + Math.random() * 2200;
     wanderTimer = setTimeout(function () {
-      if (!el.walker || el.walker.style.display === 'none' || state.panel) return;
-      el.walker.classList.remove('idle');
-      var next = pickSpot(pos);
-      var dist = Math.hypot(next.x - pos.x, next.y - pos.y);
-      var dur = Math.max(1.8, Math.min(7, 1.6 + dist / 140));
-      setPos(next.x, next.y, dur, pos.x);
-      wanderTimer = setTimeout(function () {
+      if (!el.walker || el.walker.style.display === 'none' || state.panel || state.atHome) return;
+      if (Date.now() >= nextVisitAt && paintStation()) {
+        goToStation();
+        return;
+      }
+      var next = pickWalkTarget(pos);
+      var path = findPath(pos, next);
+      walkPath(path, function () {
         if (el.walker) el.walker.classList.add('idle');
         scheduleWander();
-      }, dur * 1000 + 200);
+      });
     }, pause);
   }
-  function onResize() {
-    var b = bounds();
-    var x = Math.min(b.maxX, Math.max(b.minX, pos.x));
-    var y = Math.min(b.maxY, Math.max(b.minY, pos.y));
-    setPos(x, y, 0);
+
+    function onResize() {
+    paintStation();
+    var w = nearestWalkable(pos.x, pos.y, obstacleRects());
+    setPos(w.x, w.y, 0);
     if (el.walker && el.walker.style.display !== 'none') scheduleWander();
   }
 
@@ -656,6 +974,8 @@
       el.btn = el.walker.querySelector('.hb-btn');
       el.bubble = document.querySelector('.hb-bubble');
       el.panel = document.querySelector('.hb-panel');
+      el.station = document.querySelector('.hb-station');
+      ensureStation();
       return;
     }
     css();
@@ -665,14 +985,16 @@
     el.bubble = document.createElement('div'); el.bubble.className = 'hb-bubble'; el.bubble.setAttribute('role', 'status'); el.bubble.setAttribute('aria-live', 'polite');
     el.panel = document.createElement('div'); el.panel.className = 'hb-panel'; el.panel.setAttribute('role', 'dialog'); el.panel.setAttribute('aria-label', 'Hjälpbot');
     [el.walker, el.bubble, el.panel].forEach(function (x) { document.body.appendChild(x); });
+    ensureStation();
     el.btn.addEventListener('click', function () { wave(); state.panel ? closePanel() : openPanel(); });
     el.panel.addEventListener('click', onPanel);
     window.addEventListener('resize', onResize);
     document.addEventListener('visibilitychange', function () {
-      if (document.hidden) clearTimeout(wanderTimer);
+      if (document.hidden) { stopWalk(); clearTimeout(wanderTimer); }
       else if (el.walker && el.walker.style.display !== 'none') scheduleWander();
     });
     drawChar();
+    paintStation();
   }
   function drawChar() {
     try {
@@ -680,6 +1002,7 @@
       if (c === 'off' || !el.btn) return;
       el.btn.innerHTML = CHARS[c].svg();
       applyGear(el.btn.querySelector('svg'));
+      paintStation();
     } catch (e) {}
   }
   function wave() {
@@ -715,9 +1038,12 @@
   function show(on) {
     var was = el.walker && el.walker.style.display !== 'none';
     if (el.walker) el.walker.style.display = on ? '' : 'none';
-    if (!on) { hideBubble(); closePanel(); clearTimeout(wanderTimer); }
+    if (el.station) el.station.style.display = on ? '' : 'none';
+    if (!on) { hideBubble(); closePanel(); stopWalk(); if (el.station) el.station.classList.add('hb-hidden'); }
     else if (!was) {
-      var startAt = pickSpot(null);
+      ensureStation();
+      paintStation();
+      var startAt = nearestWalkable((pickSpot(null) || pos).x, (pickSpot(null) || pos).y, obstacleRects());
       setPos(startAt.x, startAt.y, 0);
       scheduleWander();
     }
@@ -862,7 +1188,41 @@
       drawChar();
       return state.forceOutfit;
     },
-    currentOutfit: currentOutfit
+    currentOutfit: currentOutfit,
+    previewStation: function (id) {
+      if (id && CHARS[id]) {
+        try { localStorage.setItem(driverKey(), id); } catch (e) {}
+      }
+      show(true);
+      drawChar();
+      ensureStation();
+      var room = paintStation();
+      var stand = standAtStation(room, charId());
+      if (!stand) return false;
+      stopWalk();
+      setPos(stand.x, stand.y, 0);
+      arriveHome();
+      return true;
+    },
+    previewAisle: function () {
+      show(true);
+      ensureStation();
+      paintStation();
+      var em = document.querySelectorAll('#app.is-home .grid .icon .emoji');
+      if (em.length < 2) return false;
+      var a = em[0].getBoundingClientRect(), b = em[1].getBoundingClientRect();
+      var x = (a.right + b.left) / 2 - SIZE / 2;
+      var y = Math.max(a.bottom, b.bottom) + 4;
+      var w = nearestWalkable(x, y, obstacleRects());
+      stopWalk();
+      setPos(w.x, w.y, 0);
+      if (el.walker) {
+        el.walker.classList.add('hb-walk');
+        el.walker.classList.remove('idle');
+        if (w.x < pos.x) el.walker.classList.add('hb-left');
+      }
+      return { x: w.x, y: w.y };
+    }
   };
 
   function start() {
@@ -876,7 +1236,11 @@
       if (el.walker && el.walker.style.display !== 'none') clearInterval(boot);
     }, 200);
     setTimeout(function () { clearInterval(boot); }, 8000);
-    document.addEventListener('animationer-change', function () { drawChar(); });
+    document.addEventListener('animationer-change', function () {
+      drawChar();
+      if (!canWalk()) { stopWalk(); var park = nearestWalkable(pos.x, pos.y, obstacleRects()); setPos(park.x, park.y, 0); }
+      else if (el.walker && el.walker.style.display !== 'none') scheduleWander();
+    });
     document.addEventListener('animationer-vader', function () { drawChar(); });
     window.HJALPBOT._previewPos = function (x, y, dur) { setPos(x, y, dur == null ? 0 : dur, pos.x); };
     window.HJALPBOT._pickSpot = pickSpot;
