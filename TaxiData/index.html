@@ -195,8 +195,9 @@
   <script src="demo.js?v=am1q"></script>
   <script src="swipe-back.js?v=20261106sb2"></script>
   <script src="view-state.js?v=20261107lazy1"></script>
-  <script src="hjalp.js?v=20261111hjalp1"></script>
-  <script src="lazy-views.js?v=20261111hjalp1"></script>
+  <script src="hjalp.js?v=20261111ordna1"></script>
+  <script src="hem-ordning.js?v=20261111ordna1"></script>
+  <script src="lazy-views.js?v=20261111ordna1"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -924,17 +925,20 @@
           html += '<div class="profile-reminder" id="profile-reminder" role="button" onclick="openProfile()"><span class="dot"></span>Fyll i dina personuppgifter<span class="arrow">›</span></div>';
         }
         html += '<div class="grid">';
-        for (var i = 0; i < menu.length; i++) {
-          if (!canSee(menu[i])) continue;
+        var visible = [];
+        for (var i = 0; i < menu.length; i++) { if (canSee(menu[i])) visible.push(menu[i]); }
+        if (window.HEM_ORDNING) visible = HEM_ORDNING.arrange(visible);
+        for (var i = 0; i < visible.length; i++) {
           // Admin-rutan får en siffra när verkstadstid väntar på ägarens beslut.
           // Bil & verkstad får en siffra för olästa bil-notiser (admin: annars antal bilar som står).
-          html += '<div class="icon" onclick="openItem(\'' + menu[i].id + '\')"' + (menu[i].id === 'admin' ? ' data-badge="workshop"' : menu[i].id === VERKSTAD.id ? ' data-badge="bil"' : menu[i].id === FORUM.id ? ' data-badge="forum"' : menu[i].id === OM.id ? ' data-badge="nyheter"' : menu[i].id === PROGNOS.id ? ' data-badge="prognos"' : '') + '>';
-          html += '<div class="emoji">' + menu[i].icon + '</div>';
-          html += '<div class="label">' + menu[i].label + '</div></div>';
+          html += '<div class="icon" data-tool="' + visible[i].id + '" onclick="openItem(\'' + visible[i].id + '\')"' + (visible[i].id === 'admin' ? ' data-badge="workshop"' : visible[i].id === VERKSTAD.id ? ' data-badge="bil"' : visible[i].id === FORUM.id ? ' data-badge="forum"' : visible[i].id === OM.id ? ' data-badge="nyheter"' : visible[i].id === PROGNOS.id ? ' data-badge="prognos"' : '') + '>';
+          html += '<div class="emoji">' + visible[i].icon + '</div>';
+          html += '<div class="label">' + visible[i].label + '</div></div>';
         }
         html += '</div>';
         html += '<div id="home-devices" class="home-devices"></div>';
         content.innerHTML = html;
+        if (window.HEM_ORDNING) HEM_ORDNING.decorate(content);
         if (window.DELAD && DELAD.renderDevices) DELAD.renderDevices(document.getElementById('home-devices'));
         refreshWorkshopBadge();
         refreshBilBadge();
