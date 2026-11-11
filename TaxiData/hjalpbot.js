@@ -1,10 +1,13 @@
-/* Hjälpboten: en liten animerad figur längst ner i förarappen.
+/* Hjälpboten: en liten animerad figur i förarappen.
  * Regelbaserad (ingen AI, inga betal-API:er). Den pratar bara om siffror som redan finns i appen.
  * Figurer: Robot, Chaufför, Cool och Taxi-Diva (egna SVG-teckningar). Valet sparas per förare i localStorage.
  * Byt namn/repliker här nedan. Inställning: Inställningar på hemskärmen eller tryck på boten.
+ * 2026-11-11 botfix: laddas globalt, vandrar fritt utan list, kläder mer tåliga.
  */
 (function () {
   'use strict';
+  if (window.__HB_LOADED) return;
+  window.__HB_LOADED = true;
 
   var CHARS = {
     robot: { name: 'Robot', svg: robotSvg },
@@ -173,7 +176,18 @@
     if (old && old.parentNode) old.parentNode.removeChild(old);
     var g = gearSvg(currentOutfit());
     if (!g) return;
-    svg.insertAdjacentHTML('beforeend', g);
+    try {
+      var doc = new DOMParser().parseFromString('<svg xmlns="http://www.w3.org/2000/svg">' + g + '</svg>', 'image/svg+xml');
+      if (doc.querySelector('parsererror')) throw new Error('gear');
+      var node = doc.documentElement.firstElementChild;
+      while (node) {
+        var next = node.nextElementSibling;
+        svg.appendChild(document.importNode(node, true));
+        node = next;
+      }
+    } catch (e) {
+      try { svg.insertAdjacentHTML('beforeend', g); } catch (e2) {}
+    }
   }
 
   // ---------- repliker: en egen personlighet per figur ----------
@@ -430,15 +444,15 @@
 
   function css() {
     var s = document.createElement('style');
+    s.id = 'hb-css';
     s.textContent =
-      'body.hb-on{padding-bottom:66px}' +
-      '.hb-road{position:fixed;left:0;right:0;bottom:0;height:62px;background:var(--surface);border-top:1px solid var(--border);z-index:40;' +
-      'background-image:repeating-linear-gradient(90deg,var(--border) 0 14px,transparent 14px 28px);background-size:100% 2px;background-repeat:no-repeat;background-position:0 58px}' +
-      '.hb-walker{position:fixed;left:0;bottom:3px;width:56px;height:56px;z-index:41;animation:hb-walk 26s ease-in-out infinite alternate;will-change:transform}' +
-      '.hb-flip{width:100%;height:100%;animation:hb-flip 52s linear infinite}' +
-      '.hb-btn{display:block;width:100%;height:100%;padding:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}' +
+      '.hb-walker{position:fixed;left:0;top:0;width:56px;height:56px;z-index:45;pointer-events:none;will-change:transform;' +
+      'transition:transform 3.2s cubic-bezier(.4,.1,.2,1)}' +
+      '.hb-walker.snap{transition:none}' +
+      '.hb-flip{width:100%;height:100%}' +
+      '.hb-walker.hb-left .hb-flip{transform:scaleX(-1)}' +
+      '.hb-btn{display:block;width:100%;height:100%;padding:0;border:0;background:none;cursor:pointer;pointer-events:auto;-webkit-tap-highlight-color:transparent}' +
       '.hb-btn svg{width:56px;height:56px;display:block;animation:hb-bob 1.1s ease-in-out infinite alternate;transform-origin:50% 100%}' +
-      '.hb-walker.idle,.hb-walker.idle .hb-flip{animation-play-state:paused}' +
       '.hb-walker.idle .hb-btn svg{animation-duration:2.2s}' +
       '.hb-walker.talking .hb-btn svg{animation:hb-talk .32s ease-in-out infinite alternate}' +
       '.hb-eyes,.hb-eye-r,.hb-eye-l{transform-box:fill-box;transform-origin:50% 50%;animation:hb-blink 4.6s infinite}' +
@@ -448,8 +462,6 @@
       '.hb-hair{transform-box:fill-box;transform-origin:50% 0}' +
       '.hb-walker.waving .hb-hair{animation:hb-hairflip .5s ease-in-out 2 alternate}' +
       '.hb-walker.waving .hb-eye-r{animation:hb-winknow .9s ease-in-out 1}' +
-      '@keyframes hb-walk{from{transform:translateX(6px)}to{transform:translateX(calc(100vw - 62px))}}' +
-      '@keyframes hb-flip{0%,49.99%{transform:scaleX(1)}50%,100%{transform:scaleX(-1)}}' +
       '@keyframes hb-bob{from{transform:translateY(0)}to{transform:translateY(-2px)}}' +
       '@keyframes hb-talk{from{transform:translateY(0) scale(1)}to{transform:translateY(-4px) scale(1.04,.97)}}' +
       '@keyframes hb-blink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}' +
@@ -457,11 +469,11 @@
       '@keyframes hb-winknow{0%,100%{transform:scaleY(1)}30%,70%{transform:scaleY(.1)}}' +
       '@keyframes hb-wave{from{transform:rotate(-18deg)}to{transform:rotate(16deg)}}' +
       '@keyframes hb-hairflip{from{transform:rotate(0)}to{transform:rotate(-8deg) translateX(-1px)}}' +
-      '.hb-bubble{position:fixed;left:10px;right:10px;bottom:68px;max-width:360px;margin:0 auto;z-index:42;background:var(--surface);color:var(--text);' +
+      '.hb-bubble{position:fixed;width:max-content;max-width:min(360px,calc(100vw - 16px));z-index:46;background:var(--surface);color:var(--text);' +
       'border:1px solid var(--border);border-radius:12px;padding:9px 12px;font-size:.92rem;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.15);' +
-      'pointer-events:none;opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s}' +
-      '.hb-bubble.show{opacity:1;transform:none}' +
-      '.hb-panel{position:fixed;left:8px;right:8px;bottom:68px;max-width:380px;margin:0 auto;max-height:72vh;overflow:auto;z-index:130;background:var(--surface);color:var(--text);' +
+      'pointer-events:none;opacity:0;transition:opacity .25s}' +
+      '.hb-bubble.show{opacity:1}' +
+      '.hb-panel{position:fixed;left:8px;right:8px;bottom:12px;max-width:380px;margin:0 auto;max-height:72vh;overflow:auto;z-index:130;background:var(--surface);color:var(--text);' +
       'border:1px solid var(--border);border-radius:14px;padding:12px;box-shadow:0 8px 28px rgba(0,0,0,.25);display:none}' +
       '.hb-panel.open{display:block}' +
       '.hb-ph{display:flex;align-items:center;justify-content:space-between;font-weight:700;margin-bottom:6px}' +
@@ -477,40 +489,191 @@
       '.hb-pick button{border:2px solid var(--border);background:var(--surface);border-radius:12px;padding:6px;width:78px;cursor:pointer;color:var(--text);font-size:.8rem}' +
       '.hb-pick button.on{border-color:var(--primary);background:var(--surface-soft);font-weight:700}' +
       '.hb-pick svg{width:56px;height:56px;display:block;margin:0 auto 2px}' +
-      '@media (prefers-reduced-motion: reduce){.hb-walker{animation:none;transform:translateX(calc(100vw - 62px))}' +
+      '@media (prefers-reduced-motion: reduce){.hb-walker{transition:none!important}' +
       '.hb-flip,.hb-btn svg,.hb-eyes,.hb-eye-r,.hb-eye-l,.hb-walker.waving .hb-arm,.hb-walker.waving .hb-hair,.hb-walker.talking .hb-btn svg{animation:none!important}' +
       '.hb-bubble{transition:none}}';
     document.head.appendChild(s);
   }
 
+  var SIZE = 56, MARGIN = 8, PAD_TOP = 8;
+  var wanderTimer = 0, pos = { x: 8, y: 200 }, reduceMotion = false;
+
+  function prefersReduce() {
+    try { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+    catch (e) { return false; }
+  }
+  function headerBottom() {
+    var h = document.querySelector('header');
+    if (!h) return 56;
+    var r = h.getBoundingClientRect();
+    return Math.max(48, Math.ceil(r.bottom) + PAD_TOP);
+  }
+  function avoidRects() {
+    var out = [];
+    function add(node, pad) {
+      if (!node) return;
+      var r = node.getBoundingClientRect();
+      if (r.width < 8 || r.height < 8) return;
+      out.push({ l: r.left - pad, t: r.top - pad, r: r.right + pad, b: r.bottom + pad });
+    }
+    document.querySelectorAll('#app .grid .icon, .home-devices, #home-devices, .home-dev, .home-dev-ask').forEach(function (node) { add(node, 10); });
+    document.querySelectorAll('header, #profile-menu, .hb-panel').forEach(function (node) { add(node, 6); });
+    return out;
+  }
+  function hits(x, y, boxes) {
+    var right = x + SIZE, bot = y + SIZE, i, box;
+    for (i = 0; i < boxes.length; i++) {
+      box = boxes[i];
+      if (x < box.r && right > box.l && y < box.b && bot > box.t) return true;
+    }
+    return false;
+  }
+  function bounds() {
+    var vw = window.innerWidth, vh = window.innerHeight;
+    return {
+      minX: MARGIN,
+      maxX: Math.max(MARGIN, vw - SIZE - MARGIN),
+      minY: headerBottom(),
+      maxY: Math.max(headerBottom(), vh - SIZE - MARGIN)
+    };
+  }
+  function pickSpot(from) {
+    var b = bounds(), boxes = avoidRects(), i, x, y, sc, best = null, bestScore = -1e9;
+    function score(sx, sy) {
+      if (hits(sx, sy, boxes)) return -1e6;
+      var near = 80, cx = sx + SIZE / 2, cy = sy + SIZE / 2;
+      near = Math.min(cx - b.minX, b.maxX + SIZE - cx, cy - b.minY, b.maxY + SIZE - cy, near);
+      boxes.forEach(function (box) {
+        var dx = 0, dy = 0;
+        if (cx < box.l) dx = box.l - cx; else if (cx > box.r) dx = cx - box.r;
+        if (cy < box.t) dy = box.t - cy; else if (cy > box.b) dy = cy - box.b;
+        var d = Math.sqrt(dx * dx + dy * dy);
+        if (d < near) near = d;
+      });
+      var val = near;
+      if (from) {
+        var dist = Math.hypot(sx - from.x, sy - from.y);
+        if (dist < 40) val -= 80;
+        else val += Math.min(80, dist * 0.12);
+      }
+      return val;
+    }
+    var candidates = [
+      [b.minX, b.minY], [b.maxX, b.minY],
+      [b.minX, b.maxY], [b.maxX, b.maxY],
+      [b.minX, (b.minY + b.maxY) / 2], [b.maxX, (b.minY + b.maxY) / 2],
+      [(b.minX + b.maxX) / 2, b.maxY],
+      [b.minX, b.minY + 20], [b.maxX, b.minY + 20]
+    ];
+    for (i = 0; i < candidates.length; i++) {
+      x = Math.round(Math.min(b.maxX, Math.max(b.minX, candidates[i][0])));
+      y = Math.round(Math.min(b.maxY, Math.max(b.minY, candidates[i][1])));
+      sc = score(x, y);
+      if (sc > bestScore) { bestScore = sc; best = { x: x, y: y }; }
+    }
+    for (i = 0; i < 28; i++) {
+      x = Math.round(b.minX + Math.random() * Math.max(0, b.maxX - b.minX));
+      y = Math.round(b.minY + Math.random() * Math.max(0, b.maxY - b.minY));
+      sc = score(x, y);
+      if (sc > bestScore) { bestScore = sc; best = { x: x, y: y }; }
+    }
+    return best || { x: b.minX, y: b.maxY };
+  }
+  function setPos(x, y, dur, flipFrom) {
+    pos = { x: x, y: y };
+    if (!el.walker) return;
+    if (dur === 0 || reduceMotion) el.walker.classList.add('snap');
+    else {
+      el.walker.classList.remove('snap');
+      el.walker.style.transitionDuration = (dur || 3.2) + 's';
+    }
+    if (typeof flipFrom === 'number') {
+      if (x < flipFrom) el.walker.classList.add('hb-left');
+      else el.walker.classList.remove('hb-left');
+    }
+    el.walker.style.transform = 'translate3d(' + x + 'px,' + y + 'px,0)';
+    placeChrome();
+  }
+  function placeChrome() {
+    if (!el.bubble || !el.walker) return;
+    var vw = window.innerWidth;
+    var bw = Math.min(360, vw - 16);
+    var left = pos.x + SIZE / 2 - bw / 2;
+    if (left < 8) left = 8;
+    if (left + bw > vw - 8) left = Math.max(8, vw - 8 - bw);
+    el.bubble.style.width = bw + 'px';
+    var bh = el.bubble.offsetHeight || 48;
+    if (pos.y - bh - 10 >= headerBottom()) el.bubble.style.top = (pos.y - bh - 8) + 'px';
+    else el.bubble.style.top = (pos.y + SIZE + 6) + 'px';
+    el.bubble.style.left = left + 'px';
+    el.bubble.style.right = 'auto';
+    el.bubble.style.bottom = 'auto';
+    el.bubble.style.margin = '0';
+  }
+  function scheduleWander() {
+    clearTimeout(wanderTimer);
+    if (!el.walker || el.walker.style.display === 'none' || document.hidden) return;
+    if (reduceMotion) {
+      var park = pickSpot(pos);
+      setPos(park.x, park.y, 0, pos.x);
+      el.walker.classList.add('idle');
+      return;
+    }
+    if (state.panel) return;
+    var pause = 2500 + Math.random() * 2500;
+    wanderTimer = setTimeout(function () {
+      if (!el.walker || el.walker.style.display === 'none' || state.panel) return;
+      el.walker.classList.remove('idle');
+      var next = pickSpot(pos);
+      var dist = Math.hypot(next.x - pos.x, next.y - pos.y);
+      var dur = Math.max(1.8, Math.min(7, 1.6 + dist / 140));
+      setPos(next.x, next.y, dur, pos.x);
+      wanderTimer = setTimeout(function () {
+        if (el.walker) el.walker.classList.add('idle');
+        scheduleWander();
+      }, dur * 1000 + 200);
+    }, pause);
+  }
+  function onResize() {
+    var b = bounds();
+    var x = Math.min(b.maxX, Math.max(b.minX, pos.x));
+    var y = Math.min(b.maxY, Math.max(b.minY, pos.y));
+    setPos(x, y, 0);
+    if (el.walker && el.walker.style.display !== 'none') scheduleWander();
+  }
+
+
   function build() {
+    if (document.querySelector('.hb-walker') && document.getElementById('hb-css')) {
+      el.walker = document.querySelector('.hb-walker');
+      el.btn = el.walker.querySelector('.hb-btn');
+      el.bubble = document.querySelector('.hb-bubble');
+      el.panel = document.querySelector('.hb-panel');
+      return;
+    }
     css();
-    el.road = document.createElement('div'); el.road.className = 'hb-road'; el.road.setAttribute('aria-hidden', 'true');
     el.walker = document.createElement('div'); el.walker.className = 'hb-walker idle';
     el.walker.innerHTML = '<div class="hb-flip"><button class="hb-btn" type="button" aria-label="Hjälpbot – tryck för frågor"></button></div>';
     el.btn = el.walker.querySelector('.hb-btn');
     el.bubble = document.createElement('div'); el.bubble.className = 'hb-bubble'; el.bubble.setAttribute('role', 'status'); el.bubble.setAttribute('aria-live', 'polite');
     el.panel = document.createElement('div'); el.panel.className = 'hb-panel'; el.panel.setAttribute('role', 'dialog'); el.panel.setAttribute('aria-label', 'Hjälpbot');
-    [el.road, el.walker, el.bubble, el.panel].forEach(function (x) { document.body.appendChild(x); });
+    [el.walker, el.bubble, el.panel].forEach(function (x) { document.body.appendChild(x); });
     el.btn.addEventListener('click', function () { wave(); state.panel ? closePanel() : openPanel(); });
     el.panel.addEventListener('click', onPanel);
+    window.addEventListener('resize', onResize);
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) clearTimeout(wanderTimer);
+      else if (el.walker && el.walker.style.display !== 'none') scheduleWander();
+    });
     drawChar();
   }
   function drawChar() {
-    var c = charId();
-    if (c === 'off' || !el.btn) return;
-    el.btn.innerHTML = CHARS[c].svg();
-    applyGear(el.btn.querySelector('svg'));
-  }
-
-  // Går en stund, står still en stund (snällare mot batteriet)
-  var walkT = null;
-  function rhythm() {
-    clearTimeout(walkT);
-    if (!el.walker || state.panel || el.walker.classList.contains('talking')) return;
-    var walking = !el.walker.classList.contains('idle');
-    el.walker.classList.toggle('idle', walking);
-    walkT = setTimeout(rhythm, walking ? 9000 + Math.random() * 9000 : 7000 + Math.random() * 6000);
+    try {
+      var c = charId();
+      if (c === 'off' || !el.btn) return;
+      el.btn.innerHTML = CHARS[c].svg();
+      applyGear(el.btn.querySelector('svg'));
+    } catch (e) {}
   }
   function wave() {
     el.walker.classList.remove('waving'); void el.walker.offsetWidth; el.walker.classList.add('waving');
@@ -521,12 +684,13 @@
     clearTimeout(state.hideT);
     el.bubble.textContent = text;
     el.bubble.classList.add('show');
+    placeChrome();
     el.walker.classList.add('talking', 'idle');
     state.lastComment = Date.now(); sessionStorage.setItem('hb_last', String(state.lastComment));
     setTimeout(function () { el.walker.classList.remove('talking'); }, 2200);
     state.hideT = setTimeout(hideBubble, BUBBLE_MS);
   }
-  function hideBubble() { el.bubble.classList.remove('show'); rhythm(); }
+  function hideBubble() { if (el.bubble) el.bubble.classList.remove('show'); scheduleWander(); }
 
   // Verkstadstimmar: förarens egna siffror från serverns svar (window.VERKSTAD_LAST)
   var MONL = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
@@ -542,9 +706,14 @@
   }
 
   function show(on) {
-    document.body.classList.toggle('hb-on', on);
-    [el.road, el.walker].forEach(function (x) { x.style.display = on ? '' : 'none'; });
-    if (!on) { hideBubble(); closePanel(); }
+    var was = el.walker && el.walker.style.display !== 'none';
+    if (el.walker) el.walker.style.display = on ? '' : 'none';
+    if (!on) { hideBubble(); closePanel(); clearTimeout(wanderTimer); }
+    else if (!was) {
+      var startAt = pickSpot(null);
+      setPos(startAt.x, startAt.y, 0);
+      scheduleWander();
+    }
   }
 
   // ---------- spontana kommentarer ----------
@@ -608,7 +777,7 @@
     }).join('');
   }
   function openPanel() {
-    state.panel = true; clearTimeout(walkT); el.walker.classList.add('idle'); hideBubble2();
+    state.panel = true; clearTimeout(wanderTimer); el.walker.classList.add('idle'); hideBubble2();
     var c = charId();
     el.panel.innerHTML = '<div class="hb-ph"><span>' + esc(CHARS[c].name) + '</span><button class="hb-x" data-hb-close aria-label="Stäng">✕</button></div>' +
       '<div class="hb-say" id="hb-say">' + esc(line('hello')) + '</div>' +
@@ -617,7 +786,7 @@
     el.panel.classList.add('open');
   }
   function hideBubble2() { clearTimeout(state.hideT); el.bubble.classList.remove('show'); }
-  function closePanel() { state.panel = false; if (el.panel) el.panel.classList.remove('open'); rhythm(); }
+  function closePanel() { state.panel = false; if (el.panel) el.panel.classList.remove('open'); scheduleWander(); }
   function answer(html) { var s = document.getElementById('hb-say'); if (s) s.innerHTML = html; el.walker.classList.add('talking'); setTimeout(function () { el.walker.classList.remove('talking'); }, 1800); }
 
   function onPanel(e) {
@@ -669,7 +838,7 @@
     renderSettings: function (content) {
       var c = charId();
       content.innerHTML = '<div class="section"><h3 style="margin-top:0">Hjälpbot</h3>' +
-        '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">En liten figur längst ner som kommenterar dina siffror och svarar på enkla frågor. Tryck på den för att fråga.</p>' +
+        '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">En liten figur på skärmen som kommenterar dina siffror och svarar på enkla frågor. Tryck på den för att fråga.</p>' +
         '<div class="hb-pick">' + charButtons('hb-pickbtn') + '<button class="hb-pickbtn' + (c === 'off' ? ' on' : '') + '" data-hb-char="off"><div style="height:56px;display:flex;align-items:center;justify-content:center;font-size:1.6rem">🚫</div>Av</button></div></div>';
       content.onclick = function (e) {
         var t = e.target.closest('[data-hb-char]'); if (!t) return;
@@ -690,12 +859,21 @@
   };
 
   function start() {
+    reduceMotion = prefersReduce();
     build();
     show(false);
-    tick(); rhythm();
+    tick();
     setInterval(function () { if (!document.hidden) tick(); }, 1000);
+    var boot = setInterval(function () {
+      tick();
+      if (el.walker && el.walker.style.display !== 'none') clearInterval(boot);
+    }, 200);
+    setTimeout(function () { clearInterval(boot); }, 8000);
     document.addEventListener('animationer-change', function () { drawChar(); });
     document.addEventListener('animationer-vader', function () { drawChar(); });
+    window.HJALPBOT._previewPos = function (x, y, dur) { setPos(x, y, dur == null ? 0 : dur, pos.x); };
+    window.HJALPBOT._pickSpot = pickSpot;
+    window.HJALPBOT._pos = function () { return { x: pos.x, y: pos.y }; };
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();

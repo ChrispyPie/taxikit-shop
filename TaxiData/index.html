@@ -13,9 +13,10 @@
   <script src="bevakning-ljud.js?v=20261111anim1"></script>
   <script src="animationer.js?v=20261111tyst1"></script>
   <script src="animationer-vader.js?v=20261111tyst1"></script>
+  <script src="hjalpbot.js?v=20261111botfix1"></script>
   <script src="namn.js?v=20261028nm1"></script>
   <link rel="stylesheet" href="style.css?v=20261111land1">
-  <link rel="stylesheet" href="tema.css?v=20261110hl3">
+  <link rel="stylesheet" href="tema.css?v=20261111botfix1">
   <link rel="manifest" href="manifest.webmanifest?v=20261111pwa1">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -88,12 +89,14 @@
     .home-devices { margin: 12px 0 0; }
     .home-devices-h { font-size: 0.78rem; font-weight: 700; color: var(--text-soft, #718096); margin: 0 0 6px; }
     .home-devices-row { display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 0 0 4px; }
-    .home-dev { flex: 0 0 auto; min-width: 118px; max-width: 70vw; border: 1px solid var(--border, #cbd5e0); border-radius: 10px; padding: 8px 10px; font-size: 0.8rem; line-height: 1.25; text-align: left; background: var(--card, #fff); color: inherit; font-family: inherit; }
+    .home-dev { flex: 0 0 auto; min-width: 118px; max-width: 70vw; border: 1px solid var(--border, #cbd5e0); border-radius: 10px; padding: 8px 10px; font-size: 0.8rem; line-height: 1.25; text-align: left; background: var(--surface, #fff); color: var(--text, #1a365d); font-family: inherit; }
     button.home-dev { cursor: pointer; }
     .home-dev-this { border-color: var(--primary, #2b6cb0); }
     .home-dev-name { font-weight: 700; }
     .home-dev-meta { color: var(--text-soft, #718096); font-size: 0.72rem; margin-top: 2px; }
-    .home-dev-ask { margin-top: 8px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border, #cbd5e0); background: var(--card, #fff); font-size: 0.9rem; }
+    .home-dev-ask { margin-top: 8px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border, #cbd5e0); background: var(--surface, #fff); color: var(--text, #1a365d); font-size: 0.9rem; }
+    html[data-theme="dark"] .home-dev,
+    html[data-theme="dark"] .home-dev-ask { background: var(--surface, #1a2430); color: var(--text, #e2e8f0); border-color: var(--border, #3a4a5c); }
     .home-dev-ask p { margin: 0 0 6px; font-weight: 700; }
     .home-dev-ask-note { font-weight: 400 !important; color: var(--text-soft, #718096); font-size: 0.82rem !important; }
     .home-dev-ask-btns { display: flex; gap: 8px; justify-content: flex-end; }
@@ -192,7 +195,7 @@
   <script src="demo.js?v=am1q"></script>
   <script src="swipe-back.js?v=20261106sb2"></script>
   <script src="view-state.js?v=20261107lazy1"></script>
-  <script src="lazy-views.js?v=20261111tyst1"></script>
+  <script src="lazy-views.js?v=20261111botfix1"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.

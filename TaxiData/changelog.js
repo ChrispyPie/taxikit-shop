@@ -15,6 +15,11 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-11', id: '2026-11-11botfix1', tid: '09:35', rader: [
+    ['Rättat', 'Hjälpboten syns igen i appen och går fritt över skärmen, utan en egen list längst ner. Den skymmer inte knapparna.'],
+    ['Förbättrat', 'Verktygen på hemskärmen visas luftigare, bara ikon och namn, så mer får plats.'],
+    ['Rättat', 'Texten på Inloggade enheter syns tydligt i mörkt läge.']
+  ]},
   { datum: '2026-11-11', id: '2026-11-11land1', tid: '09:20', rader: [
     ['Nytt', 'När ett flyg landar i Prognos gör planet en kort landningsrörelse vid sin plats i flygspalten. Det styrs av samma val Animationer under Inställningar.']
   ]},

@@ -141,32 +141,49 @@ html[data-theme="dark"] a { color: var(--primary); }
 html[data-theme="dark"] img.pfp-avatar, html[data-theme="dark"] .emoji { filter: none; }
 
 /* Rutmenyn (startsidan och adminmenyn). Startskärm-valet under Inställningar sätter html[data-home] = 2 | 3 | lista
-   och gäller båda menyerna. Utan val: 3 i bredd på telefon, annars automatiskt. */
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 16px; }
-.icon { background: var(--surface); border: 1px solid var(--c-cbd5e0); border-radius: 8px; padding: 16px; text-align: center; cursor: pointer; color: var(--text); }
-.icon .emoji { font-size: 32px; margin-bottom: 8px; }
+   och gäller båda menyerna. Utan val: 3 i bredd på telefon, annars automatiskt.
+   2026-11-11: ramar bort, tätare rutnät (minst ~44 px tryckyta). Ångra: backup/pre-fix-hjalpbot-enheter-20261111. */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px 6px; }
+.icon {
+  background: transparent; border: 0; border-radius: 10px; padding: 8px 2px 6px;
+  text-align: center; cursor: pointer; color: var(--text);
+  position: relative; overflow: visible; min-height: 44px; box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+.icon .emoji { font-size: 30px; margin-bottom: 4px; line-height: 1; }
 .icon .label { font-size: calc(13px * var(--font-scale, 1)); }
+.icon:active { background: rgba(127,127,127,0.16); transform: scale(0.96); }
+.icon:focus-visible { outline: 2px solid var(--accent, #3182ce); outline-offset: 2px; }
 @media (max-width: 600px) {
-  .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-  .icon { min-height: 92px; padding: 12px 4px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; }
-  .icon .emoji { font-size: 30px; line-height: 1; margin-bottom: 7px; }
-  /* 3 i bredd: texten växer högst 15 % så att långa ord (Inställningar) får plats i rutan */
-  .icon .label { font-size: calc(13px * min(var(--font-scale, 1), 1.15)); line-height: 1.2; overflow-wrap: break-word; hyphens: manual; }
+  .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 4px; }
+  .icon { min-height: 64px; padding: 6px 2px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; }
+  .icon .emoji { font-size: 28px; line-height: 1; margin-bottom: 4px; }
+  /* 3 i bredd: texten växer högst 15 % så att långa ord (Inställningar) får plats */
+  .icon .label { font-size: calc(13px * min(var(--font-scale, 1), 1.15)); line-height: 1.15; overflow-wrap: break-word; hyphens: manual; }
 }
 html[data-home] .grid { max-width: 760px; }
-html[data-home="2"] .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-html[data-home="2"] .icon { min-height: 0; padding: 16px; display: block; }
-html[data-home="2"] .icon .emoji { font-size: 32px; line-height: normal; margin-bottom: 8px; }
+html[data-home="2"] .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 6px; }
+html[data-home="2"] .icon { min-height: 64px; padding: 8px 4px 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+html[data-home="2"] .icon .emoji { font-size: 30px; line-height: 1; margin-bottom: 4px; }
 html[data-home="2"] .icon .label { font-size: calc(13px * var(--font-scale, 1)); }
-html[data-home="3"] .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-html[data-home="3"] .icon { min-height: 92px; padding: 12px 4px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; }
-html[data-home="3"] .icon .emoji { font-size: 30px; line-height: 1; margin-bottom: 7px; }
-html[data-home="3"] .icon .label { font-size: calc(13px * min(var(--font-scale, 1), 1.15)); line-height: 1.2; overflow-wrap: break-word; }
-html[data-home="lista"] .grid { grid-template-columns: 1fr; gap: 8px; }
-html[data-home="lista"] .icon { min-height: 52px; padding: 0 14px; display: flex; flex-direction: row; align-items: center; text-align: left; box-sizing: border-box; }
+html[data-home="3"] .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 4px; }
+html[data-home="3"] .icon { min-height: 64px; padding: 6px 2px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; }
+html[data-home="3"] .icon .emoji { font-size: 28px; line-height: 1; margin-bottom: 4px; }
+html[data-home="3"] .icon .label { font-size: calc(13px * min(var(--font-scale, 1), 1.15)); line-height: 1.15; overflow-wrap: break-word; }
+html[data-home="lista"] .grid { grid-template-columns: 1fr; gap: 2px; }
+html[data-home="lista"] .icon { min-height: 44px; padding: 6px 28px 6px 10px; display: flex; flex-direction: row; align-items: center; text-align: left; box-sizing: border-box; }
 html[data-home="lista"] .icon .emoji { font-size: 24px; line-height: 1; margin: 0 12px 0 0; width: 30px; text-align: center; flex-shrink: 0; }
 html[data-home="lista"] .icon .label { font-size: calc(15px * var(--font-scale, 1)); flex: 1; }
-html[data-home="lista"] .icon::after { content: '›'; color: var(--c-a0aec0); font-size: 22px; margin-left: 8px; }
+html[data-home="lista"] .icon::before { content: '›'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--c-a0aec0); font-size: 22px; pointer-events: none; }
+/* Notisprickar sitter vid ikonen (utan ram skulle hörnet hamna långt från bilden). */
+.grid .icon.badge-host.has-badge::after,
+.grid .icon.badge-host.has-badge[data-badge-text]:not([data-badge-text=""])::after {
+  top: 0; right: 50%; left: auto; transform: translateX(22px);
+}
+html[data-home="lista"] .grid .icon.badge-host.has-badge::after,
+html[data-home="lista"] .grid .icon.badge-host.has-badge[data-badge-text]:not([data-badge-text=""])::after {
+  top: 2px; right: auto; left: 26px; transform: none;
+}
 
 /* Fast header (2026-11-04): headern står kvar högst upp, bara innehållet skrollar.
    Hem-, notis- och profilikonerna visas utan bakgrund och ram. Gäller alla sidor som laddar tema.css. */
