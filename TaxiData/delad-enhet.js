@@ -1,7 +1,8 @@
 /* Delad enhet (Inställningar) och inloggade enheter (startsidan).
  * Delad enhet sparas i localStorage 'taxi_delad_enhet' (av som standard). På delade
- * plattor märks sessionen på servern. Servern stänger den när passet är slut, eller
- * om timkörningen inte har uppdaterats på 1 timme. Orsaken sparas på enheten per
+ * plattor märks sessionen på servern redan vid inloggning, och igen som backup
+ * efteråt (med omförsök). Servern stänger den när passet är slut, när appen
+ * används igen, eller om timkörningen inte har uppdaterats på 1 timme. Orsaken sparas på enheten per
  * förar-ID. När samma konto loggar in igen på den enheten visas ett rött meddelande
  * (inte på inloggningsskärmen, så nästa förare inte ser det). Annat konto: visas inte.
  * Övriga inloggade enheter får en notis (push + Notiser). Startsidan visar inloggade
@@ -112,12 +113,19 @@
   function syncFlag(on) {
     var t = token();
     if (!t || typeof window.rpc !== 'function') return;
-    function send(endpoint) {
+    function send(endpoint, attempt) {
       var args = { p_token: t, p_on: !!on };
       if (endpoint) args.p_endpoint = endpoint;
       Promise.resolve(window.rpc('session_set_delad_enhet', args))
         .then(function () { reportDevice(); })
-        .catch(function (e) { if (on && e && e.code === '28000') signOutForPass(); });
+        .catch(function (e) {
+          if (on && e && e.code === '28000') { signOutForPass(); return; }
+          var n = attempt || 1;
+          if (on && n < 3) {
+            setTimeout(function () { send(endpoint, n + 1); }, 800 * n);
+            return;
+          }
+        });
     }
     if (!on) { send(null); return; }
     currentEndpoint(send);
