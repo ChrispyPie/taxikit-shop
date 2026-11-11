@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-11', id: '2026-11-11hjalp1', tid: '10:05', rader: [
+    ['Nytt', 'Ett frågetecken uppe till höger öppnar en kort hjälptext för sidan du är på.']
+  ]},
   { datum: '2026-11-11', id: '2026-11-11karta1', tid: '09:50', rader: [
     ['Nytt', 'Under Väder på hemskärmen finns en karta över Västsverige. Du kan visa nederbörd, blixt, vind och temperatur. Uppgifterna kommer från SMHI och Open-Meteo.']
   ]},
