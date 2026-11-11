@@ -15,6 +15,10 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-11', id: '2026-11-11datatid1', tid: '22:35', rader: [
+    ['Rättat', 'I Prognos på Landvetter visar tiden när flygdata senast hämtades från Swedavia, inte när appen öppnades. Är uppgifterna mer än 30 minuter gamla syns det i texten. Tiden för själva prognosen visas också.'],
+    ['Rättat', 'I Ankomster visar "uppdaterad" när tåg, flyg och båtar senast hämtades från källan, inte när du öppnade sidan.']
+  ]},
   { datum: '2026-11-11', id: '2026-11-11hopp1', tid: '22:20', rader: [
     ['Ändrat', 'Om hjälpboten just gått in i en ikon på startskärmen och du öppnar samma verktyg, hoppar den ut genom hemknappen (🏠) uppe till vänster och försvinner, ungefär en sekund. I övrigt syns den inte inne i verktygen. På startskärmen är den tillbaka som vanligt.']
   ]},

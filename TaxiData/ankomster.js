@@ -283,7 +283,8 @@
     var html = '<div class="tabs ank-tabs">' + A.sources.map(function (x) {
       return '<button class="tab' + (x.id === s.id ? ' active' : '') + '" data-ank-tab="' + x.id + '">' + x.icon + ' ' + esc(x.label) + '</button>';
     }).join('') + '</div>';
-    var upd = state.at[s.id] ? new Date(state.at[s.id]) : (state.updated[s.id] ? d(state.updated[s.id]) : null);
+    // Tiden i huvudet är när källan hämtade data (Swedavia/Stena/Trafikverket), inte när appen öppnades.
+    var upd = state.updated[s.id] ? d(state.updated[s.id]) : (state.at[s.id] ? new Date(state.at[s.id]) : null);
     var stale = upd && now - upd > 15 * 60000;
     html += '<div class="ank-toolbar">';
     if(s.id==='tag')html+='<div class="ank-station-picker"><button type="button" class="ank-station-title" data-ank-picker aria-haspopup="dialog" aria-label="Station, '+esc(stationLabel())+'"><span class="ank-station-title-label">'+esc(stationLabel())+'</span><span class="ank-station-caret" aria-hidden="true"></span></button>'+mapsLink(stationLabel(), stationLabel())+'</div>';

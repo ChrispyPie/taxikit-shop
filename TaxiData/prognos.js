@@ -65,6 +65,7 @@
     seenIds: {},
     inAppAlert: true,
     flights: null,       // Landvetter-ankomster (för flygvarningen i 293)
+    flightUpdated: null, // när got.json senast hämtades från Swedavia (arrivalsUpdated)
     cellMap: {},         // data-pg-cell -> bokningar i rutan (förklaringsrutan)
     flyMap: {},          // data-pg-fly -> ankomst (got.json / Ankomster)
     pendingPaint: false, // omritning väntar tills förklaringsrutan stängs
@@ -383,9 +384,19 @@
       rpc('prognos_zones', {}),
       rpc('prognos_watch_list', {}),
       rpc('prognos_original', {}).catch(function () { return null; }),
-      (window.ARRIVAL_DATA && ARRIVAL_DATA.flightItems ? ARRIVAL_DATA.flightItems(120000) : Promise.resolve(null)).catch(function () { return null; })
+      (function () {
+        var A = window.ARRIVAL_DATA;
+        if (A && A.flightFeed) return A.flightFeed(120000);
+        if (A && A.loadFlights) return A.loadFlights();
+        if (A && A.flightItems) return A.flightItems(120000).then(function (items) { return items ? { items: items } : null; });
+        return Promise.resolve(null);
+      }()).catch(function () { return null; })
     ]).then(function (xs) {
-      if (xs[6]) st.flights = xs[6];
+      var fly = xs[6];
+      if (fly) {
+        st.flights = fly.items || (Array.isArray(fly) ? fly : null);
+        st.flightUpdated = fly.updated || fly.arrivalsUpdated || st.flightUpdated;
+      }
       st.status = xs[0] || {};
       st.ktRaw = xs[1] || [];
       st.bookings = ktApply(st.ktRaw); st.bookingsReady = true;
@@ -1857,22 +1868,65 @@
     return html;
   }
 
+  // Klockslag i svensk tid. Tom sträng om tiden saknas.
+  function clockSv(iso, sec) {
+    var d = iso ? new Date(iso) : null;
+    if (!d || isNaN(d.getTime())) return '';
+    return d.toLocaleTimeString('sv-SE', {
+      hour: '2-digit', minute: '2-digit',
+      second: sec ? '2-digit' : undefined,
+      timeZone: 'Europe/Stockholm'
+    });
+  }
+
+  function minutesOld(iso, now) {
+    var d = iso ? new Date(iso) : null;
+    if (!d || isNaN(d.getTime())) return null;
+    return Math.floor(((now != null ? now : Date.now()) - d.getTime()) / 60000);
+  }
+
+  var FLY_STALE_MIN = 30; // visa diskret om Swedavia-cachen är äldre än en halvtimme
+
+  // onFly: Landvetter-vyn visar när flygdata hämtades från Swedavia, inte när appen öppnades.
+  function statusStamp(opts) {
+    opts = opts || {};
+    var fly = opts.flyUpdated, last = opts.lastOkAt, onFly = !!opts.onFly, now = opts.now;
+    var parts = [], warn = '';
+    if (onFly) {
+      parts.push({ k: 'flyg', t: clockSv(fly, true) || '–' });
+      var pg = clockSv(last, true);
+      if (pg) parts.push({ k: 'prognos', t: pg });
+    } else {
+      parts.push({ k: '', t: clockSv(last, true) || '–' });
+    }
+    if (opts.codeNeeded) warn = 'Kod behövs';
+    else if (opts.status && opts.status !== 'ok') warn = 'Kunde inte hämta ny data';
+    else {
+      var fa = onFly ? minutesOld(fly, now) : null;
+      if (fa != null && fa >= FLY_STALE_MIN) warn = 'Flygdata är ' + fa + ' min gammal';
+      else {
+        var age = minutesOld(last, now);
+        if (age != null && age >= 5) warn = 'Data är ' + age + ' min gammal';
+      }
+    }
+    return { parts: parts, warn: warn };
+  }
+
   function statusLine() {
     var s = st.status || {};
-    var last = s.last_ok_at ? new Date(s.last_ok_at) : null;
-    var lastTxt = last && !isNaN(last.getTime())
-      ? p2(last.getHours()) + ':' + p2(last.getMinutes()) + ':' + p2(last.getSeconds())
-      : '–';
-    // t350u: bara tiden när allt är OK – extra text endast när något är fel
-    var warn = '';
-    if (s.code_needed) warn = 'Kod behövs';
-    else if (s.status && s.status !== 'ok') warn = 'Kunde inte hämta ny data';
-    else if (last && !isNaN(last.getTime())) {
-      var age = Math.floor((Date.now() - last.getTime()) / 60000);
-      if (age >= 5) warn = 'Data är ' + age + ' min gammal';
-    }
-    return '<div class="pg-status">Senaste uppdatering: <strong>' + esc(lastTxt) +
-      '</strong>' + (warn ? ' · <span class="pg-stale">' + esc(warn) + '</span>' : '') +
+    var stamp = statusStamp({
+      onFly: st.zoneTab === FLIGHT_ZONE,
+      flyUpdated: st.flightUpdated,
+      lastOkAt: s.last_ok_at,
+      codeNeeded: s.code_needed,
+      status: s.status
+    });
+    var times = stamp.parts.map(function (p) {
+      var t = '<strong>' + esc(p.t) + '</strong>';
+      return p.k ? esc(p.k) + ' ' + t : t;
+    }).join(' · ');
+    return '<div class="pg-status">Senaste uppdatering: ' + times +
+      (stamp.warn ? ' · <span class="pg-stale">' + esc(stamp.warn) + '</span>' : '') +
       '<br><span class="pg-muted">Håll fingret på en ruta för förklaring.</span></div>' +
       renderWarn();
   }
@@ -1946,6 +2000,10 @@
       }
       lines.push('Filter: ' + (hidden.length ? hidden.join(', ') + ' dold' + (hidden.length > 1 ? 'a' : '') : 'alla kategorier') +
         (zones ? ' · zoner: ' + zones.join(', ') : ''));
+      if (st.zoneTab === FLIGHT_ZONE) {
+        var flyTxt = st.flightUpdated ? dm(new Date(st.flightUpdated)) + ' ' + hhmm(st.flightUpdated, true) : '–';
+        lines.push('Flygdata (Swedavia): ' + flyTxt);
+      }
       lines.push('Senaste data: ' + lastTxt);
       lines.push('Skickad: ' + dm(now) + ' ' + hm(now));
       lines.push('Version: ' + appVersion());
@@ -2261,7 +2319,7 @@
   }
 
   P.clearCache = function () {
-    st.bookings = []; st.bookingsReady = false; st.flights = null; st.cellMap = {}; st.flyMap = {}; st.ktRaw = [];
+    st.bookings = []; st.bookingsReady = false; st.flights = null; st.flightUpdated = null; st.cellMap = {}; st.flyMap = {}; st.ktRaw = [];
   };
   P.cachedBookings = function () { return st.bookingsReady ? (st.bookings || []) : null; };
   P.cachedProblem = function () { return st.err ? { kind: 'error', source: 'prognos', message: String(st.err) } : null; };
