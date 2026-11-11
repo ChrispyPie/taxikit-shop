@@ -58,7 +58,7 @@ async function openHome(br, base, { width, height, theme, scale, anim }) {
     document.documentElement.style.setProperty('--font-scale', s);
     const b = document.createElement('div');
     b.textContent = 'TESTVY · påhittade exempel';
-    b.style = 'text-align:center;background:#243c4b;color:#fde68a;font:11px system-ui;padding:3px 4px;position:absolute;left:0;right:0;top:0;z-index:200;pointer-events:none';
+    b.style = 'text-align:center;background:#243c4b;color:#fde68a;font:11px system-ui;padding:3px 4px;position:fixed;left:0;right:0;top:0;z-index:200;pointer-events:none';
     document.body.prepend(b);
   }, scale);
   await p.waitForFunction(() => window.BERRA && document.querySelector('.td-berra'), { timeout: 8000 });
@@ -70,6 +70,15 @@ async function openHome(br, base, { width, height, theme, scale, anim }) {
   return p;
 }
 
+
+async function scrollBerraIntoView(p) {
+  await p.evaluate(() => {
+    const b = document.querySelector('.td-berra');
+    if (b) b.scrollIntoView({ block: 'end', inline: 'nearest' });
+  });
+  await new Promise(r => setTimeout(r, 80));
+}
+
 async function berraInfo(p) {
   return p.evaluate(() => {
     const b = document.querySelector('.td-berra');
@@ -79,6 +88,16 @@ async function berraInfo(p) {
     const icons = [...document.querySelectorAll('#app.is-home .grid .icon')].map(n => n.getBoundingClientRect());
     const overlap = r && icons.some(i => r.left < i.right && r.right > i.left && r.top < i.bottom && r.bottom > i.top);
     const txt = bub && bub.querySelector('.td-berra-bubble-txt');
+    const slot = document.querySelector('.td-berra-slot');
+    const content = document.getElementById('content');
+    const grid = document.querySelector('#app.is-home .grid');
+    const dev = document.getElementById('home-devices');
+    const cs = b && getComputedStyle(b);
+    const yDoc = r ? r.top + scrollY : 0;
+    const tilesBottom = Math.max(
+      grid ? grid.getBoundingClientRect().bottom + scrollY : 0,
+      dev ? dev.getBoundingClientRect().bottom + scrollY : 0
+    );
     return {
       shown: !!(r && r.width > 8 && (b.style.display !== 'none')),
       x: r && r.left, y: r && r.top, w: r && r.width, h: r && r.height,
@@ -88,7 +107,11 @@ async function berraInfo(p) {
       bubbleOn: br && br.left >= -1 && br.top >= -1 && br.right <= innerWidth + 1 && br.bottom <= innerHeight + 1,
       hasTail: !!(bub && bub.querySelector('.td-berra-bubble-tail')),
       text: txt ? txt.textContent : '',
-      hen: /\bStig\b|\bhen\b/.test(document.body.innerText)
+      hen: /\bStig\b|\bhen\b/.test(document.body.innerText),
+      inContent: !!(content && slot && b && content.contains(slot) && slot.contains(b)),
+      position: cs ? cs.position : '',
+      belowTiles: !!(r && yDoc >= tilesBottom - 1),
+      pageScrolls: document.documentElement.scrollHeight > innerHeight + 20
     };
   });
 }
@@ -102,9 +125,12 @@ async function berraInfo(p) {
     const p = await openHome(br, base, { width: 412, height: 780, theme: 'dark', scale: '1.4', anim: '1' });
     ok('no pageerror 412', p._errs.length === 0, p._errs.join('|'));
     let info = await berraInfo(p);
-    ok('berra visible 412', info.shown, JSON.stringify(info));
-    ok('berra on-screen 412', info.x >= 0 && info.y >= 0 && info.x + info.w <= info.vw + 1 && info.y + info.h <= info.vh + 1, JSON.stringify(info));
+    ok('berra in content below tiles 412', info.shown && info.inContent && info.belowTiles && info.position === 'relative', JSON.stringify(info));
+    ok('berra at bottom of home 412', info.belowTiles && info.y + info.h >= info.vh - 40, JSON.stringify(info));
     ok('berra does not cover tiles 412', !info.overlap, JSON.stringify(info));
+    await scrollBerraIntoView(p);
+    info = await berraInfo(p);
+    ok('berra on-screen after scroll 412', info.shown && info.x >= 0 && info.y >= 0 && info.x + info.w <= info.vw + 1 && info.y + info.h <= info.vh + 1, JSON.stringify(info));
     await p.screenshot({ path: path.join(out, 'berra-hem-412-scale14-dark.png') });
 
     await p.click('.td-berra');
@@ -121,6 +147,7 @@ async function berraInfo(p) {
 
   {
     const p = await openHome(br, base, { width: 412, height: 780, theme: 'light', scale: '1.4', anim: '1' });
+    await scrollBerraIntoView(p);
     await p.click('.td-berra');
     await p.waitForFunction(() => document.querySelector('.td-berra-bubble.show'), { timeout: 4000 });
     const info = await berraInfo(p);
@@ -132,6 +159,7 @@ async function berraInfo(p) {
 
   {
     const p = await openHome(br, base, { width: 412, height: 780, theme: 'dark', scale: '1.4', anim: '0' });
+    await scrollBerraIntoView(p);
     await p.click('.td-berra');
     await p.waitForFunction(() => document.querySelector('.td-berra-bubble.show'), { timeout: 4000 });
     const info = await berraInfo(p);
@@ -144,7 +172,10 @@ async function berraInfo(p) {
   {
     const p = await openHome(br, base, { width: 1024, height: 600, theme: 'dark', scale: '1', anim: '1' });
     let info = await berraInfo(p);
-    ok('berra visible 1024', info.shown && !info.overlap, JSON.stringify(info));
+    ok('berra in content below tiles 1024', info.shown && info.inContent && info.belowTiles && info.position === 'relative' && !info.overlap, JSON.stringify(info));
+    await scrollBerraIntoView(p);
+    info = await berraInfo(p);
+    ok('berra on-screen after scroll 1024', info.shown && info.y + info.h <= info.vh + 1, JSON.stringify(info));
     await p.screenshot({ path: path.join(out, 'berra-hem-1024x600-dark.png') });
     await p.click('.td-berra');
     await p.waitForFunction(() => document.querySelector('.td-berra-bubble.show'), { timeout: 4000 });

@@ -1,5 +1,6 @@
-/* Berra: en stillastående figur på startskärmen. Inte valbar, visas för alla.
- * Tryck så säger han ett skämt i en pratbubbla. Rörelse bara om Animationer är på. */
+/* Berra: en stillastående figur längst ner på startskärmen, under rutorna.
+ * Inte valbar, syns för alla, ingen inställning för att ta bort honom.
+ * Han säger bara något när man trycker. Rörelse bara om Animationer är på. */
 (function () {
   'use strict';
   if (window.BERRA) return;
@@ -112,8 +113,9 @@
     var s = document.createElement('style');
     s.id = 'td-berra-css';
     s.textContent =
-      '.td-berra{position:fixed;left:0;top:0;width:' + W + 'px;height:' + H + 'px;z-index:43;margin:0;padding:0;border:0;background:none;cursor:pointer;' +
-      'pointer-events:auto;-webkit-tap-highlight-color:transparent;will-change:transform;overflow:visible}' +
+      '.td-berra-slot{display:flex;justify-content:flex-start;align-items:flex-end;padding:8px 2px 16px;box-sizing:border-box;pointer-events:none}' +
+      '.td-berra{position:relative;width:' + W + 'px;height:' + H + 'px;margin:0;padding:0;border:0;background:none;cursor:pointer;' +
+      'pointer-events:auto;flex:0 0 auto;-webkit-tap-highlight-color:transparent;overflow:visible;z-index:2}' +
       '.td-berra svg{width:' + W + 'px;height:' + H + 'px;display:block;overflow:visible;transform-origin:50% 100%}' +
       '.td-berra.td-berra-poke svg{animation:td-berra-poke .45s ease-out}' +
       '@keyframes td-berra-poke{0%{transform:translateY(0) rotate(0)}30%{transform:translateY(-5px) rotate(-7deg)}62%{transform:translateY(-1px) rotate(4deg)}100%{transform:translateY(0) rotate(0)}}' +
@@ -130,55 +132,63 @@
     document.head.appendChild(s);
   }
 
-  function overlaps(a, b) { return a.l < b.r && a.r > b.l && a.t < b.b && a.b > b.t; }
+  function berraBox() {
+    if (!el.btn || el.btn.style.display === 'none') return null;
+    var r = el.btn.getBoundingClientRect();
+    if (r.width < 4 || r.height < 4) return null;
+    return r;
+  }
 
-  function room() {
-    if (!onHome()) return null;
-    var vw = window.innerWidth, vh = window.innerHeight;
-    var bottom = 56, r, i;
-    var header = document.querySelector('#app > header') || document.querySelector('header');
-    if (header) bottom = Math.max(bottom, Math.ceil(header.getBoundingClientRect().bottom));
-    var grid = document.querySelector('#app.is-home .grid');
-    if (grid) bottom = Math.max(bottom, grid.getBoundingClientRect().bottom);
-    var dev = document.getElementById('home-devices');
-    if (dev) bottom = Math.max(bottom, dev.getBoundingClientRect().bottom);
-    var x = MARGIN, y = vh - H - 14;
-    if (y < bottom + 6) y = bottom + 8;
-    if (y + H > vh - 2) return null;
-    var box = { l: x, t: y, r: x + W, b: y + H };
-    var blocked = [];
-    document.querySelectorAll('#app.is-home .grid .icon, #home-devices, .hb-station').forEach(function (n) {
-      r = n.getBoundingClientRect();
-      if (r.width > 4 && r.height > 4) blocked.push({ l: r.left - 6, t: r.top - 6, r: r.right + 6, b: r.bottom + 6 });
-    });
-    for (i = 0; i < blocked.length; i++) if (overlaps(box, blocked[i])) return null;
-    return { x: x, y: y };
+  function sizeSlot() {
+    if (!el.slot) return;
+    el.slot.style.minHeight = '0px';
+    var rect = el.slot.getBoundingClientRect();
+    var topDoc = rect.top + (window.scrollY || window.pageYOffset || 0);
+    // Fyll ut utrymmet under rutorna så Berra sitter längst ner på startskärmen.
+    // Om innehållet redan är högre än skärmen räcker det med plats för figuren —
+    // då når man honom genom att skrolla ner.
+    var leftover = window.innerHeight - topDoc;
+    var h = Math.max(H + 32, leftover);
+    el.slot.style.minHeight = h + 'px';
+  }
+
+  function unmount() {
+    if (el.slot && el.slot.parentNode) el.slot.parentNode.removeChild(el.slot);
+    if (el.btn) el.btn.style.display = 'none';
   }
 
   function place() {
     if (!el.btn) return;
-    var at = room();
-    if (!at) {
-      el.btn.style.display = 'none';
+    if (!onHome()) {
+      unmount();
       hideBubble();
       return;
     }
+    var content = document.getElementById('content');
+    if (!content) return;
+    if (!el.slot) {
+      el.slot = document.createElement('div');
+      el.slot.className = 'td-berra-slot';
+    }
+    if (el.btn.parentNode !== el.slot) el.slot.appendChild(el.btn);
+    if (el.slot.parentNode !== content || content.lastElementChild !== el.slot) content.appendChild(el.slot);
     el.btn.style.display = '';
-    el.btn.style.transform = 'translate3d(' + Math.round(at.x) + 'px,' + Math.round(at.y) + 'px,0)';
-    el.pos = at;
+    el.btn.style.transform = '';
+    sizeSlot();
     if (el.bubble && el.bubble.classList.contains('show')) placeBubble();
   }
 
   function placeBubble() {
-    if (!el.bubble || !el.pos) return;
+    var r = berraBox();
+    if (!el.bubble || !r) return;
     var vw = window.innerWidth, vh = window.innerHeight, pad = 8, tail = 8;
     var bw = Math.min(260, vw - pad * 2);
     el.bubble.style.width = bw + 'px';
     el.bubble.style.maxWidth = bw + 'px';
     var bh = el.bubble.offsetHeight || 48;
-    var cx = el.pos.x + W / 2, cy = el.pos.y + H / 2;
-    var aboveTop = el.pos.y - bh - tail - 4;
-    var belowTop = el.pos.y + H + tail + 4;
+    var cx = r.left + r.width / 2;
+    var aboveTop = r.top - bh - tail - 4;
+    var belowTop = r.bottom + tail + 4;
     var side, top;
     var header = document.querySelector('#app > header');
     var headerY = header ? Math.ceil(header.getBoundingClientRect().bottom) + 4 : 56;
@@ -265,7 +275,6 @@
     el.tail.setAttribute('aria-hidden', 'true');
     el.bubble.appendChild(el.txt);
     el.bubble.appendChild(el.tail);
-    document.body.appendChild(el.btn);
     document.body.appendChild(el.bubble);
     el.btn.addEventListener('click', function (e) {
       e.preventDefault();
@@ -280,15 +289,21 @@
     build();
     place();
     window.addEventListener('resize', place);
+    window.addEventListener('scroll', function () {
+      if (el.bubble && el.bubble.classList.contains('show')) placeBubble();
+    }, { passive: true });
     document.addEventListener('visibilitychange', function () {
       if (document.visibilityState !== 'visible') hideBubble();
       else place();
     });
-    document.addEventListener('animationer-change', function () { /* rörelse styrs vid poke */ });
     setInterval(tick, 1000);
     var app = document.getElementById('app');
     if (app && window.MutationObserver) {
       new MutationObserver(function () { place(); }).observe(app, { attributes: true, attributeFilter: ['class', 'style'] });
+    }
+    var content = document.getElementById('content');
+    if (content && window.MutationObserver) {
+      new MutationObserver(function () { place(); }).observe(content, { childList: true });
     }
   }
 
@@ -302,7 +317,10 @@
       say(text || pickJoke());
       return true;
     },
-    _pos: function () { return el.pos ? { x: el.pos.x, y: el.pos.y } : null; }
+    _pos: function () {
+      var r = berraBox();
+      return r ? { x: r.left, y: r.top } : null;
+    }
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
