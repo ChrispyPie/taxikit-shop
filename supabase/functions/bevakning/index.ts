@@ -2,6 +2,7 @@
 //  - action "vapid": publik VAPID-nyckel (skapas första gången och sparas i Supabase Vault, privata nyckeln lämnar aldrig servern)
 //  - action "test":  skickar en testnotis till förarens egna enheter (kräver inloggning, token)
 //  - action "tick":  körs av pg_cron varje minut NÄR det finns aktiva bevakningar eller tågnotiser (kräver x-tick-key)
+//  - action "notify": skickar en färdig notis till en förare (kräver x-tick-key). skip_endpoints hoppas över (t.ex. utloggad platta).
 // Fasta Bevakningar för tåg (tagnotis.ts) och flyg (flygnotis.ts).
 // Flygdata: samma cache som appen (skiftlogg/feed/got.json, uppdateras ca var 5:e minut från Swedavia).
 // Tågdata: samma Vercel-funktion som appen (/api/trains, CDN-cache 60 s) – ingen extra last på Trafikverket.
@@ -67,15 +68,18 @@ async function vapid(): Promise<string> {
 }
 
 type Msg = { title: string; body: string; tag: string };
-async function sendTo(driver: string, msg: Msg) {
+type SendOpts = { skipEndpoints?: string[]; skipSave?: boolean; nkey?: string };
+async function sendTo(driver: string, msg: Msg, opts: SendOpts = {}) {
   await vapid();
   const { data } = await sb.rpc("bev_svc_targets", { p_driver: driver });
-  const subs = (data || []) as { id: number; endpoint: string; p256dh: string; auth: string }[];
+  const skip = new Set((opts.skipEndpoints || []).filter(Boolean));
+  const subs = ((data || []) as { id: number; endpoint: string; p256dh: string; auth: string }[])
+    .filter((s) => !skip.has(s.endpoint));
   let sent = 0, failed = 0;
   const ts = Date.now();
-  const nkey = notisKey(msg, ts);
+  const nkey = opts.nkey || notisKey(msg, ts);
   // Spara i notisflödet först (även om föraren inte har någon telefon med push påslagen)
-  const saved = await saveNotice(sb, driver, msg, nkey);
+  const saved = opts.skipSave ? false : await saveNotice(sb, driver, msg, nkey);
   const payload = JSON.stringify({ ...msg, url: msg.tag === "test" ? APP_URL : notisUrl(msg), ts, nkey });
   for (const s of subs) {
     try {
@@ -314,6 +318,21 @@ Deno.serve(async (req) => {
       if (error || !data) return out({ error: "invalid_session", code: "28000" }, 401);
       const r = await sendTo(data as string, { title: "🔔 Testnotis från TaxiData",
         body: "Det fungerar! Så här låter det när ett bevakat flyg eller tåg ändras.", tag: "test" });
+      return out(r);
+    }
+    if (b.action === "notify") {
+      const key = await secret("BEVAKNING_TICK_KEY");
+      if (!key || req.headers.get("x-tick-key") !== key) return out({ error: "forbidden" }, 403);
+      const driver = typeof b.driver === "string" ? b.driver : "";
+      if (!driver || driver.length > 40) return out({ error: "bad_driver" }, 400);
+      const title = String(b.title || "").slice(0, 200);
+      const body = String(b.body || "").slice(0, 600);
+      if (!title) return out({ error: "bad_msg" }, 400);
+      const rawSkip = Array.isArray(b.skip_endpoints) ? b.skip_endpoints : [];
+      const skipEndpoints = rawSkip.filter((u): u is string => typeof u === "string" && u.startsWith("https://")).slice(0, 10);
+      const nkey = typeof b.nkey === "string" && b.nkey ? b.nkey.slice(0, 200) : undefined;
+      const tag = String(b.tag || "konto-delad").slice(0, 120);
+      const r = await sendTo(driver, { title, body, tag }, { skipEndpoints, skipSave: true, nkey });
       return out(r);
     }
     if (b.action === "tick") {

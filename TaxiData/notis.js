@@ -291,6 +291,7 @@
     { id: 'bat', label: 'Båt' },
     { id: 'event', label: 'Evenemang' },
     { id: 'nyheter', label: 'Uppdateringar' },
+    { id: 'konto', label: 'Konto' },
     { id: 'prognos', label: 'Prognos' },
     { id: 'forum', label: 'Forum' },
     { id: 'bil', label: 'Bil' },
@@ -308,6 +309,7 @@
     if (k === 'bat') return 'bat';
     if (k === 'reminder' || k === 'event' || k.indexOf('kal') === 0) return 'event';
     if (k === 'nyheter') return 'nyheter';
+    if (k === 'konto') return 'konto';
     if (k === 'prognos') return 'prognos';
     if (k.indexOf('forum') === 0) return 'forum';
     if (k.indexOf('bil') === 0) return 'bil';
