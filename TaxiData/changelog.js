@@ -15,6 +15,11 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-11', id: '2026-11-11poke1', tid: '12:25', rader: [
+    ['Nytt', 'När du trycker på hjälpboten öppnas ingen ruta. Den gör en kort reaktion och kan säga något. Hjälp finns under frågetecknet.'],
+    ['Förbättrat', 'Pratbubblor från hjälpboten och Berra stannar tills du lämnar sidan, trycker igen eller trettio sekunder har gått.'],
+    ['Förbättrat', 'Berra har fått många nya skämt. Du hör alla innan något upprepas.']
+  ]},
   { datum: '2026-11-11', id: '2026-11-11maps1', tid: '12:20', rader: [
     ['Nytt', 'Vid platser i Kalendern och vid stationer och flygplatser i Ankomster finns en liten länk till vägbeskrivning i Google Maps.']
   ]},

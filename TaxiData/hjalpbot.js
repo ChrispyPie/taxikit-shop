@@ -17,7 +17,7 @@
   var DEFAULT_CHAR = 'robot';
   var COMMENT_CHANCE = 0.4;        // chans att boten säger något när en sida öppnas
   var COMMENT_GAP_MS = 60 * 1000;  // minst så här länge mellan spontana kommentarer
-  var BUBBLE_MS = 7000;
+  var BUBBLE_MS = 30000;
 
   // ---------- figurer (SVG, viewBox 64×64) ----------
   var K = '#1a1a1a', Y = '#f5c518', T = '#14a3a3', SKIN = '#f6d2b3';
@@ -1145,16 +1145,19 @@
     }
     css();
     el.walker = document.createElement('div'); el.walker.className = 'hb-walker idle';
-    el.walker.innerHTML = '<div class="hb-flip"><button class="hb-btn" type="button" aria-label="Hjälpbot – tryck för frågor"></button></div>';
+    el.walker.innerHTML = '<div class="hb-flip"><button class="hb-btn" type="button" aria-label="Hjälpbot"></button></div>';
     el.btn = el.walker.querySelector('.hb-btn');
     el.bubble = document.createElement('div'); el.bubble.className = 'hb-bubble'; el.bubble.setAttribute('role', 'status'); el.bubble.setAttribute('aria-live', 'polite');
     el.bubbleTxt = document.createElement('div'); el.bubbleTxt.className = 'hb-bubble-txt';
     el.bubbleTail = document.createElement('span'); el.bubbleTail.className = 'hb-bubble-tail'; el.bubbleTail.setAttribute('aria-hidden', 'true');
     el.bubble.appendChild(el.bubbleTxt); el.bubble.appendChild(el.bubbleTail);
-    el.panel = document.createElement('div'); el.panel.className = 'hb-panel'; el.panel.setAttribute('role', 'dialog'); el.panel.setAttribute('aria-label', 'Hjälpbot');
-    [el.walker, el.bubble, el.panel].forEach(function (x) { document.body.appendChild(x); });
+    [el.walker, el.bubble].forEach(function (x) { document.body.appendChild(x); });
     ensureStation();
-    el.btn.addEventListener('click', function () { wave(); state.panel ? closePanel() : openPanel(); });
+    el.btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      poke();
+    });
     el.bubble.addEventListener('click', function (e) {
       var tip = state.bubbleTip, id = state.bubbleTool;
       if (!tip && !id) return;
@@ -1166,7 +1169,7 @@
       else if (id && typeof window.openItem === 'function') window.openItem(id);
     });
 
-    el.panel.addEventListener('click', onPanel);
+    if (el.panel) el.panel.addEventListener('click', onPanel);
     window.addEventListener('resize', onResize);
     document.addEventListener('visibilitychange', function () {
       if (!pageVisible()) {
@@ -1196,6 +1199,50 @@
   function wave() {
     el.walker.classList.remove('waving'); void el.walker.offsetWidth; el.walker.classList.add('waving');
     setTimeout(function () { el.walker.classList.remove('waving'); }, 1500);
+  }
+  var lastPoke = 0;
+  var POKE = {
+    robot: [
+      'Bip. En vänlig knuff är registrerad.',
+      '42 är svaret. Men vad var frågan?',
+      'Min hjärna är stor som en planet. Den här knuffen var ändå trevlig.',
+      'Systemet noterar kontakt. Tack, det var det mest spännande på ett tag.',
+      'Kretsarna reagerar. Inte dåligt, för att vara en knuff.',
+      'Diagnos: någon vill säga hej. Jag också, lite.',
+      'Batteriet klarar fler knuffar. Hjälp finns under frågetecknet.',
+      'Bip bop. Jag är här. Inte i en ruta, bara här.'
+    ],
+    chauffor: [
+      'Varför tog taxin med sig en stege? Den skulle till en högre nivå.',
+      'Jag kör natt, men den här knuffen väckte även mig.',
+      'En kort paus, sen rullar vi igen.',
+      'Taxi utan skämt är bara en bil. Den här knuffen räknas som beställning.',
+      'Jag stannar när du knuffar. Mer än man kan säga om vissa i rusningen.',
+      'Pappa sa att man inte petar på chauffören. Pappa körde inte natt.',
+      'Mjukt där, precis som ett bra baksäte.',
+      'Vad sa däcket till asfalten? Vi sitter ihop i det här.'
+    ],
+    diva: [
+      'Aj då, du tar i. Jag gillar stilen ändå.',
+      'Kör försiktigt med lacken, du.',
+      'Mmm, mer uppmärksamhet så där och jag tar en extra runda.',
+      'Hej stjärna. Jag såg dig, men det var trevligt att du sa hej.',
+      'Knuffa på, älskling. Jag ramlar inte.',
+      'Så du ville säga något? Jag lyssnar. Med stil.',
+      'En knuff från dig? Då stannar jag gärna en stund.',
+      'Var rädd om lacken. Den är jobbig att laga i nattljus.'
+    ]
+  };
+  function pokeLine() {
+    var list = POKE[charId()] || POKE.robot;
+    return pick(list);
+  }
+  function poke() {
+    if (charId() === 'off' || !el.walker || el.walker.style.display === 'none') return;
+    if (Date.now() - lastPoke < 400) return;
+    lastPoke = Date.now();
+    if (animOn() && !reduceMotion) wave();
+    say(pokeLine());
   }
   function pageVisible() {
     try { return document.visibilityState === 'visible'; } catch (e) { return true; }
@@ -1231,8 +1278,9 @@
     } else {
       state.tipCounted = !!opt.alreadyCounted;
     }
-    if (!sticky) state.hideT = setTimeout(hideBubble, BUBBLE_MS);
-    else state.hideT = null;
+    var ms = (opt.remainMs != null) ? opt.remainMs : BUBBLE_MS;
+    if (opt.remainMs == null) state.bubbleUntil = Date.now() + BUBBLE_MS;
+    state.hideT = setTimeout(hideBubble, ms);
     if (sticky && opt.tip && !opt.skipGuide && typeof opt.tip.guide === 'function') {
       opt.tip.guide({ walk: canWalk() });
     }
@@ -1262,9 +1310,11 @@
   }
   function resumeStickyBubble() {
     if (!state.pausedTip || !pageVisible()) return;
+    var left = (state.bubbleUntil || 0) - Date.now();
+    if (left <= 0) { state.pausedTip = null; return; }
     var p = state.pausedTip;
     state.pausedTip = null;
-    say(p.text, { tip: p.tip, tool: p.tool, persist: true, alreadyCounted: p.marked, skipGuide: true });
+    say(p.text, { tip: p.tip, tool: p.tool, persist: true, alreadyCounted: p.marked, skipGuide: true, remainMs: left });
   }
 
   // Verkstadstimmar: förarens egna siffror från serverns svar (window.VERKSTAD_LAST)
@@ -1501,7 +1551,7 @@
     renderSettings: function (content) {
       var c = charId();
       content.innerHTML = '<div class="section"><h3 style="margin-top:0">Hjälpbot</h3>' +
-        '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">En liten figur på skärmen som kommenterar dina siffror och svarar på enkla frågor. Tryck på den för att fråga.</p>' +
+        '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">En liten figur på skärmen som kan kommentera dina siffror. Tryck på den så gör den en kort reaktion och kan säga något. Hjälp finns under frågetecknet uppe till höger.</p>' +
         '<div class="hb-pick">' + charButtons('hb-pickbtn') + '<button class="hb-pickbtn' + (c === 'off' ? ' on' : '') + '" data-hb-char="off"><div style="height:56px;display:flex;align-items:center;justify-content:center;font-size:1.6rem">🚫</div>Av</button></div></div>';
       content.onclick = function (e) {
         var t = e.target.closest('[data-hb-char]'); if (!t) return;
@@ -1510,6 +1560,7 @@
       };
     },
     say: function (t) { say(t); },
+    poke: poke,
     chars: CHARS,
     lines: L,
     previewOutfit: function (outfit) {

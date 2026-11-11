@@ -510,6 +510,49 @@
         chauffor: function (a) { return a.what + ' ' + a.when + '. Packa tålamod, inte bara backspegeln.'; },
         diva: function (a) { return a.what + ' ' + a.when + '. Det blir folk – och du kan skjutsa med stil. 😉'; }
       }
+    },
+    {
+      id: 'ankomster-sen', tool: 'ankomster', context: ['home', 'page'], priority: 77, cooldownMs: 15 * 60 * 1000,
+      when: function () {
+        var s = ankSum();
+        if (!s || !s.next || !s.next.est || !s.next.sched) return null;
+        var late = Math.round((s.next.est - s.next.sched) / 60000);
+        if (late < 5) return null;
+        var src = s.source;
+        return { no: s.next.no, from: s.next.from, n: late, kind: src && src.id === 'flyg' ? 'flyg' : 'tåg' };
+      },
+      lines: {
+        robot: function (a) { return 'Bip… ' + a.no + ' från ' + a.from + ' är ' + a.n + ' min sen. Tid att ladda batteriet.'; },
+        chauffor: function (a) { return a.no + ' från ' + a.from + ' är ' + a.n + ' min sen. Hinner du en kaffe, inte för varm.'; },
+        diva: function (a) { return a.no + ' från ' + a.from + ' är ' + a.n + ' min sen. Vissa vet hur man låter någon vänta… 😉'; }
+      }
+    },
+    {
+      id: 'ankomster-installt', tool: 'ankomster', context: ['home', 'page'], priority: 73, cooldownMs: 20 * 60 * 1000,
+      when: function () { var s = ankSum(); return s && s.canceled >= 1 ? { n: s.canceled } : null; },
+      lines: {
+        robot: function (a) { return 'Bip. ' + a.n + ' inställd' + (a.n === 1 ? '' : 'a') + ' ankomst' + (a.n === 1 ? '' : 'er') + '. Kolla listan innan du kör.'; },
+        chauffor: function (a) { return a.n + ' inställd' + (a.n === 1 ? '' : 'a') + ' just nu. Bättre att kolla än att vinka åt fel tåg.'; },
+        diva: function (a) { return a.n + ' inställd' + (a.n === 1 ? '' : 'a') + ', älskling. Kolla listan innan du kör dit.'; }
+      }
+    },
+    {
+      id: 'inkorg-olast', tool: 'inkorg', context: ['home', 'page'], priority: 69, cooldownMs: 25 * 60 * 1000,
+      when: function () { try { return window.INKORG_HAS ? {} : null; } catch (e) { return null; } },
+      lines: {
+        robot: 'Bip! Det ligger oläst i Meddelanden. Jag har sett lampan.',
+        chauffor: 'Du har något oläst i Meddelanden. Inte en böter, hoppas jag. Kolla när du kan.',
+        diva: 'Någon har skrivit till dig, stjärna. Meddelanden väntar. 😉'
+      }
+    },
+    {
+      id: 'kordata-manga', tool: 'kordata', context: ['home', 'page'], priority: 66, cooldownMs: 25 * 60 * 1000,
+      when: function () { var s = anyStats(); return s && s.antal >= 12 ? s : null; },
+      lines: {
+        robot: function (a) { return 'Bip bop! ' + a.antal + ' körningar i räknaren. Mina kretsar är imponerade.'; },
+        chauffor: function (a) { return a.antal + ' körningar. Stolen har förtjänat en kudde, och du en kaffe.'; },
+        diva: function (a) { return a.antal + ' körningar, älskling. Du ger inte upp lätt. 😉'; }
+      }
     }
   ];
 
