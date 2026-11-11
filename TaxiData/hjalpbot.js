@@ -108,6 +108,74 @@
       '<g transform="rotate(-14 32 12)">' + capSvg(32, 5, 24) + '</g></g></svg>';
   }
 
+
+  // Kläder utifrån cachad väderbild (samma SMHI-cache som Animationer).
+  // Överraskning: nämns inte i Om, hjälp eller nyheter. Av Animationer → standardklädsel.
+  function gearSvg(outfit) {
+    if (!outfit) return '';
+    var n = '#1e4d6b', n2 = '#163a52', y = Y, t = T, w = '#e8eef5';
+    if (outfit === 'cold') {
+      return '<g class="hb-gear hb-gear-cold" aria-hidden="true">' +
+        '<path d="M18 16 Q18 6 32 5.5 Q46 6 46 16 L45 19 Q32 21 19 19 z" fill="' + n + '" stroke="' + n2 + '" stroke-width="1"/>' +
+        '<path d="M19 16 h26" stroke="' + n2 + '" stroke-width="1.6"/>' +
+        '<circle cx="32" cy="5" r="2.5" fill="' + w + '" stroke="' + n2 + '" stroke-width="1"/>' +
+        '<path d="M21 38 Q32 43 43 38 L45 44 Q32 49 19 44 z" fill="' + t + '" stroke="' + K + '" stroke-width="1"/>' +
+        '<path d="M23 43 l-4 11 5 1.2 2.2 -10 z" fill="' + y + '" stroke="' + K + '" stroke-width="0.9"/>' +
+        '<path d="M40 43 l5 11 5 -1 -3.2 -10 z" fill="' + t + '" stroke="' + K + '" stroke-width="0.9"/>' +
+        '</g>';
+    }
+    if (outfit === 'rain') {
+      return '<g class="hb-gear hb-gear-rain" aria-hidden="true">' +
+        '<path d="M8 16 Q8 6 18 6 Q22 6 24 10" fill="none" stroke="' + K + '" stroke-width="1.4"/>' +
+        '<path d="M24 10 L24 16" stroke="' + K + '" stroke-width="1.3"/>' +
+        '<path d="M8 16 Q18 22 28 16 Q18 12 8 16 z" fill="' + y + '" stroke="' + K + '" stroke-width="1.2"/>' +
+        '<path d="M18 36 Q32 32 46 36 L48 56 Q32 58 16 56 z" fill="' + y + '" stroke="' + K + '" stroke-width="1.2"/>' +
+        '<path d="M18 37 Q32 41 46 37" fill="none" stroke="' + K + '" stroke-width="1"/>' +
+        '<path d="M17 24 Q17 8 32 6.5 Q47 8 47 24 L42 24 Q42 13 32 12 Q22 13 22 24 z" fill="#d4a40a" stroke="' + K + '" stroke-width="1.1"/>' +
+        '</g>';
+    }
+    if (outfit === 'snow') {
+      return '<g class="hb-gear hb-gear-snow" aria-hidden="true">' +
+        '<path d="M18 36 Q32 31 46 36 L49 57 Q32 60 15 57 z" fill="' + n + '" stroke="' + n2 + '" stroke-width="1.2"/>' +
+        '<path d="M18 38 Q32 42 46 38" fill="none" stroke="' + w + '" stroke-width="1.4" opacity="0.7"/>' +
+        '<path d="M21 38 Q32 43 43 38 L45 44 Q32 49 19 44 z" fill="#0e7490" stroke="' + K + '" stroke-width="1"/>' +
+        '<path d="M23 43 l-4 11 5 1.2 2.2 -10 z" fill="' + y + '" stroke="' + K + '" stroke-width="0.9"/>' +
+        '<path d="M18 16 Q18 6 32 5.5 Q46 6 46 16 L45 19 Q32 21 19 19 z" fill="' + n + '" stroke="' + n2 + '" stroke-width="1"/>' +
+        '<path d="M19 16 h26" stroke="' + w + '" stroke-width="1.3" opacity="0.8"/>' +
+        '<circle cx="32" cy="5" r="2.5" fill="' + w + '" stroke="' + n2 + '" stroke-width="1"/>' +
+        '</g>';
+    }
+    if (outfit === 'sun') {
+      return '<g class="hb-gear hb-gear-sun" aria-hidden="true">' +
+        '<path d="M20 26.2 h24" stroke="' + K + '" stroke-width="1.7"/>' +
+        '<rect x="21.2" y="25.2" width="9.2" height="6.2" rx="2.7" fill="#111" stroke="' + K + '" stroke-width="1"/>' +
+        '<rect x="33.6" y="25.2" width="9.2" height="6.2" rx="2.7" fill="#111" stroke="' + K + '" stroke-width="1"/>' +
+        '<path d="M23.4 27 l2 -0.9" stroke="#fff" stroke-width="0.8" opacity="0.7"/>' +
+        '<path d="M35.8 27 l2 -0.9" stroke="#fff" stroke-width="0.8" opacity="0.7"/>' +
+        '</g>';
+    }
+    return '';
+  }
+  function currentOutfit() {
+    if (state && state.forceOutfit != null) return state.forceOutfit;
+    try {
+      if (!window.ANIMATIONER || !window.ANIMATIONER.isOn()) return '';
+      var V = window.ANIMATIONER_VADER;
+      if (!V) return '';
+      var snap = V.readCache ? V.readCache() : null;
+      if (V.outfitFrom) return V.outfitFrom(snap) || '';
+    } catch (e) {}
+    return '';
+  }
+  function applyGear(svg) {
+    if (!svg) return;
+    var old = svg.querySelector('.hb-gear');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    var g = gearSvg(currentOutfit());
+    if (!g) return;
+    svg.insertAdjacentHTML('beforeend', g);
+  }
+
   // ---------- repliker: en egen personlighet per figur ----------
   // Alla siffror kommer från appens riktiga data (a.kr, a.diff osv.). Lägg gärna till fler varianter.
   // a = { p:'idag', g:'dagsmålet', inkort, diff, rest, antal, kind:'tåg'|'flyg', no, from, place, when:'om 7 min'|'kl 20:06', late:' (5 min sen)', n, f, hi, name }
@@ -358,7 +426,7 @@
   }
 
   // ---------- DOM ----------
-  var el = {}, state = { page: undefined, lastComment: +(sessionStorage.getItem('hb_last') || 0), timer: null, pendingFor: null, hideT: null, panel: false };
+  var el = {}, state = { page: undefined, lastComment: +(sessionStorage.getItem('hb_last') || 0), timer: null, pendingFor: null, hideT: null, panel: false, forceOutfit: null };
 
   function css() {
     var s = document.createElement('style');
@@ -428,7 +496,12 @@
     el.panel.addEventListener('click', onPanel);
     drawChar();
   }
-  function drawChar() { var c = charId(); if (c !== 'off') el.btn.innerHTML = CHARS[c].svg(); }
+  function drawChar() {
+    var c = charId();
+    if (c === 'off' || !el.btn) return;
+    el.btn.innerHTML = CHARS[c].svg();
+    applyGear(el.btn.querySelector('svg'));
+  }
 
   // Går en stund, står still en stund (snällare mot batteriet)
   var walkT = null;
@@ -606,7 +679,14 @@
     },
     say: function (t) { say(t); },
     chars: CHARS,
-    lines: L
+    lines: L,
+    previewOutfit: function (outfit) {
+      var ok = { cold: 1, rain: 1, snow: 1, sun: 1 };
+      state.forceOutfit = ok[outfit] ? outfit : '';
+      drawChar();
+      return state.forceOutfit;
+    },
+    currentOutfit: currentOutfit
   };
 
   function start() {
@@ -614,6 +694,8 @@
     show(false);
     tick(); rhythm();
     setInterval(function () { if (!document.hidden) tick(); }, 1000);
+    document.addEventListener('animationer-change', function () { drawChar(); });
+    document.addEventListener('animationer-vader', function () { drawChar(); });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();
