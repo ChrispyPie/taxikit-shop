@@ -43,3 +43,17 @@
 .mb-block-booking.pending{background:#e8ecef;color:#52606a;border:2px dashed #87939c}
 .mb-row-booking{border-left:4px solid var(--primary,#234)}
 .mb-row-booking.pending{background:#e8ecef;color:#52606a;border-left:4px dashed #87939c}
+
+/* Schema-rader: tätare, tydlig statusbricka som funkar i ljust och mörkt. */
+.mb-open{gap:10px;padding:12px 12px 12px 14px;min-height:72px}
+.mb-time{flex:0 0 52px;font-variant-numeric:tabular-nums}
+.mb-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:5px}
+.mb-st{display:inline-block;font-size:11px;font-weight:700;line-height:1.2;padding:3px 8px;border-radius:999px;letter-spacing:.01em}
+.mb-st-ontime{background:color-mix(in srgb,var(--ok,#276749) 18%,transparent);color:var(--ok,#276749)}
+.mb-st-late{background:color-mix(in srgb,#d97706 20%,transparent);color:#b45309}
+.mb-st-arrived{background:color-mix(in srgb,#2563eb 18%,transparent);color:#1d4ed8}
+.mb-st-canceled,.mb-st-removed{background:color-mix(in srgb,var(--danger,#e53e3e) 18%,transparent);color:var(--danger-text,#c53030)}
+html[data-theme="dark"] .mb-st-late{color:#fdba74}
+html[data-theme="dark"] .mb-st-arrived{color:#93c5fd}
+.mb-block .mb-st{margin-top:4px;display:inline-block}
+.mb-row .mb-open span[aria-hidden]{color:var(--muted,#94a3b8)}
