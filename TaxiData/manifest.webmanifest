@@ -1,9 +1,12 @@
 {
   "name": "TaxiData",
   "short_name": "TaxiData",
+  "description": "Körpass, prognos, ankomster och mer för taxichaufförer.",
+  "id": "/TaxiData/",
   "start_url": "/TaxiData/",
   "scope": "/TaxiData/",
   "display": "standalone",
+  "display_override": ["standalone", "fullscreen"],
   "background_color": "#ffffff",
   "theme_color": "#1a365d",
   "lang": "sv",
