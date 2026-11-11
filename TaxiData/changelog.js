@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-11', id: '2026-11-11fly1', tid: '09:00', rader: [
+    ['Rättat', 'I prognosens liggande läge pekar flygplanen åt vänster, mot strecket för nu. I stående läge pekar de uppåt, mot nu.']
+  ]},
   { datum: '2026-11-11', id: '2026-11-11pwa1', tid: '08:55', rader: [
     ['Nytt', 'Du kan lägga TaxiData på hemskärmen. Då öppnas appen utan webbläsarens adressrad. Där står taxikit.shop litet längst ner, och knappen bredvid Hem öppnar samma sida i vanliga webbläsaren. Vill du ha adressraden hela tiden använder du appen i Chrome som vanligt.'],
     ['Förbättrat', 'Knappen bredvid Hem byter ikon när du är i helskärm eller när appen är tillagd på hemskärmen. Då visas Gå ur helskärm, med pilar inåt.']
