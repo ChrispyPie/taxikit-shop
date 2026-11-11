@@ -58,6 +58,13 @@
       'Nederbörd är radar ungefär den senaste timmen.',
       'Uppgifterna kommer från SMHI och Open-Meteo. Kartan från OpenStreetMap.'
     ],
+    nyheter: [
+      'Här läser du korta nyheter. Göteborg från SVT Väst visas alltid.',
+      'Du kan lägga till Politik, Sport, Sverige och Nöje. Valet sparas på den här enheten.',
+      'Varje rad visar rubrik, en kort sammanfattning, källa och tid.',
+      'Tryck på en nyhet för att öppna artikeln hos källan i en ny flik.',
+      'Listan uppdateras när du öppnar sidan. Hela artiklar kopieras inte hit.'
+    ],
     kalender: [
       'Kalendern samlar det som är inbokat.',
       'Tryck på en dag för att se detaljerna.',
