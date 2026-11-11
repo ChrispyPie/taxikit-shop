@@ -132,3 +132,17 @@ node tests/bevakningar/timeline.cjs
 Kvällens main-ändringar integrerades med en vanlig merge-commit på feature-grenen,
 inte genom omskrivning av redan publicerade commits. Ingen force-push behövs.
 PR #81 är fortfarande ett utkast och får inte mergas utan Christians kör.
+
+## Fasta ruttbevakningar (20261111d, PR senare)
+
+Tillfällig bevakning (silverstjärna) skapas med ☆ på Ankomster och ligger kvar i
+`arrival_watches` som förut, cirka 30–60 min efter ankomst. Fast bevakning
+(guldstjärna) skapas bara i Mina bevakningar med ett långt tryck och gäller
+samma tur och klockslag (±15 min, svensk tid), inte tåg- eller flygnummer.
+Tabell `route_watches` + RPC `route_watch_*`. Edge-funktionen `bevakning` tickar
+även `rw_svc_active`. Befintliga `train_watches` och `flight_watches` lämnas kvar
+och matchas fortfarande, men korten på Ankomster är borttagna.
+
+Ljudfiler: `TaxiData/ljud/{tag,flyg,bat}.mp3` (valda av Christian). Saknas fil
+spelas reservton. Toggles finns på Ankomster och i Mina bevakningar, inte under
+Inställningar. Ångra SQL: `supabase/migrations/undo/20261111d_route_watches_undo.sql`.

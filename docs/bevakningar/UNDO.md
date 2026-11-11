@@ -32,3 +32,11 @@ Ingen SQL eller serverändring finns att återställa. Befintliga bevakningar ä
 På/av-valet `taxi_kal_watches` kan lämnas kvar; det är ofarligt utan funktionen.
 Avbevakningar som användaren själv gjort från listan ångras genom att bevaka igen i
 Ankomster/Kalender. En pausad tågnotis slås på igen i Ankomster → Mina tågnotiser.
+
+## Fasta ruttbevakningar (20261111d)
+
+- Säkerhetsgren: `backup/pre-bevakningar-redesign-20261111`
+- Ångra SQL: `supabase/migrations/undo/20261111d_route_watches_undo.sql`
+  (tar bort `route_watches` / `route_watch_sent` och återställer `private.bevakning_tick`
+  som efter 20261110b). Tillfälliga bevakningar och äldre tåg-/flygregler lämnas kvar.
+- Ångra appen med vanlig revert av merge-committen, ingen force-push.

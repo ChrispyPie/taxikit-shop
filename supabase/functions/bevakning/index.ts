@@ -10,6 +10,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { notisKey, notisUrl, saveNotice } from "./notis.ts";
 import { decide, sentMap, type SentState, type TrainWatch } from "./tagnotis.ts";
 import { decide as decideFlights, sentMap as flightSentMap, type FlightWatch } from "./flygnotis.ts";
+import { decideRoutes, routeSentMap, type RouteWatch } from "./routewatch.ts";
 
 // Hur länge en bevakning ligger kvar efter sista händelsen (tåg ankommit / sista väskan ute). EN konstant.
 const AFTER_MIN = 30;
@@ -277,6 +278,26 @@ async function tickFlightWatches() {
   return todo.length;
 }
 
+
+async function tickRouteWatches() {
+  const { data, error } = await sb.rpc("rw_svc_active");
+  if (error || !data) return 0;
+  const d = data as { watches: RouteWatch[]; sent: { driver_id: string; ident: string; sched: string; state: SentState }[] };
+  if (!d.watches?.length) return 0;
+  const needTag = d.watches.some((w) => w.kind === "tag");
+  const needFlyg = d.watches.some((w) => w.kind === "flyg");
+  const [trains, flights] = await Promise.all([
+    needTag ? loadTrains() : Promise.resolve([] as Record<string, unknown>[]),
+    needFlyg ? loadFlights() : Promise.resolve([] as Record<string, unknown>[]),
+  ]);
+  const todo = decideRoutes(d.watches, trains, flights, routeSentMap(d.sent), Date.now());
+  for (const o of todo) {
+    await sb.rpc("rw_svc_mark", { p_driver: o.driver, p_ident: o.ident, p_sched: o.sched, p_state: o.state });
+    await sendTo(o.driver, o.msg);
+  }
+  return todo.length;
+}
+
 Deno.serve(async (req) => {
   const h = headers(req.headers.get("origin") || "");
   const out = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: h });
@@ -306,6 +327,7 @@ Deno.serve(async (req) => {
       try { res.tag = await tickTrains((tr.data || []) as Watch[]); } catch (e) { res.tagErr = String(e).slice(0, 100); }
       try { res.tagnotis = await tickTrainWatches(); } catch (e) { res.tagnotisErr = String(e).slice(0, 100); }
       try { res.flygnotis = await tickFlightWatches(); } catch (e) { res.flygnotisErr = String(e).slice(0, 100); }
+      try { res.routewatch = await tickRouteWatches(); } catch (e) { res.routewatchErr = String(e).slice(0, 100); }
       return out(res);
     }
     return out({ error: "bad_action" }, 400);

@@ -132,24 +132,11 @@
   }
 
   // Anropas i slutet av ANKOMSTER paint() (efter BEVAKNING.decorate)
-  T.decorate = function (el) {
-    if (cur() !== 'tag' || !token()) return;
-    if (st.tok !== token()) { st.tok = token(); st.list = null; st.err = false; }  // annan förare loggade in
+  // Korten på Ankomster är borttagna; inställning sker i Mina bevakningar.
+  T.decorate = function () {
+    if (!token()) return;
+    if (st.tok !== token()) { st.tok = token(); st.list = null; st.err = false; }
     if (st.list === null && !st.loading) load();
-    var after = el.querySelector('.bev-bar') || el.querySelector('.ank-head');
-    var wrap = document.createElement('div'); wrap.innerHTML = cardHtml();
-    if (after) after.parentNode.insertBefore(wrap.firstChild, after.nextSibling);
-    // 🔔 på tåg som matchar en påslagen bevakning
-    var on = (st.list || []).filter(function (w) { return w.enabled; });
-    if (!on.length || !window.ANKOMSTER || !ANKOMSTER.item) return;
-    var rows = el.querySelectorAll('[data-ank-key^="t"]');
-    for (var i = 0; i < rows.length; i++) {
-      var it = ANKOMSTER.item(rows[i].getAttribute('data-ank-key'));
-      if (it && on.some(function (w) { return T.matches(w, it); })) {
-        var f = rows[i].querySelector('.ank-from');
-        if (f && !f.querySelector('.tn-bell')) { var b = document.createElement('span'); b.className = 'tn-bell'; b.title = 'Mina bevakningar'; b.textContent = ' 🔔'; f.appendChild(b); }
-      }
-    }
   };
 
   // ---------- spara ----------

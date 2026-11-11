@@ -1,12 +1,14 @@
 /* Bevakning: markera ett flyg eller tåg i Ankomster och få en notis med ljud när det händer något
  * (flyg: landat, bagaget rullar, sista väskan ute, ny tid, inställt; tåg: ankommit, ny tid, inställt).
  *
- * - Flyg: tryck på ☆ (eller håll fingret på raden). Tåg: håll fingret på raden ca en halv sekund.
+ * - Tryck på ☆ vid en ankomst för en tillfällig bevakning (silverstjärna). Den försvinner
+ *   av sig själv ca 30 min efter ankomst. Fasta bevakningar (guldstjärna, samma tur och tid)
+ *   skapas i Mina bevakningar med ett långt tryck. En guldstjärna kan inte ändras här.
  * - Notiserna skickas från servern (Supabase edge-funktionen "bevakning") som webbnotiser (push),
  *   så de kommer även när telefonen ligger i fickan med skärmen släckt.
  * - När appen är öppen spelas ett typiskt ljud (tåg, flyg eller båt) och telefonen vibrerar.
- *   Ljudet styrs under Inställningar → Ljud för bevakningar (BEV_LJUD).
- * - Bevakningen tas bort automatiskt 30 min efter sista händelsen (flyg: sista väskan, tåg: ankomst; AFTER_MIN i edge-funktionen).
+ *   Ljudet slås på eller av på den här sidan och i Mina bevakningar (BEV_LJUD).
+ * - Tillfällig bevakning tas bort automatiskt 30 min efter sista händelsen (AFTER_MIN i edge-funktionen).
  * - Utloggning: B.logout() stänger av notiserna på telefonen och tar bort den hos servern.
  */
 (function () {
@@ -61,9 +63,9 @@
 
   // nyckel i Ankomster: 'f' + flygnr + '|' + planerad tid, 't' + tågnr + '|' + planerad tid
   function parseKey(key) {
-    var m = /^([ft])(.*)\|(.*)$/.exec(String(key || ''));
+    var m = /^([ftb])(.*)\|(.*)$/.exec(String(key || ''));
     if (!m) return null;
-    return { kind: m[1] === 'f' ? 'flyg' : 'tag', ident: m[2], schedRaw: m[3], sched: Date.parse(m[3]) };
+    return { kind: m[1] === 'f' ? 'flyg' : m[1] === 'b' ? 'bat' : 'tag', ident: m[2], schedRaw: m[3], sched: Date.parse(m[3]) };
   }
   function watchOf(key) {
     var k = parseKey(key); if (!k) return null;
@@ -75,6 +77,86 @@
     return null;
   }
   B.isWatched = function (key) { return !!watchOf(key); };
+
+  // Fasta ruttbevakningar (samma tur och klockslag, inte nummer)
+  B.routes = [];
+  var routesAt = 0, routesLoading = false;
+  var SLACK = 15;
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function hhmm(m) { m = ((m % 1440) + 1440) % 1440; return pad2(Math.floor(m / 60)) + ':' + pad2(m % 60); }
+  function schedMinOf(v) {
+    var x = v instanceof Date ? v : new Date(v); if (isNaN(+x)) return -1;
+    var p = x.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Stockholm' });
+    var m = /^(\d{2}):(\d{2})/.exec(p);
+    return m ? +m[1] * 60 + +m[2] : -1;
+  }
+  function isoDowOf(v) {
+    var x = v instanceof Date ? v : new Date(v); if (isNaN(+x)) return 0;
+    var wd = x.toLocaleDateString('en-GB', { weekday: 'short', timeZone: 'Europe/Stockholm' }).toLowerCase().slice(0, 2);
+    return wd === 'mo' ? 1 : wd === 'tu' ? 2 : wd === 'we' ? 3 : wd === 'th' ? 4 : wd === 'fr' ? 5 : wd === 'sa' ? 6 : 7;
+  }
+  function inRouteWindow(schedMin, atMin, slack) {
+    if (schedMin < 0 || atMin < 0) return false;
+    var d = Math.abs(schedMin - atMin);
+    return Math.min(d, 1440 - d) <= (slack == null ? SLACK : slack);
+  }
+  function kindOfItem(it) {
+    if (!it) return '';
+    if (it.kind === 'tag' || it.kind === 'flyg' || it.kind === 'bat') return it.kind;
+    var k = String(it.key || '');
+    if (k[0] === 'f') return 'flyg';
+    if (k[0] === 'b') return 'bat';
+    if (k[0] === 't') return 'tag';
+    return '';
+  }
+  function routeOf(it) {
+    if (!it) return '';
+    if (it.route) return it.route;
+    if (kindOfItem(it) === 'flyg') return (window.FLYGNOTIS && FLYGNOTIS.originOf) ? FLYGNOTIS.originOf(it) : '';
+    return String(it.group || '');
+  }
+  function matchesRoute(w, it) {
+    if (!w || w.enabled === false || !it) return false;
+    if (w.kind !== kindOfItem(it)) return false;
+    if (String(w.route || '') !== String(routeOf(it) || '')) return false;
+    if (!inRouteWindow(w.sched_min, schedMinOf(it.sched))) return false;
+    var days = w.days || [];
+    if (days.length && days.indexOf(isoDowOf(it.sched)) < 0) return false;
+    return true;
+  }
+  function findRoute(it) {
+    if (!it) return null;
+    for (var i = 0; i < B.routes.length; i++) if (matchesRoute(B.routes[i], it)) return B.routes[i];
+    return null;
+  }
+  function loadRoutes(force) {
+    if (!token() || routesLoading || (!force && Date.now() - routesAt < 60000)) return Promise.resolve(B.routes);
+    routesLoading = true;
+    return rpc('route_watch_list', {}).then(function (l) { B.routes = Array.isArray(l) ? l : []; routesAt = Date.now(); })
+      .catch(function () { if (!Array.isArray(B.routes)) B.routes = []; })
+      .then(function () { routesLoading = false; return B.routes; });
+  }
+  B.routeOf = routeOf;
+  B.kindOfItem = kindOfItem;
+  B.schedMinOf = schedMinOf;
+  B.isoDowOf = isoDowOf;
+  B.hhmm = hhmm;
+  B.SLACK = SLACK;
+  B.findRoute = findRoute;
+  B.matchesRoute = matchesRoute;
+  B.inRouteWindow = inRouteWindow;
+  B.isPermanent = function (it) { return !!findRoute(it); };
+  B.loadRoutes = function (force) { return loadRoutes(force); };
+  B.saveRoute = function (data, id) {
+    return rpc('route_watch_save', { p_id: id == null ? null : id, p_data: data }).then(function (l) {
+      B.routes = Array.isArray(l) ? l : []; routesAt = Date.now(); return B.routes;
+    });
+  };
+  B.deleteRoute = function (id) {
+    return rpc('route_watch_delete', { p_id: id }).then(function (l) {
+      B.routes = Array.isArray(l) ? l : []; routesAt = Date.now(); return B.routes;
+    });
+  };
 
   // ---------- notiser (push) ----------
   var supported = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
@@ -194,11 +276,14 @@
   function refresh(force) {
     if (!token() || st.loading || (!force && Date.now() - st.loadedAt < 60000)) return Promise.resolve();
     st.loading = true;
-    return rpc('watch_list', {}).then(function (l) { st.list = l || []; st.loadedAt = Date.now(); })
-      .catch(function () {}).then(function () { st.loading = false; repaint(); });
+    return Promise.all([
+      rpc('watch_list', {}).then(function (l) { st.list = l || []; st.loadedAt = Date.now(); }),
+      loadRoutes(force)
+    ]).catch(function () {}).then(function () { st.loading = false; repaint(); });
   }
   function toggle(key, item) {
     if(item&&item.station&&item.station!=='G'){toast('Tågbevakningar gäller Göteborg C. Stationsvalet visar tider utan bevakning.');return;}
+    if (item && findRoute(item)) { toast('Det här är en fast bevakning. Ändra den i Mina bevakningar.'); return; }
     var k = parseKey(key); if (!k || !token()) return;
     var on = !watchOf(key);
     var state = {};
@@ -212,8 +297,8 @@
       p_label: item ? item.from : null, p_sub: item ? item.sub : null, p_state: state })
       .then(function (l) {
         st.list = l || []; st.loadedAt = Date.now();
-        var what = k.kind === 'flyg' ? 'flyget landar, när bagaget rullar och när sista väskan är ute' : 'tåget ankommer';
-        toast(on ? '⭐ Bevakas – du får en notis när ' + what + '.' + (st.push === 'on' ? '' : ' Slå på notiser ovanför listan.')
+        var what = k.kind === 'flyg' ? 'flyget landar, när bagaget rullar och när sista väskan är ute' : (k.kind === 'bat' ? 'båten ankommer' : 'tåget ankommer');
+        toast(on ? 'Tillfällig bevakning – du får en notis när ' + what + '.' + (st.push === 'on' ? '' : ' Slå på notiser ovanför listan.')
                  : 'Bevakningen är borttagen.');
         repaint();
       }).catch(function (e) {
@@ -247,23 +332,32 @@
   var host = null;
   function repaint() { if (host && host.isConnected && window.ANKOMSTER && ANKOMSTER.repaint) ANKOMSTER.repaint(); }
 
+  function tabKind() {
+    var s = src();
+    return s === 'flyg' ? 'flyg' : s === 'bat' ? 'bat' : s === 'tag' ? 'tag' : '';
+  }
+  function kindIcon(k) { return k === 'flyg' ? '✈️' : k === 'bat' ? '⛴️' : '🚆'; }
+  function prefixOf(k) { return k === 'flyg' ? 'f' : k === 'bat' ? 'b' : 't'; }
+
   function barHtml() {
     var h = '<div class="bev-bar">';
     var now = Date.now();
-    var active = st.list.filter(function (w) { return Date.parse(w.expires_at) > now; });
+    var tk = tabKind();
+    var active = st.list.filter(function (w) { return Date.parse(w.expires_at) > now && (!tk || w.kind === tk); });
     if (active.length) {
-      h += '<div class="bev-list"><b>⭐ Bevakar</b>' + active.map(function (w) {
-        var key = (w.kind === 'flyg' ? 'f' : 't') + w.ident + '|' + w.sched;
-        return '<span class="bev-chip">' + (w.kind === 'flyg' ? '✈️ ' : '🚆 ') + esc(w.ident) + ' ' + hm(w.sched) +
+      h += '<div class="bev-list"><b>Bevakar</b>' + active.map(function (w) {
+        var key = prefixOf(w.kind) + w.ident + '|' + w.sched;
+        return '<span class="bev-chip">' + kindIcon(w.kind) + ' ' + esc(w.ident) + ' ' + hm(w.sched) +
           '<button data-bev-del="' + esc(key) + '" aria-label="Sluta bevaka">✕</button></span>';
       }).join('') + '</div>';
     }
+    h += '<div id="bev-ljud-box" class="bev-ljud-box"></div>';
     if (st.push === 'on') {
-      h += '<div class="bev-row"><span>🔔 Notiser med ljud är på</span><span>' +
+      h += '<div class="bev-row"><span>🔔 Notiser på</span><span>' +
         '<button class="bev-btn" data-bev-test' + (st.busy ? ' disabled' : '') + '>Testa</button>' +
         '<button class="bev-btn ghost" data-bev-off' + (st.busy ? ' disabled' : '') + '>Stäng av</button></span></div>';
     } else if (st.push === 'off' || st.push === 'unknown') {
-      h += '<button class="bev-btn main" data-bev-on' + (st.busy ? ' disabled' : '') + '>🔔 Aktivera ljudsignal/notiser</button>';
+      h += '<button class="bev-btn main" data-bev-on' + (st.busy ? ' disabled' : '') + '>🔔 Aktivera notiser</button>';
     } else if (st.push === 'denied') {
       h += '<div class="bev-note">🔕 Notiser är blockerade för appen. Tillåt dem i webbläsarens inställningar för taxikit.shop.</div>';
     } else {
@@ -271,14 +365,14 @@
         ? '🔔 På iPhone: lägg först appen på hemskärmen (Dela ⬆️ → Lägg till på hemskärmen) och öppna den därifrån. Kräver iOS 16.4 eller senare.'
         : '🔕 Den här webbläsaren kan inte ta emot notiser.') + '</div>';
     }
-    h += '<div class="bev-hint">' + (src() === 'flyg' ? 'Tryck ☆ på ett flyg' : 'Håll fingret på ett tåg') +
-      ' för att bevaka det. <button class="bev-link" data-bev-help>' + (st.help ? 'Dölj hjälp' : 'Hjälp') + '</button></div>';
+    h += '<div class="bev-hint">Tryck ☆ för en tillfällig bevakning. Fasta (guld) ställs in i Mina bevakningar. <button class="bev-link" data-bev-help>' + (st.help ? 'Dölj hjälp' : 'Hjälp') + '</button></div>';
     if (st.help) {
       h += '<div class="bev-help">' +
-        '<p><b>Så fungerar det:</b> du får en notis med ljud när ett bevakat flyg landar, när bagaget börjar rulla, när sista väskan är ute, ' +
+        '<p><b>Så fungerar det:</b> stjärnan gör en tillfällig bevakning (silver). Du får en notis när ett bevakat flyg landar, när bagaget börjar rulla, när sista väskan är ute, ' +
         'när tiden ändras eller om det ställs in. För tåg: när tåget ankommer. Det fungerar även när telefonen ligger i fickan. ' +
-        'Bevakningen tas bort av sig själv en halvtimme efter sista händelsen (för flyg: sista väskan). ' +
-        'När du loggar ut stängs notiserna av på telefonen.</p>' +
+        'En tillfällig bevakning tas bort av sig själv en halvtimme efter sista händelsen (för flyg: sista väskan). ' +
+        'Vill du ha samma tur varje dag håller du fingret på den i Mina bevakningar, så blir den fast (guld). ' +
+        'Ljudet (tåg, flyg, båt) slås på eller av ovanför listan. När du loggar ut stängs notiserna av på telefonen.</p>' +
         '<p><b>Android:</b> tryck "Aktivera ljudsignal/notiser" och välj Tillåt. Kolla att notiser för Chrome inte är avstängda och att telefonen inte står på ljudlöst.</p>' +
         '<p><b>iPhone:</b> öppna taxikit.shop/TaxiData i Safari, tryck Dela ⬆️ → "Lägg till på hemskärmen". Öppna appen från hemskärmen, ' +
         'logga in och tryck "Aktivera ljudsignal/notiser". Kräver iOS 16.4 eller senare.</p>' +
@@ -301,7 +395,9 @@
       timer = setTimeout(function () {
         fired = true; row.classList.remove('bev-press');
         try { if (navigator.vibrate) navigator.vibrate(30); } catch (x) {}
-        toggle(key, window.ANKOMSTER && ANKOMSTER.item ? ANKOMSTER.item(key) : null);
+        var itHold = window.ANKOMSTER && ANKOMSTER.item ? ANKOMSTER.item(key) : null;
+        if (itHold && findRoute(itHold)) toast('Det här är en fast bevakning. Ändra den i Mina bevakningar.');
+        else toggle(key, itHold);
       }, HOLD_MS);
     });
     function cancel() { clear(); var p = el.querySelector('.bev-press'); if (p) p.classList.remove('bev-press'); }
@@ -329,7 +425,10 @@
     var head = el.querySelector('.ank-head');
     var wrap = document.createElement('div'); wrap.innerHTML = barHtml();
     if (head) head.parentNode.insertBefore(wrap.firstChild, head.nextSibling);
+    var ljud = el.querySelector('#bev-ljud-box');
+    if (ljud && window.BEV_LJUD && BEV_LJUD.renderCompact) BEV_LJUD.renderCompact(ljud, tabKind() || 'tag');
     if (!st.loadedAt) refresh();
+    else loadRoutes();
     if (st.push === 'unknown' && !st.checking) { st.checking = true; checkPush().then(function () { st.checking = false; repaint(); }); }
   };
   document.addEventListener('ankomster:data', function () { refresh(); });
@@ -349,7 +448,7 @@
         var loc = s ? s.unsubscribe().catch(function () {}) : Promise.resolve();
         return Promise.all([srv, loc]);
       });
-    st.list = []; st.push = 'unknown'; savedOnce = false;
+    st.list = []; B.routes = []; routesAt = 0; st.push = 'unknown'; savedOnce = false;
     try { if (window.PROGNOS_NOTIS && PROGNOS_NOTIS.logout) PROGNOS_NOTIS.logout(); } catch (e) {}
     return Promise.race([work, new Promise(function (r) { setTimeout(r, 4000); })]);
   };
