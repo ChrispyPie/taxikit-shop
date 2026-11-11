@@ -16,6 +16,8 @@
     hem: [
       'Här öppnar du verktygen. Tryck på en ikon för att gå in.',
       'En röd prick betyder att något nytt väntar.',
+      'Tryck på Ordna för att flytta ikonerna. Dra en ikon till en ny plats och tryck Klar.',
+      'Återställ sätter tillbaka standardordningen. Ordningen sparas på ditt konto.',
       'Under Inställningar byter du utseende, textstorlek och startskärmens layout.',
       'Inloggade enheter visar telefoner som är inne på ditt konto just nu.'
     ],

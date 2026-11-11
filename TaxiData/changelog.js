@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-11', id: '2026-11-11ordna1', tid: '10:15', rader: [
+    ['Nytt', 'På startskärmen kan du trycka på Ordna och flytta verktygen. Tryck Klar när du är nöjd. Ordningen sparas på ditt konto, och Återställ tar tillbaka standardordningen.']
+  ]},
   { datum: '2026-11-11', id: '2026-11-11hjalp1', tid: '10:05', rader: [
     ['Nytt', 'Ett frågetecken uppe till höger öppnar en kort hjälptext för sidan du är på.']
   ]},
