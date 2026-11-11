@@ -6,7 +6,8 @@
  *   priority (högre först), ev. boost(): extra prioritet när tipset är mer relevant,
  *   audience(): om tipset bara ska visas för vissa förare (saknas eller returnerar true = alla),
  *   used(): hoppa över helt om föraren redan hittat/använt funktionen,
- *   go(opt): körs när bubblan trycks; opt.walk är false när Animationer är av.
+ *   guide(opt): körs när tipset visas (gå till målet och peka). opt.walk är false när Animationer är av.
+ *   go(opt): körs när bubblan trycks (öppna målet).
  */
 (function () {
   'use strict';
@@ -67,14 +68,36 @@
     return false;
   }
 
-  function visibleProfileBtn() {
-    var nodes = document.querySelectorAll('#profile-btn, header .profile-btn[aria-label="Profil"], .kp-profile-btn');
-    var i, r;
-    for (i = 0; i < nodes.length; i++) {
-      r = nodes[i].getBoundingClientRect();
-      if (r.width > 8 && r.height > 8) return nodes[i];
+  function isShown(node) {
+    if (!node) return false;
+    var r = node.getBoundingClientRect();
+    if (r.width <= 8 || r.height <= 8) return false;
+    if (r.bottom < 0 || r.top > (window.innerHeight || 0) || r.right < 0 || r.left > (window.innerWidth || 0)) return false;
+    var p = node;
+    while (p && p !== document.body) {
+      if (p.classList && p.classList.contains('hidden')) return false;
+      p = p.parentElement;
     }
-    return nodes[0] || null;
+    try {
+      var st = window.getComputedStyle(node);
+      if (st.display === 'none' || st.visibility === 'hidden') return false;
+    } catch (e) {}
+    return true;
+  }
+
+  function visibleProfileBtn() {
+    var nodes = document.querySelectorAll('#app > header #profile-btn, #profile-btn, header .profile-btn[aria-label="Profil"], .kp-profile-btn');
+    var i;
+    for (i = 0; i < nodes.length; i++) {
+      if (isShown(nodes[i])) return nodes[i];
+    }
+    return null;
+  }
+
+  function highlightProfileBtn() {
+    var btn = visibleProfileBtn();
+    if (!btn) return;
+    btn.classList.add('hb-tip-hl');
   }
 
   function highlightMeddelanden() {
@@ -86,11 +109,24 @@
     } else if (menu && !menu.classList.contains('show') && btn) {
       btn.click();
     }
-    [item, btn].forEach(function (n) {
-      if (!n) return;
-      n.classList.add('hb-tip-hl');
-      setTimeout(function () { n.classList.remove('hb-tip-hl'); }, 5500);
-    });
+    if (item) item.classList.add('hb-tip-hl');
+    if (btn) btn.classList.add('hb-tip-hl');
+  }
+
+  function guideToProfile(opt) {
+    opt = opt || {};
+    var walk = !!opt.walk;
+    var openMenu = !!opt.openMenu;
+    var btn = visibleProfileBtn();
+    var after = function () {
+      if (openMenu) highlightMeddelanden();
+      else highlightProfileBtn();
+    };
+    if (walk && btn && window.HJALPBOT && typeof window.HJALPBOT.walkTo === 'function') {
+      var started = window.HJALPBOT.walkTo(btn, after, { fast: true, stay: true });
+      if (started) return;
+    }
+    after();
   }
 
   var TIPS = [
@@ -105,15 +141,10 @@
         return hasUsed('inkorg') || hasUsed('verkstad') || hasSubmittedHours();
       },
       boost: function () { return (nearMonthEnd() || nearPassEnd()) ? 20 : 0; },
-      go: function (opt) {
-        var walk = !!(opt && opt.walk);
-        var run = function () { highlightMeddelanden(); };
-        if (walk && window.HJALPBOT && typeof window.HJALPBOT.walkTo === 'function') {
-          var started = window.HJALPBOT.walkTo(visibleProfileBtn(), function () { setTimeout(run, 30); });
-          if (started) return;
-        }
-        setTimeout(run, 30);
-      }
+      // När tipset visas: gå snabbt fram till profilikonen och peka ut den.
+      // När bubblan trycks: öppna menyn och markera Meddelanden.
+      guide: function (opt) { guideToProfile({ walk: !!(opt && opt.walk), openMenu: false }); },
+      go: function (opt) { guideToProfile({ walk: !!(opt && opt.walk), openMenu: true }); }
     }
   ];
 

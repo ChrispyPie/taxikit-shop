@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-11', id: '2026-11-11tipguide1', tid: '11:45', rader: [
+    ['Förbättrat', 'När hjälpboten tipsar om verkstadstimmar går den fram till profilikonen och visar vägen. Trycker du på pratbubblan öppnas Meddelanden.']
+  ]},
   { datum: '2026-11-11', id: '2026-11-11tips1', tid: '11:15', rader: [
     ['Nytt', 'Hjälpboten kan visa ett kort tips om var du rapporterar verkstadstimmar: under Meddelanden i din profil. Tipset försvinner när du har varit där, och visas högst tre gånger.']
   ]},

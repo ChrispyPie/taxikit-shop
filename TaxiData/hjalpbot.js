@@ -437,7 +437,7 @@
   }
 
   // ---------- DOM ----------
-  var el = {}, state = { page: undefined, lastComment: +(sessionStorage.getItem('hb_last') || 0), timer: null, pendingFor: null, hideT: null, panel: false, forceOutfit: null, atHome: false, visiting: false, bubbleTool: null };
+  var el = {}, state = { page: undefined, lastComment: +(sessionStorage.getItem('hb_last') || 0), timer: null, pendingFor: null, hideT: null, panel: false, forceOutfit: null, atHome: false, visiting: false, guiding: false, bubbleTool: null };
 
   function css() {
     var s = document.createElement('style');
@@ -466,10 +466,16 @@
       '@keyframes hb-winknow{0%,100%{transform:scaleY(1)}30%,70%{transform:scaleY(.1)}}' +
       '@keyframes hb-wave{from{transform:rotate(-18deg)}to{transform:rotate(16deg)}}' +
       '@keyframes hb-hairflip{from{transform:rotate(0)}to{transform:rotate(-8deg) translateX(-1px)}}' +
-      '.hb-bubble{position:fixed;width:max-content;max-width:min(360px,calc(100vw - 16px));z-index:46;background:var(--surface);color:var(--text);' +
-      'border:1px solid var(--border);border-radius:12px;padding:9px 12px;font-size:.92rem;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.15);' +
-      'pointer-events:none;opacity:0;transition:opacity .25s}' +
-      '.hb-bubble.show{opacity:1}' +
+      '.hb-bubble{position:fixed;width:max-content;max-width:min(280px,calc(100vw - 16px));z-index:46;background:var(--surface);color:var(--text);' +
+      'border:2px solid var(--text);border-radius:16px;padding:7px 10px 8px;font-size:calc(14px * min(var(--font-scale,1),1.15));line-height:1.3;' +
+      'box-shadow:0 3px 10px rgba(0,0,0,.18);pointer-events:none;opacity:0;transition:opacity .2s;box-sizing:border-box}' +
+      '.hb-bubble.show{opacity:1;visibility:visible}' +
+      '.hb-bubble:not(.show){visibility:hidden}' +
+      '.hb-bubble-txt{position:relative;z-index:1}' +
+      '.hb-bubble-tail{position:absolute;width:12px;height:12px;background:var(--surface);border:2px solid var(--text);' +
+      'left:var(--tail-left,50%);transform:translateX(-50%) rotate(45deg);pointer-events:none}' +
+      '.hb-bubble[data-side="above"] .hb-bubble-tail{bottom:-7px;border-top:0;border-left:0}' +
+      '.hb-bubble[data-side="below"] .hb-bubble-tail{top:-7px;border-bottom:0;border-right:0}' +
       '.hb-panel{position:fixed;left:8px;right:8px;bottom:12px;max-width:380px;margin:0 auto;max-height:72vh;overflow:auto;z-index:130;background:var(--surface);color:var(--text);' +
       'border:1px solid var(--border);border-radius:14px;padding:12px;box-shadow:0 8px 28px rgba(0,0,0,.25);display:none}' +
       '.hb-panel.open{display:block}' +
@@ -509,7 +515,8 @@
       '.hb-walker.hb-enter .hb-btn{transition:transform .45s ease,opacity .45s ease;transform:scale(.18);opacity:0}' +
       '.hb-walker.hb-enter-preview .hb-btn{transition:none;transform:scale(.45);opacity:.8}' +
       '.hb-bubble.hb-tap{pointer-events:auto;cursor:pointer}' +
-      '.hb-tip-hl{outline:2px solid var(--accent,#63b3ed);outline-offset:2px;border-radius:8px;animation:hb-tip-pulse 1.1s ease-in-out 4}' +
+      '.hb-tip-hl{outline:2px solid var(--accent,#63b3ed);outline-offset:3px;border-radius:inherit;animation:hb-tip-pulse 1.1s ease-in-out 4}' +
+      '#menu-inkorg.hb-tip-hl{border-radius:8px}' +
       '@keyframes hb-tip-pulse{50%{outline-color:transparent}}' +
       '@media (prefers-reduced-motion:reduce){.hb-tip-hl{animation:none}}' +
       '.hb-walker.hb-marvin .hb-btn svg{animation:hb-marvin-sigh 2.6s ease-in-out;transform-origin:50% 90%}' +
@@ -630,25 +637,99 @@
   }
   function placeChrome() {
     if (!el.bubble || !el.walker) return;
-    var vw = window.innerWidth;
-    var bw = Math.min(360, vw - 16);
-    var left = pos.x + SIZE / 2 - bw / 2;
-    if (left < 8) left = 8;
-    if (left + bw > vw - 8) left = Math.max(8, vw - 8 - bw);
+    var vw = window.innerWidth, vh = window.innerHeight, pad = 8, tail = 8;
+    var bw = Math.min(280, vw - pad * 2);
     el.bubble.style.width = bw + 'px';
+    el.bubble.style.maxWidth = bw + 'px';
     var bh = el.bubble.offsetHeight || 48;
-    if (pos.y - bh - 10 >= headerBottom()) el.bubble.style.top = (pos.y - bh - 8) + 'px';
-    else el.bubble.style.top = (pos.y + SIZE + 6) + 'px';
+    var botCx = pos.x + SIZE / 2, botCy = pos.y + SIZE / 2;
+    var headerY = headerBottom();
+    var aboveTop = pos.y - bh - tail - 4;
+    var belowTop = pos.y + SIZE + tail + 4;
+    var side, top;
+    if (aboveTop >= Math.max(pad, headerY)) {
+      top = aboveTop;
+      side = 'above';
+    } else if (belowTop + bh <= vh - pad) {
+      top = belowTop;
+      side = 'below';
+    } else {
+      top = Math.max(pad, Math.min(vh - pad - bh, belowTop));
+      side = (top + bh / 2 < botCy) ? 'above' : 'below';
+    }
+    if (top < pad) top = pad;
+    if (top + bh > vh - pad) top = Math.max(pad, vh - pad - bh);
+    var left = botCx - bw / 2;
+    if (left < pad) left = pad;
+    if (left + bw > vw - pad) left = Math.max(pad, vw - pad - bw);
+    el.bubble.style.top = top + 'px';
     el.bubble.style.left = left + 'px';
     el.bubble.style.right = 'auto';
     el.bubble.style.bottom = 'auto';
     el.bubble.style.margin = '0';
+    el.bubble.setAttribute('data-side', side);
+    var tailX = botCx - left;
+    if (tailX < 16) tailX = 16;
+    if (tailX > bw - 16) tailX = bw - 16;
+    el.bubble.style.setProperty('--tail-left', tailX + 'px');
+  }
+
+  function setBubbleText(text) {
+    if (el.bubbleTxt) el.bubbleTxt.textContent = text == null ? '' : text;
+    else if (el.bubble) el.bubble.textContent = text == null ? '' : text;
+  }
+  function getBubbleText() {
+    if (el.bubbleTxt) return el.bubbleTxt.textContent || '';
+    return (el.bubble && el.bubble.textContent) || '';
+  }
+  function clearTipHl() {
+    document.querySelectorAll('.hb-tip-hl').forEach(function (n) { n.classList.remove('hb-tip-hl'); });
   }
 
   function animOn() {
     try { return !!(window.ANIMATIONER && ANIMATIONER.isOn && ANIMATIONER.isOn()); } catch (e) { return true; }
   }
   function canWalk() { return !reduceMotion && animOn(); }
+  function destNearTarget(node) {
+    var r = node.getBoundingClientRect();
+    var b = bounds();
+    var x, y;
+    if (r.bottom <= headerBottom() + 12) {
+      // Profilikonen sitter i headern: stå precis under, i högerkant, utan att glida in i rutnätet.
+      x = Math.round(r.right - SIZE);
+      if (x > b.maxX) x = b.maxX;
+      if (x < b.minX) x = b.minX;
+      y = b.minY;
+      return { x: x, y: y };
+    }
+    x = r.left + r.width / 2 - SIZE / 2;
+    y = r.bottom + 6;
+    return nearestWalkable(x, y, obstacleRects());
+  }
+  function glideTo(dest, done, opt) {
+    opt = opt || {};
+    clearTimeout(wanderTimer);
+    var gen = ++walkGen;
+    state.visiting = true;
+    if (el.walker) {
+      el.walker.classList.add('hb-walk');
+      el.walker.classList.remove('idle', 'snap');
+      el.walker.style.transitionTimingFunction = 'cubic-bezier(.22,.7,.28,1)';
+    }
+    var dist = Math.hypot(dest.x - pos.x, dest.y - pos.y);
+    var dur = dist < 4 ? 0 : Math.max(0.8, Math.min(1.2, 0.8 + dist / 900));
+    setPos(dest.x, dest.y, dur, pos.x);
+    function finish() {
+      if (gen !== walkGen) return;
+      if (el.walker) el.walker.classList.remove('hb-walk');
+      if (!opt.stay) state.visiting = false;
+      if (done) done();
+      if (!opt.stay) scheduleWander();
+    }
+    if (dur === 0) { finish(); return true; }
+    wanderTimer = setTimeout(finish, dur * 1000 + 30);
+    return true;
+  }
 
   function stationSvg(id) {
     var k = '#1a1a1a', y = Y, wood = '#c4a06a', wood2 = '#8a5a2b', metal = '#6b7280';
@@ -1066,6 +1147,9 @@
     el.walker.innerHTML = '<div class="hb-flip"><button class="hb-btn" type="button" aria-label="Hjälpbot – tryck för frågor"></button></div>';
     el.btn = el.walker.querySelector('.hb-btn');
     el.bubble = document.createElement('div'); el.bubble.className = 'hb-bubble'; el.bubble.setAttribute('role', 'status'); el.bubble.setAttribute('aria-live', 'polite');
+    el.bubbleTxt = document.createElement('div'); el.bubbleTxt.className = 'hb-bubble-txt';
+    el.bubbleTail = document.createElement('span'); el.bubbleTail.className = 'hb-bubble-tail'; el.bubbleTail.setAttribute('aria-hidden', 'true');
+    el.bubble.appendChild(el.bubbleTxt); el.bubble.appendChild(el.bubbleTail);
     el.panel = document.createElement('div'); el.panel.className = 'hb-panel'; el.panel.setAttribute('role', 'dialog'); el.panel.setAttribute('aria-label', 'Hjälpbot');
     [el.walker, el.bubble, el.panel].forEach(function (x) { document.body.appendChild(x); });
     ensureStation();
@@ -1075,7 +1159,8 @@
       if (!tip && !id) return;
       e.preventDefault();
       e.stopPropagation();
-      hideBubble();
+      if (tip && tip.go) state.visiting = true;
+      hideBubble({ keepVisit: !!(tip && tip.go) });
       if (tip && tip.go) tip.go({ walk: canWalk() });
       else if (id && typeof window.openItem === 'function') window.openItem(id);
     });
@@ -1123,7 +1208,7 @@
       return;
     }
     clearTimeout(state.hideT);
-    el.bubble.textContent = text;
+    setBubbleText(text);
     state.bubbleTool = opt.tool || null;
     state.bubbleTip = opt.tip || null;
     state.stickyBubble = sticky;
@@ -1147,8 +1232,12 @@
     }
     if (!sticky) state.hideT = setTimeout(hideBubble, BUBBLE_MS);
     else state.hideT = null;
+    if (sticky && opt.tip && !opt.skipGuide && typeof opt.tip.guide === 'function') {
+      opt.tip.guide({ walk: canWalk() });
+    }
   }
-  function hideBubble() {
+  function hideBubble(opt) {
+    opt = opt || {};
     clearTimeout(state.hideT);
     if (el.bubble) { el.bubble.classList.remove('show', 'hb-tap'); }
     state.bubbleTool = null;
@@ -1157,12 +1246,16 @@
     state.tipCounted = false;
     state.pausedTip = null;
     if (el.walker) el.walker.classList.remove('hb-marvin');
-    if (!state.visiting) scheduleWander();
+    if (!opt.keepVisit) {
+      clearTipHl();
+      state.guiding = false;
+      if (!state.visiting) scheduleWander();
+    }
   }
   function pauseStickyBubble() {
     if (!state.stickyBubble && !state.bubbleTip) return;
     if (!el.bubble || !el.bubble.classList.contains('show')) return;
-    state.pausedTip = { text: el.bubble.textContent, tip: state.bubbleTip, tool: state.bubbleTool, marked: !!state.tipCounted };
+    state.pausedTip = { text: getBubbleText(), tip: state.bubbleTip, tool: state.bubbleTool, marked: !!state.tipCounted };
     clearTimeout(state.hideT);
     el.bubble.classList.remove('show', 'hb-tap');
   }
@@ -1170,7 +1263,7 @@
     if (!state.pausedTip || !pageVisible()) return;
     var p = state.pausedTip;
     state.pausedTip = null;
-    say(p.text, { tip: p.tip, tool: p.tool, persist: true, alreadyCounted: p.marked });
+    say(p.text, { tip: p.tip, tool: p.tool, persist: true, alreadyCounted: p.marked, skipGuide: true });
   }
 
   // Verkstadstimmar: förarens egna siffror från serverns svar (window.VERKSTAD_LAST)
@@ -1522,17 +1615,19 @@
       }
     });
     document.addEventListener('animationer-vader', function () { drawChar(); });
-    window.HJALPBOT.walkTo = function (node, done) {
+    window.HJALPBOT.walkTo = function (node, done, opt) {
+      opt = opt || {};
       if (typeof node === 'string') node = document.querySelector(node);
       if (!node || !el.walker || !canWalk()) { if (done) done(); return false; }
-      var r = node.getBoundingClientRect();
-      var dest = nearestWalkable(r.left + r.width / 2 - SIZE / 2, r.bottom + 6, obstacleRects());
+      var dest = destNearTarget(node);
       state.visiting = true;
+      state.guiding = !!opt.stay;
       clearTimeout(wanderTimer);
+      if (opt.fast) return glideTo(dest, done, opt);
       walkPath(findPath(pos, dest), function () {
-        state.visiting = false;
+        if (!opt.stay) state.visiting = false;
         if (done) done();
-        scheduleWander();
+        if (!opt.stay) scheduleWander();
       }, { noPause: true });
       return true;
     };
