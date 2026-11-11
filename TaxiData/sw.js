@@ -2,7 +2,7 @@
  * Ingen cache av sidor eller data här (appen hämtar alltid färsk data).
  * Varje push sparas också i telefonen (IndexedDB 'taxidata-notis') så att notis.js kan lägga in den i notisflödet
  * när appen öppnas – annars var notisen borta om man inte tryckte på den direkt.
- * Tryck på notisen öppnar det den gäller: Ankomster (flyg/tåg-fliken) eller Prognos (rätt zon) (t551u).
+ * Tryck på notisen öppnar det den gäller: Ankomster (flyg/tåg/båt-fliken) eller Prognos (rätt zon) (t551u).
  * Ångra: ta bort filen och avregistrera i bevakning.js (se UNDO-flygbevakning-2026-10-25.md). */
 self.addEventListener('install', function () { self.skipWaiting(); });
 self.addEventListener('activate', function (e) { e.waitUntil(self.clients.claim()); });
@@ -29,9 +29,9 @@ function notisTarget(d) {
 }
 function notisUrl(d, tg) {
   var tag = String(d.tag || ''), u = new URL(d.url || './', self.registration.scope);
-  if (tag.indexOf('flyg') === 0 || tag.indexOf('tag') === 0) {
+  if (tag.indexOf('flyg') === 0 || tag.indexOf('tag') === 0 || tag.indexOf('bat') === 0) {
     u.searchParams.set('sida', 'ankomster');
-    if (!u.searchParams.get('flik')) u.searchParams.set('flik', tag.indexOf('flyg') === 0 ? 'flyg' : 'tag');
+    if (!u.searchParams.get('flik')) u.searchParams.set('flik', tag.indexOf('flyg') === 0 ? 'flyg' : (tag.indexOf('bat') === 0 ? 'bat' : 'tag'));
   } else if (tag.indexOf('prognos') === 0) {
     u.searchParams.set('sida', 'prognos');
     if (tg && tg.zone && !u.searchParams.get('zon')) u.searchParams.set('zon', tg.zone);

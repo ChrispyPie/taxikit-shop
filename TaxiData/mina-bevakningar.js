@@ -122,14 +122,15 @@
         watch: null, rules: [], routeWatch: w, permanent: true, placeholder: true, route: w.route, sched: at });
     });
   }
-  function normalize(watches, rules, trains, flights, events, now, flightRules, routeWatches) {
+  function normalize(watches, rules, trains, flights, events, now, flightRules, routeWatches, boats) {
     flightRules = flightRules || [];
     routeWatches = routeWatches || [];
+    boats = boats || [];
     var out = [], used = {};
     watches.forEach(function (w) {
       if (Date.parse(w.expires_at) <= now) return;
-      var list = w.kind === 'flyg' ? flights : w.kind === 'bat' ? [] : trains;
-      var it = list.find(function (x) { return x.key.charAt(0) === (w.kind === 'flyg' ? 'f' : 't') && x.key.split('|')[0].slice(1) === String(w.ident) && Math.abs(+x.sched - Date.parse(w.sched)) < 60000; });
+      var list = w.kind === 'flyg' ? flights : w.kind === 'bat' ? boats : trains;
+      var it = list.find(function (x) { return x.key.charAt(0) === kindPrefix(w.kind) && x.key.split('|')[0].slice(1) === String(w.ident) && Math.abs(+x.sched - Date.parse(w.sched)) < 60000; });
       var r = arrival(w, it);
       // Regeln visas också, så Sluta bevaka kan förklara om tåget eller flyget har flera källor.
       if (it && w.kind === 'tag') r.rules = rules.filter(function (q) { return q.enabled && TAGNOTIS.matches(q, it) && inWindow(q, r.at); });
@@ -176,14 +177,15 @@
       safe(rpc('train_watch_list', {}), 'bevakningar', []),
       safe(ARRIVAL_DATA.watchItems('tag'), 'tågtider', []),
       safe(ARRIVAL_DATA.watchItems('flyg'), 'flygtider', []),
+      safe(ARRIVAL_DATA.watchItems('bat'), 'båttider', []),
       onlyTransport ? Promise.resolve([]) : safe(calendarEvents(errors), 'kalendern', []),
       onlyTransport ? Promise.resolve([]) : safe((window.DEMO&&DEMO.on()?Promise.resolve([]):rpc('mailbox_v2',{p_token:localStorage.getItem('taxi_session')||'',p_action:'timeline',p_data:{}})), 'bokade tider', []),
       safe(rpc('flight_watch_list', {}), 'flygbevakningar', []),
       safe(window.BEVAKNING && BEVAKNING.loadRoutes ? BEVAKNING.loadRoutes(true) : rpc('route_watch_list', {}), 'fasta bevakningar', [])
     ]).then(function (data) {
       if (session !== token()) throw new Error('session');
-      var bookings = (data[5] || []).map(function (b) { return { id: 'booking-' + b.id, kind: 'booking', thread_id: b.thread_id, at: Date.parse(b.at), end: Date.parse(b.at), title: b.title, status: b.status === 'accepted' ? 'Bokad tid · Godkänd' : 'Bokad tid · Väntar på ' + (b.status === 'pending_admin' ? 'admin' : 'ditt svar'), pending: b.status !== 'accepted', rules: [] }; });
-      return { rows: normalize(data[0], data[1], data[2], data[3], data[4], Date.now(), data[6], data[7]).concat(bookings).sort(function (a,b) { return a.at-b.at; }), errors: errors };
+      var bookings = (data[6] || []).map(function (b) { return { id: 'booking-' + b.id, kind: 'booking', thread_id: b.thread_id, at: Date.parse(b.at), end: Date.parse(b.at), title: b.title, status: b.status === 'accepted' ? 'Bokad tid · Godkänd' : 'Bokad tid · Väntar på ' + (b.status === 'pending_admin' ? 'admin' : 'ditt svar'), pending: b.status !== 'accepted', rules: [] }; });
+      return { rows: normalize(data[0], data[1], data[2], data[3], data[5], Date.now(), data[7], data[8], data[4]).concat(bookings).sort(function (a,b) { return a.at-b.at; }), errors: errors };
     });
   };
   M.open = function (r) {

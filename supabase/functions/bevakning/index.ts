@@ -1,4 +1,4 @@
-// bevakning: webbnotiser (push) för bevakade flyg (Landvetter) och tåg (Göteborg C).
+// bevakning: webbnotiser (push) för bevakade flyg (Landvetter), tåg (Göteborg C) och båtar (Stena Line).
 //  - action "vapid": publik VAPID-nyckel (skapas första gången och sparas i Supabase Vault, privata nyckeln lämnar aldrig servern)
 //  - action "test":  skickar en testnotis till förarens egna enheter (kräver inloggning, token)
 //  - action "tick":  körs av pg_cron varje minut NÄR det finns aktiva bevakningar eller tågnotiser (kräver x-tick-key)
@@ -6,6 +6,7 @@
 // Fasta Bevakningar för tåg (tagnotis.ts) och flyg (flygnotis.ts).
 // Flygdata: samma cache som appen (skiftlogg/feed/got.json, uppdateras ca var 5:e minut från Swedavia).
 // Tågdata: samma Vercel-funktion som appen (/api/trains, CDN-cache 60 s) – ingen extra last på Trafikverket.
+// Båtdata: samma cache som appen (skiftlogg/feed/bat.json, Stena Lines offentliga tidtabell, ev. AIS).
 import webpush from "npm:web-push@3.6.7";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { notisKey, notisUrl, saveNotice } from "./notis.ts";
@@ -28,6 +29,8 @@ const ORIGINS = ["https://taxikit.shop", "https://www.taxikit.shop", "https://ch
 const FLIGHT_URLS = ["https://taxikit.shop/skiftlogg/feed/got.json",
   "https://raw.githubusercontent.com/ChrispyPie/taxikit-shop/main/skiftlogg/feed/got.json"];
 const TRAIN_URLS = ["https://taxikit-shop.vercel.app/api/trains", "https://taxikit.shop/skiftlogg/feed/tag.json"];
+const BOAT_URLS = ["https://taxikit.shop/skiftlogg/feed/bat.json",
+  "https://raw.githubusercontent.com/ChrispyPie/taxikit-shop/main/skiftlogg/feed/bat.json"];
 const APP_URL = "/TaxiData/?sida=ankomster";
 
 const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
@@ -283,6 +286,54 @@ async function tickFlightWatches() {
 }
 
 
+
+let boatCache: Promise<Record<string, unknown>[]> | null = null;
+function loadBoats() {
+  if (!boatCache) {
+    boatCache = getJson(BOAT_URLS).then((j) => (j.arrivals || []) as Record<string, unknown>[]);
+    boatCache.catch(() => {});
+  }
+  return boatCache;
+}
+
+async function tickBoats(watches: Watch[]) {
+  if (!watches.length) return 0;
+  const list = (await loadBoats()) as Record<string, string>[];
+  let n = 0;
+  for (const w of watches) {
+    const t = findItem(list, w);
+    if (!t) continue;
+    const s = { ...(w.state || {}) } as Record<string, unknown>;
+    const sched = ms(t.sched) || ms(w.sched), est = ms(t.est), act = ms(t.act);
+    const from = String(t.other || w.label || "");
+    const ferry = String(t.ferry || t.id || "Båt");
+    const name = ferry + (from ? " från " + from : "");
+    const canceled = String(t.canceled) === "true" || String(t.status || "").toUpperCase() === "CAN";
+    const term = String(t.terminal || "");
+    let title = "", body = "", exp = capOf(sched, est);
+    if (canceled && !s.canceled) { s.canceled = true; title = "❌ " + name + " är inställd"; }
+    if (canceled) exp = Math.min(exp, Date.now() + AFTER_MIN * 60e3);
+    if (act && !s.arrived) {
+      s.arrived = true;
+      title = "⛴️ " + name + " har ankommit" + (term ? " till " + term : "") + ", " + hm(act);
+      const late = Math.round((act - sched) / 60e3);
+      body = late >= 1 ? late + " min sen." : "I tid.";
+    } else if (!act && !canceled && est && sched) {
+      const prev = ms(s.est as string) || sched;
+      if (Math.abs(est - prev) >= EST_STEP_MIN * 60e3) {
+        s.est = iso(est);
+        title = "🕒 " + name + ": ny tid " + hm(est);
+        body = "Planerad " + hm(sched) + (est > sched ? ", försenad " + Math.round((est - sched) / 60e3) + " min." : ".") +
+          (term ? " " + term + "." : "");
+      }
+    }
+    if (act) exp = Math.min(exp, act + AFTER_MIN * 60e3);
+    if (title) { await sendTo(w.driver_id, { title, body, tag: "bat-" + t.id }); n++; }
+    if (title || ms(w.expires_at) !== exp) await sb.rpc("bev_svc_update", { p_id: w.id, p_state: s, p_expires: iso(exp) });
+  }
+  return n;
+}
+
 async function tickRouteWatches() {
   const { data, error } = await sb.rpc("rw_svc_active");
   if (error || !data) return 0;
@@ -338,12 +389,18 @@ Deno.serve(async (req) => {
     if (b.action === "tick") {
       const key = await secret("BEVAKNING_TICK_KEY");
       if (!key || req.headers.get("x-tick-key") !== key) return out({ error: "forbidden" }, 403);
-      const [fl, tr] = await Promise.all([sb.rpc("bev_svc_active", { p_kind: "flyg" }), sb.rpc("bev_svc_active", { p_kind: "tag" })]);
+      const [fl, tr, ba] = await Promise.all([
+        sb.rpc("bev_svc_active", { p_kind: "flyg" }),
+        sb.rpc("bev_svc_active", { p_kind: "tag" }),
+        sb.rpc("bev_svc_active", { p_kind: "bat" }),
+      ]);
       const res: Record<string, unknown> = {};
       trainCache = null;
       flightCache = null;
+      boatCache = null;
       try { res.flyg = await tickFlights((fl.data || []) as Watch[]); } catch (e) { res.flygErr = String(e).slice(0, 100); }
       try { res.tag = await tickTrains((tr.data || []) as Watch[]); } catch (e) { res.tagErr = String(e).slice(0, 100); }
+      try { res.bat = await tickBoats((ba.data || []) as Watch[]); } catch (e) { res.batErr = String(e).slice(0, 100); }
       try { res.tagnotis = await tickTrainWatches(); } catch (e) { res.tagnotisErr = String(e).slice(0, 100); }
       try { res.flygnotis = await tickFlightWatches(); } catch (e) { res.flygnotisErr = String(e).slice(0, 100); }
       try { res.routewatch = await tickRouteWatches(); } catch (e) { res.routewatchErr = String(e).slice(0, 100); }

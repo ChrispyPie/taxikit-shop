@@ -24,7 +24,7 @@ function reset(rpc: (fn: string, a: Record<string, unknown>) => unknown) { g.__c
 const SUB = [{ id: 1, endpoint: "https://push.example/abc", p256dh: "x", auth: "y" }];
 
 Deno.test("nyckel och typ: samma som sw.js / notis.js", () => {
-  eq(notisKind("flyg-SK1427"), "flyg", "flyg"); eq(notisKind("tag-123"), "tag", "tag"); eq(notisKind("prognos-110-app"), "prognos", "prognos");
+  eq(notisKind("flyg-SK1427"), "flyg", "flyg"); eq(notisKind("tag-123"), "tag", "tag"); eq(notisKind("bat-FRGO-DANI"), "bat", "bat"); eq(notisKind("prognos-110-app"), "prognos", "prognos");
   const m = { tag: "flyg-SK1427", title: "t", body: "b" }, ts = 1761660000000;
   eq(notisKey(m, ts), swKey({ ...m, ts }, ts + 5000), "flyg-nyckel = sw.js");
   const p = { tag: "prognos-110-app", title: "Ny förbokning", body: "Landvetter · App · ca 15:40" };
@@ -45,6 +45,7 @@ Deno.test("sw.js: tryck på push leder rätt (även push från gammal server uta
   eq(swFns.notisUrl(nw, nw.target), "https://taxikit.shop/TaxiData/?sida=prognos&zon=161&kat=app&tid=x&bok=7", "serverns url orörd");
   eq(swFns.notisUrl({ tag: "flyg-SK1427", url: "/TaxiData/?sida=ankomster" }, null), "https://taxikit.shop/TaxiData/?sida=ankomster&flik=flyg", "flyg-fliken");
   eq(swFns.notisUrl({ tag: "tag-3911", url: "/TaxiData/?sida=ankomster" }, null), "https://taxikit.shop/TaxiData/?sida=ankomster&flik=tag", "tåg-fliken");
+  eq(swFns.notisUrl({ tag: "bat-FRGO-DANI", url: "/TaxiData/?sida=ankomster" }, null), "https://taxikit.shop/TaxiData/?sida=ankomster&flik=bat", "båt-fliken");
   eq(swFns.notisTarget({ tag: "flyg-SK1" }), null, "flyg har ingen target");
 });
 

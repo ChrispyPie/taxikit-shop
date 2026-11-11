@@ -41,11 +41,11 @@
       'Hör med din åkare om något ser fel ut.'
     ],
     ankomster: [
-      'Här ser du tåg och flyg som är på väg in.',
-      'Tryck på en rad för mer om just den ankomsten.',
+      'Här ser du tåg till Göteborg C, flyg till Landvetter och Stena-båtar till Göteborg.',
+      'Båtarna kommer från Fredrikshamn (Danmarksterminalen i Masthugget) och Kiel (Tysklandsterminalen vid Majnabbe).',
+      'Tryck på en rad för mer om just den ankomsten. På båtar finns en länk till vägbeskrivning.',
       'Du kan bevaka en ankomst och få en påminnelse.',
-      'Tiderna uppdateras från servern.',
-      'Vid stationen eller flygplatsen finns en liten länk till vägbeskrivning i Google Maps.'
+      'Tiderna uppdateras från servern. Båttiderna kommer från Stena Lines tidtabell.'
     ],
     prognos: [
       'Prognos visar hur resenärer kan röra sig kring tåg och flyg.',

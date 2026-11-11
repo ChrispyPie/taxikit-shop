@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-11', id: '2026-11-11bat1', tid: '19:30', rader: [
+    ['Nytt', 'Under Ankomster finns nu fliken Båt. Där ser du Stenas ankomster till Göteborg från Fredrikshamn och Kiel, med terminal och möjlighet att bevaka precis som tåg och flyg.']
+  ]},
   { datum: '2026-11-11', id: '2026-11-11delad3', tid: '18:30', rader: [
     ['Rättat', 'På en delad platta märks sessionen redan när du loggar in. Öppnar du appen igen loggas du ut om passet har avslutats, även om skärmen varit av.']
   ]},

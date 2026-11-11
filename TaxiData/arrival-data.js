@@ -3,6 +3,8 @@
   var TRAIN_URLS = ['https://taxikit-shop.vercel.app/api/trains', '../skiftlogg/feed/tag.json'];
   var FLIGHT_URLS = ['../skiftlogg/feed/got.json',
     'https://raw.githubusercontent.com/ChrispyPie/taxikit-shop/main/skiftlogg/feed/got.json'];
+  var BOAT_URLS = ['../skiftlogg/feed/bat.json',
+    'https://raw.githubusercontent.com/ChrispyPie/taxikit-shop/main/skiftlogg/feed/bat.json'];
 
   function d(v) { if (!v) return null; var x = new Date(v); return isNaN(x) ? null : x; }
   function hm(x) {
@@ -192,8 +194,52 @@
   }
 
 
+
+  var BOAT_GROUPS = [
+    { id: 'frh', label: 'Fredrikshamn', short: 'Frh', route: 'FRGO' },
+    { id: 'kiel', label: 'Kiel', short: 'Kiel', route: 'KIGO' }
+  ];
+  function boatGroups() {
+    return [{ id: '', label: 'Alla' }].concat(BOAT_GROUPS);
+  }
+  function boatItem(b) {
+    var st = String(b.status || '').toUpperCase();
+    var canceled = !!b.canceled || st === 'CAN';
+    var ais = b.ais || null;
+    var info = [];
+    if (b.terminal) info.push(b.terminal + (b.area ? ', ' + b.area : ''));
+    if (ais && ais.status === 'vid_kaj') info.push('Vid kaj');
+    else if (st === 'DEL') info.push(b.statusSv || 'Försenad');
+    return {
+      key: 'b' + b.id + '|' + b.sched,
+      no: b.ferry || b.id || '',
+      sub: '',
+      from: b.other || '',
+      sched: d(b.sched), est: d(b.est), act: d(b.act),
+      canceled: canceled,
+      removed: false,
+      special: '',
+      info: info.join(' · '),
+      note: '',
+      reason: String(b.reason || ''),
+      reasonInfo: '',
+      terminal: b.terminal || '',
+      area: b.area || '',
+      address: b.address || '',
+      maps: b.maps || '',
+      group: (b.route === 'KIGO' ? 'kiel' : (b.route === 'FRGO' ? 'frh' : '')),
+      route: b.route || '',
+      ais: ais
+    };
+  }
+  function loadBoats() {
+    return getJson(BOAT_URLS, true).then(function (j) {
+      return { updated: j.updated, warning: !!j.error, items: (j.arrivals || []).map(boatItem) };
+    });
+  }
+
  var cache={},pending={};
- function watchItems(kind){if(pending[kind])return pending[kind];var p=(kind==='tag'?loadTrains():loadFlights()).then(function(r){cache[kind]={at:Date.now(),items:r.items};return r.items;}).finally(function(){delete pending[kind];});pending[kind]=p;return p;}
+ function watchItems(kind){if(pending[kind])return pending[kind];var p=(kind==='tag'?loadTrains():kind==='bat'?loadBoats():loadFlights()).then(function(r){cache[kind]={at:Date.now(),items:r.items};return r.items;}).finally(function(){delete pending[kind];});pending[kind]=p;return p;}
  var catalogPending=null;
  function stationCatalog(force){
    if(!force){try{var saved=JSON.parse(localStorage.getItem('taxi_train_stations_v1')||'null');if(saved&&Array.isArray(saved.stations)&&Date.now()-saved.at<24*3600*1000)return Promise.resolve(saved.stations);}catch(e){}}
@@ -234,5 +280,5 @@
     return h + '</dl></div>';
   }
 
-window.ARRIVAL_DATA={date:d,hm:hm,hms:hms,trainLine:trainLine,stationCatalog:stationCatalog,loadTrains:loadTrains,loadTrainDelta:loadTrainDelta,mergeTrainDeltas:mergeTrainDeltas,loadFlights:loadFlights,trainGroups:trainGroups,watchItems:watchItems,flightDetailHtml:flightDetailHtml,flightItems:function(age){return cache.flyg&&Date.now()-cache.flyg.at<(age||120000)?Promise.resolve(cache.flyg.items):watchItems('flyg').catch(function(){return cache.flyg?cache.flyg.items:[];});}};
+window.ARRIVAL_DATA={date:d,hm:hm,hms:hms,trainLine:trainLine,stationCatalog:stationCatalog,loadTrains:loadTrains,loadTrainDelta:loadTrainDelta,mergeTrainDeltas:mergeTrainDeltas,loadFlights:loadFlights,loadBoats:loadBoats,trainGroups:trainGroups,boatGroups:boatGroups,watchItems:watchItems,flightDetailHtml:flightDetailHtml,flightItems:function(age){return cache.flyg&&Date.now()-cache.flyg.at<(age||120000)?Promise.resolve(cache.flyg.items):watchItems('flyg').catch(function(){return cache.flyg?cache.flyg.items:[];});}};
 })();
