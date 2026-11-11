@@ -15,6 +15,12 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-11', id: '2026-11-11bev1', tid: '07:30', rader: [
+    ['Nytt', 'Stjärnan på en ankomst i Tåg, Flyg eller Båt gör en tillfällig bevakning (silverstjärna). Den syns i Mina bevakningar och som en liten etikett högst upp på sidan, och försvinner cirka en halvtimme efter ankomst.'],
+    ['Nytt', 'I Mina bevakningar kan du hålla fingret på en tillfällig tåg-, flyg- eller båtbevakning för att göra den fast (guldstjärna). Den gäller samma tur och ungefär samma klockslag, så den följer med även om tågnumret ändras. Kugghjulet ställer in tid och dagar, till exempel mån–fre 05:40. En fast bevakning görs tillfällig bara här, inte på Ankomster. Konserter och andra evenemang kan bara vara tillfälliga.'],
+    ['Förbättrat', 'Ljudet för tåg, flyg och båt är inspelningar. Du slår på eller av varje ljud och kan testa det på Ankomster och i Mina bevakningar. Valet sparas i telefonen. Om en fil saknas används en reservton. Rutan Ljud för bevakningar är borttagen från Inställningar.'],
+    ['Förbättrat', 'De extra korten Bevakningar under Tåg och Flyg är borttagna. Notislistan, Schema och Tidslinjen är kvar. Knappar och etiketter är mindre så listan får plats bättre på telefonen.']
+  ]},
   { datum: '2026-11-11', id: '2026-11-11ljud1', rader: [
     ['Nytt', 'När en bevakning slår till medan appen är öppen spelas ett kort ljud: ett tåghorn för tåg, ett flygljud för flyg och en båtsignal för båt. Under Inställningar finns Ljud för bevakningar, där du kan slå av allt eller en typ i taget, och prova hur det låter. Valet sparas i telefonen.'],
     ['Förbättrat', 'Mina bevakningar visar tydligare status på varje ankomst: I tid, försenad, ankommen eller inställd. Listan heter Schema och är tätare, så dagens och kommande ankomster är lätta att läsa på telefonen.']

@@ -170,10 +170,16 @@
 
   function rowHtml(it) {
     var shown = when(it), changed = it.sched && shown && Math.abs(shown - it.sched) >= 60000;
-    var bev = window.BEVAKNING, watched = !!(bev && (!it.station||it.station==='G') && bev.isWatched(it.key));  // bevakning.js
-    var cls = 'ank-row' + (it.canceled || it.removed ? ' canceled' : '') + (it.act ? ' arrived' : '') + (watched ? ' watched' : '');
-    var star = bev && (watched || it.key[0] === 'f')
-      ? '<button class="ank-star' + (watched ? ' on' : '') + '" data-bev-star aria-label="' + (watched ? 'Sluta bevaka' : 'Bevaka') + '">' + (watched ? '⭐' : '☆') + '</button>' : '';
+    var bev = window.BEVAKNING;
+    var home = !it.station || it.station === 'G';
+    var perm = !!(bev && home && bev.isPermanent && bev.isPermanent(it));
+    var watched = !!(bev && home && ((bev.isWatched && bev.isWatched(it.key)) || perm));
+    var canStar = !!(bev && home && it.key && (it.key[0] === 'f' || it.key[0] === 't' || it.key[0] === 'b'));
+    var cls = 'ank-row' + (it.canceled || it.removed ? ' canceled' : '') + (it.act ? ' arrived' : '') + (watched ? ' watched' : '') + (perm ? ' perm' : '');
+    var starCls = 'ank-star' + (perm ? ' gold' : (watched ? ' on' : ''));
+    var starLbl = perm ? 'Fast bevakning – ändra i Mina bevakningar' : (watched ? 'Sluta bevaka' : 'Bevaka');
+    var star = canStar
+      ? '<button class="' + starCls + '" data-bev-star' + (perm ? ' data-bev-perm="1"' : '') + ' aria-label="' + starLbl + '">' + (perm || watched ? '⭐' : '☆') + '</button>' : '';
     var tap = !!(it.tid || it.canceled || it.removed || it.special);
     return '<div class="' + cls + (tap ? ' ank-tap' : '') + '"' + (tap ? ' data-ank-route="' + esc(it.key) + '"' : '') + ' data-ank-key="' + esc(it.key) + '">' +
       '<div class="ank-time"><div class="ank-new' + (changed && !it.act ? ' changed' : '') + '">' + hm(it.canceled || it.removed ? it.sched : shown) + '</div>' +
@@ -289,9 +295,7 @@
       requestAnimationFrame(function () { restoreAnchor(el, anchor); });
     }
     keepActiveInView(el);
-    if (window.BEVAKNING) BEVAKNING.decorate(el);  // bevakning: notisknapp + långtryck
-    if (window.TAGNOTIS) TAGNOTIS.decorate(el);    // Mina bevakningar (tagnotis.js), bara på Tåg-fliken
-    if (window.FLYGNOTIS) FLYGNOTIS.decorate(el);  // Mina bevakningar (flygnotis.js), bara på Flyg-fliken
+    if (window.BEVAKNING) BEVAKNING.decorate(el);  // bevakning: notisknapp, stjärnor, ljud
     if (state.watchHighlight) {
       var target = Array.from(el.querySelectorAll('[data-ank-key]')).find(function (r) { return r.getAttribute('data-ank-key') === state.watchHighlight; });
       if (target) {

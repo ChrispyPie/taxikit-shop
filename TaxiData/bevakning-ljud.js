@@ -1,9 +1,10 @@
 /* Ljud för bevakningar (tåg, flyg, båt) när appen är öppen.
- * Syntetiseras med Web Audio, inga ljudfiler. Sparas bara i telefonen
- * (localStorage 'taxi_bev_ljud'). Av = tyst, typ-toggle stänger av en sort.
- * Ljudet låses upp vid första trycket (webbläsare kräver en användargest).
- * Ångra: ta bort den här filen, script-taggen och rutan i Inställningar,
- * och återställ beep() i bevakning.js.
+ * Spelar ljud/tag.mp3, flyg.mp3, bat.mp3 om filen finns, annars en reservton
+ * (Web Audio). Sparas bara i telefonen (localStorage 'taxi_bev_ljud').
+ * Av = tyst, typ-toggle stänger av en sort. Ljudet låses upp vid första
+ * trycket (webbläsare kräver en användargest). Inställningarna sitter på
+ * Ankomster och i Mina bevakningar, inte under Inställningar.
+ * Ångra: ta bort filerna i ljud/, återställ den här filen och beep() i bevakning.js.
  */
 (function () {
   'use strict';
@@ -13,6 +14,12 @@
   var unlocked = false;
   var queue = [];
   var busyUntil = 0;
+  var V = '20261111bev1';
+  var FILE = { tag: 'ljud/tag.mp3?v=' + V, flyg: 'ljud/flyg.mp3?v=' + V, bat: 'ljud/bat.mp3?v=' + V };
+  var missing = {};
+  var mounted = [];
+  var currentAudio = null;
+
 
   function read() {
     var o = {};
@@ -119,7 +126,7 @@
     return 1.05;
   }
 
-  function playKind(kind, force) {
+  function playSynth(kind, force) {
     if (!force && !enabled(kind === 'test' ? 'test' : kind)) return 0;
     unlock();
     if (!actx) return 0;
@@ -138,6 +145,54 @@
     return dur;
   }
 
+  function playFile(kind) {
+    return new Promise(function (resolve) {
+      if (!FILE[kind] || missing[kind]) { resolve(0); return; }
+      try {
+        if (currentAudio) { try { currentAudio.pause(); currentAudio.src = ''; } catch (e) {} }
+        var a = new Audio(FILE[kind]);
+        currentAudio = a;
+        a.preload = 'auto';
+        a.setAttribute('playsinline', 'true');
+        var settled = false;
+        function done(dur) {
+          if (settled) return;
+          settled = true;
+          resolve(dur);
+        }
+        a.onerror = function () { missing[kind] = true; done(0); };
+        a.onended = function () { if (currentAudio === a) currentAudio = null; };
+        var p = a.play();
+        if (p && p.then) {
+          p.then(function () {
+            var d = a.duration;
+            done(isFinite(d) && d > 0 ? d : 3);
+          }).catch(function () { done(0); });
+        } else {
+          var d = a.duration;
+          done(isFinite(d) && d > 0 ? d : 3);
+        }
+      } catch (e) { resolve(0); }
+    });
+  }
+
+  function playKind(kind, force, cb) {
+    if (!force && !enabled(kind === 'test' ? 'test' : kind)) { if (cb) cb(0); return; }
+    unlock();
+    var types = kind === 'test' ? ['tag', 'flyg', 'bat'].filter(function (k) { var s = read(); return force || s[k]; }) : [kind];
+    var i = 0, total = 0;
+    function next() {
+      if (i >= types.length) { if (cb) cb(total); return; }
+      var k = types[i++];
+      playFile(k).then(function (dur) {
+        if (!(dur > 0)) dur = playSynth(k, true);
+        total += dur || 0;
+        setTimeout(next, Math.max(200, Math.round((dur || 0.4) * 1000) + 60));
+      });
+    }
+    next();
+  }
+
   function kick() {
     var now = Date.now();
     if (!queue.length) return;
@@ -148,9 +203,11 @@
     var kind = queue.shift();
     var force = kind.indexOf('force:') === 0;
     if (force) kind = kind.slice(6);
-    var dur = playKind(kind, force);
-    busyUntil = Date.now() + Math.max(200, Math.round((dur || 0.3) * 1000) + 40);
-    if (queue.length) setTimeout(kick, Math.max(30, busyUntil - Date.now()));
+    busyUntil = Date.now() + 8000;
+    playKind(kind, force, function (dur) {
+      busyUntil = Date.now() + Math.max(200, Math.round((dur || 0.3) * 1000) + 40);
+      if (queue.length) setTimeout(kick, Math.max(30, busyUntil - Date.now()));
+    });
   }
 
   // force: används av Prova-knappar, spelar även om typen är av (så man hör innan man slår på).
@@ -175,59 +232,68 @@
     });
   }
 
-  function renderSettings(box) {
+  function notify() {
+    try { document.dispatchEvent(new CustomEvent('bev-ljud-change')); } catch (e) {}
+    mounted = mounted.filter(function (m) { return m.box && m.box.isConnected; });
+    mounted.forEach(function (m) { paintCompact(m.box, m.kinds, true); });
+  }
+
+  function ensureCompactStyle() {
+    if (document.getElementById('bljud-style')) return;
+    var css = document.createElement('style');
+    css.id = 'bljud-style';
+    css.textContent =
+      '.bljud-compact{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:4px 0 6px}' +
+      '.bljud-c{display:inline-flex;align-items:center;gap:5px;font-size:calc(13px * var(--font-scale, 1));line-height:1.2;white-space:nowrap;min-height:28px}' +
+      '.bljud-c input{width:16px;height:16px;accent-color:var(--primary);flex-shrink:0;margin:0}' +
+      '.bljud-try{flex:none;min-height:28px;padding:2px 8px;border-radius:8px;border:1px solid var(--border,#3a4a5c);background:var(--surface-soft,#222e3b);color:inherit;font:inherit;font-size:calc(12px * var(--font-scale, 1));cursor:pointer}';
+    document.head.appendChild(css);
+  }
+
+  var LABELS = { tag: 'Tågljud', flyg: 'Flygljud', bat: 'Båtljud' };
+
+  function paintCompact(box, kinds, fromSync) {
     if (!box) return;
+    ensureCompactStyle();
     var s = read();
-    var types = [
-      { id: 'tag', icon: '🚆', label: 'Tåg' },
-      { id: 'flyg', icon: '✈️', label: 'Flyg' },
-      { id: 'bat', icon: '⛴️', label: 'Båt' }
-    ];
-    var h = '<div class="section"><h3 style="margin-top:0">Ljud för bevakningar</h3>' +
-      '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">När en bevakning slår till medan appen är öppen spelas ett kort ljud: tåghornet, ett flygljud eller en båtsignal. Push-notisen kommer som vanligt även när appen är stängd. Ljudet sparas bara i den här telefonen.</p>' +
-      '<div class="hl-opts" role="radiogroup" aria-label="Ljud för bevakningar">' +
-        '<label class="hl-opt' + (s.on ? ' on' : '') + '"><input type="radio" name="bev-ljud" value="1"' + (s.on ? ' checked' : '') + '><span>På</span></label>' +
-        '<label class="hl-opt' + (!s.on ? ' on' : '') + '"><input type="radio" name="bev-ljud" value="0"' + (!s.on ? ' checked' : '') + '><span>Av</span></label>' +
-      '</div>';
-    h += '<div class="bljud-types"' + (s.on ? '' : ' aria-disabled="true" style="opacity:.55"') + '>';
-    types.forEach(function (t) {
-      h += '<div class="bljud-row">' +
-        '<label class="bljud-check"><input type="checkbox" name="bev-ljud-' + t.id + '"' + (s[t.id] ? ' checked' : '') + (s.on ? '' : ' disabled') + '> ' + t.icon + ' ' + esc(t.label) + '</label>' +
-        '<button type="button" class="bljud-try" data-bljud-try="' + t.id + '">Prova</button>' +
-        '</div>';
+    var h = '<div class="bljud-compact">';
+    kinds.forEach(function (id) {
+      var on = !!(s.on && s[id]);
+      h += '<label class="bljud-c"><input type="checkbox" data-bljud-k="' + id + '"' + (on ? ' checked' : '') + '> ' +
+        esc(LABELS[id] || id) + '</label>' +
+        '<button type="button" class="bljud-try" data-bljud-try="' + id + '">Testa ljud</button>';
     });
-    h += '</div><p class="bljud-hint">Tryck Prova för att höra. En del telefoner spelar inget ljud förrän du har rört skärmen en gång.</p></div>';
+    h += '</div>';
     box.innerHTML = h;
-    if (!document.getElementById('bljud-style')) {
-      var css = document.createElement('style');
-      css.id = 'bljud-style';
-      css.textContent =
-        '.bljud-types{margin-top:10px;display:flex;flex-direction:column;gap:8px}' +
-        '.bljud-row{display:flex;align-items:center;gap:10px;min-height:48px}' +
-        '.bljud-check{flex:1;display:flex;align-items:center;gap:10px;min-height:44px;font-size:calc(15px * var(--font-scale, 1))}' +
-        '.bljud-check input{width:22px;height:22px;accent-color:var(--primary);flex-shrink:0}' +
-        '.bljud-try{flex:none;min-height:44px;min-width:72px;padding:8px 14px;border-radius:10px;border:1px solid var(--border,#3a4a5c);background:var(--surface-soft,#222e3b);color:inherit;font:inherit;cursor:pointer}' +
-        '.bljud-hint{font-size:.8rem;color:var(--muted,#94a3b8);margin:10px 0 0;line-height:1.45}';
-      document.head.appendChild(css);
-    }
+    if (fromSync) return;
     box.onchange = function (e) {
-      var t = e.target; if (!t) return;
+      var el = e.target; if (!el || !el.getAttribute) return;
+      var k = el.getAttribute('data-bljud-k'); if (!k) return;
       var cur = read();
-      if (t.name === 'bev-ljud') cur.on = t.value === '1';
-      else if (t.name === 'bev-ljud-tag') cur.tag = t.checked;
-      else if (t.name === 'bev-ljud-flyg') cur.flyg = t.checked;
-      else if (t.name === 'bev-ljud-bat') cur.bat = t.checked;
-      else return;
+      cur[k] = !!el.checked;
+      cur.on = !!(cur.tag || cur.flyg || cur.bat);
       write(cur);
-      renderSettings(box);
+      notify();
     };
     box.onclick = function (e) {
       var b = e.target.closest && e.target.closest('[data-bljud-try]');
       if (!b) return;
+      e.preventDefault();
       unlock();
       play(b.getAttribute('data-bljud-try'), true);
     };
   }
+
+  function renderCompact(box, kinds) {
+    if (!box) return;
+    kinds = typeof kinds === 'string' ? [kinds] : (kinds && kinds.length ? kinds : ['tag', 'flyg', 'bat']);
+    mounted = mounted.filter(function (m) { return m.box !== box && m.box && m.box.isConnected; });
+    mounted.push({ box: box, kinds: kinds });
+    paintCompact(box, kinds, false);
+  }
+
+  // Inte längre i Inställningar – lämnas tom om någon gammal sida fortfarande anropar den.
+  function renderSettings(box) { if (box) box.innerHTML = ''; }
 
   // Om bevakning.js inte är laddat (appen öppen på en annan sida) spelar vi ändå ljudet.
   if ('serviceWorker' in navigator) {
@@ -240,6 +306,9 @@
     });
   }
 
+  if (document && document.addEventListener) document.addEventListener('bev-ljud-change', function () { notify(); });
+  if (window && window.addEventListener) window.addEventListener('storage', function (e) { if (e && e.key === KEY) notify(); });
+
   window.BEV_LJUD = {
     play: play,
     playFromMessage: playFromMessage,
@@ -248,6 +317,8 @@
     read: read,
     write: write,
     unlock: unlock,
-    renderSettings: renderSettings
+    renderSettings: renderSettings,
+    renderCompact: renderCompact,
+    files: FILE
   };
 })();

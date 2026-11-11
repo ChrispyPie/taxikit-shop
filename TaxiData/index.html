@@ -10,9 +10,9 @@
   <script src="helskarm.js?v=20261110hl2"></script>
   <script src="enhet.js?v=20261029d"></script>
   <script src="delad-enhet.js?v=20261110de1"></script>
-  <script src="bevakning-ljud.js?v=20261111ljud1"></script>
+  <script src="bevakning-ljud.js?v=20261111bev1"></script>
   <script src="namn.js?v=20261028nm1"></script>
-  <link rel="stylesheet" href="style.css?v=20261111pr2">
+  <link rel="stylesheet" href="style.css?v=20261111bev1">
   <link rel="stylesheet" href="tema.css?v=20261110hl3">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -162,7 +162,7 @@
   <script src="demo.js?v=am1q"></script>
   <script src="swipe-back.js?v=20261106sb2"></script>
   <script src="view-state.js?v=20261107lazy1"></script>
-  <script src="lazy-views.js?v=20261111ljud1"></script>
+  <script src="lazy-views.js?v=20261111bev1"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -859,11 +859,10 @@
       } else if (current === 'installningar') {
         title.textContent = 'Inställningar';
         content.onclick = null;
-        content.innerHTML = '<div id="home-layout-set"></div><div id="theme-set"></div><div id="text-size-set"></div><div id="bev-ljud-set"></div><div id="delad-enhet-set"></div><div id="hb-set"></div>';
+        content.innerHTML = '<div id="home-layout-set"></div><div id="theme-set"></div><div id="text-size-set"></div><div id="delad-enhet-set"></div><div id="hb-set"></div>';
         renderHomeLayoutSetting(document.getElementById('home-layout-set'));
         renderThemeSetting(document.getElementById('theme-set'));
         renderTextSizeSetting(document.getElementById('text-size-set'));
-        if (window.BEV_LJUD) BEV_LJUD.renderSettings(document.getElementById('bev-ljud-set'));
         if (window.DELAD) DELAD.renderSettings(document.getElementById('delad-enhet-set'));
         if (window.HJALPBOT) window.HJALPBOT.renderSettings(document.getElementById('hb-set'));
       } else if (current) {
