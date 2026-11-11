@@ -13,7 +13,7 @@ function loadPuppeteer() {
 }
 const puppeteer = loadPuppeteer();
 const root = path.resolve(__dirname, '../..');
-const out = process.argv[2] || '/workspace/poke-shots';
+const out = process.argv[2] || '/workspace/bubble-shots';
 fs.mkdirSync(out, { recursive: true });
 const core = fs.readFileSync(path.join(root, 'tests/meddelanden/fixtures.js'), 'utf8');
 const mime = f => f.endsWith('.js') ? 'application/javascript' : f.endsWith('.css') ? 'text/css'
@@ -87,7 +87,17 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
   ok('comic tail', info.hasTail);
   ok('no hen/Stig', !info.hen);
   await new Promise(r => setTimeout(r, 200));
-  await p.screenshot({ path: path.join(out, 'hb-poke-412-scale14-dark.png') });
+  await p.screenshot({ path: path.join(out, 'hb-bubble-412-scale14-dark.png') });
+  await p.click('.hb-bubble.show');
+  await p.waitForFunction(() => !document.querySelector('.hb-bubble.show'), { timeout: 3000 });
+  ok('tap bubble closes', await p.evaluate(() => !document.querySelector('.hb-bubble.show')));
+  await p.evaluate(() => window.HJALPBOT.poke());
+  await p.waitForFunction(() => document.querySelector('.hb-bubble.show'), { timeout: 5000 });
+  ok('tap bot without bubble pokes', await p.evaluate(() => !!(document.querySelector('.hb-bubble.show') && (document.querySelector('.hb-bubble-txt') || {}).textContent)));
+  await p.evaluate(() => window.HJALPBOT.poke());
+  await p.waitForFunction(() => !document.querySelector('.hb-bubble.show'), { timeout: 3000 });
+  ok('tap bot with bubble only closes', await p.evaluate(() => !document.querySelector('.hb-bubble.show')));
+
   await br.close(); server.close();
   if (fails.length) { console.error('FAILS\n' + fails.join('\n')); process.exit(1); }
   console.log('SHOT_OK', out);

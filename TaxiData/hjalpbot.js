@@ -17,7 +17,8 @@
   var DEFAULT_CHAR = 'robot';
   var COMMENT_CHANCE = 0.4;        // chans att boten säger något när en sida öppnas
   var COMMENT_GAP_MS = 60 * 1000;  // minst så här länge mellan spontana kommentarer
-  var BUBBLE_MS = 30000;
+  var BUBBLE_MS = 8000;
+  var TIP_BUBBLE_MS = 30000;
 
   // ---------- figurer (SVG, viewBox 64×64) ----------
   var K = '#1a1a1a', Y = '#f5c518', T = '#14a3a3', SKIN = '#f6d2b3';
@@ -1160,7 +1161,6 @@
     });
     el.bubble.addEventListener('click', function (e) {
       var tip = state.bubbleTip, id = state.bubbleTool;
-      if (!tip && !id) return;
       e.preventDefault();
       e.stopPropagation();
       if (tip && tip.go) state.visiting = true;
@@ -1237,8 +1237,16 @@
     var list = POKE[charId()] || POKE.robot;
     return pick(list);
   }
+  function bubbleOn() {
+    return !!(el.bubble && el.bubble.classList.contains('show'));
+  }
   function poke() {
     if (charId() === 'off' || !el.walker || el.walker.style.display === 'none') return;
+    if (bubbleOn()) {
+      hideBubble();
+      lastPoke = 0;
+      return;
+    }
     if (Date.now() - lastPoke < 400) return;
     lastPoke = Date.now();
     if (animOn() && !reduceMotion) wave();
@@ -1260,9 +1268,7 @@
     state.bubbleTool = opt.tool || null;
     state.bubbleTip = opt.tip || null;
     state.stickyBubble = sticky;
-    if (state.bubbleTool || state.bubbleTip) el.bubble.classList.add('hb-tap');
-    else el.bubble.classList.remove('hb-tap');
-    el.bubble.classList.add('show');
+    el.bubble.classList.add('show', 'hb-tap');
     if (opt.mood === 'marvin' && el.walker) {
       el.walker.classList.remove('hb-marvin');
       void el.walker.offsetWidth;
@@ -1278,8 +1284,9 @@
     } else {
       state.tipCounted = !!opt.alreadyCounted;
     }
-    var ms = (opt.remainMs != null) ? opt.remainMs : BUBBLE_MS;
-    if (opt.remainMs == null) state.bubbleUntil = Date.now() + BUBBLE_MS;
+    var dur = opt.tip ? TIP_BUBBLE_MS : BUBBLE_MS;
+    var ms = (opt.remainMs != null) ? opt.remainMs : dur;
+    if (opt.remainMs == null) state.bubbleUntil = Date.now() + dur;
     state.hideT = setTimeout(hideBubble, ms);
     if (sticky && opt.tip && !opt.skipGuide && typeof opt.tip.guide === 'function') {
       opt.tip.guide({ walk: canWalk() });
@@ -1551,7 +1558,7 @@
     renderSettings: function (content) {
       var c = charId();
       content.innerHTML = '<div class="section"><h3 style="margin-top:0">Hjälpbot</h3>' +
-        '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">En liten figur på skärmen som kan kommentera dina siffror. Tryck på den så gör den en kort reaktion och kan säga något. Hjälp finns under frågetecknet uppe till höger.</p>' +
+        '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">En liten figur på skärmen som kan kommentera dina siffror. Tryck på den så gör den en kort reaktion. Finns en pratbubbla stängs den vid tryck. Hjälp finns under frågetecknet uppe till höger.</p>' +
         '<div class="hb-pick">' + charButtons('hb-pickbtn') + '<button class="hb-pickbtn' + (c === 'off' ? ' on' : '') + '" data-hb-char="off"><div style="height:56px;display:flex;align-items:center;justify-content:center;font-size:1.6rem">🚫</div>Av</button></div></div>';
       content.onclick = function (e) {
         var t = e.target.closest('[data-hb-char]'); if (!t) return;
