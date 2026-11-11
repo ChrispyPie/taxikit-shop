@@ -150,10 +150,17 @@ html[data-theme="dark"] img.pfp-avatar, html[data-theme="dark"] .emoji { filter:
   position: relative; overflow: visible; min-height: 44px; box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
 }
-.icon .emoji { font-size: 30px; margin-bottom: 4px; line-height: 1; }
+.icon, .icon * { -webkit-tap-highlight-color: transparent; }
+.icon .emoji { font-size: 30px; margin-bottom: 4px; line-height: 1; display: inline-block; transform-origin: 50% 50%; }
 .icon .label { font-size: calc(13px * var(--font-scale, 1)); }
-.icon:active { background: rgba(127,127,127,0.16); transform: scale(0.96); }
-.icon:focus-visible { outline: 2px solid var(--accent, #3182ce); outline-offset: 2px; }
+.icon:active, .icon:focus {
+  background: none; background-color: transparent; transform: none; outline: none;
+}
+.icon:active .emoji {
+  transform: scale(0.92);
+  filter: brightness(1.16) drop-shadow(0 0 5px rgba(99, 179, 237, 0.55));
+}
+.icon:focus-visible { outline: 2px solid var(--accent, #3182ce); outline-offset: 2px; background: none; }
 @media (max-width: 600px) {
   .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 4px; }
   .icon { min-height: 64px; padding: 6px 2px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; }
