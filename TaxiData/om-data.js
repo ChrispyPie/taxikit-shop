@@ -7,12 +7,12 @@ window.OM_DATA = {
   features: [
     ['🚗', 'Körpassdata', 'dina pass, resor och belopp'],
     ['💰', 'Lönekoll', 'ungefär vad du får i lön för det du kört in'],
-    ['✈️', 'Ankomster', 'tåg till Göteborg C och flyg till Landvetter'],
+    ['✈️', 'Ankomster', 'tåg till Göteborg C, flyg till Landvetter och båtar från Fredrikshamn och Kiel'],
     ['🏆', 'Topplistor', 'hur du ligger till jämfört med andra (anonymt)'],
     ['✉️', 'Meddelanden och Ärenden', 'privata meddelanden, felanmälan, verkstadstid och sjukanmälan'],
     ['📅', 'Kalender', 'konserter, matcher, mässor och andra evenemang'],
     ['💬', 'Forum', 'Hjälp & guider, Frågor & svar, Allmänt, Önskemål, Buggar, Mitt åkeri'],
-    ['📌', 'Mina bevakningar', 'bevakade tåg och flyg, kalenderhändelser och bokade tider i en tidslinje eller lista', 'mina-bevakningar'],
+    ['📌', 'Mina bevakningar', 'bevakade tåg, flyg och båtar, kalenderhändelser och bokade tider i en tidslinje eller lista', 'mina-bevakningar'],
     ['🔮', 'Prognos', 'kommande bokningar per zon och morgonprognos'],
     ['🤖', 'Hjälpbot', 'liten hjälpare längst ner på skärmen']
   ],

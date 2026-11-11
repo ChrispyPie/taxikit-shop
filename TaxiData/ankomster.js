@@ -1,4 +1,4 @@
-/* Ankomster: tåg till Göteborg C och flyg till Landvetter.
+/* Ankomster: tåg till Göteborg C, flyg till Landvetter och Stena-båtar till Göteborg.
  *
  * Namn, ikon och källor finns samlade i ANKOMSTER nedan. Byt namn på sidan genom att
  * ändra title (och vid behov icon). En ny källa (t.ex. Båt) läggs till som ett nytt
@@ -6,12 +6,13 @@
  * trainItem()/flightItem() nedan.
  *
  * Inga API-nycklar här: tåg läses från Vercel-funktionen /api/trains (nyckeln finns bara
- * på servern), flyg från den delade cachen skiftlogg/feed/got.json som GitHub-jobbet skriver.
+ * på servern), flyg från den delade cachen skiftlogg/feed/got.json och båtar från
+ * skiftlogg/feed/bat.json som GitHub-jobben skriver.
  */
 (function () {
   'use strict';
 
-  var D=window.ARRIVAL_DATA,loadTrains=D.loadTrains,loadFlights=D.loadFlights,trainGroups=D.trainGroups;
+  var D=window.ARRIVAL_DATA,loadTrains=D.loadTrains,loadFlights=D.loadFlights,loadBoats=D.loadBoats,trainGroups=D.trainGroups,boatGroups=D.boatGroups;
   var A = window.ANKOMSTER = {
     id: 'ankomster',
     title: 'Ankomster',
@@ -24,8 +25,8 @@
     sources: [
       { id: 'tag', label: 'Tåg', icon: '🚆', place: 'Göteborg C', load: function(){return loadTrains(state.station);}, groups: trainGroups,
         summaryFilter: function (it) { return !!it.group; } },
-      { id: 'flyg', label: 'Flyg', icon: '✈️', place: 'Landvetter', load: loadFlights }
-      // { id: 'bat', label: 'Båt', icon: '⛴️', place: '…', load: loadBoats }
+      { id: 'flyg', label: 'Flyg', icon: '✈️', place: 'Landvetter', load: loadFlights },
+      { id: 'bat', label: 'Båt', icon: '⛴️', place: 'Stena Line', load: loadBoats, groups: boatGroups }
     ]
   };
 
@@ -34,7 +35,7 @@
   var stationList=TRAIN_STATIONS.slice();
   var QUICK_STATIONS=['G','Mdn','Gas','Kb','P','A'];
   function stationLabel(){var found=stationList.find(function(s){return s.id===state.station;});return found?found.label:state.station;}
-  var state = { station:selected,requests:{tag:0,flyg:0}, tab: null, data: {}, err: {}, updated: {}, at: {}, showPast: false, timer: null, tick: null, el: null, loading: {} };
+  var state = { station:selected,requests:{tag:0,flyg:0,bat:0}, tab: null, data: {}, err: {}, updated: {}, at: {}, showPast: false, timer: null, tick: null, el: null, loading: {} };
 
   // ---------- hjälp ----------
   function esc(s) {
@@ -87,7 +88,7 @@
   var ROUTE_URL = 'https://taxikit-shop.vercel.app/api/trains';
   state.open = {}; state.routes = {};
   function findItem(key) {
-    var lists = [state.data.tag || [], state.data.flyg || []];
+    var lists = [state.data.tag || [], state.data.flyg || [], state.data.bat || []];
     for (var L = 0; L < lists.length; L++) {
       for (var i = 0; i < lists[L].length; i++) if (lists[L][i].key === key) return lists[L][i];
     }
@@ -132,8 +133,21 @@
       ? 'Orsak: ' + esc(txt) + (txt.slice(-1) === '.' ? '' : '.')
       : (it.key[0] === 'f'
           ? 'Ingen orsak angiven av Swedavia.'
-          : 'Ingen orsak angiven av Trafikverket.');
+          : (it.key[0] === 'b'
+              ? 'Ingen orsak angiven av Stena Line.'
+              : 'Ingen orsak angiven av Trafikverket.'));
     return '<div class="ank-reason">' + body + '</div>';
+  }
+
+  function boatDetailHtml(it) {
+    var head = reasonHtml(it);
+    var term = (it.terminal || '') + (it.area ? ', ' + it.area : '');
+    var line = term ? ('<div class="ank-st-hint">' + esc(term) + mapsLink(it.maps || term, term) +
+      (it.address ? '<br>' + esc(it.address) : '') + '</div>') : '';
+    var ais = '';
+    if (it.ais && it.ais.status === 'vid_kaj') ais = '<div class="ank-st-hint">Vid kaj enligt senaste positionsuppdatering.</div>';
+    else if (it.ais && it.ais.km != null) ais = '<div class="ank-st-hint">Cirka ' + esc(String(it.ais.km).replace('.', ',')) + ' km från terminalen.</div>';
+    return '<div class="ank-route">' + head + line + ais + '</div>';
   }
   function flightReasonHtml(it) {
     return '<div class="ank-route">' + reasonHtml(it) + '</div>';
@@ -188,7 +202,7 @@
     var starLbl = perm ? 'Fast bevakning – ändra i Mina bevakningar' : (watched ? 'Sluta bevaka' : 'Bevaka');
     var star = canStar
       ? '<button class="' + starCls + '" data-bev-star' + (perm ? ' data-bev-perm="1"' : '') + ' aria-label="' + starLbl + '">' + (perm || watched ? '★' : '☆') + '</button>' : '';
-    var tap = !!(it.tid || it.canceled || it.removed || it.special);
+    var tap = !!(it.tid || it.canceled || it.removed || it.special || it.terminal);
     return '<div class="' + cls + (tap ? ' ank-tap' : '') + '"' + (tap ? ' data-ank-route="' + esc(it.key) + '"' : '') + ' data-ank-key="' + esc(it.key) + '">' +
       '<div class="ank-time"><div class="ank-new' + (changed && !it.act ? ' changed' : '') + '">' + hm(it.canceled || it.removed ? it.sched : shown) + '</div>' +
         (changed && !it.canceled && !it.removed ? '<div class="ank-old">' + hm(it.sched) + '</div>' : '') + '</div>' +
@@ -263,7 +277,7 @@
     var stale = upd && now - upd > 15 * 60000;
     html += '<div class="ank-toolbar">';
     if(s.id==='tag')html+='<div class="ank-station-picker"><button type="button" class="ank-station-title" data-ank-picker aria-haspopup="dialog" aria-label="Station, '+esc(stationLabel())+'"><span class="ank-station-title-label">'+esc(stationLabel())+'</span><span class="ank-station-caret" aria-hidden="true"></span></button>'+mapsLink(stationLabel(), stationLabel())+'</div>';
-    html += '<div class="ank-head"><span>' + (s.id==='tag'?'':('<b>'+esc(s.place)+'</b>' + mapsLink(s.place === 'Landvetter' ? 'Landvetter flygplats' : s.place, s.place))) + (upd ? (s.id==='tag'?'':' ') + 'uppdaterad ' + hms(upd) : '') + '</span></div></div>';
+    html += '<div class="ank-head"><span>' + (s.id==='tag'?'':('<b>'+esc(s.place)+'</b>' + (s.id==='bat'?'':mapsLink(s.place === 'Landvetter' ? 'Landvetter flygplats' : s.place, s.place)))) + (upd ? (s.id==='tag'?'':' ') + 'uppdaterad ' + hms(upd) : '') + '</span></div></div>';
     if(s.id==='tag'&&state.station!=='G')html+='<p class="ank-station-note">Bevakningar gäller fortfarande Göteborg C.</p>';
     if (stale) html += '<div class="ank-warn">Datan är äldre än 15 minuter.</div>';
     if(typeof state.err[s.id]==='string')html+='<div class="ank-warn">'+esc(state.err[s.id])+'</div>';
@@ -293,7 +307,7 @@
       list.forEach(function (it) {
         var k = dayKey(when(it));
         if (k !== lastDay) { html += '<div class="ank-day">' + dayLabel(when(it)) + '</div>'; lastDay = k; }
-        html += rowHtml(it) + (state.open[it.key] ? (it.tid ? routeHtml(it) : flightReasonHtml(it)) : '');
+        html += rowHtml(it) + (state.open[it.key] ? (it.tid ? routeHtml(it) : (it.key[0]==='b' ? boatDetailHtml(it) : flightReasonHtml(it))) : '');
       });
     }
     el.innerHTML = html;
@@ -426,7 +440,7 @@
     });
   };
   A.openWatch = function (key) {
-    localStorage.setItem('ank_tab', key.charAt(0) === 'f' ? 'flyg' : 'tag');
+    localStorage.setItem('ank_tab', key.charAt(0) === 'f' ? 'flyg' : (key.charAt(0) === 'b' ? 'bat' : 'tag'));
     localStorage.setItem('ank_tagfilter', '');
     A._watchTarget = key;
     window.openItem(A.id);
