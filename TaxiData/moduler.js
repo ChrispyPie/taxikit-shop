@@ -151,7 +151,7 @@
     taxi_enhet: 1, taxi_delad_enhet: 1, taxi_bev_ljud: 1, lk_settings: 1, taxi_kal_watches: 1
   };
   var PROTECTED_PREFIX = [
-    'taxi_home_order', 'taxi_home_layout', 'hb_char_', 'forum_rules', 'taxi_bev',
+    'taxi_home_order', 'taxi_home_layout', 'hb_char_', 'hb_tips_', 'hb_tip_used_', 'forum_rules', 'taxi_bev',
     'prognos_cats', 'prognos_zones', 'prognos_zone_tab', 'prognos_kundtid',
     'ank_tab', 'bil_tab', 'taxi_font', 'taxi_text', 'taxi_notis', 'tn_open', 'fn_open',
     'taxi_view', 'taxi_mb_view', 'taxi_kal_view', 'taxi_kal_chan', 'taxi_tab', 'taxi_akeri_tab'

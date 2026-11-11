@@ -239,6 +239,7 @@
   };
 
   V.render = function (content) {
+    try { if (window.HJALPBOT_TIPS && HJALPBOT_TIPS.markUsed) HJALPBOT_TIPS.markUsed('verkstad'); } catch (e) {}
     st.el = content; st.embedded = false; st.sjOn = false; st.form = null; st.f = null; st.mDone = null; st.tf = null; st.tr = null; window.VERKSTAD_LAST = null;
     content.innerHTML = '<div id="bv-root"><div id="bv-top"></div><div id="vk-body"><div class="tl-msg">Laddar…</div></div></div>';
     drawTop();
@@ -1132,7 +1133,7 @@
     if (m > WARN_MIN && !confirm('Du registrerar ' + dur(m) + ' på verkstaden. Stämmer det?')) return;
     st.busy = true; f.msg = ''; draw();
     rpc('save_my_workshop', { p_id: f.id, p_start: f.s.toISOString(), p_end: f.e.toISOString(), p_car_id: f.car, p_comment: f.comment || null, p_issue_id: f.issue || null })
-      .then(function () { st.busy = false; st.form = null; flash(f.id ? 'Ändringen är sparad.' : 'Skickat! Ägaren godkänner eller nekar.'); return load(); })
+      .then(function () { st.busy = false; st.form = null; try { if (window.HJALPBOT_TIPS && HJALPBOT_TIPS.markUsed) HJALPBOT_TIPS.markUsed('submitted'); } catch (e) {} flash(f.id ? 'Ändringen är sparad.' : 'Skickat! Ägaren godkänner eller nekar.'); return load(); })
       .catch(function (e) { st.busy = false; if (e.code === '28000') { location.reload(); return; } f.msg = errText(e); draw(); });
   }
   function remove(id) {

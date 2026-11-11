@@ -14,7 +14,8 @@
   <script src="animationer.js?v=20261111tyst1"></script>
   <script src="animationer-vader.js?v=20261111tyst1"></script>
   <script src="hjalpbot-scenarier.js?v=20261111kalsc1"></script>
-  <script src="hjalpbot.js?v=20261111komm1"></script>
+  <script src="hjalpbot-tips.js?v=20261111tips1"></script>
+  <script src="hjalpbot.js?v=20261111tips1"></script>
   <script src="namn.js?v=20261028nm1"></script>
   <link rel="stylesheet" href="style.css?v=20261111land1">
   <link rel="stylesheet" href="tema.css?v=20261111tryck1">
@@ -198,7 +199,7 @@
   <script src="view-state.js?v=20261107lazy1"></script>
   <script src="hjalp.js?v=20261111moduler1"></script>
   <script src="hem-ordning.js?v=20261111moduler1"></script>
-  <script src="moduler.js?v=20261111moduler1"></script>
+  <script src="moduler.js?v=20261111tips1"></script>
   <script src="lazy-views.js?v=20261111moduler1"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
@@ -452,6 +453,7 @@
     // Inkorg (inkorg.js): mina ärenden och svaren på dem. Ligger under profilikonen, klockan är kvar för notiser.
     function openInbox() {
       if (lockBlocked()) return;
+      try { if (window.HJALPBOT_TIPS && HJALPBOT_TIPS.markUsed) HJALPBOT_TIPS.markUsed('inkorg'); } catch (e) {}
       document.getElementById('profile-menu').classList.remove('show');
       if (current === 'inkorg') { renderMenu(); return; }
       localStorage.removeItem('taxi_view');
@@ -462,7 +464,7 @@
       renderMenu();
     }
 
-    function toggleProfile() {
+    window.toggleProfile = function toggleProfile() {
       document.getElementById('profile-menu').classList.toggle('show');
     }
 
