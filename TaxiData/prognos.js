@@ -263,7 +263,10 @@
       '.pg-focus-x{background:none;border:0;color:inherit;font-size:1rem;line-height:1;padding:.1rem .25rem;cursor:pointer;opacity:.75}' +
       '.pg-td-cell.pg-focus{outline:3px solid var(--accent,#f5b301);outline-offset:-3px;border-radius:6px;animation:pgFocus 1.2s ease-in-out 3}' +
       '@keyframes pgFocus{50%{background:color-mix(in srgb,var(--accent,#f5b301) 35%,transparent)}}' +
-      '@media (prefers-reduced-motion:reduce){.pg-td-cell.pg-focus{animation:none}}';
+      '@media (prefers-reduced-motion:reduce){.pg-td-cell.pg-focus{animation:none}}' +
+      '.pg-chart-wrap{position:relative}' +
+      '.pg-empty-note{margin:.15rem 0 .3rem;text-align:center;font-size:.82rem;font-weight:600;' +
+      'color:var(--text-soft,#888);letter-spacing:.01em;line-height:1.3}';
     (document.head || document.documentElement).appendChild(css);
   })();
 
@@ -1121,7 +1124,16 @@
   }, true);
   var flyLayTimer = 0;
   function isLand() {
-    return !!(window.matchMedia && window.matchMedia('(orientation: landscape) and (min-width: 640px)').matches);
+    // Liggande rutnät så fort enheten är i liggande, även på telefon och utan helskärm.
+    try {
+      if (window.matchMedia && window.matchMedia('(orientation: landscape)').matches) return true;
+      if (window.matchMedia && window.matchMedia('(orientation: portrait)').matches) return false;
+    } catch (e) {}
+    try {
+      var t = window.screen && screen.orientation && screen.orientation.type;
+      if (t) return String(t).indexOf('landscape') === 0;
+    } catch (e2) {}
+    return (window.innerWidth || 0) > (window.innerHeight || 0);
   }
   // Helskärm styrs globalt av helskarm.js. I liggande prognos rullas rutnätet
   // längst ner när helskärm slås på (samma beteende som tidigare).
@@ -1604,11 +1616,10 @@
     var notice = renderFilterNotice();
     var fi = focusInfo(zid);
     notice = renderFocusNote(fi) + notice;
-    if (!st.err && st.loadedOnce && !(zoneCounts()[zid])) {
-      return notice + '<div class="pg-card pg-empty-card">Inga förbokningar i ' + esc(ZONE_BY_ID[zid].name) +
-        ' de närmaste 2 timmarna.</div>';
-    }
-    return notice + renderCarTimeline(zid, fi && fi.slot);
+    // Visa alltid rutnätet, även när zonen saknar bokningar (nollor i rubrikerna).
+    var empty = !st.err && st.loadedOnce && !(zoneCounts()[zid]);
+    var note = empty ? '<div class="pg-empty-note">Inga bokningar just nu</div>' : '';
+    return notice + '<div class="pg-chart-wrap">' + note + renderCarTimeline(zid, fi && fi.slot) + '</div>';
   }
 
   var WD = ['söndag', 'måndag', 'tisdag', 'onsdag', 'torsdag', 'fredag', 'lördag'];
