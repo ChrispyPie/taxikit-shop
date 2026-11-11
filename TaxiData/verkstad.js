@@ -1191,7 +1191,7 @@
         (x.issue_id ? '<div class="vk-icom">🔗 ' + esc(issueLabel(x.issue_id)) + '</div>' : '') +
         (x.decision_comment && !ms.some(function (m) { return m.kind === x.status; }) ? '<div class="vk-boss">Ägaren: ' + esc(x.decision_comment) + '</div>' : '') +
         threadHtml(x) +
-        (x.status === 'pending' && ms.length && !st.form ? '<div class="vk-reply"><textarea id="vk-r-' + x.id + '" class="vk-rtext" data-id="' + x.id + '" maxlength="1000" rows="2" placeholder="' + (q ? 'Skriv ditt svar till ägaren' : 'Vill du lägga till något? (valfritt)') + '">' + esc(st.drafts[x.id] || '') + '</textarea>' +
+        (( !st.form && (x.status === 'pending' ? ms.length : ms.some(function (m) { return m.kind === 'msg'; })) ) ? '<div class="vk-reply"><textarea id="vk-r-' + x.id + '" class="vk-rtext" data-id="' + x.id + '" maxlength="1000" rows="2" placeholder="' + (x.status !== 'pending' ? 'Skriv till ägaren' : (q ? 'Skriv ditt svar till ägaren' : 'Vill du lägga till något? (valfritt)')) + '">' + esc(st.drafts[x.id] || '') + '</textarea>' +
           '<div class="pm-btns"><button type="button" class="primary vk-rsend" data-id="' + x.id + '"' + (st.busy ? ' disabled' : '') + '>Skicka svar</button></div></div>' : '') +
         (x.status === 'pending' && !st.form ? '<div class="vk-iact"><button type="button" class="vk-edit" data-id="' + x.id + '">Ändra</button><button type="button" class="vk-del" data-id="' + x.id + '">Ta bort</button></div>' : '') +
         '</div>';

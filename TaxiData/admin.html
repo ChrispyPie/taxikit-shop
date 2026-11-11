@@ -170,7 +170,7 @@
   <script src="onskemal-admin.js?v=20261106ik1"></script>
   <script src="view-state.js?v=20261107lazy1"></script>
   <script src="arende-status.js?v=20261107inkorg1"></script>
-  <script src="mailbox-ui.js?v=20261110acc1"></script>
+  <script src="mailbox-ui.js?v=20261111whmsg1"></script>
   <script src="arenden-admin.js?v=20261107inkorg2b"></script>
   <script src="swipe-back.js?v=20261106sb2"></script>
   <script>
@@ -1979,6 +1979,7 @@ ${renderBildtypPicker(c)}
         case 'workshop_approve': return who + ' godkände verkstadstid för ' + T(e.target_id) + ' ' + wsSpan(d) + (d.kr != null ? ' = ' + formatSEK(d.kr) : '') + (d.from === 'rejected' ? ' (var nekad)' : '') + (d.comment ? ' – "' + d.comment + '"' : '');
         case 'workshop_reject': return who + ' nekade verkstadstid för ' + T(e.target_id) + ' ' + wsSpan(d) + (d.from === 'approved' ? ' (var godkänd)' : '') + (d.comment ? ' – "' + d.comment + '"' : '');
         case 'workshop_ask': return who + ' frågade ' + T(e.target_id) + ' om verkstadstid ' + wsSpan(d) + (d.from === 'approved' ? ' (öppnade igen, var godkänd)' : d.from === 'rejected' ? ' (öppnade igen, var nekad)' : '') + (d.comment ? ' – "' + d.comment + '"' : '');
+        case 'workshop_message': return who + ' skrev till ' + T(e.target_id) + ' om verkstadstid ' + wsSpan(d) + (d.comment ? ' – "' + d.comment + '"' : '');
         case 'workshop_reply': return who + ' svarade om sin verkstadstid ' + wsSpan(d) + (d.comment ? ' – "' + d.comment + '"' : '');
         case 'workshop_rate': return who + ' ändrade timpriset för verkstadstid från ' + d.from + ' till ' + d.to + ' kr/h';
         case 'bil_issue_add': return who + (d.kind === 'supply' ? ' skrev att något behövs' : ' anmälde fel') + (d.car ? ' på bil ' + d.car : '') + (d.blocking ? ' (bilen står)' : '');
