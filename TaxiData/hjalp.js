@@ -14,11 +14,11 @@
       'Efter inloggning kommer du till startskärmen med alla verktyg.'
     ],
     hem: [
-      'Här öppnar du verktygen. Tryck på en ikon för att gå in.',
-      'En röd prick betyder att något nytt väntar.',
-      'Tryck på Ordna för att flytta ikonerna. Dra en ikon till en ny plats och tryck Klar.',
-      'Återställ sätter tillbaka standardordningen. Ordningen sparas på ditt konto.',
-      'Under Inställningar byter du utseende, textstorlek och startskärmens layout.',
+      'Här öppnar du verktygen. En röd prick betyder att något nytt väntar.',
+      'Tryck på den lilla skiftnyckeln vid verktygen för att flytta ikonerna. Dra en ikon till en ny plats och tryck Klar.',
+      'I ordningsläget tar du bort ett verktyg med krysset. Plusknappen längst ner lägger tillbaka det.',
+      'Inställningar, Om appen och Admin går inte att ta bort.',
+      'Återställ sätter tillbaka standardordningen och alla verktyg. Valen sparas på ditt konto.',
       'Inloggade enheter visar telefoner som är inne på ditt konto just nu.'
     ],
     kordata: [
