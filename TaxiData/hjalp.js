@@ -14,7 +14,7 @@
       'Efter inloggning kommer du till startskärmen med alla verktyg.'
     ],
     hem: [
-      'Här öppnar du verktygen. En röd prick betyder att något nytt väntar.',
+      'Här öppnar du verktygen. En röd prick betyder att något nytt väntar. Hjälpboten syns bara här på startskärmen.',
       'Tryck på den lilla skiftnyckeln vid verktygen för att flytta ikonerna. Dra en ikon till en ny plats och tryck Klar.',
       'Tryck länge på en ikon för en meny med Modulinfo, Flytta, Hjälp och Avinstallera. Inställningar, Om appen och Admin går inte att ta bort.',
       'Rutan Moduler längst ner öppnar en lista där du kan installera verktyg igen.',
@@ -49,6 +49,7 @@
     ],
     prognos: [
       'Prognos visar hur resenärer kan röra sig kring tåg och flyg.',
+      'På Landvetter syns planen i flygspalten. Tryck på ett plan för mer uppgifter. Stjärnan i rutan gör en tillfällig bevakning, samma som på Ankomster.',
       'Välj typ och tid för att se läget i området.',
       'Det är ett stöd när du planerar, inte en garanti för körningar.',
       'Uppgifterna uppdateras från servern.'
@@ -95,7 +96,7 @@
       'Här byter du tema, textstorlek och hur startskärmen ser ut.',
       'Animationer styr korta rörelser i appen. Det påverkar inte ljudet.',
       'Valen sparas på den här enheten.',
-      'Här väljer du också om hjälpboten ska synas. Tryck på figuren för en kort reaktion. Finns en pratbubbla stängs den vid tryck. Hjälp finns under frågetecknet.'
+      'Här väljer du också om hjälpboten ska synas. Den visas bara på startskärmen. Tryck på figuren för en kort reaktion. Finns en pratbubbla stängs den vid tryck. Hjälp finns under frågetecknet.'
     ],
     om: [
       'Här står vad som är nytt i appen, överst i listan.',

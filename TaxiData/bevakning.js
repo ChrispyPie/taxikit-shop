@@ -345,7 +345,10 @@
 
   // ---------- ritas in i Ankomster ----------
   var host = null;
-  function repaint() { if (host && host.isConnected && window.ANKOMSTER && ANKOMSTER.repaint) ANKOMSTER.repaint(); }
+  function repaint() {
+    if (host && host.isConnected && window.ANKOMSTER && ANKOMSTER.repaint) ANKOMSTER.repaint();
+    try { document.dispatchEvent(new CustomEvent('bev-watches-changed')); } catch (e) {}
+  }
 
   function tabKind() {
     var s = src();
@@ -477,5 +480,16 @@
   B.enablePush = function () { return enable(); };
   B.ensurePush = ensurePush;
   B.testPush = function () { return test(); };
+  B.toggleWatch = toggle;
+  B.refreshWatches = refresh;
+  B.starHtml = function (it) {
+    if (!it || !it.key) return '';
+    var perm = !!(B.isPermanent && B.isPermanent(it));
+    var watched = !!(B.isWatched(it.key) || perm);
+    var cls = 'ank-star' + (perm ? ' gold' : (watched ? ' on' : ''));
+    var lbl = perm ? 'Fast bevakning – ändra i Mina bevakningar' : (watched ? 'Sluta bevaka' : 'Bevaka');
+    return '<button type="button" class="' + cls + '" data-bev-star' + (perm ? ' data-bev-perm="1"' : '') +
+      ' aria-label="' + lbl + '" title="' + lbl + '">' + (perm || watched ? '★' : '☆') + '</button>';
+  };
   B._state = st;
 })();

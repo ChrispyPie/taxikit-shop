@@ -192,6 +192,7 @@ body.pg-open main, main:has(.pg) { padding-left: 5px; padding-right: 5px; }
 .badge-host.has-badge[data-badge-text]:not([data-badge-text=""])::after { min-width: 10px; padding: 0 3px; height: 16px; line-height: 16px; top: -6px; right: -6px; }
 
 /* Ankomster (tåg/flyg) */
+.ank { overflow-anchor: none; }
 .ank-tabs { margin-bottom: 0.6rem; }
 .ank-tabs .tab { padding: 0.45rem 1.1rem; font-size: 0.95rem; }
 .ank-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 8px 2px 0.5rem; max-width: 100%; }
@@ -910,7 +911,9 @@ html[data-theme="dark"] .pg-table-diag tbody tr.pg-tr-gout-line td {
 html[data-theme="dark"] .pg-fly-sheet { background: #1a202c; color: #e2e8f0; }
 .pg-fly-sheet-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
 .pg-fly-x { background: none; border: 0; font-size: 1.3rem; color: var(--text-soft); cursor: pointer; min-width: 44px; min-height: 44px; }
-.pg-fly-card-h { font-weight: 800; font-size: 1.05rem; margin: 0 0 8px; }
+.pg-fly-card-h { font-weight: 800; font-size: 1.05rem; margin: 0 0 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pg-fly-card-h .ank-star { flex: 0 0 auto; }
+.pg-fly-sheet-h .ank-star { flex: 0 0 auto; }
 .pg-fly-dl { margin: 0; display: grid; gap: 6px; }
 .pg-fly-kv { display: grid; grid-template-columns: 8.2em 1fr; gap: 6px 10px; align-items: baseline; }
 .pg-fly-kv dt { margin: 0; color: var(--muted); font-size: 0.82rem; font-weight: 600; }

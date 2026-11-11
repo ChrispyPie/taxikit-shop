@@ -14,7 +14,7 @@ window.OM_DATA = {
     ['💬', 'Forum', 'Hjälp & guider, Frågor & svar, Allmänt, Önskemål, Buggar, Mitt åkeri'],
     ['📌', 'Mina bevakningar', 'bevakade tåg, flyg och båtar, kalenderhändelser och bokade tider i en tidslinje eller lista', 'mina-bevakningar'],
     ['🔮', 'Prognos', 'kommande bokningar per zon och morgonprognos'],
-    ['🤖', 'Hjälpbot', 'liten hjälpare längst ner på skärmen']
+    ['🤖', 'Hjälpbot', 'liten hjälpare på startskärmen']
   ],
   builder: 'Appen byggs av Christian (superadmin) och är under utveckling. Saker kan ändras, och ibland blir något fel.',
   builder_demo: 'Appen är under utveckling. Saker kan ändras, och ibland blir något fel.',   // demokonton: inget namn
