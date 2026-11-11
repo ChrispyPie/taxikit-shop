@@ -6,6 +6,8 @@ Samma innehåll som visas under **Om appen → Nyheter** i appen. Källan är `T
 
 ## 11 november 2026
 
+- **Nytt:** Vid platser i Kalendern och vid stationer och flygplatser i Ankomster finns en liten länk till vägbeskrivning i Google Maps.
+
 - **Nytt:** Under Moduler finns Nyheter. Där läser du korta nyheter från Göteborg, och kan lägga till Politik, Sport, Sverige och Nöje. Tryck på en rad för att öppna artikeln hos källan.
 
 ## 27 oktober 2026

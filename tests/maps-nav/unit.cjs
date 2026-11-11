@@ -1,0 +1,17 @@
+'use strict';
+const fs = require('node:fs');
+const path = require('node:path');
+const assert = require('node:assert/strict');
+const root = path.resolve(__dirname, '../..');
+const kal = fs.readFileSync(path.join(root, 'TaxiData/kalender.js'), 'utf8');
+const ank = fs.readFileSync(path.join(root, 'TaxiData/ankomster.js'), 'utf8');
+const help = fs.readFileSync(path.join(root, 'TaxiData/hjalp.js'), 'utf8');
+assert.match(kal, /https:\/\/www\.google\.com\/maps\/dir\/\?api=1&destination=/);
+assert.match(ank, /https:\/\/www\.google\.com\/maps\/dir\/\?api=1&destination=/);
+assert.doesNotMatch(kal, /maps\/search/);
+assert.match(kal, /class="td-maps"/);
+assert.match(ank, /class="td-maps"/);
+assert.match(ank, /Landvetter flygplats/);
+assert.match(help, /vägbeskrivning i Google Maps/);
+assert.doesNotMatch(kal + ank, /\bStig\b|\bhen\b/);
+console.log('UNIT_OK');
