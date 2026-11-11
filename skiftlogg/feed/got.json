@@ -1,9 +1,9 @@
 {
   "airport": "GOT",
-  "updated": "2026-11-11T23:55:24+01:00",
-  "arrivalsUpdated": "2026-11-11T23:55:30+01:00",
+  "updated": "2026-11-12T00:01:00+01:00",
+  "arrivalsUpdated": "2026-11-12T00:01:01+01:00",
   "departuresUpdated": "2026-11-11T23:50:50+01:00",
-  "yesterdayUpdated": "2026-11-11T05:10:40+01:00",
+  "yesterdayUpdated": "2026-11-12T00:01:04+01:00",
   "tomorrowUpdated": "2026-11-11T23:50:45+01:00",
   "error": null,
   "arrivals": [
@@ -166,26 +166,6 @@
       "lastBag": "2026-11-10T11:17:27Z",
       "rawStatus": "Landat 12:02 · Sista bagage",
       "reason": "Landat 12:02 · Sista bagage"
-    },
-    {
-      "id": "AY863",
-      "dir": "ANK",
-      "other": "Helsingfors",
-      "iata": "",
-      "airline": "Finnair",
-      "status": "LAN",
-      "statusSv": "Landat 11:58",
-      "sched": "2026-11-10T11:15:00Z",
-      "est": "2026-11-10T10:55:00Z",
-      "act": "2026-11-10T10:58:00Z",
-      "terminal": "T1",
-      "gate": "17",
-      "baggage": "5",
-      "firstBag": "2026-11-10T11:09:45Z",
-      "firstBagEst": "2026-11-10T11:18:23Z",
-      "lastBag": "2026-11-10T11:10:24Z",
-      "rawStatus": "Landat 11:58 · Sista bagage",
-      "reason": "Landat 11:58 · Sista bagage"
     },
     {
       "id": "KL1233",
@@ -1813,19 +1793,19 @@
       "other": "Köpenhamn",
       "iata": "",
       "airline": "SAS Scandinavian Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 23:57",
       "sched": "2026-11-11T22:55:00Z",
       "est": "2026-11-11T22:56:00Z",
-      "act": "",
+      "act": "2026-11-11T22:57:00Z",
       "terminal": "T1",
       "gate": "20A",
       "baggage": "1",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 23:56",
-      "reason": "Ankommer 23:56"
+      "rawStatus": "Landat 23:57",
+      "reason": "Landat 23:57"
     },
     {
       "id": "LH820",
@@ -1842,10 +1822,10 @@
       "gate": "15",
       "baggage": "3",
       "firstBag": "",
-      "firstBagEst": "",
+      "firstBagEst": "2026-11-11T23:19:59Z",
       "lastBag": "",
-      "rawStatus": "Ankommer 23:55",
-      "reason": "Ankommer 23:55"
+      "rawStatus": "Landat 23:54",
+      "reason": "Landat 23:54"
     },
     {
       "id": "JTD504",
