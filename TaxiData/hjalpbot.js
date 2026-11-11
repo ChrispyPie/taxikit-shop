@@ -553,7 +553,7 @@
       if (r.width < 8 || r.height < 8) return;
       out.push({ l: r.left - pad, t: r.top - pad, r: r.right + pad, b: r.bottom + pad });
     }
-    document.querySelectorAll('#app .grid .icon, .home-devices, #home-devices, .home-dev, .home-dev-ask').forEach(function (node) { add(node, 10); });
+    document.querySelectorAll('#app .grid .icon, .home-devices, #home-devices, .home-dev, .home-dev-ask, .td-berra').forEach(function (node) { add(node, 10); });
     document.querySelectorAll('header, #profile-menu, .hb-panel').forEach(function (node) { add(node, 6); });
     return out;
   }
@@ -792,6 +792,7 @@
     if (el.station && el.station.style.display !== 'none' && !el.station.classList.contains('hb-hidden') && !state.atHome && !(opts && opts.ignoreStation)) {
       add(el.station, 4);
     }
+    document.querySelectorAll('.td-berra').forEach(function (n) { add(n, 8); });
     return out;
   }
   function overlaps(a, b) { return a.l < b.r && a.r > b.l && a.t < b.b && a.b > b.t; }
