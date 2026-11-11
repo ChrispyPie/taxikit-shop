@@ -1,16 +1,20 @@
 /* Väderanimation på samma överlager som Animationer.
- * Hämtar nuvarande typ från SMHI SNOW1g (efterföljare till pmp3g, avvecklad 31 mars 2026).
- * Ingen nyckel. Cachas 20 minuter i localStorage 'taxi_animationer_vader'.
- * Plats: enhetens läge om det finns, annars Göteborg. Samma inställning Animationer.
+ * Hämtar nuvarande nederbörd från Open-Meteo current (inte dagsprognos eller sannolikhet).
+ * Ingen nyckel. Cachas 20 minuter i localStorage 'taxi_animationer_vader_v2'.
+ * Plats: enhetens läge om tillstånd redan finns, eller efter en artig fråga en gång;
+ * annars centrala Göteborg. Koordinater avrundas till ~1 km. Sparas inte på servern.
+ * Samma inställning Animationer.
  * Ångra: ta bort den här filen och script-taggen. */
 (function () {
   'use strict';
-  var CACHE_KEY = 'taxi_animationer_vader';
+  var CACHE_KEY = 'taxi_animationer_vader_v2';
+  var GEO_ASK_KEY = 'taxi_animationer_vader_plats';
   var TTL_MS = 20 * 60 * 1000;
-  var GBG = { lat: 57.7089, lon: 11.9746 };
-  var SMHI = 'https://opendata-download-metfcst.smhi.se/api/category/snow1g/version/1/geotype/point/lon/{lon}/lat/{lat}/data.json?timeseries=8&parameters=predominant_precipitation_type_at_surface,precipitation_amount_mean,precipitation_frozen_part,probability_of_precipitation,air_temperature,symbol_code';
+  var GBG = { lat: 57.71, lon: 11.97 };
+  var METEO = 'https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,precipitation,weather_code,rain,showers,snowfall&timezone=Europe%2FStockholm';
   var timer = null;
   var started = false;
+  var asking = false;
 
   function num(v) {
     if (v == null || v === 9999) return null;
@@ -18,28 +22,38 @@
     return isFinite(n) ? n : null;
   }
 
-  // SNOW1g ptype (skiljer sig från gamla pmp3g där 1 = snö):
-  // 0 ingen, 1 regn, 2 snöblandat, 5/6 snö eller underkylt, 11 duggregn.
-  // Kompletteras med symbol_code (samma 1–27 som tidigare) och frozen_part.
+  // Avrunda till 2 decimaler (~1 km i lat, ~0,6 km i lon vid Göteborg).
+  function roundCoord(lat, lon) {
+    function r(v) {
+      var n = Number(v);
+      if (!isFinite(n)) return null;
+      return Math.round(n * 100) / 100;
+    }
+    return { lat: r(lat), lon: r(lon) };
+  }
+
+  // Open-Meteo current: visa bara om det faktiskt faller nederbörd just nu.
+  // weather_code används bara för typ (regn/snö/snöblandat), inte för att slå på animationen.
   function kindFrom(data) {
     if (!data || typeof data !== 'object') return '';
-    var pcat = num(data.predominant_precipitation_type_at_surface);
-    var amount = num(data.precipitation_amount_mean);
-    var frozen = num(data.precipitation_frozen_part);
-    var prob = num(data.probability_of_precipitation);
-    var sym = num(data.symbol_code);
-    if (frozen != null && frozen > 1) frozen = frozen / 100;
-    var wet = (amount != null && amount >= 0.05) || (prob != null && prob >= 50 && amount != null && amount >= 0.02);
-    if (pcat === 0 && !wet) return '';
-    if (pcat === 5 || pcat === 6 || pcat === 8 || pcat === 9 || pcat === 10) return 'snow';
-    if (pcat === 2 || pcat === 7) return 'sleet';
-    if (pcat === 1 || pcat === 3 || pcat === 4 || pcat === 11 || pcat === 12) return wet || pcat === 1 || pcat === 11 ? 'rain' : '';
-    if (sym >= 15 && sym <= 17 || sym >= 25 && sym <= 27) return 'snow';
-    if (sym >= 12 && sym <= 14 || sym >= 22 && sym <= 24) return 'sleet';
-    if (frozen != null && frozen >= 0.8 && wet) return 'snow';
-    if (frozen != null && frozen >= 0.2 && wet) return 'sleet';
-    if (sym >= 8 && sym <= 11 || sym >= 18 && sym <= 21) return wet ? 'rain' : '';
-    return wet ? 'rain' : '';
+    var precip = num(data.precipitation);
+    var rain = num(data.rain);
+    var showers = num(data.showers);
+    var snow = num(data.snowfall);
+    var code = num(data.weather_code);
+    var amount = precip;
+    if (amount == null) {
+      amount = (rain || 0) + (showers || 0);
+      if (snow != null && snow > 0) amount = Math.max(amount, snow);
+    }
+    if (amount == null || amount < 0.05) return '';
+    var snowy = (snow != null && snow >= 0.05) ||
+      (code != null && (code >= 71 && code <= 77 || code === 85 || code === 86));
+    var rainy = (rain != null && rain >= 0.05) || (showers != null && showers >= 0.05) ||
+      (code != null && (code >= 51 && code <= 67 || code >= 80 && code <= 82 || code >= 95));
+    if (snowy && rainy) return 'sleet';
+    if (snowy) return 'snow';
+    return 'rain';
   }
 
   function readCache() {
@@ -74,7 +88,13 @@
       '.anim-wx-flake{width:7px;height:7px;color:rgba(230,240,255,.4);font-size:7px;line-height:7px;text-align:center;animation:anim-wx-drift linear infinite}' +
       'html[data-theme="dark"] .anim-wx-flake{color:rgba(240,248,255,.38)}' +
       '@keyframes anim-wx-fall{0%{transform:translate3d(0,0,0);opacity:0}8%{opacity:1}92%{opacity:1}100%{transform:translate3d(8px,120vh,0);opacity:0}}' +
-      '@keyframes anim-wx-drift{0%{transform:translate3d(0,0,0) rotate(0deg);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translate3d(18px,120vh,0) rotate(120deg);opacity:0}}';
+      '@keyframes anim-wx-drift{0%{transform:translate3d(0,0,0) rotate(0deg);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translate3d(18px,120vh,0) rotate(120deg);opacity:0}}' +
+      '#animationer-vader-plats{position:fixed;left:8px;right:8px;bottom:8px;z-index:80;display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:rgba(20,28,36,.92);color:#eef4fa;font-size:13px;line-height:1.25;box-shadow:0 2px 10px rgba(0,0,0,.25)}' +
+      'html:not([data-theme="dark"]) #animationer-vader-plats{background:rgba(245,248,252,.96);color:#1a2430;box-shadow:0 2px 10px rgba(0,0,0,.12)}' +
+      '#animationer-vader-plats p{margin:0;flex:1;min-width:0}' +
+      '#animationer-vader-plats button{flex:0 0 auto;min-height:32px;padding:4px 10px;border:0;border-radius:8px;font-size:13px;cursor:pointer}' +
+      '#animationer-vader-plats .avp-yes{background:#2b6cb0;color:#fff}' +
+      '#animationer-vader-plats .avp-no{background:transparent;color:inherit;opacity:.85}';
     document.head.appendChild(css);
   }
 
@@ -147,29 +167,14 @@
     else el.classList.remove('anim-wx-paused');
   }
 
-  function pickTimeSeries(ts) {
-    if (!ts || !ts.length) return null;
-    var now = Date.now(), best = ts[0], bestDt = Infinity, i, t, dt;
-    for (i = 0; i < ts.length; i++) {
-      t = Date.parse(ts[i].time || ts[i].validTime || '');
-      if (!isFinite(t)) continue;
-      dt = Math.abs(t - now);
-      if (dt < bestDt) { bestDt = dt; best = ts[i]; }
-    }
-    return best;
-  }
-
   function snapshotFrom(json) {
-    var row = pickTimeSeries(json && json.timeSeries);
-    var data = (row && row.data) || {};
+    var cur = json && json.current;
+    if (!cur || typeof cur !== 'object') return { kind: '', temp: null, symbol: null };
     return {
-      kind: kindFrom(data) || '',
-      temp: num(data.air_temperature),
-      symbol: num(data.symbol_code)
+      kind: kindFrom(cur) || '',
+      temp: num(cur.temperature_2m),
+      symbol: num(cur.weather_code)
     };
-  }
-  function parseResponse(json) {
-    return snapshotFrom(json).kind;
   }
   // Klädsel till hjälpboten (överraskning: nämns inte i Om/hjälp/nyheter).
   // snö > snöblandat > regn > kallt (<5 °C) > sol/varmt.
@@ -184,7 +189,7 @@
     var sym = num(snap.symbol);
     var cold = temp != null && temp < 5;
     var warm = temp != null && temp >= 18;
-    var sun = (sym === 1 || sym === 2) && (temp == null || temp >= 5);
+    var sun = (sym === 0 || sym === 1 || sym === 2) && (temp == null || temp >= 5);
     if (kind === 'snow' || kind === 'sleet') return 'snow';
     if (kind === 'rain') return 'rain';
     if (cold) return 'cold';
@@ -198,23 +203,22 @@
     try { return !!(window.ANIMATIONER && window.ANIMATIONER.isOn && window.ANIMATIONER.isOn()); } catch (e) { return false; }
   }
 
-  function smhiUrl(coord) {
-    var lon = Number(coord.lon).toFixed(4);
-    var lat = Number(coord.lat).toFixed(4);
-    return SMHI.replace('{lon}', lon).replace('{lat}', lat);
+  function meteoUrl(coord) {
+    var r = roundCoord(coord.lat, coord.lon);
+    return METEO.replace('{lat}', String(r.lat)).replace('{lon}', String(r.lon));
   }
 
   function fetchKind(coord) {
-    return fetch(smhiUrl(coord), { credentials: 'omit' })
+    var r = roundCoord(coord.lat, coord.lon);
+    if (r.lat == null || r.lon == null) r = { lat: GBG.lat, lon: GBG.lon };
+    return fetch(meteoUrl({ lat: r.lat, lon: r.lon }), { credentials: 'omit' })
       .then(function (res) {
-        if (!res.ok) throw new Error('smhi ' + res.status);
+        if (!res.ok) throw new Error('meteo ' + res.status);
         return res.json();
       })
       .then(function (json) {
         var snap = snapshotFrom(json);
         snap.at = Date.now();
-        snap.lat = coord.lat;
-        snap.lon = coord.lon;
         snap.source = coord.source || 'gbg';
         writeCache(snap);
         emitSnap(snap);
@@ -222,30 +226,92 @@
       });
   }
 
-  function locate(cb) {
-    var cached = readCache();
-    if (cached && cached.lat && cached.lon && cached.source === 'device') {
-      cb({ lat: cached.lat, lon: cached.lon });
-      return;
-    }
-    if (!navigator.geolocation) { cb(GBG); return; }
+  function geoState(cb) {
+    if (!navigator.permissions || !navigator.permissions.query) { cb('unknown'); return; }
+    try {
+      var p = navigator.permissions.query({ name: 'geolocation' });
+      if (!p || !p.then) { cb('unknown'); return; }
+      p.then(function (s) { cb((s && s.state) || 'unknown'); }).catch(function () { cb('unknown'); });
+    } catch (e) { cb('unknown'); }
+  }
+
+  function askedChoice() {
+    try { return localStorage.getItem(GEO_ASK_KEY) || ''; } catch (e) { return ''; }
+  }
+  function rememberChoice(v) {
+    try { localStorage.setItem(GEO_ASK_KEY, v); } catch (e) {}
+  }
+
+  function hideAsk() {
+    asking = false;
+    var el = document.getElementById('animationer-vader-plats');
+    if (el && el.parentNode) el.parentNode.removeChild(el);
+  }
+
+  function showAsk(onYes, onNo) {
+    if (asking || document.getElementById('animationer-vader-plats')) return;
+    asking = true;
+    ensureWxStyle();
+    var bar = document.createElement('div');
+    bar.id = 'animationer-vader-plats';
+    bar.setAttribute('role', 'dialog');
+    var p = document.createElement('p');
+    p.textContent = 'Visa vädret där du är?';
+    var yes = document.createElement('button');
+    yes.type = 'button';
+    yes.className = 'avp-yes';
+    yes.textContent = 'Ja';
+    var no = document.createElement('button');
+    no.type = 'button';
+    no.className = 'avp-no';
+    no.textContent = 'Inte nu';
+    yes.addEventListener('click', function () { hideAsk(); if (onYes) onYes(); });
+    no.addEventListener('click', function () { hideAsk(); if (onNo) onNo(); });
+    bar.appendChild(p);
+    bar.appendChild(no);
+    bar.appendChild(yes);
+    (document.body || document.documentElement).appendChild(bar);
+  }
+
+  function takePosition(onOk, onFail) {
     var done = false;
-    var to = setTimeout(function () { if (!done) { done = true; cb(GBG); } }, 2500);
+    var to = setTimeout(function () { if (!done) { done = true; onFail(); } }, 2500);
     try {
       navigator.geolocation.getCurrentPosition(
-        function (p) {
+        function (pos) {
           if (done) return;
           done = true; clearTimeout(to);
-          cb({ lat: p.coords.latitude, lon: p.coords.longitude, source: 'device' });
+          var r = roundCoord(pos.coords.latitude, pos.coords.longitude);
+          if (r.lat == null || r.lon == null) { onFail(); return; }
+          onOk({ lat: r.lat, lon: r.lon, source: 'device' });
         },
-        function () { if (!done) { done = true; clearTimeout(to); cb(GBG); } },
-        { enableHighAccuracy: false, timeout: 2000, maximumAge: 30 * 60 * 1000 }
+        function () { if (!done) { done = true; clearTimeout(to); onFail(); } },
+        { enableHighAccuracy: false, timeout: 2000, maximumAge: 10 * 60 * 1000 }
       );
-    } catch (e) { if (!done) { done = true; clearTimeout(to); cb(GBG); } }
+    } catch (e) { if (!done) { done = true; clearTimeout(to); onFail(); } }
+  }
+
+  // cb kan anropas två gånger: först Göteborg, sedan enhetens läge om användaren säger ja.
+  function locate(cb) {
+    var gbg = { lat: GBG.lat, lon: GBG.lon, source: 'gbg' };
+    if (!navigator.geolocation) { cb(gbg); return; }
+    geoState(function (state) {
+      if (state === 'granted' || (askedChoice() === 'ja' && state !== 'denied')) {
+        takePosition(cb, function () { cb(gbg); });
+        return;
+      }
+      if (state === 'denied' || askedChoice() === 'nej') { cb(gbg); return; }
+      cb(gbg);
+      if (document.hidden) return;
+      showAsk(function () {
+        rememberChoice('ja');
+        takePosition(cb, function () {});
+      }, function () { rememberChoice('nej'); });
+    });
   }
 
   function refresh(force) {
-    if (!animOn()) { clearWx(); return; }
+    if (!animOn()) { clearWx(); hideAsk(); return; }
     if (document.hidden) return;
     var cached = !force && readCache();
     if (cached) { applyKind(cached.kind); emitSnap(cached); return; }
@@ -277,13 +343,15 @@
   window.ANIMATIONER_VADER = {
     kindFrom: kindFrom,
     outfitFrom: outfitFrom,
+    roundCoord: roundCoord,
     readCache: readCache,
     refresh: refresh,
     preview: preview,
     start: start,
     clear: clearWx,
     cacheKey: CACHE_KEY,
-    ttlMs: TTL_MS
+    ttlMs: TTL_MS,
+    gbg: GBG
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
