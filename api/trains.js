@@ -171,20 +171,168 @@ function slimBoardRows(payload) {
   return { trains, removed, changeId: lastChangeIdOf(payload) };
 }
 
-function attachLastSeen(trains, pos) {
+// Operational date in Europe/Stockholm of ScheduledDepartureDateTime (origin advertised
+// departure of this run). Same value on every announcement of the run.
+function stockholmDate(iso) {
+  if (!iso) return "";
+  const t = Date.parse(iso);
+  if (!Number.isFinite(t)) {
+    const m = String(iso).match(/^(\d{4}-\d{2}-\d{2})/);
+    return m ? m[1] : "";
+  }
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Stockholm",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(t));
+}
+
+function runDateOf(rowOrTrain) {
+  if (!rowOrTrain) return "";
+  if (rowOrTrain.depDate) return String(rowOrTrain.depDate);
+  return stockholmDate(rowOrTrain.ScheduledDepartureDateTime || rowOrTrain.depAt || "");
+}
+
+function runKey(ident, dep) {
+  const d = typeof dep === "string" && /^\d{4}-\d{2}-\d{2}$/.test(dep) ? dep : stockholmDate(dep);
+  return d ? String(ident) + "|" + d : String(ident);
+}
+
+// Last-seen belongs to this arrival if operational dates match, otherwise if the
+// timestamp falls in this journey window (not yesterday's train with the same number,
+// and not the continuation after this station, e.g. Göteborg → Uddevalla).
+function sameRunTs(f, ts, rowDep) {
+  const a = runDateOf(f);
+  const b = typeof rowDep === "string" && /^\d{4}-\d{2}-\d{2}$/.test(rowDep) ? rowDep : stockholmDate(rowDep);
+  if (a && b) return a === b;
+  const arr = Date.parse(f.est || f.sched);
+  const t = Date.parse(ts);
+  if (!Number.isFinite(arr) || !Number.isFinite(t)) return false;
+  return t > arr - 8 * 3600 * 1000 && t < arr + 30 * 60 * 1000;
+}
+
+function lastSeenOnRoute(f, sig, ts) {
+  if (!sig) return false;
+  const arr = Date.parse(f.est || f.sched);
+  const t = Date.parse(ts);
+  if (Number.isFinite(arr) && Number.isFinite(t) && (t > arr + 30 * 60 * 1000 || t < arr - 8 * 3600 * 1000)) return false;
+  const stops = f.stops;
+  if (!stops || !stops.length) return true;
+  if (stops.some((s) => s.sig === sig)) return true;
+  // Technical mid-route locations are allowed if they occurred before this arrival.
+  return Number.isFinite(arr) && Number.isFinite(t) && t <= arr + 5 * 60 * 1000;
+}
+
+function lookupLastSeen(seen, f) {
+  if (!seen || !f || !f.id) return null;
+  const rd = runDateOf(f);
+  if (rd) {
+    const hit = seen[runKey(f.id, rd)];
+    return hit || null;
+  }
+  const prefix = f.id + "|";
+  let best = null;
+  for (const k of Object.keys(seen)) {
+    if (k !== f.id && !k.startsWith(prefix)) continue;
+    const hit = seen[k];
+    if (!hit || !sameRunTs(f, hit.ts, hit.depDate || k.slice(prefix.length))) continue;
+    if (!best || Date.parse(hit.ts) > Date.parse(best.ts)) best = hit;
+  }
+  return best;
+}
+
+function filterLocsWindow(locs, f) {
+  const arr = Date.parse(f.est || f.sched);
+  const out = {};
+  for (const [sig, s] of Object.entries(locs || {})) {
+    if (!s) continue;
+    const rd = runDateOf(f);
+    if (rd && s.depDate && s.depDate !== rd) continue;
+    const t = Date.parse(s.sched || s.t || s.est || s.act);
+    if (Number.isFinite(arr) && Number.isFinite(t) && (t < arr - 8 * 3600 * 1000 || t > arr + 60 * 60 * 1000)) continue;
+    out[sig] = s;
+  }
+  return out;
+}
+
+function routesForTrain(routes, f) {
+  if (!routes || !f || !f.id) return null;
+  const rd = runDateOf(f);
+  if (rd && routes[runKey(f.id, rd)]) return routes[runKey(f.id, rd)];
+  const prefix = f.id + "|";
+  const bag = {};
+  for (const k of Object.keys(routes)) {
+    if (k !== f.id && !k.startsWith(prefix)) continue;
+    if (rd && k !== f.id && k !== runKey(f.id, rd)) continue;
+    Object.assign(bag, rd ? routes[k] : filterLocsWindow(routes[k], f));
+  }
+  return filterLocsWindow(bag, f);
+}
+
+function sliceStopsAtStation(stops, f, station) {
+  if (!station || !stops || !stops.length || f.dir !== "ANK") return stops;
+  const arr = Date.parse(f.est || f.sched);
+  let gi = -1;
+  for (let i = 0; i < stops.length; i++) {
+    if (stops[i].sig !== station) continue;
+    const t = Date.parse(stops[i].sched || stops[i].t);
+    if (!Number.isFinite(t) || !Number.isFinite(arr) || Math.abs(t - arr) < 3 * 3600 * 1000) gi = i;
+  }
+  return gi >= 0 ? stops.slice(0, gi + 1) : stops;
+}
+
+function applyLastSeenFromStops(f) {
+  if (!f.stops || !f.stops.length) return;
+  const acted = f.stops.filter((s) => s.act && sameRunTs(f, s.act, f.depDate) && lastSeenOnRoute(f, s.sig, s.act));
+  if (!acted.length) {
+    if (f.lastSeenTs && (!sameRunTs(f, f.lastSeenTs, f.depDate) || !lastSeenOnRoute(f, f.lastSeenSig, f.lastSeenTs))) {
+      delete f.lastSeen;
+      delete f.lastSeenSig;
+      delete f.lastSeenTs;
+      delete f.lastSeenAct;
+    }
+    return;
+  }
+  const last = acted.reduce((a, b) => (b.act > a.act ? b : a));
+  if (!f.lastSeenTs || String(last.act) >= String(f.lastSeenTs) || !sameRunTs(f, f.lastSeenTs, f.depDate) || !lastSeenOnRoute(f, f.lastSeenSig, f.lastSeenTs)) {
+    f.lastSeen = last.name;
+    f.lastSeenSig = last.sig;
+    f.lastSeenTs = last.act;
+  }
+}
+
+function attachLastSeen(trains, pos, routes, station) {
   const seen = (pos && pos.best) || {};
   const checked = new Set((pos && pos.idents) || []);
   for (const f of trains) {
-    const hit = seen[f.id];
-    const tArr = Date.parse(f.est || f.sched);
-    const okHit = hit && hit.sig && (!Number.isFinite(tArr) || Date.parse(hit.ts) > tArr - 8 * 3600 * 1000);
-    if (f.dir === "ANK" && checked.has(f.id)) f.posChecked = true;
+    if (routes) {
+      const locs = routesForTrain(routes, f);
+      if (locs && Object.keys(locs).length) {
+        const stops = sliceStopsAtStation(
+          Object.values(locs).sort((a, b) => String(a.t).localeCompare(String(b.t))),
+          f,
+          station
+        );
+        if (stops.length) {
+          f.stops = stops.map((s) => ({
+            sig: s.sig, name: stationName(s.sig) || s.sig, t: s.t || "",
+            act: s.act || "", est: s.est || "", sched: s.sched || "", track: s.track || "",
+          }));
+        }
+      }
+    }
+    const hit = lookupLastSeen(seen, f);
+    const okHit = hit && hit.sig && sameRunTs(f, hit.ts, hit.depDate) && lastSeenOnRoute(f, hit.sig, hit.ts);
     if (okHit) {
       f.lastSeen = stationName(hit.sig) || hit.sig;
       f.lastSeenSig = hit.sig;
       f.lastSeenTs = hit.ts;
       f.lastSeenAct = hit.act;
     }
+    applyLastSeenFromStops(f);
+    const hasRoute = !!(f.stops && f.stops.length);
+    if (f.dir === "ANK" && (checked.has(f.id) || hasRoute || runDateOf(f))) f.posChecked = true;
   }
   return trains;
 }
@@ -273,6 +421,8 @@ function slimTrain(f) {
     snabb,
     reason: parts.reason,
     info: parts.info,
+    depAt: f.ScheduledDepartureDateTime || "",
+    depDate: stockholmDate(f.ScheduledDepartureDateTime) || "",
   };
 }
 
@@ -315,7 +465,8 @@ function stationAnnouncementQuery(station, changeId) {
     "<INCLUDE>TrackAtLocation</INCLUDE><INCLUDE>FromLocation</INCLUDE>" +
     "<INCLUDE>ToLocation</INCLUDE><INCLUDE>ProductInformation</INCLUDE>" +
     "<INCLUDE>TypeOfTraffic</INCLUDE>" +
-    "<INCLUDE>Deviation</INCLUDE><INCLUDE>OtherInformation</INCLUDE><INCLUDE>Booking</INCLUDE></QUERY>"
+    "<INCLUDE>Deviation</INCLUDE><INCLUDE>OtherInformation</INCLUDE><INCLUDE>Booking</INCLUDE>" +
+    "<INCLUDE>ScheduledDepartureDateTime</INCLUDE></QUERY>"
   );
 }
 
@@ -348,14 +499,17 @@ async function lastSeenMap(key, trains) {
     '<FILTER><AND><GT name="TimeAtLocation" value="$dateadd(-06:00:00)" />' +
     "<OR>" + orIdents(idents) + "</OR></AND></FILTER>" +
     "<INCLUDE>AdvertisedTrainIdent</INCLUDE><INCLUDE>LocationSignature</INCLUDE>" +
-    "<INCLUDE>ActivityType</INCLUDE><INCLUDE>TimeAtLocation</INCLUDE></QUERY>";
+    "<INCLUDE>ActivityType</INCLUDE><INCLUDE>TimeAtLocation</INCLUDE>" +
+    "<INCLUDE>ScheduledDepartureDateTime</INCLUDE></QUERY>";
   const best = {};
   for (const row of rowsOf(await tvPost(key, q))) {
     const tid = row.AdvertisedTrainIdent;
     const ts = row.TimeAtLocation;
     if (!tid || !ts) continue;
-    const prev = best[tid];
-    if (!prev || Date.parse(ts) > Date.parse(prev.ts)) best[tid] = { ts, sig: row.LocationSignature || "", act: row.ActivityType || "" };
+    const depDate = stockholmDate(row.ScheduledDepartureDateTime);
+    const keyId = runKey(tid, depDate);
+    const prev = best[keyId];
+    if (!prev || Date.parse(ts) > Date.parse(prev.ts)) best[keyId] = { ts, sig: row.LocationSignature || "", act: row.ActivityType || "", depDate };
   }
   return { best, idents };
 }
@@ -375,7 +529,7 @@ async function routesMap(key, trains) {
         "<INCLUDE>AdvertisedTrainIdent</INCLUDE><INCLUDE>LocationSignature</INCLUDE>" +
         "<INCLUDE>AdvertisedTimeAtLocation</INCLUDE><INCLUDE>EstimatedTimeAtLocation</INCLUDE>" +
         "<INCLUDE>TimeAtLocation</INCLUDE><INCLUDE>TrackAtLocation</INCLUDE>" +
-        "<INCLUDE>Canceled</INCLUDE></QUERY>";
+        "<INCLUDE>Canceled</INCLUDE><INCLUDE>ScheduledDepartureDateTime</INCLUDE></QUERY>";
       // En misslyckad batch ska inte fälla hela svaret.
       return tvPost(key, q).then(rowsOf, () => []);
     })
@@ -387,15 +541,18 @@ async function routesMap(key, trains) {
       const sig = row.LocationSignature || "";
       if (!tid || !sig) continue;
       const t = row.TimeAtLocation || row.EstimatedTimeAtLocation || row.AdvertisedTimeAtLocation || "";
-      by[tid] = by[tid] || {};
-      const prev = by[tid][sig];
+      const depDate = stockholmDate(row.ScheduledDepartureDateTime);
+      const keyId = runKey(tid, depDate);
+      by[keyId] = by[keyId] || {};
+      const prev = by[keyId][sig];
       if (!prev || String(t) < String(prev.t || "9999")) {
-        by[tid][sig] = {
+        by[keyId][sig] = {
           sig, t,
           act: row.TimeAtLocation || "",
           est: row.EstimatedTimeAtLocation || "",
           sched: row.AdvertisedTimeAtLocation || "",
           track: row.TrackAtLocation || "",
+          depDate,
         };
       }
     }
@@ -411,40 +568,7 @@ async function buildTrains(key, station = STATION) {
     lastSeenMap(key, trains).catch(() => ({ best: {}, idents: [] })),
     routesMap(key, trains).catch(() => ({})),
   ]);
-  const seen = pos.best;
-  const checked = new Set(pos.idents);
-  for (const f of trains) {
-    const hit = seen[f.id];
-    // Bara positioner från den här körningen av tåget (inte gårdagens med samma nummer).
-    const tArr = Date.parse(f.est || f.sched);
-    const okHit = hit && hit.sig && (!Number.isFinite(tArr) || Date.parse(hit.ts) > tArr - 8 * 3600 * 1000);
-    if (f.dir === "ANK" && checked.has(f.id)) f.posChecked = true;
-    if (okHit) {
-      f.lastSeen = stationName(hit.sig) || hit.sig;
-      f.lastSeenSig = hit.sig;
-      f.lastSeenTs = hit.ts;
-      f.lastSeenAct = hit.act;
-    }
-    const locs = routes[f.id];
-    if (locs) {
-      const stops = Object.values(locs).sort((a, b) => String(a.t).localeCompare(String(b.t)));
-      if (stops.length) {
-        f.stops = stops.map((s) => ({
-          sig: s.sig, name: stationName(s.sig) || s.sig, t: s.t || "",
-          act: s.act || "", est: s.est || "", sched: s.sched || "", track: s.track || "",
-        }));
-        const acted = f.stops.filter((s) => s.act);
-        if (acted.length) {
-          const last = acted.reduce((a, b) => (b.act > a.act ? b : a));
-          if (!f.lastSeenTs || String(last.act) >= String(f.lastSeenTs)) {
-            f.lastSeen = last.name;
-            f.lastSeenSig = last.sig;
-            f.lastSeenTs = last.act;
-          }
-        }
-      }
-    }
-  }
+  attachLastSeen(trains, pos, routes, station);
   // Samma nyckel som merge_keep i Python-scriptet: (id, dir, sched).
   const uniq = new Map();
   for (const f of trains) uniq.set(trainKey(f), f);
@@ -566,20 +690,17 @@ async function routeFor(key, ident, schedIso, station = STATION) {
     "<INCLUDE>LocationSignature</INCLUDE><INCLUDE>ActivityType</INCLUDE><INCLUDE>Advertised</INCLUDE>" +
     "<INCLUDE>AdvertisedTimeAtLocation</INCLUDE><INCLUDE>EstimatedTimeAtLocation</INCLUDE>" +
     "<INCLUDE>TimeAtLocation</INCLUDE><INCLUDE>TrackAtLocation</INCLUDE><INCLUDE>Canceled</INCLUDE>" +
-    "<INCLUDE>Deviation</INCLUDE><INCLUDE>OtherInformation</INCLUDE><INCLUDE>Booking</INCLUDE></QUERY>";
+    "<INCLUDE>Deviation</INCLUDE><INCLUDE>OtherInformation</INCLUDE><INCLUDE>Booking</INCLUDE>" +
+    "<INCLUDE>ScheduledDepartureDateTime</INCLUDE></QUERY>";
   const rows = rowsOf(await tvPost(key, q));
   // Bara den körning som ankommer vald station vid sched (±3 h) – inte gårdagens/morgondagens med samma nummer.
   const lo = sched - 14 * 3600000, hi = sched + 3 * 3600000;
   const stops = new Map();
-  let seen = null;
   for (const r of rows) {
     const t = Date.parse(r.AdvertisedTimeAtLocation || r.TimeAtLocation);
     if (!Number.isFinite(t) || t < lo || t > hi) continue;
     const sig = r.LocationSignature || "";
     if (!sig) continue;
-    if (r.TimeAtLocation && (!seen || Date.parse(r.TimeAtLocation) > Date.parse(seen.ts))) {
-      seen = { sig, name: stationName(sig) || sig, ts: r.TimeAtLocation, type: r.ActivityType || "" };
-    }
     if (!r.Advertised && !r.TimeAtLocation) continue;
     const s = stops.get(sig) || { sig, name: stationName(sig) || sig, t, track: "", canceled: false };
     const arr = String(r.ActivityType || "").toLowerCase().startsWith("ank");
@@ -597,6 +718,20 @@ async function routeFor(key, ident, schedIso, station = STATION) {
   let list = Array.from(stops.values()).sort((a, b) => a.t - b.t);
   const gi = list.findIndex((s) => s.sig === station && s.arrSched);
   if (gi >= 0) list = list.slice(0, gi + 1);
+  // Last seen only at or before the selected station on this run (not the continuation after G).
+  const routeSigs = new Set(list.map((s) => s.sig));
+  const cut = list.length ? list[list.length - 1].t : sched;
+  let seen = null;
+  for (const r of rows) {
+    if (!r.TimeAtLocation) continue;
+    const t = Date.parse(r.AdvertisedTimeAtLocation || r.TimeAtLocation);
+    if (!Number.isFinite(t) || t < lo || t > hi) continue;
+    const ts = Date.parse(r.TimeAtLocation);
+    if (!Number.isFinite(ts) || ts > cut + 5 * 60 * 1000) continue;
+    const sig = r.LocationSignature || "";
+    if (routeSigs.size && !routeSigs.has(sig) && ts > cut) continue;
+    if (!seen || ts > Date.parse(seen.ts)) seen = { sig, name: stationName(sig) || sig, ts: r.TimeAtLocation, type: r.ActivityType || "" };
+  }
   list = list.map((s) => { const o = Object.assign({}, s); delete o.t; return o; });
   let reason = "", info = "";
   for (const r of rows) {
@@ -694,4 +829,4 @@ async function handler(req, res) {
 }
 
 module.exports = handler;
-module.exports._internal = { slimTrain, buildTrains, buildTrainsDelta, uniqueIdents, rowsOf, lastChangeIdOf, codesText, reasonParts, routeFor, loadCatalog, regionalStation, QUICK_STATIONS, trainKey, trainFingerprint, mergeBoard, diffBoard };
+module.exports._internal = { slimTrain, buildTrains, buildTrainsDelta, uniqueIdents, rowsOf, lastChangeIdOf, codesText, reasonParts, routeFor, loadCatalog, regionalStation, QUICK_STATIONS, trainKey, trainFingerprint, mergeBoard, diffBoard, stockholmDate, runDateOf, runKey, sameRunTs, lastSeenOnRoute, lookupLastSeen, routesForTrain, attachLastSeen, sliceStopsAtStation };

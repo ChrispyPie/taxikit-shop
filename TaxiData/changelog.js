@@ -16,7 +16,9 @@
  */
 window.CHANGELOG = [
   { datum: '2026-11-11', id: '2026-11-11bev2', tid: '08:00', rader: [
-    ['Rättat', 'En tillfällig bevakning på Ankomster visas med en silverstjärna, inte guld. Guldstjärnan används bara för fasta bevakningar, som du gör i Mina bevakningar med ett långt tryck.']
+    ['Rättat', 'En tillfällig bevakning på Ankomster visas med en silverstjärna, inte guld. Guldstjärnan används bara för fasta bevakningar, som du gör i Mina bevakningar med ett långt tryck.'],
+    ['Rättat', 'Ett tåg som inte har gått visar inte längre en slutstation från gårdagens tåg med samma nummer. Senast sedd gäller bara den här turen och bara stationer på vägen. Har tåget inte avgått står det Ej avgått.']
+    ['Rättat', 'Stjärnan på Ankomster gör bara en tillfällig bevakning. Tar du bort den där försvinner den också från Mina bevakningar. En fast bevakning (guld) gör du bara med ett långt tryck i Mina bevakningar.']
   ]},
   { datum: '2026-11-11', id: '2026-11-11bev1', tid: '07:30', rader: [
     ['Nytt', 'Stjärnan på en ankomst i Tåg, Flyg eller Båt gör en tillfällig bevakning (silverstjärna). Den syns i Mina bevakningar och som en liten etikett högst upp på sidan, och försvinner cirka en halvtimme efter ankomst.'],

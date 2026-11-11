@@ -1,0 +1,13 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const src = fs.readFileSync(path.join(__dirname, '../../TaxiData/bevakning.js'), 'utf8');
+const bind = src.slice(src.indexOf('function bind(el)'), src.indexOf('B.decorate ='));
+const toggle = src.slice(src.indexOf('function toggle(key, item)'), src.indexOf('// ---------- toast'));
+assert.equal((bind.match(/saveRoute/g) || []).length, 0, 'Ankomster long-press must not call saveRoute');
+assert.equal((bind.match(/route_watch_save/g) || []).length, 0);
+assert.match(bind, /toggle\(key, itHold\)/);
+assert.equal((toggle.match(/saveRoute|route_watch_save/g) || []).length, 0, 'star toggle must not create a route_watch');
+assert.match(toggle, /watch_set/);
+assert.match(toggle, /existing \? existing\.sched : k\.schedRaw/);
+console.log('PASS Ankomster star/long-press only toggles temporary arrival watches');
