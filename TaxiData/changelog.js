@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-11', id: '2026-11-11tryck1', tid: '10:25', rader: [
+    ['Rättat', 'När du trycker på ett verktyg på startskärmen följer återkopplingen ikonen, utan en fyrkantig ram runt rutan.']
+  ]},
   { datum: '2026-11-11', id: '2026-11-11plus1', tid: '10:30', rader: [
     ['Förbättrat', 'Verktygen på startskärmen sitter högst upp. En liten skiftnyckel vid rutnätet låter dig flytta och ändra dem.'],
     ['Nytt', 'Du kan ta bort verktyg du sällan använder och lägga tillbaka dem med plusknappen. Inställningar, Om appen och Admin stannar kvar. Valen sparas på ditt konto.']
