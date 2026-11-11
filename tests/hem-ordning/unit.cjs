@@ -43,4 +43,22 @@ assert.match(help, /Rutan Moduler/);
 const hem = help.split('hem: [')[1].split('],')[0];
 assert.doesNotMatch(hem, /\bStig\b|\bhen\b/);
 assert.doesNotMatch(hem, /regn|snö|klädsel|outfit/i);
+
+const menu2 = menu.concat([{ id: 'nyheter', label: 'Nyheter', icon: 'x' }]);
+H.setCatalog(menu2);
+H.preview([], []);
+assert.ok(!H.isInstalled('nyheter'), 'nyheter default off');
+assert.ok(!H.arrange(menu2).map(x => x.id).includes('nyheter'));
+assert.ok(H.arrange(menu2).map(x => x.id).includes('vader'));
+H.install('nyheter');
+assert.ok(H.isInstalled('nyheter'));
+assert.ok(H.arrange(menu2).map(x => x.id).includes('nyheter'));
+H.uninstall('nyheter');
+assert.ok(!H.isInstalled('nyheter'));
+assert.ok(!H.arrange(menu2).map(x => x.id).includes('nyheter'));
+
+const nyh = help.split('nyheter: [')[1].split('],')[0];
+assert.doesNotMatch(nyh, /\bStig\b|\bhen\b/);
+assert.match(help, /Göteborg från SVT Väst/);
+
 console.log('UNIT_OK', hiddenOut.join(','));

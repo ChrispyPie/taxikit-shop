@@ -4,6 +4,10 @@ Samma innehåll som visas under **Om appen → Nyheter** i appen. Källan är `T
 
 > Äldre historik (före 24 oktober 2026) är återskapad i efterhand och ungefärlig.
 
+## 11 november 2026
+
+- **Nytt:** Under Moduler finns Nyheter. Där läser du korta nyheter från Göteborg, och kan lägga till Politik, Sport, Sverige och Nöje. Tryck på en rad för att öppna artikeln hos källan.
+
 ## 27 oktober 2026
 
 - **Förbättrat:** Demokonton: den som tittar ser inte längre vems siffror det är. Förarens namn och förar-ID visas som Demoförare och bilarna som Demobil 1, 2 och så vidare. Siffrorna är fortfarande riktiga. Det döljs även i det som skickas till telefonen.

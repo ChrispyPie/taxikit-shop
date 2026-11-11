@@ -1,0 +1,54 @@
+name: Nyheter RSS cache
+on:
+  schedule:
+    - cron: "*/20 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: nyheter-feed
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - name: Hämta öppna RSS-flöden
+        run: python3 scripts/fetch_nyheter.py
+      - name: Commit cache if changed
+        run: |
+          set -e
+          git config user.name "taxikit-bot"
+          git config user.email "bot@taxikit.local"
+          git add skiftlogg/feed/nyheter.json
+          if git diff --staged --quiet; then
+            echo "Ingen ändring"
+            exit 0
+          fi
+          git commit -m "chore: uppdatera nyhetscache"
+          cp skiftlogg/feed/nyheter.json "$RUNNER_TEMP/nyheter.json"
+          for i in 1 2 3; do
+            if git push origin HEAD:main; then
+              echo "Push ok ($i)"
+              exit 0
+            fi
+            echo "Push krockade, försöker igen ($i)"
+            sleep $((i * 3))
+            git fetch --depth 1 origin main
+            git reset --hard origin/main
+            cp "$RUNNER_TEMP/nyheter.json" skiftlogg/feed/nyheter.json
+            git add skiftlogg/feed/nyheter.json
+            if git diff --staged --quiet; then
+              echo "Ingen ändring efter reset"
+              exit 0
+            fi
+            git commit -m "chore: uppdatera nyhetscache"
+          done
+          echo "Kunde inte pusha efter 3 försök"
+          exit 1

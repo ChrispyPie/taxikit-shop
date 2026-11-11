@@ -38,6 +38,7 @@ const TOOLS = [
   { id: 'ankomster' },
   { id: 'prognos' },
   { id: 'vader' },
+  { id: 'nyheter' },
   { id: 'kalender' },
   { id: 'topplistor' },
   { id: 'forum' },

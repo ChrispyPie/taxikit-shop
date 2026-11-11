@@ -9,6 +9,7 @@
     ankomster: 'Tåg och flyg som är på väg in, med möjlighet att bevaka.',
     prognos: 'Hur resenärer kan röra sig kring tåg och flyg.',
     vader: 'Väderkarta över Västsverige, med nederbörd, vind och temperatur.',
+    nyheter: 'Korta nyheter från Göteborg, med fler flöden om du vill.',
     kalender: 'Det som är inbokat, samlat på ett ställe.',
     topplistor: 'Jämför resultat mellan förare för en vald period.',
     forum: 'Frågor och tips mellan förare.',
@@ -158,7 +159,7 @@
   ];
   var CACHE_KEYS = {
     kordata: [], lonekoll: [], ankomster: ['taxi_train_stations_v1'], prognos: [],
-    vader: ['taxi_animationer_vader'], kalender: [], topplistor: [], forum: [],
+    vader: ['taxi_animationer_vader'], nyheter: [], kalender: [], topplistor: [], forum: [],
     'mina-bevakningar': [], installningar: [], om: [], admin: [], sadmin: [], verkstad: []
   };
 

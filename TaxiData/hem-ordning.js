@@ -1,18 +1,22 @@
 /* Hemskärm: ordna, dölja och lägga till verktyg. Sparat per förare på servern,
- * med localStorage som reserv. Ångra: se docs/hem-ordning/UNDO.md. */
+ * med localStorage som reserv. Ångra: se docs/hem-ordning/UNDO.md.
+ * DEFAULT_OFF-verktyg (t.ex. Nyheter) ligger inte på startskärmen förrän föraren installerar dem. */
 (function () {
   'use strict';
   if (window.HEM_ORDNING) return;
 
   var LS = 'taxi_home_order';
   var CORE = { installningar: 1, om: 1, admin: 1, sadmin: 1 };
+  var DEFAULT_OFF = { nyheter: 1 }; // nya tillval: visas inte förrän föraren installerar
   var editing = false;
   var order = null;   // string[] or null = default
-  var hidden = [];    // ids the driver has removed; empty = all installed
+  var hidden = [];    // ids the driver has removed; empty hidden = alla vanliga verktyg är installerade
   var catalog = [];   // {id, icon, label} the driver can see
   var drag = null;
 
   function isCore(id) { return !!CORE[id]; }
+  function isDefaultOff(id) { return !!DEFAULT_OFF[id]; }
+  function optedIn(id) { return !!(order && order.indexOf(id) >= 0); }
   function driverId() {
     try { return localStorage.getItem('taxi_driver') || ''; } catch (e) { return ''; }
   }
@@ -74,7 +78,12 @@
     if (catalog.length && visible && visible.length) {
       /* keep catalog fresh when called from renderMenu */
     }
-    var shown = visible.filter(function (x) { return isCore(x.id) || hidden.indexOf(x.id) < 0; });
+    var shown = visible.filter(function (x) {
+      if (isCore(x.id)) return true;
+      if (hidden.indexOf(x.id) >= 0) return false;
+      if (isDefaultOff(x.id) && !optedIn(x.id)) return false;
+      return true;
+    });
     var def = shown.map(function (x) { return x.id; });
     var saved = (order || []).filter(function (id) { return def.indexOf(id) >= 0; });
     if (!saved.length) return shown.slice();
@@ -623,7 +632,13 @@
     order: function () { return order ? order.slice() : null; },
     hidden: function () { return hidden.slice(); },
     catalog: function () { return catalog.slice(); },
-    isInstalled: function (id) { return hidden.indexOf(id) < 0; },
+    isInstalled: function (id) {
+      if (isCore(id)) return true;
+      if (hidden.indexOf(id) >= 0) return false;
+      if (isDefaultOff(id) && !optedIn(id)) return false;
+      return true;
+    },
+    isDefaultOff: isDefaultOff,
     install: addBack,
     uninstall: removeTool,
     openModuler: openModuler,
