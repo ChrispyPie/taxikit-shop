@@ -4,7 +4,8 @@
  * - Flyg: tryck på ☆ (eller håll fingret på raden). Tåg: håll fingret på raden ca en halv sekund.
  * - Notiserna skickas från servern (Supabase edge-funktionen "bevakning") som webbnotiser (push),
  *   så de kommer även när telefonen ligger i fickan med skärmen släckt.
- * - När appen är öppen spelas dessutom ett ljud och telefonen vibrerar.
+ * - När appen är öppen spelas ett typiskt ljud (tåg, flyg eller båt) och telefonen vibrerar.
+ *   Ljudet styrs under Inställningar → Ljud för bevakningar (BEV_LJUD).
  * - Bevakningen tas bort automatiskt 30 min efter sista händelsen (flyg: sista väskan, tåg: ankomst; AFTER_MIN i edge-funktionen).
  * - Utloggning: B.logout() stänger av notiserna på telefonen och tar bort den hos servern.
  */
@@ -145,6 +146,7 @@
       if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
       if (actx.state === 'suspended') actx.resume();
     } catch (e) {}
+    if (window.BEV_LJUD && BEV_LJUD.unlock) BEV_LJUD.unlock();
   }
   document.addEventListener('pointerdown', function once() { unlockAudio(); document.removeEventListener('pointerdown', once); });
   function beep() {
@@ -163,7 +165,8 @@
   // Push medan appen är öppen: ljud + ruta. Rutan går att trycka på och öppnar det notisen gäller (t551u).
   B.alert = function (msg, key) {
     msg = msg || {};
-    beep();
+    if (window.BEV_LJUD) BEV_LJUD.playFromMessage(msg, key);
+    else beep();
     try { if (navigator.vibrate) navigator.vibrate([300, 120, 300, 120, 300]); } catch (e) {}
     toast((msg.title ? msg.title : 'Ny händelse') + (msg.body ? ' – ' + msg.body : ''), 8000,
       { key: key || msg.nkey || '', tag: msg.tag || '', title: msg.title || '', body: msg.body || '', target: msg.target || null });

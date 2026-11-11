@@ -15,6 +15,10 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-11', id: '2026-11-11ljud1', rader: [
+    ['Nytt', 'När en bevakning slår till medan appen är öppen spelas ett kort ljud: ett tåghorn för tåg, ett flygljud för flyg och en båtsignal för båt. Under Inställningar finns Ljud för bevakningar, där du kan slå av allt eller en typ i taget, och prova hur det låter. Valet sparas i telefonen.'],
+    ['Förbättrat', 'Mina bevakningar visar tydligare status på varje ankomst: I tid, försenad, ankommen eller inställd. Listan heter Schema och är tätare, så dagens och kommande ankomster är lätta att läsa på telefonen.']
+  ]},
   { datum: '2026-11-11', id: '2026-11-11pr2', rader: [
     ['Rättat', 'Passrapporten öppnas när du trycker på den lilla rems-ikonen. Plusknappen och resten av raden fäller ut passet som förut. Samma sak för resor och kvittokopian.'],
     ['Rättat', 'I dagsvyn syns även körpass som började kvällen innan och pågick in på den dagen.'],
