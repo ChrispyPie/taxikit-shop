@@ -15,9 +15,14 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-11', id: '2026-11-11bev3', tid: '08:15', rader: [
+    ['Förbättrat', 'När du bevakar något slås notiserna på automatiskt. Du behöver inte en extra knapp på Ankomster.'],
+    ['Nytt', 'I Notiser kan du filtrera med små knappar högst upp: Tåg, Flyg, Båt, Evenemang, Uppdateringar och andra typer som finns. Tryck för att visa eller dölja. Valet sparas i telefonen.'],
+    ['Rättat', 'Etiketterna under Bevakar på Ankomster är silver för tillfälliga bevakningar. Guld används bara för fasta.']
+  ]},
   { datum: '2026-11-11', id: '2026-11-11bev2', tid: '08:00', rader: [
     ['Rättat', 'En tillfällig bevakning på Ankomster visas med en silverstjärna, inte guld. Guldstjärnan används bara för fasta bevakningar, som du gör i Mina bevakningar med ett långt tryck.'],
-    ['Rättat', 'Ett tåg som inte har gått visar inte längre en slutstation från gårdagens tåg med samma nummer. Senast sedd gäller bara den här turen och bara stationer på vägen. Har tåget inte avgått står det Ej avgått.']
+    ['Rättat', 'Ett tåg som inte har gått visar inte längre en slutstation från gårdagens tåg med samma nummer. Senast sedd gäller bara den här turen och bara stationer på vägen. Har tåget inte avgått står det Ej avgått.'],
     ['Rättat', 'Stjärnan på Ankomster gör bara en tillfällig bevakning. Tar du bort den där försvinner den också från Mina bevakningar. En fast bevakning (guld) gör du bara med ett långt tryck i Mina bevakningar.']
   ]},
   { datum: '2026-11-11', id: '2026-11-11bev1', tid: '07:30', rader: [

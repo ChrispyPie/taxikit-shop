@@ -463,7 +463,7 @@
     if (isIos && !standalone) {
       return '<p class="pg-hint">På iPhone: lägg till TaxiData på hemskärmen för att få push-notiser.</p>';
     }
-    return '<p class="pg-hint">Push använder samma notiser som Ankomster. Aktivera dem under Ankomster om du inte redan gjort det.</p>';
+    return '<p class="pg-hint">Push använder samma notiser som Ankomster. De slås på när du bevakar något.</p>';
   }
 
   function renderCode() {

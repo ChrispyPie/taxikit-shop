@@ -203,7 +203,7 @@
     }
     if (l.length < 10) h += '<button class="tn-add" data-fn-new>+ Egen bevakning</button>';
     var push = window.BEVAKNING && BEVAKNING.pushState ? BEVAKNING.pushState() : 'unknown';
-    if (l.length && push !== 'on') h += '<div class="tn-note">⚠️ Notiser är inte påslagna på den här telefonen. Slå på dem med knappen ovan, annars kommer inga notiser från dina bevakningar hit.</div>';
+    if (l.length && push === 'denied') h += '<div class="tn-note">⚠️ Notiser är blockerade för den här sidan. Tillåt dem i webbläsarens inställningar, annars kommer inga notiser från dina bevakningar hit.</div>';
     h += '<div class="tn-hint">Du får notis före ankomst, vid försening och om flyget ställs in, bara under tiderna du valt. Fungerar även när appen är stängd.</div>';
     return h + '</div></div>';
   }
@@ -325,10 +325,13 @@
       var btn = f.querySelector('.tn-save'); btn.disabled = true;
       save(id, d).then(function () {
         closeSheet(); st.open = true; localStorage.setItem('fn_open', '1');
-        var push = window.BEVAKNING && BEVAKNING.pushState ? BEVAKNING.pushState() : 'unknown';
-        toast(push === 'on' ? 'Sparat. Du får notiser ' + timeText(d) + ', ' + daysText(d.days) + '.'
-          : 'Sparat. Slå på notiser (🔔 Aktivera) för att få notiser från bevakningarna.', 4500);
-        repaint();
+        var done = function (push) {
+          toast(push === 'on' ? 'Sparat. Du får notiser ' + timeText(d) + ', ' + daysText(d.days) + '.'
+            : 'Sparat. Tillåt notiser i webbläsaren för att få dem på telefonen.', 4500);
+          repaint();
+        };
+        if (window.BEVAKNING && BEVAKNING.ensurePush) BEVAKNING.ensurePush().then(done);
+        else done(window.BEVAKNING && BEVAKNING.pushState ? BEVAKNING.pushState() : 'unknown');
       }).catch(function (e2) { btn.disabled = false; if (e2 && e2.message !== 'demo') err.textContent = errText(e2); });
     });
     var first = f.querySelector('input[name="name"]'); if (first && !id && !preset) setTimeout(function () { try { first.focus(); } catch (x) {} }, 50);

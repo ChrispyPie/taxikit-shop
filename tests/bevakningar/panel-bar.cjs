@@ -1,0 +1,17 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const bev = fs.readFileSync(path.join(__dirname, '../../TaxiData/bevakning.js'), 'utf8');
+const css = fs.readFileSync(path.join(__dirname, '../../TaxiData/style.css'), 'utf8');
+assert.doesNotMatch(bev, /Notiser på/);
+assert.doesNotMatch(bev, /Aktivera notiser/);
+assert.doesNotMatch(bev, /data-bev-on/);
+assert.doesNotMatch(bev, /data-bev-off/);
+assert.doesNotMatch(bev, /data-bev-test/);
+assert.match(bev, /bev-ljud-box/);
+assert.match(bev, /ensurePush\(\)/);
+assert.match(bev, /class="bev-chip perm"/);
+assert.match(css, /\.bev-chip\s*\{[^}]*#8b9aa8/);
+assert.match(css, /\.bev-chip\.perm/);
+assert.match(css, /\.bev-chip\.perm[^}]*--c-d69e2e/);
+console.log('PASS Ankomster bar: no Notiser-på row, auto ensurePush, silver/gold chips');
