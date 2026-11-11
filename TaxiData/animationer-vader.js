@@ -56,7 +56,7 @@
 
   function canShow() {
     try {
-      if (!window.ANIMATIONER || !ANIMATIONER.isOn()) return false;
+      if (!window.ANIMATIONER || !window.ANIMATIONER.isOn()) return false;
       if (ANIMATIONER.reduceMotion && ANIMATIONER.reduceMotion()) return false;
     } catch (e) { return false; }
     return true;
@@ -159,10 +159,43 @@
     return best;
   }
 
-  function parseResponse(json) {
+  function snapshotFrom(json) {
     var row = pickTimeSeries(json && json.timeSeries);
-    var data = row && row.data;
-    return kindFrom(data || {});
+    var data = (row && row.data) || {};
+    return {
+      kind: kindFrom(data) || '',
+      temp: num(data.air_temperature),
+      symbol: num(data.symbol_code)
+    };
+  }
+  function parseResponse(json) {
+    return snapshotFrom(json).kind;
+  }
+  // Klädsel till hjälpboten (överraskning: nämns inte i Om/hjälp/nyheter).
+  // snö > snöblandat > regn > kallt (<5 °C) > sol/varmt.
+  function outfitFrom(snap, opts) {
+    opts = opts || {};
+    if (!opts.force) {
+      try { if (!window.ANIMATIONER || !window.ANIMATIONER.isOn()) return ''; } catch (e) { return ''; }
+    }
+    if (!snap || typeof snap !== 'object') return '';
+    var kind = snap.kind || '';
+    var temp = num(snap.temp);
+    var sym = num(snap.symbol);
+    var cold = temp != null && temp < 5;
+    var warm = temp != null && temp >= 18;
+    var sun = (sym === 1 || sym === 2) && (temp == null || temp >= 5);
+    if (kind === 'snow' || kind === 'sleet') return 'snow';
+    if (kind === 'rain') return 'rain';
+    if (cold) return 'cold';
+    if (sun || warm) return 'sun';
+    return '';
+  }
+  function emitSnap(snap) {
+    try { document.dispatchEvent(new CustomEvent('animationer-vader', { detail: snap || null })); } catch (e) {}
+  }
+  function animOn() {
+    try { return !!(window.ANIMATIONER && window.ANIMATIONER.isOn && window.ANIMATIONER.isOn()); } catch (e) { return false; }
   }
 
   function smhiUrl(coord) {
@@ -178,9 +211,14 @@
         return res.json();
       })
       .then(function (json) {
-        var kind = parseResponse(json) || '';
-        writeCache({ at: Date.now(), lat: coord.lat, lon: coord.lon, kind: kind, source: coord.source || 'gbg' });
-        return kind;
+        var snap = snapshotFrom(json);
+        snap.at = Date.now();
+        snap.lat = coord.lat;
+        snap.lon = coord.lon;
+        snap.source = coord.source || 'gbg';
+        writeCache(snap);
+        emitSnap(snap);
+        return snap;
       });
   }
 
@@ -207,13 +245,13 @@
   }
 
   function refresh(force) {
-    if (!canShow()) { clearWx(); return; }
+    if (!animOn()) { clearWx(); return; }
     if (document.hidden) return;
     var cached = !force && readCache();
-    if (cached) { applyKind(cached.kind); return; }
+    if (cached) { applyKind(cached.kind); emitSnap(cached); return; }
     locate(function (coord) {
-      if (!canShow()) return;
-      fetchKind(coord).then(function (kind) { applyKind(kind); }).catch(function () { /* tyst: visa inget */ });
+      if (!animOn()) return;
+      fetchKind(coord).then(function (snap) { applyKind(snap && snap.kind); }).catch(function () { /* tyst: visa inget */ });
     });
   }
 
@@ -238,6 +276,8 @@
 
   window.ANIMATIONER_VADER = {
     kindFrom: kindFrom,
+    outfitFrom: outfitFrom,
+    readCache: readCache,
     refresh: refresh,
     preview: preview,
     start: start,

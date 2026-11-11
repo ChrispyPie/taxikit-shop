@@ -15,7 +15,7 @@ assert.doesNotMatch(css, /\bStig\b/);
 assert.doesNotMatch(cl, /\bStig\b/);
 assert.match(html, /style\.css\?v=20261111land1/);
 assert.match(lv, /prognos\.js\?v=20261111land1/);
-assert.match(lv, /changelog\.js\?v=20261111land1/);
+assert.match(lv, /changelog\.js\?v=20261111tyst1/);
 assert.match(cl, /2026-11-11land1/);
 assert.match(js, /taxi_animationer/);
 assert.match(js, /ANIMATIONER/);

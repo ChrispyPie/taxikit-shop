@@ -15,9 +15,9 @@ assert.match(js, /taxi_animationer_vader/);
 assert.match(js, /pointer-events:\s*none/);
 assert.match(js, /anim-wx-paused/);
 assert.match(js, /prefers-reduced-motion|reduceMotion/);
-assert.match(html, /animationer-vader\.js\?v=20261111vader1/);
-assert.match(html, /animationer\.js\?v=20261111vader1/);
-assert.match(cl, /2026-11-11vader1/);
+assert.match(html, /animationer-vader\.js\?v=20261111tyst1/);
+assert.match(html, /animationer\.js\?v=20261111tyst1/);
+assert.doesNotMatch(cl, /2026-11-11vader1|regnar eller snöar|snöflingor/);
 assert.match(anim, /ANIMATIONER\.layer|layer: ensureLayer/);
 
 const ctx = {
@@ -51,4 +51,28 @@ assert.equal(V.kindFrom({ predominant_precipitation_type_at_surface: 0, symbol_c
 assert.equal(V.kindFrom({ predominant_precipitation_type_at_surface: 9999, precipitation_amount_mean: 9999 }), '');
 // current Göteborg snapshot style
 assert.equal(V.kindFrom({ predominant_precipitation_type_at_surface: 1, precipitation_amount_mean: 0.3, precipitation_frozen_part: 0, symbol_code: 8 }), 'rain');
-console.log('PASS vader: snow1g kinds, cache key, reduced-motion, no Stig');
+const of = V.outfitFrom;
+assert.ok(of, 'outfitFrom exported');
+// ANIMATIONER is on in ctx
+assert.equal(of({ kind: 'snow', temp: 12, symbol: 1 }), 'snow');
+assert.equal(of({ kind: 'sleet', temp: -2 }), 'snow');
+assert.equal(of({ kind: 'rain', temp: 8 }), 'rain');
+assert.equal(of({ kind: '', temp: 2, symbol: 1 }), 'cold');
+assert.equal(of({ kind: '', temp: 21, symbol: 4 }), 'sun');
+assert.equal(of({ kind: '', temp: 12, symbol: 1 }), 'sun');
+assert.equal(of({ kind: '', temp: 12, symbol: 4 }), '');
+assert.equal(of({ kind: 'rain' }, { force: true }), 'rain');
+ctx.window.ANIMATIONER.isOn = function () { return false; };
+assert.equal(of({ kind: 'snow', temp: -5 }), '', 'off toggle uses default outfit');
+assert.equal(of({ kind: 'snow', temp: -5 }, { force: true }), 'snow');
+assert.ok(V.readCache, 'readCache exported so bot adds no extra request');
+const bot = fs.readFileSync(path.join(root, 'TaxiData/hjalpbot.js'), 'utf8');
+assert.match(bot, /hb-gear-cold/);
+assert.match(bot, /hb-gear-rain/);
+assert.match(bot, /hb-gear-snow/);
+assert.match(bot, /hb-gear-sun/);
+assert.match(bot, /animationer-vader/);
+assert.match(bot, /previewOutfit/);
+assert.doesNotMatch(bot, /\bStig\b/);
+assert.doesNotMatch(cl, /hjälpboten.*(regn|snö|mössa|solglas)/i);
+console.log('PASS vader: snow1g kinds, cache key, reduced-motion, outfits, no Stig');

@@ -18,11 +18,13 @@ assert.match(js, /bev-watch-fire/);
 assert.match(js, /Animationer/);
 assert.doesNotMatch(js, /localStorage\.getItem\('taxi_bev_ljud'\)/);
 assert.match(ljud, /bev-watch-fire/);
-assert.match(html, /animationer\.js\?v=20261111vader1/);
+assert.match(html, /animationer\.js\?v=20261111tyst1/);
 assert.match(html, /id="animationer-set"/);
 assert.match(html, /bevakning-ljud\.js\?v=20261111anim1/);
 assert.match(cl, /2026-11-11anim1/);
 assert.match(cl, /Inställningar, Animationer/);
+assert.doesNotMatch(cl, /regnar eller snöar|snöflingor|droppar eller flingor/);
+assert.doesNotMatch(js, /regnar eller snöar|droppar eller flingor/);
 assert.doesNotMatch(cl.split('window.CHANGELOG')[1].slice(0, 800), /\bStig\b/);
 
 const store = {};
