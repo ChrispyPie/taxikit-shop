@@ -62,6 +62,16 @@ assert.equal(T.pick({ char: 'diva' }).id, 'verkstadstimmar-flyttad');
 const bot = fs.readFileSync(path.resolve(__dirname, '../../TaxiData/hjalpbot.js'), 'utf8');
 assert.match(bot, /HJALPBOT_TIPS/);
 assert.match(bot, /previewTip/);
+
+assert.equal(typeof tip.guide, 'function');
+assert.equal(typeof tip.go, 'function');
+assert.match(bot, /glideTo/);
+assert.match(bot, /fast:\s*true|opt\.fast/);
+assert.match(bot, /hb-bubble-tail/);
+assert.match(bot, /data-side/);
+assert.match(bot, /Math\.max\(0\.8, Math\.min\(1\.2/);
+assert.match(bot, /tip\.guide/);
+
 assert.match(bot, /maybeTip/);
 assert.doesNotMatch(src + tip.text, /\bStig\b|\bhen\b/);
 console.log('UNIT_OK');
