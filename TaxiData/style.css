@@ -823,6 +823,46 @@ body.pg-land .pg-fly-ico,
 .pg-table-land .pg-fly-ico { transform: scaleX(-1); }
 body.pg-land .pg-n.pg-fly::before,
 .pg-table-land .pg-n.pg-fly::before { display: inline-block; transform: scaleX(-1); }
+
+/* Kort landning i flygspalten när ankomsttiden passerar nu. Pekar mot nu-linjen. */
+.pg-fly-land {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0; pointer-events: none; z-index: 3;
+  font-size: 1.2rem; line-height: 1;
+  animation: pg-fly-land-port 1.6s ease-out both;
+}
+body.pg-land .pg-fly-land,
+.pg-table-land .pg-fly-land { animation-name: pg-fly-land-land; }
+.pg-fly-land-reduced,
+body.pg-land .pg-fly-land-reduced,
+.pg-table-land .pg-fly-land-reduced {
+  animation-name: pg-fly-land-fade; animation-duration: 0.4s;
+}
+@keyframes pg-fly-land-port {
+  0% { transform: rotate(-45deg) translateY(16px) scale(1.25); opacity: 0; }
+  50% { transform: rotate(-45deg) translateY(0) scale(1.08); opacity: 1; }
+  72% { transform: rotate(-45deg) translateY(3px) scale(1); opacity: 1; }
+  100% { transform: rotate(-45deg) translateY(0) scale(1); opacity: 1; }
+}
+/* Liggande: tid åt höger, nu-linjen till vänster — planet kommer in från höger och landar mot nu. */
+@keyframes pg-fly-land-land {
+  0% { transform: translateX(16px) scaleX(-1) scale(1.25); opacity: 0; }
+  50% { transform: translateX(0) scaleX(-1) scale(1.08); opacity: 1; }
+  72% { transform: translateX(0) translateY(2px) scaleX(-1) scale(1); opacity: 1; }
+  100% { transform: translateX(0) scaleX(-1); opacity: 1; }
+}
+@keyframes pg-fly-land-fade {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pg-fly-land,
+  body.pg-land .pg-fly-land,
+  .pg-table-land .pg-fly-land {
+    animation-name: pg-fly-land-fade; animation-duration: 0.4s;
+  }
+}
 .pg-fly-chip:focus-visible { outline: 2px solid var(--accent, #f5b301); outline-offset: 1px; }
 html[data-theme="dark"] .pg-fly-chip { background: transparent; color: #e2e8f0; }
 .pg-fly-layer { position: absolute; pointer-events: none; z-index: 6; overflow: visible; }
