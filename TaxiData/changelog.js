@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-11', id: '2026-11-11tips1', tid: '11:15', rader: [
+    ['Nytt', 'Hjälpboten kan visa ett kort tips om var du rapporterar verkstadstimmar: under Meddelanden i din profil. Tipset försvinner när du har varit där, och visas högst tre gånger.']
+  ]},
   { datum: '2026-11-11', id: '2026-11-11moduler1', tid: '10:50', rader: [
     ['Nytt', 'På startskärmen heter den sista rutan Moduler. Där ser du alla verktyg med en bild och en kort beskrivning, och kan installera eller avinstallera dem.'],
     ['Nytt', 'Ett långt tryck på en ikon öppnar en liten meny med Modulinfo, Flytta, Hjälp och Avinstallera. Modulinfo visar storlek och version, och du kan rensa bara den modulens cache. Inställningar, Om appen och Admin går inte att ta bort.']

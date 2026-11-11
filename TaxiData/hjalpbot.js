@@ -498,6 +498,9 @@
       '.hb-walker.hb-enter .hb-btn{transition:transform .45s ease,opacity .45s ease;transform:scale(.18);opacity:0}' +
       '.hb-walker.hb-enter-preview .hb-btn{transition:none;transform:scale(.45);opacity:.8}' +
       '.hb-bubble.hb-tap{pointer-events:auto;cursor:pointer}' +
+      '.hb-tip-hl{outline:2px solid var(--accent,#63b3ed);outline-offset:2px;border-radius:8px;animation:hb-tip-pulse 1.1s ease-in-out 4}' +
+      '@keyframes hb-tip-pulse{50%{outline-color:transparent}}' +
+      '@media (prefers-reduced-motion:reduce){.hb-tip-hl{animation:none}}' +
       '.hb-walker.hb-marvin .hb-btn svg{animation:hb-marvin-sigh 2.6s ease-in-out;transform-origin:50% 90%}' +
       '@keyframes hb-marvin-sigh{0%{transform:translateY(0) rotate(0)}20%{transform:translateY(2px) rotate(4deg)}55%{transform:translateY(5px) rotate(8deg)}100%{transform:translateY(2px) rotate(3deg)}}' +
       '@media (prefers-reduced-motion: reduce){.hb-walker{transition:none!important}' +
@@ -1056,11 +1059,14 @@
     [el.walker, el.bubble, el.panel].forEach(function (x) { document.body.appendChild(x); });
     ensureStation();
     el.btn.addEventListener('click', function () { wave(); state.panel ? closePanel() : openPanel(); });
-    el.bubble.addEventListener('click', function () {
-      var id = state.bubbleTool;
-      if (!id) return;
+    el.bubble.addEventListener('click', function (e) {
+      var tip = state.bubbleTip, id = state.bubbleTool;
+      if (!tip && !id) return;
+      e.preventDefault();
+      e.stopPropagation();
       hideBubble();
-      if (typeof window.openItem === 'function') window.openItem(id);
+      if (tip && tip.go) tip.go({ walk: canWalk() });
+      else if (id && typeof window.openItem === 'function') window.openItem(id);
     });
 
     el.panel.addEventListener('click', onPanel);
@@ -1091,7 +1097,8 @@
     clearTimeout(state.hideT);
     el.bubble.textContent = text;
     state.bubbleTool = opt.tool || null;
-    if (state.bubbleTool) el.bubble.classList.add('hb-tap');
+    state.bubbleTip = opt.tip || null;
+    if (state.bubbleTool || state.bubbleTip) el.bubble.classList.add('hb-tap');
     else el.bubble.classList.remove('hb-tap');
     el.bubble.classList.add('show');
     if (opt.mood === 'marvin' && el.walker) {
@@ -1108,6 +1115,7 @@
   function hideBubble() {
     if (el.bubble) { el.bubble.classList.remove('show', 'hb-tap'); }
     state.bubbleTool = null;
+    state.bubbleTip = null;
     if (el.walker) el.walker.classList.remove('hb-marvin');
     if (!state.visiting) scheduleWander();
   }
@@ -1158,6 +1166,29 @@
     if (delay) setTimeout(go, delay);
     else go();
     return true;
+  }
+  function maybeTip() {
+    if (charId() === 'off' || !el.walker || el.walker.style.display === 'none' || state.panel) return false;
+    var T = window.HJALPBOT_TIPS, last, hit;
+    if (!T || !T.pick) return false;
+    last = +(sessionStorage.getItem('hb_last') || 0);
+    if (Date.now() - last < COMMENT_GAP_MS) return false;
+    hit = T.pick({ char: charId() });
+    if (!hit) return false;
+    state.pendingTip = true;
+    setTimeout(function () {
+      if (!state.pendingTip || page() !== 'hem' || charId() === 'off') { state.pendingTip = false; return; }
+      state.pendingTip = false;
+      if (T.markShown) T.markShown(hit.id);
+      say(hit.text, { tip: hit.tip });
+    }, 1600);
+    return true;
+  }
+  function maybeTipQuiet() {
+    if (state.pendingTip || state.panel || state.visiting) return;
+    var last = +(sessionStorage.getItem('hb_last') || 0);
+    if (Date.now() - last < COMMENT_GAP_MS * 4) return;
+    maybeTip();
   }
   function maybeComment(p) {
     if (!scenarioAnimOn()) return;
@@ -1226,9 +1257,13 @@
     if (p !== state.page) {
       state.page = p;
       hideBubble(); if (state.panel) closePanel();
-      if (on && !document.hidden) { maybeComment(p); }
+      if (on && !document.hidden) {
+        if (p === 'hem' && maybeTip()) { /* tipset tar den här visningen */ }
+        else maybeComment(p);
+      }
     } else if (on && !document.hidden) {
       maybeTimeComment();
+      if (p === 'hem') maybeTipQuiet();
     }
   }
 
@@ -1415,6 +1450,37 @@
       else if (el.walker && el.walker.style.display !== 'none') scheduleWander();
     });
     document.addEventListener('animationer-vader', function () { drawChar(); });
+    window.HJALPBOT.walkTo = function (node, done) {
+      if (typeof node === 'string') node = document.querySelector(node);
+      if (!node || !el.walker || !canWalk()) { if (done) done(); return false; }
+      var r = node.getBoundingClientRect();
+      var dest = nearestWalkable(r.left + r.width / 2 - SIZE / 2, r.bottom + 6, obstacleRects());
+      state.visiting = true;
+      clearTimeout(wanderTimer);
+      walkPath(findPath(pos, dest), function () {
+        state.visiting = false;
+        if (done) done();
+        scheduleWander();
+      }, { noPause: true });
+      return true;
+    };
+    window.HJALPBOT.previewTip = function (id) {
+      var T = window.HJALPBOT_TIPS, hit, list, i;
+      if (!T) return false;
+      list = T.all ? T.all() : [];
+      hit = null;
+      if (id) {
+        for (i = 0; i < list.length; i++) if (list[i].id === id) hit = { id: list[i].id, text: list[i].text, tip: list[i] };
+      }
+      if (!hit) hit = T.pick({ char: charId(), skipShows: true });
+      if (!hit) {
+        hit = list[0] ? { id: list[0].id, text: list[0].text, tip: list[0] } : null;
+      }
+      if (!hit) return false;
+      show(true);
+      say(hit.text, { tip: hit.tip });
+      return hit;
+    };
     window.HJALPBOT._previewPos = function (x, y, dur) { setPos(x, y, dur == null ? 0 : dur, pos.x); };
     window.HJALPBOT._pickSpot = pickSpot;
     window.HJALPBOT._pos = function () { return { x: pos.x, y: pos.y }; };
