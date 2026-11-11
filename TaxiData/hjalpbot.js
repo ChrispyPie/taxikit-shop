@@ -438,7 +438,7 @@
   }
 
   // ---------- DOM ----------
-  var el = {}, state = { page: undefined, lastComment: +(sessionStorage.getItem('hb_last') || 0), timer: null, pendingFor: null, hideT: null, panel: false, forceOutfit: null, atHome: false, visiting: false, visitTool: null, hopOut: null, preview: false, guiding: false, bubbleTool: null };
+  var el = {}, state = { page: undefined, lastComment: +(sessionStorage.getItem('hb_last') || 0), timer: null, pendingFor: null, hideT: null, panel: false, forceOutfit: null, atHome: false, visiting: false, visitTool: null, enteredTool: null, enteredAt: 0, exiting: false, preview: false, guiding: false, bubbleTool: null };
 
   function css() {
     var s = document.createElement('style');
@@ -1075,6 +1075,8 @@
     var path = findPath(pos, dest, { ignoreTool: tool });
     state.visiting = true;
     state.visitTool = tool;
+    state.enteredTool = tool;
+    state.enteredAt = Date.now();
     clearTimeout(wanderTimer);
     walkPath(path, function () {
       if (!el.walker) { state.visiting = false; state.visitTool = null; return; }
@@ -1339,42 +1341,72 @@
     return line(k, { h: V.dur(s.pending_min), n: s.pending_n, ah: V.dur(s.approved_month_min), akr: V.kr(s.approved_month_kr), m: MONL[new Date().getMonth()] });
   }
 
-  function hopOutOf(tool) {
-    var node = iconNode(tool);
-    if (!node || !el.walker) return false;
-    var r = node.getBoundingClientRect();
-    var dest = { x: r.left + r.width / 2 - SIZE / 2, y: r.top + r.height / 2 - SIZE / 2 };
-    stopWalk();
-    hideBubble();
+  function homeBtn() {
+    var roots = [], dash = document.getElementById('dashboard-view'), app = document.getElementById('app'), i, btn;
+    if (dash && !dash.classList.contains('hidden') && dash.style.display !== 'none') roots.push(dash);
+    if (app && app.style.display !== 'none') roots.push(app);
+    for (i = 0; i < roots.length; i++) {
+      btn = roots[i].querySelector('header .hdr-left button[aria-label="Hem"]');
+      if (btn) return btn;
+    }
+    return document.querySelector('header button[aria-label="Hem"]');
+  }
+  function followedInto(p) {
+    if (!p || p === 'hem') return false;
+    if (state.visitTool === p) return true;
+    return !!(state.enteredTool === p && state.enteredAt && Date.now() - state.enteredAt < 8000);
+  }
+  function hopOutThroughHome() {
+    if (!el.walker || state.exiting) return;
+    state.exiting = true;
     state.visiting = true;
-    state.visitTool = tool;
-    setPos(dest.x, dest.y, 0);
-    el.walker.classList.add('hb-enter');
+    hideBubble();
+    closePanel();
+    stopWalk();
+    if (el.station) {
+      el.station.style.display = 'none';
+      el.station.classList.add('hb-hidden');
+    }
+    if (window.HJALPBOT_HOGTID && HJALPBOT_HOGTID.stop) {
+      try { HJALPBOT_HOGTID.stop(); } catch (e) {}
+    }
+    el.walker.style.display = '';
+    el.walker.classList.remove('hb-enter', 'hb-enter-preview', 'hb-walk', 'hb-at-home', 'idle');
     void el.walker.offsetWidth;
-    function finish(out) {
+    var btn = homeBtn();
+    function finishHide() {
+      if (!state.exiting) return;
+      if (el.walker) el.walker.classList.remove('hb-enter', 'hb-walk');
+      state.exiting = false;
       state.visiting = false;
       state.visitTool = null;
-      if (out) setPos(out.x, out.y, 0);
-      scheduleWander();
+      state.enteredTool = null;
+      show(false);
     }
-    if (reduceMotion || !canWalk()) {
-      el.walker.classList.remove('hb-enter');
-      finish(nearestWalkable(dest.x, dest.y + Math.max(36, r.height + 8), obstacleRects()));
-      return true;
+    if (!btn || reduceMotion || !canWalk()) {
+      if (btn) {
+        var r0 = btn.getBoundingClientRect();
+        setPos(r0.left + r0.width / 2 - SIZE / 2, r0.top + r0.height / 2 - SIZE / 2, 0);
+      }
+      wanderTimer = setTimeout(finishHide, reduceMotion ? 200 : 400);
+      return;
     }
-    requestAnimationFrame(function () {
-      if (!el.walker) { state.visiting = false; state.visitTool = null; return; }
-      el.walker.classList.remove('hb-enter');
-      wanderTimer = setTimeout(function () {
-        if (!el.walker) { state.visiting = false; state.visitTool = null; return; }
-        var out = nearestWalkable(dest.x, dest.y + Math.max(36, r.height + 8), obstacleRects());
-        walkPath(findPath(pos, out, { ignoreTool: tool }), function () { finish(); }, { noPause: true });
-      }, 450);
-    });
-    return true;
+    var r = btn.getBoundingClientRect();
+    var dest = { x: r.left + r.width / 2 - SIZE / 2, y: r.top + r.height / 2 - SIZE / 2 };
+    var dist = Math.hypot(dest.x - pos.x, dest.y - pos.y);
+    var glide = dist < 8 ? 0 : 0.5;
+    el.walker.classList.add('hb-walk');
+    el.walker.classList.remove('snap');
+    el.walker.style.transitionTimingFunction = 'cubic-bezier(.22,.7,.28,1)';
+    setPos(dest.x, dest.y, glide, pos.x);
+    wanderTimer = setTimeout(function () {
+      if (!state.exiting || !el.walker) { finishHide(); return; }
+      el.walker.classList.remove('hb-walk');
+      el.walker.classList.add('hb-enter');
+      wanderTimer = setTimeout(finishHide, 450);
+    }, glide * 1000 + 30);
   }
-  function show(on, opts) {
-    opts = opts || {};
+  function show(on) {
     var was = el.walker && el.walker.style.display !== 'none';
     if (el.walker) el.walker.style.display = on ? '' : 'none';
     if (el.station) el.station.style.display = on ? '' : 'none';
@@ -1382,7 +1414,6 @@
     else if (!was) {
       ensureStation();
       paintStation();
-      if (opts.fromTool && hopOutOf(opts.fromTool)) return;
       var startAt = nearestWalkable((pickSpot(null) || pos).x, (pickSpot(null) || pos).y, obstacleRects());
       setPos(startAt.x, startAt.y, 0);
       scheduleWander();
@@ -1505,21 +1536,37 @@
   function tick() {
     if (!el.walker) return;
     var p = page();
+    if (state.exiting) {
+      if (p === 'hem' || charId() === 'off') {
+        clearTimeout(wanderTimer);
+        if (el.walker) el.walker.classList.remove('hb-enter', 'hb-walk');
+        state.exiting = false;
+        state.visiting = false;
+        if (charId() === 'off') show(false);
+        else show(true);
+      }
+      if (p !== state.page) {
+        state.page = p;
+        hideBubble();
+        if (state.panel) closePanel();
+      }
+      return;
+    }
+    if (charId() !== 'off' && !state.preview && p && p !== 'hem' && followedInto(p)) {
+      if (p !== state.page) {
+        state.page = p;
+        hideBubble();
+        if (state.panel) closePanel();
+      }
+      hopOutThroughHome();
+      return;
+    }
     var on = charId() !== 'off' && (!!state.preview || p === 'hem');
     var wasOn = el.walker.style.display !== 'none';
-    if (wasOn && !on && p && p !== 'hem') {
-      if (state.visiting && state.visitTool && state.visitTool === p) state.hopOut = p;
-    }
     if (wasOn !== on) {
-      if (on && p === 'hem' && state.hopOut) {
-        var from = state.hopOut;
-        state.hopOut = null;
-        show(true, { fromTool: from });
-      } else {
-        show(on);
-        if (!on && window.HJALPBOT_HOGTID && HJALPBOT_HOGTID.stop) {
-          try { HJALPBOT_HOGTID.stop(); } catch (e) {}
-        }
+      show(on);
+      if (!on && window.HJALPBOT_HOGTID && HJALPBOT_HOGTID.stop) {
+        try { HJALPBOT_HOGTID.stop(); } catch (e) {}
       }
     }
     if (p !== state.page) {
@@ -1714,6 +1761,13 @@
     build();
     show(false);
     tick();
+    if (typeof MutationObserver !== 'undefined') {
+      var mo = new MutationObserver(function () { tick(); });
+      var app = document.getElementById('app');
+      var dash = document.getElementById('dashboard-view');
+      if (app) mo.observe(app, { attributes: true, attributeFilter: ['class', 'style'] });
+      if (dash) mo.observe(dash, { attributes: true, attributeFilter: ['class', 'style'] });
+    }
     setInterval(function () { if (!document.hidden) tick(); }, 1000);
     var boot = setInterval(function () {
       tick();
