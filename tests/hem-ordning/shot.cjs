@@ -137,10 +137,16 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
       await p.waitForSelector('.grid.td-ordna');
     }
     await p.click('.td-slot-empty');
-    await p.waitForSelector('#td-add-panel.open');
-    const list = await p.evaluate(() => [...document.querySelectorAll('#td-add-panel [data-add-id]')].map(e => e.getAttribute('data-add-id')));
-    ok('plus list has vader', list.includes('vader'), list.join(','));
-    await p.screenshot({ path: path.join(out, 'plus-lista-412-scale14-dark.png') });
+    await p.waitForSelector('.td-mod-list');
+    const list = await p.evaluate(() => [...document.querySelectorAll('.td-mod-row')].map(e => e.getAttribute('data-mod-id')));
+    ok('moduler list has vader', list.includes('vader'), list.join(','));
+    const inst = await p.evaluate(() => {
+      const row = document.querySelector('.td-mod-row[data-mod-id="vader"]');
+      const btn = row && row.querySelector('[data-mod-install]');
+      return !!(btn && /Installera/.test(btn.textContent) && !btn.disabled);
+    });
+    ok('vader shows Installera', inst);
+    await p.screenshot({ path: path.join(out, 'moduler-sida-412-scale14-dark.png') });
     await p.close();
   }
 

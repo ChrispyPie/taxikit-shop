@@ -90,6 +90,14 @@ async function fetchTripData() {
   return await tripRpc('get_trip_data', { p_dataset: 'current' }, 20000);
 }
 // Hämtar på nytt i bakgrunden om datan är äldre än en minut. Svarar true när ny data har kommit.
+window.taxiClearCachedData = function () {
+  data = null;
+  dataLoadedAt = 0;
+  dataSession = '';
+  loadPromise = null;
+  loadFailed = false;
+  try { if (window.PAY_DATA && PAY_DATA.clear) PAY_DATA.clear(); } catch (e) {}
+};
 window.taxiRefreshData = function () {
   if (COMPANY || !dataReusable() || Date.now() - dataLoadedAt < DATA_FRESH_MS) return Promise.resolve(false);
   return loadData(true).then(() => !loadFailed, () => false);

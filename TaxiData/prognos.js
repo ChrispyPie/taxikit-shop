@@ -2225,6 +2225,9 @@
     badge.seenP = rpc('prognos_seen_set', {}).catch(function () {});
   }
 
+  P.clearCache = function () {
+    st.bookings = []; st.bookingsReady = false; st.flights = null; st.cellMap = {}; st.flyMap = {}; st.ktRaw = [];
+  };
   P.cachedBookings = function () { return st.bookingsReady ? (st.bookings || []) : null; };
   P.cachedProblem = function () { return st.err ? { kind: 'error', source: 'prognos', message: String(st.err) } : null; };
   P.refreshBadge = function (force) {

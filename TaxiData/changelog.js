@@ -15,6 +15,10 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-11', id: '2026-11-11moduler1', tid: '10:50', rader: [
+    ['Nytt', 'På startskärmen heter den sista rutan Moduler. Där ser du alla verktyg med en bild och en kort beskrivning, och kan installera eller avinstallera dem.'],
+    ['Nytt', 'Ett långt tryck på en ikon öppnar en liten meny med Modulinfo, Flytta, Hjälp och Avinstallera. Modulinfo visar storlek och version, och du kan rensa bara den modulens cache. Inställningar, Om appen och Admin går inte att ta bort.']
+  ]},
   { datum: '2026-11-11', id: '2026-11-11tryck1', tid: '10:25', rader: [
     ['Rättat', 'När du trycker på ett verktyg på startskärmen följer återkopplingen ikonen, utan en fyrkantig ram runt rutan.']
   ]},
