@@ -43,6 +43,14 @@
     });
   }
   var d=D.date,hm=D.hm,hms=D.hms||function(x){return x?x.toLocaleTimeString('sv-SE',{hour:'2-digit',minute:'2-digit',second:'2-digit',timeZone:'Europe/Stockholm'}):'';};
+  function mapsLink(dest, label) {
+    dest = String(dest || '').replace(/\s+/g, ' ').trim();
+    if (!dest) return '';
+    var href = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(dest);
+    return ' <a class="td-maps" target="_blank" rel="noopener noreferrer" href="' + href + '" title="Vägbeskrivning" aria-label="Vägbeskrivning till ' + esc(label || dest) + '">' +
+      '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M8 1a4.8 4.8 0 0 0-4.8 4.8C3.2 8.9 8 15 8 15s4.8-6.1 4.8-9.2A4.8 4.8 0 0 0 8 1zm0 6.5A1.7 1.7 0 1 1 8 4.1a1.7 1.7 0 0 1 0 3.4z"/></svg></a>';
+  }
+
   function dayKey(x) { return x.toLocaleDateString('sv-SE', { timeZone: 'Europe/Stockholm' }); }
   function dayLabel(x) {
     var k = dayKey(x), now = new Date();
@@ -254,8 +262,8 @@
     var upd = state.at[s.id] ? new Date(state.at[s.id]) : (state.updated[s.id] ? d(state.updated[s.id]) : null);
     var stale = upd && now - upd > 15 * 60000;
     html += '<div class="ank-toolbar">';
-    if(s.id==='tag')html+='<div class="ank-station-picker"><button type="button" class="ank-station-title" data-ank-picker aria-haspopup="dialog" aria-label="Station, '+esc(stationLabel())+'"><span class="ank-station-title-label">'+esc(stationLabel())+'</span><span class="ank-station-caret" aria-hidden="true"></span></button></div>';
-    html += '<div class="ank-head"><span>' + (s.id==='tag'?'':('<b>'+esc(s.place)+'</b>')) + (upd ? (s.id==='tag'?'':' ') + 'uppdaterad ' + hms(upd) : '') + '</span></div></div>';
+    if(s.id==='tag')html+='<div class="ank-station-picker"><button type="button" class="ank-station-title" data-ank-picker aria-haspopup="dialog" aria-label="Station, '+esc(stationLabel())+'"><span class="ank-station-title-label">'+esc(stationLabel())+'</span><span class="ank-station-caret" aria-hidden="true"></span></button>'+mapsLink(stationLabel(), stationLabel())+'</div>';
+    html += '<div class="ank-head"><span>' + (s.id==='tag'?'':('<b>'+esc(s.place)+'</b>' + mapsLink(s.place === 'Landvetter' ? 'Landvetter flygplats' : s.place, s.place))) + (upd ? (s.id==='tag'?'':' ') + 'uppdaterad ' + hms(upd) : '') + '</span></div></div>';
     if(s.id==='tag'&&state.station!=='G')html+='<p class="ank-station-note">Bevakningar gäller fortfarande Göteborg C.</p>';
     if (stale) html += '<div class="ank-warn">Datan är äldre än 15 minuter.</div>';
     if(typeof state.err[s.id]==='string')html+='<div class="ank-warn">'+esc(state.err[s.id])+'</div>';

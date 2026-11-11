@@ -1525,3 +1525,7 @@ button.kv-ico { background-repeat: no-repeat; background-position: center; backg
   #dashboard-view .stat-row { padding-left: 0.7rem; padding-right: 0.7rem; }
   #dashboard-view .shift-trip { padding-right: 0.7rem; }
 }
+
+/* Liten länk till vägbeskrivning i Google Maps, vid platser. */
+a.td-maps{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;margin-left:2px;flex:0 0 auto;color:var(--primary);text-decoration:none;vertical-align:middle;-webkit-tap-highlight-color:transparent}
+a.td-maps svg{display:block}

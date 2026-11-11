@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-11', id: '2026-11-11maps1', tid: '12:20', rader: [
+    ['Nytt', 'Vid platser i Kalendern och vid stationer och flygplatser i Ankomster finns en liten länk till vägbeskrivning i Google Maps.']
+  ]},
   { datum: '2026-11-11', id: '2026-11-11nyheter1', tid: '12:15', rader: [
     ['Nytt', 'Under Moduler finns Nyheter. Där läser du korta nyheter från Göteborg, och kan lägga till Politik, Sport, Sverige och Nöje. Tryck på en rad för att öppna artikeln hos källan.']
   ]},

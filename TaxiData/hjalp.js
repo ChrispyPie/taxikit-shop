@@ -44,7 +44,8 @@
       'Här ser du tåg och flyg som är på väg in.',
       'Tryck på en rad för mer om just den ankomsten.',
       'Du kan bevaka en ankomst och få en påminnelse.',
-      'Tiderna uppdateras från servern.'
+      'Tiderna uppdateras från servern.',
+      'Vid stationen eller flygplatsen finns en liten länk till vägbeskrivning i Google Maps.'
     ],
     prognos: [
       'Prognos visar hur resenärer kan röra sig kring tåg och flyg.',
@@ -69,7 +70,8 @@
       'Kalendern samlar det som är inbokat.',
       'Tryck på en dag för att se detaljerna.',
       'Uppgifterna kommer från servern.',
-      'Gå tillbaka med hemknappen uppe till vänster.'
+      'Gå tillbaka med hemknappen uppe till vänster.',
+      'Vid platsen i ett evenemang finns en liten länk till vägbeskrivning i Google Maps.'
     ],
     topplistor: [
       'Här jämförs resultat mellan förare för en vald period.',

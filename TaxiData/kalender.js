@@ -58,6 +58,21 @@
   // ---------- hjälp ----------
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   // Kort namn för visning ("Christian P"), se namn.js
+  function mapsDest(e) {
+    if (e && e.lat != null && e.lon != null && isFinite(+e.lat) && isFinite(+e.lon)) return (+e.lat) + ',' + (+e.lon);
+    var parts = [], v = (e && e.venue) || '', a = (e && e.address) || '';
+    if (v && v !== 'Plats okänd') parts.push(v);
+    if (a && parts.indexOf(a) < 0) parts.push(a);
+    return parts.join(', ');
+  }
+  function mapsLink(dest, label) {
+    dest = String(dest || '').replace(/\s+/g, ' ').trim();
+    if (!dest) return '';
+    var href = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(dest);
+    return ' <a class="td-maps" target="_blank" rel="noopener noreferrer" href="' + href + '" title="Vägbeskrivning" aria-label="Vägbeskrivning till ' + esc(label || dest) + '">' +
+      '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M8 1a4.8 4.8 0 0 0-4.8 4.8C3.2 8.9 8 15 8 15s4.8-6.1 4.8-9.2A4.8 4.8 0 0 0 8 1zm0 6.5A1.7 1.7 0 1 1 8 4.1a1.7 1.7 0 0 1 0 3.4z"/></svg></a>';
+  }
+
   function sn(s) { return window.shortName ? window.shortName(s) : (s == null ? '' : String(s)); }
   function p2(n) { return String(n).padStart(2, '0'); }
   function tz() { return (st.data && st.data.city && st.data.city.timezone) || Intl.DateTimeFormat().resolvedOptions().timeZone; }
@@ -405,7 +420,7 @@
       '<div class="vk-imeta">' + esc(dayLabel(s.key)) + (e.time_unknown ? ' · tid ej angiven' : ' · start ' + s.hm) + '</div>' +
       (endText(e) && !e.time_unknown ? '<div class="kal-bigend' + (e.ends_estimated ? ' est' : '') + '">' + esc(endText(e)) + (e.ends_estimated ? '<small>uppskattat</small>' : '') + '</div>' : '') +
       '<div class="vk-imeta">📍 ' + esc(e.venue || 'Plats okänd') + (e.address ? ', ' + esc(e.address) : '') +
-      (e.lat && e.lon ? ' · <a target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=' + e.lat + ',' + e.lon + '">Karta</a>' : '') + '</div>' +
+      mapsLink(mapsDest(e), e.venue || e.address || '') + '</div>' +
       (e.pickup_note ? '<div class="vk-icom">🚕 ' + esc(e.pickup_note) + '</div>' : '') +
       (e.comment ? '<div class="vk-icom">💬 Förslag: ' + esc(e.comment) + '</div>' : '') +
       (e.decision_comment ? '<div class="vk-boss">Admin: ' + esc(e.decision_comment) + '</div>' : '') +
