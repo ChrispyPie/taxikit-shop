@@ -748,7 +748,121 @@
     }
     return { x: x, y: y };
   }
-  // Callout-etiketter i flygspalten: ikonerna stannar i sin tidrad, numren flyttas åt sidan
+
+  var LAND_WIN_MS = 90 * 1000;
+  var LAND_DUR_MS = 1600;
+  var LAND_REDUCED_MS = 400;
+  var landPlayed = {}; // flygnyckel -> { t, freezeAt? }, så animationen inte spelas om
+
+  function landMs(f) {
+    if (!f || f.canceled || f.removed) return 0;
+    var t = f.act || f.est;
+    if (!t) return 0;
+    var n = +t;
+    if (!n && t.getTime) n = +t.getTime();
+    return n || 0;
+  }
+  function shouldLandAnim(f, now, played) {
+    if (played) return false;
+    var t = landMs(f);
+    if (!t) return false;
+    return t <= now + 800 && (now - t) <= LAND_WIN_MS;
+  }
+  function landAnimOn() {
+    if (window.ANIMATIONER && ANIMATIONER.isOn) return !!ANIMATIONER.isOn();
+    try { return localStorage.getItem('taxi_animationer') !== '0'; } catch (e) { return true; }
+  }
+  function landReduce() {
+    if (window.ANIMATIONER && ANIMATIONER.reduceMotion) return !!ANIMATIONER.reduceMotion();
+    return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+  function playLandOnChip(chip, startMs, opts) {
+    if (!chip) return;
+    var existing = chip.querySelector('.pg-fly-land');
+    if (existing && !(opts && opts.force)) {
+      // redan igång efter omritning? behåll
+    }
+    if (existing) { existing.parentNode.removeChild(existing); }
+    var reduced = landReduce();
+    var dur = reduced ? LAND_REDUCED_MS : LAND_DUR_MS;
+    var now = Date.now();
+    var elapsed = Math.max(0, now - (startMs || now));
+    if (opts && opts.freezeAt != null) elapsed = Math.round((+opts.freezeAt) * dur);
+    if (elapsed >= dur && !(opts && opts.freezeAt != null)) return;
+    var span = document.createElement('span');
+    span.className = 'pg-fly-land' + (reduced ? ' pg-fly-land-reduced' : '');
+    span.setAttribute('aria-hidden', 'true');
+    span.textContent = '✈';
+    span.style.animationDelay = '-' + (elapsed / 1000) + 's';
+    if (opts && opts.freezeAt != null) span.style.animationPlayState = 'paused';
+    chip.appendChild(span);
+    var ico = chip.querySelector('.pg-fly-ico');
+    if (ico) ico.style.visibility = 'hidden';
+    if (!(opts && opts.freezeAt != null)) {
+      var left = Math.max(40, dur - elapsed + 40);
+      setTimeout(function () {
+        if (span.parentNode) span.parentNode.removeChild(span);
+        if (ico) ico.style.visibility = '';
+      }, left);
+    }
+  }
+  function tickFlyLandings(root, opts) {
+    if (!landAnimOn() && !(opts && opts.force)) return;
+    root = root || st.el;
+    if (!root) return;
+    var now = Date.now();
+    var chips = root.querySelectorAll('.pg-fly-chip[data-pg-fly]');
+    for (var i = 0; i < chips.length; i++) {
+      var chip = chips[i];
+      var key = chip.getAttribute('data-pg-fly');
+      if (!key) continue;
+      var rec = landPlayed[key];
+      var fo = opts || {};
+      if (rec && rec.freezeAt != null && fo.freezeAt == null) fo = { freezeAt: rec.freezeAt };
+      if (rec && rec.t) {
+        if (!chip.querySelector('.pg-fly-land')) playLandOnChip(chip, rec.t, fo);
+        continue;
+      }
+      var f = st.flyMap && st.flyMap[key];
+      if (!shouldLandAnim(f, now, false)) continue;
+      landPlayed[key] = { t: now, freezeAt: fo.freezeAt };
+      playLandOnChip(chip, now, fo);
+    }
+  }
+  function clearLandAnims(root) {
+    root = root || st.el || document;
+    var list = root.querySelectorAll('.pg-fly-land');
+    for (var i = 0; i < list.length; i++) {
+      var el = list[i];
+      var chip = el.parentNode;
+      if (el.parentNode) el.parentNode.removeChild(el);
+      var ico = chip && chip.querySelector && chip.querySelector('.pg-fly-ico');
+      if (ico) ico.style.visibility = '';
+    }
+  }
+  function previewLanding(opts) {
+    opts = opts || {};
+    var root = st.el || document;
+    var chip = null;
+    if (opts.key) {
+      var all = root.querySelectorAll('.pg-fly-chip[data-pg-fly]');
+      for (var i = 0; i < all.length; i++) {
+        if (all[i].getAttribute('data-pg-fly') === opts.key) { chip = all[i]; break; }
+      }
+    }
+    if (!chip) chip = root.querySelector('.pg-fly-chip[data-pg-fly]');
+    if (!chip) return false;
+    var key = chip.getAttribute('data-pg-fly');
+    landPlayed[key] = { t: Date.now(), freezeAt: opts.freezeAt };
+    playLandOnChip(chip, landPlayed[key].t, { force: true, freezeAt: opts.freezeAt });
+    return true;
+  }
+  document.addEventListener('animationer-change', function () {
+    if (!landAnimOn()) clearLandAnims();
+    else tickFlyLandings();
+  });
+
+    // Callout-etiketter i flygspalten: ikonerna stannar i sin tidrad, numren flyttas åt sidan
   // och upp/ner i grannrader så de inte överlappar, med en tunn linje till rätt plan.
   function layoutFlyCallouts(root) {
     var land = root && root.querySelector('.pg-table-land.pg-table-fly');
@@ -875,6 +989,7 @@
       labs += '<button type="button" class="pg-fly-lab" data-pg-fly="' + esc(it.key) + '" aria-label="' + esc(aria) + '" style="left:' + it.lab.x + 'px;top:' + it.lab.y + 'px">' + esc(it.no) + '</button>';
     });
     layer.innerHTML = svg + '</svg>' + icos + labs;
+    tickFlyLandings(root);
   }
 
   // Lättbegriplig förklaring till säker/trolig/osäker för en bokning
@@ -1491,6 +1606,7 @@
       labs += '<button type="button" class="pg-fly-lab" data-pg-fly="' + esc(it.key) + '" aria-label="' + esc(aria) + '" style="left:' + it.lab.x + 'px;top:' + it.lab.y + 'px">' + esc(it.no) + '</button>';
     });
     layer.innerHTML = svg + '</svg>' + icos + labs;
+    tickFlyLandings(root);
   }
 
   function renderCarTimeline(zoneId, focusSlot) {
@@ -2145,6 +2261,12 @@
       refresh();
       markSeen();  // allt som syns medan sidan är öppen räknas som sett
     }, 60000);
+    if (st.landTick) clearInterval(st.landTick);
+    st.landTick = setInterval(function () {
+      if (!onPage()) { clearInterval(st.landTick); st.landTick = null; return; }
+      if (document.visibilityState === 'hidden') return;
+      tickFlyLandings();
+    }, 1000);
   };
 
   // Anropas av prognos-notis.js när en ny bokning ringer (uppdatera schemat om sidan är öppen)
@@ -2159,6 +2281,12 @@
     document.body.classList.remove('pg-land-tablet');
     st.focus = null;   // lämnar Prognos -> markeringen från notisen är klar
     if (st.poll) { clearInterval(st.poll); st.poll = null; }
+    if (st.landTick) { clearInterval(st.landTick); st.landTick = null; }
+    clearLandAnims();
     if (badge.viewing) { badge.viewing = false; markSeen(); }  // lämnar Prognos → nollställ
   };
+
+  P.landMs = landMs;
+  P.shouldLandAnim = shouldLandAnim;
+  P.previewLanding = previewLanding;
 })();
