@@ -179,7 +179,7 @@
     var starCls = 'ank-star' + (perm ? ' gold' : (watched ? ' on' : ''));
     var starLbl = perm ? 'Fast bevakning – ändra i Mina bevakningar' : (watched ? 'Sluta bevaka' : 'Bevaka');
     var star = canStar
-      ? '<button class="' + starCls + '" data-bev-star' + (perm ? ' data-bev-perm="1"' : '') + ' aria-label="' + starLbl + '">' + (perm || watched ? '⭐' : '☆') + '</button>' : '';
+      ? '<button class="' + starCls + '" data-bev-star' + (perm ? ' data-bev-perm="1"' : '') + ' aria-label="' + starLbl + '">' + (perm || watched ? '★' : '☆') + '</button>' : '';
     var tap = !!(it.tid || it.canceled || it.removed || it.special);
     return '<div class="' + cls + (tap ? ' ank-tap' : '') + '"' + (tap ? ' data-ank-route="' + esc(it.key) + '"' : '') + ' data-ank-key="' + esc(it.key) + '">' +
       '<div class="ank-time"><div class="ank-new' + (changed && !it.act ? ' changed' : '') + '">' + hm(it.canceled || it.removed ? it.sched : shown) + '</div>' +

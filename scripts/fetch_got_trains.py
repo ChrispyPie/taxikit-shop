@@ -108,6 +108,10 @@ def attach_routes(trains):
         if stops:
             f["stops"] = [{"sig": s["sig"], "name": station_name(s["sig"]) or s["sig"], "t": s.get("t") or "", "act": s.get("act") or "", "est": s.get("est") or "", "sched": s.get("sched") or "", "track": s.get("track") or ""} for s in stops]
             acted = [s for s in f["stops"] if s.get("act")]
+            arr = parse_ts(f.get("est") or f.get("sched"))
+            if acted and arr:
+                # Bara denna körning: inte gårdagens tåg med samma nummer, och inte efter ankomst.
+                acted = [s for s in acted if parse_ts(s.get("act")) and arr.timestamp() - 8*3600 < parse_ts(s["act"]).timestamp() < arr.timestamp() + 30*60]
             if acted:
                 last = max(acted, key=lambda s: s["act"])
                 if not f.get("lastSeenTs") or str(last["act"]) >= str(f.get("lastSeenTs")):

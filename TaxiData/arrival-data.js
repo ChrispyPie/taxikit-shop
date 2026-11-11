@@ -64,7 +64,12 @@
     if (t.canceled) return 'Inställt' + (tr ? ' · Spår ' + t.track : '');
     var arr = d(t.est) || d(t.sched), mins = arr ? (arr - Date.now()) / 60000 : 1e9;
     var seen = t.lastSeen && t.lastSeenTs ? d(t.lastSeenTs) : null;
-    if (((!station||station==='G')&&NEAR_G[t.lastSeenSig]) || (mins <= 10 && (seen || mins <= 5))) return 'Inkommande' + tr;
+    // Drop last-seen from another day's run (same train number) or after this arrival.
+    if (seen && arr) {
+      var lagMin = (arr - seen) / 60000;
+      if (lagMin > 8 * 60 || lagMin < -30) seen = null;
+    }
+    if (((!station||station==='G')&&seen&&NEAR_G[t.lastSeenSig]) || (mins <= 10 && (seen || mins <= 5))) return 'Inkommande' + tr;
     if (seen) return 'Senast sedd: ' + t.lastSeen + ' ' + hm(seen);
     if ((t.posChecked && mins > 30) || mins > 300) return 'Ej avgått';
     return tr ? 'Spår ' + t.track : '';
@@ -229,5 +234,5 @@
     return h + '</dl></div>';
   }
 
-window.ARRIVAL_DATA={date:d,hm:hm,hms:hms,stationCatalog:stationCatalog,loadTrains:loadTrains,loadTrainDelta:loadTrainDelta,mergeTrainDeltas:mergeTrainDeltas,loadFlights:loadFlights,trainGroups:trainGroups,watchItems:watchItems,flightDetailHtml:flightDetailHtml,flightItems:function(age){return cache.flyg&&Date.now()-cache.flyg.at<(age||120000)?Promise.resolve(cache.flyg.items):watchItems('flyg').catch(function(){return cache.flyg?cache.flyg.items:[];});}};
+window.ARRIVAL_DATA={date:d,hm:hm,hms:hms,trainLine:trainLine,stationCatalog:stationCatalog,loadTrains:loadTrains,loadTrainDelta:loadTrainDelta,mergeTrainDeltas:mergeTrainDeltas,loadFlights:loadFlights,trainGroups:trainGroups,watchItems:watchItems,flightDetailHtml:flightDetailHtml,flightItems:function(age){return cache.flyg&&Date.now()-cache.flyg.at<(age||120000)?Promise.resolve(cache.flyg.items):watchItems('flyg').catch(function(){return cache.flyg?cache.flyg.items:[];});}};
 })();

@@ -72,7 +72,7 @@
     var now = Date.now();
     for (var i = 0; i < st.list.length; i++) {
       var w = st.list[i];
-      if (w.kind === k.kind && w.ident === k.ident && Math.abs(Date.parse(w.sched) - k.sched) < 60000 && Date.parse(w.expires_at) > now) return w;
+      if (w.kind === k.kind && String(w.ident) === String(k.ident) && Math.abs(Date.parse(w.sched) - k.sched) < 60000 && Date.parse(w.expires_at) > now) return w;
     }
     return null;
   }
@@ -283,9 +283,11 @@
   }
   function toggle(key, item) {
     if(item&&item.station&&item.station!=='G'){toast('Tågbevakningar gäller Göteborg C. Stationsvalet visar tider utan bevakning.');return;}
+    // Stjärnan på Ankomster skapar eller tar bara bort en tillfällig bevakning. Fast/guld görs i Mina bevakningar.
     if (item && findRoute(item)) { toast('Det här är en fast bevakning. Ändra den i Mina bevakningar.'); return; }
     var k = parseKey(key); if (!k || !token()) return;
-    var on = !watchOf(key);
+    var existing = watchOf(key);
+    var on = !existing;
     var state = {};
     if (item && on) {
       if (k.kind === 'flyg') { state.landed = !!item.act; state.firstBag = /Första väskan/.test(item.info || ''); state.lastBag = !!(item.lastBag && item.act && item.lastBag >= item.act - 30 * 60000); }
@@ -293,13 +295,15 @@
       state.canceled = !!item.canceled;
       if (item.est && item.sched && Math.abs(item.est - item.sched) >= 60000) state.est = new Date(item.est).toISOString();
     }
-    rpc('watch_set', { p_kind: k.kind, p_ident: k.ident, p_sched: k.schedRaw, p_on: on,
+    rpc('watch_set', { p_kind: k.kind, p_ident: k.ident, p_sched: existing ? existing.sched : k.schedRaw, p_on: on,
       p_label: item ? item.from : null, p_sub: item ? item.sub : null, p_state: state })
       .then(function (l) {
         st.list = l || []; st.loadedAt = Date.now();
         var what = k.kind === 'flyg' ? 'flyget landar, när bagaget rullar och när sista väskan är ute' : (k.kind === 'bat' ? 'båten ankommer' : 'tåget ankommer');
+        var older = !on && window.TAGNOTIS && item && TAGNOTIS.matches && Array.isArray(TAGNOTIS._state && TAGNOTIS._state.list) &&
+          TAGNOTIS._state.list.some(function (rule) { return rule && rule.enabled && TAGNOTIS.matches(rule, item); });
         toast(on ? 'Tillfällig bevakning – du får en notis när ' + what + '.' + (st.push === 'on' ? '' : ' Slå på notiser ovanför listan.')
-                 : 'Bevakningen är borttagen.');
+                 : (older ? 'Tillfällig bevakning borttagen. Tåget kan fortfarande synas i Mina bevakningar om det ingår i en äldre bevakning.' : 'Bevakningen är borttagen.'));
         repaint();
       }).catch(function (e) {
         toast(e && e.message === 'too_many' ? 'Du kan bevaka högst 20 ankomster.' : 'Det gick inte att ändra bevakningen.');
@@ -392,6 +396,7 @@
       fired = false; key = row.getAttribute('data-ank-key'); sx = e.clientX; sy = e.clientY;
       row.classList.add('bev-press');
       clear();
+      // Långtryck på Ankomster är samma som ☆: bara tillfällig (silver). Fast/guld skapas inte här.
       timer = setTimeout(function () {
         fired = true; row.classList.remove('bev-press');
         try { if (navigator.vibrate) navigator.vibrate(30); } catch (x) {}

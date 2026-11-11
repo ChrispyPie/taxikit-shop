@@ -201,7 +201,8 @@
     if (r.kind === 'event') (r.event.subs || []).forEach(function (s) {
       work.push(rpc('set_event_subscription', { p_event_id: r.event.id, p_on: false, p_kind: s.kind, p_offset_min: s.offset, p_channel: s.channel || 'inapp' }));
     });
-    (r.rules || []).forEach(function (w) {
+    // Pausa äldre regler bara när raden inte är en tillfällig stjärnbevakning.
+    if (!r.watch) (r.rules || []).forEach(function (w) {
       var fn = r.kind === 'flyg' ? 'flight_watch_save' : 'train_watch_save';
       work.push(rpc(fn, { p_id: w.id, p_data: Object.assign({}, w, { enabled: false }) }));
     });
@@ -219,7 +220,9 @@
   function canRemove(r) {
     if (!r || r.kind === 'booking' || r.placeholder) return false;
     if (r.kind === 'event') return true;
+    // Fast ruttbevakning tas inte bort här – gör den tillfällig först.
     if (r.routeWatch) return false;
+    if (r.watch) return true;
     if (r.rules && r.rules.length) return true;
     return false;
   }
@@ -315,7 +318,7 @@
     (mode === 'list' ? rows : []).forEach(function (r, i) {
       var p = parts(r.at);
       if (p.key !== day) { h += '<h3 class="mb-day">' + esc(dayLabel(p.key)) + '</h3>'; day = p.key; }
-      var star = r.permanent ? '<span class="mb-star gold" title="Fast bevakning">⭐</span>' : (r.watch ? '<span class="mb-star" title="Tillfällig bevakning">⭐</span>' : '');
+      var star = r.permanent ? '<span class="mb-star gold" title="Fast bevakning">★</span>' : (r.watch ? '<span class="mb-star" title="Tillfällig bevakning">★</span>' : '');
       var extra = '';
       if (r.permanent && r.routeWatch) extra += '<small>Fast · ' + esc(daysText(r.routeWatch.days)) + ' ' + esc((window.BEVAKNING && BEVAKNING.hhmm) ? BEVAKNING.hhmm(r.routeWatch.sched_min) : '') + '</small>';
       else if (r.rules.length) extra += '<small>Äldre bevakning: ' + esc(r.rules.map(function (w) { return w.name; }).join(', ')) + '</small>';
@@ -366,8 +369,10 @@
       if (busy) return;
       var r = rows[+b.dataset.mbRemove], g = generation;
       if (!canRemove(r)) return;
-      var verb = r.kind === 'flyg' ? 'Flyget' : r.kind === 'bat' ? 'Båten' : 'Tåget', obj = r.kind === 'flyg' ? 'flyget' : r.kind === 'bat' ? 'båten' : 'tåget';
-      var text = r.rules.length ? verb + ' ingår i en äldre bevakning. Stänga av hela bevakningen (' + r.rules.map(function (w) { return w.name; }).join(', ') + ')?' : 'Sluta bevaka ' + r.title + '?';
+      var verb = r.kind === 'flyg' ? 'Flyget' : r.kind === 'bat' ? 'Båten' : 'Tåget';
+      // Tillfällig stjärna tas bort ensam. En äldre regel stängs bara när det inte finns en tillfällig bevakning.
+      var text = r.watch ? 'Sluta bevaka ' + r.title + '?'
+        : (r.rules.length ? verb + ' ingår i en äldre bevakning. Stänga av hela bevakningen (' + r.rules.map(function (w) { return w.name; }).join(', ') + ')?' : 'Sluta bevaka ' + r.title + '?');
       if (!window.confirm(text)) return;
       busy = true; actionIndex = null; gearIndex = null; draw(errors);
       remove(r).then(function () { if (g === generation) refresh(); }).catch(function () { busy = false; if (g === generation) draw(errors, 'Kunde inte ta bort allt. Uppdatera och försök igen.'); }).finally(function () { busy = false; });
