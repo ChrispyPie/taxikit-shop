@@ -1,9 +1,11 @@
 /* Delad enhet (Inställningar) och inloggade enheter (startsidan).
  * Delad enhet sparas i localStorage 'taxi_delad_enhet' (av som standard). På delade
  * plattor märks sessionen på servern. Servern stänger den när passet är slut, eller
- * om timkörningen inte har uppdaterats på 1 timme. På den utloggade enheten visas
- * ett rött meddelande på inloggningssidan. Övriga inloggade enheter får en notis
- * (push + Notiser). Startsidan visar inloggade enheter; du kan logga ut en annan.
+ * om timkörningen inte har uppdaterats på 1 timme. Orsaken sparas på enheten per
+ * förar-ID. När samma konto loggar in igen på den enheten visas ett rött meddelande
+ * (inte på inloggningsskärmen, så nästa förare inte ser det). Annat konto: visas inte.
+ * Övriga inloggade enheter får en notis (push + Notiser). Startsidan visar inloggade
+ * enheter; du kan logga ut en annan.
  * Ångra: ta bort anropen i index.html, den här filen, inställningsrutan, ev. RPC:er och cron. */
 (function () {
   var KEY = 'taxi_delad_enhet';
@@ -40,15 +42,26 @@
     return 'Du loggades ut automatiskt kl ' + kl + ' – ' + why;
   }
 
-  function saveLogout(r) {
-    var text = (r && r.text) || fallbackText(r && r.reason, r && r.at);
-    try { localStorage.setItem(MSG, JSON.stringify({ reason: r && r.reason, at: r && r.at, text: text })); } catch (e) {}
-    try { sessionStorage.setItem(MSG, '1'); } catch (e2) {}
+  function currentDriver() { return get('taxi_driver') || ''; }
+  function msgKey(driver) { return MSG + ':' + String(driver || ''); }
+
+  function dropLegacyLogout() {
+    del(MSG);
+    try { sessionStorage.removeItem(MSG); } catch (e) {}
   }
 
-  function loadLogout() {
+  function saveLogout(r) {
+    dropLegacyLogout();
+    var driver = currentDriver();
+    if (!driver) return;
+    var text = (r && r.text) || fallbackText(r && r.reason, r && r.at);
+    put(msgKey(driver), JSON.stringify({ driver: driver, reason: r && r.reason, at: r && r.at, text: text }));
+  }
+
+  function loadLogoutFor(driver) {
+    if (!driver) return null;
     try {
-      var raw = localStorage.getItem(MSG);
+      var raw = get(msgKey(driver));
       if (!raw) return null;
       var o = JSON.parse(raw);
       if (o && o.text) return o;
@@ -56,7 +69,37 @@
     return null;
   }
 
-  function clearLogout() { del(MSG); try { sessionStorage.removeItem(MSG); } catch (e) {} }
+  function clearLogoutFor(driver) {
+    if (driver) del(msgKey(driver));
+    dropLegacyLogout();
+  }
+
+  function hideAfterLoginMsg() {
+    var wrap = document.getElementById('delad-logout-msg');
+    if (!wrap) return;
+    wrap.hidden = true;
+    wrap.classList.remove('is-on');
+  }
+
+  function showAfterLogin() {
+    dropLegacyLogout();
+    hideAfterLoginMsg();
+    var driver = currentDriver();
+    if (!token() || !driver) return;
+    var rec = loadLogoutFor(driver);
+    if (!rec || !rec.text) return;
+    var wrap = document.getElementById('delad-logout-msg');
+    var textEl = document.getElementById('delad-logout-text');
+    if (!wrap || !textEl) return;
+    textEl.textContent = rec.text;
+    wrap.hidden = false;
+    wrap.classList.add('is-on');
+    clearLogoutFor(driver);
+    var close = function () { hideAfterLoginMsg(); };
+    var ok = document.getElementById('delad-logout-ok');
+    if (ok) ok.onclick = close;
+    wrap.onclick = function (e) { if (e.target === wrap) close(); };
+  }
 
   function currentEndpoint(cb) {
     if (!navigator.serviceWorker || !navigator.serviceWorker.ready) { cb(null); return; }
@@ -114,19 +157,6 @@
       syncFlag(false);
       stop();
     }
-  }
-
-  function showPendingMessage() {
-    var rec = loadLogout();
-    var el = document.getElementById('login-delad-msg') || document.getElementById('login-notice');
-    if (!el) return;
-    if (!rec || !rec.text) {
-      if (el.id === 'login-delad-msg') el.style.display = 'none';
-      return;
-    }
-    el.textContent = rec.text;
-    el.classList.add('delad-out');
-    el.style.display = 'block';
   }
 
   function isDemo() {
@@ -197,6 +227,7 @@
   function start() {
     stopped = false;
     if (!token()) return;
+    showAfterLogin();
     reportDevice();
     if (!isOn() || isDemo()) return;
     ensureLoginAt();
@@ -220,7 +251,7 @@
   }
 
   function onLoginSuccess() {
-    clearLogout();
+    /* Meddelandet sparas per förar-ID och visas efter inloggning, inte här. */
   }
 
   function seenLabel(iso) {
@@ -330,7 +361,7 @@
     onClearSession: onClearSession,
     onInvalidSession: onInvalidSession,
     onLoginSuccess: onLoginSuccess,
-    showPendingMessage: showPendingMessage,
+    showAfterLogin: showAfterLogin,
     renderSettings: renderSettings,
     renderDevices: renderDevices,
     reportDevice: reportDevice,
@@ -338,8 +369,8 @@
   };
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', showPendingMessage);
+    document.addEventListener('DOMContentLoaded', dropLegacyLogout);
   } else {
-    showPendingMessage();
+    dropLegacyLogout();
   }
 })();

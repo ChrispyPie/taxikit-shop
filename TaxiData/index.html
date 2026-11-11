@@ -9,7 +9,7 @@
   <script src="tema.js?v=20261110hl1"></script>
   <script src="helskarm.js?v=20261111pwa1"></script>
   <script src="enhet.js?v=20261029d"></script>
-  <script src="delad-enhet.js?v=20261111delad1"></script>
+  <script src="delad-enhet.js?v=20261111delad2"></script>
   <script src="bevakning-ljud.js?v=20261111bev1"></script>
   <script src="namn.js?v=20261028nm1"></script>
   <link rel="stylesheet" href="style.css?v=20261111fly1">
@@ -76,8 +76,13 @@
     .app-toast { position: fixed; left: 12px; right: 12px; top: 12px; z-index: 300; background: var(--toast-bad); color: white; padding: 12px 14px; border-radius: 10px; font-weight: 600; box-shadow: 0 4px 14px rgba(0,0,0,0.25); text-align: center; }
     .login-notice { margin: 0 0 12px; padding: 10px 12px; border-radius: 8px; background: var(--ok-bg, #edf2f7); color: var(--text); border: 1px solid var(--border, #cbd5e0); font-weight: 600; text-align: center; }
     html[data-theme="dark"] .login-notice { background: #1a2330; color: #e2e8f0; border-color: #4a5568; }
-    #login-delad-msg, .login-notice.delad-out { display:none; margin: 0 0 16px; padding: 16px 16px; border-radius: 10px; background: #fff5f5; color: #c53030; border: 2px solid #c53030; font-weight: 800; font-size: 1.15rem; line-height: 1.35; text-align: center; }
-    html[data-theme="dark"] #login-delad-msg, html[data-theme="dark"] .login-notice.delad-out { background: #2a1515; color: #fc8181; border-color: #e53e3e; }
+    #delad-logout-msg { display: none; position: fixed; inset: 0; z-index: 280; background: rgba(0,0,0,.45); align-items: center; justify-content: center; padding: 24px 16px; }
+    #delad-logout-msg.is-on { display: flex; }
+    .delad-logout-card { width: min(100%, 380px); margin: 0 auto; padding: 20px 18px 16px; border-radius: 12px; background: #fff5f5; color: #c53030; border: 2px solid #c53030; font-weight: 800; font-size: 1.15rem; line-height: 1.35; text-align: center; box-shadow: 0 8px 28px rgba(0,0,0,.3); }
+    html[data-theme="dark"] .delad-logout-card { background: #2a1515; color: #fc8181; border-color: #e53e3e; }
+    .delad-logout-card p { margin: 0 0 14px; }
+    #delad-logout-ok { font: inherit; font-weight: 700; font-size: 0.95rem; padding: 8px 22px; border-radius: 8px; background: #c53030; color: #fff; border: 0; }
+    html[data-theme="dark"] #delad-logout-ok { background: #e53e3e; color: #1a1010; }
     .home-devices { margin: 12px 0 0; }
     .home-devices-h { font-size: 0.78rem; font-weight: 700; color: var(--text-soft, #718096); margin: 0 0 6px; }
     .home-devices-row { display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 0 0 4px; }
@@ -99,7 +104,6 @@
   <div id="login-screen">
     <div class="login-box">
       <h2>TaxiData</h2>
-      <p id="login-delad-msg" class="login-delad-msg" role="alert" style="display:none;"></p>
       <input type="text" id="driver-id" placeholder="Förar-ID" inputmode="numeric" autocomplete="username" autocapitalize="off" autocorrect="off" autofocus>
       <input type="password" id="password" placeholder="Lösenord" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false">
       <button onclick="checkPassword()">Logga in</button>
@@ -131,6 +135,13 @@
       </div>
     </header>
     <div id="content">Laddar...</div>
+  </div>
+
+  <div id="delad-logout-msg" class="delad-logout-msg" hidden role="alertdialog" aria-modal="true" aria-labelledby="delad-logout-text">
+    <div class="delad-logout-card">
+      <p id="delad-logout-text"></p>
+      <button type="button" id="delad-logout-ok">OK</button>
+    </div>
   </div>
 
   <div class="profile-menu" id="profile-menu">
@@ -179,7 +190,7 @@
   <script src="demo.js?v=am1q"></script>
   <script src="swipe-back.js?v=20261106sb2"></script>
   <script src="view-state.js?v=20261107lazy1"></script>
-  <script src="lazy-views.js?v=20261111fly1"></script>
+  <script src="lazy-views.js?v=20261111delad2"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
