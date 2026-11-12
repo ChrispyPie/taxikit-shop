@@ -21,7 +21,7 @@ assert.match(html, /hjalp\.js\?v=(20261111datatid1|20261112mapp1)/);
 assert.match(lv, /prognos\.js\?v=20261111datatid1/);
 assert.match(lv, /arrival-data\.js\?v=20261111datatid1/);
 assert.match(lv, /ankomster\.js\?v=20261111datatid1/);
-assert.match(lv, /changelog\.js\?v=20261112(zon2|mapp1)/);
+assert.match(lv, /changelog\.js\?v=20261112(bot1|mapp1)/);
 assert.match(cl, /2026-11-11datatid1/);
 
 assert.match(arrival, /function flightFeed\(/);
