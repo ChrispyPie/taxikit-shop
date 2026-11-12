@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-12', id: '2026-11-12svar2', rader: [
+    ['Nytt', 'Felanmälan, Bilen står och Behövs till bilen har en knapp Bokad tid. Ägaren kan föreslå en tid som chauffören godkänner, och chauffören kan föreslå en tid som ägaren bekräftar. Chauffören och bilen är redan ifyllda. Tiden syns i ärendet och grå i schemat tills den är godkänd.']
+  ]},
   { datum: '2026-11-12', id: '2026-11-12svar1', tid: '16:00', rader: [
     ['Fixat', 'Admin › Ägare › Ärenden: en felanmälan, Bilen står eller Behövs till bilen går nu att svara på direkt i ärendet. Meddelandet syns i tråden och föraren får en notis. Ärendet visas inte längre som Arkiv eller bara läsning.'],
     ['Fixat', 'Bil och verkstad: det går att göra nya anmälningar, skicka meddelanden och sätta Pågår eller Klar igen.']
