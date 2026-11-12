@@ -18,8 +18,13 @@
    return Promise.reject(new Error('demo_read_only'));
   }
   return A.rpc('mailbox_v2',{p_action:action,p_data:data||{}});},create:function(admin,name){
-  var U={},st={el:null,mode:'list',filter:'all',trash:false,canTrash:false,selected:[],flags:[],threads:[],cases:[],old:[],next:null,thread:null,legacy:null,recipients:[],cars:[],optionsPending:false,draft:{},replyDraft:'',busy:false,error:'',epoch:0,request:0,refreshRequest:0,loaded:false};
+  var U={},st={el:null,mode:'list',filter:'all',trash:false,canTrash:false,selected:[],flags:[],threads:[],cases:[],old:[],next:null,thread:null,legacy:null,recipients:[],cars:[],links:[],optionsPending:false,draft:{},replyDraft:'',busy:false,error:'',epoch:0,request:0,refreshRequest:0,loaded:false};
   function rpc(action,data){return MAILBOX.rpc(action,Object.assign({},data,{admin:admin}));}
+  // Bokad tid på felanmälan (2026-11-12svar2): issue_booking kopplar en vanlig mailbox-tråd till ärendet (issue_threads).
+  function ib(action,data){if(window.DEMO&&DEMO.on())return action==='links'?Promise.resolve([]):action==='get'?Promise.resolve(null):Promise.reject(new Error('demo_read_only'));return A.rpc('issue_booking',{p_action:action,p_data:Object.assign({},data,{admin:admin})});}
+  function linkFor(issueId){return st.links.find(function(l){return +l.issue_id===+issueId;})||null;}
+  function linkByThread(threadId){return st.links.find(function(l){return +l.thread_id===+threadId;})||null;}
+  function linkMeta(l){if(!l)return '';var s=l.booking_states||[];if(s.indexOf('pending_driver')>=0)return ' · Bokad tid väntar på föraren';if(s.indexOf('pending_admin')>=0)return ' · Bokad tid väntar på admin';if(l.next_at)return ' · Bokad tid '+when(l.next_at);return '';}
   function push(){try{history.pushState({view:admin?'admin':'inkorg',sub:'thread'},'');}catch(e){}}
   function go(mode){st.mode=mode;st.error='';push();paint();}
   function back(){return '<button class="ar-back" type="button" onclick="'+name+'.back()">‹ '+(admin?'Ärenden':'Meddelanden')+'</button>';}
@@ -29,7 +34,7 @@
   function hidden(kind,id){return !!preference(kind,id).hidden;}
  function owner(){return !admin&&['agare','superadmin'].indexOf(window.INKORG_ROLE)>=0;}
   // Oläst är personligt. needs styr arbetsgrupper, aldrig läsprickar eller aktivitetsantal.
-  U.count=function(){return st.threads.filter(function(x){return !hidden('thread',x.id)&&(x.unread||flagged('thread',x.id));}).length+st.cases.filter(function(x){return !hidden(x.kind,x.id)&&(x.unread>0||flagged(x.kind,x.id));}).length+st.old.filter(function(x){return !hidden('old-message',x.id)&&(x.unread||flagged('old-message',x.id));}).length;};
+  U.count=function(){return st.threads.filter(function(x){return !hidden('thread',x.id)&&(x.unread||flagged('thread',x.id));}).length+st.cases.filter(function(x){return !hidden(x.kind,x.id)&&(x.unread>0||flagged(x.kind,x.id)||(x.kind==='issue'&&!!(linkFor(x.id)||{}).unread));}).length+st.old.filter(function(x){return !hidden('old-message',x.id)&&(x.unread||flagged('old-message',x.id));}).length;};
   function badge(){if(window.LAZY)LAZY.unreadChanged();if(!admin)window.INKORG_HAS=U.count()>0;if(!admin&&window.setBadge){setBadge('inkorg',U.count());setBadge('profbtn',U.count()>0||!!window.INKORG_NEEDS_PROFILE);}}
   var refreshPending=null;
   U.refresh=function(force){
@@ -39,15 +44,15 @@
   };
   function refreshNow(){
    var epoch=st.epoch,refreshRequest=++st.refreshRequest;
-   return Promise.all([rpc('list',{}),A.rpc(admin?'case_admin_list':'case_inbox',{p_klar_limit:5000}),admin?Promise.resolve({items:[]}):A.rpc('conversation_list',{}),rpc('item_flags',{}),rpc('mailbox_capabilities',{})]).then(function(d){
+   return Promise.all([rpc('list',{}),A.rpc(admin?'case_admin_list':'case_inbox',{p_klar_limit:5000}),admin?Promise.resolve({items:[]}):A.rpc('conversation_list',{}),rpc('item_flags',{}),rpc('mailbox_capabilities',{}),ib('links',{}).catch(function(){return [];})]).then(function(d){
     if(epoch!==st.epoch||refreshRequest!==st.refreshRequest)return U.count();
-    st.canTrash=admin&&!!(d[4]&&d[4].can_trash);st.flags=d[3]||[];st.threads=d[0]||[];st.cases=(d[1].items||[]).filter(function(x){return x.kind!=='wish';});st.old=d[2].items||[];st.next=d[2].next;st.loaded=true;st.error='';badge();if(st.mode==='list')paint();return U.count();
+    st.canTrash=admin&&!!(d[4]&&d[4].can_trash);st.flags=d[3]||[];st.links=Array.isArray(d[5])?d[5]:[];st.threads=(d[0]||[]).filter(function(t){return !linkByThread(t.id);});st.cases=(d[1].items||[]).filter(function(x){return x.kind!=='wish';});st.old=d[2].items||[];st.next=d[2].next;st.loaded=true;st.error='';badge();if(st.mode==='list')paint();return U.count();
    }).catch(function(e){if(epoch!==st.epoch||refreshRequest!==st.refreshRequest)return U.count();st.loaded=true;st.error=err(e);if(st.mode==='list')paint();return 0;});
   };
   U.moreOld=function(){if(!st.next||st.busy)return;var epoch=st.epoch;st.busy=true;A.rpc('conversation_list',{p_before:st.next}).then(function(d){if(epoch!==st.epoch)return;st.old=st.old.concat(d.items||[]);st.next=d.next;st.busy=false;if(st.mode==='list')paint();}).catch(function(e){if(epoch!==st.epoch)return;st.busy=false;st.error=err(e);if(st.mode==='list')paint();});};
   var navRestored=false;
   U.render=function(el){st.el=el;if(!navRestored&&window.VIEW_STATE){navRestored=true;var n=VIEW_STATE.get(admin?'admin-mailbox':'inkorg',{});if(FILTERS.some(function(f){return f[0]===n.filter;}))st.filter=n.filter;paint();if(n.thread)return U.openThread(n.thread);if(n.kind&&n.id)return U.openCase(n.kind,n.id);}paint();if(st.mode==='list')U.refresh();};
-  U.back=function(){var dialog=st.el&&st.el.querySelector('dialog[open]');if(dialog){dialog.close();return true;}if(st.mode!=='list'){st.request++;st.mode='list';st.thread=null;st.legacy=null;st.replyDraft='';paint();U.refresh();return true;}return false;};
+  U.back=function(){var dialog=st.el&&st.el.querySelector('dialog[open]');if(dialog){dialog.close();return true;}if(st.mode==='booking'&&st.draft.issue_id){U.openCase('issue',st.draft.issue_id);return true;}if(st.mode!=='list'){st.request++;st.mode='list';st.thread=null;st.legacy=null;st.replyDraft='';paint();U.refresh();return true;}return false;};
   U.select=function(f){st.request++;st.filter=f;st.selected=[];st.mode='list';paint();};
   U.show=function(){st.mode='list';st.filter='all';st.trash=false;st.selected=[];if(!admin&&window.openInbox)openInbox();else paint();};
   U.newCase=function(){
@@ -57,11 +62,13 @@
   };
   U.choose=function(type){var d=st.el&&st.el.querySelector('dialog');if(d)d.close();if(type==='message')U.compose();else U.report(type==='sick'?'sjuk':'timmar');};
   U.compose=function(){st.draft={};go('compose');recipients();};
+  U.issueBooking=function(){if(!st.legacy||st.legacy.kind!=='issue')return;var c=st.legacy.data,d=c.data||{};st.draft={issue_id:c.id,issue_car:d.car||'',issue_who:d.reporter_name||'',issue_title:A.title?A.title(c):'Felanmälan',kind:'Verkstad',car_choice:''};go('booking');recipients();};
   U.newBooking=function(){st.draft={thread_id:st.mode==='thread'&&st.thread?st.thread.id:null,car_choice:''};go('booking');recipients();};
-  function recipients(){var epoch=st.epoch;Promise.all([rpc('cars',{}),admin?rpc('recipients',{}):Promise.resolve([])]).then(function(d){if(epoch!==st.epoch)return;st.cars=d[0]||[];st.recipients=d[1]||[];if(st.mode==='compose'||st.mode==='booking'){if(st.el&&st.el.querySelector('dialog[open]'))st.optionsPending=true;else paint();}}).catch(function(e){if(epoch!==st.epoch)return;st.error=err(e);if(!st.el||!st.el.querySelector('dialog[open]'))paint();});}
+  function recipients(){var epoch=st.epoch;Promise.all([rpc('cars',{}),admin?rpc('recipients',{}):Promise.resolve([])]).then(function(d){if(epoch!==st.epoch)return;st.cars=d[0]||[];st.recipients=d[1]||[];if(st.draft.issue_id&&!st.draft.car_choice&&st.draft.issue_car){var m=st.cars.find(function(c){return String(c.number).trim()===String(st.draft.issue_car).trim();});if(m)st.draft.car_choice=String(m.id);}if(st.mode==='compose'||st.mode==='booking'){if(st.el&&st.el.querySelector('dialog[open]'))st.optionsPending=true;else paint();}}).catch(function(e){if(epoch!==st.epoch)return;st.error=err(e);if(!st.el||!st.el.querySelector('dialog[open]'))paint();});}
 
   function captureReply(){var box=st.el&&st.el.querySelector('#mx-reply-body');if(box)st.replyDraft=box.value;}
   U.openThread=function(id){
+   var link=linkByThread(id);if(link)return U.openCase('issue',link.issue_id);
    if(owner()){location.href='admin.html#message='+encodeURIComponent(id);return Promise.resolve();}
    var stay=st.mode==='thread'&&st.thread&&+st.thread.id===+id;if(!stay)st.replyDraft='';else captureReply();
    st.mode='loading';if(!stay)st.thread=null;var request=++st.request;push();if(!stay){if(!admin&&window.openInbox)openInbox();else paint();}var epoch=st.epoch;
@@ -71,7 +78,7 @@
    if(kind==='wish'){if(admin&&window.openMenu)openMenu('onskemal');else if(U.isAdmin())location.href='admin.html#onskemal';return;}
    st.mode='loading';var request=++st.request;push();if(!admin&&window.openInbox)openInbox();else paint();
    var epoch=st.epoch;
-   return Promise.all([A.rpc(kind==='old-message'?'conversation_get':'case_get',kind==='old-message'?{p_id:id}:{p_kind:kind,p_id:id}),rpc('item_lock',{kind:kind,id:id})]).then(async function(result){var c=result[0];c.locked=!!(result[1]&&result[1].locked);if(epoch!==st.epoch||request!==st.request||st.mode!=='loading')return;try{await Promise.all([rpc('mark_read',{kind:kind,id:id}),kind==='old-message'?Promise.resolve():A.rpc('case_seen',{p_kind:kind,p_id:id})]);}catch(e){st.error=err(e);}if(epoch!==st.epoch||request!==st.request||st.mode!=='loading')return;st.legacy={kind:kind,data:c};st.mode='legacy';paint();return U.refresh(true);}).catch(function(e){if(epoch!==st.epoch||request!==st.request)return;st.error=err(e);st.mode='list';paint();});
+   return Promise.all([A.rpc(kind==='old-message'?'conversation_get':'case_get',kind==='old-message'?{p_id:id}:{p_kind:kind,p_id:id}),rpc('item_lock',{kind:kind,id:id}),kind==='issue'?ib('get',{issue_id:id}).catch(function(){return null;}):Promise.resolve(null)]).then(async function(result){var c=result[0];c.locked=!!(result[1]&&result[1].locked);c.booking=result[2]||null;if(epoch!==st.epoch||request!==st.request||st.mode!=='loading')return;try{await Promise.all([rpc('mark_read',{kind:kind,id:id}),kind==='old-message'?Promise.resolve():A.rpc('case_seen',{p_kind:kind,p_id:id})]);}catch(e){st.error=err(e);}if(epoch!==st.epoch||request!==st.request||st.mode!=='loading')return;st.legacy={kind:kind,data:c};st.mode='legacy';paint();return U.refresh(true);}).catch(function(e){if(epoch!==st.epoch||request!==st.request)return;st.error=err(e);st.mode='list';paint();});
   };
   U.tap=U.openCase;U.readConversation=function(id){return U.openCase('old-message',id);};
   function formField(label,id,type,required,max){var d=st.draft,v=d[id]||'';return '<label for="mx-'+id+'">'+label+'</label><input id="mx-'+id+'" data-mx="'+id+'" type="'+(type||'text')+'"'+(required?' required':'')+(max?' maxlength="'+max+'"':'')+' value="'+esc(v)+'">';}
@@ -90,11 +97,12 @@
   U.calendarMove=function(delta){var d=new Date(calendarMonth+'-01T12:00:00Z');d.setUTCMonth(d.getUTCMonth()+delta);calendarMonth=iso(d).slice(0,7);calendarDraw();var b=st.el.querySelector(delta<0?'[aria-label="Föregående månad"]':'[aria-label="Nästa månad"]');if(b)b.focus();};
   U.pickDate=function(key){var bound=calendarBounds();if(key<bound.today||key>bound.max)return;st.draft.date=key;var input=st.el.querySelector('#mx-date');if(input)input.value=key;var d=st.el.querySelector('#mx-calendar');if(d)d.close();};
 
-  function driverField(){if(!admin||st.draft.thread_id)return '';return '<label for="mx-driver_id">Chaufför på åkeriet</label><select id="mx-driver_id" data-mx="driver_id" required><option value="">Välj chaufför…</option>'+st.recipients.map(function(d){return '<option value="'+esc(d.id)+'"'+(String(d.id)===String(st.draft.driver_id)?' selected':'')+'>'+esc(d.name)+'</option>';}).join('')+'</select>';}
+  function driverField(){if(st.draft.issue_id)return '<p class="mx-fixed">'+esc(st.draft.issue_title||'Felanmälan')+(st.draft.issue_car?' · Bil '+esc(st.draft.issue_car):'')+(admin&&st.draft.issue_who?'<br>Chaufför: '+esc(st.draft.issue_who):'')+'</p>';if(!admin||st.draft.thread_id)return '';return '<label for="mx-driver_id">Chaufför på åkeriet</label><select id="mx-driver_id" data-mx="driver_id" required><option value="">Välj chaufför…</option>'+st.recipients.map(function(d){return '<option value="'+esc(d.id)+'"'+(String(d.id)===String(st.draft.driver_id)?' selected':'')+'>'+esc(d.name)+'</option>';}).join('')+'</select>';}
   function composeHtml(book){
    return back()+'<form class="mx-form" id="mx-form"><h3>'+(book?'Bokad tid':admin?'Meddelande till chaufför':'Meddelande till admin')+'</h3>'+driverField()+
     (book?formField('Typ (blir ärendets rubrik)','kind','text',true,120)+dateField()+timeField():formField('Rubrik','subject','text',true,120)+'<label for="mx-body">Meddelande</label><textarea id="mx-body" data-mx="body" required maxlength="2000" rows="5">'+esc(st.draft.body||'')+'</textarea>')+
-    (book?'<label for="mx-body">Meddelande (valfritt)</label><textarea id="mx-body" data-mx="body" maxlength="2000" rows="4">'+esc(st.draft.body||'')+'</textarea>':'')+carField()+(!book&&!admin?'<p class="ar-note">Sjukanmälan och läkarintyg skickas under Sjuk, inte här.</p>':'')+(book?'<p class="ar-note">'+(admin?'Föraren måste godkänna tiden.':'Admin måste bekräfta ditt förslag.')+' Tiden visas grå i schemat tills den är godkänd.</p>':'')+
+    // På en felanmälan skrivs meddelanden i ärendets svarsruta, så allt hamnar i samma tråd.
+    (book&&!st.draft.issue_id?'<label for="mx-body">Meddelande (valfritt)</label><textarea id="mx-body" data-mx="body" maxlength="2000" rows="4">'+esc(st.draft.body||'')+'</textarea>':'')+carField()+(!book&&!admin?'<p class="ar-note">Sjukanmälan och läkarintyg skickas under Sjuk, inte här.</p>':'')+(book?'<p class="ar-note">'+(st.draft.issue_id?'Vill du skriva något till '+(admin?'föraren':'ägaren')+'? Använd svarsrutan i ärendet. ':'')+(admin?'Föraren måste godkänna tiden.':'Admin måste bekräfta ditt förslag.')+' Tiden visas grå i schemat tills den är godkänd.</p>':'')+
     '<p class="mx-error mx-server-error" role="alert">'+esc(st.error)+'</p><button type="submit"'+(st.busy?' disabled':'')+'>'+(st.busy?'Sparar…':book?'Föreslå tid':'Skicka')+'</button></form>';
   }
   // Closed wins over legacy needs; a pending booking or unanswered human reply wins over other bookings.
@@ -119,7 +127,7 @@
    h+=admin?'<div class="mx-actions"><button onclick="'+name+'.compose()">Meddelande</button><button onclick="'+name+'.newBooking()">Bokad tid</button></div>':'<button class="mx-new" onclick="'+name+'.newCase()">＋ Nytt ärende</button>';
    if(owner())h+='<p class="ar-note">Alla dina ärenden hanteras i <a href="admin.html#arenden">Admin › Ärenden</a>.</p>';
    var all=st.threads.map(function(t){return {kind:'thread',id:t.id,at:t.at,title:t.subject,body:t.last_body||'',meta:t.name+(t.car_number?' · Bil '+t.car_number:'')+(t.locked?' · Tråden är stängd':''),unread:t.unread||flagged('thread',t.id),open:name+'.openThread('+t.id+')',cat:'message',group:threadGroup(t)};});
-   all=all.concat(st.cases.map(function(c){return {kind:c.kind,id:c.id,at:c.at,title:c.title,body:c.last_txt||c.txt||'',meta:(c.car?'Bil '+c.car+' · ':'')+(A.WORDS[c.st]||'')+(['sjuk','wh','issue'].indexOf(c.kind)<0?' · Arkiv':''),unread:c.unread>0||flagged(c.kind,c.id),open:name+'.openCase(\''+c.kind+'\','+c.id+')',cat:category(c),group:caseGroup(c)};}));
+   all=all.concat(st.cases.map(function(c){return {kind:c.kind,id:c.id,at:c.at,title:c.title,body:c.last_txt||c.txt||'',meta:(c.car?'Bil '+c.car+' · ':'')+(A.WORDS[c.st]||'')+(['sjuk','wh','issue'].indexOf(c.kind)<0?' · Arkiv':'')+(c.kind==='issue'?linkMeta(linkFor(c.id)):''),unread:c.unread>0||flagged(c.kind,c.id)||(c.kind==='issue'&&!!(linkFor(c.id)||{}).unread),open:name+'.openCase(\''+c.kind+'\','+c.id+')',cat:category(c),group:c.kind==='issue'&&/pending_/.test(((linkFor(c.id)||{}).booking_states||[]).join())?0:caseGroup(c)};}));
    all=all.concat(st.old.map(function(c){return {kind:'old-message',id:c.id,at:c.at,title:c.subject,body:c.last_body,meta:'Äldre privat samtal · bara läsning',unread:c.unread||flagged('old-message',c.id),open:name+'.readConversation('+c.id+')',cat:'message',group:2};}));
    all=all.filter(function(x){return !preference(x.kind,x.id).permanent&&(st.trash?st.canTrash&&preference(x.kind,x.id).in_trash:!hidden(x.kind,x.id))&&(st.filter==='all'||st.filter===x.cat);}).sort(function(a,b){return Date.parse(b.at)-Date.parse(a.at);});
    h+='<p class="mx-error mx-server-error" role="alert">'+esc(st.error)+'</p>';
@@ -133,7 +141,7 @@
    if(st.next)h+='<button onclick="'+name+'.moreOld()">Visa fler äldre samtal</button>';
    return h;
   }
-  function bookingHtml(b){var can=!(st.thread&&st.thread.locked&&!admin)&&((admin&&b.status==='pending_admin')||((!admin||(st.thread&&st.thread.is_driver))&&b.status==='pending_driver'));
+  function bookingHtml(b,ctx){ctx=ctx||st.thread||{};var can=!(ctx.locked&&!admin)&&((admin&&b.status==='pending_admin')||((!admin||ctx.is_driver)&&b.status==='pending_driver'));
    return '<section class="mx-booking '+(b.status==='accepted'?'solid':'pending')+'"><h4>'+esc(b.title)+'</h4><p>'+(b.kind&&b.kind!==b.title?esc(b.kind)+' · ':'')+esc(when(b.starts_at))+(b.car_number?' · Bil '+esc(b.car_number):' · Bil: Nej')+'</p><p>'+esc(STATUS[b.status])+'</p><small>Föreslagen '+esc(when(b.created_at))+(b.decided_at?' · Beslut '+esc(when(b.decided_at)):'')+'</small>'+(b.reason?'<p>'+esc(b.reason)+'</p>':'')+(can?'<div class="mx-actions"><button onclick="'+name+'.decide('+b.id+',\'accepted\')">'+(admin&&b.status==='pending_admin'?'Bekräfta':'Acceptera')+'</button><button onclick="'+name+'.decide('+b.id+',\'declined\')">Avböj</button></div>':'')+'</section>';
   }
   function threadHtml(){var t=st.thread;
@@ -144,11 +152,12 @@
   function legacyHtml(){var c=st.legacy.data,k=st.legacy.kind,d=c.data||{};
    if(k==='old-message')return back()+unreadButton(k,c.id)+'<h2>'+esc(c.subject)+'</h2><p class="ar-note">Äldre privat samtal – bara läsning. Nya meddelanden går till admin.</p>'+c.messages.map(function(m){return '<div class="mx-message"><small>'+esc(when(m.at))+'</small><p>'+esc(m.body)+'</p></div>';}).join('');
    var h=back()+unreadButton(k,c.id)+A.view(c,admin?'owner':'driver');
+   if(k==='issue'&&c.booking&&c.booking.bookings&&c.booking.bookings.length)h+='<div class="mx-issue-bookings">'+c.booking.bookings.map(function(b){return bookingHtml(b,{locked:c.locked,is_driver:c.booking.is_driver});}).join('')+'</div>';
    if(c.locked&&!admin)return h+'<p class="ar-note" role="status">Tråden är stängd. Du kan läsa den men inte svara här.</p>';
    if(k==='wh'){var decided=d.status&&d.status!=='pending';h+='<div class="mx-form"><label for="mx-legacy-text">'+(admin?(decided?'Meddelande till föraren (beslutet ändras inte)':'Meddelande till föraren, eller motivering till beslutet'):'Svara')+'</label><textarea id="mx-legacy-text" maxlength="1000"></textarea><div class="mx-actions">'+(admin?'<button onclick="'+name+'.legacyAct(\'message\')">Skicka meddelande</button><button onclick="'+name+'.legacyAct(\'ask\')">'+(decided?'Öppna igen och fråga':'Fråga föraren')+'</button><button onclick="'+name+'.legacyAct(\'approved\')">Godkänn</button><button onclick="'+name+'.legacyAct(\'rejected\')">Neka</button>':'<button onclick="'+name+'.legacyAct(\'reply\')">Skicka svar</button>')+'</div></div>';}
    else if(k==='sjuk')h+=admin?'<div class="mx-form"><label for="mx-legacy-text">Kommentar</label><textarea id="mx-legacy-text" maxlength="500"></textarea><div class="mx-actions">'+[['godkand','Godkänn'],['intyg_begart','Begär intyg'],['avslagen','Avslå']].map(function(x){return '<button onclick="'+name+'.legacyAct(\''+x[0]+'\')">'+x[1]+'</button>';}).join('')+'</div></div>':'<button onclick="'+name+'.report(\'sjuk\')">Öppna sjukanmälan och intyg</button>';
    // Felanmälan / Bilen står / Behövs (2026-11-12svar1): svarsruta för både ägare/admin och föraren, via car_issue_message (status ändras inte).
-   else if(k==='issue'){var closed=c.st==='klar'||(d.status&&A.st('issue',d.status)==='klar');h+='<div class="mx-form">'+(closed?'<p class="ar-note">Ärendet är redan klart. Du kan ändå skriva, status ändras inte.</p>':'')+'<label for="mx-legacy-text">'+(admin?'Meddelande till föraren':'Svara')+'</label><textarea id="mx-legacy-text" maxlength="1000"></textarea><div class="mx-actions"><button onclick="'+name+'.legacyAct(\'issue_message\')"'+(st.busy?' disabled':'')+'>'+(admin?'Skicka meddelande':'Skicka svar')+'</button></div></div>';}
+   else if(k==='issue'){var closed=c.st==='klar'||(d.status&&A.st('issue',d.status)==='klar');h+='<div class="mx-form">'+(closed?'<p class="ar-note">Ärendet är redan klart. Du kan ändå skriva, status ändras inte.</p>':'')+'<label for="mx-legacy-text">'+(admin?'Meddelande till föraren':'Svara')+'</label><textarea id="mx-legacy-text" maxlength="1000"></textarea><p id="mx-decline-error" class="mx-error" role="alert"></p><div class="mx-actions"><button onclick="'+name+'.legacyAct(\'issue_message\')"'+(st.busy?' disabled':'')+'>'+(admin?'Skicka meddelande':'Skicka svar')+'</button>'+(c.booking?'<button onclick="'+name+'.issueBooking()">Bokad tid</button>':'')+'</div></div>';}
    else h+='<p class="ar-note">Äldre bilärende – bara läsning. Skapa ett Meddelande om något nytt behövs.</p>';
    return h+'<p class="mx-error mx-server-error" role="alert">'+esc(st.error)+'</p>';
   }
@@ -159,9 +168,11 @@
    if(st.mode==='legacy'&&st.legacy.kind==='sjuk')A.mountCertificates(st.legacy.data,st.el);
   }
   function submit(action,data){if(st.busy)return;if(action==='book'||action==='create'){var ce=st.el.querySelector('#mx-car-error');if(!data.car_choice){if(ce)ce.textContent='Välj en bil på åkeriet eller Nej.';return;}if(ce)ce.textContent='';if(action==='book'&&!data.date){var error=st.el.querySelector('.mx-server-error');if(error)error.textContent='Välj datum i kalendern.';return;}}st.busy=true;st.error='';var epoch=st.epoch,request=st.request;var btn=st.el.querySelector('button[type="submit"]');if(btn)btn.disabled=true;
-   rpc(action,data).then(function(r){if(epoch!==st.epoch)return;if(request!==st.request){st.busy=false;return;}st.busy=false;if(owner()){location.href='admin.html#message='+r.id;return;}if(action==='reply'||(action==='decide'&&data.decision==='declined')){st.replyDraft='';var box=st.el&&st.el.querySelector('#mx-reply-body');if(box)box.value='';}else captureReply();U.openThread(r.id);}).catch(function(e){if(epoch!==st.epoch)return;if(request!==st.request){st.busy=false;return;}st.busy=false;st.error=err(e);var error=st.el&&st.el.querySelector('.mx-server-error');if(error)error.textContent=st.error;if(btn)btn.disabled=false;});
+   var issueId=action==='book'&&data.issue_id?data.issue_id:action==='decide'&&st.mode==='legacy'&&st.legacy&&st.legacy.kind==='issue'?st.legacy.data.id:null;
+   var call=action==='book'&&data.issue_id?ib('book',{issue_id:data.issue_id,kind:data.kind,date:data.date,time:data.time,body:'',car_choice:data.car_choice}):rpc(action,data);
+   call.then(function(r){if(epoch!==st.epoch)return;if(request!==st.request){st.busy=false;return;}st.busy=false;if(issueId){st.draft={};U.openCase('issue',issueId);return;}if(owner()){location.href='admin.html#message='+r.id;return;}if(action==='reply'||(action==='decide'&&data.decision==='declined')){st.replyDraft='';var box=st.el&&st.el.querySelector('#mx-reply-body');if(box)box.value='';}else captureReply();U.openThread(r.id);}).catch(function(e){if(epoch!==st.epoch)return;if(request!==st.request){st.busy=false;return;}st.busy=false;st.error=err(e);var error=st.el&&st.el.querySelector('.mx-server-error');if(error)error.textContent=st.error;if(btn)btn.disabled=false;});
   }
-  U.decide=function(id,decision){var reply=st.el.querySelector('#mx-reply-body'),error=st.el.querySelector('#mx-decline-error'),reason=reply?reply.value.trim():'';if(error)error.textContent='';if(decision==='declined'&&!reason){if(error)error.textContent='Vänligen specificera orsak';if(reply){reply.setAttribute('aria-invalid','true');reply.focus();}return;}if(reply)reply.removeAttribute('aria-invalid');submit('decide',{booking_id:id,decision:decision,reason:decision==='declined'?reason:''});};
+  U.decide=function(id,decision){var reply=st.el.querySelector('#mx-reply-body')||st.el.querySelector('#mx-legacy-text'),error=st.el.querySelector('#mx-decline-error'),reason=reply?reply.value.trim():'';if(error)error.textContent='';if(decision==='declined'&&!reason){if(error)error.textContent='Vänligen specificera orsak';if(reply){reply.setAttribute('aria-invalid','true');reply.focus();}return;}if(reply)reply.removeAttribute('aria-invalid');submit('decide',{booking_id:id,decision:decision,reason:decision==='declined'?reason:''});};
 
   U.legacyAct=function(action){if(st.busy||!st.legacy)return;var c=st.legacy.data,txt=(st.el.querySelector('#mx-legacy-text')||{}).value||'',box=st.el.querySelector('#mx-legacy-text');
    if((action==='ask'||action==='reply'||action==='message'||action==='issue_message')&&!String(txt).trim()){st.error=err({message:'need_text'});if(box)box.focus();paint();return;}
