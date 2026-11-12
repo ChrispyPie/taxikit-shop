@@ -23,16 +23,19 @@
     "modeled_js_transfer_seconds_at_1_6mbps": 1.488
   },
   "after": {
-    "js_files": 9,
-    "js_decoded_bytes": 36999,
-    "js_gzip_bytes": 15062,
-    "html_bytes": 54679,
+    "js_files": 22,
+    "js_decoded_bytes": 411982,
+    "js_gzip_bytes": 127022,
+    "html_bytes": 61523,
     "startup_rpc_requests": [
+      "forecast?latitude=57.71&longitude=11.97&current=temperature_2m,precipitation,weather_code,rain,showers,snowfall&timezone=Europe%2FStockholm",
       "get_my_features",
       "get_me",
-      "shell_badge_counts"
+      "session_set_device",
+      "shell_badge_counts",
+      "list_my_sessions"
     ],
     "offline_dom_errors": [],
-    "modeled_js_transfer_seconds_at_1_6mbps": 0.075
+    "modeled_js_transfer_seconds_at_1_6mbps": 0.635
   }
 }

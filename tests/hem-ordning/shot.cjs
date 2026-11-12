@@ -67,6 +67,17 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
     return p;
   }
 
+  // Ordningsläget nås via håll in -> Flytta (skiftnyckeln är borttagen 2026-11-12mapp1)
+  async function enterEdit(p) {
+    const b = await (await p.$('#app .grid .icon[data-tool="kordata"] .emoji')).boundingBox();
+    await p.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+    await p.mouse.down();
+    await new Promise(r => setTimeout(r, 1050));
+    await p.mouse.up();
+    await new Promise(r => setTimeout(r, 500));
+    await p.click('#td-lp-menu [data-lp="move"]');
+    await p.waitForSelector('.grid.td-ordna');
+  }
   async function metrics(p) {
     return p.evaluate(() => {
       const header = document.querySelector('#app header');
@@ -84,7 +95,7 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
       return {
         gap: Math.round(gr.top - hr.bottom),
         hasBar: !!bar,
-        pencil: !!(pencil && pb.width >= 40 && pb.height >= 40),
+        pencil: !pencil, // skiftnyckeln borttagen 2026-11-12mapp1
         plusLast: !!(plus && plus === grid.lastElementChild),
         plusH: pr ? Math.round(pr.height) : 0,
         handlesVis,
@@ -101,14 +112,13 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
     const m = await metrics(p);
     ok('grid close under header', m.gap >= 0 && m.gap <= 16, 'gap=' + m.gap);
     ok('no ordna row', m.noOrdnaRow);
-    ok('wrench 44 hit target', m.pencil);
+    ok('no wrench on home', m.pencil);
     ok('plus last', m.plusLast && m.plusH >= 44, JSON.stringify(m));
     ok('handles hidden', m.handlesVis === 0, 'vis=' + m.handlesVis);
     await p.screenshot({ path: path.join(out, 'hem-412-scale14-dark.png') });
 
     // enter edit, remove a tool, screenshot with X
-    await p.click('.td-wrench');
-    await p.waitForSelector('.grid.td-ordna');
+    await enterEdit(p);
     const editM = await p.evaluate(() => {
       const ban = document.querySelector('.td-andringslage');
       const cs = ban ? getComputedStyle(ban) : null;
@@ -119,7 +129,7 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
         banner: !!(cs && cs.display !== 'none' && /Ändringsläge/.test(ban.textContent)),
         klar: !!document.querySelector('.td-andringslage [data-ordna="done"]'),
         reset: !!document.querySelector('.td-andringslage [data-ordna="reset"]'),
-        wrenchHidden: !document.querySelector('.td-wrench') || getComputedStyle(document.querySelector('.td-wrench')).display === 'none'
+        wrenchHidden: !document.querySelector('.td-wrench')
       };
     });
     ok('x badges on removable', editM.x >= 6, 'x=' + editM.x);
@@ -132,10 +142,7 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
     await p.click('.icon[data-tool="vader"] .td-remove');
     await p.waitForFunction(() => !document.querySelector('.icon[data-tool="vader"]') && document.querySelector('.td-slot-empty'));
     // still editing after re-render
-    if (!(await p.$('.grid.td-ordna'))) {
-      await p.click('.td-wrench');
-      await p.waitForSelector('.grid.td-ordna');
-    }
+    if (!(await p.$('.grid.td-ordna'))) await enterEdit(p);
     await p.click('.td-slot-empty');
     await p.waitForSelector('.td-mod-list');
     const list = await p.evaluate(() => [...document.querySelectorAll('.td-mod-row')].map(e => e.getAttribute('data-mod-id')));
@@ -157,8 +164,7 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
     ok('light gap', m.gap >= 0 && m.gap <= 16, 'gap=' + m.gap);
     ok('light plus last', m.plusLast);
     await p.screenshot({ path: path.join(out, 'hem-412-scale125-light.png') });
-    await p.click('.td-wrench');
-    await p.waitForSelector('.grid.td-ordna');
+    await enterEdit(p);
     await p.screenshot({ path: path.join(out, 'ordna-kryss-412-scale125-light.png') });
     await p.close();
   }
@@ -177,8 +183,7 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
     ok('tablet gap', m.gap >= 0 && m.gap <= 20, 'gap=' + m.gap);
     ok('tablet plus last', m.plusLast);
     await p.screenshot({ path: path.join(out, 'hem-1024x600-dark.png') });
-    await p.click('.td-wrench');
-    await p.waitForSelector('.grid.td-ordna');
+    await enterEdit(p);
     await p.screenshot({ path: path.join(out, 'ordna-kryss-1024x600-dark.png') });
     await p.close();
   }

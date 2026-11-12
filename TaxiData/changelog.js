@@ -15,6 +15,11 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-12', id: '2026-11-12mapp1', rader: [
+    ['Ändrat', 'Startskärmen: den lilla skiftnyckeln är borta, så du inte råkar trycka på den när du ska öppna översta högra verktyget. Håll i stället in en ikon i ungefär en sekund, så lyfts den och du kan dra den till en ny plats. Menyn med Avinstallera, Modulinfo, Flytta och Hjälp visas som förut.'],
+    ['Nytt', 'Mappar på startskärmen, som på Android: släpp en ikon på en annan så blir det en mapp. Tryck på mappen för att öppna den och på namnet för att byta namn. Håll in en ikon i mappen och dra ut den för att lägga den på startskärmen igen. En mapp med bara en ikon kvar försvinner av sig själv.'],
+    ['Nytt', 'Håll in en mapp för Byt namn eller Ta bort mapp. Ta bort mapp lägger tillbaka ikonerna på startskärmen, inga verktyg avinstalleras.']
+  ]},
   { datum: '2026-11-12', id: '2026-11-12zon2', tid: '13:42', rader: [
     ['Nytt', 'Prognos: när en zon du bevakar får en ny förbokning visas zonens märke över skärmen, samtidigt som notisen. Landvetter: ett plan som sveper förbi, och när appen är öppen låter notisen som säkerhetsbältessignalen i stället för pipet. Essity, Astra, Volvo och Hotell Draken: loggan glider in, stannar några sekunder och glider ut. Andra zoner låter som förut.'],
     ['Ändrat', 'Ankomster: när ett bevakat flyg har landat visas nu ett plan som landar på en bana. När en båt har ankommit visas en Stenafärja. Tåget är som förut. Animationen körs fortfarande bara vid själva ankomsten.'],
