@@ -15,6 +15,11 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-12', id: '2026-11-12mapp1', tid: '15:10', rader: [
+    ['Ändrat', 'Startskärmen: den lilla skiftnyckeln är borta, så du inte råkar trycka på den när du ska öppna översta högra verktyget. Håll i stället in en ikon i ungefär en sekund, så lyfts den och du kan dra den till en ny plats. Menyn med Avinstallera, Modulinfo, Flytta och Hjälp visas som förut.'],
+    ['Nytt', 'Mappar på startskärmen, som på Android: släpp en ikon på en annan så blir det en mapp. Tryck på mappen för att öppna den och på namnet för att byta namn. Håll in en ikon i mappen och dra ut den för att lägga den på startskärmen igen. En mapp med bara en ikon kvar försvinner av sig själv.'],
+    ['Nytt', 'Håll in en mapp för Byt namn eller Ta bort mapp. Ta bort mapp lägger tillbaka ikonerna på startskärmen, inga verktyg avinstalleras.']
+  ]},
   { datum: '2026-11-12', id: '2026-11-12bot1', tid: '14:25', rader: [
     ['Ändrat', 'Hjälpboten vandrar inte längre runt bland ikonerna på startskärmen. Den står längst ner, direkt efter din sista ikon, och pratar bara där, så att pratbubblan inte hamnar över ikonerna. Bubblan sitter nu fast i boten.'],
     ['Ändrat', 'När boten kollar något, till exempel vädret, springer den snabbt till ikonen, in och ut, tillbaka ner och berättar sedan. Vill den att du följer med till något (ett tips) går den först dit och visar bubblan där.'],

@@ -38,7 +38,8 @@ assert.ok(H.isCore('installningar') && H.isCore('om') && H.isCore('admin') && H.
 assert.ok(!H.isCore('vader'));
 
 const help = fs.readFileSync(path.resolve(__dirname, '../../TaxiData/hjalp.js'), 'utf8');
-assert.match(help, /skiftnyckeln vid verktygen/);
+assert.doesNotMatch(help, /skiftnyckel/i);
+assert.match(help, /Håll in en ikon/);
 assert.match(help, /Rutan Moduler/);
 const hem = help.split('hem: [')[1].split('],')[0];
 assert.doesNotMatch(hem, /\bStig\b|\bhen\b/);

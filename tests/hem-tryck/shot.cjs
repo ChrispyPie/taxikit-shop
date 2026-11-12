@@ -135,28 +135,8 @@ function pressCheck(sel, emojiSel) {
   await p.screenshot({ path: path.join(out, 'tryck-plus-412-scale14-dark.png') });
   await p.mouse.up();
 
-  const wrench = await p.$('.td-wrench');
-  const wb = await wrench.boundingBox();
-  await p.mouse.move(wb.x + wb.width - 8, wb.y + 8);
-  await p.mouse.down();
-  const wmid = await p.evaluate(() => {
-    const el = document.querySelector('.td-wrench');
-    const svg = el.querySelector('svg');
-    const cs = getComputedStyle(el);
-    const ss = getComputedStyle(svg);
-    const bg = cs.backgroundColor;
-    return {
-      noBox: (bg === 'rgba(0, 0, 0, 0)' || bg === 'transparent') && cs.transform === 'none',
-      scaled: ss.transform !== 'none' && ss.transform !== 'matrix(1, 0, 0, 1, 0, 0)',
-      h: el.getBoundingClientRect().height,
-      w: el.getBoundingClientRect().width
-    };
-  });
-  ok('wrench no square', wmid.noBox, JSON.stringify(wmid));
-  ok('wrench scale on icon', wmid.scaled, JSON.stringify(wmid));
-  ok('wrench 44 target', wmid.h >= 44 && wmid.w >= 44, JSON.stringify(wmid));
-  await p.screenshot({ path: path.join(out, 'tryck-skiftnyckel-412-scale14-dark.png') });
-  await p.mouse.up();
+  // Skiftnyckeln är borttagen (2026-11-12mapp1): den låg för nära översta högra ikonen.
+  ok('no wrench', !(await p.$('.td-wrench')));
   await p.close();
 
   const p2 = await openHome(br, base, { width: 412, height: 780, theme: 'light', scale: '1.25' });
