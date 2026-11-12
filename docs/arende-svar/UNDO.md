@@ -11,6 +11,6 @@ till en ny tagg (inte den gamla `20261111whmsg1`, så att telefoner hämtar om f
 i `TaxiData/changelog.js` och `CHANGELOG.md` om den inte ska synas.
 
 ## DB (bara om 20261112c har körts)
-`supabase/migrations/undo/20261112c_arende_felanmalan_svar_undo.sql` tar bort execute på `car_issue_message` igen
+`supabase/migrations/undo/20261112c_arende_felanmalan_svar_undo.sql` tar bort execute på `car_issue_message`, `set_car_issue_status`, `set_car_issue_kind`, `move_car_issue_to_maint`, `save_car_issue` och `save_car_maintenance` igen
 (samma läge som efter 20261107135140). Inga tabeller eller data ändras; meddelanden som skrivits ligger kvar i
 `car_issue_messages` och syns fortfarande i ärendet.

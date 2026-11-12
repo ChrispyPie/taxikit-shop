@@ -7,6 +7,7 @@ Samma innehåll som visas under **Om appen → Nyheter** i appen. Källan är `T
 ## 12 november 2026
 
 - **Fixat:** Admin › Ägare › Ärenden: en felanmälan, Bilen står eller Behövs till bilen går nu att svara på direkt i ärendet. Meddelandet syns i tråden och föraren får en notis. Ärendet visas inte längre som Arkiv eller bara läsning.
+- **Fixat:** Bil och verkstad: det går att göra nya anmälningar, skicka meddelanden och sätta Pågår eller Klar igen.
 
 ## 11 november 2026
 

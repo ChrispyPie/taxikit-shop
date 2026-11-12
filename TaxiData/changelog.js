@@ -15,8 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-11-12', id: '2026-11-12svar1', rader: [
-    ['Fixat', 'Admin › Ägare › Ärenden: en felanmälan, Bilen står eller Behövs till bilen går nu att svara på direkt i ärendet. Meddelandet syns i tråden och föraren får en notis. Ärendet visas inte längre som Arkiv eller bara läsning.']
+  { datum: '2026-11-12', id: '2026-11-12svar1', tid: '16:00', rader: [
+    ['Fixat', 'Admin › Ägare › Ärenden: en felanmälan, Bilen står eller Behövs till bilen går nu att svara på direkt i ärendet. Meddelandet syns i tråden och föraren får en notis. Ärendet visas inte längre som Arkiv eller bara läsning.'],
+    ['Fixat', 'Bil och verkstad: det går att göra nya anmälningar, skicka meddelanden och sätta Pågår eller Klar igen.']
   ]},
   { datum: '2026-11-12', id: '2026-11-12mapp1', tid: '15:10', rader: [
     ['Ändrat', 'Startskärmen: den lilla skiftnyckeln är borta, så du inte råkar trycka på den när du ska öppna översta högra verktyget. Håll i stället in en ikon i ungefär en sekund, så lyfts den och du kan dra den till en ny plats. Menyn med Avinstallera, Modulinfo, Flytta och Hjälp visas som förut.'],
