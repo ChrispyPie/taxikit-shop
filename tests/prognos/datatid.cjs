@@ -18,10 +18,10 @@ assert.doesNotMatch(help, /'[^']*\bStig\b/);
 assert.doesNotMatch(cl, /\bStig\b/);
 
 assert.match(html, /hjalp\.js\?v=(20261111datatid1|20261112mapp1|20261112ljud1)/);
-assert.match(lv, /prognos\.js\?v=20261111datatid1/);
+assert.match(lv, /prognos\.js\?v=(20261111datatid1|20261112pgfix1)/);
 assert.match(lv, /arrival-data\.js\?v=20261111datatid1/);
 assert.match(lv, /ankomster\.js\?v=20261111datatid1/);
-assert.match(lv, /changelog\.js\?v=20261112(bot1|mapp1|ljud1)/);
+assert.match(lv, /changelog\.js\?v=20261112(bot1|mapp1|ljud1|svar2|pgfix1)/);
 assert.match(cl, /2026-11-11datatid1/);
 
 assert.match(arrival, /function flightFeed\(/);

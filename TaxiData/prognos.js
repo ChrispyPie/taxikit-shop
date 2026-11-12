@@ -2021,8 +2021,12 @@
 
   // Ritar bara när Prognos är den öppna sidan – annars skulle en sen
   // uppdatering skriva över startsidan/en annan sida (samma #content-ruta).
+  // Ritar bara när Prognos är den öppna sidan (P.render sätter badge.viewing,
+  // P.stop nollställer). Inte taxi_view: vid omladdning/inloggning på delad
+  // enhet kan adressen vara #view=prognos medan taxi_view är tömd, och då
+  // fastnade sidan på "Laddar verktyget…".
   function onPage() {
-    return !!st.el && st.el.isConnected && localStorage.getItem('taxi_view') === P.id;
+    return !!st.el && st.el.isConnected && !!badge.viewing;
   }
 
   function paint() {
@@ -2351,6 +2355,7 @@
     st.panel = 'schema';
     st.zoneTab = loadTab();
     badge.viewing = true;
+    try { localStorage.setItem('taxi_view', P.id); } catch (e) {}
     markSeen();
     paint();
     refresh();

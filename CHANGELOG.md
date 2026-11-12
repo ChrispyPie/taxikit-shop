@@ -6,6 +6,8 @@ Samma innehåll som visas under **Om appen → Nyheter** i appen. Källan är `T
 
 ## 12 november 2026
 
+- **Fixat:** Prognos fastnade på Laddar verktyget efter omladdning eller inloggning, särskilt på en delad platta. Öppna Prognos från startskärmen om det händer innan uppdateringen är inne.
+
 - **Nytt:** Felanmälan, Bilen står och Behövs till bilen har en knapp Bokad tid. Ägaren kan föreslå en tid som chauffören godkänner, och chauffören kan föreslå en tid som ägaren bekräftar. Chauffören och bilen är redan ifyllda. Tiden syns i ärendet och grå i schemat tills den är godkänd.
 - **Förbättrat:** Tåg piper mycket mindre. Små förseningar, under 15 minuter, ger ingen notis och inget ljud. Du får notis när tåget börjar närma sig, när förseningen blir stor (30 minuter eller mer), när tiden plötsligt ändras mycket, när tåget ställs in och när det har kommit fram.
 - **Nytt:** I Mina bevakningar finns Ljud och notiser för tåg. Där väljer du själv hur många minuter före ankomst du vill ha notis, och vad som räknas som liten och stor försening. Det sparas på ditt konto.
