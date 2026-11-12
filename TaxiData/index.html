@@ -197,12 +197,13 @@
 
   <script src="badges.js?v=20261024x"></script>
   <script src="demo.js?v=am1q"></script>
-  <script src="swipe-back.js?v=20261106sb2"></script>
+  <script src="nav-historik.js?v=20261112swipe1"></script>
+  <script src="swipe-back.js?v=20261112swipe1"></script>
   <script src="view-state.js?v=20261107lazy1"></script>
   <script src="hjalp.js?v=20261111datatid1"></script>
   <script src="hem-ordning.js?v=20261111nyheter1"></script>
   <script src="moduler.js?v=20261111nyheter1"></script>
-  <script src="lazy-views.js?v=20261112zon2"></script>
+  <script src="lazy-views.js?v=20261112swipe1"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -235,6 +236,18 @@
     ];
 
     var current = null;
+    // Vilken sida som visas, för sidhistoriken (nav-historik.js). '' = startskärmen.
+    window.NAV_VIEW = function () {
+      var dv = document.getElementById('dashboard-view');
+      if (dv && !dv.classList.contains('hidden')) return 'kordata';
+      return current || '';
+    };
+    // Nytt steg i historiken när man går till en ny sida (inte vid bakåt/framåt, inte samma sida igen).
+    function navPush(id, opts) {
+      if (opts && opts.fromHistory) return;
+      if (window.NAV) { NAV.push(id || '', !!(opts && opts.replace)); return; }
+      try { history.pushState({ view: id || null }, ''); } catch (e) {}
+    }
     var driverId = null;
     var driverData = { first_name: '', last_name: '', category: '' };
     // Profilspärr: sann när profilsidan är öppen och namn/telefon saknas (gäller inte huvudlösenords-inloggning)
@@ -435,7 +448,7 @@
       } else {
         if (LAZY.has(savedView) && savedView !== 'notiser') {
           current = savedView;
-          try { history.pushState({ view: current }, ''); } catch (e) {}
+          navPush(current);   // omladdning på samma sida: inget nytt steg (NAV.push hoppar över samma sida)
         }
         document.getElementById('app').style.display = 'block';
         setFullName();
@@ -456,7 +469,7 @@
     }
 
     // Inkorg (inkorg.js): mina ärenden och svaren på dem. Ligger under profilikonen, klockan är kvar för notiser.
-    function openInbox() {
+    function openInbox(opts) {
       if (lockBlocked()) return;
       try { if (window.HJALPBOT_TIPS && HJALPBOT_TIPS.markUsed) HJALPBOT_TIPS.markUsed('inkorg'); } catch (e) {}
       document.getElementById('profile-menu').classList.remove('show');
@@ -465,7 +478,7 @@
       document.getElementById('dashboard-view').classList.add('hidden');
       document.getElementById('app').style.display = 'block';
       ++LAZY.navigation;current = 'inkorg'; LAZY.setView('inkorg');
-      try { history.pushState({ view: 'inkorg' }, ''); } catch (e) {}
+      navPush('inkorg', opts);
       renderMenu();
     }
 
@@ -473,7 +486,7 @@
       document.getElementById('profile-menu').classList.toggle('show');
     }
 
-    function openProfile() {
+    function openProfile(opts) {
       if (forcePwLock) { lockBlocked(); return; }
       document.getElementById('profile-menu').classList.remove('show');
       if (current === 'profil') return;
@@ -482,7 +495,7 @@
       document.getElementById('app').style.display = 'block';
       ++LAZY.navigation;current = 'profil'; LAZY.setView('profil');
       // Eget steg i webbläsarens historik, så att telefonens bakåtknapp kan fångas
-      try { history.pushState({ view: 'profil' }, ''); } catch (e) {}
+      navPush('profil', opts);
       renderMenu();
     }
 
@@ -829,26 +842,48 @@
       setTimeout(function () { t.style.background = ''; }, 4000);
     }
 
-    // Telefonens/webbläsarens bakåtknapp
-    window.addEventListener('popstate', function () {
-      if (window.NOTIS && NOTIS.onPop && NOTIS.onPop()) return;   // bakåt stänger notispanelen
+    // Telefonens/webbläsarens bakåtknapp, bakåt- och framåt-swipen (swipe-back.js): en gemensam historik.
+    // Bakåt går till föregående sida (inte alltid startskärmen), framåt går tillbaka dit man backade från.
+    function navSubBack() {
+      if (current === FORUM.id && FORUM.back && FORUM.back()) return true;            // forumet: inlägg -> lista
+      if (current === 'inkorg' && window.INKORG && INKORG.back()) return true;        // inkorgen: tråd -> lista
+      if (current === VERKSTAD.id && VERKSTAD.closeEdit && VERKSTAD.closeEdit()) return true; // stäng öppen anmälan
+      if (current === 'profil' && window.PROFIL_SIDA && PROFIL_SIDA.back && PROFIL_SIDA.back()) return true; // profilens under-vy
+      return false;
+    }
+    function navLocked() {
       if (forcePwLock) {
         try { history.pushState({ view: 'nytt-losenord' }, ''); } catch (e) {}
-        lockBlocked();
-      } else if (profileLock) {
-        try { history.pushState({ view: 'profil' }, ''); } catch (e) {}
-        lockBlocked();
-      } else if (current === FORUM.id && FORUM.back && FORUM.back()) {
-        // forumet gick tillbaka från ett inlägg till listan
-      } else if (current === 'inkorg' && window.INKORG && INKORG.back()) {
-        // Inkorgen gick tillbaka från en tråd till listan
-      } else if (current === VERKSTAD.id && VERKSTAD.closeEdit && VERKSTAD.closeEdit()) {
-        // Bil & verkstad: stäng öppen anmälan, visa listan igen
-      } else if (current === 'profil' && window.PROFIL_SIDA && PROFIL_SIDA.back && PROFIL_SIDA.back()) {
-        // profilens under-vy (redigera/galleri/gästbok)
-      } else if (current === 'profil' || current === 'inkorg' || current === ANKOMSTER.id || current === PROGNOS.id || current === TOPPLISTOR.id || current === VERKSTAD.id || current === KALENDER.id || current === FORUM.id || current === OM.id || current === LONEKOLL.id || current === MINA_BEVAKNINGAR.id) {
-        goHome();
+        lockBlocked(); return true;
       }
+      if (profileLock) {
+        try { history.pushState({ view: 'profil' }, ''); } catch (e) {}
+        lockBlocked(); return true;
+      }
+      return false;
+    }
+    function navShow(v) {
+      var o = { fromHistory: true };
+      if (!v || v === 'nytt-losenord') goHome(o);
+      else if (v === 'profil') openProfile(o);
+      else if (v === 'inkorg') openInbox(o);
+      else if (v === 'moduler' || findItem(v) || LAZY.has(v)) openItem(v, o);
+      else goHome(o);   // sidan finns inte längre: startskärmen
+    }
+    window.addEventListener('popstate', function (ev) {
+      if (window.NAV && NAV.handlePop) {
+        NAV.handlePop(ev.state, {
+          notis: function () { return !!(window.NOTIS && NOTIS.onPop && NOTIS.onPop()); },
+          locked: navLocked,
+          subBack: navSubBack,
+          here: window.NAV_VIEW,
+          show: navShow
+        });
+        return;
+      }
+      if (window.NOTIS && NOTIS.onPop && NOTIS.onPop()) return;
+      if (navLocked() || navSubBack()) return;
+      if (current) goHome({ fromHistory: true });
     });
 
     function menuRole() {
@@ -974,7 +1009,8 @@
     function refreshBilBadge(){LAZY.refreshBadges();}
     function refreshForumBadge(){LAZY.refreshBadges();}
 
-    async function openItem(id) {
+    async function openItem(id, opts) {
+      if (id === 'hem' || !id) { goHome(opts); return; }
       if (lockBlocked()) return;
       var item = findItem(id);
       if (item && !canSee(item)) return;
@@ -990,12 +1026,13 @@
       var navigation=++LAZY.navigation;LAZY.setView(id);
       if (LAZY.has(id)) {
         var wanted=id; document.getElementById('content').innerHTML='<p role="status">Laddar verktyget…</p>';
-        try{await LAZY.ensure(id);if(navigation!==LAZY.navigation)return;}catch(e){LAZY.error(document.getElementById('content'),function(){openItem(wanted);});return;}
+        try{await LAZY.ensure(id);if(navigation!==LAZY.navigation)return;}catch(e){LAZY.error(document.getElementById('content'),function(){openItem(wanted,opts);});return;}
       }
       if (id === 'kordata') {
         localStorage.setItem('taxi_view', 'kordata');
         document.getElementById('app').style.display = 'none';
         document.getElementById('dashboard-view').classList.remove('hidden');
+        navPush('kordata', opts);
         if (window.initServerStatus) initServerStatus('server-status');
         
         if (typeof loadData === 'function') loadData().then(render);
@@ -1004,21 +1041,26 @@
         document.getElementById('app').style.display = 'block';
         localStorage.setItem('taxi_view', id);
         current = id;
-        try { history.pushState({ view: id }, ''); } catch (e) {}
+        navPush(id, opts);
         renderMenu();
       } else {
         document.getElementById('dashboard-view').classList.add('hidden');  // t.ex. "Om appen" från profilmenyn i Körpassdata
         document.getElementById('app').style.display = 'block';
         localStorage.removeItem('taxi_view');
         current = id;
+        navPush(id, opts);   // t.ex. Inställningar: eget steg så bakåt/framåt hittar hit
         renderMenu();
       }
     }
 
-    function goHome() {
+    function goHome(opts) {
       if (lockBlocked()) return;
       localStorage.removeItem('taxi_view');
-      ++LAZY.navigation;current = null; LAZY.setView(null);
+      if (!opts || typeof opts !== 'object' || opts.type) opts = null;   // onclick kan skicka ett event
+      ++LAZY.navigation;current = null;
+      document.getElementById('dashboard-view').classList.add('hidden');
+      navPush('', opts);   // 🏠 är ett vanligt steg: bakåt därifrån går till sidan du var på
+      LAZY.setView(null);
       document.getElementById('profile-menu').classList.remove('show');
       document.getElementById('dashboard-view').classList.add('hidden');
       document.getElementById('app').style.display = 'block';
