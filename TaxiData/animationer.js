@@ -1,5 +1,7 @@
 /* Animationer i appen: ett överlager som kan visa stora figurer
  * över hela skärmen utan att blockera tryck.
+ * Allt rör sig från höger till vänster och fordonen pekar åt vänster (texten
+ * ritas aldrig spegelvänd).
  * Ankomster: när ett bevakat tåg, flyg eller båt ankommer (samma ögonblick
  * som ljudet) körs en helsidesanimation i ungefär 5 sekunder: ett landande
  * plan, tåget eller en Stenafärja. Inte vid försening, inställt, ny tid
@@ -59,7 +61,7 @@
   }
   var ICONS = {
     // Landande trafikflygplan från sidan: hjulen nere, landningsljus (flyg ankomst)
-    flyg: '<svg viewBox="0 0 240 84" width="100%" height="100%" aria-hidden="true">' +
+    flyg: '<svg viewBox="0 0 240 84" width="100%" height="100%" aria-hidden="true"><g transform="matrix(-1 0 0 1 240 0)">' +
       '<path fill="currentColor" d="M2 37l40 2 3 4-36-1z"/>' +
       '<path fill="currentColor" d="M14 30L22 4h12l30 29h128c20 0 34 4 42 12-8 5-22 7-40 7H72c-20 0-42-6-58-14z"/>' +
       '<path fill="#000" fill-opacity=".14" d="M2 37l40 2 3 4-36-1z"/>' +
@@ -73,29 +75,14 @@
       '<g fill="#2d3748" stroke="#a0aec0" stroke-width="1"><circle cx="101.5" cy="77" r="4.6"/><circle cx="110.5" cy="77" r="4.6"/><circle cx="212" cy="77.4" r="4.2"/></g>' +
       '<g fill="#cbd5e0"><circle cx="101.5" cy="77" r="1.6"/><circle cx="110.5" cy="77" r="1.6"/><circle cx="212" cy="77.4" r="1.4"/></g>' +
       '<circle cx="229" cy="47.5" r="4" fill="#fefcbf" fill-opacity=".35"/><circle cx="229" cy="47.5" r="1.8" fill="#fffff0"/>' +
-      '</svg>',
+      '</g></svg>',
     // Plan som sveper förbi (Landvetter-prognos), samma rörelse som den gamla flyganimationen
-    landvetter: '<svg viewBox="0 0 64 32" width="100%" height="100%" aria-hidden="true">' +
+    landvetter: '<svg viewBox="0 0 64 32" width="100%" height="100%" aria-hidden="true"><g transform="matrix(-1 0 0 1 64 0)">' +
       '<path d="M-26 13h18M-36 17.5h24M-24 22h16" stroke="currentColor" stroke-opacity=".45" stroke-width="1.4" stroke-linecap="round"/>' +
-      '<path fill="currentColor" d="M62 17c-1.2 0-8.5-1.1-13.2-1.8L36.4 4.2c-.4-.5-1-.8-1.6-.8h-3.1l7.4 11.1H22.6L16 9.4c-.3-.4-.8-.6-1.3-.6h-2.7l4.2 8.3H4.2C2.4 17.1 1 16 1 16s1.2 1.4 2.6 2.1l13.6.9-4.4 7.2c-.2.4 0 .9.5 1.1.2.1.4.1.6.1h2.6c.5 0 1-.3 1.3-.7l5.2-8H40l-6.6 11h3.2c.7 0 1.3-.3 1.7-.8l10.8-13.2c5.2.7 12 1.8 13 1.8 1.2 0 2-.5 2-1.2s-.9-1.2-2.1-1.2z"/></svg>',
-    tag: '<svg viewBox="0 0 72 28" width="100%" height="100%" aria-hidden="true"><path fill="currentColor" d="M4 6.5c0-1.4 1.1-2.5 2.5-2.5H42c.8 0 1.5.4 1.9 1.1L50 12h12.5c2 0 3.5 1.4 3.5 3.2V20H4V6.5z"/><rect x="8" y="8" width="8" height="6" rx="1" fill="#fff" fill-opacity=".35"/><rect x="19" y="8" width="8" height="6" rx="1" fill="#fff" fill-opacity=".35"/><rect x="30" y="8" width="8" height="6" rx="1" fill="#fff" fill-opacity=".35"/><circle cx="14" cy="22.5" r="3.2" fill="currentColor"/><circle cx="14" cy="22.5" r="1.2" fill="#fff" fill-opacity=".5"/><circle cx="28" cy="22.5" r="3.2" fill="currentColor"/><circle cx="28" cy="22.5" r="1.2" fill="#fff" fill-opacity=".5"/><circle cx="54" cy="22.5" r="3.2" fill="currentColor"/><circle cx="54" cy="22.5" r="1.2" fill="#fff" fill-opacity=".5"/><path fill="currentColor" d="M50 12l6.2-7.2c.3-.4.8-.6 1.3-.6H62v8H50z"/></svg>',
+      '<path fill="currentColor" d="M62 17c-1.2 0-8.5-1.1-13.2-1.8L36.4 4.2c-.4-.5-1-.8-1.6-.8h-3.1l7.4 11.1H22.6L16 9.4c-.3-.4-.8-.6-1.3-.6h-2.7l4.2 8.3H4.2C2.4 17.1 1 16 1 16s1.2 1.4 2.6 2.1l13.6.9-4.4 7.2c-.2.4 0 .9.5 1.1.2.1.4.1.6.1h2.6c.5 0 1-.3 1.3-.7l5.2-8H40l-6.6 11h3.2c.7 0 1.3-.3 1.7-.8l10.8-13.2c5.2.7 12 1.8 13 1.8 1.2 0 2-.5 2-1.2s-.9-1.2-2.1-1.2z"/></g></svg>',
+    tag: '<svg viewBox="0 0 72 28" width="100%" height="100%" aria-hidden="true"><g transform="matrix(-1 0 0 1 72 0)"><path fill="currentColor" d="M4 6.5c0-1.4 1.1-2.5 2.5-2.5H42c.8 0 1.5.4 1.9 1.1L50 12h12.5c2 0 3.5 1.4 3.5 3.2V20H4V6.5z"/><rect x="8" y="8" width="8" height="6" rx="1" fill="#fff" fill-opacity=".35"/><rect x="19" y="8" width="8" height="6" rx="1" fill="#fff" fill-opacity=".35"/><rect x="30" y="8" width="8" height="6" rx="1" fill="#fff" fill-opacity=".35"/><circle cx="14" cy="22.5" r="3.2" fill="currentColor"/><circle cx="14" cy="22.5" r="1.2" fill="#fff" fill-opacity=".5"/><circle cx="28" cy="22.5" r="3.2" fill="currentColor"/><circle cx="28" cy="22.5" r="1.2" fill="#fff" fill-opacity=".5"/><circle cx="54" cy="22.5" r="3.2" fill="currentColor"/><circle cx="54" cy="22.5" r="1.2" fill="#fff" fill-opacity=".5"/><path fill="currentColor" d="M50 12l6.2-7.2c.3-.4.8-.6 1.3-.6H62v8H50z"/></g></svg>',
     // Stenafärja (egen teckning): vitt skrov och överbyggnad, blått band, STENA LINE, röd skorsten med vitt S
-    bat: '<svg viewBox="0 -8 240 88" width="100%" height="100%" aria-hidden="true">' +
-      '<path d="M2 75q9-4 18 0t18 0 18 0 18 0 18 0 18 0 18 0 18 0 18 0 18 0 18 0 18 0 18 0" fill="none" stroke="#63b3ed" stroke-width="2.2" stroke-linecap="round" stroke-opacity=".85"/>' +
-      '<path fill="#16325c" d="M8 54h220l-10 13c-2 3-5 4-9 4H22c-6 0-10-3-12-7z"/>' +
-      '<path fill="#fff" stroke="#cbd5e0" stroke-width=".6" d="M6 36h216c5 0 9 3 12 7l-6 11H8z"/>' +
-      '<path fill="#1d4f91" d="M8 50.5h221.9l-1.9 3.5H8z"/>' +
-      '<text x="64" y="47.6" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="11" fill="#16325c" textLength="108" lengthAdjust="spacingAndGlyphs">STENA LINE</text>' +
-      '<path fill="#fff" stroke="#cbd5e0" stroke-width=".6" d="M18 36V25h180l12 11z"/>' +
-      '<path fill="#fff" stroke="#cbd5e0" stroke-width=".6" d="M34 25V15h148l10 10z"/>' +
-      '<path fill="#fff" stroke="#cbd5e0" stroke-width=".6" d="M146 15V8h40l6 7z"/>' +
-      '<g fill="none" stroke="#1d3a6e" stroke-opacity=".8"><path d="M22 30.5h172" stroke-width="3.4" stroke-dasharray="3.6 2.4"/><path d="M38 20h140" stroke-width="3.2" stroke-dasharray="3.6 2.4"/><path d="M150 11.4h38" stroke-width="3"/><path d="M14 41.5h44M180 41.5h40" stroke-width="2" stroke-dasharray="2 3"/></g>' +
-      '<path fill="#d71920" d="M70 15l4-21h24l-3 21z"/>' +
-      '<path fill="#1d4f91" d="M74-6h24l-.8 4H73.2z"/><path fill="#fff" d="M73.2-2h24l-.3 1.6H72.9z"/>' +
-      '<text x="84.6" y="11.6" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="900" font-size="12.5" fill="#fff">S</text>' +
-      '<path d="M170 8V-3M165.5 0h9" stroke="#e2e8f0" stroke-width="1.6" stroke-linecap="round"/>' +
-      '<path d="M220 68q9-1 16 5M214 70q6 0 10 4" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".9"/>' +
-      '</svg>'
+    bat: '<svg viewBox="0 -8 240 88" width="100%" height="100%" aria-hidden="true"><g transform="matrix(-1 0 0 1 240 0)"><path d="M2 75q9-4 18 0t18 0 18 0 18 0 18 0 18 0 18 0 18 0 18 0 18 0 18 0 18 0 18 0" fill="none" stroke="#63b3ed" stroke-width="2.2" stroke-linecap="round" stroke-opacity=".85"/><path fill="#16325c" d="M8 54h220l-10 13c-2 3-5 4-9 4H22c-6 0-10-3-12-7z"/><path fill="#fff" stroke="#cbd5e0" stroke-width=".6" d="M6 36h216c5 0 9 3 12 7l-6 11H8z"/><path fill="#1d4f91" d="M8 50.5h221.9l-1.9 3.5H8z"/><path fill="#fff" stroke="#cbd5e0" stroke-width=".6" d="M18 36V25h180l12 11z"/><path fill="#fff" stroke="#cbd5e0" stroke-width=".6" d="M34 25V15h148l10 10z"/><path fill="#fff" stroke="#cbd5e0" stroke-width=".6" d="M146 15V8h40l6 7z"/><g fill="none" stroke="#1d3a6e" stroke-opacity=".8"><path d="M22 30.5h172" stroke-width="3.4" stroke-dasharray="3.6 2.4"/><path d="M38 20h140" stroke-width="3.2" stroke-dasharray="3.6 2.4"/><path d="M150 11.4h38" stroke-width="3"/><path d="M14 41.5h44M180 41.5h40" stroke-width="2" stroke-dasharray="2 3"/></g><path fill="#d71920" d="M70 15l4-21h24l-3 21z"/><path fill="#1d4f91" d="M74-6h24l-.8 4H73.2z"/><path fill="#fff" d="M73.2-2h24l-.3 1.6H72.9z"/><path d="M170 8V-3M165.5 0h9" stroke="#e2e8f0" stroke-width="1.6" stroke-linecap="round"/><path d="M220 68q9-1 16 5M214 70q6 0 10 4" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".9"/></g><text x="68" y="47.6" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="11" fill="#16325c" textLength="108" lengthAdjust="spacingAndGlyphs">STENA LINE</text><text x="155.4" y="11.6" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="900" font-size="12.5" fill="#fff">S</text></svg>'
   };
   // Zonloggor på kort. Essity: förenklat officiellt märke. Volvo och Astra: egna förenklade teckningar.
   // Draken: guldskölden från Drakens grafiska profil (Brasserie Draken, utan ordet) + HOTELL DRAKEN, guld på mörkt kort.
@@ -138,30 +125,30 @@
       // Flyg ankomst: planet sjunker mot banan, sätter ner hjulen (rökpuff) och rullar ut
       '.anim-runway{position:absolute;left:-4vw;right:-4vw;bottom:calc(20% + env(safe-area-inset-bottom,0px) - 11px);height:11px;border-radius:3px;background:#4a5568 repeating-linear-gradient(90deg,transparent 0 22px,rgba(255,255,255,.85) 22px 46px) center/100% 2px no-repeat;box-shadow:0 -2px 0 rgba(255,255,255,.18),0 6px 16px rgba(0,0,0,.3);opacity:0;animation-name:anim-runway;animation-timing-function:ease}' +
       '@keyframes anim-runway{0%{opacity:0}12%{opacity:.95}88%{opacity:.95}100%{opacity:0}}' +
-      '.anim-land{position:absolute;left:0;bottom:calc(20% + env(safe-area-inset-bottom,0px));width:var(--aw);color:#2b6cb0;filter:drop-shadow(0 6px 18px rgba(0,0,0,.35));transform-origin:44% 98%;will-change:transform,opacity;opacity:0;animation-name:anim-land;animation-timing-function:linear}' +
-      '@keyframes anim-land{0%{transform:translate3d(-92vw,-50vh,0) rotate(7deg);opacity:0}6%{opacity:.97}' +
-        '44%{transform:translate3d(-2vw,-7vh,0) rotate(4deg)}52%{transform:translate3d(8vw,-1vh,0) rotate(-3deg);animation-timing-function:ease-out}' +
-        '57%{transform:translate3d(13vw,0,0) rotate(-2.5deg);animation-timing-function:ease-out}66%{transform:translate3d(24vw,0,0) rotate(0deg);animation-timing-function:ease-out}' +
-        '90%{transform:translate3d(46vw,0,0) rotate(0deg);opacity:.97}100%{transform:translate3d(52vw,0,0) rotate(0deg);opacity:0}}' +
-      '.anim-puff{position:absolute;left:calc(13vw + var(--aw) * .44 - 34px);bottom:calc(20% + env(safe-area-inset-bottom,0px) - 6px);width:68px;height:26px;border-radius:50%;background:radial-gradient(ellipse at center,rgba(240,244,248,.95) 0,rgba(226,232,240,.7) 45%,rgba(226,232,240,0) 72%);opacity:0;animation-name:anim-puff;animation-timing-function:ease-out}' +
-      '@keyframes anim-puff{0%,55%{transform:scale(.3);opacity:0}60%{transform:scale(1);opacity:.95}80%{transform:translate3d(-28px,-4px,0) scale(1.9);opacity:0}100%{opacity:0}}' +
+      '.anim-land{position:absolute;right:0;bottom:calc(20% + env(safe-area-inset-bottom,0px));width:var(--aw);color:#2b6cb0;filter:drop-shadow(0 6px 18px rgba(0,0,0,.35));transform-origin:56% 98%;will-change:transform,opacity;opacity:0;animation-name:anim-land;animation-timing-function:linear}' +
+      '@keyframes anim-land{0%{transform:translate3d(92vw,-50vh,0) rotate(-7deg);opacity:0}6%{opacity:.97}' +
+        '44%{transform:translate3d(2vw,-7vh,0) rotate(-4deg)}52%{transform:translate3d(-8vw,-1vh,0) rotate(3deg);animation-timing-function:ease-out}' +
+        '57%{transform:translate3d(-13vw,0,0) rotate(2.5deg);animation-timing-function:ease-out}66%{transform:translate3d(-24vw,0,0) rotate(0deg);animation-timing-function:ease-out}' +
+        '90%{transform:translate3d(-46vw,0,0) rotate(0deg);opacity:.97}100%{transform:translate3d(-52vw,0,0) rotate(0deg);opacity:0}}' +
+      '.anim-puff{position:absolute;right:calc(13vw + var(--aw) * .44 - 34px);bottom:calc(20% + env(safe-area-inset-bottom,0px) - 6px);width:68px;height:26px;border-radius:50%;background:radial-gradient(ellipse at center,rgba(240,244,248,.95) 0,rgba(226,232,240,.7) 45%,rgba(226,232,240,0) 72%);opacity:0;animation-name:anim-puff;animation-timing-function:ease-out}' +
+      '@keyframes anim-puff{0%,55%{transform:scale(.3);opacity:0}60%{transform:scale(1);opacity:.95}80%{transform:translate3d(28px,-4px,0) scale(1.9);opacity:0}100%{opacity:0}}' +
       // Landvetter-prognos: planet sveper förbi (samma bana som den gamla flyganimationen)
-      '.anim-landvetter{top:16%;animation:anim-sweep 5s ease-in-out forwards}' +
-      '@keyframes anim-sweep{0%{transform:translate3d(-80vw,10vh,0) rotate(-8deg);opacity:0}8%{opacity:.96}88%{opacity:.96}100%{transform:translate3d(108vw,-8vh,0) rotate(5deg);opacity:0}}' +
-      '.anim-tag{top:auto;bottom:calc(12% + env(safe-area-inset-bottom,0px));animation:anim-tag 5s ease-in-out forwards}' +
-      '.anim-bat{top:auto;bottom:calc(12% + env(safe-area-inset-bottom,0px));transform-origin:50% 80%;animation:anim-bat 5s ease-in-out forwards}' +
-      '@keyframes anim-tag{0%{transform:translate3d(-80vw,0,0);opacity:0}8%{opacity:.96}18%{transform:translate3d(-8vw,0,0)}22%{transform:translate3d(0,-6px,0)}40%{transform:translate3d(28vw,0,0)}44%{transform:translate3d(36vw,-6px,0)}62%{transform:translate3d(58vw,0,0)}66%{transform:translate3d(66vw,-6px,0)}88%{opacity:.96}100%{transform:translate3d(108vw,0,0);opacity:0}}' +
-      '@keyframes anim-bat{0%{transform:translate3d(-80vw,0,0) rotate(0deg);opacity:0}8%{opacity:1}22%{transform:translate3d(-4vw,-8px,0) rotate(-1.2deg)}48%{transform:translate3d(32vw,6px,0) rotate(1deg)}74%{transform:translate3d(68vw,-6px,0) rotate(-1deg)}88%{opacity:1}100%{transform:translate3d(108vw,3px,0) rotate(.5deg);opacity:0}}' +
-      // Zonloggor: glider in från vänster (~0,8 s), stannar i mitten (~4 s), glider ut åt höger (~1,2 s)
+      '.anim-landvetter{left:auto;right:0;top:16%;animation:anim-sweep 5s ease-in-out forwards}' +
+      '@keyframes anim-sweep{0%{transform:translate3d(80vw,10vh,0) rotate(8deg);opacity:0}8%{opacity:.96}88%{opacity:.96}100%{transform:translate3d(-108vw,-8vh,0) rotate(-5deg);opacity:0}}' +
+      '.anim-tag{left:auto;right:0;top:auto;bottom:calc(12% + env(safe-area-inset-bottom,0px));animation:anim-tag 5s ease-in-out forwards}' +
+      '.anim-bat{left:auto;right:0;top:auto;bottom:calc(12% + env(safe-area-inset-bottom,0px));transform-origin:50% 80%;animation:anim-bat 5s ease-in-out forwards}' +
+      '@keyframes anim-tag{0%{transform:translate3d(80vw,0,0);opacity:0}8%{opacity:.96}18%{transform:translate3d(8vw,0,0)}22%{transform:translate3d(0,-6px,0)}40%{transform:translate3d(-28vw,0,0)}44%{transform:translate3d(-36vw,-6px,0)}62%{transform:translate3d(-58vw,0,0)}66%{transform:translate3d(-66vw,-6px,0)}88%{opacity:.96}100%{transform:translate3d(-108vw,0,0);opacity:0}}' +
+      '@keyframes anim-bat{0%{transform:translate3d(80vw,0,0) rotate(0deg);opacity:0}8%{opacity:1}22%{transform:translate3d(4vw,-8px,0) rotate(1.2deg)}48%{transform:translate3d(-32vw,6px,0) rotate(-1deg)}74%{transform:translate3d(-68vw,-6px,0) rotate(1deg)}88%{opacity:1}100%{transform:translate3d(-108vw,3px,0) rotate(-.5deg);opacity:0}}' +
+      // Zonloggor: glider in från höger (~0,8 s), stannar i mitten (~4 s), glider ut åt vänster (~1,2 s)
       '.anim-card{position:absolute;left:0;right:0;top:26%;margin:0 auto;width:clamp(220px,78vw,520px);box-sizing:border-box;padding:clamp(16px,5vw,30px) clamp(18px,6vw,36px) clamp(10px,3vw,16px);border-radius:22px;background:#fff;box-shadow:0 14px 40px rgba(0,0,0,.38);opacity:0;will-change:transform,opacity;animation-name:anim-zon;animation-timing-function:ease-in-out}' +
       '.anim-logo svg{width:100%;height:auto;max-height:34vh}' +
       '.anim-card-volvo .anim-logo{width:58%;margin:0 auto}' +
       '.anim-card-draken{background:#1b2033;border:1px solid rgba(204,186,141,.5)}' +
       '.anim-card-cap{margin-top:clamp(8px,2.4vw,14px);text-align:center;font-size:clamp(.85rem,3.6vw,1.05rem);font-weight:600;color:#4a5568;letter-spacing:.01em}' +
       '.anim-card-draken .anim-card-cap{color:#ccba8d}' +
-      '@keyframes anim-zon{0%{transform:translate3d(-110vw,0,0);opacity:0;animation-timing-function:cubic-bezier(.25,.8,.35,1)}4%{opacity:1}13.3%{transform:translate3d(0,0,0);animation-timing-function:ease-in-out}80%{transform:translate3d(0,0,0);opacity:1;animation-timing-function:cubic-bezier(.55,0,.75,.4)}96%{opacity:1}100%{transform:translate3d(110vw,0,0);opacity:0}}' +
+      '@keyframes anim-zon{0%{transform:translate3d(110vw,0,0);opacity:0;animation-timing-function:cubic-bezier(.25,.8,.35,1)}4%{opacity:1}13.3%{transform:translate3d(0,0,0);animation-timing-function:ease-in-out}80%{transform:translate3d(0,0,0);opacity:1;animation-timing-function:cubic-bezier(.55,0,.75,.4)}96%{opacity:1}100%{transform:translate3d(-110vw,0,0);opacity:0}}' +
       // Minskad rörelse: kort tona in och ut på plats, ingen färd över skärmen
-      '.anim-actor.anim-reduced{animation:anim-reduced 1.6s ease forwards!important;left:50%;top:22%;bottom:auto;margin-left:-39vw;width:clamp(200px,78vw,480px)}' +
+      '.anim-actor.anim-reduced{animation:anim-reduced 1.6s ease forwards!important;left:50%;right:auto;top:22%;bottom:auto;margin-left:-39vw;width:clamp(200px,78vw,480px)}' +
       '.anim-tag.anim-reduced,.anim-bat.anim-reduced{top:auto;bottom:calc(18% + env(safe-area-inset-bottom,0px))}' +
       '@keyframes anim-reduced{0%{transform:scale(.88);opacity:0}20%{transform:scale(1);opacity:.96}80%{transform:scale(1);opacity:.96}100%{transform:scale(.96);opacity:0}}' +
       '.anim-scene.anim-reduced{opacity:0;animation:anim-fade 1.6s ease forwards}' +

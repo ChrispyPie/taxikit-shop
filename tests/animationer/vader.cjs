@@ -19,7 +19,7 @@ assert.match(js, /pointer-events:\s*none/);
 assert.match(js, /anim-wx-paused/);
 assert.match(js, /prefers-reduced-motion|reduceMotion/);
 assert.match(html, /animationer-vader\.js\?v=20261111regn1/);
-assert.match(html, /animationer\.js\?v=20261112zon1/);
+assert.match(html, /animationer\.js\?v=20261112zon2/);
 assert.doesNotMatch(cl, /2026-11-11vader1|regnar eller snöar|snöflingor/);
 assert.match(anim, /ANIMATIONER\.layer|layer: ensureLayer/);
 

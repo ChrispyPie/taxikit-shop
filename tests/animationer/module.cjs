@@ -18,7 +18,7 @@ assert.match(js, /bev-watch-fire/);
 assert.match(js, /Animationer/);
 assert.doesNotMatch(js, /localStorage\.getItem\('taxi_bev_ljud'\)/);
 assert.match(ljud, /bev-watch-fire/);
-assert.match(html, /animationer\.js\?v=20261112zon1/);
+assert.match(html, /animationer\.js\?v=20261112zon2/);
 assert.match(html, /id="animationer-set"/);
 assert.match(html, /bevakning-ljud\.js\?v=20261112anim5/);
 assert.match(cl, /2026-11-11anim1/);
@@ -131,12 +131,12 @@ assert.ok(!L.isArrival({ title: '✈️ SK1 ankommer 06:20' }));
 assert.ok(!L.isArrival({ title: '❌ SK1 är inställt' }));
 assert.ok(!L.isArrival({ title: '🧳 Bagaget rullar på band 4 – SK1' }));
 
-// ---- Prognoszoner, landande plan, Stena (2026-11-12zon1) ----
-assert.match(html, /lazy-views\.js\?v=20261112zon1/);
+// ---- Prognoszoner, landande plan, Stena (2026-11-12zon2) ----
+assert.match(html, /lazy-views\.js\?v=20261112zon2/);
 const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
-assert.match(lv, /prognos-notis\.js\?v=20261112zon1/);
-assert.match(lv, /changelog\.js\?v=20261112zon1/);
-assert.match(cl, /2026-11-12zon1/);
+assert.match(lv, /prognos-notis\.js\?v=20261112zon2/);
+assert.match(lv, /changelog\.js\?v=20261112zon2/);
+assert.match(cl, /2026-11-12zon2/);
 assert.doesNotMatch(cl.split('window.CHANGELOG')[1].slice(0, 1600), /\bStig\b|BRASSERIE|Brasserie/);
 assert.doesNotMatch(js, /BRASSERIE/);
 assert.doesNotMatch(js, />\s*Brasserie/i);
@@ -318,4 +318,29 @@ E.layerEl().children.length = 0;
 E.document.dispatchEvent(ev);
 assert.match(E.actor().className, /anim-essity/);
 
-console.log('PASS animationer: default on, independent of sound, reduced-motion, kinds, hook, no Stig, landing vs sweep, prognos zones, Stena');
+// ---- Höger till vänster (2026-11-12zon2) ----
+const kf = (name) => { const m = new RegExp('@keyframes ' + name + '\\{(.*?)\\}\\}').exec(js.replace(/'\s*\+\s*'/g, '')); assert.ok(m, name); return m[1]; };
+const xs = (name) => [...kf(name).matchAll(/translate3d\((-?[\d.]+)vw/g)].map(m => +m[1]);
+for (const name of ['anim-land', 'anim-sweep', 'anim-tag', 'anim-bat', 'anim-zon']) {
+  const x = xs(name);
+  assert.ok(x[0] > 0 && x[x.length - 1] < 0, name + ' går från höger till vänster: ' + x.join(','));
+}
+assert.match(kf('anim-zon'), /^0%\{transform:translate3d\(110vw/);
+assert.match(kf('anim-zon'), /100%\{transform:translate3d\(-110vw/);
+assert.match(kf('anim-puff'), /translate3d\(28px/, 'röken driver bakåt (åt höger)');
+assert.match(kf('anim-land'), /52%\{transform:translate3d\(-8vw,-1vh,0\) rotate\(3deg\)/, 'nosen upp vid flare när planet pekar åt vänster');
+assert.match(js, /\.anim-land\{position:absolute;right:0;/);
+assert.match(js, /\.anim-(landvetter|tag|bat)\{left:auto;right:0;/);
+// Fordonen vänds med geometri, texten ligger utanför spegelgruppen
+const flip = (k, w) => new RegExp(k + ": '<svg[^']*aria-hidden=\"true\"><g transform=\"matrix\\(-1 0 0 1 " + w + " 0\\)\">");
+assert.match(js, flip('flyg', 240));
+assert.match(js, flip('landvetter', 64));
+assert.match(js, flip('tag', 72));
+assert.match(js, flip('bat', 240));
+const batSvg = /bat: '(<svg.*?<\/svg>)'/s.exec(js)[1];
+const flipped = batSvg.slice(batSvg.indexOf('<g transform="matrix(-1'), batSvg.lastIndexOf('</g>'));
+assert.doesNotMatch(flipped, /<text/, 'ingen text i spegelgruppen');
+assert.match(batSvg, /<\/g><text x="68"[^>]*>STENA LINE<\/text><text x="155.4"[^>]*>S<\/text><\/svg>/);
+assert.doesNotMatch(js, /scale\(-1|scaleX\(-1/);
+
+console.log('PASS animationer: default on, independent of sound, reduced-motion, kinds, hook, no Stig, landing vs sweep, prognos zones, Stena, right-to-left');
