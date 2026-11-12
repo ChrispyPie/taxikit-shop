@@ -4,6 +4,11 @@ Samma innehåll som visas under **Om appen → Nyheter** i appen. Källan är `T
 
 > Äldre historik (före 24 oktober 2026) är återskapad i efterhand och ungefärlig.
 
+## 12 november 2026
+
+- **Fixat:** Admin › Ägare › Ärenden: en felanmälan, Bilen står eller Behövs till bilen går nu att svara på direkt i ärendet. Meddelandet syns i tråden och föraren får en notis. Ärendet visas inte längre som Arkiv eller bara läsning.
+- **Fixat:** Bil och verkstad: det går att göra nya anmälningar, skicka meddelanden och sätta Pågår eller Klar igen.
+
 ## 11 november 2026
 
 - **Nytt:** När du trycker på hjälpboten öppnas ingen ruta. Den gör en kort reaktion och kan säga något. Hjälp finns under frågetecknet.
