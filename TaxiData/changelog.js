@@ -15,6 +15,11 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-12', id: '2026-11-12bot1', rader: [
+    ['Ändrat', 'Hjälpboten vandrar inte längre runt bland ikonerna på startskärmen. Den står längst ner, direkt efter din sista ikon, och pratar bara där, så att pratbubblan inte hamnar över ikonerna. Bubblan sitter nu fast i boten.'],
+    ['Ändrat', 'När boten kollar något, till exempel vädret, springer den snabbt till ikonen, in och ut, tillbaka ner och berättar sedan. Vill den att du följer med till något (ett tips) går den först dit och visar bubblan där.'],
+    ['Nytt', 'Under Inställningar, Hjälpbot finns Prova väderkollen, så du kan se hur det ser ut utan att vänta.']
+  ]},
   { datum: '2026-11-12', id: '2026-11-12zon2', tid: '13:42', rader: [
     ['Nytt', 'Prognos: när en zon du bevakar får en ny förbokning visas zonens märke över skärmen, samtidigt som notisen. Landvetter: ett plan som sveper förbi, och när appen är öppen låter notisen som säkerhetsbältessignalen i stället för pipet. Essity, Astra, Volvo och Hotell Draken: loggan glider in, stannar några sekunder och glider ut. Andra zoner låter som förut.'],
     ['Ändrat', 'Ankomster: när ett bevakat flyg har landat visas nu ett plan som landar på en bana. När en båt har ankommit visas en Stenafärja. Tåget är som förut. Animationen körs fortfarande bara vid själva ankomsten.'],

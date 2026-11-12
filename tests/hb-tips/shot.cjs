@@ -157,7 +157,7 @@ async function waitGuided(p, { openMenu }) {
     ok('fast glide to profile <= 1600ms', ms <= 1600, 'took ' + ms);
     const box = await bubbleBox(p);
     ok('bubble on-screen after glide', box && box.show && box.l >= -1 && box.t >= -1 && box.r <= box.w + 1 && box.b <= box.h + 1, JSON.stringify(box));
-    ok('comic tail after glide', box && box.hasTail && (box.side === 'above' || box.side === 'below'), JSON.stringify(box));
+    ok('comic tail after glide', box && box.hasTail && ['above', 'below', 'left', 'right'].indexOf(box.side) >= 0, JSON.stringify(box));   // 2026-11-12: bubblan kan öppna åt sidan när boten leder
     ok('no hen/Stig after glide', box && !box.hen);
     ok('no pageerror anim-on', p._errs.length === 0, p._errs.join('|'));
     await new Promise(r => setTimeout(r, 150));

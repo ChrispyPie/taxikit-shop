@@ -206,9 +206,12 @@ function contrast(a, b) {
       const w = document.querySelector('.hb-walker');
       const t = getComputedStyle(w).transitionProperty + ' ' + getComputedStyle(w).transitionDuration;
       const a = getComputedStyle(w.querySelector('svg')).animationName;
+      return new Promise(res => setTimeout(res, 1200)).then(() => {
+      // 2026-11-12: boten ställer sig på sittplatsen efter sista ikonen när enhetsraden ritats om; mät efter det
       const p1 = HJALPBOT._pos();
       return new Promise(res => {
         setTimeout(() => { const p2 = HJALPBOT._pos(); res({ t, a, p1, p2 }); }, 900);
+      });
       });
     });
     ok('reduced motion no css walk', String(info.a) === 'none' || !info.a, info.a);
