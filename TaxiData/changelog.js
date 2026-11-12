@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-12', id: '2026-11-12pgfix1', tid: '', rader: [
+    ['Fixat', 'Prognos fastnade på Laddar verktyget efter omladdning eller inloggning, särskilt på en delad platta. Öppna Prognos från startskärmen om det händer innan uppdateringen är inne.']
+  ]},
   { datum: '2026-11-12', id: '2026-11-12svar2', tid: '16:15', rader: [
     ['Nytt', 'Felanmälan, Bilen står och Behövs till bilen har en knapp Bokad tid. Ägaren kan föreslå en tid som chauffören godkänner, och chauffören kan föreslå en tid som ägaren bekräftar. Chauffören och bilen är redan ifyllda. Tiden syns i ärendet och grå i schemat tills den är godkänd.']
   ]},
