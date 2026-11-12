@@ -13,6 +13,7 @@ import { notisKey, notisUrl, saveNotice } from "./notis.ts";
 import { decide, sentMap, type SentState, type TrainWatch } from "./tagnotis.ts";
 import { decide as decideFlights, sentMap as flightSentMap, type FlightWatch } from "./flygnotis.ts";
 import { decideRoutes, routeSentMap, type RouteWatch } from "./routewatch.ts";
+import { decide as decideVillkor, estStep, loadVillkor, resolve as resolveVillkor, type VillkorData } from "./villkor.ts";
 
 // Hur länge en bevakning ligger kvar efter sista händelsen (tåg ankommit / sista väskan ute). EN konstant.
 const AFTER_MIN = 30;
@@ -70,7 +71,8 @@ async function vapid(): Promise<string> {
   return pub;
 }
 
-type Msg = { title: string; body: string; tag: string };
+// silent: notis utan ljud (förarens villkor, villkor.ts). v: 1 = servern har avgjort ljudet (appen litar på silent).
+type Msg = { title: string; body: string; tag: string; silent?: boolean; v?: number };
 type SendOpts = { skipEndpoints?: string[]; skipSave?: boolean; nkey?: string };
 async function sendTo(driver: string, msg: Msg, opts: SendOpts = {}) {
   await vapid();
@@ -208,9 +210,23 @@ function loadTrains() {
   return trainCache;
 }
 
+// Förarnas villkor för tåg (Mina bevakningar). Hämtas en gång per tick. Saknas = standard (tystare).
+let villkorCache: Promise<Record<string, VillkorData>> | null = null;
+let villkorDrivers: string[] = [];
+function villkorFor(drivers: string[]) {
+  const more = drivers.filter((d) => d && !villkorDrivers.includes(d));
+  if (!villkorCache || more.length) {
+    villkorDrivers = villkorDrivers.concat(more);
+    const ids = villkorDrivers.slice();
+    villkorCache = loadVillkor(sb, ids);
+  }
+  return villkorCache;
+}
+
 async function tickTrains(watches: Watch[]) {
   if (!watches.length) return 0;
   const list = (await loadTrains()) as Record<string, string>[];
+  const vmap = await villkorFor(watches.map((w) => w.driver_id));
   let n = 0;
   for (const w of watches) {
     const t = findItem(list, w);
@@ -221,26 +237,33 @@ async function tickTrains(watches: Watch[]) {
     const prod = String(t.product || "Tåg").replace(/\s*\(.*\)$/, "");
     const name = prod + " " + t.id + (from ? " från " + from : "");
     const canceled = String(t.canceled) === "true";
-    let title = "", body = "", exp = capOf(sched, est);
-    if (canceled && !s.canceled) { s.canceled = true; title = "❌ " + name + " är inställt"; }
+    const vill = resolveVillkor(vmap[w.driver_id], { ident: w.ident, sched: w.sched }).settings;
+    let title = "", body = "", exp = capOf(sched, est), dirty = false, sound = vill.sound;
+    if (canceled && !s.canceled) { s.canceled = true; title = "❌ " + name + " är inställt"; sound = decideVillkor({ type: "canceled", sched }, vill, Date.now()).sound; }
     if (canceled) exp = Math.min(exp, Date.now() + AFTER_MIN * 60e3);
     if (act && !s.arrived) {
       s.arrived = true;
       title = "🚆 " + name + " har ankommit" + (t.track ? " spår " + t.track : "") + ", " + hm(act);
       const late = Math.round((act - sched) / 60e3);
       body = late >= 1 ? late + " min sen." : "I tid.";
-    } else if (!act && !canceled && est && sched) {
-      const prev = ms(s.est as string) || sched;
-      if (Math.abs(est - prev) >= EST_STEP_MIN * 60e3) {
-        s.est = iso(est);
-        title = "🕒 " + name + ": ny tid " + hm(est);
-        body = "Planerad " + hm(sched) + (est > sched ? ", försenat " + Math.round((est - sched) / 60e3) + " min." : ".") +
-          (t.track ? " Spår " + t.track + "." : "");
+      sound = decideVillkor({ type: "arrived", sched }, vill, Date.now()).sound;
+    } else if (!act && !canceled && sched) {
+      // Ny beräknad tid: förarens villkor avgör (små förseningar tysta, stora/plötsliga/nära ankomst ger notis)
+      const st = estStep(s as { est?: string; seen?: string; late?: number }, sched, est || sched, vill, Date.now());
+      if (st.changed) {
+        Object.assign(s, st.state); dirty = true;
+        if (st.d && st.d.notify) {
+          const eta = est || sched;
+          title = "🕒 " + name + ": ny tid " + hm(eta);
+          body = "Planerad " + hm(sched) + (eta > sched ? ", försenat " + Math.round((eta - sched) / 60e3) + " min." : ", nu i tid.") +
+            (t.track ? " Spår " + t.track + "." : "");
+          sound = st.d.sound;
+        }
       }
     }
     if (act) exp = Math.min(exp, act + AFTER_MIN * 60e3);
-    if (title) { await sendTo(w.driver_id, { title, body, tag: "tag-" + t.id }); n++; }
-    if (title || ms(w.expires_at) !== exp) await sb.rpc("bev_svc_update", { p_id: w.id, p_state: s, p_expires: iso(exp) });
+    if (title) { await sendTo(w.driver_id, { title, body, tag: "tag-" + t.id, silent: !sound, v: 1 }); n++; }
+    if (title || dirty || ms(w.expires_at) !== exp) await sb.rpc("bev_svc_update", { p_id: w.id, p_state: s, p_expires: iso(exp) });
   }
   return n;
 }
@@ -252,13 +275,17 @@ async function tickTrainWatches() {
   const d = data as { watches: TrainWatch[]; sent: { driver_id: string; ident: string; sched: string; state: SentState }[] };
   if (!d.watches?.length) return 0;
   const list = await loadTrains();
-  const todo = decide(d.watches, list, sentMap(d.sent), Date.now());
+  const vmap = await villkorFor(d.watches.map((w) => w.driver_id));
+  const todo = decide(d.watches, list, sentMap(d.sent), Date.now(),
+    (driver, ident, sched) => resolveVillkor(vmap[driver], { ident, sched }).settings);
+  let n = 0;
   for (const o of todo) {
-    // Markera först, så en notis aldrig skickas två gånger även om sändningen tar tid
+    // Markera först, så en notis aldrig skickas två gånger även om sändningen tar tid.
+    // Utan msg: bara senast sedda tid sparas (behövs för "plötslig ändring"), ingen notis.
     await sb.rpc("tw_svc_mark", { p_driver: o.driver, p_ident: o.ident, p_sched: o.sched, p_state: o.state });
-    await sendTo(o.driver, o.msg);
+    if (o.msg) { await sendTo(o.driver, o.msg); n++; }
   }
-  return todo.length;
+  return n;
 }
 
 // Flyglistan hämtas högst en gång per tick (delas av tillfälliga bevakningar och flyg-Bevakningar)
@@ -345,12 +372,15 @@ async function tickRouteWatches() {
     needTag ? loadTrains() : Promise.resolve([] as Record<string, unknown>[]),
     needFlyg ? loadFlights() : Promise.resolve([] as Record<string, unknown>[]),
   ]);
-  const todo = decideRoutes(d.watches, trains, flights, routeSentMap(d.sent), Date.now());
+  const vmap = needTag ? await villkorFor(d.watches.filter((w) => w.kind === "tag").map((w) => w.driver_id)) : {};
+  const todo = decideRoutes(d.watches, trains, flights, routeSentMap(d.sent), Date.now(),
+    (driver, ident, sched, routeId) => resolveVillkor(vmap[driver], { ident, sched, routeId }).settings);
+  let n = 0;
   for (const o of todo) {
     await sb.rpc("rw_svc_mark", { p_driver: o.driver, p_ident: o.ident, p_sched: o.sched, p_state: o.state });
-    await sendTo(o.driver, o.msg);
+    if (o.msg) { await sendTo(o.driver, o.msg); n++; }
   }
-  return todo.length;
+  return n;
 }
 
 Deno.serve(async (req) => {
@@ -396,6 +426,7 @@ Deno.serve(async (req) => {
       ]);
       const res: Record<string, unknown> = {};
       trainCache = null;
+      villkorCache = null; villkorDrivers = [];
       flightCache = null;
       boatCache = null;
       try { res.flyg = await tickFlights((fl.data || []) as Watch[]); } catch (e) { res.flygErr = String(e).slice(0, 100); }

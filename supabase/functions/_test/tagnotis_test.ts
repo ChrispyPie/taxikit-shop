@@ -31,33 +31,32 @@ Deno.test("förvarning: X min före ankomst, en gång", () => {
   eq(r.length, 0, "25 min kvar, 20 min förvarning: inget än");
   r = decide([W()], [sj({ sched: T(18) })], new Map(), NOW);
   eq(r.length, 1, "18 min kvar: notis");
-  eq(r[0].msg.title, "🚆 SJ Snabbtåg 423 från Stockholm C ankommer 20:18", "titel");
-  eq(r[0].msg.body, "Om 18 min. Spår 5. I tid.", "text"); eq(r[0].msg.tag, "tag-423", "tagg");
+  eq(r[0].msg!.title, "🚆 SJ Snabbtåg 423 från Stockholm C ankommer 20:18", "titel");
+  eq(r[0].msg!.body, "Om 18 min. Spår 5. I tid.", "text"); eq(r[0].msg!.tag, "tag-423", "tagg");
   const sent = sentMap([{ driver_id: "A", ident: "423", sched: T(18), state: r[0].state }]);
   eq(decide([W()], [sj({ sched: T(18) })], sent, NOW + 60e3).length, 0, "inte igen");
   eq(decide([W({ lead_min: 0, notify_delay: false })], [sj({ sched: T(5) })], new Map(), NOW).length, 0, "ingen förvarning vald");
   eq(decide([W()], [sj({ sched: T(5), act: T(-1) })], new Map(), NOW).length, 0, "redan ankommit");
 });
 
-Deno.test("försening: över gränsen, nytt besked var 10:e min; förvarning tar med förseningen", () => {
-  eq(decide([W()], [sj({ sched: T(60), est: T(67) })], new Map(), NOW).length, 0, "7 min: under 10");
+Deno.test("försening: villkoren (12 nov) – små tysta, plötslig ändring ger notis; förvarning tar med förseningen", () => {
+  const sends = (r: ReturnType<typeof decide>) => r.filter((x) => x.msg);
+  eq(sends(decide([W()], [sj({ sched: T(60), est: T(67) })], new Map(), NOW)).length, 0, "7 min: under 15, tyst");
   let r = decide([W()], [sj({ sched: T(60), est: T(75) })], new Map(), NOW);
-  eq(r[0].msg.title, "🕒 SJ Snabbtåg 423 från Stockholm C: ny tid 21:15", "försenad titel");
-  eq(r[0].msg.body, "Planerad 21:00, försenat 15 min. Spår 5.", "försenad text");
-  let sent = sentMap([{ driver_id: "A", ident: "423", sched: T(60), state: r[0].state }]);
-  eq(decide([W()], [sj({ sched: T(60), est: T(80) })], sent, NOW).length, 0, "+5 min: inget nytt");
-  r = decide([W()], [sj({ sched: T(60), est: T(86) })], sent, NOW);
-  eq(r.length, 1, "+11 min: nytt besked");
-  sent = sentMap([{ driver_id: "A", ident: "423", sched: T(60), state: r[0].state }]);
+  eq(r[0].msg!.title, "🕒 SJ Snabbtåg 423 från Stockholm C: ny tid 21:15", "försenad titel (15 min på en gång)");
+  eq(r[0].msg!.body, "Planerad 21:00, försenat 15 min. Spår 5.", "försenad text");
+  const sent = sentMap([{ driver_id: "A", ident: "423", sched: T(60), state: r[0].state }]);
+  eq(sends(decide([W()], [sj({ sched: T(60), est: T(80) })], sent, NOW)).length, 0, "+5 min: inget nytt");
+  eq(sends(decide([W()], [sj({ sched: T(60), est: T(86) })], sent, NOW)).length, 0, "+11 min långt bort, under 30: dropp, tyst");
   r = decide([W()], [sj({ sched: T(60), est: T(86) })], sent, NOW + 70 * 60e3);
-  eq(r[0].msg.body, "Om 16 min. Spår 5. 26 min sen (planerad 21:00).", "förvarning med försening");
+  eq(r[0].msg!.body, "Om 16 min. Spår 5. 26 min sen (planerad 21:00).", "förvarning med försening");
   eq(decide([W({ notify_delay: false })], [sj({ sched: T(60), est: T(90) })], new Map(), NOW).length, 0, "försening avstängd");
   eq(decide([W()], [sj({ sched: T(240), est: T(260) })], new Map(), NOW).length, 0, "mer än 3 h bort: inget");
 });
 
 Deno.test("inställt: en gång, bara om valt", () => {
   const r = decide([W()], [sj({ sched: T(90), canceled: true })], new Map(), NOW);
-  eq(r[0].msg.title, "❌ SJ Snabbtåg 423 från Stockholm C är inställt", "inställt"); eq(r[0].msg.body, "Skulle ankomma 21:30.", "text");
+  eq(r[0].msg!.title, "❌ SJ Snabbtåg 423 från Stockholm C är inställt", "inställt"); eq(r[0].msg!.body, "Skulle ankomma 21:30.", "text");
   const sent = sentMap([{ driver_id: "A", ident: "423", sched: T(90), state: r[0].state }]);
   eq(decide([W()], [sj({ sched: T(15), canceled: true })], sentMap([{ driver_id: "A", ident: "423", sched: T(15), state: { canceled: true } }]), NOW).length, 0, "inte igen");
   eq(decide([W({ notify_cancel: false })], [sj({ sched: T(15), canceled: true })], new Map(), NOW).length, 0, "inställt avstängt");
