@@ -17,7 +17,7 @@ assert.doesNotMatch(ank, /\bStig\b/);
 assert.doesNotMatch(help, /'[^']*\bStig\b/);
 assert.doesNotMatch(cl, /\bStig\b/);
 
-assert.match(html, /hjalp\.js\?v=(20261111datatid1|20261112mapp1)/);
+assert.match(html, /hjalp\.js\?v=(20261111datatid1|20261112mapp1|20261112ljud1)/);
 assert.match(lv, /prognos\.js\?v=20261111datatid1/);
 assert.match(lv, /arrival-data\.js\?v=20261111datatid1/);
 assert.match(lv, /ankomster\.js\?v=20261111datatid1/);

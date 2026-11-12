@@ -20,7 +20,7 @@ assert.doesNotMatch(js, /localStorage\.getItem\('taxi_bev_ljud'\)/);
 assert.match(ljud, /bev-watch-fire/);
 assert.match(html, /animationer\.js\?v=20261112zon2/);
 assert.match(html, /id="animationer-set"/);
-assert.match(html, /bevakning-ljud\.js\?v=20261112anim5/);
+assert.match(html, /bevakning-ljud\.js\?v=20261112ljud1/);
 assert.match(cl, /2026-11-11anim1/);
 assert.match(cl, /Inställningar, Animationer/);
 assert.doesNotMatch(cl, /regnar eller snöar|snöflingor|droppar eller flingor/);
