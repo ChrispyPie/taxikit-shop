@@ -22,7 +22,7 @@ Nyheter: id `2026-11-12ljud1` (utan `tid`). Cache-tagg: `?v=20261112ljud1`.
 
 1. Merga PR:en (GitHub Pages tar klientdelen; fallback i appen och SW gör att små
    "ny tid"-förseningar blir tysta redan innan edge-funktionen är uppdaterad).
-2. Valfri men rekommenderad SQL: `supabase/migrations/20261112c_bev_villkor.sql`
+2. Valfri men rekommenderad SQL: `supabase/migrations/20261112e_bev_villkor.sql`
    (additiv: tabell `private.bev_villkor`, RPC `bev_villkor_get/save`, `bev_svc_villkor`).
    Utan den sparas villkoren bara i telefonen och servern använder standardvärdena.
 3. Deploya edge-funktionen `bevakning` (filer: `index.ts`, `villkor.ts`, `tagnotis.ts`,
@@ -36,7 +36,7 @@ Nyheter: id `2026-11-12ljud1` (utan `tid`). Cache-tagg: `?v=20261112ljud1`.
   ändringen ligger i `docs/bevakningar/bevakning-edge-pre-ljud1-rollback/`
   (`index.ts`, `tagnotis.ts`, `routewatch.ts`; `villkor.ts` är ny och kan tas bort).
   Kontrollera mot den faktiskt deployade versionen innan återställning.
-- SQL: `supabase/migrations/undo/20261112c_bev_villkor_undo.sql` (tar bort de tre
+- SQL: `supabase/migrations/undo/20261112e_bev_villkor_undo.sql` (tar bort de tre
   funktionerna och tabellen; sparade villkor försvinner). Gamla edge-funktionen anropar inte
   `bev_svc_villkor`, och ny edge-funktion klarar att den saknas (standardvärden).
 - Lokalt sparade villkor `taxi_bev_villkor:<förare>` i telefonen är ofarliga utan funktionen.

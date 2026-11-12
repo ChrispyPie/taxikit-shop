@@ -1,4 +1,4 @@
--- 20261112c: villkor för tågbevakningar (när en bevakning får ge notis och ljud).
+-- 20261112e: villkor för tågbevakningar (när en bevakning får ge notis och ljud).
 --
 -- Nytt (bara tillägg, inget befintligt ändras):
 --  * tabell private.bev_villkor: förarens villkor som jsonb, en rad per förare
@@ -9,7 +9,7 @@
 -- Siffrorna valideras och begränsas i appen och i edge-funktionen (villkor.ts normalize), här bara storlek och typ.
 -- Appen och edge-funktionen klarar sig utan migrationen: appen sparar då bara i telefonen och servern
 -- använder standardvillkoren (tystare än förut).
--- Ångra: undo/20261112c_bev_villkor_undo.sql
+-- Ångra: undo/20261112e_bev_villkor_undo.sql
 
 create table if not exists private.bev_villkor (
   driver_id text primary key references public.drivers(id) on delete cascade,

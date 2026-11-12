@@ -1,4 +1,4 @@
--- Ångra 20261112c_bev_villkor.sql
+-- Ångra 20261112e_bev_villkor.sql
 -- Tar bort RPC:erna och tabellen. Appen faller då tillbaka på villkoren i telefonen och edge-funktionen
 -- på standardvillkoren (inga fel, bev_svc_villkor saknas => standard).
 drop function if exists public.bev_svc_villkor(text[]);
