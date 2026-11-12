@@ -1,6 +1,8 @@
-/* Animationer i appen: ett tunt överlager som kan visa korta figurer
- * utan att blockera tryck. Först ut: när en bevakning slår till (samma
- * ögonblick som tåg-/flyg-/båtljudet) flyger en figur över skärmen.
+/* Animationer i appen: ett överlager som kan visa stora figurer
+ * över hela skärmen utan att blockera tryck. När ett bevakat tåg, flyg
+ * eller båt ankommer (samma ögonblick som ljudet) körs en helsides-
+ * animation i ungefär 5 sekunder. Inte vid försening, inställt, ny tid
+ * eller andra statusuppdateringar (bev-watch-fire.detail.arrival).
  * Inställningen 'Animationer' (localStorage 'taxi_animationer', på som
  * standard) är fristående från ljudet (taxi_bev_ljud). Fler animationer
  * (t.ex. väder) kan återanvända samma lager senare.
@@ -9,9 +11,9 @@
 (function () {
   'use strict';
   var KEY = 'taxi_animationer';
-  var DURATION_MS = 2400;
-  var REDUCED_MS = 900;
-  var MAX_ON_SCREEN = 2;
+  var DURATION_MS = 5000;
+  var REDUCED_MS = 1600;
+  var MAX_ON_SCREEN = 1;
 
   function read() {
     var o = {};
@@ -44,20 +46,23 @@
     css.textContent =
       '#animationer-layer{position:fixed;inset:0;z-index:240;pointer-events:none!important;overflow:hidden}' +
       '#animationer-layer *{pointer-events:none!important}' +
-      '.anim-actor{position:absolute;left:0;top:0;width:clamp(48px,9vw,84px);height:auto;color:#2b6cb0;filter:drop-shadow(0 2px 5px rgba(0,0,0,.28));will-change:transform,opacity;opacity:0}' +
-      'html[data-theme="dark"] .anim-actor{color:#90cdf4;filter:drop-shadow(0 2px 6px rgba(0,0,0,.45))}' +
+      '.anim-veil{position:absolute;inset:0;background:rgba(12,22,36,.22);opacity:0;animation:anim-veil 5s ease forwards}' +
+      'html:not([data-theme="dark"]) .anim-veil{background:rgba(20,40,70,.14)}' +
+      '@keyframes anim-veil{0%{opacity:0}8%{opacity:1}84%{opacity:1}100%{opacity:0}}' +
+      '.anim-actor{position:absolute;left:0;top:0;width:clamp(220px,78vw,620px);height:auto;color:#2b6cb0;filter:drop-shadow(0 6px 18px rgba(0,0,0,.35));will-change:transform,opacity;opacity:0}' +
+      'html[data-theme="dark"] .anim-actor{color:#90cdf4;filter:drop-shadow(0 8px 22px rgba(0,0,0,.55))}' +
       '.anim-actor svg{display:block;overflow:visible}' +
-      '.anim-flyg{top:12%;animation:anim-flyg 2.4s cubic-bezier(.2,.7,.2,1) forwards}' +
-      '.anim-tag{top:auto;bottom:calc(16% + env(safe-area-inset-bottom,0px));animation:anim-tag 2.4s cubic-bezier(.25,.7,.2,1) forwards}' +
-      '.anim-bat{top:auto;bottom:calc(12% + env(safe-area-inset-bottom,0px));animation:anim-bat 2.6s cubic-bezier(.25,.7,.2,1) forwards}' +
-      '@keyframes anim-flyg{0%{transform:translate3d(-22vw,0,0) rotate(-10deg);opacity:0}10%{opacity:.95}82%{opacity:.95}100%{transform:translate3d(118vw,14vh,0) rotate(6deg);opacity:0}}' +
-      '@keyframes anim-tag{0%{transform:translate3d(-24vw,0,0);opacity:0}10%{opacity:.95}20%{transform:translate3d(8vw,0,0)}22%{transform:translate3d(12vw,-2px,0)}40%{transform:translate3d(40vw,0,0)}42%{transform:translate3d(44vw,-2px,0)}70%{transform:translate3d(82vw,0,0)}82%{opacity:.95}100%{transform:translate3d(118vw,0,0);opacity:0}}' +
-      '@keyframes anim-bat{0%{transform:translate3d(-24vw,0,0);opacity:0}10%{opacity:.95}25%{transform:translate3d(18vw,-4px,0)}50%{transform:translate3d(50vw,3px,0)}75%{transform:translate3d(84vw,-3px,0)}82%{opacity:.95}100%{transform:translate3d(118vw,0,0);opacity:0}}' +
-      '.anim-actor.anim-reduced{animation:anim-reduced .9s ease forwards!important;left:50%;top:18%;bottom:auto;margin-left:-32px}' +
+      '.anim-flyg{top:16%;animation:anim-flyg 5s ease-in-out forwards}' +
+      '.anim-tag{top:auto;bottom:calc(12% + env(safe-area-inset-bottom,0px));animation:anim-tag 5s ease-in-out forwards}' +
+      '.anim-bat{top:auto;bottom:calc(14% + env(safe-area-inset-bottom,0px));animation:anim-bat 5s ease-in-out forwards}' +
+      '@keyframes anim-flyg{0%{transform:translate3d(-80vw,10vh,0) rotate(-8deg);opacity:0}8%{opacity:.96}88%{opacity:.96}100%{transform:translate3d(108vw,-8vh,0) rotate(5deg);opacity:0}}' +
+      '@keyframes anim-tag{0%{transform:translate3d(-80vw,0,0);opacity:0}8%{opacity:.96}18%{transform:translate3d(-8vw,0,0)}22%{transform:translate3d(0,-6px,0)}40%{transform:translate3d(28vw,0,0)}44%{transform:translate3d(36vw,-6px,0)}62%{transform:translate3d(58vw,0,0)}66%{transform:translate3d(66vw,-6px,0)}88%{opacity:.96}100%{transform:translate3d(108vw,0,0);opacity:0}}' +
+      '@keyframes anim-bat{0%{transform:translate3d(-80vw,0,0);opacity:0}8%{opacity:.96}22%{transform:translate3d(-4vw,-10px,0)}48%{transform:translate3d(32vw,8px,0)}74%{transform:translate3d(68vw,-8px,0)}88%{opacity:.96}100%{transform:translate3d(108vw,4px,0);opacity:0}}' +
+      '.anim-actor.anim-reduced{animation:anim-reduced 1.6s ease forwards!important;left:50%;top:22%;bottom:auto;margin-left:-39vw;width:clamp(200px,78vw,480px)}' +
       '.anim-tag.anim-reduced,.anim-bat.anim-reduced{top:auto;bottom:calc(18% + env(safe-area-inset-bottom,0px))}' +
-      '@keyframes anim-reduced{0%{transform:scale(.85);opacity:0}25%{transform:scale(1);opacity:.95}75%{transform:scale(1);opacity:.95}100%{transform:scale(.95);opacity:0}}' +
-      '@media (min-width:900px){.anim-actor{width:clamp(64px,8vw,96px)}}' +
-      '.anim-try{min-height:32px;padding:4px 12px;border-radius:8px;border:1px solid var(--border,#cbd5e0);background:var(--surface,#fff);color:inherit;font:inherit;font-size:.85rem;font-weight:600;cursor:pointer}';
+      '@keyframes anim-reduced{0%{transform:scale(.88);opacity:0}20%{transform:scale(1);opacity:.96}80%{transform:scale(1);opacity:.96}100%{transform:scale(.96);opacity:0}}' +
+      '@media (min-width:900px){.anim-actor{width:clamp(320px,62vw,680px)}.anim-actor.anim-reduced{margin-left:-31vw}}' +
+      '.anim-try{min-height:32px;padding:4px 12px;border-radius:8px;border:1px solid var(--border,#cbd5e0);background:var(--surface,#fff);color:inherit;font:inherit;font-size:.85rem;font-weight:600;cursor:pointer;margin-right:6px}';
     document.head.appendChild(css);
   }
 
@@ -93,21 +98,30 @@
     el.setAttribute('data-anim-kind', kind);
     el.setAttribute('aria-hidden', 'true');
     el.innerHTML = ICONS[kind] || '';
-    var ms = reduced ? REDUCED_MS : (kind === 'bat' ? 2600 : DURATION_MS);
+    var ms = reduced ? REDUCED_MS : DURATION_MS;
+    el.style.animationDuration = (ms / 1000) + 's';
     if (opts.freezeAt != null) {
       var at = Math.max(0, Math.min(0.95, Number(opts.freezeAt) || 0));
       el.style.animationDelay = (-at * (ms / 1000)) + 's';
       el.style.animationPlayState = 'paused';
     } else {
-      setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, ms + 80);
+      var veil = document.createElement('div');
+      veil.className = 'anim-veil';
+      veil.style.animationDuration = (ms / 1000) + 's';
+      host.appendChild(veil);
+      setTimeout(function () {
+        if (el.parentNode) el.parentNode.removeChild(el);
+        if (veil.parentNode) veil.parentNode.removeChild(veil);
+      }, ms + 80);
     }
     host.appendChild(el);
     return el;
   }
 
   function playFromEvent(e) {
-    var kind = e && e.detail && e.detail.kind;
-    if (kind) play(kind);
+    var d = e && e.detail;
+    if (!d || !d.kind || !d.arrival) return;
+    play(d.kind);
   }
 
   function renderSettings(box) {
@@ -116,12 +130,15 @@
     var on = isOn();
     box.innerHTML = '<div class="section"><h3 style="margin-top:0">Animationer</h3>' +
       '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">' +
-      'När en bevakning slår till flyger en kort figur över skärmen: flygplan, tåg eller båt. Påverkar inte ljudet.</p>' +
+      'När ett bevakat tåg, flyg eller båt ankommer visas en stor figur över hela skärmen i ungefär fem sekunder. Inte vid försening eller andra statusuppdateringar. Påverkar inte ljudet.</p>' +
       '<div class="hl-opts" role="radiogroup" aria-label="Animationer">' +
         '<label class="hl-opt' + (!on ? ' on' : '') + '"><input type="radio" name="animationer" value="0"' + (!on ? ' checked' : '') + '><span>Av</span></label>' +
         '<label class="hl-opt' + (on ? ' on' : '') + '"><input type="radio" name="animationer" value="1"' + (on ? ' checked' : '') + '><span>På</span></label>' +
       '</div>' +
-      '<p style="margin:.55rem 0 0"><button type="button" class="anim-try" data-anim-try="flyg">Prova</button></p>' +
+      '<p style="margin:.55rem 0 0">' +
+        '<button type="button" class="anim-try" data-anim-try="flyg">Prova flyg</button>' +
+        '<button type="button" class="anim-try" data-anim-try="tag">Prova tåg</button>' +
+        '<button type="button" class="anim-try" data-anim-try="bat">Prova båt</button></p>' +
       '</div>';
     box.onchange = function (e) {
       if (!e.target || e.target.name !== 'animationer') return;
