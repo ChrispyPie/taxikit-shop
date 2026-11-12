@@ -102,7 +102,7 @@ function setup() {
     assert.match(fs.readFileSync(path.join(root, 'TaxiData', f), 'utf8'), /swipe-back\.js\?v=20261112swipe1/, f);
   }
   const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
-  assert.match(lv, /changelog\.js\?v=20261112swipe1/);
+  assert.match(lv, /changelog\.js\?v=20261112bot1/);
   assert.match(html, /lazy-views\.js\?v=20261112swipe1/);
   const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
   assert.ok(cl.indexOf("2026-11-12swipe1") < cl.indexOf("2026-11-12zon2"));

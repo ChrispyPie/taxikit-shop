@@ -15,6 +15,11 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-12', id: '2026-11-12bot1', tid: '14:25', rader: [
+    ['Ändrat', 'Hjälpboten vandrar inte längre runt bland ikonerna på startskärmen. Den står längst ner, direkt efter din sista ikon, och pratar bara där, så att pratbubblan inte hamnar över ikonerna. Bubblan sitter nu fast i boten.'],
+    ['Ändrat', 'När boten kollar något, till exempel vädret, springer den snabbt till ikonen, in och ut, tillbaka ner och berättar sedan. Vill den att du följer med till något (ett tips) går den först dit och visar bubblan där.'],
+    ['Nytt', 'Under Inställningar, Hjälpbot finns Prova väderkollen, så du kan se hur det ser ut utan att vänta.']
+  ]},
   { datum: '2026-11-12', id: '2026-11-12swipe1', tid: '14:10', rader: [
     ['Förbättrat', 'Dra åt höger för att backa tar dig nu till föregående sida i stället för alltid till startskärmen. Har du gått flera steg, till exempel Prognos, sedan Ankomster och sedan Inställningar, backar du ett steg i taget. Telefonens bakåtknapp gör samma sak.'],
     ['Nytt', 'Har du backat kan du gå framåt igen: dra åt vänster från mitten av skärmen. Finns det ingen sida framåt händer inget. Trycker du dig till en ny sida försvinner det som låg framåt, som i en webbläsare.'],
