@@ -15,6 +15,12 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-12', id: '2026-11-12ljud1', rader: [
+    ['Förbättrat', 'Tåg piper mycket mindre. Små förseningar, under 15 minuter, ger ingen notis och inget ljud. Du får notis när tåget börjar närma sig, när förseningen blir stor (30 minuter eller mer), när tiden plötsligt ändras mycket, när tåget ställs in och när det har kommit fram.'],
+    ['Nytt', 'I Mina bevakningar finns Ljud och notiser för tåg. Där väljer du själv hur många minuter före ankomst du vill ha notis, och vad som räknas som liten och stor försening. Det sparas på ditt konto.'],
+    ['Nytt', 'Tryck på 🔔 vid ett tåg i Mina bevakningar för att ge just den avgången egna villkor, bara den här gången eller varje gång för en fast bevakning.'],
+    ['Ändrat', 'Under tåg på Ankomster finns nu bara Ljud för tåg, av eller på, och en länk till villkoren i Mina bevakningar.']
+  ]},
   { datum: '2026-11-12', id: '2026-11-12mapp1', tid: '15:10', rader: [
     ['Ändrat', 'Startskärmen: den lilla skiftnyckeln är borta, så du inte råkar trycka på den när du ska öppna översta högra verktyget. Håll i stället in en ikon i ungefär en sekund, så lyfts den och du kan dra den till en ny plats. Menyn med Avinstallera, Modulinfo, Flytta och Hjälp visas som förut.'],
     ['Nytt', 'Mappar på startskärmen, som på Android: släpp en ikon på en annan så blir det en mapp. Tryck på mappen för att öppna den och på namnet för att byta namn. Håll in en ikon i mappen och dra ut den för att lägga den på startskärmen igen. En mapp med bara en ikon kvar försvinner av sig själv.'],

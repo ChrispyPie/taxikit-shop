@@ -45,6 +45,7 @@
       'Båtarna kommer från Fredrikshamn (Danmarksterminalen i Masthugget) och Kiel (Tysklandsterminalen vid Majnabbe).',
       'Tryck på en rad för mer om just den ankomsten. På båtar finns en länk till vägbeskrivning.',
       'Du kan bevaka en ankomst och få en påminnelse.',
+      'Under tåg finns bara Ljud för tåg. När och hur notiser kommer ställer du in i Mina bevakningar.',
       'Tiderna uppdateras från servern. Båttiderna kommer från Stena Lines tidtabell.',
       'Tiden "uppdaterad" är när uppgifterna senast hämtades från källan (Swedavia för flyg, Stena för båtar, Trafikverket för tåg), inte när du öppnade sidan.'
     ],
@@ -91,7 +92,9 @@
       'Här finns de ankomster och händelser du bevakar.',
       'Tryck på en rad för att öppna den.',
       'Stäng av en bevakning när du inte längre behöver den.',
-      'Påminnelser kommer när något du bevakar händer.'
+      'Påminnelser kommer när något du bevakar händer.',
+      'Under Ljud och notiser för tåg väljer du när tåg får ge notis och ljud. Små förseningar ger ingen notis. Stora förseningar, inställda tåg och plötsliga tidsändringar ger alltid notis.',
+      'Tryck på 🔔 vid ett tåg för att ge just den avgången egna villkor, en gång eller varje gång.'
     ],
     installningar: [
       'Här byter du tema, textstorlek och hur startskärmen ser ut.',

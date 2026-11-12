@@ -62,6 +62,13 @@ self.addEventListener('push', function (e) {
   var d = {};
   try { d = e.data ? e.data.json() : {}; } catch (x) { d = { title: 'TaxiData', body: e.data ? e.data.text() : '' }; }
   var title = d.title || 'TaxiData';
+  // Villkor för tåg (12 nov): servern skickar silent när notisen inte ska låta. Äldre server (utan v):
+  // "ny tid" för tåg med försening under 30 min blir tyst (samma standard som villkoren).
+  var quiet = d.silent === true;
+  if (!quiet && d.v !== 1 && String(d.tag || '').indexOf('tag') === 0 && /: ny tid /.test(title)) {
+    var lm = /försenat (\d+) min/.exec(d.body || '');
+    quiet = !lm || +lm[1] < 30;
+  }
   var opts = {
     body: d.body || '',
     tag: d.tag || 'bevakning',
@@ -72,6 +79,8 @@ self.addEventListener('push', function (e) {
     badge: 'icon-192.png',
     data: null
   };
+  // Chrome tillåter inte vibration på en tyst notis.
+  if (quiet) { opts.silent = true; delete opts.vibrate; opts.renotify = false; }
   var now = Date.now(), key = notisKey(d, now), tg = notisTarget(d);
   opts.data = { url: notisUrl(d, tg), key: key, tag: d.tag || '', target: tg };
   var item = { key: key, tag: d.tag || '', title: title, body: d.body || '', url: d.url || '', at: now, target: tg };
