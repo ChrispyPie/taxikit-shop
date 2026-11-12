@@ -44,8 +44,7 @@
       'Här ser du tåg till Göteborg C, flyg till Landvetter och Stena-båtar till Göteborg.',
       'Båtarna kommer från Fredrikshamn (Danmarksterminalen i Masthugget) och Kiel (Tysklandsterminalen vid Majnabbe).',
       'Tryck på en rad för mer om just den ankomsten. På båtar finns en länk till vägbeskrivning.',
-      'Du kan bevaka en ankomst och få en påminnelse.',
-      'Under tåg finns bara Ljud för tåg. När och hur notiser kommer ställer du in i Mina bevakningar.',
+      'Du kan bevaka en ankomst och få en påminnelse. För tåg väljer du här bara ljud av eller på. När notiser kommer ställer du in i Mina bevakningar.',
       'Tiderna uppdateras från servern. Båttiderna kommer från Stena Lines tidtabell.',
       'Tiden "uppdaterad" är när uppgifterna senast hämtades från källan (Swedavia för flyg, Stena för båtar, Trafikverket för tåg), inte när du öppnade sidan.'
     ],
