@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-12', id: '2026-11-12mod1', rader: [
+    ['Ändrat', 'Startskärmen: rutan Moduler kan du nu flytta precis som de andra ikonerna. Den stannar alltid på startskärmen, så du inte tappar bort den. Den kan inte läggas i en mapp eller avinstalleras.']
+  ]},
   { datum: '2026-11-12', id: '2026-11-12mapp1', tid: '15:10', rader: [
     ['Ändrat', 'Startskärmen: den lilla skiftnyckeln är borta, så du inte råkar trycka på den när du ska öppna översta högra verktyget. Håll i stället in en ikon i ungefär en sekund, så lyfts den och du kan dra den till en ny plats. Menyn med Avinstallera, Modulinfo, Flytta och Hjälp visas som förut.'],
     ['Nytt', 'Mappar på startskärmen, som på Android: släpp en ikon på en annan så blir det en mapp. Tryck på mappen för att öppna den och på namnet för att byta namn. Håll in en ikon i mappen och dra ut den för att lägga den på startskärmen igen. En mapp med bara en ikon kvar försvinner av sig själv.'],

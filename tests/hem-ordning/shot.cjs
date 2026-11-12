@@ -82,7 +82,7 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
     return p.evaluate(() => {
       const header = document.querySelector('#app header');
       const grid = document.querySelector('#app .grid');
-      const plus = document.querySelector('.td-slot-empty');
+      const plus = document.querySelector('.icon[data-tool="moduler"]');
       const bar = document.querySelector('.td-ordna-bar');
       const pencil = document.querySelector('.td-wrench');
       const hr = header.getBoundingClientRect();
@@ -96,7 +96,7 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
         gap: Math.round(gr.top - hr.bottom),
         hasBar: !!bar,
         pencil: !pencil, // skiftnyckeln borttagen 2026-11-12mapp1
-        plusLast: !!(plus && plus === grid.lastElementChild),
+        plusLast: !!(plus && plus === grid.lastElementChild && plus.getAttribute('data-tool') === 'moduler'),
         plusH: pr ? Math.round(pr.height) : 0,
         handlesVis,
         iconCount: icons.length,
@@ -125,7 +125,7 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
       return {
         x: document.querySelectorAll('.grid.td-ordna .td-remove').length,
         noXCore: !document.querySelector('.icon[data-tool="installningar"] .td-remove') && !document.querySelector('.icon[data-tool="om"] .td-remove'),
-        plusLast: document.querySelector('.td-slot-empty') === document.querySelector('#app .grid').lastElementChild,
+        plusLast: document.querySelector('.icon[data-tool="moduler"]') === document.querySelector('#app .grid').lastElementChild,
         banner: !!(cs && cs.display !== 'none' && /Ändringsläge/.test(ban.textContent)),
         klar: !!document.querySelector('.td-andringslage [data-ordna="done"]'),
         reset: !!document.querySelector('.td-andringslage [data-ordna="reset"]'),
@@ -140,11 +140,13 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
 
     // remove Väder
     await p.click('.icon[data-tool="vader"] .td-remove');
-    await p.waitForFunction(() => !document.querySelector('.icon[data-tool="vader"]') && document.querySelector('.td-slot-empty'));
-    // still editing after re-render
+    await p.waitForFunction(() => !document.querySelector('.icon[data-tool="vader"]') && document.querySelector('.icon[data-tool="moduler"]'));
+    // still editing after re-render: lämna ändringsläget innan Moduler öppnas (den är en vanlig ikon)
     if (!(await p.$('.grid.td-ordna'))) await enterEdit(p);
-    await p.click('.td-slot-empty');
-    await p.waitForSelector('.td-mod-list');
+    await p.evaluate(() => { var b = document.querySelector('.td-andringslage [data-ordna="done"]'); if (b) b.click(); });
+    await new Promise(r => setTimeout(r, 400));
+    await p.click('.icon[data-tool="moduler"]');
+    await p.waitForSelector('.td-mod-list', { timeout: 8000 });
     const list = await p.evaluate(() => [...document.querySelectorAll('.td-mod-row')].map(e => e.getAttribute('data-mod-id')));
     ok('moduler list has vader', list.includes('vader'), list.join(','));
     const inst = await p.evaluate(() => {

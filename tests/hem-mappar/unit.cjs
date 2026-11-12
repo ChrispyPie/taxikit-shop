@@ -29,12 +29,12 @@ const top0 = ['kordata', 'lonekoll', 'ankomster', 'prognos', 'vader', 'kalender'
 
 // 1. Flytta en ikon (ordning)
 let s = M.placeTop(top0, [], 'vader', ['vader', 'kordata', 'lonekoll', 'ankomster', 'prognos', 'kalender', 'installningar', 'om']);
-assert.deepEqual(plain(s.top), ['vader', 'kordata', 'lonekoll', 'ankomster', 'prognos', 'kalender', 'installningar', 'om']);
+assert.deepEqual(plain(s.top), ['vader', 'kordata', 'lonekoll', 'ankomster', 'prognos', 'kalender', 'installningar', 'om', 'moduler']);
 assert.deepEqual(plain(s.folders), []);
 
 // 2. Släpp ikon på ikon = ny mapp på målets plats, målet först
 s = M.createFolder(top0, [], 'vader', 'ankomster', 'mapp-a1', 'Mapp');
-assert.deepEqual(plain(s.top), ['kordata', 'lonekoll', 'mapp-a1', 'prognos', 'kalender', 'installningar', 'om']);
+assert.deepEqual(plain(s.top), ['kordata', 'lonekoll', 'mapp-a1', 'prognos', 'kalender', 'installningar', 'om', 'moduler']);
 assert.deepEqual(plain(s.folders), [{ id: 'mapp-a1', name: 'Mapp', items: ['ankomster', 'vader'] }]);
 
 // 3. Lägg till i befintlig mapp (släpp på mappen)
@@ -53,25 +53,25 @@ assert.deepEqual(plain(s.folders[0].items), ['kalender', 'ankomster', 'vader']);
 // 5. Dra ut ur mappen till startskärmen (öppna mapp -> håll in -> dra ut -> släpp på hem)
 //    Ny ordning från rutnätet där ikonen släpptes, mappen står kvar med två.
 s = M.placeTop(s.top, s.folders, 'kalender', ['kalender', 'kordata', 'lonekoll', 'mapp-a1', 'prognos', 'installningar', 'om']);
-assert.deepEqual(plain(s.top), ['kalender', 'kordata', 'lonekoll', 'mapp-a1', 'prognos', 'installningar', 'om']);
+assert.deepEqual(plain(s.top), ['kalender', 'kordata', 'lonekoll', 'mapp-a1', 'prognos', 'installningar', 'om', 'moduler']);
 assert.deepEqual(plain(s.folders[0].items), ['ankomster', 'vader']);
 
 // 6. Dra ut en till: bara en kvar -> mappen löses upp, sista ikonen tar mappens plats
 s = M.placeTop(s.top, s.folders, 'vader', ['kalender', 'kordata', 'lonekoll', 'mapp-a1', 'prognos', 'installningar', 'om', 'vader']);
 assert.deepEqual(plain(s.folders), []);
-assert.deepEqual(plain(s.top), ['kalender', 'kordata', 'lonekoll', 'ankomster', 'prognos', 'installningar', 'om', 'vader']);
+assert.deepEqual(plain(s.top), ['kalender', 'kordata', 'lonekoll', 'ankomster', 'prognos', 'installningar', 'om', 'vader', 'moduler']);
 
 // 7. Ta ut via menyn (removeFromFolder) och upplösning
 s = M.createFolder(top0, [], 'vader', 'ankomster', 'mapp-b2', 'Bra');
 s = M.removeFromFolder(s.top, s.folders, 'vader');
 assert.deepEqual(plain(s.folders), []);
-assert.deepEqual(plain(s.top), ['kordata', 'lonekoll', 'ankomster', 'vader', 'prognos', 'kalender', 'installningar', 'om']);
+assert.deepEqual(plain(s.top), ['kordata', 'lonekoll', 'ankomster', 'vader', 'prognos', 'kalender', 'installningar', 'om', 'moduler']);
 
 // 8. Dra ikon ur mapp A och släpp på annan ikon: ny mapp B, A löses upp
 s = M.createFolder(top0, [], 'vader', 'ankomster', 'mapp-a1', 'A');
 s = M.createFolder(s.top, s.folders, 'vader', 'kordata', 'mapp-b1', 'B');
 assert.deepEqual(plain(s.folders), [{ id: 'mapp-b1', name: 'B', items: ['kordata', 'vader'] }]);
-assert.deepEqual(plain(s.top), ['mapp-b1', 'lonekoll', 'ankomster', 'prognos', 'kalender', 'installningar', 'om']);
+assert.deepEqual(plain(s.top), ['mapp-b1', 'lonekoll', 'ankomster', 'prognos', 'kalender', 'installningar', 'om', 'moduler']);
 
 // 9. Inga mappar i mappar, inget att släppa på sig själv
 let n = M.createFolder(s.top, s.folders, 'mapp-b1', 'lonekoll', 'mapp-c1', 'C');
@@ -92,7 +92,7 @@ s = M.createFolder(top0, [], 'vader', 'ankomster', 'mapp-a1', 'A');
 s = M.addToFolder(s.top, s.folders, 'om', 'mapp-a1');
 n = M.unpackFolder(s.top, s.folders, 'mapp-a1');
 assert.deepEqual(plain(n.folders), []);
-assert.deepEqual(plain(n.top), ['kordata', 'lonekoll', 'ankomster', 'vader', 'om', 'prognos', 'kalender', 'installningar']);
+assert.deepEqual(plain(n.top), ['kordata', 'lonekoll', 'ankomster', 'vader', 'om', 'prognos', 'kalender', 'installningar', 'moduler']);
 for (const id of top0) assert.ok(n.top.includes(id), id);
 
 // 12. Byt namn: rensas, max 24 tecken, tomt = Mapp
@@ -105,7 +105,7 @@ assert.equal(f[0].name.length, 24);
 
 // 13. Avinstallera ikon i mapp med två -> mappen löses upp
 n = M.removeTool(['mapp-a1', 'kordata'], [{ id: 'mapp-a1', name: 'A', items: ['vader', 'ankomster'] }], 'vader');
-assert.deepEqual(plain(n), { top: ['ankomster', 'kordata'], folders: [] });
+assert.deepEqual(plain(n), { top: ['ankomster', 'kordata', 'moduler'], folders: [] });
 
 // 14. arrange + layout: mappen grupperar sina ikoner på mappens plats, platt lista behålls för index.html
 const menu = top0.map((id) => ({ id, label: id, icon: 'x' }));
@@ -113,12 +113,12 @@ H.setCatalog(menu);
 s = M.createFolder(top0, [], 'vader', 'lonekoll', 'mapp-a1', 'Bil');
 H.preview(s.top, [], s.folders);
 const flat = plain(H.arrange(menu).map((x) => x.id));
-assert.deepEqual(flat, ['kordata', 'lonekoll', 'vader', 'ankomster', 'prognos', 'kalender', 'installningar', 'om']);
+assert.deepEqual(flat, ['kordata', 'lonekoll', 'vader', 'ankomster', 'prognos', 'kalender', 'installningar', 'om', 'moduler']);
 const lay = plain(H.layout());
 assert.equal(lay[1].type, 'folder');
 assert.deepEqual(lay[1].items, ['lonekoll', 'vader']);
 assert.equal(lay[1].name, 'Bil');
-assert.equal(lay.length, 7);
+assert.equal(lay.length, 8);
 // Ett nytt verktyg som inte finns i sparad ordning hamnar ändå på startskärmen
 const menuNew = menu.concat([{ id: 'topplistor', label: 'T', icon: 'x' }]);
 assert.ok(H.arrange(menuNew).map((x) => x.id).includes('topplistor'));
@@ -139,7 +139,7 @@ assert.deepEqual(plain(again.folders()), [{ id: 'mapp-a1', name: 'Bil', items: [
 assert.deepEqual(plain(again.order()), plain(s.top));
 // Utan mappar skrivs gammalt format (bakåtkompatibelt)
 H.preview(['vader', 'kordata'], [], []);
-assert.equal(ls.getItem('taxi_home_order:900042'), '{"ids":["vader","kordata"],"hidden":[]}');
+assert.equal(ls.getItem('taxi_home_order:900042'), '{"ids":["vader","kordata","moduler"],"hidden":[]}');
 // Trasig/manipulerad data rensas: dubbletter, nästlade mappar, en-ikonsmappar
 H.preview(['mapp-a1'], [], [{ id: 'mapp-a1', name: 'A', items: ['vader', 'vader'] }, { id: 'MAPP', items: ['a', 'b'] }]);
 assert.equal(H.folders().length, 0);
@@ -159,17 +159,18 @@ assert.match(src, /Ta ut ur mappen/);
 assert.ok(H.LIFT_MS >= 800 && H.LIFT_MS <= 1100, 'håll in ungefär en sekund');
 const html = fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8');
 assert.doesNotMatch(html, /td-wrench|skiftnyckel/i);
-assert.match(html, /hem-ordning\.js\?v=20261112mapp1/);
-assert.match(html, /hjalp\.js\?v=20261112mapp1/);
-assert.match(html, /lazy-views\.js\?v=20261112mapp1/);
+assert.match(html, /hem-ordning\.js\?v=20261112mod1/);
+assert.match(html, /hjalp\.js\?v=20261112mod1/);
+assert.match(html, /lazy-views\.js\?v=20261112mod1/);
 const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
-assert.match(lv, /changelog\.js\?v=20261112mapp1/);
+assert.match(lv, /changelog\.js\?v=20261112mod1/);
 const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
+assert.match(cl, /2026-11-12mod1/);
 assert.match(cl, /2026-11-12mapp1/);
 const help = fs.readFileSync(path.join(root, 'TaxiData/hjalp.js'), 'utf8');
 assert.doesNotMatch(help, /skiftnyckel/i);
 assert.match(help, /dra ut den/);
-const newText = cl.split("id: '2026-11-12mapp1'")[1].split(']},')[0] + help.split('hem: [')[1].split('],')[0];
+const newText = cl.split("id: '2026-11-12mod1'")[1].split(']},')[0] + help.split('hem: [')[1].split('],')[0];
 assert.doesNotMatch(newText, /\bStig\b|\bhen\b/);
 const mig = fs.readFileSync(path.join(root, 'supabase/migrations/20261112b_home_tool_folders.sql'), 'utf8');
 assert.match(mig, /add column if not exists folders jsonb/);
