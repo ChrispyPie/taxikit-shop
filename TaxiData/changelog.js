@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-12', id: '2026-11-12anim5', tid: '06:45', rader: [
+    ['Förbättrat', 'När ett bevakat tåg, flyg eller båt ankommer visas en stor figur över hela skärmen i ungefär fem sekunder, så att du hinner se det. Animationen körs inte vid försening eller andra statusuppdateringar.']
+  ]},
   { datum: '2026-11-11', id: '2026-11-11datatid1', tid: '22:35', rader: [
     ['Rättat', 'I Prognos på Landvetter visar tiden när flygdata senast hämtades från Swedavia, inte när appen öppnades. Är uppgifterna mer än 30 minuter gamla syns det i texten. Tiden för själva prognosen visas också.'],
     ['Rättat', 'I Ankomster visar "uppdaterad" när tåg, flyg och båtar senast hämtades från källan, inte när du öppnade sidan.']

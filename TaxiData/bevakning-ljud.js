@@ -220,10 +220,21 @@
     kick();
   }
 
+  // Animation bara vid själva ankomsten, inte vid försening, inställt, ny tid eller bagage.
+  // "ankommer" (förvarning) räknas inte; bara "har ankommit" / "har landat".
+  function isArrival(msg) {
+    var title = String((msg && msg.title) || '');
+    return /har landat|har ankommit/i.test(title);
+  }
+
   function playFromMessage(msg, key) {
     var kind = kindOf(msg, key);
     if (kind && kind !== 'test') {
-      try { document.dispatchEvent(new CustomEvent('bev-watch-fire', { detail: { kind: kind } })); } catch (e) {}
+      try {
+        document.dispatchEvent(new CustomEvent('bev-watch-fire', {
+          detail: { kind: kind, arrival: isArrival(msg) }
+        }));
+      } catch (e) {}
     }
     if (kind) play(kind, false);
     return kind;
@@ -315,6 +326,7 @@
   window.BEV_LJUD = {
     play: play,
     playFromMessage: playFromMessage,
+    isArrival: isArrival,
     kindOf: kindOf,
     enabled: enabled,
     read: read,
