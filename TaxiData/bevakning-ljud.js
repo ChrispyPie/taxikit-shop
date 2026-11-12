@@ -4,6 +4,7 @@
  * Av = tyst, typ-toggle stänger av en sort. Ljudet låses upp vid första
  * trycket (webbläsare kräver en användargest). Inställningarna sitter på
  * Ankomster och i Mina bevakningar, inte under Inställningar.
+ * Tåg (12 nov): om ljudet spelas avgörs av villkoren i tag-villkor.js (push med v: 1 och silent).
  * Ångra: ta bort filerna i ljud/, återställ den här filen och beep() i bevakning.js.
  */
 (function () {
@@ -236,6 +237,12 @@
         }));
       } catch (e) {}
     }
+    // Tåg: förarens villkor (tag-villkor.js). Ny server skickar v: 1 + silent, äldre push: lokala villkor.
+    if (kind === 'tag' && window.TAG_VILLKOR && TAG_VILLKOR.shouldPlay) {
+      if (!TAG_VILLKOR.shouldPlay(msg, key)) return kind;
+      if (msg && msg.v === 1) { play(kind, true); return kind; }
+    }
+    if (kind && kind !== 'test' && msg && msg.silent === true) return kind;
     if (kind) play(kind, false);
     return kind;
   }
@@ -246,10 +253,16 @@
     });
   }
 
+  // notifying: händelsen bev-ljud-change lyssnas också på här, så utan spärr anropade notify sig själv i all oändlighet.
+  var notifying = false;
   function notify() {
-    try { document.dispatchEvent(new CustomEvent('bev-ljud-change')); } catch (e) {}
-    mounted = mounted.filter(function (m) { return m.box && m.box.isConnected; });
-    mounted.forEach(function (m) { paintCompact(m.box, m.kinds, true); });
+    if (notifying) return;
+    notifying = true;
+    try {
+      try { document.dispatchEvent(new CustomEvent('bev-ljud-change')); } catch (e) {}
+      mounted = mounted.filter(function (m) { return m.box && m.box.isConnected; });
+      mounted.forEach(function (m) { paintCompact(m.box, m.kinds, true); });
+    } finally { notifying = false; }
   }
 
   function ensureCompactStyle() {
@@ -287,6 +300,8 @@
       cur[k] = !!el.checked;
       cur.on = !!(cur.tag || cur.flyg || cur.bat);
       write(cur);
+      // Tågljudet är samma som standardens Ljud på i villkoren (sparas även hos servern).
+      if (k === 'tag' && window.TAG_VILLKOR && TAG_VILLKOR.setDefault) TAG_VILLKOR.setDefault({ sound: !!el.checked });
       notify();
     };
     box.onclick = function (e) {
