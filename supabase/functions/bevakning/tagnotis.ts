@@ -1,3 +1,5 @@
+import { decide as decideVillkor, estStep, type Villkor } from "./villkor.ts";
+
 // Mina tågnotiser: fasta notiser för vissa tåg (t.ex. snabbtågen från Stockholm) under förarens valda tider.
 // Ren logik utan nätverk, så den kan testas (supabase/functions/_test/tagnotis_test.ts).
 // Vilka bevakningar som är aktiva just nu (påslagna, inom tiderna, föraren har push) avgör databasen (tw_svc_active).
@@ -7,8 +9,11 @@ export type TrainWatch = {
   lead_min: number; notify_delay: boolean; delay_min: number; notify_cancel: boolean;
 };
 export type Train = Record<string, unknown>;
-export type SentState = { lead?: boolean; est?: string; canceled?: boolean };
-export type Msg = { title: string; body: string; tag: string };
+export type SentState = { lead?: boolean; est?: string; canceled?: boolean; seen?: string; late?: number };
+// silent/v: villkor (villkor.ts). v = 1 betyder att servern redan avgjort ljudet; silent = notis utan ljud.
+export type Msg = { title: string; body: string; tag: string; silent?: boolean; v?: number };
+// Förarens villkor för en avgång (villkor.ts resolve). Saknas = standard (tystare).
+export type VillkorOf = (driver: string, ident: string, sched: number) => Partial<Villkor> | null | undefined;
 
 // Samma grupper som i appen (TaxiData/ankomster.js TRAIN_GROUPS)
 const GROUPS: Record<string, { sig: RegExp; name: RegExp }> = {
@@ -42,10 +47,12 @@ export function matches(w: TrainWatch, t: Train): boolean {
 }
 export const sentKey = (driver: string, ident: string, sched: number) => driver + "|" + ident + "|" + sched;
 
-type Out = { driver: string; ident: string; sched: string; state: SentState; msg: Msg };
+// msg saknas = bara nytt tillstånd (senast sedd tid) ska sparas, ingen notis.
+export type Out = { driver: string; ident: string; sched: string; state: SentState; msg?: Msg; reason?: string };
 
 // Avgör vilka notiser som ska skickas nu. sent: tidigare skickat (nyckel sentKey). Returnerar notiser + nytt tillstånd.
-export function decide(watches: TrainWatch[], trains: Train[], sent: Map<string, SentState>, now: number): Out[] {
+// villkorOf: förarens villkor (Mina bevakningar). Små förseningar ger ingen notis, stora/plötsliga ger notis även långt bort.
+export function decide(watches: TrainWatch[], trains: Train[], sent: Map<string, SentState>, now: number, villkorOf?: VillkorOf): Out[] {
   const byDriver = new Map<string, TrainWatch[]>();
   for (const w of watches) { const a = byDriver.get(w.driver_id) || []; a.push(w); byDriver.set(w.driver_id, a); }
   const out: Out[] = [];
@@ -58,7 +65,8 @@ export function decide(watches: TrainWatch[], trains: Train[], sent: Map<string,
     for (const { t, sched, est } of cands) {
       if (n >= MAX_PER_TICK) break;
       const eta = est || sched;
-      if (eta < now - 60e3 || eta > now + HORIZON_MIN * 60e3) continue;
+      // Planerad ELLER beräknad tid inom horisonten: ett tåg som är fem timmar sent räknas fortfarande.
+      if (eta < now - 60e3 || Math.min(sched, eta) > now + HORIZON_MIN * 60e3) continue;
       const m = ws.filter((w) => matches(w, t));
       if (!m.length) continue;
       // Flera bevakningar på samma tåg: slå ihop (längsta förvarning, minsta förseningsgräns)
@@ -69,41 +77,57 @@ export function decide(watches: TrainWatch[], trains: Train[], sent: Map<string,
       const ident = String(t.id || "");
       const key = sentKey(driver, ident, sched);
       const prev = sent.get(key) || {};
-      const s: SentState = { ...prev };
-      const from = String(t.other || "");
-      const prod = String(t.product || "Tåg").replace(/\s*\(.*\)$/, "");
-      const name = prod + " " + ident + (from ? " från " + from : "");
-      const track = t.track ? " Spår " + t.track + "." : "";
-      const late = est && est > sched ? Math.round((est - sched) / 60e3) : 0;
-      const canceled = t.canceled === true || String(t.canceled) === "true";
-      let title = "", body = "";
-      if (canceled) {
-        if (wantCancel && !s.canceled) {
-          s.canceled = true;
-          title = "❌ " + name + " är inställt";
-          body = "Skulle ankomma " + hm(sched) + ".";
-        }
-      } else if (lead > 0 && !s.lead && eta - now <= lead * 60e3) {
-        s.lead = true;
-        if (est) s.est = new Date(est).toISOString();
-        const mins = Math.max(0, Math.round((eta - now) / 60e3));
-        title = "🚆 " + name + " ankommer " + hm(eta);
-        body = (mins > 0 ? "Om " + mins + " min." : "Nu.") + track +
-          (late >= 1 ? " " + late + " min sen (planerad " + hm(sched) + ")." : " I tid.");
-      } else if (wantDelay && est && late >= delayMin) {
-        const prevEst = ms(s.est) || sched;
-        if (Math.abs(est - prevEst) >= EST_STEP_MIN * 60e3) {
-          s.est = new Date(est).toISOString();
-          title = "🕒 " + name + ": ny tid " + hm(est);
-          body = "Planerad " + hm(sched) + ", försenat " + late + " min." + track;
-        }
-      }
-      if (!title) continue;
-      n++;
-      out.push({ driver, ident, sched: new Date(sched).toISOString(), state: s, msg: { title, body, tag: "tag-" + ident } });
+      const vill = villkorOf ? villkorOf(driver, ident, sched) : null;
+      const r = trainDecision(t, ident, sched, est, eta, prev, { lead, wantDelay, delayMin, wantCancel }, vill, now);
+      if (!r) continue;
+      if (r.msg) n++;
+      out.push({ driver, ident, sched: new Date(sched).toISOString(), state: r.state, msg: r.msg, reason: r.reason });
     }
   }
   return out;
+}
+
+export type RuleOpts = { lead: number; wantDelay: boolean; delayMin: number; wantCancel: boolean };
+// Gemensam för Mina tågnotiser och fasta ruttbevakningar (routewatch.ts). null = inget att spara.
+export function trainDecision(t: Train, ident: string, sched: number, est: number, eta: number, prev: SentState, o: RuleOpts,
+  vill: Partial<Villkor> | null | undefined, now: number, icon = "🚆 "): { state: SentState; msg?: Msg; reason: string } | null {
+  const s: SentState = { ...prev };
+  const from = String(t.other || "");
+  const prod = String(t.product || "Tåg").replace(/\s*\(.*\)$/, "");
+  const name = prod + " " + ident + (from ? " från " + from : "");
+  const track = t.track ? " Spår " + t.track + "." : "";
+  const late = est && est > sched ? Math.round((est - sched) / 60e3) : 0;
+  const canceled = t.canceled === true || String(t.canceled) === "true";
+  const msg = (title: string, body: string, sound: boolean): Msg => ({ title, body, tag: "tag-" + ident, silent: !sound, v: 1 });
+  if (canceled) {
+    if (o.wantCancel && !s.canceled) {
+      s.canceled = true;
+      const d = decideVillkor({ type: "canceled", sched }, vill, now);
+      return { state: s, msg: msg("❌ " + name + " är inställt", "Skulle ankomma " + hm(sched) + ".", d.sound), reason: d.reason };
+    }
+    return null;
+  }
+  if (o.lead > 0 && !s.lead && eta - now <= o.lead * 60e3) {
+    s.lead = true;
+    if (est) { s.est = new Date(est).toISOString(); s.seen = s.est; s.late = late; }
+    const mins = Math.max(0, Math.round((eta - now) / 60e3));
+    const d = decideVillkor({ type: "lead", sched }, vill, now);
+    return { state: s, reason: d.reason, msg: msg(icon + name + " ankommer " + hm(eta),
+      (mins > 0 ? "Om " + mins + " min." : "Nu.") + track + (late >= 1 ? " " + late + " min sen (planerad " + hm(sched) + ")." : " I tid."), d.sound) };
+  }
+  if (!o.wantDelay) return null;
+  // Förarens gräns på själva bevakningen gäller också (den högsta av de två).
+  const st = estStep(s, sched, eta, vill, now);
+  if (!st.changed || !st.d) return null;
+  let d = st.d;
+  if (d.notify && d.reason !== "jump" && o.delayMin < 999 && d.late < o.delayMin) {
+    d = { ...d, notify: false, sound: false, reason: "rule_min" };
+    delete st.state.est; if (prev.est) st.state.est = prev.est;
+    if (typeof prev.late === "number") st.state.late = prev.late; else delete st.state.late;
+  }
+  if (!d.notify) return { state: st.state, reason: d.reason };
+  return { state: st.state, reason: d.reason, msg: msg("🕒 " + name + ": ny tid " + hm(eta),
+    "Planerad " + hm(sched) + (eta > sched ? ", försenat " + Math.round((eta - sched) / 60e3) + " min." : ", nu i tid.") + track, d.sound) };
 }
 
 // Gör om skickat-listan från databasen till en Map

@@ -256,9 +256,11 @@
   // Push medan appen är öppen: ljud + ruta. Rutan går att trycka på och öppnar det notisen gäller (t551u).
   B.alert = function (msg, key) {
     msg = msg || {};
+    // Tyst notis (villkoren för tåg): inget ljud och ingen vibration.
+    var quiet = msg.silent === true || (String(msg.tag || '').indexOf('tag') === 0 && window.TAG_VILLKOR && TAG_VILLKOR.shouldPlay && !TAG_VILLKOR.shouldPlay(msg, key));
     if (window.BEV_LJUD) BEV_LJUD.playFromMessage(msg, key);
-    else beep();
-    try { if (navigator.vibrate) navigator.vibrate([300, 120, 300, 120, 300]); } catch (e) {}
+    else if (!quiet) beep();
+    try { if (!quiet && navigator.vibrate) navigator.vibrate([300, 120, 300, 120, 300]); } catch (e) {}
     toast((msg.title ? msg.title : 'Ny händelse') + (msg.body ? ' – ' + msg.body : ''), 8000,
       { key: key || msg.nkey || '', tag: msg.tag || '', title: msg.title || '', body: msg.body || '', target: msg.target || null });
     st.loadedAt = 0; refresh();
@@ -303,7 +305,7 @@
       if (k.kind === 'flyg') { state.landed = !!item.act; state.firstBag = /Första väskan/.test(item.info || ''); state.lastBag = !!(item.lastBag && item.act && item.lastBag >= item.act - 30 * 60000); }
       else state.arrived = !!item.act;
       state.canceled = !!item.canceled;
-      if (item.est && item.sched && Math.abs(item.est - item.sched) >= 60000) state.est = new Date(item.est).toISOString();
+      if (item.est && item.sched && Math.abs(item.est - item.sched) >= 60000) { state.est = new Date(item.est).toISOString(); state.late = Math.max(0, Math.round((item.est - item.sched) / 60000)); }
     }
     rpc('watch_set', { p_kind: k.kind, p_ident: k.ident, p_sched: existing ? existing.sched : k.schedRaw, p_on: on,
       p_label: item ? item.from : null, p_sub: item ? item.sub : null, p_state: state })
@@ -392,6 +394,7 @@
         'En tillfällig bevakning tas bort av sig själv en halvtimme efter sista händelsen (för flyg: sista väskan). ' +
         'Vill du ha samma tur varje dag håller du fingret på den i Mina bevakningar, så blir den fast (guld). ' +
         'När du bevakar något slås notiserna på automatiskt. Ljudet (tåg, flyg, båt) slås på eller av ovanför listan. När du loggar ut stängs notiserna av på telefonen.</p>' +
+        '<p><b>Tåg:</b> små förseningar (under 15 min) ger varken notis eller ljud. En stor försening (30 min) eller en plötslig ändring (15 min på en gång) ger notis även när tåget är långt bort. Ändra siffrorna, och när ljudet ska gå, under Specificera villkor i Mina bevakningar.</p>' +
         '<p><b>Android:</b> när du bevakar något första gången frågar telefonen om notiser. Välj Tillåt. Kolla att notiser för Chrome inte är avstängda och att telefonen inte står på ljudlöst.</p>' +
         '<p><b>iPhone:</b> öppna taxikit.shop/TaxiData i Safari, tryck Dela ⬆️ → "Lägg till på hemskärmen". Öppna appen från hemskärmen och logga in. När du bevakar något frågar telefonen om notiser. Kräver iOS 16.4 eller senare.</p>' +
         '<p>Flygtider uppdateras ungefär var 5:e minut, tåg varje minut.</p></div>';
@@ -442,7 +445,9 @@
     var wrap = document.createElement('div'); wrap.innerHTML = barHtml();
     if (head) head.parentNode.insertBefore(wrap.firstChild, head.nextSibling);
     var ljud = el.querySelector('#bev-ljud-box');
-    if (ljud && window.BEV_LJUD && BEV_LJUD.renderCompact) BEV_LJUD.renderCompact(ljud, tabKind() || 'tag');
+    // Tåg: bara kryssrutan Ljud för tåg och länken till villkoren i Mina bevakningar (tag-villkor.js).
+    if (ljud && (tabKind() || 'tag') === 'tag' && window.TAG_VILLKOR && TAG_VILLKOR.renderAnkomster) TAG_VILLKOR.renderAnkomster(ljud);
+    else if (ljud && window.BEV_LJUD && BEV_LJUD.renderCompact) BEV_LJUD.renderCompact(ljud, tabKind() || 'tag');
     if (!st.loadedAt) refresh();
     else loadRoutes();
     if (st.push === 'unknown' && !st.checking) { st.checking = true; checkPush().then(function () { st.checking = false; repaint(); }); }
@@ -465,6 +470,7 @@
         return Promise.all([srv, loc]);
       });
     st.list = []; B.routes = []; routesAt = 0; st.push = 'unknown'; savedOnce = false;
+    try { if (window.TAG_VILLKOR && TAG_VILLKOR.resetLocal) TAG_VILLKOR.resetLocal(); } catch (e) {}
     try { if (window.PROGNOS_NOTIS && PROGNOS_NOTIS.logout) PROGNOS_NOTIS.logout(); } catch (e) {}
     return Promise.race([work, new Promise(function (r) { setTimeout(r, 4000); })]);
   };

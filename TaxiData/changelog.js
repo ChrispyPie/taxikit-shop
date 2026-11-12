@@ -15,8 +15,14 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-11-12', id: '2026-11-12svar2', rader: [
+  { datum: '2026-11-12', id: '2026-11-12svar2', tid: '16:15', rader: [
     ['Nytt', 'Felanmälan, Bilen står och Behövs till bilen har en knapp Bokad tid. Ägaren kan föreslå en tid som chauffören godkänner, och chauffören kan föreslå en tid som ägaren bekräftar. Chauffören och bilen är redan ifyllda. Tiden syns i ärendet och grå i schemat tills den är godkänd.']
+  ]},
+  { datum: '2026-11-12', id: '2026-11-12ljud1', tid: '16:10', rader: [
+    ['Förbättrat', 'Tåg piper mycket mindre. Små förseningar, under 15 minuter, ger ingen notis och inget ljud. Du får notis när tåget börjar närma sig, när förseningen blir stor (30 minuter eller mer), när tiden plötsligt ändras mycket, när tåget ställs in och när det har kommit fram.'],
+    ['Nytt', 'I Mina bevakningar finns Ljud och notiser för tåg. Där väljer du själv hur många minuter före ankomst du vill ha notis, och vad som räknas som liten och stor försening. Det sparas på ditt konto.'],
+    ['Nytt', 'Tryck på 🔔 vid ett tåg i Mina bevakningar för att ge just den avgången egna villkor, bara den här gången eller varje gång för en fast bevakning.'],
+    ['Ändrat', 'Under tåg på Ankomster finns nu bara Ljud för tåg, av eller på, och en länk till villkoren i Mina bevakningar.']
   ]},
   { datum: '2026-11-12', id: '2026-11-12svar1', tid: '16:00', rader: [
     ['Fixat', 'Admin › Ägare › Ärenden: en felanmälan, Bilen står eller Behövs till bilen går nu att svara på direkt i ärendet. Meddelandet syns i tråden och föraren får en notis. Ärendet visas inte längre som Arkiv eller bara läsning.'],

@@ -20,7 +20,7 @@ assert.doesNotMatch(js, /localStorage\.getItem\('taxi_bev_ljud'\)/);
 assert.match(ljud, /bev-watch-fire/);
 assert.match(html, /animationer\.js\?v=20261112zon2/);
 assert.match(html, /id="animationer-set"/);
-assert.match(html, /bevakning-ljud\.js\?v=20261112anim5/);
+assert.match(html, /bevakning-ljud\.js\?v=20261112ljud1/);
 assert.match(cl, /2026-11-11anim1/);
 assert.match(cl, /Inställningar, Animationer/);
 assert.doesNotMatch(cl, /regnar eller snöar|snöflingor|droppar eller flingor/);
@@ -132,10 +132,10 @@ assert.ok(!L.isArrival({ title: '❌ SK1 är inställt' }));
 assert.ok(!L.isArrival({ title: '🧳 Bagaget rullar på band 4 – SK1' }));
 
 // ---- Prognoszoner, landande plan, Stena (2026-11-12zon2) ----
-assert.match(html, /lazy-views\.js\?v=20261112(swipe1|mapp1)/);
+assert.match(html, /lazy-views\.js\?v=20261112(swipe1|mapp1|ljud1|svar2)/);
 const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
 assert.match(lv, /prognos-notis\.js\?v=20261112zon2/);
-assert.match(lv, /changelog\.js\?v=20261112(bot1|mapp1)/);
+assert.match(lv, /changelog\.js\?v=20261112(bot1|mapp1|ljud1)/);
 assert.match(cl, /2026-11-12zon2/);
 assert.doesNotMatch(cl.split('window.CHANGELOG')[1].slice(0, 1600), /\bStig\b|BRASSERIE|Brasserie/);
 assert.doesNotMatch(js, /BRASSERIE/);
