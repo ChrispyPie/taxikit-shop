@@ -15,7 +15,7 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-11-12', id: '2026-11-12pgfix1', tid: '', rader: [
+  { datum: '2026-11-12', id: '2026-11-12pgfix1', tid: '19:12', rader: [
     ['Fixat', 'Prognos fastnade på Laddar verktyget efter omladdning eller inloggning, särskilt på en delad platta. Öppna Prognos från startskärmen om det händer innan uppdateringen är inne.']
   ]},
   { datum: '2026-11-12', id: '2026-11-12svar2', tid: '16:15', rader: [
