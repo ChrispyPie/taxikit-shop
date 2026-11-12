@@ -20,6 +20,11 @@ window.CHANGELOG = [
     ['Ändrat', 'När boten kollar något, till exempel vädret, springer den snabbt till ikonen, in och ut, tillbaka ner och berättar sedan. Vill den att du följer med till något (ett tips) går den först dit och visar bubblan där.'],
     ['Nytt', 'Under Inställningar, Hjälpbot finns Prova väderkollen, så du kan se hur det ser ut utan att vänta.']
   ]},
+  { datum: '2026-11-12', id: '2026-11-12swipe1', tid: '14:10', rader: [
+    ['Förbättrat', 'Dra åt höger för att backa tar dig nu till föregående sida i stället för alltid till startskärmen. Har du gått flera steg, till exempel Prognos, sedan Ankomster och sedan Inställningar, backar du ett steg i taget. Telefonens bakåtknapp gör samma sak.'],
+    ['Nytt', 'Har du backat kan du gå framåt igen: dra åt vänster från mitten av skärmen. Finns det ingen sida framåt händer inget. Trycker du dig till en ny sida försvinner det som låg framåt, som i en webbläsare.'],
+    ['Ändrat', 'Notiserna öppnas som förut när du drar åt vänster från högra kanten. Både bakåt och framåt kräver ett tydligt drag i sidled, så att vanlig scroll inte räknas.']
+  ]},
   { datum: '2026-11-12', id: '2026-11-12zon2', tid: '13:42', rader: [
     ['Nytt', 'Prognos: när en zon du bevakar får en ny förbokning visas zonens märke över skärmen, samtidigt som notisen. Landvetter: ett plan som sveper förbi, och när appen är öppen låter notisen som säkerhetsbältessignalen i stället för pipet. Essity, Astra, Volvo och Hotell Draken: loggan glider in, stannar några sekunder och glider ut. Andra zoner låter som förut.'],
     ['Ändrat', 'Ankomster: när ett bevakat flyg har landat visas nu ett plan som landar på en bana. När en båt har ankommit visas en Stenafärja. Tåget är som förut. Animationen körs fortfarande bara vid själva ankomsten.'],

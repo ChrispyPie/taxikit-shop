@@ -1,23 +1,30 @@
-/* Bakåt-swipe: dra åt höger från vänstra halvan av skärmen = samma som telefonens bakåtknapp.
- * Använder history.back() så att index.html:s popstate (stänger notiser, profilmeny,
- * går ur Forum/Inkorg/Profil m.m.) körs som vanligt. Saknas historik anropas goHome().
- * Startzon = vänstra 50 % (telefonfodral täcker ofta kanten). Kräver tydlig horisontell
- * dragning så vanlig scroll inte triggar bakåt. Högerkanten (notis.js) lämnas orörd.
- * Ångra: se docs/swipe-back/UNDO.md och docs/scroll-fix/UNDO.md. */
+/* Bakåt- och framåt-swipe (2026-11-12swipe1).
+ *   Dra åt höger, start i vänstra halvan av skärmen  = bakåt till föregående sida (samma som telefonens
+ *     bakåtknapp). Går via history.back() så att index.html:s popstate (NAV.handlePop i nav-historik.js)
+ *     stänger notiser/under-vyer och visar rätt sida. På startskärmen utan något bakåt händer inget.
+ *   Dra åt vänster, start var som helst utom de yttersta 24 px till höger = framåt igen, bara om det
+ *     finns en sida framåt (efter att du backat). Annars händer inget.
+ *   Dra åt vänster från högra kanten (24 px, notis.js) = notispanelen, som förut. Den zonen lämnas orörd.
+ * Kräver tydlig horisontell dragning (minst 28 % av bredden, minst 100 px, och lodrätt < halva sidled)
+ * så vanlig scroll inte triggar. Sidor utan nav-historik.js (admin.html m.fl.) får bara bakåt.
+ * Ångra: se docs/swipe-historik/UNDO.md, docs/swipe-back/UNDO.md och docs/scroll-fix/UNDO.md. */
 (function () {
-  var START_FRAC = 0.5;  // gesten får börja i vänstra halvan (fodral täcker kanten)
-  var HINT_ID = 'swipe-back-hint';
+  var START_FRAC = 0.5;  // bakåt får börja i vänstra halvan (fodral täcker kanten)
+  var NOTIS_EDGE = 24;   // = EDGE i notis.js: där börjar notispanelens drag, framåt startar aldrig där
+  var HINT_ID = 'swipe-back-hint', FWD_ID = 'swipe-fwd-hint';
   function minDx() { return Math.max(100, Math.round(window.innerWidth * 0.28)); }
 
   var CSS =
-    '#' + HINT_ID + '{position:fixed;left:0;top:50%;transform:translate(-120%,-50%);' +
+    '#' + HINT_ID + ',#' + FWD_ID + '{position:fixed;top:50%;' +
       'width:44px;height:44px;border-radius:50%;background:var(--surface,#1a202c);color:var(--text,#edf2f7);' +
       'border:1px solid var(--border,#4a5568);box-shadow:2px 0 10px rgba(0,0,0,.25);' +
       'display:flex;align-items:center;justify-content:center;font-size:1.6rem;line-height:1;' +
       'z-index:950;pointer-events:none;opacity:0;transition:none;' +
       'padding-bottom:2px;-webkit-user-select:none;user-select:none}' +
-    '#' + HINT_ID + '.show{opacity:1}' +
-    '@media print{#' + HINT_ID + '{display:none!important}}';
+    '#' + HINT_ID + '{left:0;transform:translate(-120%,-50%)}' +
+    '#' + FWD_ID + '{right:0;transform:translate(120%,-50%);box-shadow:-2px 0 10px rgba(0,0,0,.25)}' +
+    '#' + HINT_ID + '.show,#' + FWD_ID + '.show{opacity:1}' +
+    '@media print{#' + HINT_ID + ',#' + FWD_ID + '{display:none!important}}';
 
   (function injectCss() {
     if (document.getElementById('swipe-back-css')) return;
@@ -56,35 +63,50 @@
   function notisOpen() {
     return !!(window.NOTIS && typeof NOTIS.isOpen === 'function' && NOTIS.isOpen());
   }
+  function canForward() {
+    return !!(window.NAV && typeof NAV.canForward === 'function' && NAV.canForward());
+  }
 
-  function hintEl() {
-    var el = document.getElementById(HINT_ID);
+  function hintEl(id, ch) {
+    var el = document.getElementById(id);
     if (el) return el;
     el = document.createElement('div');
-    el.id = HINT_ID;
+    el.id = id;
     el.setAttribute('aria-hidden', 'true');
-    el.textContent = '\u2039';
+    el.textContent = ch;
     document.body.appendChild(el);
     return el;
   }
 
   function showHint(dx) {
-    var el = hintEl();
+    var el = hintEl(HINT_ID, '\u2039');
     var x = Math.min(56, Math.max(0, dx * 0.45));
     el.classList.add('show');
     el.style.transform = 'translate(' + (x - 56) + 'px,-50%)';
     el.style.opacity = String(Math.min(1, dx / 50));
   }
+  function showFwdHint(dist) {
+    var el = hintEl(FWD_ID, '\u203a');
+    var x = Math.min(56, Math.max(0, dist * 0.45));
+    el.classList.add('show');
+    el.style.transform = 'translate(' + (56 - x) + 'px,-50%)';
+    el.style.opacity = String(Math.min(1, dist / 50));
+  }
 
   function hideHint() {
     var el = document.getElementById(HINT_ID);
-    if (!el) return;
-    el.classList.remove('show');
-    el.style.opacity = '0';
-    el.style.transform = 'translate(-120%,-50%)';
+    if (el) { el.classList.remove('show'); el.style.opacity = '0'; el.style.transform = 'translate(-120%,-50%)'; }
+    var f = document.getElementById(FWD_ID);
+    if (f) { f.classList.remove('show'); f.style.opacity = '0'; f.style.transform = 'translate(120%,-50%)'; }
   }
 
   function goBack() {
+    if (window.NAV && typeof NAV.back === 'function') {
+      if (NAV.back()) return;
+      // Inget steg bakåt: från en annan sida till startskärmen, på startskärmen händer inget.
+      if (NAV.here() && typeof window.goHome === 'function') { try { window.goHome({ replace: true }); } catch (e) {} }
+      return;
+    }
     if (history.length > 1) {
       try { history.back(); return; } catch (e) {}
     }
@@ -92,16 +114,21 @@
       try { window.goHome(); } catch (e) {}
     }
   }
+  function goForward() {
+    if (window.NAV && typeof NAV.forward === 'function') NAV.forward();
+  }
 
   var tg = null;
 
   document.addEventListener('touchstart', function (e) {
     if (e.touches.length !== 1) { tg = null; return; }
     if (onLogin() || notisOpen()) { tg = null; return; }
-    var t = e.touches[0];
-    if (t.clientX > window.innerWidth * START_FRAC) { tg = null; return; }
+    var t = e.touches[0], w = window.innerWidth;
+    if (t.clientX >= w - NOTIS_EDGE) { tg = null; return; }   // notispanelens kant: notis.js tar den
     if (scrollsX(e.target) || blockedTarget(e.target)) { tg = null; return; }
-    tg = { x: t.clientX, y: t.clientY, active: false, dx: 0, dy: 0 };
+    var back = t.clientX <= w * START_FRAC, fwd = canForward();
+    if (!back && !fwd) { tg = null; return; }
+    tg = { x: t.clientX, y: t.clientY, back: back, fwd: fwd, dir: 0, dx: 0, dy: 0 };
   }, { passive: true });
 
   document.addEventListener('touchmove', function (e) {
@@ -110,17 +137,17 @@
     var t = e.touches[0];
     var dx = t.clientX - tg.x;
     var dy = t.clientY - tg.y;
-    if (!tg.active) {
+    if (!tg.dir) {
       if (Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)) { tg = null; return; } // lodrät scroll
-      if (dx > 12) {
-        tg.active = true;
-        showHint(dx);
-      } else return;
+      if (dx > 12 && tg.back) tg.dir = 1;
+      else if (dx < -12 && tg.fwd) tg.dir = -1;
+      else if (Math.abs(dx) > 12) { tg = null; return; }   // fel håll för den här starten
+      else return;
     }
-    if (dx < 0) dx = 0;
-    tg.dx = dx;
+    var dist = tg.dir > 0 ? Math.max(0, dx) : Math.max(0, -dx);
+    tg.dx = dist;
     tg.dy = dy;
-    showHint(dx);
+    if (tg.dir > 0) showHint(dist); else showFwdHint(dist);
     // Lätt: vi preventDefaultar inte – låt sidan skrolla om gesten avbryts.
   }, { passive: true });
 
@@ -128,10 +155,12 @@
     if (!tg) return;
     var g = tg; tg = null;
     hideHint();
-    if (!g.active) return;
+    if (!g.dir) return;
     var need = minDx();
     // Tydligt horisontellt: |dy| < dx/2, och långt nog så fodral/korta drag inte triggar.
-    if (g.dx >= need && Math.abs(g.dy || 0) < g.dx * 0.5) goBack();
+    if (g.dx >= need && Math.abs(g.dy || 0) < g.dx * 0.5) {
+      if (g.dir > 0) goBack(); else goForward();
+    }
   }, { passive: true });
 
   document.addEventListener('touchcancel', function () {
