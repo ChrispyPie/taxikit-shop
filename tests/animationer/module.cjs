@@ -18,7 +18,7 @@ assert.match(js, /bev-watch-fire/);
 assert.match(js, /Animationer/);
 assert.doesNotMatch(js, /localStorage\.getItem\('taxi_bev_ljud'\)/);
 assert.match(ljud, /bev-watch-fire/);
-assert.match(html, /animationer\.js\?v=20261112anim5/);
+assert.match(html, /animationer\.js\?v=20261112zon2/);
 assert.match(html, /id="animationer-set"/);
 assert.match(html, /bevakning-ljud\.js\?v=20261112anim5/);
 assert.match(cl, /2026-11-11anim1/);
@@ -131,4 +131,216 @@ assert.ok(!L.isArrival({ title: '✈️ SK1 ankommer 06:20' }));
 assert.ok(!L.isArrival({ title: '❌ SK1 är inställt' }));
 assert.ok(!L.isArrival({ title: '🧳 Bagaget rullar på band 4 – SK1' }));
 
-console.log('PASS animationer: default on, independent of sound, reduced-motion, kinds, hook, no Stig');
+// ---- Prognoszoner, landande plan, Stena (2026-11-12zon2) ----
+assert.match(html, /lazy-views\.js\?v=20261112zon2/);
+const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
+assert.match(lv, /prognos-notis\.js\?v=20261112zon2/);
+assert.match(lv, /changelog\.js\?v=20261112zon2/);
+assert.match(cl, /2026-11-12zon2/);
+assert.doesNotMatch(cl.split('window.CHANGELOG')[1].slice(0, 1600), /\bStig\b|BRASSERIE|Brasserie/);
+assert.doesNotMatch(js, /BRASSERIE/);
+assert.doesNotMatch(js, />\s*Brasserie/i);
+assert.match(js, /STENA LINE/);
+assert.match(js, /HOTELL<\/text>/);
+assert.match(js, /DRAKEN<\/text>/);
+for (const k of ['flyg', 'tag', 'bat', 'landvetter', 'essity', 'astra', 'volvo', 'draken']) {
+  assert.match(js, new RegExp('data-anim-try="' + k + '"'), 'Prova ' + k);
+}
+assert.doesNotMatch(js, /'290'\s*:/, 'Magasinet har ingen animation');
+
+function mkCtx() {
+  const st = {};
+  const mk = (tag) => {
+    const n = { tag, style: {}, className: '', innerHTML: '', children: [], isConnected: false, attrs: {}, parentNode: null,
+      setAttribute(k, v) { this.attrs[k] = v; }, getAttribute(k) { return this.attrs[k] ?? null; },
+      appendChild(c) { c.parentNode = this; c.isConnected = true; this.children.push(c); return c; },
+      removeChild(c) { const i = this.children.indexOf(c); if (i >= 0) this.children.splice(i, 1); c.parentNode = null; return c; },
+      closest() { return null; } };
+    n.style.setProperty = function (k, v) { this[k] = v; };
+    return n;
+  };
+  const head = mk('head');
+  const bodyEl = mk('body');
+  head.isConnected = bodyEl.isConnected = true;
+  const c = {
+    window: {},
+    document: {
+      _ls: {},
+      addEventListener(type, fn) { (this._ls[type] = this._ls[type] || []).push(fn); },
+      dispatchEvent(ev) { (this._ls[ev.type] || []).forEach(fn => fn(ev)); return true; },
+      readyState: 'complete', body: bodyEl, head,
+      createElement: mk,
+      getElementById(id) { return [...head.children, ...bodyEl.children].find(n => n.id === id) || null; }
+    },
+    localStorage: { getItem: k => st[k] ?? null, setItem: (k, v) => { st[k] = String(v); }, removeItem: k => { delete st[k]; } },
+    CustomEvent: function (type, init) { return { type, detail: init && init.detail }; },
+    matchMedia: () => ({ matches: false }),
+    console, Date, JSON, Math, setTimeout: () => {},
+  };
+  vm.createContext(c);
+  vm.runInContext(js, c);
+  c.layerEl = () => bodyEl.children.find(n => n.id === 'animationer-layer');
+  c.actor = () => (c.layerEl().children.filter(n => n.attrs['data-anim-kind']).pop() || null);
+  c.fire = (detail) => { c.layerEl().children.length = 0; c.document.dispatchEvent(new c.CustomEvent('bev-watch-fire', { detail })); return c.actor(); };
+  return c;
+}
+const Z = mkCtx();
+const ZA = Z.window.ANIMATIONER;
+assert.equal(ZA.logoMs, 6000);
+assert.equal(ZA.zoneKind('293'), 'landvetter');
+assert.equal(ZA.zoneKind('161'), 'essity');
+assert.equal(ZA.zoneKind('163'), 'astra');
+assert.equal(ZA.zoneKind('406'), 'volvo');
+assert.equal(ZA.zoneKind('432'), 'volvo');
+assert.equal(ZA.zoneKind('15'), 'draken');
+assert.equal(ZA.zoneKind('290'), '', 'Magasinet ingen animation');
+
+// Flyg ankomst = landande plan (scen med bana), kräver ankomst
+assert.equal(Z.fire({ kind: 'flyg' }), null, 'flyg utan arrival animeras inte');
+assert.equal(Z.fire({ kind: 'flyg', arrival: false }), null);
+assert.equal(Z.fire({ kind: 'tag', arrival: false }), null);
+assert.equal(Z.fire({ kind: 'bat' }), null);
+const land = Z.fire({ kind: 'flyg', arrival: true });
+assert.ok(land, 'flyg ankomst animeras');
+assert.match(land.className, /anim-scene anim-flyg/);
+assert.match(land.innerHTML, /anim-runway/);
+assert.match(land.innerHTML, /anim-land/);
+assert.doesNotMatch(land.innerHTML, /viewBox="0 0 64 32"/, 'landande planet är inte svepplanet');
+assert.equal(land.style.animationDuration, '5s');
+assert.equal(land.style['--ad'], '5s');
+
+// Landvetter-prognos = svepande plan (inte landning, inte logokort), utan arrival
+const sweep = Z.fire({ prognos: true, zone: '293' });
+assert.ok(sweep, 'Landvetter prognos animeras utan arrival');
+assert.match(sweep.className, /anim-actor anim-landvetter/);
+assert.match(sweep.innerHTML, /viewBox="0 0 64 32"/);
+assert.doesNotMatch(sweep.innerHTML, /anim-runway|anim-card/);
+assert.equal(sweep.style.animationDuration, '5s');
+assert.match(js, /\.anim-landvetter\{[^}]*anim-sweep/);
+assert.match(js, /\.anim-land\{[^}]*anim-land/);
+
+// Övriga zoner = logokort, 6 s, utan arrival
+for (const [zone, kind] of [['161', 'essity'], ['163', 'astra'], ['406', 'volvo'], ['432', 'volvo'], ['15', 'draken']]) {
+  const a = Z.fire({ prognos: true, zone, caption: 'Ny förbokning · Zon <b>' });
+  assert.ok(a, 'zon ' + zone);
+  assert.match(a.className, new RegExp('anim-scene anim-' + kind));
+  assert.match(a.innerHTML, new RegExp('anim-card anim-card-' + kind));
+  assert.match(a.innerHTML, /&lt;b&gt;/, 'caption escaped');
+  assert.equal(a.style.animationDuration, '6s');
+}
+assert.equal(Z.fire({ prognos: true, zone: '290' }), null, 'Magasinet');
+assert.equal(Z.fire({ prognos: true, zone: '' }), null);
+// kind direkt fungerar också för zonerna
+assert.ok(Z.fire({ kind: 'essity' }));
+// Bara en åt gången
+Z.layerEl().children.length = 0;
+ZA.play('essity', { force: true }); ZA.play('volvo', { force: true });
+assert.equal(Z.layerEl().children.filter(n => n.attrs['data-anim-kind']).length, 1, 'MAX_ON_SCREEN');
+// Av = ingen prognosanimation heller
+ZA.setOn(false);
+assert.equal(Z.fire({ prognos: true, zone: '161' }), null);
+ZA.setOn(true);
+
+// Stena är båtikonen
+const fer = Z.fire({ kind: 'bat', arrival: true });
+assert.match(fer.className, /anim-actor anim-bat/);
+assert.match(fer.innerHTML, /STENA LINE/);
+assert.match(fer.innerHTML, /#d71920/);
+// Tåget oförändrat
+assert.match(Z.fire({ kind: 'tag', arrival: true }).innerHTML, /viewBox="0 0 72 28"/);
+
+// Minskad rörelse: kort tona på plats
+const rl = ZA.play('essity', { force: true, reduced: true });
+assert.match(rl.className, /anim-reduced/);
+assert.equal(rl.style.animationDuration, '2.4s');
+const rf = ZA.play('flyg', { force: true, reduced: true });
+assert.equal(rf.style.animationDuration, '1.6s');
+
+// Inställningar: Prova-knappar och text
+const box = { innerHTML: '' };
+ZA.renderSettings(box);
+assert.match(box.innerHTML, /Prova Landvetter/);
+assert.match(box.innerHTML, /plan som landar/);
+assert.match(box.innerHTML, /sveper förbi/);
+assert.match(box.innerHTML, /Stenafärja/);
+assert.match(box.innerHTML, /glider in/);
+assert.match(box.innerHTML, /Bara vid själva ankomsten/);
+// Prova Landvetter spelar säkerhetsbältesljudet (flyg.mp3) via BEV_LJUD
+const played = [];
+Z.window.BEV_LJUD = { unlock() {}, play(k, f) { played.push([k, f]); } };
+const btn = { getAttribute: () => 'landvetter' };
+box.onclick({ target: { closest: () => btn }, preventDefault() {} });
+assert.deepEqual(played, [['flyg', true]]);
+const btn2 = { getAttribute: () => 'essity' };
+box.onclick({ target: { closest: () => btn2 }, preventDefault() {} });
+assert.equal(played.length, 1, 'andra zoner spelar inget ljud vid Prova');
+
+// prognos-notis: ring() skickar zonhändelse; Landvetter får flyg.mp3, andra zoner pipet som förut
+const pn = fs.readFileSync(path.join(root, 'TaxiData/prognos-notis.js'), 'utf8');
+assert.doesNotMatch(pn, /\bStig\b/);
+function mkPn() {
+  const evs = [], snd = [], rings = [], toasts = [];
+  const c = {
+    window: {},
+    document: { addEventListener() {}, dispatchEvent(ev) { evs.push(ev); return true; }, visibilityState: 'visible' },
+    localStorage: { getItem: () => null, setItem() {} },
+    location: { search: '', pathname: '/' }, history: { replaceState() {} }, URLSearchParams,
+    navigator: {}, CustomEvent: function (type, init) { return { type, detail: init && init.detail }; },
+    setInterval: () => 0, setTimeout: () => 0, console, Date, JSON, Math, Promise,
+  };
+  c.window = c;
+  c.BEV_LJUD = { play(k, f) { snd.push([k, f]); } };
+  c.BEVAKNING = { ring(t, i) { rings.push(t); }, toast(t, ms, i) { toasts.push(t); } };
+  vm.createContext(c);
+  vm.runInContext(pn, c);
+  return { c, evs, snd, rings, toasts, N: c.PROGNOS_NOTIS };
+}
+let P = mkPn();
+P.N._ring('Ny förbokning', 'Landvetter flygplats · Kombi · ca 07:40', { tag: 'prognos-293-app', target: { zone: '293' } });
+assert.deepEqual(P.snd, [['flyg', true]], 'Landvetter = flyg.mp3');
+assert.equal(P.rings.length, 0, 'inget pip för Landvetter');
+assert.equal(P.toasts.length, 1);
+let ev = P.evs.find(e => e.type === 'bev-watch-fire');
+assert.ok(ev && ev.detail.prognos && ev.detail.zone === '293' && !ev.detail.arrival);
+P = mkPn();
+P.N._ring('Ny förbokning', 'Essity · Kombi · ca 07:40', { tag: 'prognos-161-app', target: { zone: '161' } });
+assert.equal(P.snd.length, 0, 'Essity tvingas inte till flyg.mp3');
+assert.equal(P.rings.length, 1, 'Essity behåller sitt ljud (BEVAKNING.ring)');
+ev = P.evs.find(e => e.type === 'bev-watch-fire');
+assert.equal(ev.detail.zone, '161');
+assert.match(ev.detail.caption, /Ny förbokning · Essity/);
+// push utan target: zonen läses ur taggen
+assert.equal(P.N._zoneOf({ tag: 'prognos-432-elbil' }), '432');
+assert.equal(P.N._zoneOf({ tag: 'prognos' }), '');
+// End-to-end: prognos-notis-händelsen spelar rätt animation i animationer.js
+const E = mkCtx();
+E.layerEl().children.length = 0;
+E.document.dispatchEvent(ev);
+assert.match(E.actor().className, /anim-essity/);
+
+// ---- Höger till vänster (2026-11-12zon2) ----
+const kf = (name) => { const m = new RegExp('@keyframes ' + name + '\\{(.*?)\\}\\}').exec(js.replace(/'\s*\+\s*'/g, '')); assert.ok(m, name); return m[1]; };
+const xs = (name) => [...kf(name).matchAll(/translate3d\((-?[\d.]+)vw/g)].map(m => +m[1]);
+for (const name of ['anim-land', 'anim-sweep', 'anim-tag', 'anim-bat', 'anim-zon']) {
+  const x = xs(name);
+  assert.ok(x[0] > 0 && x[x.length - 1] < 0, name + ' går från höger till vänster: ' + x.join(','));
+}
+assert.match(kf('anim-zon'), /^0%\{transform:translate3d\(110vw/);
+assert.match(kf('anim-zon'), /100%\{transform:translate3d\(-110vw/);
+assert.match(kf('anim-puff'), /translate3d\(28px/, 'röken driver bakåt (åt höger)');
+assert.match(kf('anim-land'), /52%\{transform:translate3d\(-8vw,-1vh,0\) rotate\(3deg\)/, 'nosen upp vid flare när planet pekar åt vänster');
+assert.match(js, /\.anim-land\{position:absolute;right:0;/);
+assert.match(js, /\.anim-(landvetter|tag|bat)\{left:auto;right:0;/);
+// Fordonen vänds med geometri, texten ligger utanför spegelgruppen
+const flip = (k, w) => new RegExp(k + ": '<svg[^']*aria-hidden=\"true\"><g transform=\"matrix\\(-1 0 0 1 " + w + " 0\\)\">");
+assert.match(js, flip('flyg', 240));
+assert.match(js, flip('landvetter', 64));
+assert.match(js, flip('tag', 72));
+assert.match(js, flip('bat', 240));
+const batSvg = /bat: '(<svg.*?<\/svg>)'/s.exec(js)[1];
+const flipped = batSvg.slice(batSvg.indexOf('<g transform="matrix(-1'), batSvg.lastIndexOf('</g>'));
+assert.doesNotMatch(flipped, /<text/, 'ingen text i spegelgruppen');
+assert.match(batSvg, /<\/g><text x="68"[^>]*>STENA LINE<\/text><text x="155.4"[^>]*>S<\/text><\/svg>/);
+assert.doesNotMatch(js, /scale\(-1|scaleX\(-1/);
+
+console.log('PASS animationer: default on, independent of sound, reduced-motion, kinds, hook, no Stig, landing vs sweep, prognos zones, Stena, right-to-left');

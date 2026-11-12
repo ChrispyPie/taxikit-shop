@@ -59,11 +59,35 @@
     if (st.recent[key]) return false;
     st.recent[key] = now; return true;
   }
+  // Zonen notisen gäller: target.zone (appens egen koll / push med target) eller taggen prognos-{zon}-{kat}
+  function zoneOf(item) {
+    var z = item && item.target && item.target.zone;
+    if (z != null && z !== '') return String(z);
+    var m = /^prognos-([^-]+)-/.exec(String((item && item.tag) || ''));
+    return m ? m[1] : '';
+  }
+  var LANDVETTER = '293';
   // item: notisen (key, tag, target) -> rutan som ploppar upp går att trycka på och öppnar rätt zon (t551u)
   function ring(title, body, item) {
     var text = title + (body ? ' – ' + body : '');
-    if (window.BEVAKNING && BEVAKNING.ring) BEVAKNING.ring(text, item);
+    var zone = zoneOf(item);
+    if (zone === LANDVETTER && window.BEV_LJUD && BEV_LJUD.play && window.BEVAKNING && BEVAKNING.toast) {
+      // Landvetter: säkerhetsbältesljudet (ljud/flyg.mp3) i stället för pipet. Samma vibration och ruta.
+      BEV_LJUD.play('flyg', true);
+      try { if (navigator.vibrate) navigator.vibrate([300, 120, 300, 120, 300]); } catch (e) {}
+      BEVAKNING.toast(text, 8000, item);
+    }
+    else if (window.BEVAKNING && BEVAKNING.ring) BEVAKNING.ring(text, item);
     else if (window.showToast) window.showToast(text);
+    // Zonens animation (animationer.js): Landvetter = plan som sveper förbi, övriga = loggan glider in och ut.
+    // Kräver inte ankomst (prognos: true). Zoner utan animation (t.ex. Magasinet) ignoreras där.
+    if (zone) {
+      try {
+        document.dispatchEvent(new CustomEvent('bev-watch-fire', {
+          detail: { prognos: true, zone: zone, caption: (title || 'Ny förbokning') + ' · ' + (ZONE_SV[zone] || zone) }
+        }));
+      } catch (e) {}
+    }
     if (window.PROGNOS && PROGNOS.refresh) { try { PROGNOS.refresh(); } catch (e) {} }
   }
 
@@ -134,6 +158,8 @@
   N.watchesChanged = function (list) { st.watches = list || []; st.watchesAt = Date.now(); };
   N.logout = function () { st.watches = null; st.seen = null; st.recent = {}; };
   N.tick = tick;
+  N._ring = ring;
+  N._zoneOf = zoneOf;
   N._state = st;
 
   // Notisklick på en prognos-notis: öppna Prognos – på rätt zon med förbokningen markerad

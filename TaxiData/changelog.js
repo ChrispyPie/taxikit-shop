@@ -15,6 +15,12 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-12', id: '2026-11-12zon2', tid: '13:42', rader: [
+    ['Nytt', 'Prognos: när en zon du bevakar får en ny förbokning visas zonens märke över skärmen, samtidigt som notisen. Landvetter: ett plan som sveper förbi, och när appen är öppen låter notisen som säkerhetsbältessignalen i stället för pipet. Essity, Astra, Volvo och Hotell Draken: loggan glider in, stannar några sekunder och glider ut. Andra zoner låter som förut.'],
+    ['Ändrat', 'Ankomster: när ett bevakat flyg har landat visas nu ett plan som landar på en bana. När en båt har ankommit visas en Stenafärja. Tåget är som förut. Animationen körs fortfarande bara vid själva ankomsten.'],
+    ['Nytt', 'Under Inställningar, Animationer kan du prova alla animationer, även Landvetter med ljudet. Animationerna stängs av där, ljudet påverkas inte.'],
+    ['Ändrat', 'Alla animationer kommer nu in från höger och rör sig åt vänster. Plan, tåg och färja pekar åt det håll de åker.']
+  ]},
   { datum: '2026-11-12', id: '2026-11-12anim5', tid: '06:45', rader: [
     ['Förbättrat', 'När ett bevakat tåg, flyg eller båt ankommer visas en stor figur över hela skärmen i ungefär fem sekunder, så att du hinner se det. Animationen körs inte vid försening eller andra statusuppdateringar.']
   ]},
