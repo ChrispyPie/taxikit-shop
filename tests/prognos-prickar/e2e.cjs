@@ -27,8 +27,8 @@ const ok = (n, c, e) => { if (!c) { fails.push(n + (e ? ': ' + e : '')); console
 {
   const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
   const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
-  ok('cache prognos.js', /prognos\.js\?v=(20261113prick2|20261113barn1)/.test(lv));
-  ok('cache lazy-views.js', /lazy-views\.js\?v=(20261113prick2|20261113barn1)/.test(fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8')));
+  ok('cache prognos.js', /prognos\.js\?v=(20261113prick2|20261113barn1|20261113sedd1)/.test(lv));
+  ok('cache lazy-views.js', /lazy-views\.js\?v=(20261113prick2|20261113barn1|20261113sedd1)/.test(fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8')));
   const pj = fs.readFileSync(path.join(root, 'TaxiData/prognos.js'), 'utf8');
   ok('kundtid-testet borta ur Prognos', !/pg-kt-btn|ktBar|rpc\('sadmin_kundtid_get'/.test(pj) && /function ktApply\(list\) \{ return list; \}/.test(pj));
   const e = cl.split("id: '2026-11-13prick2'")[1].split(']},')[0];
@@ -127,31 +127,62 @@ function bookings(now) {
     ok('barn: inga sidfel', !p._errs.length, p._errs.join(' | '));
     await p.close();
   }
+  // Prickar: syns på zoner med nytt; öppnar man en zon och lämnar den är zonens prickar sedda
+  // (2026-11-13sedd1, t1583u) och kommer inte tillbaka efter omladdning. Ny aktivitet får prick igen.
+  const zt = (p, z) => p.evaluate(z => { const b = document.querySelector('.pg-ztab[data-ztab="' + z + '"]'); if (b) b.click(); }, z);
+  const reopen = async p => {
+    await p.evaluate(() => { PROGNOS.stop(); return openItem('prognos'); });
+    await p.waitForSelector('.pg-ztab', { timeout: 20000 }); await sleep(800);
+  };
   for (const [w, h, mobile, label] of [[1280, 800, false, 'platta-liggande'], [390, 844, true, 'telefon-staende']]) {
     const p = await open(w, h, mobile);
+    await p.evaluate(() => localStorage.setItem('prognos_zone_tab', '163'));   // börja i en zon utan nytt
     await p.evaluate(() => openItem('prognos'));
     await p.waitForSelector('.pg-ztab', { timeout: 20000 });
     await sleep(800);
-    await p.evaluate(() => { const b = document.querySelector('.pg-ztab[data-ztab="161"]'); if (b) b.click(); });
-    await sleep(500);
     let s = await state(p);
-    ok(label + ': prick på zon 161 och 293', JSON.stringify(s.zones) === JSON.stringify(['161', '293']), JSON.stringify(s));
-    ok(label + ': en prick på ny bokning i 161', s.cur === '161' && s.cells === 1, JSON.stringify(s));
-    await p.screenshot({ path: path.join(out, label + '-161.png') });
-    await p.evaluate(() => { const b = document.querySelector('.pg-ztab[data-ztab="163"]'); if (b) b.click(); });
-    await sleep(400);
+    ok(label + ': prick på zon 161 och 293', JSON.stringify(s.zones) === JSON.stringify(['161', '293']) && s.cur === '163', JSON.stringify(s));
+    await zt(p, '161'); await sleep(500);
     s = await state(p);
-    ok(label + ': ingen prick i 163 (bara gamla)', s.cur === '163' && s.cells === 0, JSON.stringify(s));
-    // Bokning 1 försvinner ur listan -> pricken på 161 försvinner, 293 kvar.
-    await p.evaluate(() => { window.__bk = window.__bk.filter(b => b.id !== 1); return PROGNOS.refresh(); });
+    ok(label + ': prickar kvar medan zon 161 är öppen', JSON.stringify(s.zones) === JSON.stringify(['161', '293']) && s.cur === '161' && s.cells === 1, JSON.stringify(s));
+    await p.screenshot({ path: path.join(out, label + '-161.png') });
+    await zt(p, '163'); await sleep(500);
+    s = await state(p);
+    ok(label + ': lämnat 161 -> zonprick och bokningsprick borta, 293 kvar', JSON.stringify(s.zones) === JSON.stringify(['293']) && s.cur === '163' && s.cells === 0, JSON.stringify(s));
+    let ls = await p.evaluate(() => [localStorage.getItem('prognos_newids_900001'), localStorage.getItem('prognos_seenids_900001')]);
+    ok(label + ': sedd sparad per bokning', ls[0] === '{"3":1}' && ls[1] === '{"1":1}', JSON.stringify(ls));
+    await zt(p, '161'); await sleep(400);
+    s = await state(p);
+    ok(label + ': tillbaka i 161 -> ingen bokningsprick', s.cur === '161' && s.cells === 0 && JSON.stringify(s.zones) === JSON.stringify(['293']), JSON.stringify(s));
+    // Lämna Prognos och öppna igen (samma lagring som efter omladdning): 161 förblir sedd.
+    await zt(p, '163'); await sleep(300);
+    await reopen(p);
+    s = await state(p);
+    ok(label + ': efter återöppning bara 293', JSON.stringify(s.zones) === JSON.stringify(['293']), JSON.stringify(s));
+    // Öppna 293 och lämna Prognos direkt därifrån -> 293 sedd.
+    await zt(p, '293'); await sleep(400);
+    s = await state(p);
+    ok(label + ': prick på ny bokning i 293 medan den är öppen', s.cur === '293' && s.cells === 1, JSON.stringify(s));
+    await reopen(p);
+    s = await state(p);
+    ok(label + ': lämnat Prognos från 293 -> inga prickar', s.zones.length === 0 && s.cells === 0, JSON.stringify(s));
+    // Ny aktivitet efter detta -> prick igen (zon 161 och bokningen).
+    await p.evaluate(() => { const n = new Date(Date.now() + 1000).toISOString(); window.__bk = window.__bk.concat([{ id: 7, zone_id: '161', zone_name: '161', category: 'app', estimated_at: new Date(Date.now() + 45 * 60000).toISOString(), observed_at: n, block_index: 0, current_block: 0, confidence: 'saker', status: 'open', addons: [] }]); });
+    await sleep(1200);
+    await p.evaluate(() => PROGNOS.refresh()); await sleep(800);
+    s = await state(p);
+    ok(label + ': ny bokning -> prick på 161 igen', JSON.stringify(s.zones) === JSON.stringify(['161']), JSON.stringify(s));
+    await zt(p, '161'); await sleep(400);
+    s = await state(p);
+    ok(label + ': ny bokning har prick, den sedda inte', s.cells === 1, JSON.stringify(s));
+    // Bokningen försvinner ur listan -> pricken försvinner av sig själv, och sedd-listan glömmer bokning 1.
+    await p.evaluate(() => { window.__bk = window.__bk.filter(b => b.id !== 7 && b.id !== 1); return PROGNOS.refresh(); });
     await sleep(800);
     s = await state(p);
-    ok(label + ': prick borta när bokningen försvann', JSON.stringify(s.zones) === JSON.stringify(['293']), JSON.stringify(s));
-    const saved = await p.evaluate(() => localStorage.getItem('prognos_newids_900001'));
-    ok(label + ': sparad lista utan bokning 1', saved === '{"3":1}', saved);
-    await p.evaluate(() => { const b = document.querySelector('.pg-ztab[data-ztab="293"]'); if (b) b.click(); });
-    await sleep(500);
-    await p.screenshot({ path: path.join(out, label + '-293-efter.png') });
+    ls = await p.evaluate(() => [localStorage.getItem('prognos_newids_900001'), localStorage.getItem('prognos_seenids_900001')]);
+    ok(label + ': prick borta när bokningen försvann', s.zones.length === 0 && s.cells === 0 && ls[0] === '{}' && !/"1"/.test(ls[1]), JSON.stringify({ s, ls }));
+    ok(label + ': ingen automatisk rullning', (await p.evaluate(() => scrollY)) === 0);
+    await p.screenshot({ path: path.join(out, label + '-sedd.png') });
     ok(label + ': inga sidfel', !p._errs.length, p._errs.join(' | '));
     await p.close();
   }
