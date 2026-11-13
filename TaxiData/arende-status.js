@@ -284,6 +284,15 @@
     }).catch(function (e) { if (box.isConnected) certError(message, e); });
   };
 
+  // Avsändare (2026-11-13avs1, t1588u): "Du" bara på det som tittaren själv skrev. Servern skickar
+  // msgs[].mine (sender_id = tittaren); förut jämfördes bara rollen, så alla med ägarroll (t.ex.
+  // Christian och Berra) blev "Du" för varandra. Äldre data utan mine faller tillbaka på rollen.
+  function isMine(m, viewer) {
+    if (typeof m.mine === 'boolean') return m.mine;
+    return viewer === 'owner' ? m.role === 'owner' : m.role === 'driver';
+  }
+  function roleWord(role) { return role === 'owner' ? 'Ägaren' : 'Föraren'; }
+
   // Vem skrev första inlägget. Ingen databasändring: bara fält som redan finns.
   function opWho(c, viewer) {
     var d = c.data || {}, rep = d.reporter_name || d.name || d.author || '';
@@ -302,7 +311,6 @@
   A.view = function (c, viewer, extra) {
     var d = c.data || {}, raw = d.status, h = '', rows = [], meta = [], sum = [];
     extra = extra || {};
-    var other = viewer === 'owner' ? 'Föraren' : 'Ägaren';
     if (c.kind === 'issue') {
       if (d.car) meta.push('Bil ' + esc(d.car));
       // Vem och när står i första händelsen i tråden (2026-11-13chatt1).
@@ -314,8 +322,8 @@
         rows.push({ at: u.at, h: sys(u.status === 'ny' ? '↩️ Öppnad igen' : 'Status: ' + A.WORDS[A.st('issue', u.status)], u.at, u.comment ? '"' + esc(u.comment) + '"' : '') });
       });
       (d.msgs || []).forEach(function (m) {
-        var me = viewer === 'owner' ? m.role === 'owner' : m.role === 'driver';
-        rows.push({ at: m.at, h: msg(me ? 'Du' : esc(fname(m.who) || other), m.at, m.body, me) });
+        var me = isMine(m, viewer);
+        rows.push({ at: m.at, h: msg(me ? 'Du' : esc(fname(m.who) || roleWord(m.role)), m.at, m.body, me) });
       });
     } else if (c.kind === 'wh') {
       if (d.car) meta.push('Bil ' + esc(d.car));
@@ -325,7 +333,7 @@
         (d.minutes != null ? ' · ' + Math.floor(d.minutes / 60) + ' h ' + (d.minutes % 60) + ' min' : '') + ' · ' + esc(A.label('wh', raw, (d.waiting || c.waiting))) + '</div>');
       if (viewer === 'owner' && d.reporter_name) meta.push(esc(fname(d.reporter_name)));
       (d.msgs || []).forEach(function (m) {
-        var me = viewer === 'owner' ? m.role === 'owner' : m.role === 'driver';
+        var me = isMine(m, viewer);
         if (m.kind === 'approved') rows.push({ at: m.at, h: sys('✅ Klar · godkänd', m.at, m.body ? '"' + esc(m.body) + '"' : '') });
         else if (m.kind === 'rejected') rows.push({ at: m.at, h: sys('❌ Klar · nekad', m.at, m.body ? '"' + esc(m.body) + '"' : '') });
         else if (m.kind === 'reopen') rows.push({ at: m.at, h: sys('↩️ Öppnad igen', m.at) });
