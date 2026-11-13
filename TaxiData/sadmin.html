@@ -283,8 +283,8 @@
         '<label class="sa-sub">Fick bilen <input id="ktt-recv" type="time"></label><input id="ktt-note" placeholder="Anteckning" size="20">' +
         '<button onclick="addTruth()">Spara fall</button></div></div>';
       const o = d.offsets || {};
-      h += '<div class="sa-card"><h3>Testvy i Prognos: kundtid</h3><div class="sa-sub">I Prognos › Schema ser bara S admin en knapp <b>🧪 S admin-test: kundtid</b>. ' +
-        'När den är på visas varje bokning på prognostid + offset för zonen. Förarna ser ingen skillnad.</div>' +
+      h += '<div class="sa-card"><h3>Testvy i Prognos: kundtid</h3><div class="sa-sub">Knappen <b>🧪 S admin-test: kundtid</b> i Prognos är borttagen (2026-11-13). ' +
+        'Offseten nedan sparas fortfarande men används inte i Prognos; där visas alltid prognostiden (+0 min).</div>' +
         '<div class="sa-scroll"><table class="sa-t"><tr><th>Zon</th><th class="n">Offset (min)</th><th></th></tr>' +
         KT_ZONES.map(z => '<tr><td>' + z[1] + ' (' + z[0] + ')</td><td class="n"><input id="kto-' + z[0] + '" type="number" min="0" max="45" style="width:60px" value="' + esc(o[z[0]] == null ? 10 : o[z[0]]) + '"></td>' +
           '<td><button onclick="saveKtOffset(\'' + z[0] + '\')">Spara</button></td></tr>').join('') + '</table></div></div>';

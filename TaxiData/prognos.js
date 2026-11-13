@@ -71,34 +71,13 @@
     cellMap: {},         // data-pg-cell -> bokningar i rutan (förklaringsrutan)
     flyMap: {},          // data-pg-fly -> ankomst (got.json / Ankomster)
     pendingPaint: false, // omritning väntar tills förklaringsrutan stängs
-    kt: null,            // S admin-test kundtid: offsets per zon från servern (sadmin_kundtid_get), false = ej S admin
-    ktRaw: []            // bokningarna som de kom från servern (testvyn flyttar bara visningen)
+    ktRaw: []            // bokningarna som de kom från servern
   };
 
-  // S admin-test (20261104d): visa kundens tid = prognostid + offset per zon. Bara när servern godkänt
-  // S admin (require_sadmin). Alla andra ser exakt samma vy som förut.
-  var LS_KT = 'prognos_kundtid_test';
-  function ktOn() { return !!st.kt && localStorage.getItem(LS_KT) === '1'; }
-  function ktApply(list) {
-    if (!ktOn()) return list;
-    return list.map(function (b) {
-      var off = st.kt[String(b.zone_id)];
-      off = off == null ? 10 : +off;
-      var t = Date.parse(b.estimated_at);
-      if (!isFinite(t)) return b;
-      var c = {}; for (var k in b) c[k] = b[k];
-      c._ut = b.estimated_at; c._off = off;
-      c.estimated_at = new Date(t + off * 60000).toISOString();
-      return c;
-    });
-  }
-  function ktBar() {
-    if (!st.kt) return '';
-    var on = ktOn();
-    return '<div class="pg-kt"><span>🧪 S admin-test: <b>kundtid</b>' + (on ? ' (prognostid + ' +
-      esc(String(st.kt[st.zoneTab] == null ? 10 : st.kt[st.zoneTab])) + ' min i den här zonen)' : '') + '</span>' +
-      '<button type="button" class="pg-kt-btn' + (on ? ' on' : '') + '" id="pg-kt-btn">' + (on ? 'På' : 'Av') + '</button></div>';
-  }
+  // S admin-test kundtid (20261104d) togs bort ur Prognos 2026-11-13 (t1580u): ingen knapp, ingen
+  // förskjutning. Alla ser prognostiden rakt från servern (som när testet var Av / +0 min).
+  // sadmin_kundtid_get anropas inte längre härifrån; utvärderingen i S admin-panelen finns kvar.
+  function ktApply(list) { return list; }
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -368,16 +347,8 @@
     toast('Ny förbokning – ' + msg, 8000);
   }
 
-  function ktCheck() {
-    if (st.kt !== null) return Promise.resolve();
-    if (!window.driverData || window.driverData.category !== 'superadmin') { st.kt = false; return Promise.resolve(); }
-    return rpc('sadmin_kundtid_get', {}).then(function (r) { st.kt = (r && r.ok && r.offsets) || false; },
-      function () { st.kt = false; });
-  }
-
   function refresh() {
     if (!token() || st.loading) return Promise.resolve();
-    if (st.kt === null) return ktCheck().then(refresh);
     st.loading = true;
     return Promise.all([
       rpc('prognos_status', {}),
@@ -689,7 +660,7 @@
   function countCell(sum) {
     if (!sum) return '';
     var tip = sum.tip + (sum.mixed ? ' · blandat → svagaste markering' : '');
-    return '<span class="pg-n pg-c-' + sum.conf + (sum.mixed ? ' pg-mixed' : '') + (sum.addon ? ' pg-addon' : '') + (sum.flight ? ' pg-fly' : '') + '">' +
+    return '<span class="pg-n pg-c-' + sum.conf + (sum.mixed ? ' pg-mixed' : '') + (sum.flight ? ' pg-fly' : '') + '">' +
       esc(sum.text) + '</span>';
   }
 
@@ -1950,11 +1921,11 @@
       renderWarn();
   }
 
-  // Kort, lugn varning + en allmän knapp till felrapport (Forum → Buggar, förifyllt).
+  // Kort, lugn varning. Knappen "Rapportera fel" togs bort ur Prognos 2026-11-13 (t1579u);
+  // reportBug finns kvar och kopplas till eventuella [data-pg-report]-knappar.
   function renderWarn() {
     return '<div class="pg-warn"><strong>Tiderna är uppskattade och ungefärliga.</strong> ' +
-      '<span class="pg-warn-sub">De räknas ut från Taxi Göteborgs prognos, inte bokningssystemet. Ser något fel ut? Rapportera gärna.</span>' +
-      '<span class="pg-warn-act"><button type="button" class="pg-rep-btn" data-pg-report="1">🐞 Rapportera fel</button></span></div>';
+      '<span class="pg-warn-sub">De räknas ut från Taxi Göteborgs prognos, inte bokningssystemet.</span></div>';
   }
 
   function appVersion() {
@@ -2077,12 +2048,10 @@
       body += renderOriginal();
     } else {
       body += statusLine();
-      body += ktBar();
       body += '<div class="pg-legend"><span class="pg-n pg-c-saker">2</span> säker ' +
         '<span class="pg-n pg-c-trolig">2</span> trolig ' +
         '<span class="pg-n pg-c-osaker">2</span> osäker ' +
-        '<span class="pg-n pg-c-trolig pg-mixed">2?</span> blandat ' +
-        '<span class="pg-n pg-c-saker pg-addon">1</span> med barnstol/babyskydd' +
+        '<span class="pg-n pg-c-trolig pg-mixed">2?</span> blandat' +
         (st.zoneTab === FLIGHT_ZONE ? ' <span class="pg-n pg-c-saker pg-fly">1</span> försenat flyg' : '') + '</div>';
       body += renderZoneTabs();
       body += renderTimeline();
@@ -2095,11 +2064,6 @@
     document.body.classList.toggle('pg-land', !!st._land);
     st.el.innerHTML = '<div class="pg">' + tabs + body + '</div>';
     bind(st.el);
-    var ktb = st.el.querySelector('#pg-kt-btn');
-    if (ktb) ktb.onclick = function () {
-      localStorage.setItem(LS_KT, ktOn() ? '0' : '1');
-      st.bookings = ktApply(st.ktRaw); st.bookingsReady = true; paint();
-    };
     bindPop(st.el);
     if (st._land) {
       settleLandLayout();
