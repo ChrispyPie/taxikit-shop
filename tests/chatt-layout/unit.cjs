@@ -1,0 +1,28 @@
+'use strict';
+// Ärende och meddelande delar samma trådritning (2026-11-13chatt1).
+const fs = require('node:fs'), path = require('node:path'), assert = require('node:assert/strict');
+const root = path.resolve(__dirname, '../..');
+const st = fs.readFileSync(path.join(root, 'TaxiData/arende-status.js'), 'utf8');
+const mb = fs.readFileSync(path.join(root, 'TaxiData/mailbox-ui.js'), 'utf8');
+assert.match(st, /A\.event = function/);
+assert.match(st, /A\.thread = function/);
+assert.match(st, /A\.mountThread = function/);
+assert.doesNotMatch(st, /ar-msg/, 'gamla bubblor borta');
+assert.doesNotMatch(st, /class="ar-body"/, 'första inlägget ritas som en händelse');
+assert.doesNotMatch(mb, /mx-message/, 'meddelanden använder samma händelse');
+assert.match(mb, /A\.thread\(t\.messages\.map/);
+assert.match(mb, /A\.mountThread\(st\.el/);
+assert.doesNotMatch(st + mb, /scrollIntoView|window\.scrollTo/, 'rullar aldrig sidan');
+const html = fs.readFileSync(path.join(root, 'TaxiData/admin.html'), 'utf8');
+assert.match(html, /arende-status\.js\?v=20261113chatt1/);
+assert.match(html, /mailbox-ui\.js\?v=20261113chatt1/);
+const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
+assert.match(lv, /arende-status\.js\?v=20261113chatt1/);
+assert.match(lv, /mailbox-ui\.js\?v=20261113chatt1/);
+assert.match(lv, /changelog\.js\?v=20261113chatt1/);
+assert.match(fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8'), /lazy-views\.js\?v=20261113chatt1/);
+const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
+const entry = cl.split("id: '2026-11-13chatt1'")[1].split(']},')[0];
+assert.doesNotMatch(entry, /\btid:/, 'tid sätts vid go-live');
+assert.doesNotMatch(entry, /\bStig\b|\bhen\b/);
+console.log('CHATT_LAYOUT_UNIT_OK');

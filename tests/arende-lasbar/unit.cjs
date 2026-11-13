@@ -4,15 +4,13 @@ const fs = require('node:fs'), path = require('node:path'), assert = require('no
 const root = path.resolve(__dirname, '../..');
 const src = fs.readFileSync(path.join(root, 'TaxiData/arende-status.js'), 'utf8');
 const tema = fs.readFileSync(path.join(root, 'TaxiData/tema.css'), 'utf8');
-const me = src.match(/\.ar-msg\.me\{[^}]*\}/)[0];
-assert.doesNotMatch(me, /background:#/, 'ingen hårdkodad ljus bakgrund');
-assert.match(me, /background:var\(--c-bee3f8/);
-assert.match(me, /color:var\(--text/);
-assert.ok((tema.match(/--c-bee3f8:/g) || []).length >= 2, 'mörkt tema har egen färg');
-assert.match(fs.readFileSync(path.join(root, 'TaxiData/admin.html'), 'utf8'), /arende-status\.js\?v=20261113lasbar1/);
-const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
-assert.match(lv, /arende-status\.js\?v=20261113lasbar1/);
+// Sedan 2026-11-13chatt1 ritas alla händelser med .tk-ev (samma för egna och andras).
+const ev = src.match(/\.tk-ev\{[^}]*\}/)[0];
+assert.doesNotMatch(ev, /background:#/, 'ingen hårdkodad ljus bakgrund');
+assert.match(ev, /background:var\(--c-edf2f7/);
+assert.match(ev, /color:var\(--text/);
+assert.doesNotMatch(src, /\.ar-msg\.me\{[^}]*background:#/);
+assert.ok((tema.match(/--c-edf2f7:/g) || []).length >= 2, 'mörkt tema har egen färg');
 const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
 assert.match(cl, /2026-11-13lasbar1/);
-assert.doesNotMatch(cl.split("2026-11-13lasbar1")[1].split(']},')[0], /\bStig\b|\bhen\b/);
 console.log('ARENDE_LASBAR_OK');
