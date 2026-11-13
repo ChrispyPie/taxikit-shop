@@ -1300,13 +1300,17 @@
   // Helskärm styrs globalt av helskarm.js. I liggande prognos rullas rutnätet
   // längst ner när helskärm slås på (samma beteende som tidigare).
   P.onFullscreen = function (on) {
-    if (on && st.el && isLand()) settleLandLayout();
+    if (on && onPage() && isLand()) settleLandLayout();
   };
   function relayoutFly() {
-    if (!st.el) return;
+    // Bara när Prognos är öppen: st.el är den delade #content-rutan och finns kvar
+    // efter att man lämnat Prognos. Annars rullade en resize (systemfält, helskärm)
+    // t.ex. tåglistan i Ankomster till botten i liggande läge.
+    if (!onPage()) return;
     if (flyLayTimer) cancelAnimationFrame(flyLayTimer);
     flyLayTimer = requestAnimationFrame(function () {
       flyLayTimer = 0;
+      if (!onPage()) return;
       var landNow = isLand();
       if (landNow !== st._land) {
         st._land = landNow;
@@ -1470,9 +1474,9 @@
   }
 
   function settleLandLayout() {
-    if (!st.el || !isLand()) return;
+    if (!onPage() || !isLand()) return;
     var run = function () {
-      if (!st.el || !isLand()) return;
+      if (!onPage() || !isLand()) return;
       fitLandCols(st.el);
       layoutFlyCallouts(st.el);
       scrollLandToBottom();
