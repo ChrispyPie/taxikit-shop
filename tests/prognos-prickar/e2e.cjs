@@ -27,8 +27,10 @@ const ok = (n, c, e) => { if (!c) { fails.push(n + (e ? ': ' + e : '')); console
 {
   const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
   const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
-  ok('cache prognos.js', /prognos\.js\?v=20261113prick2/.test(lv));
-  ok('cache lazy-views.js', /lazy-views\.js\?v=20261113prick2/.test(fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8')));
+  ok('cache prognos.js', /prognos\.js\?v=(20261113prick2|20261113barn1)/.test(lv));
+  ok('cache lazy-views.js', /lazy-views\.js\?v=(20261113prick2|20261113barn1)/.test(fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8')));
+  const pj = fs.readFileSync(path.join(root, 'TaxiData/prognos.js'), 'utf8');
+  ok('kundtid-testet borta ur Prognos', !/pg-kt-btn|ktBar|rpc\('sadmin_kundtid_get'/.test(pj) && /function ktApply\(list\) \{ return list; \}/.test(pj));
   const e = cl.split("id: '2026-11-13prick2'")[1].split(']},')[0];
   ok('nyhet utan tid, utan Stig/hen', !/tid: '(?!\d\d:\d\d')/.test(e) && !/\bStig\b|\bhen\b/.test(e));
 }
@@ -37,7 +39,9 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 function bookings(now) {
   const iso = ms => new Date(ms).toISOString();
   const mk = (id, zone, cat, inMin, obsAgoMin) => ({ id, zone_id: zone, zone_name: zone, category: cat, estimated_at: iso(now + inMin * 60000), observed_at: iso(now - obsAgoMin * 60000), block_index: 0, current_block: 0, confidence: 'saker', status: 'open', addons: [] });
-  return [mk(1, '161', 'app', 25, 10), mk(2, '161', 'elbil', 55, 120), mk(3, '293', 'storbil', 40, 5), mk(4, '293', 'app', 70, 200), mk(5, '163', 'app', 35, 300), mk(6, '163', 'ovrigt', 85, 240)];
+  const l = [mk(1, '161', 'app', 25, 10), mk(2, '161', 'elbil', 55, 120), mk(3, '293', 'storbil', 40, 5), mk(4, '293', 'app', 70, 200), mk(5, '163', 'app', 35, 300), mk(6, '163', 'ovrigt', 85, 240)];
+  l[3].addons = ['barnstol'];   // gammal Kombi med barnstol i 293 (ska inte få någon rosa prick, 2026-11-13barn1)
+  return l;
 }
 
 (async () => {
@@ -95,6 +99,32 @@ function bookings(now) {
     if (w > h) ok(label + ': liggande läge', g.land, JSON.stringify(g));
     await p.screenshot({ path: path.join(out, label + '.png') });
     ok(label + ': inga sidfel', !p._errs.length, p._errs.join(' | '));
+    await p.close();
+  }
+  // Ingen rosa barnstol/babyskydd-prick och ingen sådan rad i förklaringen (2026-11-13barn1, t1577u).
+  {
+    const p = await open(390, 844, true);
+    await p.evaluate(() => openItem('prognos'));
+    await p.waitForSelector('.pg-ztab', { timeout: 20000 });
+    await sleep(700);
+    await p.evaluate(() => { const b = document.querySelector('.pg-ztab[data-ztab="293"]'); if (b) b.click(); });
+    await sleep(700);
+    const r = await p.evaluate(() => {
+      const lg = document.querySelector('.pg-legend');
+      const after = [...document.querySelectorAll('.pg-n')].map(n => getComputedStyle(n, '::after')).filter(c => c.content !== 'none' && c.backgroundColor === 'rgb(213, 63, 140)').length;
+      return { legend: lg ? lg.textContent : '', addon: document.querySelectorAll('.pg-addon').length, pink: after,
+        childCells: [...document.querySelectorAll('td.pg-td-child .pg-n')].length, newDots: document.querySelectorAll('.pg-new-dot').length,
+        warn: (document.querySelector('.pg-warn') || {}).textContent || '', repBtn: document.querySelectorAll('.pg-warn button, .pg-rep-btn').length, kt: document.querySelectorAll('.pg-kt, #pg-kt-btn').length, status: (document.querySelector('.pg-status') || {}).textContent || '' };
+    });
+    ok('barn: ingen barnstol/babyskydd i förklaringen', !/barnstol|babyskydd/i.test(r.legend) && /blandat/.test(r.legend), r.legend);
+    ok('barn: ingen rosa prick', r.addon === 0 && r.pink === 0, JSON.stringify(r));
+    ok('barn: barnstolsspalten visar bokningen', r.childCells >= 1, JSON.stringify(r));
+    ok('rapport: rutan kvar utan Rapportera fel-knapp', /uppskattade och ungefärliga/.test(r.warn) && !/Rapportera/.test(r.warn) && r.repBtn === 0, JSON.stringify({ warn: r.warn, repBtn: r.repBtn }));
+    ok('status: ingen flygtid i 293', !/flyg/i.test(r.status) && /Senaste uppdatering/.test(r.status), r.status);
+    ok('kundtid: ingen testruta', r.kt === 0, String(r.kt));
+    ok('barn: aktivitetsprickar kvar', r.newDots >= 1, JSON.stringify(r));
+    await p.screenshot({ path: path.join(out, 'utan-barnstolsprick.png') });
+    ok('barn: inga sidfel', !p._errs.length, p._errs.join(' | '));
     await p.close();
   }
   for (const [w, h, mobile, label] of [[1280, 800, false, 'platta-liggande'], [390, 844, true, 'telefon-staende']]) {

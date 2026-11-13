@@ -626,9 +626,6 @@ html[data-theme="dark"] .pg-n.pg-c-saker { border-color: #bee3f8; }
 .pg-bar-n { width: 28px; text-align: right; font-size: 0.8rem; color: var(--text); font-variant-numeric: tabular-nums; }
 
 .pg-legend { display: flex; gap: 8px; align-items: center; font-size: 0.78rem; color: var(--muted); margin: 2px 0 6px; flex-wrap: wrap; }
-.pg-kt { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 0.8rem; margin: 4px 0 6px; padding: 6px 10px; border: 1px dashed var(--primary); border-radius: 8px; color: var(--text); }
-.pg-kt-btn { padding: 3px 12px; font-size: 0.8rem; }
-.pg-kt-btn.on { background: var(--primary); color: var(--on-primary, #fff); }
 .pg-badge.pg-c-saker { opacity: 1; border: 1px solid var(--c-2a4365, #2a4365); }
 .pg-badge.pg-c-trolig { opacity: 0.85; border: 1px dashed var(--c-2a4365, #2a4365); }
 .pg-badge.pg-c-osaker { opacity: 0.55; border: 1px dotted var(--muted); background: var(--surface-soft); color: var(--text-soft); }
@@ -762,8 +759,7 @@ html[data-theme="dark"] .pg-stale { color: #f6ad55; }
 .pg [data-pg-cell] { cursor: pointer; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .pg [data-pg-cell]:focus { outline: none; }
 .pg [data-pg-cell]:focus-visible, .pg [data-pg-cell].pg-held { outline: 2px solid var(--accent, #f5b301); outline-offset: -2px; border-radius: 6px; }
-.pg-n.pg-addon, .pg-n.pg-fly { position: relative; }
-.pg-n.pg-addon::after { content: ""; position: absolute; top: -3px; right: -3px; width: 7px; height: 7px; border-radius: 50%; background: #d53f8c; border: 1px solid var(--surface, #fff); }
+.pg-n.pg-fly { position: relative; }
 .pg-n.pg-fly::before { content: "✈"; position: absolute; top: -7px; left: -6px; font-size: 0.6rem; line-height: 1; color: #c05621; }
 html[data-theme="dark"] .pg-n.pg-fly::before { color: #fbd38d; }
 .pg-tr-snart td { background: color-mix(in srgb, var(--accent, #f5b301) 10%, transparent); }
@@ -964,7 +960,6 @@ body.pg-land main {
 body.pg-land #content { padding: 4px 4px 0; }
 body.pg-land .pg { gap: 0.25rem; }
 body.pg-land .pg-legend { margin: 0 0 2px; }
-body.pg-land .pg-kt { margin: 0 0 2px; padding: 3px 8px; }
 body.pg-land .pg-ztabs { padding: 2px 0 4px; }
 body.pg-land .pg-morgon-teaser { margin-top: 4px; }
 .pg-land-shell { position: relative; }
