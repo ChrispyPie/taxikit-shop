@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-13', id: '2026-11-13prick1', rader: [
+    ['Nytt', 'Prognos visar var det nya finns. En röd prick sitter på varje zon med nya förbokningar sedan du senast tittade, och inne i zonen har varje ny förbokning en liten prick. Pricken försvinner av sig själv när förbokningen inte längre finns i listan.']
+  ]},
   { datum: '2026-11-13', id: '2026-11-13skroll1', tid: '15:35', rader: [
     ['Fixat', 'Sidan hoppade ibland ner till botten på plattan i liggande läge, i Ankomster och tåglistan efter att Prognos varit öppen, och i Prognos varje minut eller när helskärm slogs på. Nu hoppar sidan aldrig av sig själv, den ligger kvar där du är.']
   ]},

@@ -63,6 +63,8 @@
     codeMsg: '',
     poll: null,
     seenIds: {},
+    newIds: {},          // bokningar som är nya sedan förra besöket (prickar, 2026-11-13prick1)
+    newSince: 0,
     inAppAlert: true,
     flights: null,       // Landvetter-ankomster (för flygvarningen i 293)
     flightUpdated: null, // när got.json senast hämtades från Swedavia (arrivalsUpdated)
@@ -400,6 +402,7 @@
       st.status = xs[0] || {};
       st.ktRaw = xs[1] || [];
       st.bookings = ktApply(st.ktRaw); st.bookingsReady = true;
+      updateNewIds(st.ktRaw);
       st.morgon = xs[2];
       st.zones = xs[3] || [];
       st.orig = xs[5] || null;
@@ -560,9 +563,10 @@
     var html = '<div class="pg-ztabs pg-og-tabs" role="tablist">';
     zs.forEach(function (z) {
       var on = st.zoneTab === z.id, n = o.zones[z.id].total || 0;
-      html += '<button type="button" class="pg-ztab' + (on ? ' on' : '') + (n ? '' : ' pg-ztab-zero') + '" data-ztab="' + z.id +
-        '" aria-label="' + esc(z.name) + ', zon ' + z.id + ', ' + n + ' resor">' + esc(z.id) +
-        ' <span class="pg-ztab-n">' + n + '</span></button>';
+      var nw = zoneHasNew(z.id);
+      html += '<button type="button" class="pg-ztab' + (on ? ' on' : '') + (n ? '' : ' pg-ztab-zero') + (nw ? ' pg-ztab-new' : '') + '" data-ztab="' + z.id +
+        '" aria-label="' + esc(z.name) + ', zon ' + z.id + ', ' + n + ' resor' + (nw ? ', ny aktivitet' : '') + '">' + esc(z.id) +
+        ' <span class="pg-ztab-n">' + n + '</span>' + (nw ? NEW_DOT : '') + '</button>';
     });
     html += '</div>';
     var d = o.zones[st.zoneTab];
@@ -628,6 +632,41 @@
     return out;
   }
 
+  // ---------- Aktivitetsprickar per zon och per bokning (2026-11-13prick1, t1571u) ----------
+  // Ny = först sedd (observed_at) efter förarens förra besök i Prognos, bilkategori enligt Filter,
+  // inte Magasinet (290) – samma regler som pricken på hemrutan. Pricken ligger kvar tills
+  // bokningen inte längre finns i listan (sparas lokalt per förare, ingen databasändring).
+  function drvKey(k) { return k + (localStorage.getItem('taxi_driver') || ''); }
+  function loadNewIds() { try { return JSON.parse(localStorage.getItem(drvKey('prognos_newids_')) || '{}') || {}; } catch (e) { return {}; } }
+  function saveNewIds(m) { try { localStorage.setItem(drvKey('prognos_newids_'), JSON.stringify(m)); } catch (e) {} }
+  function lastVisit() {
+    var v = +(localStorage.getItem(drvKey('prognos_visit_')) || 0);
+    if (!v) v = +(localStorage.getItem(drvKey('prognos_since_')) || 0);
+    return v || Date.now();
+  }
+  function updateNewIds(list) {
+    var cats = loadCats(), keep = {}, old = loadNewIds();
+    (list || []).forEach(function (b) {
+      var id = String(b.id);
+      if (old[id]) { keep[id] = 1; return; }
+      var obs = Date.parse(b.observed_at || b.first_seen || '');
+      if (!(obs > st.newSince)) return;
+      if (String(b.zone_id) === '290' || CAR_CATS.indexOf(b.category) < 0 || cats.indexOf(b.category) < 0) return;
+      keep[id] = 1;
+    });
+    st.newIds = keep;
+    saveNewIds(keep);
+  }
+  function isNewB(b) { return !!(b && st.newIds[String(b.id)]); }
+  function zoneHasNew(zid) { return (st.bookings || []).some(function (b) { return String(b.zone_id) === String(zid) && isNewB(b); }); }
+  var NEW_DOT = '<span class="pg-new-dot" aria-hidden="true"></span>';
+  (function () {
+    var css = document.createElement('style'); css.id = 'pg-new-css';
+    css.textContent = '.pg-ztab{position:relative}.pg-ztab .pg-new-dot{position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:#e53e3e;box-shadow:0 0 0 2px var(--surface,#fff)}' +
+      '.pg-td-cell{position:relative}.pg-td-cell .pg-new-dot{position:absolute;top:2px;right:2px;width:7px;height:7px;border-radius:50%;background:#e53e3e;box-shadow:0 0 0 1.5px var(--surface,#fff);pointer-events:none}';
+    (document.head || document.documentElement).appendChild(css);
+  })();
+
   function renderZoneTabs() {
     var vis = visibleZones();
     var cnt = zoneCounts();
@@ -635,9 +674,10 @@
     vis.forEach(function (z) {
       var on = st.zoneTab === z.id;
       var n = cnt[z.id] || 0;
-      html += '<button type="button" class="pg-ztab' + (on ? ' on' : '') + (n ? '' : ' pg-ztab-zero') + '" data-ztab="' + z.id +
-        '" title="' + esc(z.name) + ' (' + z.id + ') · ' + n + ' förbokningar närmaste 2 h" aria-label="' + esc(z.name) + ', zon ' + z.id + ', ' + n + ' förbokningar">' + esc(z.id) +
-        ' <span class="pg-ztab-n">' + n + '</span></button>';
+      var nw = zoneHasNew(z.id);
+      html += '<button type="button" class="pg-ztab' + (on ? ' on' : '') + (n ? '' : ' pg-ztab-zero') + (nw ? ' pg-ztab-new' : '') + '" data-ztab="' + z.id +
+        '" title="' + esc(z.name) + ' (' + z.id + ') · ' + n + ' förbokningar närmaste 2 h' + (nw ? ' · nytt' : '') + '" aria-label="' + esc(z.name) + ', zon ' + z.id + ', ' + n + ' förbokningar' + (nw ? ', ny aktivitet' : '') + '">' + esc(z.id) +
+        ' <span class="pg-ztab-n">' + n + '</span>' + (nw ? NEW_DOT : '') + '</button>';
     });
     html += '</div>';
     var cur = ZONE_BY_ID[st.zoneTab];
@@ -1403,10 +1443,12 @@
           st.cellMap[key] = { rowTxt: rowTxt, cat: k, list: list, flight: fly };
           sum.addon = !meta.child && list.some(function (b) { return addonsOf(b).length > 0; });
           sum.flight = !!fly;
+          var nwc = list.some(isNewB);
+          if (nwc) tdCls += ' pg-td-new';
           attrs = ' data-pg-cell="' + esc(key) + '" tabindex="0" aria-label="' + esc(rowTxt + ', ' + (meta.label || k) + ': ' + sum.n + ' st, ' + sum.tip +
-            (sum.addon ? ', med tillval' : '') + (fly ? ', ' + FLIGHT_TXT : '') + '. Håll för förklaring.') + '"';
+            (sum.addon ? ', med tillval' : '') + (fly ? ', ' + FLIGHT_TXT : '') + (nwc ? ', ny' : '') + '. Håll för förklaring.') + '"';
         }
-        html += '<td class="' + tdCls + '"' + (isF ? ' id="pg-focus-cell"' : '') + attrs + '>' + countCell(sum) + '</td>';
+        html += '<td class="' + tdCls + '"' + (isF ? ' id="pg-focus-cell"' : '') + attrs + '>' + countCell(sum) + (sum && list.some(isNewB) ? NEW_DOT : '') + '</td>';
       });
       html += '</tr>';
     });
@@ -1735,10 +1777,12 @@
           st.cellMap[key] = { rowTxt: rowTxt, cat: k, list: list, flight: fly };
           sum.addon = !meta.child && list.some(function (b) { return addonsOf(b).length > 0; });
           sum.flight = !!fly;
+          var nwc = list.some(isNewB);
+          if (nwc) tdCls += ' pg-td-new';
           attrs = ' data-pg-cell="' + esc(key) + '" tabindex="0" aria-label="' + esc(rowTxt + ', ' + (meta.label || k) + ': ' + sum.n + ' st, ' + sum.tip +
-            (sum.addon ? ', med tillval' : '') + (fly ? ', ' + FLIGHT_TXT : '') + '. Håll för förklaring.') + '"';
+            (sum.addon ? ', med tillval' : '') + (fly ? ', ' + FLIGHT_TXT : '') + (nwc ? ', ny' : '') + '. Håll för förklaring.') + '"';
         }
-        html += '<td class="' + tdCls + '"' + (isF ? ' id="pg-focus-cell"' : '') + attrs + '>' + countCell(sum) + '</td>';
+        html += '<td class="' + tdCls + '"' + (isF ? ' id="pg-focus-cell"' : '') + attrs + '>' + countCell(sum) + (sum && list.some(isNewB) ? NEW_DOT : '') + '</td>';
       });
       if (showFly) {
         var flies = d === 'snart' ? [] : flightsInSlot(slot);
@@ -2313,6 +2357,7 @@
   }
   function markSeen() {
     showBadge(0);
+    try { localStorage.setItem(drvKey('prognos_visit_'), String(Date.now())); } catch (e) {}
     if (!token()) return;
     badge.seenP = rpc('prognos_seen_set', {}).catch(function () {});
   }
@@ -2330,6 +2375,7 @@
     Promise.resolve(badge.seenP).then(function () {
       return rpc('prognos_new_count', { p_cats: cats });
     }).then(function (r) {
+      if (r && r.since) try { localStorage.setItem(drvKey('prognos_since_'), String(Date.parse(r.since) || 0)); } catch (e) {}
       if (!onPage()) showBadge(r && r.count);
     }).catch(function () {});
   };
@@ -2351,6 +2397,8 @@
     st.zoneTab = loadTab();
     badge.viewing = true;
     try { localStorage.setItem('taxi_view', P.id); } catch (e) {}
+    st.newSince = lastVisit();   // före markSeen: allt som kommit sedan förra besöket får prick
+    st.newIds = loadNewIds();
     markSeen();
     paint();
     refresh();
