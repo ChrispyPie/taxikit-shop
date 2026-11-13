@@ -63,7 +63,7 @@
     codeMsg: '',
     poll: null,
     seenIds: {},
-    newIds: {},          // bokningar som är nya sedan förra besöket (prickar, 2026-11-13prick1)
+    newIds: {},          // bokningar som är nya sedan förra besöket (prickar, 2026-11-13prick2)
     newSince: 0,
     inAppAlert: true,
     flights: null,       // Landvetter-ankomster (för flygvarningen i 293)
@@ -632,7 +632,7 @@
     return out;
   }
 
-  // ---------- Aktivitetsprickar per zon och per bokning (2026-11-13prick1, t1571u) ----------
+  // ---------- Aktivitetsprickar per zon och per bokning (2026-11-13prick2, t1571u) ----------
   // Ny = först sedd (observed_at) efter förarens förra besök i Prognos, bilkategori enligt Filter,
   // inte Magasinet (290) – samma regler som pricken på hemrutan. Pricken ligger kvar tills
   // bokningen inte längre finns i listan (sparas lokalt per förare, ingen databasändring).

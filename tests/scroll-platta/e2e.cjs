@@ -35,8 +35,8 @@ const ok = (n, c, e) => { if (!c) { fails.push(n + (e ? ': ' + e : '')); console
   const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
   const html = fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8');
   const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
-  ok('cache prognos.js', /prognos\.js\?v=(20261113skroll1|20261113prick1)/.test(lv));
-  ok('cache lazy-views.js', /lazy-views\.js\?v=(20261113skroll1|20261113prick1)/.test(html));
+  ok('cache prognos.js', /prognos\.js\?v=(20261113skroll1|20261113prick1|20261113prick2)/.test(lv));
+  ok('cache lazy-views.js', /lazy-views\.js\?v=(20261113skroll1|20261113prick1|20261113prick2)/.test(html));
   ok('nyhet', /2026-11-13skroll1/.test(cl) && !/\bStig\b|\bhen\b/.test(cl.split('2026-11-13skroll1')[1].split(']},')[0]));
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));

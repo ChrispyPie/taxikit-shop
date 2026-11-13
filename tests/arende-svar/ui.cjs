@@ -27,7 +27,7 @@ async function setup(admin,opt){
   assert(html.includes('Bil A191 · Ny'),'list meta');assert(!/Bil A191 · Ny · Arkiv/.test(html),'issue not Arkiv');assert(html.includes('Pågår · Arkiv'),'maint keeps Arkiv');console.log('PASS (d) listan visar inte Arkiv på felanmälan');}
  // (a)+(b) admin: svarsruta, ingen "Äldre bilärende", skickar car_issue_message och visar svaret i tråden
  {const {u,host,calls,box}=await setup(true);await u.openCase('issue',21);await tick();
-  let h=host.innerHTML;assert(!h.includes('Äldre bilärende'),'no legacy note');assert(h.includes('id="mx-legacy-text"')&&h.includes('maxlength="1000"'),'textarea');assert(h.includes('Meddelande till föraren'));assert(h.includes('Skicka meddelande'));assert(h.includes('Inga meddelanden än.'));
+  let h=host.innerHTML;assert(!h.includes('Äldre bilärende'),'no legacy note');assert(h.includes('id="mx-legacy-text"')&&h.includes('maxlength="1000"'),'textarea');assert(h.includes('Meddelande till föraren'));assert(h.includes('Skicka meddelande'));assert((h.match(/class="tk-ev"/g)||[]).length===1&&h.includes('Bromsar har låtit i flera veckor.'),'första inlägget är en händelse i tråden (chatt1)');
   console.log('PASS (a) admin ser svarsruta, inte "Äldre bilärende"');
   box.value='   ';u.legacyAct('issue_message');assert(!calls.some(x=>x[0]==='car_issue_message'),'empty not sent');assert(host.innerHTML.includes('Skriv något först.'));
   box.value='Rickard har bokat verkstad på måndag kl 8.';u.legacyAct('issue_message');await tick();await tick();await tick();await tick();

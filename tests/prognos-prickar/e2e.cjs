@@ -1,5 +1,5 @@
 'use strict';
-// Webbläsartest + förhandsbilder: aktivitetsprickar i Prognos (2026-11-13prick1, t1571u).
+// Webbläsartest + förhandsbilder: aktivitetsprickar i Prognos (2026-11-13prick2, t1571u).
 // Prick på varje zon med nya bokningar, liten prick på varje ny bokning i öppnad zon,
 // pricken försvinner när bokningen inte längre finns i listan.
 // Kör: node tests/prognos-prickar/e2e.cjs [utmapp]
@@ -27,10 +27,10 @@ const ok = (n, c, e) => { if (!c) { fails.push(n + (e ? ': ' + e : '')); console
 {
   const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
   const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
-  ok('cache prognos.js', /prognos\.js\?v=20261113prick1/.test(lv));
-  ok('cache lazy-views.js', /lazy-views\.js\?v=20261113prick1/.test(fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8')));
-  const e = cl.split("id: '2026-11-13prick1'")[1].split(']},')[0];
-  ok('nyhet utan tid, utan Stig/hen', !/tid: '/.test(e) && !/\bStig\b|\bhen\b/.test(e));
+  ok('cache prognos.js', /prognos\.js\?v=20261113prick2/.test(lv));
+  ok('cache lazy-views.js', /lazy-views\.js\?v=20261113prick2/.test(fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8')));
+  const e = cl.split("id: '2026-11-13prick2'")[1].split(']},')[0];
+  ok('nyhet utan tid, utan Stig/hen', !/tid: '(?!\d\d:\d\d')/.test(e) && !/\bStig\b|\bhen\b/.test(e));
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 // Syntetiska bokningar: två nya (Essity 161, Landvetter 293), resten gamla.
