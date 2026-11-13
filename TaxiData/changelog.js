@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-13', id: '2026-11-13skroll1', rader: [
+    ['Fixat', 'Ankomster och tåglistan hoppade ibland ner till botten av sidan på plattan i liggande läge, till exempel när helskärm slogs på eller systemfälten visades. Det gällde efter att Prognos hade varit öppen. Nu ligger sidan kvar där du är.']
+  ]},
   { datum: '2026-11-13', id: '2026-11-13lasbar1', tid: '15:18', rader: [
     ['Fixat', 'Ärenden: dina egna svar i en felanmälan syntes inte i mörkt tema, texten var ljus på ljus bakgrund. Nu går de att läsa.']
   ]},
