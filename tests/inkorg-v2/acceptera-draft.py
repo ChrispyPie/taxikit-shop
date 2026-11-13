@@ -46,7 +46,7 @@ with sync_playwright() as pw:
         print('FLICKER: textarea emptied or disappeared during accept'); sys.exit(1)
     p.fill('#mx-reply-body','Syntetiskt svar')
     p.locator('#mx-reply button[type=submit]').click()
-    p.wait_for_function("document.querySelectorAll('.tk-ev').length>=2")
+    p.wait_for_function("[...document.querySelectorAll('.tk-ev-b')].some(e=>e.textContent==='Syntetiskt svar')")
     cleared=p.input_value('#mx-reply-body')
     if cleared!='':
         print('REPLY_NOT_CLEARED', repr(cleared)); sys.exit(1)

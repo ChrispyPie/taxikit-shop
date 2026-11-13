@@ -3,6 +3,9 @@
 (function(){
  'use strict';
  var A=window.ARENDE,esc=A.esc;
+ // Samma händelse/tråd som i ärenden (arende-status.js, 2026-11-13chatt1). Reserv om den inte är laddad.
+ function evt(w,at,b){return A.event?A.event(w,at,b):'<div class="tk-ev"><div class="tk-ev-h"><b class="tk-ev-who">'+w+'</b><time class="tk-ev-t">'+esc(at?when(at):'')+'</time></div><div class="tk-ev-b">'+b+'</div></div>';}
+ function thr(items){return A.thread?A.thread(items):'<div class="tk-thr" data-tk-thr>'+items.join('')+'</div>';}
  var FILTERS=[['all','Alla','📥'],['message','Meddelande','💬'],['sick','Sjuk','🤒'],['hours','Verkstadstimmar','⏱️']];
  var ADMIN_FILTERS=[['all','Alla','📥'],['message','Meddelanden','💬'],['hours','Verkstadstimmar','⏱️'],['sick','Sjuk','🤒']];
  var STATUS={pending_driver:'Väntar på förarens svar',pending_admin:'Väntar på admins svar',accepted:'Godkänd',declined:'Avböjd'};
@@ -141,18 +144,30 @@
    if(st.next)h+='<button onclick="'+name+'.moreOld()">Visa fler äldre samtal</button>';
    return h;
   }
-  function bookingHtml(b,ctx){ctx=ctx||st.thread||{};var can=!(ctx.locked&&!admin)&&((admin&&b.status==='pending_admin')||((!admin||ctx.is_driver)&&b.status==='pending_driver'));
-   return '<section class="mx-booking '+(b.status==='accepted'?'solid':'pending')+'"><h4>'+esc(b.title)+'</h4><p>'+(b.kind&&b.kind!==b.title?esc(b.kind)+' · ':'')+esc(when(b.starts_at))+(b.car_number?' · Bil '+esc(b.car_number):' · Bil: Nej')+'</p><p>'+esc(STATUS[b.status])+'</p><small>Föreslagen '+esc(when(b.created_at))+(b.decided_at?' · Beslut '+esc(when(b.decided_at)):'')+'</small>'+(b.reason?'<p>'+esc(b.reason)+'</p>':'')+(can?'<div class="mx-actions"><button onclick="'+name+'.decide('+b.id+',\'accepted\')">'+(admin&&b.status==='pending_admin'?'Bekräfta':'Acceptera')+'</button><button onclick="'+name+'.decide('+b.id+',\'declined\')">Avböj</button></div>':'')+'</section>';
-  }
+  // Bokad tid i tråden (2026-11-13chatt1): en fast rad överst med det som gäller nu (väntande förslag
+  // och senaste godkända tid), och varje förslag/beslut som en vanlig händelse i tråden.
+  function bWhen(b){return A.whenLong?A.whenLong(b.starts_at):when(b.starts_at);}
+  function bWhat(b){var t=b.kind||b.title||'';return esc(bWhen(b))+(t&&t!=='Bokad tid'?' · '+esc(t):'')+(b.car_number?' · Bil '+esc(b.car_number):'');}
+  function bRole(b){return b.proposer_role||(b.status==='pending_admin'?'driver':'admin');}
+  function bWho(role,adminWord){return role==='admin'?(admin?'Du':adminWord):(admin?'Föraren':'Du');}
+  function bookingEvents(bs,adminWord){var out=[];(bs||[]).forEach(function(b){var r=bRole(b),o=r==='admin'?'driver':'admin';
+    out.push({at:b.created_at,h:evt(esc(bWho(r,adminWord)),b.created_at,'Föreslog Bokad tid: '+bWhat(b))});
+    if(b.decided_at&&(b.status==='accepted'||b.status==='declined'))out.push({at:b.decided_at,h:evt(esc(bWho(o,adminWord)),b.decided_at,(b.status==='accepted'?'Godkände Bokad tid: ':'Avböjde Bokad tid: ')+bWhat(b)+(b.reason?'\nOrsak: '+esc(b.reason):''))});});
+   return out;}
+  function bookingSummary(bs,ctx){ctx=ctx||{};bs=bs||[];var rows=[],pend=bs.filter(function(b){return b.status==='pending_driver'||b.status==='pending_admin';}),acc=bs.filter(function(b){return b.status==='accepted';}).sort(function(a,b){return new Date(a.starts_at)-new Date(b.starts_at);}),now=Date.now();
+   var cur=acc.filter(function(b){return new Date(b.starts_at).getTime()>=now-3600000;})[0]||acc[acc.length-1];
+   if(cur)rows.push(sumRow(cur,ctx));pend.forEach(function(b){rows.push(sumRow(b,ctx));});return rows;}
+  function sumRow(b,ctx){var can=!(ctx.locked&&!admin)&&((admin&&b.status==='pending_admin')||((!admin||ctx.is_driver)&&b.status==='pending_driver'));
+   return '<section class="tk-sum-row mx-booking '+(b.status==='accepted'?'solid':'pending')+'"><div><b>Bokad tid:</b> '+bWhat(b)+' · <span class="tk-sum-st">'+esc(STATUS[b.status]||'')+'</span></div>'+(can?'<div class="mx-actions"><button onclick="'+name+'.decide('+b.id+',\'accepted\')">'+(admin&&b.status==='pending_admin'?'Bekräfta':'Acceptera')+'</button><button onclick="'+name+'.decide('+b.id+',\'declined\')">Avböj</button></div>':'')+'</section>';}
   function threadHtml(){var t=st.thread;
    return back()+unreadButton('thread',t.id)+'<article class="mx-thread ar-card"><div class="ar-ct"><h2>'+esc(t.subject)+'</h2></div>'+(t.car_number?'<div class="ar-m">Bil '+esc(t.car_number)+'</div>':'')+(t.locked&&!admin?'':'<button onclick="'+name+'.newBooking()">Bokad tid</button>')+
-    A.thread(t.messages.map(function(m){return A.event(esc(m.role==='system'?'Historik':m.mine?'Du':m.role==='admin'?'Admin':'Föraren'),m.at,esc(m.body));}))+(t.bookings||[]).map(bookingHtml).join('')+
+    (function(r){return A.summary?A.summary(r):r.join('');})(bookingSummary(t.bookings,t))+thr(t.messages.map(function(m){return {at:m.at,h:evt(esc(m.role==='system'?'Historik':m.mine?'Du':m.role==='admin'?'Admin':'Föraren'),m.at,esc(m.body))};}).concat(bookingEvents(t.bookings,'Admin')).sort(function(a,b){return new Date(a.at)-new Date(b.at);}).map(function(r){return r.h;}))+
     (t.locked&&!admin?'<p class="ar-note" role="status">Tråden är stängd. Du kan läsa hela tråden men inte svara.</p>':'<form id="mx-reply"><p id="mx-decline-error" class="mx-error" role="alert"></p><label for="mx-reply-body">Svara</label><textarea id="mx-reply-body" required maxlength="2000" rows="3">'+esc(st.replyDraft||'')+'</textarea><button type="submit"'+(st.busy?' disabled':'')+'>Skicka svar</button></form>')+'<p class="mx-error mx-server-error" role="alert">'+esc(st.error)+'</p></article>';
   }
   function legacyHtml(){var c=st.legacy.data,k=st.legacy.kind,d=c.data||{};
-   if(k==='old-message')return back()+unreadButton(k,c.id)+'<h2>'+esc(c.subject)+'</h2><p class="ar-note">Äldre privat samtal – bara läsning. Nya meddelanden går till admin.</p>'+A.thread(c.messages.map(function(m){return A.event(esc(m.mine?'Du':(c.name||'Avsändare')),m.at,esc(m.body));}));
-   var h=back()+unreadButton(k,c.id)+A.view(c,admin?'owner':'driver');
-   if(k==='issue'&&c.booking&&c.booking.bookings&&c.booking.bookings.length)h+='<div class="mx-issue-bookings">'+c.booking.bookings.map(function(b){return bookingHtml(b,{locked:c.locked,is_driver:c.booking.is_driver});}).join('')+'</div>';
+   if(k==='old-message')return back()+unreadButton(k,c.id)+'<h2>'+esc(c.subject)+'</h2><p class="ar-note">Äldre privat samtal – bara läsning. Nya meddelanden går till admin.</p>'+thr(c.messages.map(function(m){return evt(esc(m.mine?'Du':(c.name||'Avsändare')),m.at,esc(m.body));}));
+   var bk=k==='issue'&&c.booking&&c.booking.bookings||[];
+   var h=back()+unreadButton(k,c.id)+A.view(c,admin?'owner':'driver',bk.length?{events:bookingEvents(bk,'Ägaren'),summary:bookingSummary(bk,{locked:c.locked,is_driver:c.booking.is_driver})}:null);
    if(c.locked&&!admin)return h+'<p class="ar-note" role="status">Tråden är stängd. Du kan läsa den men inte svara här.</p>';
    if(k==='wh'){var decided=d.status&&d.status!=='pending';h+='<div class="mx-form"><label for="mx-legacy-text">'+(admin?(decided?'Meddelande till föraren (beslutet ändras inte)':'Meddelande till föraren, eller motivering till beslutet'):'Svara')+'</label><textarea id="mx-legacy-text" maxlength="1000"></textarea><div class="mx-actions">'+(admin?'<button onclick="'+name+'.legacyAct(\'message\')">Skicka meddelande</button><button onclick="'+name+'.legacyAct(\'ask\')">'+(decided?'Öppna igen och fråga':'Fråga föraren')+'</button><button onclick="'+name+'.legacyAct(\'approved\')">Godkänn</button><button onclick="'+name+'.legacyAct(\'rejected\')">Neka</button>':'<button onclick="'+name+'.legacyAct(\'reply\')">Skicka svar</button>')+'</div></div>';}
    else if(k==='sjuk')h+=admin?'<div class="mx-form"><label for="mx-legacy-text">Kommentar</label><textarea id="mx-legacy-text" maxlength="500"></textarea><div class="mx-actions">'+[['godkand','Godkänn'],['intyg_begart','Begär intyg'],['avslagen','Avslå']].map(function(x){return '<button onclick="'+name+'.legacyAct(\''+x[0]+'\')">'+x[1]+'</button>';}).join('')+'</div></div>':'<button onclick="'+name+'.report(\'sjuk\')">Öppna sjukanmälan och intyg</button>';

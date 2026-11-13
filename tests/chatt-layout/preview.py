@@ -20,7 +20,14 @@ OVERLAY=r"""
   {id:3,role:'owner',who:'Berra',body:'Ja, lämna den 07.45 senast. Nyckeln i lådan.',at:'2026-11-12T21:38:00Z'}];
  for(var i=4;i<10;i++)msgs.push({id:i,role:i%2?'driver':'owner',who:i%2?'Christian Parsa':'Berra',body:'Uppföljning '+i+': allt klart med bilen?',at:'2026-11-13T0'+i+':05:00Z'});
  MOCK.cases['issue:21']={kind:'issue',id:21,st:'pagar',admin:true,data:{id:21,kind:'fault',car:'A191',body:body,blocking:false,status:'pagar',mine:false,created_at:'2026-11-12T17:02:00Z',reporter_name:'Christian Parsa',history:[{status:'ny',at:'2026-11-12T17:02:00Z'},{status:'pagar',at:'2026-11-12T18:40:00Z'}],msgs:msgs}};
- var thread={id:77,subject:'Däckbyte A191',car_number:'191',is_driver:false,driver_id:900001,bookings:[],messages:[
+ var ibk=[{id:31,thread_id:501,kind:'Verkstad',title:'Verkstad',starts_at:'2026-11-17T07:00:00Z',car_number:'A191',status:'accepted',proposer_role:'admin',created_at:'2026-11-12T18:45:00Z',decided_at:'2026-11-12T19:12:00Z'},
+  {id:32,thread_id:501,kind:'Verkstad',title:'Verkstad',starts_at:'2026-11-18T07:00:00Z',car_number:'A191',status:'pending_admin',proposer_role:'driver',created_at:'2026-11-13T06:30:00Z'}];
+ MOCK.cases['sjuk:41']={kind:'sjuk',id:41,st:'vantar',admin:true,data:{id:41,start:'2026-11-12',end:null,status:'intyg_begart',name:'Christian Parsa',comment:'Feber sedan i natt.',certs:0,
+  events:[{kind:'created',at:'2026-11-12T05:40:00Z',who:'Christian Parsa'},{kind:'status',to:'intyg_begart',at:'2026-11-12T08:10:00Z',who:'Berra',comment:'Skicka intyg från dag 8.'}]}};
+ MOCK.cases['wh:42']={kind:'wh',id:42,st:'klar',admin:true,data:{id:42,car:'A191',start:'2026-11-11T07:00:00Z',end:'2026-11-11T09:30:00Z',minutes:150,status:'approved',reporter_name:'Christian Parsa',comment:'Däckbyte och spolarvätska.',created_at:'2026-11-11T10:00:00Z',
+  msgs:[{kind:'approved',role:'owner',who:'Berra',body:'Tack!',at:'2026-11-11T12:00:00Z'}]}};
+ var thread={id:77,subject:'Däckbyte A191',car_number:'191',is_driver:false,driver_id:900001,bookings:[
+  {id:51,kind:'Däckbyte',title:'Däckbyte',starts_at:'2026-11-14T13:00:00Z',car_number:'191',status:'accepted',proposer_role:'admin',created_at:'2026-11-11T08:03:00Z',decided_at:'2026-11-11T09:31:00Z'}],messages:[
   {id:1,role:'driver',mine:false,body:'Hej! När kan vi byta till vinterdäck på 191?',at:'2026-11-11T07:15:00Z'},
   {id:2,role:'admin',mine:true,body:'Hej! Torsdag efter passet går bra.',at:'2026-11-11T08:02:00Z'},
   {id:3,role:'driver',mine:false,body:'Perfekt, jag ställer bilen vid verkstaden.',at:'2026-11-11T09:30:00Z'},
@@ -28,7 +35,7 @@ OVERLAY=r"""
  var prev=window.fetch;window.fetch=function(url,opt){var m=/\/rest\/v1\/rpc\/([a-z_0-9]+)/.exec(String(url));
   if(m&&m[1]==='mailbox_v2'){var b=JSON.parse(opt.body),o={item_flags:[],unread_flags:[],mailbox_capabilities:{can_trash:true},item_lock:{locked:false},mark_read:{},mark_unread:{},get:thread}[b.p_action];
    if(o!==undefined)return Promise.resolve(new Response(JSON.stringify(o),{status:200,headers:{'Content-Type':'application/json'}}));}
-  if(m&&m[1]==='issue_booking')return Promise.resolve(new Response('[]',{status:200,headers:{'Content-Type':'application/json'}}));
+  if(m&&m[1]==='issue_booking'){var ia=JSON.parse(opt.body).p_action;return Promise.resolve(new Response(JSON.stringify(ia==='get'?{thread_id:501,is_driver:false,bookings:ibk}:[]),{status:200,headers:{'Content-Type':'application/json'}}));}
   return prev.apply(this,arguments);};
 })();"""
 class Q(SimpleHTTPRequestHandler):
@@ -45,6 +52,14 @@ with sync_playwright() as pw:
     p.evaluate("ARENDEN_ADMIN.openCase('issue',21)");p.wait_for_selector('#mx-legacy-text');p.wait_for_timeout(400)
     res['arende']=p.evaluate("""(()=>{const t=document.querySelector('[data-tk-thr]');return {y:scrollY,thr:t?{top:t.scrollTop,max:t.scrollHeight-t.clientHeight}:null,text:document.querySelector('.mx').innerText.slice(0,400)}})()""")
     p.screenshot(path=str(OUT/(PREFIX+'-arende.png')))
+    if PREFIX!='fore':
+        res['arende_sum']=p.evaluate("(document.querySelector('.tk-sum')||{}).innerText||''")
+        res['arende_bk_events']=p.evaluate("[...document.querySelectorAll('.tk-ev-b')].filter(e=>/Bokad tid/.test(e.textContent)).length")
+        for kind,cid,fn in [('sjuk',41,'sjuk'),('wh',42,'verkstadstimmar')]:
+            p.evaluate("ARENDEN_ADMIN.back()");p.wait_for_timeout(150)
+            p.evaluate(f"ARENDEN_ADMIN.openCase('{kind}',{cid})");p.wait_for_selector('.tk-sum');p.wait_for_timeout(300)
+            res[fn]=p.evaluate("document.querySelector('.tk-sum').innerText")
+            p.screenshot(path=str(OUT/(PREFIX+'-'+fn+'.png')))
     p.evaluate("ARENDEN_ADMIN.back()");p.wait_for_timeout(200)
     p.evaluate("ARENDEN_ADMIN.openThread(77)");p.wait_for_selector('#mx-reply-body');p.wait_for_timeout(400)
     res['meddelande']=p.evaluate("""(()=>{const t=document.querySelector('[data-tk-thr]');return {y:scrollY,thr:t?{top:t.scrollTop,max:t.scrollHeight-t.clientHeight}:null}})()""")
@@ -66,6 +81,9 @@ srv.shutdown()
 print(json.dumps(res,ensure_ascii=False))
 assert not errors,errors
 if PREFIX!='fore':
+    assert 'Bokad tid:' in res['arende_sum'] and 'Godkänd' in res['arende_sum'] and 'Väntar på admins svar' in res['arende_sum'],res['arende_sum']
+    assert res['arende_bk_events']==3,res['arende_bk_events']
+    assert 'Sjukanmälan:' in res['sjuk'] and 'Verkstadstimmar:' in res['verkstadstimmar'],res
     a=res['arende'];assert a['y']==0 and a['thr'] and a['thr']['max']>0 and abs(a['thr']['top']-a['thr']['max'])<2,a
     assert 'Service lampan' in a['text'] and 'Christian P' in a['text'],a
     st_=res['stil'];assert st_['bgs']==1 and st_['heads'] and st_['minContrast']>=4.5,st_
