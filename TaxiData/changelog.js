@@ -15,7 +15,7 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-11-13', id: '2026-11-13chatt1', rader: [
+  { datum: '2026-11-13', id: '2026-11-13chatt1', tid: '16:01', rader: [
     ['Ändrat', 'Ärenden och meddelanden ser nu likadana ut. Varje inlägg, även det första, visas på samma sätt: namn och tid överst, sedan texten. Allt går att läsa i mörkt tema.'],
     ['Ändrat', 'När du öppnar en tråd visas det senaste inlägget direkt, längst ner precis ovanför svarsrutan. Äldre inlägg ser du genom att rulla uppåt i tråden.'],
     ['Nytt', 'Bokad tid, sjukanmälan och verkstadstimmar visar överst i tråden en fast rad med det som gäller just nu, till exempel Bokad tid: tis 18/11 kl. 08:00 · Godkänd. Varje förslag och beslut syns dessutom i tråden med namn och tid.']

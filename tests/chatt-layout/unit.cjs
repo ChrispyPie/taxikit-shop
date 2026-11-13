@@ -32,6 +32,6 @@ assert.match(lv, /changelog\.js\?v=20261113chatt1/);
 assert.match(fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8'), /lazy-views\.js\?v=20261113chatt1/);
 const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
 const entry = cl.split("id: '2026-11-13chatt1'")[1].split(']},')[0];
-assert.doesNotMatch(entry, /\btid: '/, 'tid sätts vid go-live');
+assert.doesNotMatch(entry, /\btid: '(?!\d\d:\d\d')/, 'tid är HH:MM (sätts vid go-live)');
 assert.doesNotMatch(entry, /\bStig\b|\bhen\b/);
 console.log('CHATT_LAYOUT_UNIT_OK');
