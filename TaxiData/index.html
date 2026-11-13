@@ -204,7 +204,7 @@
   <script src="hjalp.js?v=20261113mod2"></script>
   <script src="hem-ordning.js?v=20261113mod2"></script>
   <script src="moduler.js?v=20261113mod2"></script>
-  <script src="lazy-views.js?v=20261113sedd1"></script>
+  <script src="lazy-views.js?v=20261113hem1"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -363,6 +363,7 @@
         localStorage.setItem('taxi_logged_in', '1');
         localStorage.setItem('taxi_driver', r.driver.id);
         if (window.DELAD) { DELAD.onLoginSuccess(); DELAD.markLogin(); }
+        try { sessionStorage.setItem('taxi_go_home', '1'); } catch (e) {}   // efter inloggning: alltid startskärmen
         location.reload();
       } catch (e) {
         showLoginError('Kunde inte kontrollera lösenordet. Försök igen.');
@@ -422,6 +423,29 @@
       }
     }
 
+    // Start (2026-11-13hem1, t1584u): vid ny start av appen (PWA, ny flik, kallstart) och direkt efter
+    // inloggning hamnar man på startskärmen. Minnet av senaste sida (#view=…, sparad vy, taxi_view)
+    // används bara när sidan laddas om. Länkar från notiser (?sida=…) öppnar alltid sin sida.
+    function isReload() {
+      try {
+        var e = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+        if (e && e.type) return e.type === 'reload';
+      } catch (e1) {}
+      try { return !!(performance.navigation && performance.navigation.type === 1); } catch (e2) {}
+      return false;
+    }
+    function startView() {
+      var afterLogin = false;
+      try { afterLogin = sessionStorage.getItem('taxi_go_home') === '1'; sessionStorage.removeItem('taxi_go_home'); } catch (e) {}
+      if (isReload() && !afterLogin) return LAZY.restoreView() || localStorage.getItem('taxi_view');
+      try { localStorage.removeItem('taxi_view'); } catch (e) {}
+      try { LAZY.save('view', null); } catch (e) {}
+      if (location.hash) { try { history.replaceState(history.state, '', location.pathname + location.search); } catch (e) {} }
+      var sida = null;
+      try { sida = new URLSearchParams(location.search).get('sida'); } catch (e) {}
+      return sida ? LAZY.restoreView() : null;
+    }
+
     async function showMenu() {
       SESSION_READY.begin();
       driverId = localStorage.getItem('taxi_driver') || 'okänd';
@@ -432,7 +456,7 @@
       LAZY.refreshBadges();
       updateProfileReminder();
 
-      var savedView = LAZY.restoreView() || localStorage.getItem('taxi_view');
+      var savedView = startView();
       if (driverData.must_change_password) {
         localStorage.removeItem('taxi_view');
         document.getElementById('app').style.display = 'block';
