@@ -16,7 +16,7 @@
  */
 window.CHANGELOG = [
   { datum: '2026-11-13', id: '2026-11-13skroll1', rader: [
-    ['Fixat', 'Ankomster och tåglistan hoppade ibland ner till botten av sidan på plattan i liggande läge, till exempel när helskärm slogs på eller systemfälten visades. Det gällde efter att Prognos hade varit öppen. Nu ligger sidan kvar där du är.']
+    ['Fixat', 'Sidan hoppade ibland ner till botten på plattan i liggande läge, i Ankomster och tåglistan efter att Prognos varit öppen, och i Prognos varje minut eller när helskärm slogs på. Nu hoppar sidan aldrig av sig själv, den ligger kvar där du är.']
   ]},
   { datum: '2026-11-13', id: '2026-11-13lasbar1', tid: '15:18', rader: [
     ['Fixat', 'Ärenden: dina egna svar i en felanmälan syntes inte i mörkt tema, texten var ljus på ljus bakgrund. Nu går de att läsa.']

@@ -1,5 +1,6 @@
 'use strict';
 // Webbläsartest: sidan får inte hoppa till botten i Ankomster (tåglistan) på plattan.
+// Christian 2026-11-13: sidan ska aldrig rullas till botten automatiskt, inte heller i Prognos.
 // Orsak (2026-11-13): Prognos lyssnar på resize/visualViewport och fullskärmsbyte.
 // Lyssnaren levde kvar efter att man lämnat Prognos (samma #content-ruta), så en liten
 // storleksändring (systemfält, adressfält, helskärm) rullade Ankomster till botten.
@@ -82,9 +83,26 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   for (const [w, h, label] of sizes) {
     const p = await open(w, h);
     const tag = w + 'x' + h + ' ' + label;
-    // 1) Öppna Prognos (som i bilen), sedan Ankomster.
+    // 0) Inne i Prognos: sidan får aldrig hoppa, varken vid resize, helskärm eller uppdatering.
     await p.evaluate(() => openItem('prognos'));
     await sleep(1200);
+    await p.evaluate(() => { document.body.style.paddingBottom = '3000px'; });
+    for (const start of [0, 400]) {
+      await p.evaluate((y0) => window.scrollTo(0, y0), start);
+      await sleep(100);
+      await p.setViewport({ width: w, height: h - 24, deviceScaleFactor: 1, isMobile: false, hasTouch: true });
+      await sleep(300);
+      await p.setViewport({ width: w, height: h, deviceScaleFactor: 1, isMobile: false, hasTouch: true });
+      await sleep(300);
+      await p.evaluate(() => { if (window.PROGNOS && PROGNOS.onFullscreen) PROGNOS.onFullscreen(true); });
+      await sleep(300);
+      await p.evaluate(() => window.PROGNOS && PROGNOS.refresh && PROGNOS.refresh());
+      await sleep(600);
+      const yp = await y(p);
+      ok(tag + ': Prognos står kvar (start ' + start + ')', Math.abs(yp - start) < 2, 'scrollY=' + yp);
+    }
+    await p.evaluate(() => { document.body.style.paddingBottom = ''; });
+    // 1) Sedan Ankomster (som i bilen).
     await p.evaluate(() => openItem('ankomster'));
     await p.waitForFunction(() => document.querySelectorAll('[data-ank-key]').length > 20, { timeout: 20000 });
     await sleep(400);

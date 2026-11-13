@@ -1297,8 +1297,8 @@
     } catch (e2) {}
     return (window.innerWidth || 0) > (window.innerHeight || 0);
   }
-  // Helskärm styrs globalt av helskarm.js. I liggande prognos rullas rutnätet
-  // längst ner när helskärm slås på (samma beteende som tidigare).
+  // Helskärm styrs globalt av helskarm.js. I liggande prognos räknas rutnätet om
+  // när helskärm slås på, men sidan rullas aldrig (2026-11-13skroll1).
   P.onFullscreen = function (on) {
     if (on && onPage() && isLand()) settleLandLayout();
   };
@@ -1457,20 +1457,12 @@
     var avail = Math.max(0, Math.floor((window.innerHeight || 0) - landHeaderBottom() - padB - 2));
     var extra = Math.max(0, avail - Math.ceil(contentH));
     spacer.style.height = extra + 'px';
-    scrollLandToBottom();
-    var gap = Math.round((window.innerHeight || 0) - padB - shell.getBoundingClientRect().bottom);
-    if (gap > 1) {
-      spacer.style.height = (extra + gap) + 'px';
-      scrollLandToBottom();
+    // Sidan rullas aldrig automatiskt (2026-11-13skroll1, Christian): rutnätet läggs längst ner
+    // med luft ovanför när det får plats, men är sidan längre står den kvar där föraren är.
+    if ((window.scrollY || 0) < 1) {
+      var gap = Math.round((window.innerHeight || 0) - padB - shell.getBoundingClientRect().bottom);
+      if (gap > 1) spacer.style.height = (extra + gap) + 'px';
     }
-  }
-
-  function scrollLandToBottom() {
-    var se = document.scrollingElement || document.documentElement;
-    if (!se) return;
-    void se.offsetHeight;
-    var max = Math.max(0, (se.scrollHeight || 0) - (window.innerHeight || se.clientHeight || 0));
-    if (Math.abs((window.scrollY || se.scrollTop || 0) - max) > 1) window.scrollTo(0, max);
   }
 
   function settleLandLayout() {
@@ -1479,7 +1471,6 @@
       if (!onPage() || !isLand()) return;
       fitLandCols(st.el);
       layoutFlyCallouts(st.el);
-      scrollLandToBottom();
     };
     run();
     requestAnimationFrame(function () {
