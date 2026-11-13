@@ -15,9 +15,9 @@
     ],
     hem: [
       'Här öppnar du verktygen. En röd prick betyder att något nytt väntar. Hjälpboten syns bara här på startskärmen.',
-      'Håll in en ikon i ungefär en sekund. Den lyfts och en meny med Modulinfo, Flytta, Hjälp och Avinstallera visas. Dra ikonen för att flytta den. Inställningar, Om appen och Admin går inte att ta bort.',
+      'Håll in en ikon i ungefär en sekund. Den lyfts och en meny med Modulinfo, Flytta, Hjälp och Avinstallera visas. Dra ikonen för att flytta den. Inställningar, Om appen, Admin och Moduler går inte att ta bort.',
       'Släpp en ikon på en annan för att göra en mapp. Tryck på mappen för att öppna den och på namnet för att byta namn. Håll in en ikon i mappen och dra ut den för att lägga den på startskärmen igen. Ta bort mapp (håll in mappen) lägger tillbaka ikonerna.',
-      'Rutan Moduler längst ner öppnar en lista där du kan installera verktyg igen.',
+      'Rutan Moduler öppnar en lista där du kan installera verktyg igen. Du kan flytta den, men den stannar alltid på startskärmen och kan inte läggas i en mapp.',
       'Flytta i menyn ger ordningsläget. Där drar du utan att hålla in, tar bort med krysset, och Återställ sätter tillbaka standardordningen. Valen sparas på ditt konto.',
       'Inloggade enheter visar telefoner som är inne på ditt konto just nu.'
     ],
@@ -25,8 +25,8 @@
       'Här ser du alla verktyg som hör till ditt konto.',
       'Varje rad visar en bild, namnet och en kort beskrivning.',
       'Installera lägger till verktyget på startskärmen. Installerad betyder att det redan finns där.',
-      'Inställningar, Om appen och Admin är alltid installerade och går inte att ta bort.',
-      'Från startskärmen kan du hålla in en ikon för Modulinfo, Flytta, Hjälp eller Avinstallera, och dra den till en ny plats eller in i en mapp.'
+      'Inställningar, Om appen och Admin är alltid installerade och går inte att ta bort. Moduler finns alltid på startskärmen.',
+      'Från startskärmen kan du hålla in en ikon för Modulinfo, Flytta, Hjälp eller Avinstallera, och dra den till en ny plats eller in i en mapp. Moduler kan flyttas men inte läggas i en mapp eller avinstalleras.'
     ],
     kordata: [
       'Här ser du vad du kört in, per dag, vecka, månad eller år.',

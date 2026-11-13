@@ -1,5 +1,5 @@
 /* Sidan Moduler: lista med förhandsvisning, beskrivning och Installera/Installerad.
- * Öppnas från rutan Moduler på hemskärmen. Modulinfo vid långtryck öppnar en infosida, inte den här listan. */
+ * Öppnas från rutan Moduler på hemskärmen, som kan flyttas men alltid ligger kvar där. Modulinfo vid långtryck öppnar en infosida, inte den här listan. */
 (function () {
   'use strict';
 
@@ -18,7 +18,8 @@
     om: 'Om appen och vad som är nytt.',
     admin: 'Administration för åkeriet.',
     sadmin: 'Systemadmin för TaxiData.',
-    verkstad: 'Anmälningar och ärenden, till exempel när bilen är på verkstan.'
+    verkstad: 'Anmälningar och ärenden, till exempel när bilen är på verkstan.',
+    moduler: 'Här ser du alla verktyg och kan installera dem på startskärmen. Rutan ligger alltid kvar på startskärmen.'
   };
 
   function css() {
@@ -291,7 +292,7 @@
     var items = catalog();
     var m = null, i;
     for (i = 0; i < items.length; i++) if (items[i].id === id) m = items[i];
-    if (!m) m = { id: id, label: id, icon: '' };
+    if (!m) m = { id: id, label: id === 'moduler' ? 'Moduler' : id, icon: '' };
     var files = moduleFiles(id);
     var ver = versionOf(files);
     var when = dateOfVersion(ver);

@@ -86,7 +86,7 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
     const p = await openHome({ width: 412, height: 780, theme: 'dark', scale: '1.4' });
     ok('no pageerror home', p._errs.length === 0, p._errs.join('|'));
     const tile = await p.evaluate(() => {
-      const plus = document.querySelector('.td-slot-empty');
+      const plus = document.querySelector('.icon[data-tool="moduler"]');
       if (!plus) return null;
       const cs = getComputedStyle(plus);
       return {
@@ -195,7 +195,7 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
 
   {
     const p = await openHome({ width: 412, height: 780, theme: 'dark', scale: '1.4' });
-    await p.click('.td-slot-empty');
+    await p.click('.icon[data-tool="moduler"]');
     await p.waitForSelector('.td-mod-list');
     const page = await p.evaluate(() => {
       const rows = [...document.querySelectorAll('.td-mod-row')];
@@ -226,7 +226,7 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
     await p.waitForSelector('#td-info-sheet');
     await p.screenshot({ path: path.join(out, 'modulinfo-1024x600-dark.png') });
     await p.click('#td-info-back');
-    await p.click('.td-slot-empty');
+    await p.click('.icon[data-tool="moduler"]');
     await p.waitForSelector('.td-mod-list');
     await p.screenshot({ path: path.join(out, 'moduler-sida-1024x600-dark.png') });
     await p.close();

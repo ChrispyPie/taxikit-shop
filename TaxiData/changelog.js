@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-13', id: '2026-11-13mod2', tid: '15:13', rader: [
+    ['Ändrat', 'Startskärmen: rutan Moduler kan du nu flytta precis som de andra ikonerna. Den stannar alltid på startskärmen, så du inte tappar bort den. Den kan inte läggas i en mapp eller avinstalleras.']
+  ]},
   { datum: '2026-11-12', id: '2026-11-12pgfix1', tid: '19:12', rader: [
     ['Fixat', 'Prognos fastnade på Laddar verktyget efter omladdning eller inloggning, särskilt på en delad platta. Öppna Prognos från startskärmen om det händer innan uppdateringen är inne.']
   ]},

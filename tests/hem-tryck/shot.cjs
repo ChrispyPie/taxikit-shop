@@ -113,25 +113,26 @@ function pressCheck(sel, emojiSel) {
   await p.screenshot({ path: path.join(out, 'tryck-ikon-412-scale14-dark.png') });
   await p.mouse.up();
 
-  const plus = await p.$('.td-slot-empty');
+  const plus = await p.$('.icon[data-tool="moduler"]');
   const pb = await plus.boundingBox();
   await p.mouse.move(pb.x + pb.width / 2, pb.y + pb.height / 2);
   await p.mouse.down();
   const pmid = await p.evaluate(() => {
-    const el = document.querySelector('.td-slot-empty');
-    const plus = el.querySelector('.td-slot-plus');
+    const el = document.querySelector('.icon[data-tool="moduler"]');
+    const em = el.querySelector('.emoji');
     const cs = getComputedStyle(el);
-    const ps = getComputedStyle(plus);
+    const ps = getComputedStyle(em);
     const bg = cs.backgroundColor;
     return {
       noBox: (bg === 'rgba(0, 0, 0, 0)' || bg === 'transparent') && cs.transform === 'none',
       scaled: ps.transform !== 'none' && ps.transform !== 'matrix(1, 0, 0, 1, 0, 0)',
       filter: ps.filter,
-      h: el.getBoundingClientRect().height
+      h: el.getBoundingClientRect().height,
+      hasSvg: !!el.querySelector('.emoji svg')
     };
   });
   ok('plus no square', pmid.noBox, JSON.stringify(pmid));
-  ok('plus scale on +', pmid.scaled, JSON.stringify(pmid));
+  ok('plus scale on +', pmid.scaled && pmid.hasSvg, JSON.stringify(pmid));
   await p.screenshot({ path: path.join(out, 'tryck-plus-412-scale14-dark.png') });
   await p.mouse.up();
 

@@ -1,14 +1,17 @@
 /* Hemskärm: ordna, dölja, lägga till verktyg och samla dem i mappar. Sparat per förare på servern,
- * med localStorage som reserv. Ångra: se docs/hem-ordning/UNDO.md och docs/hem-mappar/UNDO.md.
+ * med localStorage som reserv. Ångra: se docs/hem-ordning/UNDO.md, docs/hem-mappar/UNDO.md och docs/hem-moduler/UNDO.md.
  * DEFAULT_OFF-verktyg (t.ex. Nyheter) ligger inte på startskärmen förrän föraren installerar dem.
  * 2026-11-12: skiftnyckeln är borttagen. Håll in en ikon (~1 s) för meny och dra, som på Android.
- * Släpp en ikon på en annan för att göra en mapp. */
+ * Släpp en ikon på en annan för att göra en mapp.
+ * Moduler är en vanlig ikon på startskärmen: den kan flyttas, men den får inte ligga i en mapp,
+ * avinstalleras eller döljas. Saknas den lägger normalize tillbaka den sist. */
 (function () {
   'use strict';
   if (window.HEM_ORDNING) return;
 
   var LS = 'taxi_home_order';
   var CORE = { installningar: 1, om: 1, admin: 1, sadmin: 1 };
+  var PINNED = { moduler: 1 }; // alltid en egen ruta på startskärmen, aldrig i mapp
   var DEFAULT_OFF = { nyheter: 1 }; // nya tillval: visas inte förrän föraren installerar
   var LIFT_MS = 900;        // håll in så länge innan ikonen lyfts (nära en sekund)
   var SLOP = 10;            // px rörelse före lyft = scroll, ingen dragning
@@ -27,6 +30,7 @@
   var lastLayout = [];
 
   function isCore(id) { return !!CORE[id]; }
+  function isPinned(id) { return !!PINNED[id]; }
   function isDefaultOff(id) { return !!DEFAULT_OFF[id]; }
   function inFolders(id) { return folders.some(function (f) { return f.items.indexOf(id) >= 0; }); }
   function optedIn(id) { return !!((order && M.expand(order, folders).indexOf(id) >= 0) || inFolders(id)); }
@@ -61,7 +65,7 @@
       var out = [], seenF = {}, seenT = {};
       a.forEach(function (f) {
         if (!f || typeof f !== 'object' || !isFolderId(f.id) || seenF[f.id] || out.length >= MAX_FOLDERS) return;
-        var items = cleanList(f.items).filter(function (id) { return !isFolderId(id) && !seenT[id]; });
+        var items = cleanList(f.items).filter(function (id) { return !isFolderId(id) && !isPinned(id) && !seenT[id]; });
         items.forEach(function (id) { seenT[id] = 1; });
         seenF[f.id] = 1;
         out.push({ id: f.id, name: cleanName(f.name), items: items });
@@ -73,6 +77,7 @@
     function folderOf(fs, tool) { for (var i = 0; i < fs.length; i++) if (fs[i].items.indexOf(tool) >= 0) return fs[i]; return null; }
     function normalize(top, fs) {
       fs = copy(fs);
+      fs.forEach(function (f) { f.items = f.items.filter(function (i) { return !isPinned(i); }); });
       top = cleanList(top);
       var keep = {}, inF = {}, out = [];
       fs.forEach(function (f) { if (f.items.length >= 2) { keep[f.id] = 1; f.items.forEach(function (i) { inF[i] = f.id; }); } });
@@ -92,6 +97,7 @@
         if (out.indexOf(id) >= 0) return;
         out.push(id);
       });
+      if (out.indexOf('moduler') < 0) out.push('moduler');
       return { top: out, folders: fs.filter(function (f) { return keep[f.id]; }) };
     }
     function without(top, fs, id) {
@@ -106,6 +112,11 @@
     }
     function createFolder(top, fs, dragId, targetId, newId, name) {
       if (isFolderId(targetId)) return addToFolder(top, fs, dragId, targetId);
+      if (isPinned(dragId) || isPinned(targetId)) {
+        var p = without(top, fs, dragId), t = p.top.slice(), i = t.indexOf(targetId);
+        if (i < 0) t.push(dragId); else t.splice(i + 1, 0, dragId);
+        return normalize(t, p.folders);
+      }
       if (isFolderId(dragId) || dragId === targetId || !isFolderId(newId) || find(fs, newId)) return normalize(top, fs);
       if (cleanList(top).indexOf(targetId) < 0) return normalize(top, fs);
       var s = without(top, fs, dragId);
@@ -114,7 +125,7 @@
       return normalize(s.top, s.folders);
     }
     function addToFolder(top, fs, id, folderId, index) {
-      if (isFolderId(id) || !find(fs, folderId)) return normalize(top, fs);
+      if (isPinned(id) || isFolderId(id) || !find(fs, folderId)) return normalize(top, fs);
       var s = without(top, fs, id), f = find(s.folders, folderId);
       var at = typeof index === 'number' ? Math.max(0, Math.min(index, f.items.length)) : f.items.length;
       f.items.splice(at, 0, id);
@@ -151,7 +162,11 @@
       if (f) f.name = cleanName(name) || DEFAULT_NAME;
       return fs;
     }
-    function removeTool(top, fs, id) { var s = without(top, fs, id); return normalize(s.top, s.folders); }
+    function removeTool(top, fs, id) {
+      if (isPinned(id)) return normalize(top, fs);
+      var s = without(top, fs, id);
+      return normalize(s.top, s.folders);
+    }
     function expand(top, fs) {
       var out = [];
       cleanList(top).forEach(function (id) {
@@ -177,7 +192,7 @@
     }
     return { isFolderId: isFolderId, cleanName: cleanName, cleanFolders: cleanFolders, normalize: normalize, placeTop: placeTop,
       createFolder: createFolder, addToFolder: addToFolder, removeFromFolder: removeFromFolder, reorderInFolder: reorderInFolder,
-      unpackFolder: unpackFolder, renameFolder: renameFolder, removeTool: removeTool, expand: expand, group: group, find: find, folderOf: folderOf };
+      unpackFolder: unpackFolder, renameFolder: renameFolder, removeTool: removeTool, expand: expand, group: group, find: find, folderOf: folderOf, isPinned: isPinned };
   })();
 
   function readLocal() {
@@ -189,7 +204,7 @@
       if (v && typeof v === 'object') {
         return {
           ids: cleanList(v.ids),
-          hidden: cleanList(v.hidden).filter(function (id) { return !isCore(id); }),
+          hidden: cleanList(v.hidden).filter(function (id) { return !isCore(id) && !isPinned(id); }),
           folders: M.cleanFolders(v.folders).filter(function (f) { return f.items.length >= 2; })
         };
       }
@@ -225,23 +240,22 @@
   function setState(ids, hid, fs) {
     if (fs !== undefined) folders = M.cleanFolders(fs).filter(function (f) { return f.items.length >= 2; });
     order = ids && ids.length ? cleanList(ids) : null;
-    hidden = cleanList(hid).filter(function (id) { return !isCore(id); });
-    if (hidden.length) {
-      folders.forEach(function (f) { f.items = f.items.filter(function (x) { return hidden.indexOf(x) < 0 || isCore(x); }); });
-      var n = M.normalize(order || [], folders);
-      folders = n.folders;
-      if (order) order = n.top;
-    }
+    hidden = cleanList(hid).filter(function (id) { return !isCore(id) && !isPinned(id); });
+    folders.forEach(function (f) { f.items = f.items.filter(function (x) { return (hidden.indexOf(x) < 0 || isCore(x)) && !isPinned(x); }); });
+    var n = M.normalize(order || [], folders);
+    folders = n.folders;
+    if (order) order = n.top;
     writeLocal();
   }
 
   function arrange(visible) {
     var shown = visible.filter(function (x) {
-      if (isCore(x.id)) return true;
+      if (isPinned(x.id) || isCore(x.id)) return true;
       if (hidden.indexOf(x.id) >= 0) return false;
       if (isDefaultOff(x.id) && !optedIn(x.id)) return false;
       return true;
-    });
+    }).filter(function (x) { return !isPinned(x.id); });
+    shown.push({ id: 'moduler', icon: ICO_MODULER(), label: 'Moduler' });
     var def = shown.map(function (x) { return x.id; });
     var saved = M.expand(order || [], folders).filter(function (id) { return def.indexOf(id) >= 0; });
     var flat;
@@ -322,19 +336,9 @@
       'border:0;border-radius:50%;background:var(--danger,#e53e3e);color:#fff;font:700 16px/1 system-ui,sans-serif;' +
       'display:none;align-items:center;justify-content:center;cursor:pointer;z-index:2;-webkit-tap-highlight-color:transparent}' +
       '.grid.td-ordna .icon[data-tool] .td-remove{display:inline-flex}' +
-      '.td-slot-empty{appearance:none;background:transparent;border:0;border-radius:0;box-shadow:none;' +
-      'min-height:44px;color:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;' +
-      'padding:8px 2px 6px;box-sizing:border-box;-webkit-tap-highlight-color:transparent;font:inherit}' +
-      '.td-slot-empty,.td-slot-empty *{-webkit-tap-highlight-color:transparent}' +
-      '.td-slot-empty .td-slot-plus{width:30px;height:30px;display:block;color:var(--text,#e2e8f0);transform-origin:50% 50%}' +
-      '.td-slot-empty .td-slot-plus svg{width:30px;height:30px;display:block}' +
-      '.td-slot-empty .label{font-size:calc(13px * min(var(--font-scale,1),1.15));margin-top:2px;color:var(--text,#e2e8f0)}' +
-      '.td-slot-empty:active,.td-slot-empty:focus{background:none;transform:none;outline:none}' +
-      '.td-slot-empty:active .td-slot-plus{transform:scale(0.92);filter:brightness(1.16) drop-shadow(0 0 5px rgba(99,179,237,.55))}' +
-      '.td-slot-empty:focus-visible{outline:2px solid var(--accent,#3182ce);outline-offset:2px}' +
-      'html[data-home="lista"] .td-slot-empty{flex-direction:row;justify-content:flex-start;gap:12px;padding:6px 10px;min-height:44px}' +
-      'html[data-home="lista"] .td-slot-empty .td-slot-plus{width:30px;height:30px}' +
-      '.grid.td-ordna .td-slot-empty{animation:none;cursor:pointer;touch-action:auto}' +
+      '.icon[data-tool="moduler"] .emoji{color:var(--text,#e2e8f0)}' +
+      '.icon[data-tool="moduler"] .emoji svg{width:30px;height:30px;display:block;margin:0 auto}' +
+      'html[data-home="lista"] .icon[data-tool="moduler"] .emoji svg{width:24px;height:24px}' +
       '@keyframes td-wiggle{0%,100%{transform:rotate(-1.2deg)}50%{transform:rotate(1.2deg)}}' +
       '.grid.td-ordna .icon[data-tool]:not(.td-dragging){animation:td-wiggle .45s ease-in-out infinite}' +
       '.grid.td-ordna .td-folder:not(.td-ph){animation:td-wiggle .45s ease-in-out infinite}' +
@@ -378,7 +382,7 @@
       '.td-ghost .emoji{filter:drop-shadow(0 8px 12px rgba(0,0,0,.55))}' +
       '.td-ghost .td-remove,.td-ghost .td-handle{display:none!important}' +
       '.td-ghost.td-ghost-off{opacity:.45}' +
-      'body.td-drag-on .grid .icon,body.td-drag-on .grid .td-slot-empty{animation:none!important}' +
+      'body.td-drag-on .grid .icon{animation:none!important}' +
       'body.td-drag-on,body.td-drag-on *{cursor:grabbing!important}' +
       '.icon.td-drop-target .emoji{transform:scale(1.14);transition:transform .14s ease-out;border-radius:14px;' +
       'background:rgba(148,163,184,.22);box-shadow:0 0 0 7px rgba(148,163,184,.22)}' +
@@ -492,10 +496,11 @@
     }
   }
 
-  function keepPlusLast(grid) {
+  function dropOldSlot(grid) {
     if (!grid) return;
-    var plus = grid.querySelector('.td-slot-empty');
-    if (plus) grid.appendChild(plus);
+    Array.prototype.forEach.call(grid.querySelectorAll('.td-slot-empty'), function (n) {
+      if (n.parentNode) n.parentNode.removeChild(n);
+    });
   }
 
   function closeAdd() { closeLpMenu(); }
@@ -711,7 +716,7 @@
   }
   function onPDown(e) {
     if (dg || (e.pointerType === 'mouse' && e.button !== 0) || e.isPrimary === false) return;
-    if (e.target.closest && e.target.closest('.td-remove, .td-slot-empty, .td-mapp-namn, input, #td-lp-menu')) return;
+    if (e.target.closest && e.target.closest('.td-remove, .td-mapp-namn, input, #td-lp-menu')) return;
     var el = tileOf(e.target);
     if (!el) return;
     var inPanel = !!(el.closest && el.closest('#td-mapp'));
@@ -855,13 +860,12 @@
       r = tiles[i].getBoundingClientRect();
       if (inside(r, x, y)) { t = tiles[i]; break; }
     }
-    var plus = container.querySelector('.td-slot-empty');
     if (!t) {
-      // nedanför sista ikonen (eller på Moduler-rutan): lägg sist
-      var last = tiles[tiles.length - 1], pr = plus && plus.getBoundingClientRect();
+      // nedanför eller till höger om sista ikonen: lägg sist
+      var last = tiles[tiles.length - 1];
       var lr = last && last.getBoundingClientRect();
       var below = lr && (y > lr.bottom || (y > lr.top && x > lr.right));
-      if ((pr && inside(pr, x, y)) || below) queueInsert(container, plus || null);
+      if (below) queueInsert(container, null);
       return;
     }
     r = t.getBoundingClientRect();
@@ -887,12 +891,13 @@
     if (dg.ghost) dg.ghost.classList.toggle('td-ghost-off', dg.outside);
     if (dg.outside) { clearTarget(); clearTimeout(dg.rTimer); dg.rKey = null; return; }
     var tiles = gridTiles(grid).filter(function (n) { return n !== dg.el; });
-    // mitt på en ikon = mapp-mål (inte för mappar: inga mappar i mappar)
+    // mitt på en ikon = mapp-mål (inte för mappar: inga mappar i mappar;
+    // Moduler stannar på startskärmen, så varken den eller målet bildar mapp med den)
     var cand = null;
-    if (dg.kind === 'tool') {
+    if (dg.kind === 'tool' && !isPinned(dg.id)) {
       for (var i = 0; i < tiles.length; i++) {
         var em = tiles[i].querySelector('.emoji');
-        if (em && inside(em.getBoundingClientRect(), x, y, 8)) { cand = tiles[i]; break; }
+        if (em && inside(em.getBoundingClientRect(), x, y, 8) && !isPinned(tileId(tiles[i]))) { cand = tiles[i]; break; }
       }
     }
     if (cand) {
@@ -919,7 +924,7 @@
     closeFolder(dg.el);
     dg.zone = 'grid';
     if (grid && tile && tile.parentNode === grid) grid.insertBefore(dg.el, tile.nextSibling);
-    else if (grid) grid.insertBefore(dg.el, grid.querySelector('.td-slot-empty'));
+    else if (grid) grid.appendChild(dg.el);
     hitTest();
   }
   function autoScroll() {
@@ -953,7 +958,7 @@
       off();
       if (Date.now() - t0 > 450) return;
       if (e.target.closest && (e.target.closest('#td-lp-menu') || e.target.closest('#td-info-sheet'))) return;
-      if (!tileOf(e.target) && !(e.target.closest && e.target.closest('.td-folder, .td-slot-empty, #td-mapp'))) return;
+      if (!tileOf(e.target) && !(e.target.closest && e.target.closest('.td-folder, #td-mapp'))) return;
       e.preventDefault();
       e.stopPropagation();
       if (e.stopImmediatePropagation) e.stopImmediatePropagation();
@@ -982,7 +987,9 @@
     var reopen = null, res = null;
     if (cancel || (d.zone === 'grid' && d.outside)) {
       reopen = d.zone === 'folder' ? d.from : null;
-    } else if (d.zone === 'grid' && d.target) {
+    } else if (d.zone === 'folder' && isPinned(d.id)) {
+      res = M.placeTop(currentTop(), folders, d.id, topIdsFromDom(homeGrid()));
+    } else if (d.zone === 'grid' && d.target && !isPinned(d.id) && !isPinned(tileId(d.target))) {
       var tid = tileId(d.target);
       if (M.isFolderId(tid)) res = M.addToFolder(currentTop(), folders, d.id, tid);
       else res = M.createFolder(currentTop(), folders, d.id, tid, newFolderId(), DEFAULT_NAME);
@@ -1078,7 +1085,7 @@
         '<button type="button" role="menuitem" data-lp="move">' + icoMove() + '<span>Flytta</span></button>' +
         '</div>';
     } else {
-      if (!isCore(id)) {
+      if (!isCore(id) && !isPinned(id)) {
         html += '<div class="td-lp-top">' +
           '<button type="button" class="td-lp-ico td-lp-off" data-lp="off" role="menuitem" aria-label="Avinstallera">' +
           icoTrash() + '<span>Avinstallera</span></button></div>';
@@ -1142,7 +1149,7 @@
   }
 
   function addBack(id) {
-    if (!okId(id) || isCore(id)) return;
+    if (!okId(id) || isCore(id) || isPinned(id)) return;
     hidden = hidden.filter(function (x) { return x !== id; });
     var top = currentTop();
     if (!top.length && order) top = order.slice();
@@ -1154,7 +1161,7 @@
   }
 
   function removeTool(id) {
-    if (!okId(id) || isCore(id)) return;
+    if (!okId(id) || isCore(id) || isPinned(id)) return;
     var f = M.folderOf(folders, id), reopen = null;
     if (hidden.indexOf(id) < 0) hidden.push(id);
     if (f && openF && openF.id === f.id) reopen = f.id;
@@ -1174,19 +1181,21 @@
     if (app) app.classList.add('is-home');
     var grid = content.querySelector('.grid');
     if (!grid) { syncChrome(content); return; }
-    if (!grid.querySelector('.td-slot-empty')) {
-      var plus = document.createElement('button');
-      plus.type = 'button';
-      plus.className = 'td-slot-empty';
-      plus.setAttribute('data-ordna', 'add');
+    dropOldSlot(grid);
+    if (!grid.querySelector('.icon[data-tool="moduler"]')) {
+      var plus = document.createElement('div');
+      plus.className = 'icon';
+      plus.setAttribute('data-tool', 'moduler');
+      plus.setAttribute('role', 'button');
+      plus.setAttribute('tabindex', '0');
       plus.setAttribute('aria-label', 'Moduler');
-      plus.innerHTML = '<span class="td-slot-plus" aria-hidden="true">' + ICO_MODULER() + '</span><span class="label">Moduler</span>';
-      plus.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); openModuler(); });
+      plus.innerHTML = '<div class="emoji">' + ICO_MODULER() + '</div><div class="label">Moduler</div>';
+      plus.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); if (!editing) openModuler(); });
       grid.appendChild(plus);
     }
-    keepPlusLast(grid);
     Array.prototype.forEach.call(grid.querySelectorAll('.icon[data-tool]'), function (el) {
       var id = el.getAttribute('data-tool');
+      if (id === 'moduler' && !el.getAttribute('aria-label')) el.setAttribute('aria-label', 'Moduler');
       if (!el.querySelector('.td-handle')) {
         var h = document.createElement('span');
         h.className = 'td-handle';
@@ -1195,7 +1204,7 @@
         el.appendChild(h);
       }
       var rm = el.querySelector('.td-remove');
-      if (!isCore(id)) {
+      if (!isCore(id) && !isPinned(id)) {
         if (!rm) {
           rm = document.createElement('button');
           rm.type = 'button';
@@ -1215,17 +1224,7 @@
       if (editing) el.onclick = function (ev) { ev.stopPropagation(); ev.preventDefault(); };
     });
     buildFolders(grid);
-    keepPlusLast(grid);
     grid.classList.toggle('td-ordna', editing);
-    if (!content._ordnaBound) {
-      content._ordnaBound = true;
-      content.addEventListener('click', function (e) {
-        var b = e.target.closest && e.target.closest('[data-ordna="add"], .td-slot-empty');
-        if (!b) return;
-        e.preventDefault();
-        openModuler();
-      });
-    }
     bindPointer();
     syncChrome(content);
     if (reopen && M.find(folders, reopen)) openFolder(reopen);
@@ -1261,7 +1260,7 @@
       var hasF = Array.isArray(fs);
       if (ids == null && (hid == null || (Array.isArray(hid) && !hid.length)) && !(hasF && fs.length)) return;
       var nextIds = Array.isArray(ids) ? cleanList(ids) : (order || []);
-      var nextHid = Array.isArray(hid) ? cleanList(hid).filter(function (id) { return !isCore(id); }) : hidden;
+      var nextHid = Array.isArray(hid) ? cleanList(hid).filter(function (id) { return !isCore(id) && !isPinned(id); }) : hidden;
       // Utan mappkolumn (före migration 20261112b) behålls mapparna från den här enheten.
       var nextF = hasF ? M.cleanFolders(fs).filter(function (f) { return f.items.length >= 2; }) : folders;
       var pushLocal = false;
@@ -1288,13 +1287,14 @@
     isEditing: function () { return editing; },
     isDragging: function () { return !!(dg && dg.dragging); },
     isCore: isCore,
+    isPinned: isPinned,
     order: function () { return order ? order.slice() : null; },
     hidden: function () { return hidden.slice(); },
     folders: function () { return JSON.parse(JSON.stringify(folders)); },
     layout: function () { return JSON.parse(JSON.stringify(lastLayout)); },
     catalog: function () { return catalog.slice(); },
     isInstalled: function (id) {
-      if (isCore(id)) return true;
+      if (isCore(id) || isPinned(id)) return true;
       if (hidden.indexOf(id) >= 0) return false;
       if (isDefaultOff(id) && !optedIn(id)) return false;
       return true;

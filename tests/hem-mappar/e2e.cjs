@@ -180,14 +180,14 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   // Öppna mapp -> håll in -> dra UT -> släpp på startskärmen (touch, som på telefonen)
   inA = await center(p, `#td-mapp .icon[data-tool="${A}"] .emoji`);
   const box = await center(p, '#td-mapp .td-mapp-box');
-  // efter att mappen stängts: släpp på Moduler-rutans plats (= sist), mätt när ikonen kommit ut
-  await touchDrag(p, inA, () => center(p, '#app .grid .td-slot-empty'), { via: { x: inA.x, y: box.b + 60 } });
+  // efter att mappen stängts: släpp till höger om Moduler (= sist). Moduler är en vanlig ikon, inte en sista-ruta.
+  await touchDrag(p, inA, () => center(p, '#app .grid .icon[data-tool="moduler"]').then(c => ({ x: c.r - 4, y: c.y })), { via: { x: inA.x, y: box.b + 60 } });
   await p.screenshot({ path: path.join(out, 'utdragen-390-dark.png') });
   let t2 = await top(p);
   st = await stored(p);
   ok('dra ut ur mapp (touch)', t2.includes(A) && st.folders[0].items.indexOf(A) < 0, t2.join(',') + ' ' + JSON.stringify(st.folders));
   ok('mappen stängd efter utdragning', await p.evaluate(() => !document.getElementById('td-mapp')));
-  ok('utdragen ikon sist före Moduler', t2[t2.length - 1] === A, t2.join(','));
+  ok('utdragen ikon sist (Moduler kan ligga före)', t2[t2.length - 1] === A && t2.includes('moduler'), t2.join(','));
   ok('ingen sidbyte under dragning', await p.evaluate(() => document.querySelector('#title').textContent === 'TaxiData'));
 
   // Dra ut en till: bara en kvar -> mappen löses upp
