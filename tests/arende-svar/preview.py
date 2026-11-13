@@ -42,7 +42,7 @@ with sync_playwright() as pw:
     p.locator('#mx-legacy-text').scroll_into_view_if_needed();p.wait_for_timeout(150)
     p.screenshot(path=str(OUT/'01-felanmalan-svarsruta.png'),full_page=True)
     p.get_by_role('button',name='Skicka meddelande',exact=True).click()
-    p.wait_for_function("document.querySelector('.ar-thr')&&document.querySelector('.ar-thr').textContent.includes('Rickard har bokat')");p.wait_for_timeout(200)
+    p.wait_for_function("document.querySelector('[data-tk-thr]')&&document.querySelector('[data-tk-thr]').textContent.includes('Rickard har bokat')");p.wait_for_timeout(200)
     assert p.input_value('#mx-legacy-text')==''
     p.screenshot(path=str(OUT/'02-efter-skickat-svar.png'),full_page=True)
     br.close()

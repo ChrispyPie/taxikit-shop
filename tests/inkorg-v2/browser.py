@@ -72,7 +72,7 @@ try:
     p.evaluate('INKORG.refresh()');check(p.input_value('#mx-body')=='Syntetiskt meddelande till admin.')
     p.locator('#mx-form button[type=submit]').click();p.wait_for_selector('#mx-reply')
     check(p.evaluate("V2.calls.filter(x=>x.action==='create').length") == 1)
-    p.fill('#mx-reply-body','Syntetiskt svar');p.locator('#mx-reply button').click();p.wait_for_function("document.querySelectorAll('.mx-message').length===2")
+    p.fill('#mx-reply-body','Syntetiskt svar');p.locator('#mx-reply button').click();p.wait_for_function("document.querySelectorAll('.tk-ev').length===2")
     p.get_by_role('button',name='Bokad tid',exact=True).click();p.wait_for_selector('#mx-date')
     p.fill('#mx-kind','Mitt tidsförslag (test)');check(p.locator('#mx-title').count()==0);p.fill('#mx-body','Ett frivilligt meddelande till admin (test)');check(p.input_value('#mx-car_choice')=='');p.select_option('#mx-car_choice','1');check(p.locator('#mx-date').get_attribute('readonly') is not None);p.get_by_role('button',name='Välj datum',exact=True).click();p.evaluate('INKORG.back()');p.locator('#mx-calendar').wait_for(state='detached');check(p.locator('#mx-calendar').count()==0);check(p.input_value('#mx-kind')=='Mitt tidsförslag (test)');pickdate(p,'2027-01-15','10-kalenderval');settime(p,'10:30');p.locator('#mx-form button[type=submit]').click()
     p.wait_for_selector('.mx-booking.pending');check('admins svar' in p.locator('.mx-booking').inner_text())

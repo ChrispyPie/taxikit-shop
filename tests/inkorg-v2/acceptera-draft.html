@@ -22,6 +22,9 @@ window.ARENDE={
     return Promise.resolve([]);
   },
   view:function(){return '';},
+  event:function(w,at,b){return '<div class="tk-ev"><div class="tk-ev-h"><b class="tk-ev-who">'+w+'</b></div><div class="tk-ev-b">'+b+'</div></div>';},
+  thread:function(items){return '<div class="tk-thr" data-tk-thr>'+items.join('')+'</div>';},
+  mountThread:function(){},
   mountCertificates:function(){}
 };
 window.__thread={id:10,subject:'Testtråd',locked:false,is_driver:true,car_number:'',messages:[{mine:false,role:'admin',body:'Hej',at:'2026-11-09T10:00:00Z'}],bookings:[{id:50,status:'pending_driver',title:'Bokad tid',kind:'Bokad tid',starts_at:'2026-11-11T10:00:00Z',created_at:'2026-11-09T10:00:00Z',car_number:''}]};

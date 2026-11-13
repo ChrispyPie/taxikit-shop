@@ -38,6 +38,21 @@
     var s = A.st(kind, status, waiting), d = A.detail(kind, status);
     return s ? A.WORDS[s] + (d ? ' · ' + d : '') : '';
   };
+  // "tis 18/11 kl. 08:00" i svensk tid (2026-11-13chatt1)
+  A.whenLong = function (iso) {
+    if (!iso) return '';
+    try {
+      var p = {};
+      new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Stockholm', weekday: 'short', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+        .formatToParts(new Date(iso)).forEach(function (x) { p[x.type] = x.value; });
+      return String(p.weekday || '').replace('.', '') + ' ' + p.day + '/' + p.month + ' kl. ' + p.hour + ':' + p.minute;
+    } catch (e) { return A.when(iso); }
+  };
+  A.dayLong = function (ymd) {
+    if (!ymd) return '';
+    var s = A.whenLong(String(ymd).slice(0, 10) + 'T12:00:00+01:00');
+    return s.split(' kl. ')[0];
+  };
   A.chip = function (st, detail) {
     if (!st) return '';
     return '<span class="ar-chip ar-' + st + '">' + A.WORDS[st] + (detail ? ' · ' + esc(detail) : '') + '</span>';
@@ -139,10 +154,17 @@
     '.ar-card{background:var(--surface,#fff);border:1px solid var(--border-soft,#e2e8f0);border-radius:12px;padding:12px}' +
     '.ar-ct{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}.ar-ct h2{font-size:1.08em;margin:0}' +
     '.ar-body{margin:10px 0 2px;white-space:pre-wrap;word-break:break-word}' +
-    '.ar-thr{margin-top:12px;display:flex;flex-direction:column;gap:8px}' +
-    '.ar-msg{max-width:86%;padding:8px 10px;border-radius:12px;background:var(--c-edf2f7,#edf2f7);font-size:.93em;white-space:pre-wrap;word-break:break-word}' +
-    '.ar-msg.me{align-self:flex-end;background:var(--c-bee3f8,#dbeafe);color:var(--text,inherit)}.ar-msg .w{display:block;font-size:.78em;color:var(--c-718096,#718096);margin-bottom:2px}' +
-    '.ar-msg.sys{align-self:center;background:transparent;border:1px dashed var(--border,#cbd5e0);font-size:.82em;color:var(--c-4a5568,#4a5568);text-align:center}' +
+    // Gemensam tråd för ärenden och meddelanden (2026-11-13chatt1): varje händelse ser likadan ut,
+    // namn och tid överst, sedan texten. Ingen skillnad på första inlägget och svaren.
+    '.tk-thr{margin-top:12px;display:flex;flex-direction:column;gap:8px;max-height:min(62vh,640px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}' +
+    '.tk-ev{padding:9px 12px 10px;border-radius:10px;background:var(--c-edf2f7,#edf2f7);color:var(--text,#1a202c);border:1px solid var(--border-soft,#e2e8f0)}' +
+    '.tk-ev-h{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:2px 10px;font-size:.8em;margin-bottom:3px}' +
+    '.tk-ev-who{font-weight:700;color:var(--text,#1a202c)}.tk-ev-t{color:var(--c-718096,#718096);font-variant-numeric:tabular-nums;white-space:nowrap}' +
+    '.tk-sum{margin-top:12px;display:flex;flex-direction:column;gap:6px}' +
+    '.tk-sum-row{padding:9px 12px;border-radius:10px;border:2px solid var(--primary,#2b6cb0);background:var(--surface,#fff);color:var(--text,#1a202c);font-size:.93em;line-height:1.4}' +
+    '.tk-sum-row.pending,.tk-sum .tk-sum-row.mx-booking.pending{border:2px dashed var(--c-718096,#718096)}.tk-sum-row b{font-weight:700}.tk-sum-row .mx-actions{margin-top:8px}' +
+    '.tk-sum .tk-sum-row.mx-booking{margin:0;padding:9px 12px;background:var(--surface,#fff);color:var(--text,#1a202c)}' +
+    '.tk-ev-b{white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;font-size:.95em;line-height:1.4}' +
     '.ar-reply{margin-top:12px}.ar-reply textarea{width:100%;min-height:74px;border-radius:10px;border:1px solid var(--border,#cbd5e0);padding:9px;font:inherit;box-sizing:border-box;background:var(--surface,#fff);color:inherit}' +
     '.ar-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.ar-btns button{flex:1 1 auto;padding:10px 12px;border-radius:10px;border:1px solid var(--border,#cbd5e0);background:var(--surface,#fff);color:inherit;font:inherit;font-size:.92em;cursor:pointer}' +
     '.ar-btns .pri{background:var(--primary,#0a3d62);border-color:var(--primary,#0a3d62);color:#fff}.ar-btns .ok{background:#dcf5e3;border-color:#9ad8ad;color:#1d6b38}' +
@@ -180,8 +202,30 @@
     if (c.kind === 'issue') return d.kind === 'fault' ? (d.blocking ? '🛑' : '⚠️') : '🧴';
     return { maint: '🔧', wh: '⏱️', task: '📋', sjuk: '🤒', wish: '💡' }[c.kind] || '📄';
   };
-  function sys(t, at, extra) { return '<div class="ar-msg sys">' + t + (at ? ' · ' + esc(A.when(at)) : '') + (extra ? '<br>' + extra : '') + '</div>'; }
-  function msg(who, at, body, me) { return '<div class="ar-msg' + (me ? ' me' : '') + '"><span class="w">' + who + ' · ' + esc(A.when(at)) + '</span>' + esc(body) + '</div>'; }
+  // En händelse i en tråd: vem (redan escapad HTML) och när, sedan texten (redan escapad HTML).
+  // Samma utseende för första inlägget, svar och statusrader, i ärenden och i meddelanden.
+  A.event = function (whoHtml, at, bodyHtml) {
+    return '<div class="tk-ev"><div class="tk-ev-h"><b class="tk-ev-who">' + whoHtml + '</b>' +
+      (at ? '<time class="tk-ev-t" datetime="' + esc(at) + '">' + esc(A.when(at)) + '</time>' : '') + '</div>' +
+      (bodyHtml ? '<div class="tk-ev-b">' + bodyHtml + '</div>' : '') + '</div>';
+  };
+  A.summary = function (rows) { return rows.length ? '<div class="tk-sum" role="group" aria-label="Gäller nu">' + rows.join('') + '</div>' : ''; };
+  A.thread = function (items) { return '<div class="tk-thr" data-tk-thr>' + items.join('') + '</div>'; };
+  // Rulla bara trådrutan (aldrig sidan) så att den senaste händelsen syns när en tråd öppnas.
+  // Ritas samma tråd om (svar skickat, uppdatering) står rutan kvar, eller följer med längst ner om den var där.
+  var thrKey = null, thrPos = null;
+  A.mountThread = function (root, key) {
+    var el = root && root.querySelector ? root.querySelector('[data-tk-thr]') : null;
+    if (!el || key == null) { thrKey = null; thrPos = null; return; }
+    var same = key === thrKey && thrPos;
+    thrKey = key;
+    var max = function () { return Math.max(0, el.scrollHeight - el.clientHeight); };
+    el.scrollTop = same && !thrPos.bottom ? Math.min(thrPos.top, max()) : max();
+    thrPos = { top: el.scrollTop, bottom: true };
+    el.addEventListener('scroll', function () { if (thrKey === key) thrPos = { top: el.scrollTop, bottom: max() - el.scrollTop < 4 }; }, { passive: true });
+  };
+  function sys(t, at, extra) { return A.event(t, at, extra || ''); }
+  function msg(who, at, body, me) { return A.event(who, at, esc(body)); }
 
   // Intyg finns redan i privata sjuk-intyg. Edge → databas kontrollerar ägare/förare
   // innan några 15-minuterslänkar skapas. Inga intyg eller länkar sparas lokalt.
@@ -240,13 +284,29 @@
     }).catch(function (e) { if (box.isConnected) certError(message, e); });
   };
 
-  A.view = function (c, viewer) {
-    var d = c.data || {}, raw = d.status, h = '', rows = [], meta = [];
+  // Vem skrev första inlägget. Ingen databasändring: bara fält som redan finns.
+  function opWho(c, viewer) {
+    var d = c.data || {}, rep = d.reporter_name || d.name || d.author || '';
+    if (c.kind === 'task' || c.kind === 'maint') return 'Ägaren';
+    if (d.mine === true) return 'Du';
+    if (viewer === 'owner') return fname(rep) || 'Föraren';
+    if (c.kind === 'wish' && d.mine === false) return fname(rep) || 'Föraren';
+    return 'Du';
+  }
+  function opAt(c) {
+    var d = c.data || {}, ev = (d.events || []).filter(function (e) { return e.kind === 'created'; })[0];
+    return d.created_at || (ev && ev.at) || d.start || d.updated_at || null;
+  }
+
+  // extra (valfritt): { events: [{at, h}], summary: [html] } – t.ex. Bokad tid från mailbox-ui.js.
+  A.view = function (c, viewer, extra) {
+    var d = c.data || {}, raw = d.status, h = '', rows = [], meta = [], sum = [];
+    extra = extra || {};
     var other = viewer === 'owner' ? 'Föraren' : 'Ägaren';
     if (c.kind === 'issue') {
       if (d.car) meta.push('Bil ' + esc(d.car));
-      meta.push('Anmäld ' + esc(A.when(d.created_at)));
-      if (viewer === 'owner' && d.reporter_name) meta.push('av ' + esc(fname(d.reporter_name)));
+      // Vem och när står i första händelsen i tråden (2026-11-13chatt1).
+      if (!d.body) meta.push('Anmäld ' + esc(A.when(d.created_at)));
       if (d.photos) meta.push('📷 ' + d.photos);
       var hist = d.history || [];
       hist.forEach(function (u, ix) {
@@ -259,8 +319,10 @@
       });
     } else if (c.kind === 'wh') {
       if (d.car) meta.push('Bil ' + esc(d.car));
-      meta.push(esc(A.when(d.start)) + '–' + esc(A.when(d.end).split(' ')[1] || ''));
-      if (d.minutes != null) meta.push(Math.floor(d.minutes / 60) + ' h ' + (d.minutes % 60) + ' min');
+      // Fast rad överst: vad som gäller nu (2026-11-13chatt1)
+      sum.push('<div class="tk-sum-row' + (A.st('wh', raw, (d.waiting || c.waiting)) === 'klar' ? '' : ' pending') + '"><b>Verkstadstimmar:</b> ' + esc(A.whenLong(d.start)) +
+        (d.end ? '–' + esc(A.when(d.end).split(' ')[1] || '') : '') +
+        (d.minutes != null ? ' · ' + Math.floor(d.minutes / 60) + ' h ' + (d.minutes % 60) + ' min' : '') + ' · ' + esc(A.label('wh', raw, (d.waiting || c.waiting))) + '</div>');
       if (viewer === 'owner' && d.reporter_name) meta.push(esc(fname(d.reporter_name)));
       (d.msgs || []).forEach(function (m) {
         var me = viewer === 'owner' ? m.role === 'owner' : m.role === 'driver';
@@ -277,7 +339,8 @@
       if (items.length) meta.push('Checklista ' + items.filter(function (x) { return x.done; }).length + '/' + items.length);
       (d.log || []).forEach(function (l) { rows.push({ at: l.at, h: sys((LOG[l.action] || esc(l.action)) + (l.by_name ? ' – ' + esc(fname(l.by_name)) : ''), l.at, l.detail ? esc(l.detail) : '') }); });
     } else if (c.kind === 'sjuk') {
-      meta.push('Från ' + esc(String(d.start || '').slice(5).split('-').reverse().join('/')) + (d.end ? ' till ' + esc(String(d.end).slice(5).split('-').reverse().join('/')) : ' · pågår'));
+      sum.push('<div class="tk-sum-row' + (A.st('sjuk', raw) === 'klar' ? '' : ' pending') + '"><b>Sjukanmälan:</b> från ' + esc(A.dayLong(d.start)) +
+        (d.end ? ' till ' + esc(A.dayLong(d.end)) : ' · pågår') + ' · ' + esc(A.label('sjuk', raw)) + '</div>');
       if (viewer === 'owner' && d.name) meta.push(esc(fname(d.name)));
       if (d.certs) meta.push('📄 Intyg: ' + d.certs);
       // Historik med tid (2026-11-07, t1009u): anmäld, varje intyg och varje statusbyte – vem och när
@@ -301,13 +364,17 @@
       if (viewer === 'owner' && d.author && !d.mine) meta.push('av ' + esc(fname(d.author)));
       if (d.reply) rows.push({ at: d.updated_at, h: msg('Christian', d.updated_at, d.reply, false) });
     }
+    (extra.events || []).forEach(function (e) { rows.push(e); });
+    (extra.summary || []).forEach(function (x) { sum.push(x); });
     rows.sort(function (a, b) { return new Date(a.at) - new Date(b.at); });
     var body = c.kind === 'issue' ? d.body : c.kind === 'wh' ? d.comment : c.kind === 'task' ? d.instruction : c.kind === 'sjuk' ? d.comment : c.kind === 'wish' ? d.body : c.kind === 'maint' ? d.note : '';
+    // Första inlägget är en händelse som alla andra, överst i tråden.
+    if (body) rows.unshift({ at: null, h: A.event(esc(opWho(c, viewer)), opAt(c), esc(body)) });
     h += '<div class="ar-card"><div class="ar-ct"><h2>' + esc(A.title(c)) + '</h2>' + A.chip(c.st, A.detail(c.kind, raw)) + '</div>';
     h += '<div class="ar-m">' + meta.join(' · ') + '</div>';
-    if (body) h += '<div class="ar-body">' + esc(body) + '</div>';
     if (c.kind === 'sjuk' && d.certs) h += '<section data-ar-certs aria-label="Läkarintyg"><h3>Läkarintyg</h3><div class="ar-cert-files"></div><div class="ar-note" role="status">Hämtar intyg…</div></section>';
-    h += rows.length ? '<div class="ar-thr">' + rows.map(function (r) { return r.h; }).join('') + '</div>' : '<div class="ar-note">Inga meddelanden än.</div>';
+    h += A.summary(sum);
+    h += rows.length ? A.thread(rows.map(function (r) { return r.h; })) : '<div class="ar-note">Inga meddelanden än.</div>';
     return h;   // kortet stängs av den som anropar (svarsruta/verktyg läggs till först)
   };
 })();
