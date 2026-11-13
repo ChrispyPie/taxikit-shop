@@ -15,8 +15,24 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-11-12', id: '2026-11-12mod1', rader: [
+  { datum: '2026-11-13', id: '2026-11-13mod2', tid: '15:13', rader: [
     ['Ändrat', 'Startskärmen: rutan Moduler kan du nu flytta precis som de andra ikonerna. Den stannar alltid på startskärmen, så du inte tappar bort den. Den kan inte läggas i en mapp eller avinstalleras.']
+  ]},
+  { datum: '2026-11-12', id: '2026-11-12pgfix1', tid: '19:12', rader: [
+    ['Fixat', 'Prognos fastnade på Laddar verktyget efter omladdning eller inloggning, särskilt på en delad platta. Öppna Prognos från startskärmen om det händer innan uppdateringen är inne.']
+  ]},
+  { datum: '2026-11-12', id: '2026-11-12svar2', tid: '16:15', rader: [
+    ['Nytt', 'Felanmälan, Bilen står och Behövs till bilen har en knapp Bokad tid. Ägaren kan föreslå en tid som chauffören godkänner, och chauffören kan föreslå en tid som ägaren bekräftar. Chauffören och bilen är redan ifyllda. Tiden syns i ärendet och grå i schemat tills den är godkänd.']
+  ]},
+  { datum: '2026-11-12', id: '2026-11-12ljud1', tid: '16:10', rader: [
+    ['Förbättrat', 'Tåg piper mycket mindre. Små förseningar, under 15 minuter, ger ingen notis och inget ljud. Du får notis när tåget börjar närma sig, när förseningen blir stor (30 minuter eller mer), när tiden plötsligt ändras mycket, när tåget ställs in och när det har kommit fram.'],
+    ['Nytt', 'I Mina bevakningar finns Ljud och notiser för tåg. Där väljer du själv hur många minuter före ankomst du vill ha notis, och vad som räknas som liten och stor försening. Det sparas på ditt konto.'],
+    ['Nytt', 'Tryck på 🔔 vid ett tåg i Mina bevakningar för att ge just den avgången egna villkor, bara den här gången eller varje gång för en fast bevakning.'],
+    ['Ändrat', 'Under tåg på Ankomster finns nu bara Ljud för tåg, av eller på, och en länk till villkoren i Mina bevakningar.']
+  ]},
+  { datum: '2026-11-12', id: '2026-11-12svar1', tid: '16:00', rader: [
+    ['Fixat', 'Admin › Ägare › Ärenden: en felanmälan, Bilen står eller Behövs till bilen går nu att svara på direkt i ärendet. Meddelandet syns i tråden och föraren får en notis. Ärendet visas inte längre som Arkiv eller bara läsning.'],
+    ['Fixat', 'Bil och verkstad: det går att göra nya anmälningar, skicka meddelanden och sätta Pågår eller Klar igen.']
   ]},
   { datum: '2026-11-12', id: '2026-11-12mapp1', tid: '15:10', rader: [
     ['Ändrat', 'Startskärmen: den lilla skiftnyckeln är borta, så du inte råkar trycka på den när du ska öppna översta högra verktyget. Håll i stället in en ikon i ungefär en sekund, så lyfts den och du kan dra den till en ny plats. Menyn med Avinstallera, Modulinfo, Flytta och Hjälp visas som förut.'],

@@ -228,6 +228,22 @@
     if (r.rules && r.rules.length) return true;
     return false;
   }
+  // Villkor per avgång (bara tåg): nyckel för avgången och, för fasta, för den fasta bevakningen.
+  function canVillkor(r) { return !!(r && r.kind === 'tag' && window.TAG_VILLKOR && TAG_VILLKOR.openSheet && (villkorTarget(r).key || villkorTarget(r).routeKey)); }
+  function villkorTarget(r) {
+    var V = window.TAG_VILLKOR, t = { title: r.title, key: null, routeKey: null, onlyRoute: !!r.placeholder };
+    if (!V) return t;
+    var m = /^t([^|]*)\|(.*)$/.exec(String(r.key || ''));
+    if (m && !r.placeholder) t.key = V.depKey(m[1], m[2]);
+    if (r.routeWatch && r.routeWatch.id != null) t.routeKey = V.routeKey(r.routeWatch.id);
+    return t;
+  }
+  function hasVillkor(r) {
+    if (!canVillkor(r)) return false;
+    var t = villkorTarget(r);
+    return TAG_VILLKOR.hasOverride(t.key) || TAG_VILLKOR.hasOverride(t.routeKey);
+  }
+  function openVillkor(r) { if (canVillkor(r)) TAG_VILLKOR.openSheet(villkorTarget(r)); }
   function toast(msg) { if (window.BEVAKNING && BEVAKNING.toast) BEVAKNING.toast(msg, 4000); else alert(msg); }
   function togglePermanent(r) {
     var Bv = window.BEVAKNING;
@@ -311,7 +327,7 @@
     if (!host || !host.isConnected) return;
     var oldScroll = host.querySelector('.mb-timeline-scroll'), scrollTop = oldScroll ? oldScroll.scrollTop : null;
     lastErrors = errors || [];
-    var h = '<div class="mb"><div class="mb-view-toggle" role="group" aria-label="Visning"><button data-mb-view="timeline" aria-pressed="' + (mode === 'timeline') + '">Tidslinje</button><button data-mb-view="list" aria-pressed="' + (mode === 'list') + '">Schema</button></div><div id="mb-ljud-box"></div><p class="mb-intro">Håll fingret på en tåg-, flyg- eller båtbevakning för att göra den fast (guldstjärna). Kugghjulet ställer in tid och dagar. Evenemang kan bara vara tillfälliga.</p><button type="button" class="mb-refresh" data-mb-refresh>↻ Uppdatera</button>';
+    var h = '<div class="mb"><div class="mb-view-toggle" role="group" aria-label="Visning"><button data-mb-view="timeline" aria-pressed="' + (mode === 'timeline') + '">Tidslinje</button><button data-mb-view="list" aria-pressed="' + (mode === 'list') + '">Schema</button></div><div id="mb-villkor-box"></div><div id="mb-ljud-box"></div><p class="mb-intro">Håll fingret på en tåg-, flyg- eller båtbevakning för att göra den fast (guldstjärna). Kugghjulet ställer in tid och dagar. Evenemang kan bara vara tillfälliga.</p><button type="button" class="mb-refresh" data-mb-refresh>↻ Uppdatera</button>';
     if (message) h += '<p role="status" class="mb-warning">' + esc(message) + '</p>';
     if (errors && errors.length) h += '<p role="status" class="mb-warning">Kunde inte hämta ' + esc(errors.join(', ')) + '. Listan kan vara ofullständig. Försök igen med Uppdatera.</p>';
     if (!rows.length) h += '<div class="mb-empty"><div>📌</div><h3>' + (errors && errors.length ? 'Inget att visa just nu' : 'Inga bevakningar än') + '</h3><p>Tryck ☆ på en ankomst under Ankomster för en tillfällig bevakning. I Kalender: öppna ett evenemang och välj en påminnelse.</p><button data-mb-source="ankomster">Öppna Ankomster</button><button data-mb-source="kalender">Öppna Kalender</button></div>';
@@ -324,7 +340,8 @@
       var extra = '';
       if (r.permanent && r.routeWatch) extra += '<small>Fast · ' + esc(daysText(r.routeWatch.days)) + ' ' + esc((window.BEVAKNING && BEVAKNING.hhmm) ? BEVAKNING.hhmm(r.routeWatch.sched_min) : '') + '</small>';
       else if (r.rules.length) extra += '<small>Äldre bevakning: ' + esc(r.rules.map(function (w) { return w.name; }).join(', ')) + '</small>';
-      var tools = star + (canGear(r) ? '<button class="mb-gear-btn" data-mb-gear="' + i + '" aria-label="Tid och dagar">⚙</button>' : '');
+      if (hasVillkor(r)) extra += '<small class="mb-own-villkor">🔔 Egna villkor för ljud och notis</small>';
+      var tools = star + (canVillkor(r) ? '<button class="mb-villkor-btn" data-mb-villkor="' + i + '" aria-label="Ljud och notiser för ' + esc(r.title) + '">🔔</button>' : '') + (canGear(r) ? '<button class="mb-gear-btn" data-mb-gear="' + i + '" aria-label="Tid och dagar">⚙</button>' : '');
       var removeBtn = canRemove(r) ? '<button class="mb-remove" data-mb-remove="' + i + '"' + (busy ? ' disabled' : '') + ' aria-label="Sluta bevaka ' + esc(r.title) + '">Sluta bevaka</button>' : '';
       h += '<article class="mb-row' + (r.kind === 'booking' ? ' mb-row-booking' : '') + (r.pending ? ' pending' : '') + (r.permanent ? ' mb-row-perm' : '') + '" data-mb-row="' + i + '"><button class="mb-open" data-mb-open="' + i + '"><span class="mb-time">' + p.hm + '<small>' + icon(r) + '</small></span><span class="mb-text"><b>' + esc(r.title) + '</b>' + statusChip(r) + extra + '</span>' + tools + (r.placeholder ? '' : '<span aria-hidden="true">›</span>') + '</button>' + removeBtn + '</article>';
     });
@@ -332,6 +349,7 @@
       var ar = rows[actionIndex];
       h += '<div class="mb-action-shade"><section class="mb-action-sheet" role="dialog" aria-modal="true" aria-label="Bevakning"><b>' + esc(ar.title) + '</b>';
       if (canHold(ar)) h += '<button data-mb-perm="' + actionIndex + '">' + (ar.permanent ? 'Gör till tillfällig' : 'Gör till fast bevakning') + '</button>';
+      if (canVillkor(ar)) h += '<button data-mb-villkor="' + actionIndex + '">Ljud och notiser för den här avgången</button>';
       if (canGear(ar)) h += '<button data-mb-gear="' + actionIndex + '">Tid och dagar</button>';
       if (canRemove(ar)) h += '<button data-mb-remove="' + actionIndex + '">Sluta bevaka</button>';
       h += '<button data-mb-cancel>Avbryt</button></section></div>';
@@ -383,6 +401,12 @@
       e.preventDefault(); e.stopPropagation();
       gearIndex = +b.dataset.mbGear; actionIndex = null; draw(errors);
     }; });
+    host.querySelectorAll('[data-mb-villkor]').forEach(function (b) { b.onclick = function (e) {
+      e.preventDefault(); e.stopPropagation();
+      var r = rows[+b.dataset.mbVillkor];
+      if (actionIndex !== null) { actionIndex = null; draw(errors); }
+      openVillkor(r);
+    }; });
     host.querySelectorAll('[data-mb-perm]').forEach(function (b) { b.onclick = function () {
       if (busy) return;
       var r = rows[+b.dataset.mbPerm], g = generation;
@@ -419,7 +443,10 @@
       b.setAttribute('aria-pressed', b.classList.contains('on') ? 'true' : 'false');
     }; });
     var ljud = host.querySelector('#mb-ljud-box');
-    if (ljud && window.BEV_LJUD && BEV_LJUD.renderCompact) BEV_LJUD.renderCompact(ljud, ['tag', 'flyg', 'bat']);
+    var vbox = host.querySelector('#mb-villkor-box');
+    // Tåg: ljud och villkor i en egen ruta (tag-villkor.js). Flyg och båt som förut.
+    if (vbox && window.TAG_VILLKOR && TAG_VILLKOR.renderPanel) TAG_VILLKOR.renderPanel(vbox);
+    if (ljud && window.BEV_LJUD && BEV_LJUD.renderCompact) BEV_LJUD.renderCompact(ljud, window.TAG_VILLKOR ? ['flyg', 'bat'] : ['tag', 'flyg', 'bat']);
     bindHold(host, errors);
   }
   function bindHold(el, errors) {
@@ -428,7 +455,7 @@
     function clear() { clearTimeout(timer); timer = null; }
     el.addEventListener('pointerdown', function (e) {
       var row = e.target.closest('[data-mb-row]');
-      if (!row || e.target.closest('.mb-gear-btn, .mb-remove, .mb-action-shade') || (e.pointerType === 'mouse' && e.button !== 0)) return;
+      if (!row || e.target.closest('.mb-gear-btn, .mb-villkor-btn, .mb-remove, .mb-action-shade') || (e.pointerType === 'mouse' && e.button !== 0)) return;
       idx = +row.getAttribute('data-mb-row');
       var r = rows[idx];
       if (!canHold(r)) return;
@@ -465,12 +492,14 @@
       draw(d.errors);
     }).catch(function () { if (g === generation) { rows = []; draw(['bevakningar']); } });
   }
+  if (typeof document !== 'undefined' && document.addEventListener) document.addEventListener('tag-villkor-change', function () { if (host && host.isConnected && actionIndex === null && gearIndex === null) draw(lastErrors); });
   M.stop = function () { generation++; clearInterval(timer); timer = null; host = null; rows = []; busy = false; actionIndex = null; gearIndex = null; };
   M.render = function (el) {
     M.stop(); selectedDay = (window.VIEW_STATE&&VIEW_STATE.get('mina-bevakningar',{}).day)||parts(Date.now()).key; mode = localStorage.getItem('taxi_mb_view') === 'list' ? 'list' : 'timeline'; autoPosition = true; actionIndex = null; host = el; el.innerHTML = '<div class="mb"><p role="status">Laddar dina bevakningar…</p></div>'; refresh();
     timer = setInterval(function () { if (!host || !host.isConnected) M.stop(); else if (!document.hidden && !busy && actionIndex === null) refresh(); }, 60000);
   };
   // Ren logik för tester med syntetiska data.
+  M.villkorTarget = villkorTarget;
   M.normalize = normalize; M.inWindow = inWindow; M.timelineLayout = timelineLayout; M.daySegments = daySegments;
 
  if(window.VIEW_STATE)VIEW_STATE.bind('mina-bevakningar',function(){return {day:selectedDay};});

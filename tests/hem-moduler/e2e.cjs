@@ -1,5 +1,5 @@
 'use strict';
-// Webbläsartest: Moduler kan flyttas men stannar på startskärmen (2026-11-12mod1).
+// Webbläsartest: Moduler kan flyttas men stannar på startskärmen (2026-11-13mod2).
 // Kör: node tests/hem-moduler/e2e.cjs [utmapp]
 const fs = require('node:fs');
 const path = require('node:path');

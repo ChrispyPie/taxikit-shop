@@ -146,3 +146,10 @@ och matchas fortfarande, men korten på Ankomster är borttagna.
 Ljudfiler: `TaxiData/ljud/{tag,flyg,bat}.mp3` (valda av Christian). Saknas fil
 spelas reservton. Toggles finns på Ankomster och i Mina bevakningar, inte under
 Inställningar. Ångra SQL: `supabase/migrations/undo/20261111d_route_watches_undo.sql`.
+
+## Ljud och notiser för tåg (20261112ljud1)
+
+Villkor för när tågbevakningar får ge notis och ljud: standard i Mina bevakningar och
+egna villkor per avgång (🔔). Samma regler på servern (`supabase/functions/bevakning/villkor.ts`)
+och i appen (`TaxiData/tag-villkor.js`). Driftsättning och ångra:
+`docs/bevakningar/UNDO-tag-ljudvillkor-20261112.md`.

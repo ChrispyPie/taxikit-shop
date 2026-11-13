@@ -87,7 +87,7 @@ assert.match(body('poke'), /if \(bubbleOn\(\)\) \{\s*hideBubble\(\);/);
 
 // cache och nyheter
 assert.match(index, /hjalpbot\.js\?v=20261112bot1/);
-assert.match(lazy, /changelog\.js\?v=20261112(bot1|mapp1|mod1)/);
+assert.match(lazy, /changelog\.js\?v=2026111[23](bot1|mapp1|ljud1|mod2)/);
 assert.match(changelog, /id: '2026-11-12bot1'/);
 assert.ok(changelog.indexOf("'2026-11-12bot1'") < changelog.indexOf("'2026-11-12zon2'"), 'överst');
 assert.doesNotMatch(src + changelog.slice(0, 3000), /\bStig\b/);

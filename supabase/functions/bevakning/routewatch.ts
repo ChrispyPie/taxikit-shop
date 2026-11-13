@@ -1,7 +1,8 @@
 // Fasta ruttbevakningar: samma tur och klockslag (±15 min, svensk tid), inte tåg-/flygnummer.
 // Ren logik utan nätverk, så den kan testas.
 
-import { groupOf, hm as hmTag, HORIZON_MIN as HORIZON_TAG, EST_STEP_MIN as EST_TAG, MAX_PER_TICK } from "./tagnotis.ts";
+import { groupOf, hm as hmTag, HORIZON_MIN as HORIZON_TAG, EST_STEP_MIN as EST_TAG, MAX_PER_TICK, trainDecision } from "./tagnotis.ts";
+import type { Villkor } from "./villkor.ts";
 import { originCode, hm as hmFlyg, HORIZON_MIN as HORIZON_FLYG, EST_STEP_MIN as EST_FLYG } from "./flygnotis.ts";
 
 export type RouteWatch = {
@@ -9,8 +10,10 @@ export type RouteWatch = {
   route: string; sched_min: number; days: number[];
   lead_min: number; notify_delay: boolean; delay_min: number; notify_cancel: boolean;
 };
-export type SentState = { lead?: boolean; est?: string; canceled?: boolean };
-export type Msg = { title: string; body: string; tag: string };
+export type SentState = { lead?: boolean; est?: string; canceled?: boolean; seen?: string; late?: number };
+export type Msg = { title: string; body: string; tag: string; silent?: boolean; v?: number };
+// Tåg: förarens villkor för avgången (egna för avgången, för den fasta bevakningen, annars standard).
+export type RouteVillkorOf = (driver: string, ident: string, sched: number, routeId: number) => Partial<Villkor> | null | undefined;
 export const SLACK_MIN = 15;
 
 const ms = (v: unknown) => { if (!v) return 0; const t = Date.parse(String(v)); return Number.isFinite(t) ? t : 0; };
@@ -47,7 +50,7 @@ export function matches(w: RouteWatch, item: Record<string, unknown>, kind: "tag
 
 export const sentKey = (driver: string, ident: string, sched: number) => driver + "|" + ident + "|" + sched;
 
-type Out = { driver: string; ident: string; sched: string; state: SentState; msg: Msg };
+type Out = { driver: string; ident: string; sched: string; state: SentState; msg?: Msg; reason?: string };
 
 function decideKind(
   kind: "tag" | "flyg",
@@ -55,6 +58,7 @@ function decideKind(
   items: Record<string, unknown>[],
   sent: Map<string, SentState>,
   now: number,
+  villkorOf?: RouteVillkorOf,
 ): Out[] {
   const byDriver = new Map<string, RouteWatch[]>();
   for (const w of watches) {
@@ -81,7 +85,8 @@ function decideKind(
         if (code === "DEL" || code === "LAN") continue;
       }
       const eta = est || sched;
-      if (eta < now - 60e3 || eta > now + horizon * 60e3) continue;
+      // Tåg: planerad eller beräknad tid inom horisonten (ett tåg som är timmar sent räknas fortfarande).
+      if (eta < now - 60e3 || (kind === "tag" ? Math.min(sched, eta) : eta) > now + horizon * 60e3) continue;
       const m = ws.filter((w) => matches(w, it, kind));
       if (!m.length) continue;
       const lead = Math.max(...m.map((w) => w.lead_min || 0));
@@ -91,6 +96,15 @@ function decideKind(
       const ident = String(it.id || "");
       const key = sentKey(driver, ident, sched);
       const prev = sent.get(key) || {};
+      if ((kind as string) === "tag") {
+        // Tåg följer förarens villkor (villkor.ts): små förseningar tysta, stora/plötsliga ger notis.
+        const vill = villkorOf ? villkorOf(driver, ident, sched, m[0].id) : null;
+        const r = trainDecision(it, ident, sched, est, eta, prev, { lead, wantDelay, delayMin, wantCancel }, vill, now);
+        if (!r) continue;
+        if (r.msg) n++;
+        out.push({ driver, ident, sched: new Date(sched).toISOString(), state: r.state, msg: r.msg, reason: r.reason });
+        continue;
+      }
       const s: SentState = { ...prev };
       const from = String(it.other || "");
       const late = est && est > sched ? Math.round((est - sched) / 60e3) : 0;
@@ -137,9 +151,10 @@ export function decideRoutes(
   flights: Record<string, unknown>[],
   sent: Map<string, SentState>,
   now: number,
+  villkorOf?: RouteVillkorOf,
 ): Out[] {
   return [
-    ...decideKind("tag", watches, trains, sent, now),
+    ...decideKind("tag", watches, trains, sent, now, villkorOf),
     ...decideKind("flyg", watches, flights, sent, now),
   ];
 }

@@ -1,5 +1,5 @@
 'use strict';
-// Moduler som flyttbar, fastnålad startskärmsikon (2026-11-12mod1).
+// Moduler som flyttbar, fastnålad startskärmsikon (2026-11-13mod2).
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
@@ -104,20 +104,20 @@ assert.doesNotMatch(src, /className = 'td-slot-empty'/);
 assert.match(src, /data-tool', 'moduler'/);
 assert.match(src, /!isCore\(id\) && !isPinned\(id\)/);
 const html = fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8');
-assert.match(html, /hem-ordning\.js\?v=20261112mod1/);
-assert.match(html, /hjalp\.js\?v=20261112mod1/);
-assert.match(html, /lazy-views\.js\?v=20261112mod1/);
-assert.match(html, /moduler\.js\?v=20261112mod1/);
+assert.match(html, /hem-ordning\.js\?v=20261113mod2/);
+assert.match(html, /hjalp\.js\?v=20261113mod2/);
+assert.match(html, /lazy-views\.js\?v=20261113mod2/);
+assert.match(html, /moduler\.js\?v=20261113mod2/);
 const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
-assert.match(lv, /changelog\.js\?v=20261112mod1/);
+assert.match(lv, /changelog\.js\?v=20261113mod2/);
 const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
-assert.match(cl, /id: '2026-11-12mod1'/);
-assert.doesNotMatch(cl.split("id: '2026-11-12mod1'")[1].split(']},')[0], /\btid:/);
+assert.match(cl, /id: '2026-11-13mod2'/);
+assert.match(cl.split("id: '2026-11-13mod2'")[0].slice(-60) + cl.split("id: '2026-11-13mod2'")[1].split(']},')[0], /tid: '\d\d:\d\d'/);
 const help = fs.readFileSync(path.join(root, 'TaxiData/hjalp.js'), 'utf8');
 assert.doesNotMatch(help, /Rutan Moduler längst ner/);
 assert.match(help, /Rutan Moduler öppnar/);
 assert.match(help, /stannar alltid på startskärmen/);
-const newText = cl.split("id: '2026-11-12mod1'")[1].split(']},')[0] + help.split('hem: [')[1].split('],')[0];
+const newText = cl.split("id: '2026-11-13mod2'")[1].split(']},')[0] + help.split('hem: [')[1].split('],')[0];
 assert.doesNotMatch(newText, /\bStig\b|\bhen\b/);
 
 console.log('HEM_MODULER_UNIT_OK');

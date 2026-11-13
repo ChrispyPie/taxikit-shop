@@ -10,7 +10,8 @@
   <script src="helskarm.js?v=20261111pwa1"></script>
   <script src="enhet.js?v=20261029d"></script>
   <script src="delad-enhet.js?v=20261111delad3"></script>
-  <script src="bevakning-ljud.js?v=20261112anim5"></script>
+  <script src="tag-villkor.js?v=20261112ljud1"></script>
+  <script src="bevakning-ljud.js?v=20261112ljud1"></script>
   <script src="animationer.js?v=20261112zon2"></script>
   <script src="animationer-vader.js?v=20261111regn1"></script>
   <script src="hjalpbot-scenarier.js?v=20261111poke1"></script>
@@ -200,10 +201,10 @@
   <script src="nav-historik.js?v=20261112swipe1"></script>
   <script src="swipe-back.js?v=20261112swipe1"></script>
   <script src="view-state.js?v=20261107lazy1"></script>
-  <script src="hjalp.js?v=20261112mod1"></script>
-  <script src="hem-ordning.js?v=20261112mod1"></script>
-  <script src="moduler.js?v=20261112mod1"></script>
-  <script src="lazy-views.js?v=20261112mod1"></script>
+  <script src="hjalp.js?v=20261113mod2"></script>
+  <script src="hem-ordning.js?v=20261113mod2"></script>
+  <script src="moduler.js?v=20261113mod2"></script>
+  <script src="lazy-views.js?v=20261113mod2"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -448,6 +449,7 @@
       } else {
         if (LAZY.has(savedView) && savedView !== 'notiser') {
           current = savedView;
+          try { localStorage.setItem('taxi_view', savedView); } catch (e) {}
           navPush(current);   // omladdning på samma sida: inget nytt steg (NAV.push hoppar över samma sida)
         }
         document.getElementById('app').style.display = 'block';
