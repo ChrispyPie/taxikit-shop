@@ -83,6 +83,20 @@ function bookings(now) {
     cells: document.querySelectorAll('.pg-td-cell .pg-new-dot').length,
     cur: (document.querySelector('.pg-ztab.on') || {}).getAttribute ? document.querySelector('.pg-ztab.on').getAttribute('data-ztab') : null
   }));
+  // Inget tomrum ovanför rutnätet (spacern borttagen 2026-11-13): flikarna ligger direkt under rubriken.
+  for (const [w, h, mobile, label] of [[1280, 800, false, 'platta-liggande-utan-tomrum'], [1340, 800, false, 'platta-1340-utan-tomrum'], [390, 844, true, 'telefon-staende-utan-tomrum']]) {
+    const p = await open(w, h, mobile);
+    await p.evaluate(() => openItem('prognos'));
+    await p.waitForSelector('.pg-tabs', { timeout: 20000 });
+    await sleep(900);
+    const g = await p.evaluate(() => { const hd = document.querySelector('header'), t = document.querySelector('.pg-tabs'), sp = document.querySelector('.pg-land-spacer');
+      return { gap: Math.round(t.getBoundingClientRect().top - (hd ? hd.getBoundingClientRect().bottom : 0)), spacer: !!sp, y: scrollY, land: document.body.classList.contains('pg-land') }; });
+    ok(label + ': inget tomrum ovanför (gap ' + g.gap + ' px)', g.gap < 40 && !g.spacer && g.y === 0, JSON.stringify(g));
+    if (w > h) ok(label + ': liggande läge', g.land, JSON.stringify(g));
+    await p.screenshot({ path: path.join(out, label + '.png') });
+    ok(label + ': inga sidfel', !p._errs.length, p._errs.join(' | '));
+    await p.close();
+  }
   for (const [w, h, mobile, label] of [[1280, 800, false, 'platta-liggande'], [390, 844, true, 'telefon-staende']]) {
     const p = await open(w, h, mobile);
     await p.evaluate(() => openItem('prognos'));

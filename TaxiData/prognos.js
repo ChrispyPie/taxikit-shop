@@ -1476,35 +1476,15 @@
     document.body.classList.remove('pg-land-tablet');
   }
 
+  // Tidigare lades en tom ruta (spacer) överst så att rutnätet hamnade längst ner på skärmen,
+  // tillsammans med automatisk rullning till botten. Båda är borttagna (2026-11-13): rutnätet
+  // ligger direkt under rubriken. Funktionen tar bara bort en eventuell gammal spacer.
   function pinLandGrid(root) {
     var pg = root && root.querySelector ? root.querySelector('.pg') : null;
     if (!pg && root && root.classList && root.classList.contains('pg')) pg = root;
     if (!pg) return;
-    var shell = pg.querySelector('.pg-land-shell');
-    if (!shell) return;
     var spacer = pg.querySelector('.pg-land-spacer');
-    if (!spacer) {
-      spacer = document.createElement('div');
-      spacer.className = 'pg-land-spacer';
-      spacer.setAttribute('aria-hidden', 'true');
-      pg.insertBefore(spacer, pg.firstChild);
-    }
-    spacer.style.height = '0px';
-    var first = spacer.nextElementSibling;
-    var contentTop = first ? first.getBoundingClientRect().top : pg.getBoundingClientRect().top;
-    var contentH = shell.getBoundingClientRect().bottom - contentTop;
-    var main = document.querySelector('main');
-    var padB = 0;
-    try { if (main) padB = parseFloat(getComputedStyle(main).paddingBottom) || 0; } catch (e) {}
-    var avail = Math.max(0, Math.floor((window.innerHeight || 0) - landHeaderBottom() - padB - 2));
-    var extra = Math.max(0, avail - Math.ceil(contentH));
-    spacer.style.height = extra + 'px';
-    // Sidan rullas aldrig automatiskt (2026-11-13skroll1, Christian): rutnätet läggs längst ner
-    // med luft ovanför när det får plats, men är sidan längre står den kvar där föraren är.
-    if ((window.scrollY || 0) < 1) {
-      var gap = Math.round((window.innerHeight || 0) - padB - shell.getBoundingClientRect().bottom);
-      if (gap > 1) spacer.style.height = (extra + gap) + 'px';
-    }
+    if (spacer && spacer.parentNode) spacer.parentNode.removeChild(spacer);
   }
 
   function settleLandLayout() {
