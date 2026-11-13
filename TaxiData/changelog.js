@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-13', id: '2026-11-13lasbar1', tid: '15:18', rader: [
+    ['Fixat', 'Ärenden: dina egna svar i en felanmälan syntes inte i mörkt tema, texten var ljus på ljus bakgrund. Nu går de att läsa.']
+  ]},
   { datum: '2026-11-13', id: '2026-11-13mod2', tid: '15:13', rader: [
     ['Ändrat', 'Startskärmen: rutan Moduler kan du nu flytta precis som de andra ikonerna. Den stannar alltid på startskärmen, så du inte tappar bort den. Den kan inte läggas i en mapp eller avinstalleras.']
   ]},
