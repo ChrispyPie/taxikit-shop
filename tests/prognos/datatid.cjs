@@ -50,11 +50,11 @@ assert.equal(api.clockSv(null, true), '');
 assert.equal(api.minutesOld(flyOld, now), 50);
 
 const land = api.statusStamp({ onFly: true, flyUpdated: flyOk, lastOkAt: lastOk, now: now });
-assert.deepEqual(land.parts, [{ k: 'flyg', t: '22:25:31' }, { k: 'prognos', t: '22:26:10' }]);
+assert.deepEqual(land.parts, [{ k: '', t: '22:26:10' }]);   // bara prognostid (t1582u)
 assert.equal(land.warn, '');
 
 const stale = api.statusStamp({ onFly: true, flyUpdated: flyOld, lastOkAt: lastOk, now: now });
-assert.equal(stale.parts[0].t, '21:40:00');
+assert.deepEqual(stale.parts, [{ k: '', t: '22:26:10' }]);
 assert.equal(stale.warn, 'Flygdata är 50 min gammal');
 
 const other = api.statusStamp({ onFly: false, flyUpdated: flyOk, lastOkAt: lastOk, now: now });
@@ -73,8 +73,7 @@ const both = api.statusStamp({
 assert.equal(both.warn, 'Flygdata är 50 min gammal');
 
 const noFly = api.statusStamp({ onFly: true, flyUpdated: null, lastOkAt: lastOk, now: now });
-assert.equal(noFly.parts[0].t, '–');
-assert.equal(noFly.parts[1].t, '22:26:10');
+assert.deepEqual(noFly.parts, [{ k: '', t: '22:26:10' }]);
 
 assert.equal(api.FLY_STALE_MIN, 30);
 

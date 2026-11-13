@@ -1882,13 +1882,9 @@
     opts = opts || {};
     var fly = opts.flyUpdated, last = opts.lastOkAt, onFly = !!opts.onFly, now = opts.now;
     var parts = [], warn = '';
-    if (onFly) {
-      parts.push({ k: 'flyg', t: clockSv(fly, true) || '–' });
-      var pg = clockSv(last, true);
-      if (pg) parts.push({ k: 'prognos', t: pg });
-    } else {
-      parts.push({ k: '', t: clockSv(last, true) || '–' });
-    }
+    // Bara prognosens tid visas, även på Landvetter (flygets tid togs bort 2026-11-13, t1582u).
+    // Varningen för gammal flygdata finns kvar.
+    parts.push({ k: '', t: clockSv(last, true) || '–' });
     if (opts.codeNeeded) warn = 'Kod behövs';
     else if (opts.status && opts.status !== 'ok') warn = 'Kunde inte hämta ny data';
     else {

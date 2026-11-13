@@ -114,12 +114,13 @@ function bookings(now) {
       const after = [...document.querySelectorAll('.pg-n')].map(n => getComputedStyle(n, '::after')).filter(c => c.content !== 'none' && c.backgroundColor === 'rgb(213, 63, 140)').length;
       return { legend: lg ? lg.textContent : '', addon: document.querySelectorAll('.pg-addon').length, pink: after,
         childCells: [...document.querySelectorAll('td.pg-td-child .pg-n')].length, newDots: document.querySelectorAll('.pg-new-dot').length,
-        warn: (document.querySelector('.pg-warn') || {}).textContent || '', repBtn: document.querySelectorAll('.pg-warn button, .pg-rep-btn').length, kt: document.querySelectorAll('.pg-kt, #pg-kt-btn').length };
+        warn: (document.querySelector('.pg-warn') || {}).textContent || '', repBtn: document.querySelectorAll('.pg-warn button, .pg-rep-btn').length, kt: document.querySelectorAll('.pg-kt, #pg-kt-btn').length, status: (document.querySelector('.pg-status') || {}).textContent || '' };
     });
     ok('barn: ingen barnstol/babyskydd i förklaringen', !/barnstol|babyskydd/i.test(r.legend) && /blandat/.test(r.legend), r.legend);
     ok('barn: ingen rosa prick', r.addon === 0 && r.pink === 0, JSON.stringify(r));
     ok('barn: barnstolsspalten visar bokningen', r.childCells >= 1, JSON.stringify(r));
     ok('rapport: rutan kvar utan Rapportera fel-knapp', /uppskattade och ungefärliga/.test(r.warn) && !/Rapportera/.test(r.warn) && r.repBtn === 0, JSON.stringify({ warn: r.warn, repBtn: r.repBtn }));
+    ok('status: ingen flygtid i 293', !/flyg/i.test(r.status) && /Senaste uppdatering/.test(r.status), r.status);
     ok('kundtid: ingen testruta', r.kt === 0, String(r.kt));
     ok('barn: aktivitetsprickar kvar', r.newDots >= 1, JSON.stringify(r));
     await p.screenshot({ path: path.join(out, 'utan-barnstolsprick.png') });
