@@ -63,6 +63,7 @@
     codeMsg: '',
     poll: null,
     seenIds: {},
+    viewZone: null,      // zonen som visas just nu (prickarna där blir sedda när man lämnar den)
     newIds: {},          // bokningar som är nya sedan förra besöket (prickar, 2026-11-13prick2)
     newSince: 0,
     inAppAlert: true,
@@ -615,10 +616,35 @@
     if (!v) v = +(localStorage.getItem(drvKey('prognos_since_')) || 0);
     return v || Date.now();
   }
+  // Sedda (2026-11-13sedd1, t1583u): öppnar man en zon och sedan lämnar den (byter zon, flik eller
+  // lämnar Prognos) räknas zonens nya bokningar som sedda. De sparas per förare och bokning så att
+  // prickarna inte kommer tillbaka efter omladdning; listan rensas när bokningen lämnar listan.
+  function loadSeenIds() { try { return JSON.parse(localStorage.getItem(drvKey('prognos_seenids_')) || '{}') || {}; } catch (e) { return {}; } }
+  function saveSeenIds(m) { try { localStorage.setItem(drvKey('prognos_seenids_'), JSON.stringify(m)); } catch (e) {} }
+  function clearZoneDots(zid) {
+    if (!zid) return;
+    var seen = loadSeenIds(), hit = false;
+    (st.bookings || []).forEach(function (b) {
+      var id = String(b.id);
+      if (String(b.zone_id) === String(zid) && st.newIds[id]) { delete st.newIds[id]; seen[id] = 1; hit = true; }
+    });
+    if (!hit) return;
+    saveNewIds(st.newIds);
+    saveSeenIds(seen);
+  }
+  // Zonen som just nu visas (Schema/Original). leaveZone() anropas när man lämnar den.
+  function leaveZone() {
+    var z = st.viewZone;
+    st.viewZone = null;
+    if (z) clearZoneDots(z);
+  }
+  // Stänger/laddar man om appen inne i en zon räknas den också som lämnad.
+  window.addEventListener('pagehide', function () { if (onPage()) { var z = st.viewZone; leaveZone(); st.viewZone = z; } });
   function updateNewIds(list) {
-    var cats = loadCats(), keep = {}, old = loadNewIds();
+    var cats = loadCats(), keep = {}, old = loadNewIds(), seen = loadSeenIds(), seenKeep = {};
     (list || []).forEach(function (b) {
       var id = String(b.id);
+      if (seen[id]) { seenKeep[id] = 1; return; }
       if (old[id]) { keep[id] = 1; return; }
       var obs = Date.parse(b.observed_at || b.first_seen || '');
       if (!(obs > st.newSince)) return;
@@ -627,6 +653,7 @@
     });
     st.newIds = keep;
     saveNewIds(keep);
+    saveSeenIds(seenKeep);   // bokningar som lämnat listan glöms
   }
   function isNewB(b) { return !!(b && st.newIds[String(b.id)]); }
   function zoneHasNew(zid) { return (st.bookings || []).some(function (b) { return String(b.zone_id) === String(zid) && isNewB(b); }); }
@@ -2221,14 +2248,20 @@
 
   function bind(root) {
     root.querySelectorAll('[data-panel]').forEach(function (btn) {
-      btn.onclick = function () { st.panel = btn.getAttribute('data-panel'); paint(); };
+      btn.onclick = function () {
+        var np = btn.getAttribute('data-panel');
+        if (np !== st.panel) { leaveZone(); if (np === 'schema' || np === 'original') st.viewZone = st.zoneTab; }
+        st.panel = np; paint();
+      };
     });
     root.querySelectorAll('[data-pg-report]').forEach(function (btn) { btn.onclick = reportBug; });
     root.querySelectorAll('[data-ztab]').forEach(function (btn) {
       btn.onclick = function () {
         var z = btn.getAttribute('data-ztab');
         if (st.focus && st.focus.zone !== z) st.focus = null;   // annan zon vald -> släpp markeringen
+        if (st.viewZone && st.viewZone !== z) leaveZone();       // lämnar zonen -> dess prickar är sedda
         saveTab(z);
+        st.viewZone = z;
         paint();
       };
     });
@@ -2335,6 +2368,7 @@
     st.el = el;
     st.panel = 'schema';
     st.zoneTab = loadTab();
+    st.viewZone = st.zoneTab;   // zonen som öppnas räknas som visad
     badge.viewing = true;
     try { localStorage.setItem('taxi_view', P.id); } catch (e) {}
     st.newSince = lastVisit();   // före markSeen: allt som kommit sedan förra besöket får prick
@@ -2368,6 +2402,7 @@
     document.body.classList.remove('pg-land');
     document.body.classList.remove('pg-land-tablet');
     st.focus = null;   // lämnar Prognos -> markeringen från notisen är klar
+    leaveZone();       // lämnar Prognos -> den öppna zonens prickar är sedda
     if (st.poll) { clearInterval(st.poll); st.poll = null; }
     if (st.landTick) { clearInterval(st.landTick); st.landTick = null; }
     clearLandAnims();

@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-13', id: '2026-11-13sedd1', rader: [
+    ['Fixat', 'Prognos: prickarna för ny aktivitet försvinner nu när du har sett dem. Öppnar du en zon med prick och sedan lämnar den (byter zon, flik eller går ur Prognos) är zonens prick och prickarna på dess bokningar borta, även efter omladdning. Nya bokningar som kommer senare får prick igen.']
+  ]},
   { datum: '2026-11-13', id: '2026-11-13barn1', tid: '16:16', rader: [
     ['Ändrat', 'Prognos: den rosa pricken för barnstol/babyskydd på rutorna och raden om den i förklaringen är borttagna, så att de inte blandas ihop med de nya prickarna för nya bokningar. Barnstol och babyskydd har redan egna spalter.'],
     ['Ändrat', 'Prognos: knappen Rapportera fel i rutan om att tiderna är ungefärliga är borttagen. Själva rutan finns kvar.'],
