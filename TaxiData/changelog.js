@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-13', id: '2026-11-13hem1', tid: '21:54', rader: [
+    ['Ändrat', 'När du öppnar appen eller precis har loggat in hamnar du alltid på startskärmen. Appen kommer bara ihåg sidan du var på när du laddar om sidan. Trycker du på en notis öppnas fortfarande rätt sida direkt.']
+  ]},
   { datum: '2026-11-13', id: '2026-11-13sedd1', tid: '21:48', rader: [
     ['Fixat', 'Prognos: prickarna för ny aktivitet försvinner nu när du har sett dem. Öppnar du en zon med prick och sedan lämnar den (byter zon, flik eller går ur Prognos) är zonens prick och prickarna på dess bokningar borta, även efter omladdning. Nya bokningar som kommer senare får prick igen.']
   ]},
