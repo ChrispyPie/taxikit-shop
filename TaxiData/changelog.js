@@ -15,6 +15,14 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-14', id: '2026-11-14sidor1', tid: '14:34', rader: [
+    ['Nytt', 'Startskärmen: flytta ikoner och mappar dit du vill. Håll in och dra till valfri ruta, tomma rutor får vara tomma och ingenting packas ihop. Släpper du på en ruta där något redan står byter de plats. Väljer du en layout i Inställningar sorteras allt en gång, sedan kan du flytta fritt igen.'],
+    ['Nytt', 'Inställningar: 4 i bredd (tätare ikoner) och Ikonstorlek, Små eller Stora. Ikonstorleken är fristående från textstorleken.'],
+    ['Nytt', 'Startskärmen har flera sidor. Svep åt vänster till sida 2, där du kan lägga ikoner och mappar. Dra en ikon till skärmkanten för att flytta den till sidan bredvid. Prickarna längst ned visar vilken sida du är på, och 🏠 tar dig alltid till startskärmen.'],
+    ['Nytt', 'Admin: svep åt höger från startskärmen till en Admin-sida med Ärenden, Chaufförer och de andra admindelarna. S admin har en sida till längst till vänster. Admin-ikonen finns kvar.', 'admin'],
+    ['Nytt', 'Applådan: svep uppåt på startskärmen (eller tryck på ⌃ ovanför prickarna) så visas alla moduler du har tillgång till, i bokstavsordning och med sökfält. Tryck för att öppna. Håll in för Lägg till på hemskärm, eller dra ut modulen dit du vill ha den. Svep nedåt eller tryck bakåt för att stänga.'],
+    ['Nytt', 'Ta bort genväg: håll in en ikon och välj Ta bort genväg, eller dra den till Ta bort högst upp. Bara ikonen försvinner, modulen finns kvar i applådan.']
+  ]},
   { datum: '2026-11-14', id: '2026-11-14kvar1', tid: '14:32', rader: [
     ['Fixat', 'Prognos: prickarna för ny aktivitet försvann ibland redan när du öppnade Prognos, till exempel om rutan trycktes två gånger. Nu syns prickarna på alla zoner och bokningar med nytt när du öppnar Prognos, och de ligger kvar medan du tittar. En zons prickar försvinner först när du har haft zonen öppen och sedan lämnar den (byter zon, flik, går ur Prognos eller stänger appen).']
   ]},

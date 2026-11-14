@@ -94,16 +94,16 @@ function setup() {
 {
   const html = fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8');
   assert.match(html, /nav-historik\.js\?v=20261112swipe1/);
-  assert.match(html, /swipe-back\.js\?v=20261112swipe1/);
+  assert.match(html, /swipe-back\.js\?v=(20261112swipe1|20261114sidor1)/);
   assert.ok(html.indexOf('nav-historik.js') < html.indexOf('swipe-back.js'));
   assert.match(html, /NAV\.handlePop\(ev\.state/);
   assert.doesNotMatch(html, /current === MINA_BEVAKNINGAR\.id\) \{\s*goHome\(\);/);   // inte längre alltid hem
   for (const f of ['admin.html', 'akeridata.html', 'sadmin.html']) {
-    assert.match(fs.readFileSync(path.join(root, 'TaxiData', f), 'utf8'), /swipe-back\.js\?v=20261112swipe1/, f);
+    assert.match(fs.readFileSync(path.join(root, 'TaxiData', f), 'utf8'), /swipe-back\.js\?v=(20261112swipe1|20261114sidor1)/, f);
   }
   const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
-  assert.match(lv, /changelog\.js\?v=2026111[234](bot1|mapp1|ljud1|svar2|pgfix1|mod2|lasbar1|skroll1|chatt1|prick2|barn1|sedd1|hem1|avs1|kp1)/);
-  assert.match(html, /lazy-views\.js\?v=2026111[234](swipe1|mapp1|ljud1|svar2|pgfix1|mod2|lasbar1|skroll1|chatt1|prick2|barn1|sedd1|hem1|avs1|kp1)/);
+  assert.match(lv, /changelog\.js\?v=2026111[234](bot1|mapp1|ljud1|svar2|pgfix1|mod2|lasbar1|skroll1|chatt1|prick2|barn1|sedd1|hem1|avs1|kp1|sem1|sidor1)/);
+  assert.match(html, /lazy-views\.js\?v=2026111[234](swipe1|mapp1|ljud1|svar2|pgfix1|mod2|lasbar1|skroll1|chatt1|prick2|barn1|sedd1|hem1|avs1|kp1|sem1|sidor1)/);
   const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
   assert.ok(cl.indexOf("2026-11-12swipe1") < cl.indexOf("2026-11-12zon2"));
 }

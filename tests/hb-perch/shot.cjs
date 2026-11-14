@@ -196,7 +196,10 @@ function afterLast(L) {
     const p = await open({ width: 412, height: 780 });
     const before = await p.evaluate(() => HJALPBOT._perch());
     await p.evaluate(() => {
-      [...document.querySelectorAll('#app .grid .icon[data-tool]')].slice(3, 9).forEach(n => n.remove());
+      // som när föraren tar bort moduler (fri placering 2026-11-14: att bara plocka bort noder lämnar tomma rutor)
+      [...document.querySelectorAll('#app .grid .icon[data-tool]')].slice(3, 9).map(n => n.getAttribute('data-tool')).forEach(id => HEM_ORDNING.uninstall(id));
+      // borttagna lämnar tomma rutor (som på Android); ny layout i Inställningar sorterar ihop dem
+      HEM_ORDNING.resetPositions(); renderMenu();
     });
     await sleep(1600);
     const L = await p.evaluate(layoutInPage);

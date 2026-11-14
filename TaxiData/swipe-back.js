@@ -123,6 +123,8 @@
   document.addEventListener('touchstart', function (e) {
     if (e.touches.length !== 1) { tg = null; return; }
     if (onLogin() || notisOpen()) { tg = null; return; }
+    // Hemskärmen: svepet byter hemsida (hem-sidor.js), ingen bakåt/framåt där (2026-11-14sidor1)
+    if (window.HEM_SIDOR && HEM_SIDOR.ownsSwipe && HEM_SIDOR.ownsSwipe()) { tg = null; return; }
     var t = e.touches[0], w = window.innerWidth;
     if (t.clientX >= w - NOTIS_EDGE) { tg = null; return; }   // notispanelens kant: notis.js tar den
     if (scrollsX(e.target) || blockedTarget(e.target)) { tg = null; return; }

@@ -143,7 +143,11 @@ html[data-theme="dark"] img.pfp-avatar, html[data-theme="dark"] .emoji { filter:
 /* Rutmenyn (startsidan och adminmenyn). Startskärm-valet under Inställningar sätter html[data-home] = 2 | 3 | lista
    och gäller båda menyerna. Utan val: 3 i bredd på telefon, annars automatiskt.
    2026-11-11: ramar bort, tätare rutnät (minst ~44 px tryckyta). Ångra: backup/pre-fix-hjalpbot-enheter-20261111. */
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px 6px; }
+/* Ikonstorlek (2026-11-14fri1): Små = som förut (standard), Stora = ikonerna 1,25x och texten under 1,1x.
+   Oberoende av Textstorlek (den ändrar bara texten). tema.js sätter html[data-icons="stora"]. */
+:root { --icon-k: 1; --icon-tk: 1; }
+html[data-icons="stora"] { --icon-k: 1.25; --icon-tk: 1.1; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(calc(88px * var(--icon-k, 1)), 1fr)); gap: 8px 6px; }
 .icon {
   background: transparent; border: 0; border-radius: 10px; padding: 8px 2px 6px;
   text-align: center; cursor: pointer; color: var(--text);
@@ -151,8 +155,8 @@ html[data-theme="dark"] img.pfp-avatar, html[data-theme="dark"] .emoji { filter:
   -webkit-tap-highlight-color: transparent;
 }
 .icon, .icon * { -webkit-tap-highlight-color: transparent; }
-.icon .emoji { font-size: 30px; margin-bottom: 4px; line-height: 1; display: inline-block; transform-origin: 50% 50%; }
-.icon .label { font-size: calc(13px * var(--font-scale, 1)); }
+.icon .emoji { font-size: calc(30px * var(--icon-k, 1)); margin-bottom: 4px; line-height: 1; display: inline-block; transform-origin: 50% 50%; }
+.icon .label { font-size: calc(13px * var(--font-scale, 1) * var(--icon-tk, 1)); }
 .icon:active, .icon:focus {
   background: none; background-color: transparent; transform: none; outline: none;
 }
@@ -163,33 +167,37 @@ html[data-theme="dark"] img.pfp-avatar, html[data-theme="dark"] .emoji { filter:
 .icon:focus-visible { outline: 2px solid var(--accent, #3182ce); outline-offset: 2px; background: none; }
 @media (max-width: 600px) {
   .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 4px; }
-  .icon { min-height: 64px; padding: 6px 2px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; }
-  .icon .emoji { font-size: 28px; line-height: 1; margin-bottom: 4px; }
+  .icon { min-height: calc(64px * var(--icon-k, 1)); padding: 6px 2px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; }
+  .icon .emoji { font-size: calc(28px * var(--icon-k, 1)); line-height: 1; margin-bottom: 4px; }
   /* 3 i bredd: texten växer högst 15 % så att långa ord (Inställningar) får plats */
-  .icon .label { font-size: calc(13px * min(var(--font-scale, 1), 1.15)); line-height: 1.15; overflow-wrap: break-word; hyphens: manual; }
+  .icon .label { font-size: calc(13px * min(var(--font-scale, 1), 1.15) * var(--icon-tk, 1)); line-height: 1.15; overflow-wrap: break-word; hyphens: manual; }
 }
 html[data-home] .grid { max-width: 760px; }
 html[data-home="2"] .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 6px; }
-html[data-home="2"] .icon { min-height: 64px; padding: 8px 4px 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-html[data-home="2"] .icon .emoji { font-size: 30px; line-height: 1; margin-bottom: 4px; }
-html[data-home="2"] .icon .label { font-size: calc(13px * var(--font-scale, 1)); }
+html[data-home="2"] .icon { min-height: calc(64px * var(--icon-k, 1)); padding: 8px 4px 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+html[data-home="2"] .icon .emoji { font-size: calc(30px * var(--icon-k, 1)); line-height: 1; margin-bottom: 4px; }
+html[data-home="2"] .icon .label { font-size: calc(13px * var(--font-scale, 1) * var(--icon-tk, 1)); }
 html[data-home="3"] .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 4px; }
-html[data-home="3"] .icon { min-height: 64px; padding: 6px 2px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; }
-html[data-home="3"] .icon .emoji { font-size: 28px; line-height: 1; margin-bottom: 4px; }
-html[data-home="3"] .icon .label { font-size: calc(13px * min(var(--font-scale, 1), 1.15)); line-height: 1.15; overflow-wrap: break-word; }
+html[data-home="3"] .icon { min-height: calc(64px * var(--icon-k, 1)); padding: 6px 2px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; }
+html[data-home="3"] .icon .emoji { font-size: calc(28px * var(--icon-k, 1)); line-height: 1; margin-bottom: 4px; }
+html[data-home="3"] .icon .label { font-size: calc(13px * min(var(--font-scale, 1), 1.15) * var(--icon-tk, 1)); line-height: 1.15; overflow-wrap: break-word; }
+html[data-home="4"] .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px 2px; }
+html[data-home="4"] .icon { min-height: calc(60px * var(--icon-k, 1)); padding: 6px 1px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; }
+html[data-home="4"] .icon .emoji { font-size: calc(28px * var(--icon-k, 1)); line-height: 1; margin-bottom: 4px; }
+html[data-home="4"] .icon .label { font-size: calc(12px * min(var(--font-scale, 1), 1.1) * var(--icon-tk, 1)); line-height: 1.15; overflow-wrap: anywhere; }
 html[data-home="lista"] .grid { grid-template-columns: 1fr; gap: 2px; }
 html[data-home="lista"] .icon { min-height: 44px; padding: 6px 28px 6px 10px; display: flex; flex-direction: row; align-items: center; text-align: left; box-sizing: border-box; }
-html[data-home="lista"] .icon .emoji { font-size: 24px; line-height: 1; margin: 0 12px 0 0; width: 30px; text-align: center; flex-shrink: 0; }
-html[data-home="lista"] .icon .label { font-size: calc(15px * var(--font-scale, 1)); flex: 1; }
+html[data-home="lista"] .icon .emoji { font-size: calc(24px * var(--icon-k, 1)); line-height: 1; margin: 0 12px 0 0; width: calc(30px * var(--icon-k, 1)); text-align: center; flex-shrink: 0; }
+html[data-home="lista"] .icon .label { font-size: calc(15px * var(--font-scale, 1) * var(--icon-tk, 1)); flex: 1; }
 html[data-home="lista"] .icon::before { content: '›'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--c-a0aec0); font-size: 22px; pointer-events: none; }
 /* Notisprickar sitter vid ikonen (utan ram skulle hörnet hamna långt från bilden). */
 .grid .icon.badge-host.has-badge::after,
 .grid .icon.badge-host.has-badge[data-badge-text]:not([data-badge-text=""])::after {
-  top: 0; right: 50%; left: auto; transform: translateX(22px);
+  top: 0; right: 50%; left: auto; transform: translateX(calc(22px * var(--icon-k, 1)));
 }
 html[data-home="lista"] .grid .icon.badge-host.has-badge::after,
 html[data-home="lista"] .grid .icon.badge-host.has-badge[data-badge-text]:not([data-badge-text=""])::after {
-  top: 2px; right: auto; left: 26px; transform: none;
+  top: 2px; right: auto; left: calc(26px * var(--icon-k, 1)); transform: none;
 }
 
 /* Fast header (2026-11-04): headern står kvar högst upp, bara innehållet skrollar.
