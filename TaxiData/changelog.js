@@ -15,7 +15,7 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-11-14', id: '2026-11-14ladd1', rader: [
+  { datum: '2026-11-14', id: '2026-11-14ladd1', tid: '18:48', rader: [
     ['Nytt', 'Hjälpboten står vid sin egen station när den inte pratar. Roboten laddar i en liten laddstation, Chauffören är vid sin taxi och Taxi-Diva vid sminkbordet. När den ska säga något går den fram och pratar, och går sedan tillbaka till stationen. Stationen täcker inte ikoner eller sidprickarna längst ner.']
   ]},
   { datum: '2026-11-14', id: '2026-11-14sidor1', tid: '14:34', rader: [
