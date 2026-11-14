@@ -4,7 +4,11 @@
  * 2026-11-12: skiftnyckeln är borttagen. Håll in en ikon (~1 s) för meny och dra, som på Android.
  * Släpp en ikon på en annan för att göra en mapp.
  * Moduler är en vanlig ikon på startskärmen: den kan flyttas, men den får inte ligga i en mapp,
- * avinstalleras eller döljas. Saknas den lägger normalize tillbaka den sist. */
+ * avinstalleras eller döljas. Saknas den lägger normalize tillbaka den sist.
+ * 2026-11-14fri1: fri placering. Startskärmen är ett fast osynligt rutnät (som Android): varje ikon och mapp
+ * har en sparad ruta (rad, kolumn) per kolumnantal, så lediga rutor förblir lediga. Släpp i en ruta = flytta dit;
+ * står något där byter de plats. Val av Startskärm under Inställningar sorterar om en gång (positionerna nollställs).
+ * Gäller inte Lista. Ångra: docs/hem-fri-placering/UNDO.md. */
 (function () {
   'use strict';
   if (window.HEM_ORDNING) return;
@@ -28,6 +32,8 @@
   var catalog = [];   // {id, icon, label} the driver can see
   var lastTop = [];   // startskärmens översta nivå från senaste arrange
   var lastLayout = [];
+  var pos = {};       // fri placering: { '<kolumner>': { id: [rad, kolumn] } }
+  var freeNow = null; // { C, grid } senast utlagda rutnät
 
   function isCore(id) { return !!CORE[id]; }
   function isPinned(id) { return !!PINNED[id]; }
@@ -195,6 +201,98 @@
       unpackFolder: unpackFolder, renameFolder: renameFolder, removeTool: removeTool, expand: expand, group: group, find: find, folderOf: folderOf, isPinned: isPinned };
   })();
 
+  /* ---------- Fri placering: rena funktioner (testas i tests/hem-fri) ---------- */
+  var F = (function () {
+    var MAXR = 60, MAXK = 8, MAXN = 80;
+    function okCell(v, C) {
+      return Array.isArray(v) && v.length === 2 && v[0] === Math.floor(v[0]) && v[1] === Math.floor(v[1]) &&
+        v[0] >= 0 && v[0] < MAXR && v[1] >= 0 && v[1] < C;
+    }
+    function cleanMap(m, C) {
+      var o = {}, used = {}, n = 0;
+      if (!m || typeof m !== 'object' || Array.isArray(m)) return o;
+      Object.keys(m).forEach(function (id) {
+        var v = m[id];
+        if (n >= MAXN || !okId(id) || !okCell(v, C) || used[v[0] + ':' + v[1]]) return;
+        used[v[0] + ':' + v[1]] = 1;
+        o[id] = [v[0], v[1]];
+        n++;
+      });
+      return o;
+    }
+    function cleanPos(p) {
+      var out = {};
+      if (!p || typeof p !== 'object' || Array.isArray(p)) return out;
+      Object.keys(p).filter(function (k) { return /^([1-9]|1[0-6])$/.test(k); }).slice(0, MAXK).forEach(function (k) {
+        var m = cleanMap(p[k], +k);
+        if (Object.keys(m).length) out[k] = m;
+      });
+      return out;
+    }
+    // Från ett annat kolumnantal: kanterna stannar vid kanterna, resten skalas.
+    function clamp(m, Cs, C) {
+      var o = {};
+      Object.keys(m).forEach(function (id) {
+        var r = m[id][0], c = m[id][1], nc;
+        if (Cs <= 1 || C <= 1) nc = 0;
+        else if (c >= Cs - 1) nc = C - 1;
+        else nc = Math.min(C - 1, Math.round(c * (C - 1) / (Cs - 1)));
+        o[id] = [r, nc];
+      });
+      return o;
+    }
+    function source(p, C) {
+      if (p[String(C)]) return p[String(C)];
+      var ks = Object.keys(p).map(Number);
+      if (!ks.length) return null;
+      ks.sort(function (a, b) { return Math.abs(a - C) - Math.abs(b - C) || b - a; });
+      return clamp(p[String(ks[0])], ks[0], C);
+    }
+    function key(r, c) { return r + ':' + c; }
+    function nearest(taken, r, c, C) {
+      for (var d = 0; d < MAXR + C; d++) {
+        for (var dr = -d; dr <= d; dr++) {
+          var rest = d - Math.abs(dr), cands = rest ? [c - rest, c + rest] : [c];
+          for (var i = 0; i < cands.length; i++) {
+            var rr = r + dr, cc = cands[i];
+            if (rr >= 0 && rr < MAXR && cc >= 0 && cc < C && !taken[key(rr, cc)]) return [rr, cc];
+          }
+        }
+      }
+      return [0, 0];
+    }
+    function firstFree(taken, C, from) {
+      for (var i = from || 0; i < MAXR * C; i++) if (!taken[key(Math.floor(i / C), i % C)]) return [Math.floor(i / C), i % C];
+      return [0, 0];
+    }
+    /* ids: översta nivån i ordning. Returnerar { id: [rad, kolumn] } för C kolumner.
+     * Sparad ruta används om den är ledig; krock -> närmaste lediga ruta. Utan sparad ruta (nytt verktyg)
+     * hamnar ikonen efter den sista upptagna rutan, så att medvetet tomma rutor förblir tomma. */
+    function resolve(ids, C, p) {
+      C = Math.max(1, C | 0);
+      var want = source(p || {}, C) || {}, out = {}, taken = {}, late = [], newc = [], last = -1;
+      ids.forEach(function (id) {
+        var w = want[id];
+        if (w && w[1] < C && !taken[key(w[0], w[1])]) { out[id] = [w[0], w[1]]; taken[key(w[0], w[1])] = 1; last = Math.max(last, w[0] * C + w[1]); }
+        else if (w) late.push(id);
+        else newc.push(id);
+      });
+      late.forEach(function (id) {
+        var w = want[id], cell = nearest(taken, w[0], Math.min(w[1], C - 1), C);
+        out[id] = cell; taken[key(cell[0], cell[1])] = 1; last = Math.max(last, cell[0] * C + cell[1]);
+      });
+      newc.forEach(function (id) {
+        var cell = firstFree(taken, C, last + 1);
+        out[id] = cell; taken[key(cell[0], cell[1])] = 1; last = cell[0] * C + cell[1];
+      });
+      return out;
+    }
+    function sorted(map) {
+      return Object.keys(map).sort(function (a, b) { return (map[a][0] - map[b][0]) || (map[a][1] - map[b][1]); });
+    }
+    return { cleanPos: cleanPos, clamp: clamp, resolve: resolve, sorted: sorted, nearest: nearest, MAXR: MAXR };
+  })();
+
   function readLocal() {
     try {
       var raw = localStorage.getItem(lsKey());
@@ -205,7 +303,8 @@
         return {
           ids: cleanList(v.ids),
           hidden: cleanList(v.hidden).filter(function (id) { return !isCore(id) && !isPinned(id); }),
-          folders: M.cleanFolders(v.folders).filter(function (f) { return f.items.length >= 2; })
+          folders: M.cleanFolders(v.folders).filter(function (f) { return f.items.length >= 2; }),
+          pos: F.cleanPos(v.pos)
         };
       }
     } catch (e) {}
@@ -213,10 +312,12 @@
   }
   function writeLocal() {
     try {
-      if ((!order || !order.length) && !hidden.length && !folders.length) localStorage.removeItem(lsKey());
+      var hasPos = Object.keys(pos).length > 0;
+      if ((!order || !order.length) && !hidden.length && !folders.length && !hasPos) localStorage.removeItem(lsKey());
       else {
         var v = { ids: order || [], hidden: hidden || [] };
         if (folders.length) v.folders = folders;
+        if (hasPos) v.pos = pos;
         localStorage.setItem(lsKey(), JSON.stringify(v));
       }
     } catch (e) {}
@@ -284,10 +385,15 @@
   function saveServer() {
     var base = { p_token: token(), p_ids: order || [], p_hidden: hidden || [] };
     var withF = { p_token: base.p_token, p_ids: base.p_ids, p_hidden: base.p_hidden, p_folders: folders };
-    // 4-arg (med mappar) finns efter migration 20261112b. Saknas den faller vi tillbaka på 3-arg; mapparna finns då kvar i localStorage.
-    return rpc('home_tool_order_set', withF).then(function (r) {
-      if (r == null && token() && !isDemo()) return rpc('home_tool_order_set', base);
-      return r;
+    var withP = { p_token: base.p_token, p_ids: base.p_ids, p_hidden: base.p_hidden, p_folders: folders, p_pos: pos };
+    // 5-arg (med positioner) finns efter migration 20261114c, 4-arg (mappar) efter 20261112b. Saknas de faller vi
+    // tillbaka; det som servern inte kan spara ligger kvar i localStorage.
+    return rpc('home_tool_order_set', withP).then(function (r) {
+      if (r != null || !token() || isDemo()) return r;
+      return rpc('home_tool_order_set', withF).then(function (r2) {
+        if (r2 == null && token() && !isDemo()) return rpc('home_tool_order_set', base);
+        return r2;
+      });
     });
   }
   function apply(res) {
@@ -337,8 +443,8 @@
       'display:none;align-items:center;justify-content:center;cursor:pointer;z-index:2;-webkit-tap-highlight-color:transparent}' +
       '.grid.td-ordna .icon[data-tool] .td-remove{display:inline-flex}' +
       '.icon[data-tool="moduler"] .emoji{color:var(--text,#e2e8f0)}' +
-      '.icon[data-tool="moduler"] .emoji svg{width:30px;height:30px;display:block;margin:0 auto}' +
-      'html[data-home="lista"] .icon[data-tool="moduler"] .emoji svg{width:24px;height:24px}' +
+      '.icon[data-tool="moduler"] .emoji svg{width:1em;height:1em;display:block;margin:0 auto}' +
+      'html[data-home="lista"] .icon[data-tool="moduler"] .emoji svg{width:1em;height:1em}' +
       '@keyframes td-wiggle{0%,100%{transform:rotate(-1.2deg)}50%{transform:rotate(1.2deg)}}' +
       '.grid.td-ordna .icon[data-tool]:not(.td-dragging){animation:td-wiggle .45s ease-in-out infinite}' +
       '.grid.td-ordna .td-folder:not(.td-ph){animation:td-wiggle .45s ease-in-out infinite}' +
@@ -388,13 +494,13 @@
       'background:rgba(148,163,184,.22);box-shadow:0 0 0 7px rgba(148,163,184,.22)}' +
       '.td-folder.td-drop-target .td-folder-ico{transform:scale(1.16);background:rgba(148,163,184,.3);box-shadow:none}' +
       /* Mappikonen: genomskinlig ruta med de fyra första ikonerna, som på Android */
-      '.icon.td-folder .td-folder-ico{width:42px;height:42px;margin:-6px 0 -2px;padding:4px;box-sizing:border-box;border-radius:14px;' +
-      'display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1px;place-items:center;font-size:15px;line-height:1;' +
+      '.icon.td-folder .td-folder-ico{width:calc(42px * var(--icon-k,1));height:calc(42px * var(--icon-k,1));margin:-6px 0 -2px;padding:4px;box-sizing:border-box;border-radius:14px;' +
+      'display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1px;place-items:center;font-size:calc(15px * var(--icon-k,1));line-height:1;' +
       'background:rgba(148,163,184,.16);box-shadow:inset 0 0 0 1px rgba(148,163,184,.26);' +
       '-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);transition:transform .14s ease-out}' +
       '.icon.td-folder .td-folder-ico.td-fn-2{grid-template-rows:1fr;font-size:16px}' +
       '.td-folder-ico .td-fmini{display:flex;align-items:center;justify-content:center;width:100%;height:100%;overflow:hidden}' +
-      '.td-folder-ico .td-fmini img,.td-folder-ico .td-fmini svg{width:15px;height:15px}' +
+      '.td-folder-ico .td-fmini img,.td-folder-ico .td-fmini svg{width:calc(15px * var(--icon-k,1));height:calc(15px * var(--icon-k,1))}' +
       '.icon.td-folder.td-open .td-folder-ico{opacity:.35}' +
       'html[data-home="lista"] .icon.td-folder .td-folder-ico{width:32px;height:32px;margin:0 11px 0 -1px;padding:2px;border-radius:9px;font-size:11px}' +
       'html[data-home="lista"] .td-folder-ico .td-fmini img,html[data-home="lista"] .td-folder-ico .td-fmini svg{width:11px;height:11px}' +
@@ -414,6 +520,9 @@
       '.td-mapp .td-mapp-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 4px;max-height:min(60vh,420px);overflow:auto;max-width:none}' +
       'html[data-home="lista"] .td-mapp .td-mapp-grid{grid-template-columns:1fr;gap:2px}' +
       'html[data-home="2"] .td-mapp .td-mapp-grid{grid-template-columns:repeat(2,minmax(0,1fr))}' +
+      '.grid.td-free{grid-auto-flow:row}' +
+      '.grid.td-free .td-cell-hit{border:2px solid var(--primary,#3182ce);background:rgba(49,130,206,.14);border-radius:12px;margin:3px;pointer-events:none;box-sizing:border-box}' +
+      '.grid.td-free .td-cell{border:1.5px dashed rgba(148,163,184,.38);border-radius:12px;margin:3px;pointer-events:none;box-sizing:border-box;min-height:0}' +
       '.td-mapp-tips{margin:6px 4px 0;font-size:calc(12px * min(var(--font-scale,1),1.2));line-height:1.3;color:var(--text-soft,#94a3b8);text-align:center}' +
       '.td-lp-menu .td-lp-top button.td-lp-ico.td-lp-unpack{color:inherit}' +
       '@media (prefers-reduced-motion:reduce){.td-mapp-box{animation:none}.icon.td-lifted .emoji,.icon.td-drop-target .emoji{transition:none}}' +
@@ -485,8 +594,12 @@
       if (folders.length && typeof window.confirm === 'function' &&
           !window.confirm('Återställ startskärmen? Mapparna tas bort och ikonerna läggs tillbaka i standardordning.')) return;
       folders = [];
+      pos = {};
       setState(null, []);
-      rpc('home_tool_order_set', { p_token: token(), p_ids: [], p_hidden: [], p_folders: [] }).then(function (r) {
+      rpc('home_tool_order_set', { p_token: token(), p_ids: [], p_hidden: [], p_folders: [], p_pos: {} }).then(function (r) {
+        if (r == null && token() && !isDemo()) return rpc('home_tool_order_set', { p_token: token(), p_ids: [], p_hidden: [], p_folders: [] });
+        return r;
+      }).then(function (r) {
         if (r == null && token() && !isDemo()) rpc('home_tool_order_set', { p_token: token(), p_ids: [], p_hidden: [] });
       });
       editing = false;
@@ -532,6 +645,151 @@
     try { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e2) { return false; }
   }
   function vibrate() { try { if (navigator.vibrate) navigator.vibrate(10); } catch (e) {} }
+
+  /* ---------- Fri placering: rutnätet på skärmen ---------- */
+  function freeOn() { return !isList(); }
+  function gridCols(grid) {
+    var t = String(getComputedStyle(grid).gridTemplateColumns || '').trim();
+    var n = t && t !== 'none' ? t.split(/\s+/).filter(function (s) { return /px$/.test(s); }).length : 0;
+    return Math.max(1, n || 1);
+  }
+  function cellOf(el) {
+    var r = parseInt(el.style.gridRowStart, 10), c = parseInt(el.style.gridColumnStart, 10);
+    return r > 0 && c > 0 ? [r - 1, c - 1] : null;
+  }
+  function setCell(el, cell) { el.style.gridRowStart = String(cell[0] + 1); el.style.gridColumnStart = String(cell[1] + 1); }
+  function domMap(grid, skip) {
+    var m = {};
+    gridTiles(grid).forEach(function (n) { var c = cellOf(n), id = tileId(n); if (n !== skip && c && id) m[id] = c; });
+    return m;
+  }
+  function takenOf(m) { var t = {}; Object.keys(m).forEach(function (id) { t[m[id][0] + ':' + m[id][1]] = 1; }); return t; }
+  function dropCells(grid) {
+    Array.prototype.forEach.call(grid.querySelectorAll('.td-cell'), function (n) { if (n.parentNode) n.parentNode.removeChild(n); });
+  }
+  function clearFree(grid) {
+    grid.classList.remove('td-free');
+    grid.style.gridAutoRows = '';
+    gridTiles(grid).forEach(function (n) { n.style.gridRowStart = ''; n.style.gridColumnStart = ''; });
+    dropCells(grid);
+    freeNow = null;
+  }
+  function layoutFree(grid) {
+    if (!grid) return;
+    clearFree(grid);
+    if (!freeOn()) return;
+    var tiles = gridTiles(grid);
+    if (!tiles.length) return;
+    var C = gridCols(grid), h = 0;
+    tiles.forEach(function (n) { h = Math.max(h, n.offsetHeight || 0); });
+    var map = F.resolve(tiles.map(tileId), C, pos);
+    tiles.forEach(function (n) { var c = map[tileId(n)]; if (c) setCell(n, c); });
+    grid.classList.add('td-free');
+    if (h) grid.style.gridAutoRows = h + 'px';   // tomma rader behåller höjden
+    freeNow = { C: C, grid: grid };
+    showCells(grid);
+  }
+  // Lediga rutor visas streckade i ändringsläget och medan man drar (plus en tom rad under).
+  function showCells(grid) {
+    dropCells(grid);
+    if (!freeNow || freeNow.grid !== grid || (!editing && !(dg && dg.dragging))) return;
+    var C = freeNow.C, m = domMap(grid), taken = takenOf(m), maxR = 0;
+    Object.keys(m).forEach(function (id) { maxR = Math.max(maxR, m[id][0]); });
+    for (var r = 0; r <= maxR + 1; r++) {
+      for (var c = 0; c < C; c++) {
+        if (taken[r + ':' + c]) continue;
+        var d = document.createElement('div');
+        d.className = 'td-cell';
+        d.setAttribute('aria-hidden', 'true');
+        setCell(d, [r, c]);
+        grid.appendChild(d);
+      }
+    }
+  }
+  function cellAt(grid, x, y) {
+    if (!freeNow || freeNow.grid !== grid) return null;
+    var r = grid.getBoundingClientRect(), cs = getComputedStyle(grid);
+    var cols = String(cs.gridTemplateColumns || '').trim().split(/\s+/).map(parseFloat).filter(function (v) { return v >= 0; });
+    if (!cols.length) return null;
+    var cg = parseFloat(cs.columnGap) || 0, rg = parseFloat(cs.rowGap) || 0;
+    var rowH = parseFloat(grid.style.gridAutoRows) || 72;
+    var cx = x - r.left - (parseFloat(cs.paddingLeft) || 0), cy = y - r.top - (parseFloat(cs.paddingTop) || 0);
+    var c = 0, acc = 0;
+    for (c = 0; c < cols.length - 1; c++) { acc += cols[c] + cg; if (cx < acc - cg / 2) break; }
+    var m = domMap(grid), maxR = 0;
+    Object.keys(m).forEach(function (id) { maxR = Math.max(maxR, m[id][0]); });
+    var row = Math.floor((cy + rg / 2) / (rowH + rg));
+    row = Math.max(0, Math.min(row, maxR + 1, F.MAXR - 1));
+    return [row, Math.max(0, Math.min(c, cols.length - 1))];
+  }
+  // Under dragningen flyttas inget: målrutan markeras, och ikonen läggs där när man släpper
+  // (står något där byter de plats). Då hoppar inga ikoner undan när man bara passerar.
+  function freeHover(grid, x, y) {
+    var cell = cellAt(grid, x, y), cur = cellOf(dg.el);
+    if (cell && cur && cell[0] === cur[0] && cell[1] === cur[1]) cell = null;
+    dg.freeCell = cell;
+    var hit = grid.querySelector('.td-cell-hit');
+    if (!cell) { if (hit && hit.parentNode) hit.parentNode.removeChild(hit); return; }
+    if (!hit) { hit = document.createElement('div'); hit.className = 'td-cell-hit'; hit.setAttribute('aria-hidden', 'true'); grid.appendChild(hit); }
+    setCell(hit, cell);
+  }
+  function clearHit(grid) {
+    var hit = grid && grid.querySelector('.td-cell-hit');
+    if (hit && hit.parentNode) hit.parentNode.removeChild(hit);
+    if (dg) dg.freeCell = null;
+  }
+  function moveToCell(grid, el, cell) {
+    var cur = cellOf(el), occ = null;
+    gridTiles(grid).forEach(function (n) { var c = cellOf(n); if (n !== el && c && c[0] === cell[0] && c[1] === cell[1]) occ = n; });
+    if (occ) setCell(occ, cur || F.nearest(takenOf(domMap(grid, occ)), cell[0], cell[1], freeNow.C));
+    setCell(el, cell);
+  }
+  function savePos(m) {
+    if (!freeNow) return;
+    var o = {}; o[String(freeNow.C)] = m;
+    var clean = F.cleanPos(o)[String(freeNow.C)] || {};
+    pos[String(freeNow.C)] = clean;
+    if (!Object.keys(clean).length) delete pos[String(freeNow.C)];
+  }
+  function placeNear(m, ids, cell) {
+    if (!freeNow || !cell) return;
+    var taken = takenOf(m);
+    ids.forEach(function (it) {
+      if (m[it]) return;
+      var c = F.nearest(taken, cell[0], cell[1], freeNow.C);
+      m[it] = c; taken[c[0] + ':' + c[1]] = 1;
+    });
+  }
+  // Efter en ändring av mappar: upplöst mapp -> verktygen tar mappens ruta (och närmaste lediga),
+  // borttagna id glöms. m = rutorna före ändringen.
+  function syncPos(m, oldFolders, res) {
+    if (!freeNow || !m || !res) return;
+    var top = res.top || [];
+    (oldFolders || []).forEach(function (f) {
+      if (!m[f.id] || top.indexOf(f.id) >= 0) return;
+      var cell = m[f.id];
+      delete m[f.id];
+      placeNear(m, f.items.filter(function (i) { return top.indexOf(i) >= 0; }), cell);
+    });
+    Object.keys(m).forEach(function (id) { if (top.indexOf(id) < 0) delete m[id]; });
+    savePos(m);
+  }
+  function resetPositions() {
+    pos = {};
+    if (freeNow && freeNow.grid) clearFree(freeNow.grid);
+    writeLocal();
+    saveServer();
+  }
+  var rsT = 0;
+  window.addEventListener('resize', function () {
+    clearTimeout(rsT);
+    rsT = setTimeout(function () {
+      var g = homeGrid();
+      if (!g || dg) return;
+      if (!freeOn()) { if (freeNow) clearFree(g); return; }
+      layoutFree(g);   // kolumnantalet kan ha ändrats (vridning, Fyll bredd)
+    }, 150);
+  });
 
   /* ---------- Mappar på startskärmen ---------- */
   function store() {
@@ -692,7 +950,10 @@
   }
   function unpack(id) {
     closeFolder();
-    apply(M.unpackFolder(currentTop(), folders, id));
+    var m = freeNow ? domMap(freeNow.grid) : null, old = JSON.parse(JSON.stringify(folders));
+    var res = M.unpackFolder(currentTop(), folders, id);
+    syncPos(m, old, res);
+    apply(res);
     persist();
     rerender();
   }
@@ -700,7 +961,11 @@
     var f = M.folderOf(folders, id);
     closeFolder();
     if (!f) return;
-    apply(M.removeFromFolder(currentTop(), folders, id));
+    var m = freeNow ? domMap(freeNow.grid) : null, old = JSON.parse(JSON.stringify(folders)), fc = m && m[f.id];
+    var res = M.removeFromFolder(currentTop(), folders, id);
+    if (m && fc) placeNear(m, [id], fc);
+    syncPos(m, old, res);
+    apply(res);
     persist();
     rerender();
   }
@@ -810,6 +1075,7 @@
     dg.offY = dg.y0 - r.top;
     dg.el.classList.remove('td-lifted');
     dg.el.classList.add('td-ph');
+    if (freeNow && dg.zone === 'grid') showCells(freeNow.grid);
     autoScroll();
   }
   function placeGhost() {
@@ -820,7 +1086,7 @@
   function inside(r, x, y, pad) { pad = pad || 0; return x >= r.left - pad && x <= r.right + pad && y >= r.top - pad && y <= r.bottom + pad; }
   function isList() { return document.documentElement.getAttribute('data-home') === 'lista'; }
   function flip(container, fn) {
-    var kids = Array.prototype.filter.call(container.children, function (n) { return n !== dg.el && n.nodeType === 1; });
+    var kids = Array.prototype.filter.call(container.children, function (n) { return n !== dg.el && n.nodeType === 1 && !(n.classList && (n.classList.contains('td-cell') || n.classList.contains('td-cell-hit'))); });
     var before = kids.map(function (n) { return n.getBoundingClientRect(); });
     fn();
     if (animOff()) return;
@@ -889,7 +1155,7 @@
     var wrap = grid.parentNode && grid.parentNode.classList && grid.parentNode.classList.contains('td-grid-wrap') ? grid.parentNode : grid;
     dg.outside = !inside(wrap.getBoundingClientRect(), x, y, 28);
     if (dg.ghost) dg.ghost.classList.toggle('td-ghost-off', dg.outside);
-    if (dg.outside) { clearTarget(); clearTimeout(dg.rTimer); dg.rKey = null; return; }
+    if (dg.outside) { clearTarget(); clearTimeout(dg.rTimer); dg.rKey = null; clearHit(grid); return; }
     var tiles = gridTiles(grid).filter(function (n) { return n !== dg.el; });
     // mitt på en ikon = mapp-mål (inte för mappar: inga mappar i mappar;
     // Moduler stannar på startskärmen, så varken den eller målet bildar mapp med den)
@@ -902,6 +1168,7 @@
     }
     if (cand) {
       clearTimeout(dg.rTimer); dg.rKey = null;
+      clearHit(grid);
       if (dg.target === cand || dg.tCand === cand) return;
       clearTarget();
       dg.tCand = cand;
@@ -914,7 +1181,8 @@
       return;
     }
     clearTarget();
-    reorderIn(grid, tiles, x, y);
+    if (freeNow && freeNow.grid === grid) freeHover(grid, x, y);
+    else reorderIn(grid, tiles, x, y);
   }
   function leaveFolder() {
     if (!dg) return;
@@ -925,6 +1193,11 @@
     dg.zone = 'grid';
     if (grid && tile && tile.parentNode === grid) grid.insertBefore(dg.el, tile.nextSibling);
     else if (grid) grid.appendChild(dg.el);
+    if (grid && freeNow && freeNow.grid === grid) {
+      var fc = (tile && cellOf(tile)) || [0, 0];
+      setCell(dg.el, F.nearest(takenOf(domMap(grid, dg.el)), fc[0], fc[1], freeNow.C));
+      showCells(grid);
+    }
     hitTest();
   }
   function autoScroll() {
@@ -990,11 +1263,23 @@
     } else if (d.zone === 'folder' && isPinned(d.id)) {
       res = M.placeTop(currentTop(), folders, d.id, topIdsFromDom(homeGrid()));
     } else if (d.zone === 'grid' && d.target && !isPinned(d.id) && !isPinned(tileId(d.target))) {
-      var tid = tileId(d.target);
-      if (M.isFolderId(tid)) res = M.addToFolder(currentTop(), folders, d.id, tid);
-      else res = M.createFolder(currentTop(), folders, d.id, tid, newFolderId(), DEFAULT_NAME);
+      var tid = tileId(d.target), g1 = homeGrid(), fm = freeNow && g1 ? domMap(g1, d.el) : null, old1 = JSON.parse(JSON.stringify(folders));
+      var top1 = currentTop();
+      if (M.isFolderId(tid)) res = M.addToFolder(top1, folders, d.id, tid);
+      else res = M.createFolder(top1, folders, d.id, tid, newFolderId(), DEFAULT_NAME);
+      if (fm) {
+        var nid = (res.top || []).filter(function (x) { return M.isFolderId(x) && top1.indexOf(x) < 0; })[0];
+        if (nid && fm[tid]) { fm[nid] = fm[tid]; delete fm[tid]; }   // nya mappen tar målets ruta
+        syncPos(fm, old1, res);
+      }
     } else if (d.zone === 'grid') {
-      res = M.placeTop(currentTop(), folders, d.id, topIdsFromDom(homeGrid()));
+      var g2 = homeGrid();
+      if (freeNow && g2 && freeNow.grid === g2) {
+        if (d.freeCell) moveToCell(g2, d.el, d.freeCell);
+        var m2 = domMap(g2), old2 = JSON.parse(JSON.stringify(folders));
+        res = M.placeTop(currentTop(), folders, d.id, F.sorted(m2));
+        syncPos(m2, old2, res);
+      } else res = M.placeTop(currentTop(), folders, d.id, topIdsFromDom(homeGrid()));
     } else if (d.zone === 'folder' && openF) {
       res = M.reorderInFolder(currentTop(), folders, d.from, Array.prototype.map.call(openF.grid.children, tileId));
       reopen = d.from;
@@ -1166,7 +1451,10 @@
     if (hidden.indexOf(id) < 0) hidden.push(id);
     if (f && openF && openF.id === f.id) reopen = f.id;
     closeFolder();
-    apply(M.removeTool(currentTop(), folders, id));
+    var m = freeNow ? domMap(freeNow.grid) : null, old = JSON.parse(JSON.stringify(folders));
+    var res = M.removeTool(currentTop(), folders, id);
+    syncPos(m, old, res);
+    apply(res);
     persist();
     rerender();
     if (reopen && M.find(folders, reopen)) openFolder(reopen);
@@ -1225,6 +1513,7 @@
     });
     buildFolders(grid);
     grid.classList.toggle('td-ordna', editing);
+    layoutFree(grid);
     bindPointer();
     syncChrome(content);
     if (reopen && M.find(folders, reopen)) openFolder(reopen);
@@ -1251,6 +1540,7 @@
       order = local.ids.length ? local.ids : null;
       hidden = local.hidden || [];
       folders = local.folders || [];
+      pos = local.pos || {};
     }
     rpc('home_tool_order_get', { p_token: token() }).then(function (r) {
       if (!r) return;
@@ -1258,6 +1548,9 @@
       var hid = r.hidden;
       var fs = r.folders;
       var hasF = Array.isArray(fs);
+      var hasP = r.pos && typeof r.pos === 'object' && !Array.isArray(r.pos);
+      var nextP = hasP ? F.cleanPos(r.pos) : pos;
+      if (hasP && !Object.keys(nextP).length && Object.keys(pos).length) nextP = pos;   // gjort innan servern kunde spara
       if (ids == null && (hid == null || (Array.isArray(hid) && !hid.length)) && !(hasF && fs.length)) return;
       var nextIds = Array.isArray(ids) ? cleanList(ids) : (order || []);
       var nextHid = Array.isArray(hid) ? cleanList(hid).filter(function (id) { return !isCore(id) && !isPinned(id); }) : hidden;
@@ -1270,7 +1563,10 @@
       }
       var same = JSON.stringify(nextIds) === JSON.stringify(order || []) &&
         JSON.stringify(nextHid) === JSON.stringify(hidden || []) &&
-        JSON.stringify(nextF) === JSON.stringify(folders || []);
+        JSON.stringify(nextF) === JSON.stringify(folders || []) &&
+        JSON.stringify(nextP) === JSON.stringify(pos);
+      if (hasP && nextP === pos && Object.keys(pos).length && !Object.keys(F.cleanPos(r.pos)).length) pushLocal = true;
+      pos = nextP;
       setState(nextIds.length ? nextIds : null, nextHid, nextF);
       if (pushLocal) saveServer();
       var onHome = !!(document.querySelector('#app.is-home .grid .icon') && !document.querySelector('.vd, .td-hjalp-panel.open'));
@@ -1307,8 +1603,12 @@
     closeFolder: closeFolder,
     unpackFolder: unpack,
     model: M,
+    free: F,
+    positions: function () { return JSON.parse(JSON.stringify(pos)); },
+    resetPositions: resetPositions,
+    freeLayout: function () { return freeNow ? { C: freeNow.C, map: domMap(freeNow.grid) } : null; },
     LIFT_MS: LIFT_MS,
-    preview: function (ids, hid, fs) { setState(ids, hid || [], fs === undefined ? [] : fs); }
+    preview: function (ids, hid, fs, p) { if (p !== undefined) pos = F.cleanPos(p); setState(ids, hid || [], fs === undefined ? [] : fs); }
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load);

@@ -2,13 +2,15 @@
    före stilmallarna, så att rätt färger och storlek gäller redan vid första målningen (ingen vit blixt).
    localStorage: taxi_theme = 'light' | 'dark' | 'auto' (standard auto = följ telefonen)
                  taxi_text_size = '90' | '100' | '115' | '130' (procent, standard 100)
-                 taxi_home_layout = 'fyll' | '2' | '3' | 'lista' (Startskärm, gäller även adminmenyn).
+                 taxi_home_layout = 'fyll' | '2' | '3' | '4' | 'lista' (Startskärm, gäller även adminmenyn).
+                 taxi_icon_size = 'sma' | 'stora' (Ikonstorlek, standard sma = samma storlek som förut; stora = 1,25x).
+                   Oberoende av textstorleken: html[data-icons="stora"] sätter --icon-k i tema.css (2026-11-14fri1).
    Utan sparat val, eller 'fyll': samma som tidigare osatt läge (auto-fill på stor skärm, 3 i bredd på telefon). */
 (function () {
   var root = document.documentElement;
   var mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
   var THEMES = ['light', 'dark', 'auto'], SIZES = ['90', '100', '115', '130'];
-  var LAYOUT_FIXED = ['2', '3', 'lista'], LAYOUTS = ['fyll', '2', '3', 'lista'];
+  var LAYOUT_FIXED = ['2', '3', '4', 'lista'], LAYOUTS = ['fyll', '2', '3', '4', 'lista'], ICONS = ['sma', 'stora'];
   var META = { light: '#ffffff', dark: '#0f1720' };
   function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function put(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -36,7 +38,12 @@
     if (LAYOUT_FIXED.indexOf(v) >= 0) root.setAttribute('data-home', v);
     else root.removeAttribute('data-home');
   }
-  function applyAll() { applyTheme(); applySize(); applyLayout(); }
+  function getIcons() { var v = get('taxi_icon_size'); return ICONS.indexOf(v) >= 0 ? v : 'sma'; }
+  function applyIcons() {
+    if (getIcons() === 'stora') root.setAttribute('data-icons', 'stora');
+    else root.removeAttribute('data-icons');
+  }
+  function applyAll() { applyTheme(); applySize(); applyLayout(); applyIcons(); }
   applyAll();
   if (mq) {
     var onChange = function () { if (getTheme() === 'auto') applyTheme(); };
@@ -44,13 +51,15 @@
   }
   // Ändring i en annan flik (t.ex. admin öppen samtidigt) slår igenom direkt.
   window.addEventListener('storage', function (e) {
-    if (!e.key || e.key === 'taxi_theme' || e.key === 'taxi_text_size' || e.key === 'taxi_home_layout') applyAll();
+    if (!e.key || e.key === 'taxi_theme' || e.key === 'taxi_text_size' || e.key === 'taxi_home_layout' || e.key === 'taxi_icon_size') applyAll();
   });
   // meta theme-color kan stå senare i <head> än detta skript: sätt om när sidan är tolkad.
   document.addEventListener('DOMContentLoaded', applyTheme);
   window.TEMA = {
     getTheme: getTheme, getSize: getSize, resolved: resolved,
     getLayout: getLayout,
+    getIcons: getIcons,
+    setIcons: function (v) { if (ICONS.indexOf(v) < 0) return; put('taxi_icon_size', v); applyIcons(); },
     setTheme: function (v) { if (THEMES.indexOf(v) < 0) return; put('taxi_theme', v); applyTheme(); },
     setSize: function (v) { v = String(v); if (SIZES.indexOf(v) < 0) return; put('taxi_text_size', v); applySize(); },
     setLayout: function (v) {

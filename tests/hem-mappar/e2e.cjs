@@ -191,6 +191,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   ok('ingen sidbyte under dragning', await p.evaluate(() => document.querySelector('#title').textContent === 'TaxiData'));
 
   // Dra ut en till: bara en kvar -> mappen löses upp
+  const fcell = await p.evaluate(id => { const l = HEM_ORDNING.freeLayout(); return l ? l.map[id] : null; }, folder.id);   // fri placering (2026-11-14fri1)
   await p.click('#app .grid .td-folder'); await sleep(250);
   const inB = await center(p, `#td-mapp .icon[data-tool="${B}"] .emoji`);
   const box2 = await center(p, '#td-mapp .td-mapp-box');
@@ -198,7 +199,9 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   let t3 = await top(p);
   st = await stored(p);
   ok('sista ikonen kvar -> mappen löses upp', !(st.folders || []).length && !t3.some(x => /^mapp-/.test(x)) && t3.includes(D) && t3.includes(B), t3.join(',') + ' ' + JSON.stringify(st));
-  ok('upplöst ikon tar mappens plats', t3.indexOf(D) === t2.indexOf(folder.id) + 1 && t3[t3.indexOf(D) - 1] === t2[t2.indexOf(folder.id) - 1], t3.join(','));
+  // Fri placering (2026-11-14fri1): sista ikonen tar mappens ruta (släpp på en upptagen ruta byter plats i stället för att skjuta på).
+  const dcell = await p.evaluate(id => { const l = HEM_ORDNING.freeLayout(); return l ? l.map[id] : null; }, D);
+  ok('upplöst ikon tar mappens plats', fcell && JSON.stringify(dcell) === JSON.stringify(fcell), JSON.stringify({ fcell, dcell }) + ' ' + t3.join(','));
   ok('utdragen B först', t3[0] === B, t3.join(','));
 
   // Gör ny mapp, ta bort mapp via håll-in-menyn

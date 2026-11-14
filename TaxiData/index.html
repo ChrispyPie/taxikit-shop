@@ -39,6 +39,8 @@
     .hl-prev i { display: block; background: var(--c-a0aec0); border-radius: 2px; height: 8px; }
     .hl-prev.c2 { grid-template-columns: repeat(2, 1fr); } .hl-prev.c2 i { height: 12px; }
     .hl-prev.c3 { grid-template-columns: repeat(3, 1fr); }
+    .hl-prev.c4 { grid-template-columns: repeat(4, 1fr); } .hl-prev.c4 i { height: 6px; }
+    .is-prev { margin-left: auto; width: 40px; text-align: center; line-height: 1; flex-shrink: 0; }
     .hl-prev.cl { grid-template-columns: 1fr; } .hl-prev.cl i { height: 5px; }
     .hl-prev.cf { grid-template-columns: repeat(4, 1fr); } .hl-prev.cf i { height: 7px; }
     .th-prev { margin-left: auto; width: 34px; height: 22px; border-radius: 5px; border: 1px solid var(--border); flex-shrink: 0; }
@@ -531,23 +533,26 @@
       { v: 'fyll', label: 'Fyll bredd (stor skärm)', prev: 'cf', n: 8 },
       { v: '2', label: 'Stora rutor (2 i bredd)', prev: 'c2', n: 4 },
       { v: '3', label: 'Mellan (3 i bredd)', prev: 'c3', n: 6 },
+      { v: '4', label: 'Tätt (4 i bredd)', prev: 'c4', n: 8 },
       { v: 'lista', label: 'Lista', prev: 'cl', n: 4 }
     ];
     function getHomeLayout() {
       if (window.TEMA && TEMA.getLayout) return TEMA.getLayout();
       var v = null; try { v = localStorage.getItem('taxi_home_layout'); } catch (e) {}
-      if (v === '2' || v === '3' || v === 'lista') return v;
+      if (v === '2' || v === '3' || v === '4' || v === 'lista') return v;
       return 'fyll';
     }
     function setHomeLayout(v) {
+      // Nytt val sorterar ikonerna en gång (fri placering nollställs), sedan kan de flyttas fritt igen (2026-11-14fri1).
+      if (window.HEM_ORDNING && HEM_ORDNING.resetPositions) HEM_ORDNING.resetPositions();
       if (window.TEMA && TEMA.setLayout) { TEMA.setLayout(v); return; }
       try { localStorage.setItem('taxi_home_layout', v); } catch (e) {}
-      if (v === '2' || v === '3' || v === 'lista') document.documentElement.setAttribute('data-home', v);
+      if (v === '2' || v === '3' || v === '4' || v === 'lista') document.documentElement.setAttribute('data-home', v);
       else document.documentElement.removeAttribute('data-home');
     }
     function renderHomeLayoutSetting(box) {
       var cur = getHomeLayout(), h = '<div class="section"><h3 style="margin-top:0">Startskärm</h3>' +
-        '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">Välj hur knapparna på startsidan (och i adminmenyn) ska visas.</p><div class="hl-opts" role="radiogroup">';
+        '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">Välj hur knapparna på startsidan (och i adminmenyn) ska visas. Ett nytt val sorterar ikonerna; sedan kan du hålla in och flytta dem till valfri ruta igen.</p><div class="hl-opts" role="radiogroup">';
       HOME_LAYOUTS.forEach(function (o) {
         h += '<label class="hl-opt' + (o.v === cur ? ' on' : '') + '"><input type="radio" name="home-layout" value="' + o.v + '"' + (o.v === cur ? ' checked' : '') + '>' +
           '<span>' + o.label + '</span><span class="hl-prev ' + o.prev + '" aria-hidden="true">' + new Array(o.n + 1).join('<i></i>') + '</span></label>';
@@ -595,6 +600,17 @@
       if (!window.TEMA) return;
       renderChoiceSetting(box, 'Textstorlek', 'Gör texten i appen mindre eller större.', 'text-size', SIZE_OPTS, TEMA.getSize(),
         function (o) { return '<span class="ts-prev" aria-hidden="true" style="font-size:' + (15 * parseInt(o.v, 10) / 100) + 'px">Aa</span>'; }, TEMA.setSize);
+    }
+
+    // Ikonstorlek (2026-11-14fri1): Små = som förut, Stora = 1,25x. Oberoende av Textstorlek.
+    var ICON_OPTS = [
+      { v: 'sma', label: 'Små' },
+      { v: 'stora', label: 'Stora' }
+    ];
+    function renderIconSizeSetting(box) {
+      if (!window.TEMA || !TEMA.getIcons) return;
+      renderChoiceSetting(box, 'Ikonstorlek', 'Gör ikonerna på startskärmen större eller mindre. Textstorleken ändras inte.', 'icon-size', ICON_OPTS, TEMA.getIcons(),
+        function (o) { return '<span class="is-prev" aria-hidden="true" style="font-size:' + (o.v === 'stora' ? 28 : 22) + 'px">🚗</span>'; }, TEMA.setIcons);
     }
 
     function showToast(msg) {
@@ -986,10 +1002,11 @@
       } else if (current === 'installningar') {
         title.textContent = 'Inställningar';
         content.onclick = null;
-        content.innerHTML = '<div id="home-layout-set"></div><div id="theme-set"></div><div id="text-size-set"></div><div id="animationer-set"></div><div id="delad-enhet-set"></div><div id="hb-set"></div>';
+        content.innerHTML = '<div id="home-layout-set"></div><div id="theme-set"></div><div id="text-size-set"></div><div id="icon-size-set"></div><div id="animationer-set"></div><div id="delad-enhet-set"></div><div id="hb-set"></div>';
         renderHomeLayoutSetting(document.getElementById('home-layout-set'));
         renderThemeSetting(document.getElementById('theme-set'));
         renderTextSizeSetting(document.getElementById('text-size-set'));
+        renderIconSizeSetting(document.getElementById('icon-size-set'));
         if (window.ANIMATIONER) ANIMATIONER.renderSettings(document.getElementById('animationer-set'));
         if (window.DELAD) DELAD.renderSettings(document.getElementById('delad-enhet-set'));
         if (window.HJALPBOT) window.HJALPBOT.renderSettings(document.getElementById('hb-set'));
