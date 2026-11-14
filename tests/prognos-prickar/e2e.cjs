@@ -27,8 +27,8 @@ const ok = (n, c, e) => { if (!c) { fails.push(n + (e ? ': ' + e : '')); console
 {
   const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
   const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
-  ok('cache prognos.js', /prognos\.js\?v=(20261113prick2|20261113barn1|20261113sedd1|20261113hem1|20261113avs1)/.test(lv));
-  ok('cache lazy-views.js', /lazy-views\.js\?v=(20261113prick2|20261113barn1|20261113sedd1|20261113hem1|20261113avs1)/.test(fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8')));
+  ok('cache prognos.js', /prognos\.js\?v=(20261113prick2|20261113barn1|20261113sedd1|20261113hem1|20261113avs1|20261114kp1)/.test(lv));
+  ok('cache lazy-views.js', /lazy-views\.js\?v=(20261113prick2|20261113barn1|20261113sedd1|20261113hem1|20261113avs1|20261114kp1)/.test(fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8')));
   const pj = fs.readFileSync(path.join(root, 'TaxiData/prognos.js'), 'utf8');
   ok('kundtid-testet borta ur Prognos', !/pg-kt-btn|ktBar|rpc\('sadmin_kundtid_get'/.test(pj) && /function ktApply\(list\) \{ return list; \}/.test(pj));
   const e = cl.split("id: '2026-11-13prick2'")[1].split(']},')[0];

@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-14', id: '2026-11-14kp1', tid: '07:04', rader: [
+    ['Fixat', 'Körpassdata, dagsvyn: nattpass räknades på två dagar, så det kunde stå 25 arbetade timmar på ett dygn (och för mycket inkört). Nu räknas varje pass bara på dagen det startade, som i vecka och månad. Nattpasset från kvällen innan visas fortfarande i listan, med datum.']
+  ]},
   { datum: '2026-11-13', id: '2026-11-13avs1', tid: '02:13', rader: [
     ['Fixat', 'Ärenden: rätt avsändare på svaren. Förut stod det Du på alla svar från någon med ägarroll, även när någon annan hade skrivit dem. Nu står Du bara på det du själv skrivit, och annars personens namn.']
   ]},
