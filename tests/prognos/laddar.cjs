@@ -17,9 +17,9 @@ const md = fs.readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8');
 
 assert.doesNotMatch(js, /\bStig\b/);
 assert.doesNotMatch(cl, /\bStig\b/);
-assert.match(lv, /prognos\.js\?v=(20261112pgfix1|20261113skroll1|20261113chatt1|20261113prick2|20261113barn1|20261113sedd1|20261113hem1|20261113avs1|20261114kp1)/);
-assert.match(html, /lazy-views\.js\?v=(20261112pgfix1|20261113mod2|20261113lasbar1|20261113skroll1|20261113chatt1|20261113prick2|20261113barn1|20261113sedd1|20261113hem1|20261113avs1|20261114kp1)/);
-assert.match(lv, /changelog\.js\?v=(20261112pgfix1|20261113mod2|20261113lasbar1|20261113skroll1|20261113chatt1|20261113prick2|20261113barn1|20261113sedd1|20261113hem1|20261113avs1|20261114kp1)/);
+assert.match(lv, /prognos\.js\?v=(20261112pgfix1|20261113skroll1|20261113chatt1|20261113prick2|20261113barn1|20261113sedd1|20261113hem1|20261113avs1|20261114kp1|20261114mal1|20261114arfel1|20261114sem1|20261114skatt1|20261114kvar1)/);
+assert.match(html, /lazy-views\.js\?v=(20261112pgfix1|20261113mod2|20261113lasbar1|20261113skroll1|20261113chatt1|20261113prick2|20261113barn1|20261113sedd1|20261113hem1|20261113avs1|20261114kp1|20261114mal1|20261114arfel1|20261114sem1|20261114skatt1|20261114kvar1)/);
+assert.match(lv, /changelog\.js\?v=(20261112pgfix1|20261113mod2|20261113lasbar1|20261113skroll1|20261113chatt1|20261113prick2|20261113barn1|20261113sedd1|20261113hem1|20261113avs1|20261114kp1|20261114mal1|20261114arfel1|20261114sem1|20261114skatt1|20261114kvar1)/);
 assert.match(cl, /2026-11-12pgfix1/);
 assert.match(md, /Laddar verktyget/);
 assert.match(js, /function onPage\(\) \{\s*return !!st\.el && st\.el\.isConnected && !!badge\.viewing;/);

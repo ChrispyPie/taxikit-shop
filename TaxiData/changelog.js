@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-14', id: '2026-11-14kvar1', tid: '14:32', rader: [
+    ['Fixat', 'Prognos: prickarna för ny aktivitet försvann ibland redan när du öppnade Prognos, till exempel om rutan trycktes två gånger. Nu syns prickarna på alla zoner och bokningar med nytt när du öppnar Prognos, och de ligger kvar medan du tittar. En zons prickar försvinner först när du har haft zonen öppen och sedan lämnar den (byter zon, flik, går ur Prognos eller stänger appen).']
+  ]},
   { datum: '2026-11-14', id: '2026-11-14mal1', tid: '14:22', rader: [
     ['Fixat', 'Körpassdata: ditt mål sparas nu på ditt konto och i telefonen, så det hoppar inte tillbaka till 100 000 kr i månaden när du öppnar appen igen.']
   ]},
