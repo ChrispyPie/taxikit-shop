@@ -23,7 +23,7 @@ window.OM_DATA = {
     { q: 'Vad loggas när jag använder appen?',
       a: 'Inloggningar och ändringar loggas med IP-adress och enhet för säkerhetens skull. Loggen sparas i 13 månader. Loggen visar till exempel när någon loggar in, byter lösenord eller ändrar uppgifter. Den används bara för att upptäcka och utreda missbruk. Enheten är ett slumpat nummer som appen sparar i telefonen, inte telefonens namn eller nummer.' },
     { q: 'Hur räknar Lönekoll ut min lön?',
-      a: 'Lönekoll tar det du kört in i månaden, drar bort BOM, moms och avgifter och räknar sedan provision, semesterersättning och skatt, på samma sätt som lönebeskedet. Procent och avdrag kan du ändra själv. Det är en uppskattning, lönebeskedet gäller. Obs: rättade kvitton från Taxi Göteborg kommer in den 16:e varje månad, så lönen här kan visa lite fel fram till dess.' },
+      a: 'Lönekoll tar det du kört in i månaden, drar bort BOM, moms och avgifter och räknar sedan provision, semesterersättning och skatt, på samma sätt som lönebeskedet. Skatten tas från Skatteverkets skattetabell för 2026 och anpassas efter hur hög bruttolönen är den månaden. Tabell och kolumn, eller en fast procent, och övriga avdrag kan du ändra själv. Det är en uppskattning, lönebeskedet gäller. Obs: rättade kvitton från Taxi Göteborg kommer in den 16:e varje månad, så lönen här kan visa lite fel fram till dess.' },
     { q: 'Var kommer mina pass och resor ifrån?',
       a: 'De hämtas automatiskt från servern, samma system som taxametern skickar till. Du behöver inte skriva in något själv.' },
     { q: 'Hur ofta uppdateras siffrorna?',

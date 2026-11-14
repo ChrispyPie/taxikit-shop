@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-14', id: '2026-11-14skatt1', rader: [
+    ['Fixat', 'Lönekoll räknar nu preliminärskatten från Skatteverkets skattetabell för 2026, utifrån hur hög bruttolönen är den månaden. Förut användes en fast skatt på 21 procent för alla, vilket blev för hög skatt vid lägre lön och för låg vid högre. Välj din tabell och kolumn under Inställningar (numret står på lönebeskedet; i Göteborg är det oftast 33, eller 34 om du betalar kyrkoavgift). Du kan fortfarande välja en fast procent om du vill.']
+  ]},
   { datum: '2026-11-14', id: '2026-11-14kp1', tid: '07:04', rader: [
     ['Fixat', 'Körpassdata, dagsvyn: nattpass räknades på två dagar, så det kunde stå 25 arbetade timmar på ett dygn (och för mycket inkört). Nu räknas varje pass bara på dagen det startade, som i vecka och månad. Nattpasset från kvällen innan visas fortfarande i listan, med datum.']
   ]},
