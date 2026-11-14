@@ -37,8 +37,9 @@
     lonekoll: [
       'Lönekoll är ett underlag för lön, utifrån godkänd tid.',
       'Det är en kontroll, inte den färdiga lönen.',
-      'Siffrorna hämtas från servern.',
-      'Hör med din åkare om något ser fel ut.'
+      'Skatten tas från Skatteverkets tabell och följer hur mycket du tjänat den månaden. Tabellnumret står på lönebeskedet.',
+      'Semesterersättningen är förvalt inbakad i månadslönen. Under Inställningar kan du välja att räkna utan den, om den betalas ut separat. Då visas intjänad semester för månaden och totalt för den period det finns kördata för.',
+      'Siffrorna hämtas från servern. Hör med din åkare om något ser fel ut.'
     ],
     ankomster: [
       'Här ser du tåg till Göteborg C, flyg till Landvetter och Stena-båtar till Göteborg.',
