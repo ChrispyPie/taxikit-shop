@@ -1,9 +1,10 @@
-/* Topplistor + Rekordtavlan (2026-11-06).
+/* Topplistor + Rekordtavlan (2026-11-06, Bil öppen 2026-11-14).
  *
  * Växel Topplista | Rekord. Samma mått i båda. Period = aktuell period i Topplista,
  * respektive varje förares bästa sådan period sedan jan 2025 i Rekord.
- * Sortera störst/minst. Förare/Bil som förut (bil: vanliga förare ser bara egen bil).
- * Anonymitet avgörs på servern. Arkiv läses automatiskt för äldre år / rekord.
+ * Sortera störst/minst. Förare: andras namn bara för ägare. Bil: alla i åkeriet
+ * ser alla bilar med nummer, modell, plats och värde. Den egna bilen markeras.
+ * Arkiv läses automatiskt för äldre år / rekord.
  */
 (function () {
   'use strict';
@@ -307,13 +308,17 @@
     else if (st.loading && !d) h = '<div class="tl-msg">Laddar…</div>';
     else if (!d || !d.rows) h = '<div class="tl-msg">Ingen data ' + esc(T.periodText()) + ' än.</div>';
     else {
-      var own = d.scope === 'own';
+      var ownOnly = d.scope === 'own';
       var whoN = st.mode === 'bil' ? ((d.n || 0) + ' bilar') : ((d.n || 0) + ' förare');
       h += '<div class="tl-hint">' + esc(title) + ' · ' + esc(L.t) +
         (rek ? ' · bästa ' + esc(GRAIN_SV[st.tab] || 'period') + ' sedan 2025' : ' · ' + esc(label())) + '</div>';
-      if (own) {
+      if (ownOnly) {
         h += '<div class="tl-info">🔒 Visar bara din bil' + (d.own ? ' (' + esc(d.own) + ')' : '') +
           ': din placering bland ' + (d.n || 0) + ' bilar. Andra bilar visas inte.</div>';
+      } else if (st.mode === 'bil') {
+        h += '<div class="tl-info">' + esc(whoN) + ' · ' + esc(T.periodText()) + '. ' +
+          (d.arkiv ? '📦 Äldre data från arkivet. ' : '') +
+          (window.DEMO && DEMO.on() ? 'Demokonto: bilar visas anonymt.' : 'Din bil är markerad.') + '</div>';
       } else {
         h += '<div class="tl-info">' + esc(whoN) + ' · ' + esc(T.periodText()) + '. ' +
           (d.arkiv ? '📦 Äldre data från arkivet. ' : '') +
@@ -326,18 +331,19 @@
       h += '<div class="tl-card"><div class="tl-head"><span class="tl-title">' + esc(L.t) + '</span>' +
         '<span class="tl-me">' + (d.me ? 'Du: plats ' + d.me.pos + ' av ' + d.n : (d.n || 0) + (st.mode === 'bil' ? ' bilar' : ' förare')) + '</span></div>';
 
-      if (own && !rows.length) h += '<div class="tl-row"><span class="tl-who">Din bil finns inte med i den här listan.</span></div>';
+      if (ownOnly && !rows.length) h += '<div class="tl-row"><span class="tl-who">Din bil finns inte med i den här listan.</span></div>';
       rows.forEach(function (r) {
         var who;
+        var isOwn = st.mode === 'bil' ? !!(r.id && d.own && r.id === d.own) : !!r.du;
         if (st.mode === 'bil') {
           who = esc(r.id || '') + (r.modell ? ' <span class="tl-id">' + esc(r.modell) + '</span>' : '') +
-            (r.du && !own ? ' <span class="tl-id">· du har kört</span>' : '');
+            (r.du && d.own && r.id !== d.own ? ' <span class="tl-id">· du har kört</span>' : '');
         } else {
           who = r.du ? 'Du' : (d.named && r.id
             ? (r.namn && r.namn !== r.id ? esc(sn(r.namn)) + ' <span class="tl-id">' + esc(r.id) + '</span>' : esc(r.id))
             : (window.DEMO && DEMO.on() ? 'Förare ' + r.pos : ''));
         }
-        h += '<div class="tl-row' + (r.du ? ' du' : '') + '"><span class="tl-pos">' +
+        h += '<div class="tl-row' + (isOwn ? ' du' : '') + '"><span class="tl-pos">' +
           (r.pos <= 3 ? ['🥇', '🥈', '🥉'][r.pos - 1] : r.pos + '.') + '</span>' +
           '<span class="tl-who">' + who + '</span><span class="tl-val">' + fmt(r.v, L.f) + cnt(r) + '</span></div>';
       });
