@@ -104,7 +104,7 @@ assert.doesNotMatch(src, /className = 'td-slot-empty'/);
 assert.match(src, /data-tool', 'moduler'/);
 assert.match(src, /!isCore\(id\) && !isPinned\(id\)/);
 const html = fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8');
-assert.match(html, /hem-ordning\.js\?v=20261113mod2/);
+assert.match(html, /hem-ordning\.js\?v=(20261113mod2|20261114sidor1)/);
 assert.match(html, /hjalp\.js\?v=20261113mod2/);
 assert.match(html, /lazy-views\.js\?v=(20261113mod2|20261113lasbar1|20261113skroll1|20261113chatt1|20261113prick2|20261113barn1|20261113sedd1|20261113hem1|20261113avs1|20261114kp1)/);
 assert.match(html, /moduler\.js\?v=20261113mod2/);

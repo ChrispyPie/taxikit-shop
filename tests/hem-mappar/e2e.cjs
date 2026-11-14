@@ -225,9 +225,11 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   ok('Flytta ger ordningsläget', await p.evaluate(() => getComputedStyle(document.querySelector('.td-andringslage')).display !== 'none' && document.querySelector('#app .grid').classList.contains('td-ordna')));
   const tE = await top(p);
   e0 = await center(p, `#app .grid .icon[data-tool="${D}"] .emoji`);
-  const firstE = await center(p, '#app .grid > .icon:first-child');
+  // Fri placering (2026-11-14sidor1): rutan längst upp till vänster, inte första i DOM-ordningen
+  const id00 = await p.evaluate(() => { const l = HEM_ORDNING.freeLayout(); return l ? Object.keys(l.map).find(k => !l.map[k][0] && !l.map[k][1]) : null; });
+  const firstE = await center(p, id00 ? `#app .grid > [data-tool="${id00}"], #app .grid > [data-folder="${id00}"]` : '#app .grid > .icon:first-child');
   await mouseDrag(p, e0, { x: firstE.l + 4, y: firstE.y }, { hold: 0, dwell: 250 });
-  ok('dra utan att hålla in i ordningsläget', (await top(p))[0] === D, (await top(p)).join(',') + ' från ' + tE.join(','));
+  ok('dra utan att hålla in i ordningsläget', (await top(p))[0] === D, D + ': ' + (await top(p)).join(',') + ' från ' + tE.join(',') + ' ' + JSON.stringify(await p.evaluate(() => HEM_ORDNING.freeLayout())));
   await p.click('.td-andringslage [data-ordna="done"]'); await sleep(200);
   ok('Klar lämnar ordningsläget', await p.evaluate(() => getComputedStyle(document.querySelector('.td-andringslage')).display === 'none'));
 

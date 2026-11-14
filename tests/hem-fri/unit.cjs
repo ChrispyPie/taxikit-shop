@@ -45,6 +45,17 @@ assert.deepEqual(plain(F.sorted({ x: [1, 0], y: [0, 2], z: [0, 1] })), ['z', 'y'
 const cp = plain(F.cleanPos({ 4: { a: [0, 0], b: [0, 4], c: [0, 0], 'X!': [1, 1], d: [1.5, 0], e: [70, 1], f: [2, 3] }, 99: { a: [0, 0] }, x: 1 }));
 assert.deepEqual(cp, { 4: { a: [0, 0], f: [2, 3] } });
 assert.deepEqual(plain(F.cleanPos(null)), {}); assert.deepEqual(plain(F.cleanPos([1])), {});
+// Sida 2 (2026-11-14sidor1): egna positioner (e<n>), lista över vad som ligger där, borttagna genvägar
+const sp = { 4: { a: [0, 0] }, e4: { b: [3, 3], c: [0, 0] }, e9: { b: [0, 8] }, sida2: ['b', 'c', 'b', 'X!', 7], ute: ['om', 'moduler', 'om'] };
+assert.deepEqual(plain(F.cleanPos(sp)), { 4: { a: [0, 0] }, e4: { b: [3, 3], c: [0, 0] }, e9: { b: [0, 8] }, sida2: ['b', 'c'], ute: ['om'] });
+assert.deepEqual(plain(F.cleanPos({ e4: { b: [0, 4] } })), {});
+// Sidorna blandas inte: startskärmen läser '4', sida 2 läser 'e4'
+assert.deepEqual(plain(F.resolve(['b', 'c'], 4, sp, 'e')), { b: [3, 3], c: [0, 0] });
+assert.deepEqual(plain(F.resolve(['b'], 4, { e4: { b: [3, 3] } })), { b: [0, 0] });
+// Annat kolumnantal på sida 2: härleds bara från e-nycklar
+assert.deepEqual(plain(F.resolve(['b'], 3, { e4: { b: [1, 3] }, 3: { b: [0, 0] } }, 'e')), { b: [1, 2] });
+// Första lediga rutan (Lägg till på hemskärm från applådan)
+assert.deepEqual(plain(F.firstFree({ '0:0': 1, '0:1': 1, '0:3': 1 }, 4, 0)), [0, 2]);
 console.log('ok  modell');
 
 (async () => {
@@ -57,6 +68,8 @@ console.log('ok  modell');
   const q = async (j) => (await db.query('select private.home_tool_pos_clean($1::jsonb) r', [JSON.stringify(j)])).rows[0].r;
   assert.deepEqual(await q({ 4: { a: [0, 0], b: [0, 4], c: [0, 0], 'X!': [1, 1], d: [1.5, 0], e: [70, 1], f: [2, 3] }, 99: { a: [0, 0] }, x: 1 }), { 4: { a: [0, 0], f: [2, 3] } });
   assert.deepEqual(await q(null), {}); assert.deepEqual(await q([1]), {});
+  assert.deepEqual(await q(sp), plain(F.cleanPos(sp)));
+  assert.deepEqual(await q({ e4: { b: [0, 4] }, sida2: 'x', ute: [] }), {});
   console.log('ok  SQL-städning som klienten');
   console.log('HEM_FRI_UNIT_OK');
 })().catch(e => { console.error(e); process.exit(1); });

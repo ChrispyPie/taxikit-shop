@@ -21,6 +21,8 @@
   var SLOP = 10;            // px rörelse före lyft = scroll, ingen dragning
   var FOLDER_DWELL = 240;   // ms över en ikon innan den visas som mapp-mål
   var LEAVE_DWELL = 220;
+  var EDGE_PX = 22;         // dra till skärmkanten = byt sida (hem-sidor.js)
+  var EDGE_DWELL = 650;
   var REORDER_DWELL = 170;  // ms stilla innan de andra ikonerna flyttar sig    // ms utanför öppen mapp innan den stängs och ikonen kommer ut på startskärmen
   var MAX_FOLDERS = 20;
   var NAME_MAX = 24;
@@ -32,10 +34,10 @@
   var catalog = [];   // {id, icon, label} the driver can see
   var lastTop = [];   // startskärmens översta nivå från senaste arrange
   var lastLayout = [];
-  var pos = {};       // fri placering: { '<kolumner>': { id: [rad, kolumn] } }
-  var freeNow = null; // { C, grid } senast utlagda rutnät
+  var pos = {};       // fri placering: { '<kolumner>': { id: [rad, kolumn] }, 'e<kolumner>': {...} (sidan till höger), sida2: [id] }
 
   function isCore(id) { return !!CORE[id]; }
+  function isOff(id) { return Array.isArray(pos.ute) && pos.ute.indexOf(id) >= 0; }   // genväg borttagen
   function isPinned(id) { return !!PINNED[id]; }
   function isDefaultOff(id) { return !!DEFAULT_OFF[id]; }
   function inFolders(id) { return folders.some(function (f) { return f.items.indexOf(id) >= 0; }); }
@@ -203,7 +205,7 @@
 
   /* ---------- Fri placering: rena funktioner (testas i tests/hem-fri) ---------- */
   var F = (function () {
-    var MAXR = 60, MAXK = 8, MAXN = 80;
+    var MAXR = 60, MAXK = 16, MAXN = 80;
     function okCell(v, C) {
       return Array.isArray(v) && v.length === 2 && v[0] === Math.floor(v[0]) && v[1] === Math.floor(v[1]) &&
         v[0] >= 0 && v[0] < MAXR && v[1] >= 0 && v[1] < C;
@@ -223,10 +225,16 @@
     function cleanPos(p) {
       var out = {};
       if (!p || typeof p !== 'object' || Array.isArray(p)) return out;
-      Object.keys(p).filter(function (k) { return /^([1-9]|1[0-6])$/.test(k); }).slice(0, MAXK).forEach(function (k) {
-        var m = cleanMap(p[k], +k);
+      Object.keys(p).filter(function (k) { return /^e?([1-9]|1[0-6])$/.test(k); }).sort().slice(0, MAXK).forEach(function (k) {
+        var m = cleanMap(p[k], +k.replace(/^e/, ''));
         if (Object.keys(m).length) out[k] = m;
       });
+      // sida2: verktyg och mappar som ligger på sidan till höger om startskärmen (2026-11-14sidor1)
+      var s2 = cleanList(Array.isArray(p.sida2) ? p.sida2 : []).slice(0, MAXN);
+      if (s2.length) out.sida2 = s2;
+      // ute: genvägar som tagits bort från hemskärmen (modulen finns kvar i applådan och i Moduler)
+      var ut = cleanList(Array.isArray(p.ute) ? p.ute : []).filter(function (id) { return id !== 'moduler'; }).slice(0, MAXN);
+      if (ut.length) out.ute = ut;
       return out;
     }
     // Från ett annat kolumnantal: kanterna stannar vid kanterna, resten skalas.
@@ -241,12 +249,14 @@
       });
       return o;
     }
-    function source(p, C) {
-      if (p[String(C)]) return p[String(C)];
-      var ks = Object.keys(p).map(Number);
+    function source(p, C, pre) {
+      pre = pre || '';
+      if (p[pre + C]) return p[pre + C];
+      var re = pre ? /^e\d+$/ : /^\d+$/;
+      var ks = Object.keys(p).filter(function (k) { return re.test(k); }).map(function (k) { return +k.replace(/^e/, ''); });
       if (!ks.length) return null;
       ks.sort(function (a, b) { return Math.abs(a - C) - Math.abs(b - C) || b - a; });
-      return clamp(p[String(ks[0])], ks[0], C);
+      return clamp(p[pre + ks[0]], ks[0], C);
     }
     function key(r, c) { return r + ':' + c; }
     function nearest(taken, r, c, C) {
@@ -268,9 +278,9 @@
     /* ids: översta nivån i ordning. Returnerar { id: [rad, kolumn] } för C kolumner.
      * Sparad ruta används om den är ledig; krock -> närmaste lediga ruta. Utan sparad ruta (nytt verktyg)
      * hamnar ikonen efter den sista upptagna rutan, så att medvetet tomma rutor förblir tomma. */
-    function resolve(ids, C, p) {
+    function resolve(ids, C, p, pre) {
       C = Math.max(1, C | 0);
-      var want = source(p || {}, C) || {}, out = {}, taken = {}, late = [], newc = [], last = -1;
+      var want = source(p || {}, C, pre) || {}, out = {}, taken = {}, late = [], newc = [], last = -1;
       ids.forEach(function (id) {
         var w = want[id];
         if (w && w[1] < C && !taken[key(w[0], w[1])]) { out[id] = [w[0], w[1]]; taken[key(w[0], w[1])] = 1; last = Math.max(last, w[0] * C + w[1]); }
@@ -290,7 +300,7 @@
     function sorted(map) {
       return Object.keys(map).sort(function (a, b) { return (map[a][0] - map[b][0]) || (map[a][1] - map[b][1]); });
     }
-    return { cleanPos: cleanPos, clamp: clamp, resolve: resolve, sorted: sorted, nearest: nearest, MAXR: MAXR };
+    return { cleanPos: cleanPos, clamp: clamp, resolve: resolve, sorted: sorted, nearest: nearest, firstFree: firstFree, MAXR: MAXR };
   })();
 
   function readLocal() {
@@ -355,7 +365,7 @@
       if (hidden.indexOf(x.id) >= 0) return false;
       if (isDefaultOff(x.id) && !optedIn(x.id)) return false;
       return true;
-    }).filter(function (x) { return !isPinned(x.id); });
+    }).filter(function (x) { return !isPinned(x.id) && !isOff(x.id); });
     shown.push({ id: 'moduler', icon: ICO_MODULER(), label: 'Moduler' });
     var def = shown.map(function (x) { return x.id; });
     var saved = M.expand(order || [], folders).filter(function (id) { return def.indexOf(id) >= 0; });
@@ -523,6 +533,12 @@
       '.grid.td-free{grid-auto-flow:row}' +
       '.grid.td-free .td-cell-hit{border:2px solid var(--primary,#3182ce);background:rgba(49,130,206,.14);border-radius:12px;margin:3px;pointer-events:none;box-sizing:border-box}' +
       '.grid.td-free .td-cell{border:1.5px dashed rgba(148,163,184,.38);border-radius:12px;margin:3px;pointer-events:none;box-sizing:border-box;min-height:0}' +
+      '.td-trash{position:fixed;left:0;right:0;top:0;z-index:140;display:flex;align-items:center;justify-content:center;gap:8px;' +
+      'padding:calc(env(safe-area-inset-top,0px) + 14px) 12px 14px;min-height:64px;box-sizing:border-box;font-weight:600;' +
+      'background:linear-gradient(rgba(15,23,42,.82),rgba(15,23,42,.55));color:#fff;pointer-events:none;animation:tdTrashIn .15s ease-out}' +
+      '.td-trash svg{width:22px;height:22px}' +
+      '.td-trash.td-trash-on{background:linear-gradient(rgba(197,48,48,.95),rgba(197,48,48,.78))}' +
+      '@keyframes tdTrashIn{from{transform:translateY(-100%)}to{transform:none}}' +
       '.td-mapp-tips{margin:6px 4px 0;font-size:calc(12px * min(var(--font-scale,1),1.2));line-height:1.3;color:var(--text-soft,#94a3b8);text-align:center}' +
       '.td-lp-menu .td-lp-top button.td-lp-ico.td-lp-unpack{color:inherit}' +
       '@media (prefers-reduced-motion:reduce){.td-mapp-box{animation:none}.icon.td-lifted .emoji,.icon.td-drop-target .emoji{transition:none}}' +
@@ -625,7 +641,29 @@
     if (typeof window.openItem === 'function') window.openItem('moduler');
   }
 
-  function homeGrid() { return document.querySelector('#app.is-home .grid'); }
+  // Sidan som visas nu (startskärmen eller sidan till höger, hem-sidor.js). Startskärmens rutnät som reserv.
+  function mainGrid() { return document.querySelector('#app.is-home #content .grid'); }
+  function extraGrid() { return document.querySelector('#app.is-home .td-extra-grid'); }
+  function homeGrid() {
+    var s = window.HEM_SIDOR, g = s && s.activeGrid ? s.activeGrid() : null;
+    return g || mainGrid();
+  }
+  function pageGrids() { return [mainGrid(), extraGrid()].filter(Boolean); }
+  function gridOfTile(id) {
+    var t = null;
+    pageGrids().forEach(function (g) { gridTiles(g).forEach(function (n) { if (tileId(n) === id) t = g; }); });
+    return t;
+  }
+  function isExtra(g) { return !!(g && g.classList && g.classList.contains('td-extra-grid')); }
+  function fsOf(g) { return (g && g._free) || null; }
+  function extraIds() { return Array.isArray(pos.sida2) ? pos.sida2.slice() : []; }
+  function setExtra(a) { a = cleanList(a); if (a.length) pos.sida2 = a; else delete pos.sida2; }
+  // Alla på översta nivån: startskärmen först, sedan sidan till höger (ordningen = rutornas ordning).
+  function allTopFromDom() {
+    var out = [];
+    pageGrids().forEach(function (g) { out = out.concat(fsOf(g) ? F.sorted(domMap(g)) : topIdsFromDom(g)); });
+    return out;
+  }
   function tileId(el) { return el ? (el.getAttribute('data-tool') || el.getAttribute('data-folder') || '') : ''; }
   function gridTiles(grid) {
     if (!grid) return [];
@@ -672,30 +710,34 @@
     grid.style.gridAutoRows = '';
     gridTiles(grid).forEach(function (n) { n.style.gridRowStart = ''; n.style.gridColumnStart = ''; });
     dropCells(grid);
-    freeNow = null;
+    grid._free = null;
   }
+  var lastRowH = 0;
   function layoutFree(grid) {
     if (!grid) return;
     clearFree(grid);
     if (!freeOn()) return;
     var tiles = gridTiles(grid);
-    if (!tiles.length) return;
+    if (!tiles.length && !isExtra(grid)) return;
     var C = gridCols(grid), h = 0;
-    tiles.forEach(function (n) { h = Math.max(h, n.offsetHeight || 0); });
-    var map = F.resolve(tiles.map(tileId), C, pos);
+    if (isExtra(grid)) { var mg = mainGrid(); h = (mg && parseFloat(mg.style.gridAutoRows)) || lastRowH || 0; }   // samma radhöjd som startskärmen
+    if (!h) tiles.forEach(function (n) { h = Math.max(h, n.offsetHeight || 0); });
+    if (h && !isExtra(grid)) lastRowH = h;
+    var map = F.resolve(tiles.map(tileId), C, pos, isExtra(grid) ? 'e' : '');
     tiles.forEach(function (n) { var c = map[tileId(n)]; if (c) setCell(n, c); });
     grid.classList.add('td-free');
     if (h) grid.style.gridAutoRows = h + 'px';   // tomma rader behåller höjden
-    freeNow = { C: C, grid: grid };
+    grid._free = { C: C, pre: isExtra(grid) ? 'e' : '' };
     showCells(grid);
   }
   // Lediga rutor visas streckade i ändringsläget och medan man drar (plus en tom rad under).
   function showCells(grid) {
     dropCells(grid);
-    if (!freeNow || freeNow.grid !== grid || (!editing && !(dg && dg.dragging))) return;
-    var C = freeNow.C, m = domMap(grid), taken = takenOf(m), maxR = 0;
+    if (!fsOf(grid) || (!editing && !(dg && dg.dragging))) return;
+    var C = fsOf(grid).C, m = domMap(grid), taken = takenOf(m), maxR = 0;
     Object.keys(m).forEach(function (id) { maxR = Math.max(maxR, m[id][0]); });
-    for (var r = 0; r <= maxR + 1; r++) {
+    var lastR = Math.max(maxR + 1, visRows(grid) - 1);
+    for (var r = 0; r <= lastR; r++) {
       for (var c = 0; c < C; c++) {
         if (taken[r + ':' + c]) continue;
         var d = document.createElement('div');
@@ -706,8 +748,15 @@
       }
     }
   }
+  // Sida 2 får använda hela den synliga ytan (rader som får plats), startskärmen en rad under den sista.
+  function visRows(grid) {
+    if (!isExtra(grid)) return 0;
+    var sc = grid.parentNode, rowH = parseFloat(grid.style.gridAutoRows) || 72, rg = parseFloat(getComputedStyle(grid).rowGap) || 0;
+    var h = sc && sc.clientHeight ? sc.clientHeight - 100 : 0;
+    return Math.max(0, Math.min(F.MAXR, Math.floor(h / (rowH + rg))));
+  }
   function cellAt(grid, x, y) {
-    if (!freeNow || freeNow.grid !== grid) return null;
+    if (!fsOf(grid)) return null;
     var r = grid.getBoundingClientRect(), cs = getComputedStyle(grid);
     var cols = String(cs.gridTemplateColumns || '').trim().split(/\s+/).map(parseFloat).filter(function (v) { return v >= 0; });
     if (!cols.length) return null;
@@ -719,7 +768,7 @@
     var m = domMap(grid), maxR = 0;
     Object.keys(m).forEach(function (id) { maxR = Math.max(maxR, m[id][0]); });
     var row = Math.floor((cy + rg / 2) / (rowH + rg));
-    row = Math.max(0, Math.min(row, maxR + 1, F.MAXR - 1));
+    row = Math.max(0, Math.min(row, Math.max(maxR + 1, visRows(grid) - 1), F.MAXR - 1));
     return [row, Math.max(0, Math.min(c, cols.length - 1))];
   }
   // Under dragningen flyttas inget: målrutan markeras, och ikonen läggs där när man släpper
@@ -741,42 +790,52 @@
   function moveToCell(grid, el, cell) {
     var cur = cellOf(el), occ = null;
     gridTiles(grid).forEach(function (n) { var c = cellOf(n); if (n !== el && c && c[0] === cell[0] && c[1] === cell[1]) occ = n; });
-    if (occ) setCell(occ, cur || F.nearest(takenOf(domMap(grid, occ)), cell[0], cell[1], freeNow.C));
+    var occC = fsOf(grid) ? fsOf(grid).C : gridCols(grid);
+    if (occ) setCell(occ, cur && el.parentNode === grid ? cur : F.nearest(takenOf(domMap(grid, occ)), cell[0], cell[1], occC));
     setCell(el, cell);
   }
-  function savePos(m) {
-    if (!freeNow) return;
-    var o = {}; o[String(freeNow.C)] = m;
-    var clean = F.cleanPos(o)[String(freeNow.C)] || {};
-    pos[String(freeNow.C)] = clean;
-    if (!Object.keys(clean).length) delete pos[String(freeNow.C)];
+  function savePos(grid, m) {
+    var f = fsOf(grid);
+    if (!f) return;
+    var k = f.pre + f.C, o = {}; o[k] = m;
+    var clean = F.cleanPos(o)[k] || {};
+    pos[k] = clean;
+    if (!Object.keys(clean).length) delete pos[k];
   }
-  function placeNear(m, ids, cell) {
-    if (!freeNow || !cell) return;
+  function placeNear(grid, m, ids, cell) {
+    var f = fsOf(grid);
+    if (!f || !cell) return;
     var taken = takenOf(m);
     ids.forEach(function (it) {
       if (m[it]) return;
-      var c = F.nearest(taken, cell[0], cell[1], freeNow.C);
+      var c = F.nearest(taken, cell[0], cell[1], f.C);
       m[it] = c; taken[c[0] + ':' + c[1]] = 1;
     });
   }
   // Efter en ändring av mappar: upplöst mapp -> verktygen tar mappens ruta (och närmaste lediga),
-  // borttagna id glöms. m = rutorna före ändringen.
-  function syncPos(m, oldFolders, res) {
-    if (!freeNow || !m || !res) return;
-    var top = res.top || [];
+  // borttagna id glöms. m = rutorna före ändringen. Sidan till höger: verktygen stannar på den sidan.
+  function syncPos(grid, m, oldFolders, res) {
+    if (!res) return;
+    var top = res.top || [], ex = extraIds();
     (oldFolders || []).forEach(function (f) {
-      if (!m[f.id] || top.indexOf(f.id) >= 0) return;
+      if (top.indexOf(f.id) >= 0) return;
+      var was = ex.indexOf(f.id) >= 0;
+      if (was) f.items.forEach(function (i) { if (top.indexOf(i) >= 0 && ex.indexOf(i) < 0) ex.push(i); });
+      if (!m || !m[f.id]) return;
       var cell = m[f.id];
       delete m[f.id];
-      placeNear(m, f.items.filter(function (i) { return top.indexOf(i) >= 0; }), cell);
+      placeNear(grid, m, f.items.filter(function (i) { return top.indexOf(i) >= 0; }), cell);
     });
+    setExtra(ex.filter(function (id) { return top.indexOf(id) >= 0; }));
+    if (!m || !fsOf(grid)) return;
     Object.keys(m).forEach(function (id) { if (top.indexOf(id) < 0) delete m[id]; });
-    savePos(m);
+    savePos(grid, m);
   }
   function resetPositions() {
+    var s2 = pos.sida2;
     pos = {};
-    if (freeNow && freeNow.grid) clearFree(freeNow.grid);
+    if (s2) pos.sida2 = s2;   // vilken sida ikonerna ligger på ändras inte av en ny layout
+    pageGrids().forEach(clearFree);
     writeLocal();
     saveServer();
   }
@@ -784,10 +843,11 @@
   window.addEventListener('resize', function () {
     clearTimeout(rsT);
     rsT = setTimeout(function () {
-      var g = homeGrid();
-      if (!g || dg) return;
-      if (!freeOn()) { if (freeNow) clearFree(g); return; }
-      layoutFree(g);   // kolumnantalet kan ha ändrats (vridning, Fyll bredd)
+      if (dg) return;
+      pageGrids().forEach(function (g) {
+        if (!freeOn()) { if (fsOf(g)) clearFree(g); return; }
+        layoutFree(g);   // kolumnantalet kan ha ändrats (vridning, Fyll bredd)
+      });
     }, 150);
   });
 
@@ -950,9 +1010,9 @@
   }
   function unpack(id) {
     closeFolder();
-    var m = freeNow ? domMap(freeNow.grid) : null, old = JSON.parse(JSON.stringify(folders));
+    var g = gridOfTile(id), m = fsOf(g) ? domMap(g) : null, old = JSON.parse(JSON.stringify(folders));
     var res = M.unpackFolder(currentTop(), folders, id);
-    syncPos(m, old, res);
+    syncPos(g, m, old, res);
     apply(res);
     persist();
     rerender();
@@ -961,10 +1021,11 @@
     var f = M.folderOf(folders, id);
     closeFolder();
     if (!f) return;
-    var m = freeNow ? domMap(freeNow.grid) : null, old = JSON.parse(JSON.stringify(folders)), fc = m && m[f.id];
+    var g = gridOfTile(f.id), m = fsOf(g) ? domMap(g) : null, old = JSON.parse(JSON.stringify(folders)), fc = m && m[f.id];
     var res = M.removeFromFolder(currentTop(), folders, id);
-    if (m && fc) placeNear(m, [id], fc);
-    syncPos(m, old, res);
+    if (m && fc) placeNear(g, m, [id], fc);
+    if (isExtra(g)) { var ex0 = extraIds(); if (ex0.indexOf(id) < 0) ex0.push(id); setExtra(ex0); }
+    syncPos(g, m, old, res);
     apply(res);
     persist();
     rerender();
@@ -1075,8 +1136,46 @@
     dg.offY = dg.y0 - r.top;
     dg.el.classList.remove('td-lifted');
     dg.el.classList.add('td-ph');
-    if (freeNow && dg.zone === 'grid') showCells(freeNow.grid);
+    if (dg.zone === 'grid') pageGrids().forEach(showCells);
+    showTrash();
     autoScroll();
+  }
+  /* Släpp-ytan 'Ta bort' högst upp medan man drar (2026-11-14sidor1). Tar bara bort genvägen. */
+  function showTrash() {
+    hideTrash();
+    if (!dg || isPinned(dg.id)) return;
+    var t = document.createElement('div');
+    t.id = 'td-trash';
+    t.className = 'td-trash';
+    t.setAttribute('aria-hidden', 'true');
+    t.innerHTML = icoTrash() + '<span>' + (dg.kind === 'folder' ? 'Ta bort mapp och genvägar' : 'Ta bort genväg') + '</span>';
+    document.body.appendChild(t);
+  }
+  function hideTrash() { var t = document.getElementById('td-trash'); if (t && t.parentNode) t.parentNode.removeChild(t); }
+  function overTrash(x, y) {
+    var t = document.getElementById('td-trash');
+    var on = !!(t && inside(t.getBoundingClientRect(), x, y));
+    if (t) t.classList.toggle('td-trash-on', on);
+    if (dg) { if (on && !dg.trash) vibrate(); dg.trash = on; }
+    return on;
+  }
+  // Dra till skärmkanten: efter en kort stund byts sidan (startskärmen <-> sidan till höger).
+  function edgeCheck(x) {
+    var S = window.HEM_SIDOR, w = window.innerWidth || 0, dir = x < EDGE_PX ? -1 : x > w - EDGE_PX ? 1 : 0;
+    if (!S || !S.canDropRel || isPinned(dg.id) || !dir || !S.canDropRel(dir)) { clearTimeout(dg.eTimer); dg.eTimer = 0; dg.eDir = 0; return; }
+    if (dg.eTimer && dg.eDir === dir) return;
+    clearTimeout(dg.eTimer);
+    dg.eDir = dir;
+    dg.eTimer = setTimeout(function () {
+      if (!dg) return;
+      dg.eTimer = 0;
+      var old = homeGrid();
+      if (!S.goRel(dir)) return;
+      clearHit(old); clearTarget();
+      vibrate();
+      pageGrids().forEach(showCells);
+      setTimeout(function () { if (dg && dg.dragging) { dg.eDir = 0; hitTest(); } }, 380);
+    }, EDGE_DWELL);
   }
   function placeGhost() {
     if (!dg || !dg.ghost) return;
@@ -1140,6 +1239,12 @@
   }
   function hitTest() {
     var x = dg.x, y = dg.y;
+    if (dg.dragging && overTrash(x, y)) {
+      clearTarget(); clearTimeout(dg.rTimer); dg.rKey = null; clearHit(homeGrid());
+      clearTimeout(dg.leaveTimer); dg.leaveTimer = 0;
+      return;
+    }
+    if (dg.dragging && dg.zone === 'grid') edgeCheck(x);
     if (dg.zone === 'folder' && openF) {
       var br = openF.panel.querySelector('.td-mapp-box').getBoundingClientRect();
       if (inside(br, x, y, 4)) {
@@ -1153,7 +1258,9 @@
     var grid = homeGrid();
     if (!grid) return;
     var wrap = grid.parentNode && grid.parentNode.classList && grid.parentNode.classList.contains('td-grid-wrap') ? grid.parentNode : grid;
-    dg.outside = !inside(wrap.getBoundingClientRect(), x, y, 28);
+    var wr = wrap.getBoundingClientRect();
+    // Fri placering: allt under rutnätet räknas också (ikonen hamnar på raden under den sista).
+    dg.outside = fsOf(grid) ? y < wr.top - 28 : !inside(wr, x, y, 28);
     if (dg.ghost) dg.ghost.classList.toggle('td-ghost-off', dg.outside);
     if (dg.outside) { clearTarget(); clearTimeout(dg.rTimer); dg.rKey = null; clearHit(grid); return; }
     var tiles = gridTiles(grid).filter(function (n) { return n !== dg.el; });
@@ -1181,7 +1288,7 @@
       return;
     }
     clearTarget();
-    if (freeNow && freeNow.grid === grid) freeHover(grid, x, y);
+    if (fsOf(grid)) freeHover(grid, x, y);
     else reorderIn(grid, tiles, x, y);
   }
   function leaveFolder() {
@@ -1193,9 +1300,9 @@
     dg.zone = 'grid';
     if (grid && tile && tile.parentNode === grid) grid.insertBefore(dg.el, tile.nextSibling);
     else if (grid) grid.appendChild(dg.el);
-    if (grid && freeNow && freeNow.grid === grid) {
+    if (grid && fsOf(grid)) {
       var fc = (tile && cellOf(tile)) || [0, 0];
-      setCell(dg.el, F.nearest(takenOf(domMap(grid, dg.el)), fc[0], fc[1], freeNow.C));
+      setCell(dg.el, F.nearest(takenOf(domMap(grid, dg.el)), fc[0], fc[1], fsOf(grid).C));
       showCells(grid);
     }
     hitTest();
@@ -1245,7 +1352,8 @@
     if (!d) return;
     dg = null;
     endListen();
-    clearTimeout(d.timer); clearTimeout(d.tTimer); clearTimeout(d.leaveTimer); clearTimeout(d.rTimer);
+    clearTimeout(d.timer); clearTimeout(d.tTimer); clearTimeout(d.leaveTimer); clearTimeout(d.rTimer); clearTimeout(d.eTimer);
+    hideTrash();
     if (!d.lifted) return;              // kort tryck: verktyget öppnas av click
     if (!d.dragging) {                  // håll in utan att röra: menyn står kvar
       if (!editing) blockNextClick();
@@ -1258,28 +1366,40 @@
     d.el.classList.remove('td-ph', 'td-lifted');
     if (d.target) d.target.classList.remove('td-drop-target');
     var reopen = null, res = null;
+    if (!cancel && d.trash && !isPinned(d.id)) {
+      pageGrids().forEach(function (g) { clearHit(g); showCells(g); });
+      removeShortcut(d.id);
+      return;
+    }
     if (cancel || (d.zone === 'grid' && d.outside)) {
       reopen = d.zone === 'folder' ? d.from : null;
     } else if (d.zone === 'folder' && isPinned(d.id)) {
-      res = M.placeTop(currentTop(), folders, d.id, topIdsFromDom(homeGrid()));
+      res = M.placeTop(currentTop(), folders, d.id, allTopFromDom());
     } else if (d.zone === 'grid' && d.target && !isPinned(d.id) && !isPinned(tileId(d.target))) {
-      var tid = tileId(d.target), g1 = homeGrid(), fm = freeNow && g1 ? domMap(g1, d.el) : null, old1 = JSON.parse(JSON.stringify(folders));
+      var tid = tileId(d.target), g1 = d.target.parentNode, src1 = d.el.parentNode;
+      var fm = fsOf(g1) ? domMap(g1, d.el) : null, old1 = JSON.parse(JSON.stringify(folders));
       var top1 = currentTop();
       if (M.isFolderId(tid)) res = M.addToFolder(top1, folders, d.id, tid);
       else res = M.createFolder(top1, folders, d.id, tid, newFolderId(), DEFAULT_NAME);
-      if (fm) {
-        var nid = (res.top || []).filter(function (x) { return M.isFolderId(x) && top1.indexOf(x) < 0; })[0];
-        if (nid && fm[tid]) { fm[nid] = fm[tid]; delete fm[tid]; }   // nya mappen tar målets ruta
-        syncPos(fm, old1, res);
-      }
+      var nid = (res.top || []).filter(function (x) { return M.isFolderId(x) && top1.indexOf(x) < 0; })[0];
+      var ex1 = extraIds().filter(function (x) { return x !== d.id; });
+      if (nid && ex1.indexOf(tid) >= 0) ex1.push(nid);   // nya mappen hamnar på målets sida
+      setExtra(ex1);
+      if (fm && nid && fm[tid]) { fm[nid] = fm[tid]; delete fm[tid]; }   // nya mappen tar målets ruta
+      if (src1 && src1 !== g1 && fsOf(src1)) savePos(src1, domMap(src1, d.el));   // dragen från andra sidan
+      syncPos(g1, fm, old1, res);
     } else if (d.zone === 'grid') {
-      var g2 = homeGrid();
-      if (freeNow && g2 && freeNow.grid === g2) {
-        if (d.freeCell) moveToCell(g2, d.el, d.freeCell);
-        var m2 = domMap(g2), old2 = JSON.parse(JSON.stringify(folders));
-        res = M.placeTop(currentTop(), folders, d.id, F.sorted(m2));
-        syncPos(m2, old2, res);
-      } else res = M.placeTop(currentTop(), folders, d.id, topIdsFromDom(homeGrid()));
+      var g2 = homeGrid(), src2 = d.el.parentNode;
+      if (fsOf(g2) && d.freeCell) {
+        moveToCell(g2, d.el, d.freeCell);
+        if (src2 !== g2) g2.appendChild(d.el);   // till en annan sida (dragen till skärmkanten)
+      }
+      var ex2 = extraIds().filter(function (x) { return x !== d.id; });
+      if (isExtra(d.el.parentNode)) ex2.push(d.id);
+      setExtra(ex2);
+      var old2 = JSON.parse(JSON.stringify(folders));
+      res = M.placeTop(currentTop(), folders, d.id, allTopFromDom());
+      pageGrids().forEach(function (g) { syncPos(g, fsOf(g) ? domMap(g) : null, old2, res); });
     } else if (d.zone === 'folder' && openF) {
       res = M.reorderInFolder(currentTop(), folders, d.from, Array.prototype.map.call(openF.grid.children, tileId));
       reopen = d.from;
@@ -1288,6 +1408,38 @@
     closeFolder();
     rerender();
     if (reopen && M.find(folders, reopen)) openFolder(reopen);
+  }
+  /* Applådan (hem-sidor.js): håll in en modul och dra ut den på hemskärmen. Verktyget läggs på
+   * startskärmen (ur mapp, borttagen genväg eller avinstallerat) och bärs sedan som vanligt. */
+  function beginDragFrom(id, x, y, ptype, pid) {
+    if (!okId(id) || isPinned(id)) return false;
+    if (dg) finishDrag(true);
+    closeLpMenu(); closeFolder();
+    var f = M.folderOf(folders, id);
+    if (f) {
+      var g0 = gridOfTile(f.id), m0 = fsOf(g0) ? domMap(g0) : null, old0 = JSON.parse(JSON.stringify(folders));
+      var r0 = M.removeFromFolder(currentTop(), folders, id);
+      if (m0 && m0[f.id]) placeNear(g0, m0, [id], m0[f.id]);
+      if (isExtra(g0)) setExtra(extraIds().concat([id]));
+      syncPos(g0, m0, old0, r0);
+      apply(r0); persist(); rerender();
+    } else if (!addToHome(id) && currentTop().indexOf(id) < 0) return false;
+    var el = null;
+    pageGrids().forEach(function (g) { gridTiles(g).forEach(function (n) { if (tileId(n) === id) el = n; }); });
+    if (!el) return false;
+    var r = el.getBoundingClientRect();
+    dg = {
+      el: el, id: id, kind: 'tool', from: null, zone: 'grid',
+      x0: r.left + r.width / 2, y0: r.top + r.height / 2, x: x, y: y, pid: pid == null ? null : pid, ptype: ptype || 'touch',
+      lifted: true, dragging: false, timer: 0, target: null, tTimer: 0, tCand: null, leaveTimer: 0, outside: false, rTimer: 0, rKey: null
+    };
+    window.addEventListener('pointermove', onPMove, true);
+    window.addEventListener('pointerup', onPUp, true);
+    window.addEventListener('pointercancel', onPCancel, true);
+    startDrag();
+    placeGhost();
+    hitTest();
+    return true;
   }
   function bindPointer() {
     if (document._tdDragBound) return;
@@ -1314,6 +1466,9 @@
     });
   }
 
+  function icoUnpin() {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 9l6 6M15 9l-6 6"/></svg>';
+  }
   function icoInfo() {
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg>';
   }
@@ -1376,6 +1531,7 @@
           icoTrash() + '<span>Avinstallera</span></button></div>';
       }
       html += '<div class="td-lp-list">' +
+        (isPinned(id) ? '' : '<button type="button" role="menuitem" data-lp="shortcut">' + icoUnpin() + '<span>Ta bort genväg</span></button>') +
         '<button type="button" role="menuitem" data-lp="info">' + icoInfo() + '<span>Modulinfo</span></button>' +
         (kind === 'intool'
           ? '<button type="button" role="menuitem" data-lp="out">' + icoOut() + '<span>Ta ut ur mappen</span></button>'
@@ -1412,6 +1568,8 @@
         else if (window.HJALP && HJALP.open) HJALP.open();
       } else if (act === 'off') {
         removeTool(id);
+      } else if (act === 'shortcut') {
+        removeShortcut(id);
       } else if (act === 'out') {
         takeOut(id);
       } else if (act === 'open') {
@@ -1434,8 +1592,9 @@
   }
 
   function addBack(id) {
-    if (!okId(id) || isCore(id) || isPinned(id)) return;
+    if (!okId(id) || isPinned(id)) return;
     hidden = hidden.filter(function (x) { return x !== id; });
+    if (isOff(id)) { pos.ute = pos.ute.filter(function (x) { return x !== id; }); if (!pos.ute.length) delete pos.ute; }
     var top = currentTop();
     if (!top.length && order) top = order.slice();
     if (top.indexOf(id) < 0 && !inFolders(id)) top.push(id);
@@ -1451,13 +1610,49 @@
     if (hidden.indexOf(id) < 0) hidden.push(id);
     if (f && openF && openF.id === f.id) reopen = f.id;
     closeFolder();
-    var m = freeNow ? domMap(freeNow.grid) : null, old = JSON.parse(JSON.stringify(folders));
+    var g = gridOfTile(f ? f.id : id), m = fsOf(g) ? domMap(g) : null, old = JSON.parse(JSON.stringify(folders));
     var res = M.removeTool(currentTop(), folders, id);
-    syncPos(m, old, res);
+    syncPos(g, m, old, res);
     apply(res);
     persist();
     rerender();
     if (reopen && M.find(folders, reopen)) openFolder(reopen);
+  }
+
+  /* Ta bort genväg (2026-11-14sidor1): bara ikonen på hemskärmen försvinner. Modulen är kvar (installerad)
+   * och finns i applådan. En mapp: mappen och dess genvägar tas bort. Moduler stannar alltid. */
+  function removeShortcut(id) {
+    if (!okId(id) || isPinned(id)) return;
+    var f = M.find(folders, id), ids = f ? f.items.slice() : [id];
+    var inF = !f && M.folderOf(folders, id), reopen = inF && openF && openF.id === inF.id ? inF.id : null;
+    closeFolder();
+    var g = gridOfTile(f ? f.id : (inF ? inF.id : id)), m = fsOf(g) ? domMap(g) : null, old = JSON.parse(JSON.stringify(folders));
+    var ute = Array.isArray(pos.ute) ? pos.ute.slice() : [];
+    ids.forEach(function (x) { if (!isPinned(x) && ute.indexOf(x) < 0) ute.push(x); });
+    pos.ute = ute;
+    var res = { top: currentTop(), folders: folders };
+    ids.forEach(function (x) { res = M.removeTool(res.top, res.folders, x); });
+    if (f) res = { top: (res.top || []).filter(function (x) { return x !== f.id; }), folders: (res.folders || []).filter(function (x) { return x.id !== f.id; }) };
+    syncPos(g, m, old, res);
+    apply(res);
+    persist();
+    rerender();
+    if (reopen && M.find(folders, reopen)) openFolder(reopen);
+  }
+  // Applådan: lägg verktyget på hemskärmen (första lediga rutan på startskärmen) om det inte redan finns där.
+  function addToHome(id, opt) {
+    if (!okId(id)) return false;
+    var onHome = currentTop().indexOf(id) >= 0 || inFolders(id);
+    if (onHome && !isOff(id) && hidden.indexOf(id) < 0) return false;
+    setExtra(extraIds().filter(function (x) { return x !== id; }));
+    var g = mainGrid();
+    if (opt && opt.firstFree && fsOf(g)) {   // första lediga rutan på startskärmen
+      var m = domMap(g);
+      m[id] = F.firstFree(takenOf(m), fsOf(g).C, 0);
+      savePos(g, m);
+    }
+    addBack(id);
+    return true;
   }
 
   function decorate(content) {
@@ -1513,7 +1708,16 @@
     });
     buildFolders(grid);
     grid.classList.toggle('td-ordna', editing);
+    // Sidan till höger om startskärmen (hem-sidor.js): dess ikoner och mappar flyttas dit.
+    var eg = window.HEM_SIDOR && HEM_SIDOR.extraGrid ? HEM_SIDOR.extraGrid(true) : null;
+    if (eg) {
+      Array.prototype.slice.call(eg.children).forEach(function (n) { if (n.parentNode) n.parentNode.removeChild(n); });
+      var ex = extraIds();
+      gridTiles(grid).forEach(function (n) { var id = tileId(n); if (ex.indexOf(id) >= 0 && !isPinned(id)) eg.appendChild(n); });
+      eg.classList.toggle('td-ordna', editing);
+    }
     layoutFree(grid);
+    if (eg) layoutFree(eg);
     bindPointer();
     syncChrome(content);
     if (reopen && M.find(folders, reopen)) openFolder(reopen);
@@ -1528,6 +1732,7 @@
       closeFolder();
     }
     syncChrome(document.getElementById('content'));
+    if (window.HEM_SIDOR && HEM_SIDOR.sync) HEM_SIDOR.sync(!!onHome);
   }
 
   function setCatalog(items) {
@@ -1606,7 +1811,16 @@
     free: F,
     positions: function () { return JSON.parse(JSON.stringify(pos)); },
     resetPositions: resetPositions,
-    freeLayout: function () { return freeNow ? { C: freeNow.C, map: domMap(freeNow.grid) } : null; },
+    freeLayout: function (page) {
+      var g = page === 'extra' ? extraGrid() : mainGrid();
+      return fsOf(g) ? { C: fsOf(g).C, map: domMap(g) } : null;
+    },
+    extraIds: extraIds,
+    addToHome: addToHome,
+    removeShortcut: removeShortcut,
+    beginDragFrom: beginDragFrom,
+    isBusy: function () { return !!(dg && dg.lifted) || !!openF || !!document.getElementById('td-lp-menu'); },
+    _drag: function () { return dg ? { outside: dg.outside, freeCell: dg.freeCell, zone: dg.zone, trash: !!dg.trash, lifted: dg.lifted, dragging: dg.dragging } : null; },
     LIFT_MS: LIFT_MS,
     preview: function (ids, hid, fs, p) { if (p !== undefined) pos = F.cleanPos(p); setState(ids, hid || [], fs === undefined ? [] : fs); }
   };

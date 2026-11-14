@@ -172,7 +172,7 @@
   <script src="arende-status.js?v=20261113avs1"></script>
   <script src="mailbox-ui.js?v=20261113chatt1"></script>
   <script src="arenden-admin.js?v=20261107inkorg2b"></script>
-  <script src="swipe-back.js?v=20261112swipe1"></script>
+  <script src="swipe-back.js?v=20261114sidor1"></script>
   <script>
     const APP_VERSION = '1.0.26';
     console.log('Admin version:', APP_VERSION);
@@ -459,6 +459,7 @@
       if (mt && canSeeCases()) { history.replaceState(null, '', location.pathname); openMenu('arenden'); ARENDEN_ADMIN.openThread(+mt[1]); return; }
       if (location.hash === '#arenden' && canSeeCases()) { history.replaceState(null, '', location.pathname); openMenu('arenden'); return; }
       if (location.hash === '#onskemal' && canSeeCases()) { history.replaceState(null, '', location.pathname); openMenu('onskemal'); return; }
+      if (location.hash === '#chaufforer') { history.replaceState(null, '', location.pathname); openMenu('chaufforer'); return; }   // från hemskärmens Admin-sida
       if (location.hash === '#bilar' && canSeeAkeridata()) { history.replaceState(null, '', location.pathname); openMenu('bilar'); return; }
       // admin.html#verkstad öppnar Bil & verkstad (verkstadstimmar) direkt (länk från förarappen)
       if (location.hash === '#loner' && canSeeAkeridata()) { history.replaceState(null, '', location.pathname); openMenu('loner'); return; }

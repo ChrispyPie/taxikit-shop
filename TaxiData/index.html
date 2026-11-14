@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaxiData</title>
-  <script src="tema.js?v=20261110hl1"></script>
+  <script src="tema.js?v=20261114sidor1"></script>
   <script src="helskarm.js?v=20261111pwa1"></script>
   <script src="enhet.js?v=20261029d"></script>
   <script src="delad-enhet.js?v=20261111delad3"></script>
@@ -21,7 +21,7 @@
   <script src="berra.js?v=20261111poke1"></script>
   <script src="namn.js?v=20261028nm1"></script>
   <link rel="stylesheet" href="style.css?v=20261113barn1">
-  <link rel="stylesheet" href="tema.css?v=20261111tryck1">
+  <link rel="stylesheet" href="tema.css?v=20261114sidor1">
   <link rel="manifest" href="manifest.webmanifest?v=20261111pwa1">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -201,10 +201,11 @@
   <script src="badges.js?v=20261024x"></script>
   <script src="demo.js?v=am1q"></script>
   <script src="nav-historik.js?v=20261112swipe1"></script>
-  <script src="swipe-back.js?v=20261112swipe1"></script>
+  <script src="swipe-back.js?v=20261114sidor1"></script>
   <script src="view-state.js?v=20261107lazy1"></script>
   <script src="hjalp.js?v=20261113mod2"></script>
-  <script src="hem-ordning.js?v=20261113mod2"></script>
+  <script src="hem-ordning.js?v=20261114sidor1"></script>
+  <script src="hem-sidor.js?v=20261114sidor1"></script>
   <script src="moduler.js?v=20261113mod2"></script>
   <script src="lazy-views.js?v=20261114kp1"></script>
   <script>
@@ -887,6 +888,7 @@
     // Telefonens/webbläsarens bakåtknapp, bakåt- och framåt-swipen (swipe-back.js): en gemensam historik.
     // Bakåt går till föregående sida (inte alltid startskärmen), framåt går tillbaka dit man backade från.
     function navSubBack() {
+      if (window.HEM_SIDOR && HEM_SIDOR.onBack && HEM_SIDOR.onBack()) return true;          // applådan stängs
       if (current === FORUM.id && FORUM.back && FORUM.back()) return true;            // forumet: inlägg -> lista
       if (current === 'inkorg' && window.INKORG && INKORG.back()) return true;        // inkorgen: tråd -> lista
       if (current === VERKSTAD.id && VERKSTAD.closeEdit && VERKSTAD.closeEdit()) return true; // stäng öppen anmälan
@@ -1101,6 +1103,7 @@
       localStorage.removeItem('taxi_view');
       if (!opts || typeof opts !== 'object' || opts.type) opts = null;   // onclick kan skicka ett event
       ++LAZY.navigation;current = null;
+      if (window.HEM_SIDOR && HEM_SIDOR.reset) HEM_SIDOR.reset();   // 🏠 = startskärmen (mitten-sidan)
       document.getElementById('dashboard-view').classList.add('hidden');
       navPush('', opts);   // 🏠 är ett vanligt steg: bakåt därifrån går till sidan du var på
       LAZY.setView(null);

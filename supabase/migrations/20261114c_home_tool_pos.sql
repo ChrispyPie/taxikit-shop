@@ -1,7 +1,10 @@
 -- 20261114c: fri placering på startskärmen (2026-11-14fri1). Additivt:
 --   * ny kolumn pos jsonb på private.home_tool_order (standard '{}', befintliga rader oförändrade)
---     form: { "<kolumner>": { "<id>": [rad, kolumn] } }, t.ex. {"4": {"kordata": [0,0], "mapp-ab": [0,3]}}
---   * hjälpfunktion private.home_tool_pos_clean (högst 8 kolumnantal, 80 id per antal, rad 0–59, kolumn < antal)
+--     form: { "<kolumner>": { "<id>": [rad, kolumn] }, "e<kolumner>": {...}, "sida2": [id], "ute": [id] }
+--       t.ex. {"4": {"kordata": [0,0], "mapp-ab": [0,3]}, "e4": {"vader": [2,1]}, "sida2": ["vader"], "ute": ["om"]}
+--       "e<n>" = positioner på hemskärmens sida 2, "sida2" = vilka som ligger där, "ute" = borttagna genvägar
+--       (modulen finns kvar i applådan). 2026-11-14sidor1.
+--   * hjälpfunktion private.home_tool_pos_clean (högst 16 nycklar, 80 id per nyckel/lista, rad 0–59, kolumn < antal)
 --   * get-RPC returnerar även pos
 --   * ny 5-arg set-RPC med p_pos. 4-, 3- och 2-arg finns kvar och rör inte pos.
 -- Klienten klarar sig utan migrationen (positionerna sparas då bara på enheten).
@@ -34,10 +37,27 @@ begin
   if p is null or jsonb_typeof(p) <> 'object' then
     return '{}'::jsonb;
   end if;
+  -- id-listor: sida2 och ute (giltiga id, utan dubbletter, högst 80; Moduler kan inte tas bort)
+  for k in select unnest(array['sida2', 'ute']) loop
+    continue when jsonb_typeof(p->k) is distinct from 'array';
+    select coalesce(jsonb_agg(x.v order by x.o), '[]'::jsonb) into v_map
+    from (
+      select v, min(o) as o from (
+        select e2.value #>> '{}' as v, e2.ordinality as o
+        from jsonb_array_elements(p->k) with ordinality as e2(value, ordinality)
+        where jsonb_typeof(e2.value) = 'string'
+      ) y
+      where v ~ '^[a-z0-9-]{1,40}$' and not (k = 'ute' and v = 'moduler')
+      group by v order by min(o) limit 80
+    ) x;
+    if jsonb_array_length(v_map) > 0 then
+      v_out := v_out || jsonb_build_object(k, v_map);
+    end if;
+  end loop;
   for k in select key from jsonb_each(p) order by key loop
-    exit when nk >= 8;
-    continue when k !~ '^([1-9]|1[0-6])$';
-    v_c := k::int;
+    exit when nk >= 16;
+    continue when k !~ '^e?([1-9]|1[0-6])$';
+    v_c := regexp_replace(k, '^e', '')::int;
     continue when jsonb_typeof(p->k) <> 'object';
     v_map := '{}'::jsonb; v_used := '{}'::text[]; n := 0;
     for e in select key, value from jsonb_each(p->k) loop
