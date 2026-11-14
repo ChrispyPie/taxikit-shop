@@ -567,9 +567,18 @@ function render() {
   }
   // Data visas nu (från servern eller reservvägen get_trip_data): ta alltid bort nedtoningen.
   { const d = document.getElementById('dashboard'); d.style.opacity = ''; d.setAttribute('aria-busy', 'false'); }
-  let shifts = getShiftsInRange(rangeStart, rangeEnd, currentTab === 'dag');
+  // Summor (timmar, inkört, km, antal) räknas bara på pass som STARTAR i perioden, som i vecka/månad.
+  // Dagsvyn listar dessutom nattpass som började kvällen innan (2026-11-11), men de räknas på sin
+  // egen startdag. Förut räknades de på båda dagarna, t.ex. 25 h per dygn (2026-11-14kp1, t1590u).
+  let shifts = getShiftsInRange(rangeStart, rangeEnd);
   if (P) shifts = P.shifts.slice();
   shifts.sort((a, b) => (b.start || '').localeCompare(a.start || ''));
+  let listShifts = shifts;
+  if (!P && currentTab === 'dag') {
+    listShifts = getShiftsInRange(rangeStart, rangeEnd, true);
+    listShifts.sort((a, b) => (b.start || '').localeCompare(a.start || ''));
+  }
+  const fromBefore = s => { const t = parseShiftTime(s.start); return !!t && t < rangeStart; };
 
   let allTrips = [];
   let totalMinutes = 0;
@@ -710,14 +719,15 @@ function render() {
 
   if (currentTab === 'dag' && !COMPANY) {
     // Dagsvy: passrader med passrapport-ikon, resor under plustecknet (samma som övriga flikar).
-    if (shifts.length) {
-      html += `<div class="section">${shifts.map(s => shiftEntryHtml(s, getTripsForShift(s), { dateLabel: '' })).join('')}${looseTrips.length ? looseTripsRow(looseTrips) : ''}</div>`;
+    if (listShifts.length) {
+      html += `<div class="section">${listShifts.map(s => shiftEntryHtml(s, getTripsForShift(s), { dateLabel: fromBefore(s) ? formatShiftDate(s.start) + ' ' : '' })).join('')}${looseTrips.length ? looseTripsRow(looseTrips) : ''}</div>`;
+      if (listShifts.some(fromBefore)) html += `<p class="kp-note" style="font-size:.8rem;opacity:.75;margin:6px 10px">Pass med datum började dagen innan och räknas på den dagen.</p>`;
     } else if (allTrips.length) {
       html += `<div class="section">${allTrips.map(t => tripEntryHtml(t, "day")).join('')}</div>`;
     }
-  } else if (shifts.length) {
+  } else if (listShifts.length) {
     // Lista med skift (för hela åkeriet även på dagsfliken: ett skift per förare och bil)
-    html += `<div class="section">${shifts.map(s => {
+    html += `<div class="section">${listShifts.map(s => {
       // Åkeridata: passets resor följer med för korta perioder, annars hämtas de när passet fälls ut.
       const lazyId = P && !s._trips ? s._id : null;
       const shiftTrips = P ? (s._trips || companyApi.trips[s._id] || []) : getTripsForShift(s);
@@ -761,7 +771,7 @@ window.taxiStats = function (tab) {
   const range = tab === 'vecka' ? [getWeekStart(now), getWeekEnd(now)]
     : tab === 'manad' ? [getMonthStart(now), getMonthEnd(now)]
     : tab === 'ar' ? [new Date(now.getFullYear(), 0, 1), new Date(now.getFullYear(), 11, 31, 23, 59, 59)] : [startOfDay(now), endOfDay(now)];
-  const shifts = getShiftsInRange(range[0], range[1], tab === 'dag');
+  const shifts = getShiftsInRange(range[0], range[1]);   // summor: pass räknas på startdagen (2026-11-14kp1)
   let trips = [];
   let totalMinutes = 0;
   shifts.forEach(s => { trips = trips.concat(getTripsForShift(s)); totalMinutes += parseTime(s.tid); });
