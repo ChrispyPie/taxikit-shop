@@ -47,10 +47,24 @@
   };
   function refreshNow(){
    var epoch=st.epoch,refreshRequest=++st.refreshRequest;
-   return Promise.all([rpc('list',{}),A.rpc(admin?'case_admin_list':'case_inbox',{p_klar_limit:5000}),admin?Promise.resolve({items:[]}):A.rpc('conversation_list',{}),rpc('item_flags',{}),rpc('mailbox_capabilities',{}),ib('links',{}).catch(function(){return [];})]).then(function(d){
+   function part(p){return p.then(function(v){return {ok:true,v:v};},function(e){return {ok:false,e:e};});}
+   function optional(p,fallback){return p.catch(function(){return fallback;});}
+   return Promise.all([
+    part(rpc('list',{})),
+    part(A.rpc(admin?'case_admin_list':'case_inbox',{p_klar_limit:5000})),
+    part(admin?Promise.resolve({items:[]}):A.rpc('conversation_list',{})),
+    optional(rpc('item_flags',{}),[]),
+    optional(rpc('mailbox_capabilities',{}),{}),
+    optional(ib('links',{}),[])
+   ]).then(function(d){
     if(epoch!==st.epoch||refreshRequest!==st.refreshRequest)return U.count();
-    st.canTrash=admin&&!!(d[4]&&d[4].can_trash);st.flags=d[3]||[];st.links=Array.isArray(d[5])?d[5]:[];st.threads=(d[0]||[]).filter(function(t){return !linkByThread(t.id);});st.cases=(d[1].items||[]).filter(function(x){return x.kind!=='wish';});st.old=d[2].items||[];st.next=d[2].next;st.loaded=true;st.error='';badge();if(st.mode==='list')paint();return U.count();
-   }).catch(function(e){if(epoch!==st.epoch||refreshRequest!==st.refreshRequest)return U.count();st.loaded=true;st.error=err(e);if(st.mode==='list')paint();return 0;});
+    st.flags=d[3]||[];st.canTrash=admin&&!!(d[4]&&d[4].can_trash);st.links=Array.isArray(d[5])?d[5]:[];
+    if(d[0].ok)st.threads=(d[0].v||[]).filter(function(t){return !linkByThread(t.id);});
+    if(d[1].ok)st.cases=((d[1].v&&d[1].v.items)||[]).filter(function(x){return x.kind!=='wish';});
+    if(d[2].ok){st.old=d[2].v.items||[];st.next=d[2].v.next;}
+    var fatal=(!d[0].ok&&d[0].e)||(!d[1].ok&&d[1].e)||(!d[2].ok&&d[2].e)||null;
+    st.loaded=true;st.error=fatal?err(fatal):'';badge();if(st.mode==='list')paint();return U.count();
+   });
   };
   U.moreOld=function(){if(!st.next||st.busy)return;var epoch=st.epoch;st.busy=true;A.rpc('conversation_list',{p_before:st.next}).then(function(d){if(epoch!==st.epoch)return;st.old=st.old.concat(d.items||[]);st.next=d.next;st.busy=false;if(st.mode==='list')paint();}).catch(function(e){if(epoch!==st.epoch)return;st.busy=false;st.error=err(e);if(st.mode==='list')paint();});};
   var navRestored=false;
