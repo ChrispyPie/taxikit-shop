@@ -21,7 +21,7 @@ assert.doesNotMatch(cl, /\bhen\b|\bStig\b/);
 assert.match(cl, /id: '2026-11-14bil1'/);
 assert.match(cl, /Topplistor, Bil: du ser nu alla bilar med nummer, modell, plats och belopp/);
 assert.doesNotMatch(cl.split("id: '2026-11-14bil1'")[1].split(']},')[0], /anonym/);
-assert.ok(!/tid:/.test(cl.split("id: '2026-11-14bil1'")[1].split('rader:')[0]), 'ingen tid före go-live');
+assert.match(cl.split("id: '2026-11-14bil1'")[1].split('rader:')[0], /tid: '20:33'/);
 assert.ok(cl.indexOf("'2026-11-14bil1'") < cl.indexOf("'2026-11-14ladd1'"), 'nyheten överst');
 
 assert.match(lv, /topplistor\.js\?v=20261114bil1/);
