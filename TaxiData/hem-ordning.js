@@ -1,5 +1,9 @@
-/* Hemskärm: ordna, dölja, lägga till verktyg och samla dem i mappar. Sparat per förare på servern,
- * med localStorage som reserv. Ångra: se docs/hem-ordning/UNDO.md, docs/hem-mappar/UNDO.md och docs/hem-moduler/UNDO.md.
+/* Hemskärm: ordna, dölja, lägga till verktyg och samla dem i mappar.
+ * 2026-11-14lokal1: layouten (ordning, mappar, fri placering och sidor) sparas lokalt på just den här
+ * enheten, så telefon och platta kan ha olika layout. Den gemensamma serverns kopia lämnas orörd
+ * (reversibelt). Vid första laddningen efter uppdateringen används den layout som redan finns här,
+ * eller den senaste serverkopian om enheten är tom. Ikonstorlek och val av rutnät under Inställningar
+ * har redan varit lokala. Ångra: se docs/hem-ordning/UNDO.md, docs/hem-mappar/UNDO.md och docs/hem-moduler/UNDO.md.
  * DEFAULT_OFF-verktyg (t.ex. Nyheter) ligger inte på startskärmen förrän föraren installerar dem.
  * 2026-11-12: skiftnyckeln är borttagen. Håll in en ikon (~1 s) för meny och dra, som på Android.
  * Släpp en ikon på en annan för att göra en mapp.
@@ -46,6 +50,10 @@
     try { return localStorage.getItem('taxi_driver') || ''; } catch (e) { return ''; }
   }
   function lsKey() { return LS + ':' + (driverId() || 'x'); }
+  var SEED = 'taxi_home_order_local';
+  function seedKey() { return SEED + ':' + (driverId() || 'x'); }
+  function isSeeded() { try { return localStorage.getItem(seedKey()) === '1'; } catch (e) { return false; } }
+  function markSeeded() { try { localStorage.setItem(seedKey(), '1'); } catch (e) {} }
   function okId(id) { return typeof id === 'string' && /^[a-z0-9-]{1,40}$/.test(id); }
   function cleanList(a) {
     if (!Array.isArray(a)) return [];
@@ -329,6 +337,7 @@
         if (folders.length) v.folders = folders;
         if (hasPos) v.pos = pos;
         localStorage.setItem(lsKey(), JSON.stringify(v));
+        markSeeded();
       }
     } catch (e) {}
   }
@@ -393,18 +402,8 @@
   function currentTop() { return lastTop.slice(); }
 
   function saveServer() {
-    var base = { p_token: token(), p_ids: order || [], p_hidden: hidden || [] };
-    var withF = { p_token: base.p_token, p_ids: base.p_ids, p_hidden: base.p_hidden, p_folders: folders };
-    var withP = { p_token: base.p_token, p_ids: base.p_ids, p_hidden: base.p_hidden, p_folders: folders, p_pos: pos };
-    // 5-arg (med positioner) finns efter migration 20261114e, 4-arg (mappar) efter 20261112b. Saknas de faller vi
-    // tillbaka; det som servern inte kan spara ligger kvar i localStorage.
-    return rpc('home_tool_order_set', withP).then(function (r) {
-      if (r != null || !token() || isDemo()) return r;
-      return rpc('home_tool_order_set', withF).then(function (r2) {
-        if (r2 == null && token() && !isDemo()) return rpc('home_tool_order_set', base);
-        return r2;
-      });
-    });
+    // Layouten är lokal per enhet. Serverns rad i home_tool_order lämnas orörd så ändringen är reversibel.
+    return Promise.resolve(null);
   }
   function apply(res) {
     order = res.top && res.top.length ? res.top.slice() : null;
@@ -612,12 +611,7 @@
       folders = [];
       pos = {};
       setState(null, []);
-      rpc('home_tool_order_set', { p_token: token(), p_ids: [], p_hidden: [], p_folders: [], p_pos: {} }).then(function (r) {
-        if (r == null && token() && !isDemo()) return rpc('home_tool_order_set', { p_token: token(), p_ids: [], p_hidden: [], p_folders: [] });
-        return r;
-      }).then(function (r) {
-        if (r == null && token() && !isDemo()) rpc('home_tool_order_set', { p_token: token(), p_ids: [], p_hidden: [] });
-      });
+      markSeeded();
       editing = false;
       rerender();
     } else if (act === 'add') {
@@ -1758,35 +1752,31 @@
       folders = local.folders || [];
       pos = local.pos || {};
     }
+    // Redan sådd eller har en lokal kopia: rör inte servern, så två enheter inte skriver över varandra.
+    if (isSeeded() || local) {
+      markSeeded();
+      return;
+    }
     rpc('home_tool_order_get', { p_token: token() }).then(function (r) {
-      if (!r) return;
+      if (isSeeded() || readLocal()) { markSeeded(); return; }
+      if (!r) { markSeeded(); return; }
       var ids = r.ids;
       var hid = r.hidden;
       var fs = r.folders;
       var hasF = Array.isArray(fs);
       var hasP = r.pos && typeof r.pos === 'object' && !Array.isArray(r.pos);
-      var nextP = hasP ? F.cleanPos(r.pos) : pos;
-      if (hasP && !Object.keys(nextP).length && Object.keys(pos).length) nextP = pos;   // gjort innan servern kunde spara
-      if (ids == null && (hid == null || (Array.isArray(hid) && !hid.length)) && !(hasF && fs.length)) return;
-      var nextIds = Array.isArray(ids) ? cleanList(ids) : (order || []);
-      var nextHid = Array.isArray(hid) ? cleanList(hid).filter(function (id) { return !isCore(id) && !isPinned(id); }) : hidden;
-      // Utan mappkolumn (före migration 20261112b) behålls mapparna från den här enheten.
-      var nextF = hasF ? M.cleanFolders(fs).filter(function (f) { return f.items.length >= 2; }) : folders;
-      var pushLocal = false;
-      if (hasF && !nextF.length && folders.length && nextIds.some(function (id) { return !!M.find(folders, id); })) {
-        nextF = folders; // mappar gjorda innan servern kunde spara dem: behåll och skicka upp
-        pushLocal = true;
+      if (ids == null && (hid == null || (Array.isArray(hid) && !hid.length)) && !(hasF && fs.length) && !hasP) {
+        markSeeded();
+        return;
       }
-      var same = JSON.stringify(nextIds) === JSON.stringify(order || []) &&
-        JSON.stringify(nextHid) === JSON.stringify(hidden || []) &&
-        JSON.stringify(nextF) === JSON.stringify(folders || []) &&
-        JSON.stringify(nextP) === JSON.stringify(pos);
-      if (hasP && nextP === pos && Object.keys(pos).length && !Object.keys(F.cleanPos(r.pos)).length) pushLocal = true;
-      pos = nextP;
+      var nextIds = Array.isArray(ids) ? cleanList(ids) : [];
+      var nextHid = Array.isArray(hid) ? cleanList(hid).filter(function (id) { return !isCore(id) && !isPinned(id); }) : [];
+      var nextF = hasF ? M.cleanFolders(fs).filter(function (f) { return f.items.length >= 2; }) : [];
+      pos = hasP ? F.cleanPos(r.pos) : {};
       setState(nextIds.length ? nextIds : null, nextHid, nextF);
-      if (pushLocal) saveServer();
+      markSeeded();
       var onHome = !!(document.querySelector('#app.is-home .grid .icon') && !document.querySelector('.vd, .td-hjalp-panel.open'));
-      if (!same && onHome && !editing && !dg && !openF && typeof renderMenu === 'function') renderMenu();
+      if (onHome && !editing && !dg && !openF && typeof renderMenu === 'function') renderMenu();
     });
   }
 
@@ -1833,7 +1823,9 @@
     isBusy: function () { return !!(dg && dg.lifted) || !!openF || !!document.getElementById('td-lp-menu'); },
     _drag: function () { return dg ? { outside: dg.outside, freeCell: dg.freeCell, zone: dg.zone, trash: !!dg.trash, lifted: dg.lifted, dragging: dg.dragging } : null; },
     LIFT_MS: LIFT_MS,
-    preview: function (ids, hid, fs, p) { if (p !== undefined) pos = F.cleanPos(p); setState(ids, hid || [], fs === undefined ? [] : fs); }
+    preview: function (ids, hid, fs, p) { if (p !== undefined) pos = F.cleanPos(p); setState(ids, hid || [], fs === undefined ? [] : fs); },
+    persist: persist,
+    isLocal: isSeeded
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load);

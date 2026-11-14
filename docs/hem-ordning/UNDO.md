@@ -13,3 +13,9 @@ kör först undo för 20261111h, därefter `supabase/migrations/undo/20261111g_h
 Det tar bort tabellen `private.home_tool_order` och RPC:erna. Övriga tabeller påverkas inte.
 
 Förare som bara hade valet i localStorage (`taxi_home_order:<förar-id>`) kan rensa den nyckeln i webbläsaren.
+
+## Layout per enhet (2026-11-14lokal1)
+
+Ingen databasändring. Layouten läses och skrivs bara i enhetens localStorage; raden i `private.home_tool_order` lämnas orörd.
+Ångra i koden: börja läsa och skriva `home_tool_order_get` / `home_tool_order_set` igen (som före den här ändringen).
+
