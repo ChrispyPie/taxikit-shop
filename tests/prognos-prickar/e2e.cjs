@@ -27,8 +27,8 @@ const ok = (n, c, e) => { if (!c) { fails.push(n + (e ? ': ' + e : '')); console
 {
   const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
   const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
-  ok('cache prognos.js', /prognos\.js\?v=(20261113prick2|20261113barn1|20261113sedd1|20261113hem1|20261113avs1|20261114kp1)/.test(lv));
-  ok('cache lazy-views.js', /lazy-views\.js\?v=(20261113prick2|20261113barn1|20261113sedd1|20261113hem1|20261113avs1|20261114kp1)/.test(fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8')));
+  ok('cache prognos.js', /prognos\.js\?v=(20261113prick2|20261113barn1|20261113sedd1|20261113hem1|20261113avs1|20261114kp1|20261114kvar1)/.test(lv));
+  ok('cache lazy-views.js', /lazy-views\.js\?v=(20261113prick2|20261113barn1|20261113sedd1|20261113hem1|20261113avs1|20261114kp1|20261114kvar1)/.test(fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8')));
   const pj = fs.readFileSync(path.join(root, 'TaxiData/prognos.js'), 'utf8');
   ok('kundtid-testet borta ur Prognos', !/pg-kt-btn|ktBar|rpc\('sadmin_kundtid_get'/.test(pj) && /function ktApply\(list\) \{ return list; \}/.test(pj));
   const e = cl.split("id: '2026-11-13prick2'")[1].split(']},')[0];
@@ -142,7 +142,7 @@ function bookings(now) {
     await sleep(800);
     let s = await state(p);
     ok(label + ': prick på zon 161 och 293', JSON.stringify(s.zones) === JSON.stringify(['161', '293']) && s.cur === '163', JSON.stringify(s));
-    await zt(p, '161'); await sleep(500);
+    await zt(p, '161'); await sleep(1300);
     s = await state(p);
     ok(label + ': prickar kvar medan zon 161 är öppen', JSON.stringify(s.zones) === JSON.stringify(['161', '293']) && s.cur === '161' && s.cells === 1, JSON.stringify(s));
     await p.screenshot({ path: path.join(out, label + '-161.png') });
@@ -160,7 +160,7 @@ function bookings(now) {
     s = await state(p);
     ok(label + ': efter återöppning bara 293', JSON.stringify(s.zones) === JSON.stringify(['293']), JSON.stringify(s));
     // Öppna 293 och lämna Prognos direkt därifrån -> 293 sedd.
-    await zt(p, '293'); await sleep(400);
+    await zt(p, '293'); await sleep(1300);
     s = await state(p);
     ok(label + ': prick på ny bokning i 293 medan den är öppen', s.cur === '293' && s.cells === 1, JSON.stringify(s));
     await reopen(p);
@@ -184,6 +184,43 @@ function bookings(now) {
     ok(label + ': ingen automatisk rullning', (await p.evaluate(() => scrollY)) === 0);
     await p.screenshot({ path: path.join(out, label + '-sedd.png') });
     ok(label + ': inga sidfel', !p._errs.length, p._errs.join(' | '));
+    await p.close();
+  }
+  // 2026-11-14kvar1 (t1600u): prickarna ska inte försvinna när Prognos öppnas, även vid dubbeltryck
+  // och långsam server. Öppna zon A -> prickarna kvar; lämna A -> A:s prickar borta, andra kvar.
+  for (const [w, h, mobile, label] of [[1280, 800, false, 'kvar-platta'], [390, 844, true, 'kvar-telefon']]) {
+    const p = await open(w, h, mobile);
+    await p.evaluate(() => {
+      localStorage.setItem('prognos_zone_tab', '293');   // startzonen har nytt
+      const f = window.fetch;
+      window.fetch = function (url) { const r = f.apply(this, arguments); return /prognos_list_bookings/.test(String(url)) ? new Promise(res => setTimeout(() => res(r), 1200)) : r; };
+    });
+    await p.evaluate(() => { openItem('prognos'); setTimeout(() => openItem('prognos'), 80); });   // dubbeltryck
+    await p.waitForSelector('.pg-ztab', { timeout: 20000 }); await sleep(2200);
+    let s = await state(p);
+    ok(label + ': öppnat (dubbeltryck) -> prick på 161 och 293 och på ny bokning i 293', JSON.stringify(s.zones) === JSON.stringify(['161', '293']) && s.cur === '293' && s.cells === 1, JSON.stringify(s));
+    await p.evaluate(() => PROGNOS.refresh()); await sleep(1600);
+    s = await state(p);
+    ok(label + ': prickar kvar efter uppdatering medan man tittar', JSON.stringify(s.zones) === JSON.stringify(['161', '293']) && s.cells === 1, JSON.stringify(s));
+    await zt(p, '161'); await sleep(1300);
+    s = await state(p);
+    ok(label + ': lämnat 293 -> 293 borta, 161 kvar med bokningsprick', JSON.stringify(s.zones) === JSON.stringify(['161']) && s.cur === '161' && s.cells === 1, JSON.stringify(s));
+    await zt(p, '163'); await sleep(400);
+    s = await state(p);
+    ok(label + ': lämnat 161 -> inga prickar kvar', s.zones.length === 0 && s.cells === 0, JSON.stringify(s));
+    ok(label + ': inga sidfel', !p._errs.length, p._errs.join(' | '));
+    await p.close();
+  }
+  // Snabb render+stopp (flimmer) räknas inte som sett
+  {
+    const p = await open(1280, 800, false);
+    await p.evaluate(() => localStorage.setItem('prognos_zone_tab', '293'));
+    await p.evaluate(() => { openItem('prognos'); });
+    await sleep(150);
+    await p.evaluate(() => { PROGNOS.stop(); return openItem('prognos'); });
+    await p.waitForSelector('.pg-ztab', { timeout: 20000 }); await sleep(900);
+    const s = await state(p);
+    ok('flimmer: prick kvar på 293 och 161', JSON.stringify(s.zones) === JSON.stringify(['161', '293']) && s.cells === 1, JSON.stringify(s));
     await p.close();
   }
   await br.close(); server.close();
