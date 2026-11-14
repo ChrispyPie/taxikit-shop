@@ -4,7 +4,8 @@
  *   inkört brutto − BOM = netto inkl moms
  *   ÷ 1,06 (6 % moms)   = netto exkl moms
  *   − Uberavgift (25 % av Uber brutto) − adm.avgift (≈1,3 %) − inpasseringsavgifter = lönegrund
- *   × 37 % = lön,  + 13 % semesterersättning = bruttolön,  − preliminärskatt = nettolön
+ *   × 37 % = lön,  + 13 % semesterersättning = bruttolön (om den är inbakad i månadslönen),
+ *   − preliminärskatt = nettolön
  *   − Kronofogden/förskott/övrigt − behållna kontanter + kortdricks = utbetalning
  * Preliminärskatten tas från Skatteverkets allmänna månadstabeller för 2026 (skattetabell-2026.js),
  * utifrån månadens bruttolön, vald tabell och kolumn. En fast procent går att välja i inställningarna.
@@ -12,7 +13,9 @@
  * men passlistan på beskedet är 1–30 sep). Lönen betalas runt den 25:e månaden efter.
  * Alla procentsatser och avdrag kan ändras under Inställningar och sparas bara i telefonen (localStorage).
  * Data: window.taxiPayData() i script.js (samma pass och resor som Körpassdata).
- * Ångra: återgå till backup-grenen backup/pre-lonekoll-skattetabell-20261114.
+ * Semesterersättning: förvalt inbakad i månadslönen (sem_i_lon). Kan stängas av under Inställningar;
+ * då ingår den inte i bruttolön, skatt eller utbetalning, men visas som intjänad semester.
+ * Ångra: återgå till backup-grenen backup/pre-lonekoll-semester-val-20261114.
  */
 (function () {
   'use strict';
@@ -20,7 +23,7 @@
   var L = window.LONEKOLL = { id: 'lonekoll', title: 'Lönekoll', icon: '💰' };
 
   var SET_KEY = 'lk_settings';
-  var DEF = { provision: 37, semester: 13, moms: 6, uber: 25, adm: 1.3, inpass: 2500, skatt: 21, skatt_mode: 'tabell', tabell: 33, kolumn: 1, kfm: 0, forskott: 0, ovrigt: 0 };
+  var DEF = { provision: 37, semester: 13, sem_i_lon: true, moms: 6, uber: 25, adm: 1.3, inpass: 2500, skatt: 21, skatt_mode: 'tabell', tabell: 33, kolumn: 1, kfm: 0, forskott: 0, ovrigt: 0 };
   var FIELDS = [
     { k: 'provision', t: 'Provision (procent av lönegrund)', u: '%' },
     { k: 'semester', t: 'Semesterersättning', u: '%' },
@@ -46,6 +49,7 @@
     try { s = JSON.parse(localStorage.getItem(SET_KEY) || '{}') || {}; } catch (e) { s = {}; }
     var o = {};
     Object.keys(DEF).forEach(function (k) {
+      if (k === 'sem_i_lon') { o[k] = !(s[k] === false || s[k] === 'nej' || s[k] === 0 || s[k] === '0'); return; }
       if (k === 'skatt_mode') { o[k] = s[k] === 'procent' ? 'procent' : 'tabell'; return; }
       if (k === 'tabell') {
         var t = parseInt(s[k], 10);
@@ -115,7 +119,8 @@
     r.lonegrund = Math.max(0, r.exMoms - r.uberFee - r.adm - r.inpass);
     r.lon = r.lonegrund * s.provision / 100;
     r.sem = r.lon * s.semester / 100;
-    r.bruttolon = r.lon + r.sem;
+    r.sem_i_lon = s.sem_i_lon !== false;
+    r.bruttolon = r.sem_i_lon ? r.lon + r.sem : r.lon;
     r.skatt = taxAmount(r.bruttolon, s);
     r.nettolon = r.bruttolon - r.skatt;
     r.avdrag = s.kfm + s.forskott + s.ovrigt;
@@ -124,6 +129,64 @@
     return r;
   }
   L.compute = compute;
+
+  // Pass-start: "YYYYMMDD HH:MM" (samma format som i kördata).
+  function parseStart(str) {
+    var parts = String(str || '').split(' ');
+    if (parts.length < 2) return null;
+    var d = parts[0].replace(/\D/g, '');
+    if (d.length < 8) return null;
+    var tm = parts[1].replace(/\s/g, '');
+    var dt = new Date(d.slice(0, 4) + '-' + d.slice(4, 6) + '-' + d.slice(6, 8) + 'T' + tm);
+    return isNaN(dt.getTime()) ? null : dt;
+  }
+
+  function monthTitle(y, m) {
+    return MON[m].charAt(0).toUpperCase() + MON[m].slice(1) + ' ' + y;
+  }
+
+  // Intjänad semester per månad till och med through (inkl.), utifrån den kördata som finns.
+  // thisShare används bara för just den månaden (pågående månad). payFn är taxiPayData eller en test-dubbel.
+  function semesterAcc(s, throughY, throughM, thisShare, payFn) {
+    var fn = payFn || (typeof window !== 'undefined' && window.taxiPayData);
+    if (!fn) return null;
+    var end = new Date(throughY, throughM + 1, 0, 23, 59, 59, 999);
+    var wide = fn(new Date(1990, 0, 1), end);
+    var first = null;
+    ((wide && wide.shifts) || []).forEach(function (sh) {
+      var d = parseStart(sh.start);
+      if (d && (!first || d < first)) first = d;
+    });
+    if (!first) {
+      return { thisMonth: 0, total: 0, from: null, to: { y: throughY, m: throughM } };
+    }
+    var y = first.getFullYear(), m = first.getMonth(), total = 0, thisMonth = 0;
+    while (y < throughY || (y === throughY && m <= throughM)) {
+      var d = fn(new Date(y, m, 1, 0, 0, 0), new Date(y, m + 1, 0, 23, 59, 59, 999));
+      var share = (y === throughY && m === throughM && thisShare != null) ? thisShare : 1;
+      var r = compute(sums(d && d.trips), s, share);
+      total += r.sem || 0;
+      if (y === throughY && m === throughM) thisMonth = r.sem || 0;
+      m++;
+      if (m > 11) { m = 0; y++; }
+    }
+    return {
+      thisMonth: thisMonth,
+      total: total,
+      from: { y: first.getFullYear(), m: first.getMonth() },
+      to: { y: throughY, m: throughM }
+    };
+  }
+  function semesterPeriodText(acc) {
+    if (!acc || !acc.from) return '';
+    var a = acc.from, b = acc.to;
+    if (a.y === b.y && a.m === b.m) return monthTitle(a.y, a.m);
+    if (a.y === b.y) return MON[a.m] + '–' + MON[b.m] + ' ' + b.y;
+    return MON[a.m] + ' ' + a.y + ' – ' + MON[b.m] + ' ' + b.y;
+  }
+  L.parseStart = parseStart;
+  L.semesterAcc = semesterAcc;
+  L.semesterPeriodText = semesterPeriodText;
 
   function period() {
     var now = new Date();
@@ -242,8 +305,12 @@
     h += step('− Inpasseringsavgifter', share < 1 ? 'Del av ' + kr(s.inpass) + ' för den del av månaden som gått' : kr(s.inpass) + ' per månad (ändra under Inställningar)', '−' + kr(r.inpass), 'minus');
     h += step('= Lönegrund', 'Det som provisionen räknas på', kr(r.lonegrund), 'sum');
     h += step('× Provision ' + pct(s.provision), '', kr(r.lon));
-    h += step('+ Semesterersättning ' + pct(s.semester), 'Betalas ut varje månad', '+' + kr(r.sem), 'plus');
-    h += step('= Bruttolön', 'Lön före skatt', kr(r.bruttolon), 'sum');
+    if (r.sem_i_lon) {
+      h += step('+ Semesterersättning ' + pct(s.semester), 'Betalas ut i månadslönen', '+' + kr(r.sem), 'plus');
+      h += step('= Bruttolön', 'Lön före skatt', kr(r.bruttolon), 'sum');
+    } else {
+      h += step('= Bruttolön', 'Lön före skatt, utan semesterersättning', kr(r.bruttolon), 'sum');
+    }
     h += step(taxL.t, taxL.h, '−' + kr(r.skatt), 'minus');
     h += step('= Nettolön', '', kr(r.nettolon), 'sum');
     if (s.kfm) h += step('− Kronofogden', 'Utmätning (införsel)', '−' + kr(s.kfm), 'minus');
@@ -253,6 +320,15 @@
     h += step('− Kontanter du behållit', 'Kontantkörningar, pengarna har du redan fått', '−' + kr(r.kontant), 'minus');
     h += step('+ Dricks på kort', 'Från kortkörningar (kan bli lite högre på lönebeskedet)', '+' + kr(r.dricks), 'plus');
     h += step('= Beräknad utbetalning', 'Det som kommer in på kontot', kr(r.utbetalt), 'sum');
+    if (!r.sem_i_lon) {
+      var acc = semesterAcc(s, p.y, p.m, share);
+      h += step('Intjänad semester den här månaden', pct(s.semester) + ' av lönen, före skatt. Betalas inte ut i månadslönen.', kr(acc && acc.thisMonth != null ? acc.thisMonth : r.sem));
+      if (acc && acc.from && !(acc.from.y === acc.to.y && acc.from.m === acc.to.m)) {
+        h += step('Intjänat totalt ' + semesterPeriodText(acc), 'Summa före skatt, utifrån den kördata som finns i appen', kr(acc.total));
+      } else if (acc && acc.from) {
+        h += '<div class="lk-note">Ingen tidigare månad finns i kördatan, så totalsumman är samma som den här månaden.</div>';
+      }
+    }
     h += '</div>';
 
     h += '<div class="tl-card lk-set"><div class="tl-head"><span class="tl-title">Inställningar</span></div>';
@@ -269,6 +345,9 @@
       h += '</div>';
       h += '<div id="lk-procent-box"><div class="gm-row"><label for="lk-skatt">Skatt (fast uppskattning)</label><span style="display:flex;align-items:center;gap:4px">' +
         '<input id="lk-skatt" type="number" inputmode="decimal" step="any" min="0" value="' + esc(s.skatt) + '"><span class="u">%</span></span></div></div>';
+      h += '<div class="lk-note">Semesterersättning i månadslönen</div>';
+      h += '<label class="lk-mode"><input type="radio" name="lk-sem-i-lon" id="lk-sem-ja" value="ja"' + (s.sem_i_lon !== false ? ' checked' : '') + '> Ja, den är inbakad</label>';
+      h += '<label class="lk-mode"><input type="radio" name="lk-sem-i-lon" id="lk-sem-nej" value="nej"' + (s.sem_i_lon === false ? ' checked' : '') + '> Nej, den betalas ut separat</label>';
       FIELDS.forEach(function (F) {
         h += '<div class="gm-row"><label for="lk-' + F.k + '">' + esc(F.t) + '</label><span style="display:flex;align-items:center;gap:4px">' +
           '<input id="lk-' + F.k + '" type="number" inputmode="decimal" step="any" min="0" value="' + esc(s[F.k]) + '"><span class="u">' + F.u + '</span></span></div>';
@@ -276,7 +355,8 @@
       h += '<button type="button" class="lk-btn primary" id="lk-save">Spara</button><button type="button" class="lk-btn" id="lk-reset">Återställ standardvärden</button>';
     } else {
       var skattTxt = s.skatt_mode === 'procent' ? ('skatt ' + pct(s.skatt)) : ('skatt enligt tabell ' + s.tabell + ' kolumn ' + s.kolumn);
-      h += '<div class="lk-note">Provision ' + pct(s.provision) + ', semesterersättning ' + pct(s.semester) + ', ' + skattTxt +
+      var semTxt = 'semesterersättning ' + pct(s.semester) + (s.sem_i_lon !== false ? ' i månadslönen' : ' inte i månadslönen');
+      h += '<div class="lk-note">Provision ' + pct(s.provision) + ', ' + semTxt + ', ' + skattTxt +
         ', Kronofogden ' + kr(s.kfm) + '. Värdena sparas bara i din telefon.</div><button type="button" class="lk-btn" id="lk-edit">Ändra värden</button>';
     }
     h += '</div>';
@@ -299,6 +379,7 @@
       var o = loadSettings();
       FIELDS.forEach(function (F) { var v = parseFloat(String(document.getElementById('lk-' + F.k).value).replace(',', '.')); o[F.k] = isFinite(v) && v >= 0 ? v : DEF[F.k]; });
       o.skatt_mode = (document.getElementById('lk-mode-procent') && document.getElementById('lk-mode-procent').checked) ? 'procent' : 'tabell';
+      o.sem_i_lon = !(document.getElementById('lk-sem-nej') && document.getElementById('lk-sem-nej').checked);
       var t = parseInt(document.getElementById('lk-tabell') && document.getElementById('lk-tabell').value, 10);
       var c = parseInt(document.getElementById('lk-kolumn') && document.getElementById('lk-kolumn').value, 10);
       var pctv = parseFloat(String((document.getElementById('lk-skatt') || {}).value || '').replace(',', '.'));
