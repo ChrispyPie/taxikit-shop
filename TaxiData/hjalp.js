@@ -37,8 +37,8 @@
     lonekoll: [
       'Lönekoll är ett underlag för lön, utifrån godkänd tid.',
       'Det är en kontroll, inte den färdiga lönen.',
-      'Siffrorna hämtas från servern.',
-      'Hör med din åkare om något ser fel ut.'
+      'Skatten tas från Skatteverkets tabell och följer hur mycket du tjänat den månaden. Tabellnumret står på lönebeskedet.',
+      'Siffrorna hämtas från servern. Hör med din åkare om något ser fel ut.'
     ],
     ankomster: [
       'Här ser du tåg till Göteborg C, flyg till Landvetter och Stena-båtar till Göteborg.',

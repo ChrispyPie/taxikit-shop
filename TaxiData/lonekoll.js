@@ -6,11 +6,13 @@
  *   − Uberavgift (25 % av Uber brutto) − adm.avgift (≈1,3 %) − inpasseringsavgifter = lönegrund
  *   × 37 % = lön,  + 13 % semesterersättning = bruttolön,  − preliminärskatt = nettolön
  *   − Kronofogden/förskott/övrigt − behållna kontanter + kortdricks = utbetalning
+ * Preliminärskatten tas från Skatteverkets allmänna månadstabeller för 2026 (skattetabell-2026.js),
+ * utifrån månadens bruttolön, vald tabell och kolumn. En fast procent går att välja i inställningarna.
  * Löneperiod: pass som STARTAR i kalendermånaden (lönebeskedet skriver t.ex. "2 sep – 1 okt"
  * men passlistan på beskedet är 1–30 sep). Lönen betalas runt den 25:e månaden efter.
  * Alla procentsatser och avdrag kan ändras under Inställningar och sparas bara i telefonen (localStorage).
  * Data: window.taxiPayData() i script.js (samma pass och resor som Körpassdata).
- * Ångra: se UNDO-lonekoll-2026-10-26.md.
+ * Ångra: återgå till backup-grenen backup/pre-lonekoll-skattetabell-20261114.
  */
 (function () {
   'use strict';
@@ -18,11 +20,10 @@
   var L = window.LONEKOLL = { id: 'lonekoll', title: 'Lönekoll', icon: '💰' };
 
   var SET_KEY = 'lk_settings';
-  var DEF = { provision: 37, semester: 13, moms: 6, uber: 25, adm: 1.3, inpass: 2500, skatt: 21, kfm: 0, forskott: 0, ovrigt: 0 };
+  var DEF = { provision: 37, semester: 13, moms: 6, uber: 25, adm: 1.3, inpass: 2500, skatt: 21, skatt_mode: 'tabell', tabell: 33, kolumn: 1, kfm: 0, forskott: 0, ovrigt: 0 };
   var FIELDS = [
     { k: 'provision', t: 'Provision (procent av lönegrund)', u: '%' },
     { k: 'semester', t: 'Semesterersättning', u: '%' },
-    { k: 'skatt', t: 'Skatt (uppskattning, se din skattetabell)', u: '%' },
     { k: 'uber', t: 'Uberavgift (av Uber brutto)', u: '%' },
     { k: 'adm', t: 'Administrationsavgift', u: '%' },
     { k: 'moms', t: 'Moms på taxiresor', u: '%' },
@@ -44,11 +45,38 @@
     var s = {};
     try { s = JSON.parse(localStorage.getItem(SET_KEY) || '{}') || {}; } catch (e) { s = {}; }
     var o = {};
-    Object.keys(DEF).forEach(function (k) { var v = parseFloat(s[k]); o[k] = isFinite(v) && v >= 0 ? v : DEF[k]; });
+    Object.keys(DEF).forEach(function (k) {
+      if (k === 'skatt_mode') { o[k] = s[k] === 'procent' ? 'procent' : 'tabell'; return; }
+      if (k === 'tabell') {
+        var t = parseInt(s[k], 10);
+        o[k] = t >= 29 && t <= 42 ? t : DEF.tabell;
+        return;
+      }
+      if (k === 'kolumn') {
+        var c = parseInt(s[k], 10);
+        o[k] = c >= 1 && c <= 6 ? c : DEF.kolumn;
+        return;
+      }
+      var v = parseFloat(s[k]);
+      o[k] = isFinite(v) && v >= 0 ? v : DEF[k];
+    });
     return o;
   }
   function saveSettings(o) { try { localStorage.setItem(SET_KEY, JSON.stringify(o)); } catch (e) {} }
   L.defaults = DEF;
+  L.loadSettings = loadSettings;
+
+  function taxFn() {
+    var T = (typeof SKATTETABELL !== 'undefined' && SKATTETABELL) || (window && window.SKATTETABELL);
+    return T && typeof T.tax === 'function' ? T.tax : null;
+  }
+  function taxAmount(bruttolon, s) {
+    if (s && s.skatt_mode === 'procent') return (bruttolon || 0) * (s.skatt || 0) / 100;
+    var fn = taxFn();
+    if (!fn) return (bruttolon || 0) * ((s && s.skatt) || DEF.skatt) / 100;
+    return fn(bruttolon, s && s.tabell, s && s.kolumn);
+  }
+  L.taxAmount = taxAmount;
 
   // Utbetalningsdag: den 25:e månaden efter, eller fredagen innan om den 25:e är lördag/söndag
   function payday(y, m) {
@@ -88,7 +116,7 @@
     r.lon = r.lonegrund * s.provision / 100;
     r.sem = r.lon * s.semester / 100;
     r.bruttolon = r.lon + r.sem;
-    r.skatt = r.bruttolon * s.skatt / 100;
+    r.skatt = taxAmount(r.bruttolon, s);
     r.nettolon = r.bruttolon - r.skatt;
     r.avdrag = s.kfm + s.forskott + s.ovrigt;
     r.kontant = x.kontant; r.dricks = x.dricks;
@@ -119,6 +147,7 @@
     '.lk-note{font-size:.8rem;color:var(--muted);margin:.4rem 2px}' +
     '.lk-btn{display:block;width:100%;padding:.65rem;border-radius:8px;border:2px solid var(--primary);background:var(--surface);color:var(--primary);font-size:1rem;margin-top:.5rem}' +
     '.lk-btn.primary{background:var(--primary);color:var(--on-primary,#fff)}' +
+    '.lk-mode{display:block;margin:.35rem 0;font-size:.95rem}' +
     '.lk-set .gm-row input{width:96px}.lk-set .gm-row span.u{width:22px;color:var(--muted);font-size:.85rem}.lk-warn{font-size:.82rem;line-height:1.4;color:var(--text-soft,var(--muted));background:var(--surface-soft,#edf2f7);border-left:3px solid var(--accent,#3182ce);border-radius:10px;padding:.55rem .75rem;margin:0 0 .75rem}';
   function ensureCss() {
     if (document.getElementById('lk-css')) return;
@@ -155,6 +184,18 @@
       '</span><span class="lk-v">' + val + '</span></div>';
   }
 
+  function taxLabel(s, r) {
+    if (s.skatt_mode === 'procent') {
+      return { t: '− Skatt ' + pct(s.skatt), h: 'Fast procent som du själv har valt' };
+    }
+    var eff = r.bruttolon ? (r.skatt / r.bruttolon * 100) : 0;
+    var effTxt = (Math.round(eff * 10) / 10).toFixed(1).replace('.', ',');
+    return {
+      t: '− Skatt enligt tabell ' + s.tabell + ', kolumn ' + s.kolumn,
+      h: 'Preliminärskatt 2026 från Skatteverket, utifrån din bruttolön den här månaden (' + effTxt + ' %)'
+    };
+  }
+
   function draw() {
     var body = document.getElementById('lk-body');
     if (!body) return;
@@ -171,6 +212,7 @@
     var r = compute(x, s, share);
     var pd = payday(p.y, p.m);
     var pdTxt = pd.getDate() + ' ' + MON[pd.getMonth()];
+    var taxL = taxLabel(s, r);
 
     // Prognos för hela månaden i samma takt (bara när månaden pågår)
     var proj = null;
@@ -202,7 +244,7 @@
     h += step('× Provision ' + pct(s.provision), '', kr(r.lon));
     h += step('+ Semesterersättning ' + pct(s.semester), 'Betalas ut varje månad', '+' + kr(r.sem), 'plus');
     h += step('= Bruttolön', 'Lön före skatt', kr(r.bruttolon), 'sum');
-    h += step('− Skatt ' + pct(s.skatt), 'Uppskattning. Den riktiga skatten tas från skattetabellen', '−' + kr(r.skatt), 'minus');
+    h += step(taxL.t, taxL.h, '−' + kr(r.skatt), 'minus');
     h += step('= Nettolön', '', kr(r.nettolon), 'sum');
     if (s.kfm) h += step('− Kronofogden', 'Utmätning (införsel)', '−' + kr(s.kfm), 'minus');
     if (s.forskott) h += step('− Förskott', '', '−' + kr(s.forskott), 'minus');
@@ -215,24 +257,54 @@
 
     h += '<div class="tl-card lk-set"><div class="tl-head"><span class="tl-title">Inställningar</span></div>';
     if (st.showSet) {
+      h += '<div class="lk-note">Så räknas skatten</div>';
+      h += '<label class="lk-mode"><input type="radio" name="lk-skatt-mode" id="lk-mode-tabell" value="tabell"' + (s.skatt_mode !== 'procent' ? ' checked' : '') + '> Enligt skattetabellen (anpassar sig efter lönen)</label>';
+      h += '<label class="lk-mode"><input type="radio" name="lk-skatt-mode" id="lk-mode-procent" value="procent"' + (s.skatt_mode === 'procent' ? ' checked' : '') + '> Fast procent</label>';
+      h += '<div id="lk-tabell-box">';
+      h += '<div class="gm-row"><label for="lk-tabell">Skattetabell</label><span style="display:flex;align-items:center;gap:4px">' +
+        '<input id="lk-tabell" type="number" inputmode="numeric" step="1" min="29" max="42" value="' + esc(s.tabell) + '"></span></div>';
+      h += '<div class="gm-row"><label for="lk-kolumn">Kolumn</label><span style="display:flex;align-items:center;gap:4px">' +
+        '<input id="lk-kolumn" type="number" inputmode="numeric" step="1" min="1" max="6" value="' + esc(s.kolumn) + '"></span></div>';
+      h += '<div class="lk-note">Tabellnumret står på lönebeskedet. I Göteborg är det oftast 33, eller 34 om du betalar kyrkoavgift. Kolumn 1 är vanlig lön om du inte har fyllt 66 år.</div>';
+      h += '</div>';
+      h += '<div id="lk-procent-box"><div class="gm-row"><label for="lk-skatt">Skatt (fast uppskattning)</label><span style="display:flex;align-items:center;gap:4px">' +
+        '<input id="lk-skatt" type="number" inputmode="decimal" step="any" min="0" value="' + esc(s.skatt) + '"><span class="u">%</span></span></div></div>';
       FIELDS.forEach(function (F) {
         h += '<div class="gm-row"><label for="lk-' + F.k + '">' + esc(F.t) + '</label><span style="display:flex;align-items:center;gap:4px">' +
           '<input id="lk-' + F.k + '" type="number" inputmode="decimal" step="any" min="0" value="' + esc(s[F.k]) + '"><span class="u">' + F.u + '</span></span></div>';
       });
       h += '<button type="button" class="lk-btn primary" id="lk-save">Spara</button><button type="button" class="lk-btn" id="lk-reset">Återställ standardvärden</button>';
     } else {
-      h += '<div class="lk-note">Provision ' + pct(s.provision) + ', semesterersättning ' + pct(s.semester) + ', skatt ' + pct(s.skatt) +
+      var skattTxt = s.skatt_mode === 'procent' ? ('skatt ' + pct(s.skatt)) : ('skatt enligt tabell ' + s.tabell + ' kolumn ' + s.kolumn);
+      h += '<div class="lk-note">Provision ' + pct(s.provision) + ', semesterersättning ' + pct(s.semester) + ', ' + skattTxt +
         ', Kronofogden ' + kr(s.kfm) + '. Värdena sparas bara i din telefon.</div><button type="button" class="lk-btn" id="lk-edit">Ändra värden</button>';
     }
     h += '</div>';
-    h += '<div class="tl-foot">Det här är en uppskattning, inte ett lönebesked. Den riktiga lönen kan skilja sig, till exempel på grund av skattetabell, ' +
-      'justerade kvitton och avgifter. Jämför gärna med ditt lönebesked.</div>';
+    h += '<div class="tl-foot">Det här är en uppskattning, inte ett lönebesked. Skatten tas från Skatteverkets tabell för 2026 utifrån månadens bruttolön. Den riktiga lönen kan ändå skilja sig, till exempel vid annan tabell eller kolumn, jämkning, justerade kvitton eller andra avgifter. Jämför gärna med ditt lönebesked.</div>';
     body.innerHTML = h;
+
+    function syncMode() {
+      var isT = !document.getElementById('lk-mode-procent') || !document.getElementById('lk-mode-procent').checked;
+      var a = document.getElementById('lk-tabell-box');
+      var b = document.getElementById('lk-procent-box');
+      if (a) a.style.display = isT ? '' : 'none';
+      if (b) b.style.display = isT ? 'none' : '';
+    }
+    var mt = document.getElementById('lk-mode-tabell'); if (mt) mt.onchange = syncMode;
+    var mp = document.getElementById('lk-mode-procent'); if (mp) mp.onchange = syncMode;
+    syncMode();
 
     var e = document.getElementById('lk-edit'); if (e) e.onclick = function () { st.showSet = true; draw(); };
     var sv = document.getElementById('lk-save'); if (sv) sv.onclick = function () {
-      var o = {};
+      var o = loadSettings();
       FIELDS.forEach(function (F) { var v = parseFloat(String(document.getElementById('lk-' + F.k).value).replace(',', '.')); o[F.k] = isFinite(v) && v >= 0 ? v : DEF[F.k]; });
+      o.skatt_mode = (document.getElementById('lk-mode-procent') && document.getElementById('lk-mode-procent').checked) ? 'procent' : 'tabell';
+      var t = parseInt(document.getElementById('lk-tabell') && document.getElementById('lk-tabell').value, 10);
+      var c = parseInt(document.getElementById('lk-kolumn') && document.getElementById('lk-kolumn').value, 10);
+      var pctv = parseFloat(String((document.getElementById('lk-skatt') || {}).value || '').replace(',', '.'));
+      o.tabell = t >= 29 && t <= 42 ? t : DEF.tabell;
+      o.kolumn = c >= 1 && c <= 6 ? c : DEF.kolumn;
+      o.skatt = isFinite(pctv) && pctv >= 0 ? pctv : DEF.skatt;
       saveSettings(o); st.showSet = false; draw();
     };
     var rs = document.getElementById('lk-reset'); if (rs) rs.onclick = function () { saveSettings(DEF); st.showSet = false; draw(); };
