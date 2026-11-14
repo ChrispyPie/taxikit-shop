@@ -23,6 +23,15 @@ window.CHANGELOG = [
     ['Nytt', 'Applådan: svep uppåt på startskärmen (eller tryck på ⌃ ovanför prickarna) så visas alla moduler du har tillgång till, i bokstavsordning och med sökfält. Tryck för att öppna. Håll in för Lägg till på hemskärm, eller dra ut modulen dit du vill ha den. Svep nedåt eller tryck bakåt för att stänga.'],
     ['Nytt', 'Ta bort genväg: håll in en ikon och välj Ta bort genväg, eller dra den till Ta bort högst upp. Bara ikonen försvinner, modulen finns kvar i applådan.']
   ]},
+  { datum: '2026-11-14', id: '2026-11-14kvar1', tid: '14:32', rader: [
+    ['Fixat', 'Prognos: prickarna för ny aktivitet försvann ibland redan när du öppnade Prognos, till exempel om rutan trycktes två gånger. Nu syns prickarna på alla zoner och bokningar med nytt när du öppnar Prognos, och de ligger kvar medan du tittar. En zons prickar försvinner först när du har haft zonen öppen och sedan lämnar den (byter zon, flik, går ur Prognos eller stänger appen).']
+  ]},
+  { datum: '2026-11-14', id: '2026-11-14mal1', tid: '14:22', rader: [
+    ['Fixat', 'Körpassdata: ditt mål sparas nu på ditt konto och i telefonen, så det hoppar inte tillbaka till 100 000 kr i månaden när du öppnar appen igen.']
+  ]},
+  { datum: '2026-11-14', id: '2026-11-14arfel1', tid: '14:09', rader: [
+    ['Fixat', 'Ärenden: felmeddelandet om nätet kunde visas när du öppnade listan, trots att ärendena redan syntes. Det hände särskilt om det gått en stund sedan du senast tittade, och försvann om du laddade om sidan. Det är åtgärdat.']
+  ]},
   { datum: '2026-11-14', id: '2026-11-14sem1', tid: '13:52', rader: [
     ['Nytt', 'Lönekoll: du kan välja om semesterersättningen ska räknas in i månadslönen. Ja är som förut: 13 procent läggs på lönen och skatten räknas på summan. Nej tar bort den från månadslön och skatt, och visar i stället hur mycket semester du har tjänat in den här månaden och totalt under den period det finns kördata för. Valet finns under Inställningar.']
   ]},

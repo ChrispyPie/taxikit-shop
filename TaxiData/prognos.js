@@ -351,6 +351,7 @@
   function refresh() {
     if (!token() || st.loading) return Promise.resolve();
     st.loading = true;
+    var since = st.newSince;   // gränsen för "ny" när hämtningen startade (2026-11-14kvar1)
     return Promise.all([
       rpc('prognos_status', {}),
       rpc('prognos_list_bookings', {}),
@@ -374,7 +375,7 @@
       st.status = xs[0] || {};
       st.ktRaw = xs[1] || [];
       st.bookings = ktApply(st.ktRaw); st.bookingsReady = true;
-      updateNewIds(st.ktRaw);
+      updateNewIds(st.ktRaw, since);
       st.morgon = xs[2];
       st.zones = xs[3] || [];
       st.orig = xs[5] || null;
@@ -633,21 +634,29 @@
     saveSeenIds(seen);
   }
   // Zonen som just nu visas (Schema/Original). leaveZone() anropas när man lämnar den.
+  // Räknas bara som sedd om zonen faktiskt visats med bokningar en stund (2026-11-14kvar1, t1600u):
+  // en snabb omritning/dubbeltryck när Prognos öppnas ska inte ta bort prickarna.
+  var SEEN_MIN_MS = 1000;
+  function markShown() {
+    if (!st.viewZone || !st.bookingsReady) return;
+    if (st.shownZone !== st.viewZone) { st.shownZone = st.viewZone; st.shownAt = Date.now(); }
+  }
   function leaveZone() {
-    var z = st.viewZone;
-    st.viewZone = null;
-    if (z) clearZoneDots(z);
+    var z = st.viewZone, shown = st.shownZone === z && st.shownAt && Date.now() - st.shownAt >= SEEN_MIN_MS;
+    st.viewZone = null; st.shownZone = null; st.shownAt = 0;
+    if (z && shown) clearZoneDots(z);
   }
   // Stänger/laddar man om appen inne i en zon räknas den också som lämnad.
-  window.addEventListener('pagehide', function () { if (onPage()) { var z = st.viewZone; leaveZone(); st.viewZone = z; } });
-  function updateNewIds(list) {
+  window.addEventListener('pagehide', function () { if (onPage()) { var z = st.viewZone, a = st.shownAt; leaveZone(); st.viewZone = z; st.shownZone = z; st.shownAt = a; } });
+  function updateNewIds(list, since) {
+    if (since == null) since = st.newSince;
     var cats = loadCats(), keep = {}, old = loadNewIds(), seen = loadSeenIds(), seenKeep = {};
     (list || []).forEach(function (b) {
       var id = String(b.id);
       if (seen[id]) { seenKeep[id] = 1; return; }
       if (old[id]) { keep[id] = 1; return; }
       var obs = Date.parse(b.observed_at || b.first_seen || '');
-      if (!(obs > st.newSince)) return;
+      if (!(obs > since)) return;
       if (String(b.zone_id) === '290' || CAR_CATS.indexOf(b.category) < 0 || cats.indexOf(b.category) < 0) return;
       keep[id] = 1;
     });
@@ -2044,6 +2053,7 @@
 
   function paint() {
     if (!onPage()) return;
+    markShown();
     // Förklaringsrutan är öppen → rita om när den stängs (annars hoppar den/försvinner under fingret)
     if (popOpen()) { st.pendingPaint = true; return; }
     var tabs = '<div class="pg-tabs">' +
@@ -2368,10 +2378,13 @@
     st.el = el;
     st.panel = 'schema';
     st.zoneTab = loadTab();
-    st.viewZone = st.zoneTab;   // zonen som öppnas räknas som visad
+    var again = badge.viewing;   // ritas om medan Prognos redan är öppen (t.ex. dubbeltryck på rutan)
+    if (!again || st.viewZone !== st.zoneTab) { st.viewZone = st.zoneTab; st.shownZone = null; st.shownAt = 0; }
     badge.viewing = true;
     try { localStorage.setItem('taxi_view', P.id); } catch (e) {}
-    st.newSince = lastVisit();   // före markSeen: allt som kommit sedan förra besöket får prick
+    // Före markSeen: allt som kommit sedan förra besöket får prick. Vid omritning behålls gränsen,
+    // annars blev den "nu" och prickarna försvann direkt (2026-11-14kvar1, t1600u).
+    if (!again) st.newSince = lastVisit();
     st.newIds = loadNewIds();
     markSeen();
     paint();
