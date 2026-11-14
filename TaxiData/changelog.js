@@ -18,6 +18,9 @@ window.CHANGELOG = [
   { datum: '2026-11-14', id: '2026-11-14mal1', rader: [
     ['Fixat', 'Körpassdata: ditt mål sparas nu på ditt konto och i telefonen, så det hoppar inte tillbaka till 100 000 kr i månaden när du öppnar appen igen.']
   ]},
+  { datum: '2026-11-14', id: '2026-11-14arfel1', tid: '14:09', rader: [
+    ['Fixat', 'Ärenden: felmeddelandet om nätet kunde visas när du öppnade listan, trots att ärendena redan syntes. Det hände särskilt om det gått en stund sedan du senast tittade, och försvann om du laddade om sidan. Det är åtgärdat.']
+  ]},
   { datum: '2026-11-14', id: '2026-11-14sem1', tid: '13:52', rader: [
     ['Nytt', 'Lönekoll: du kan välja om semesterersättningen ska räknas in i månadslönen. Ja är som förut: 13 procent läggs på lönen och skatten räknas på summan. Nej tar bort den från månadslön och skatt, och visar i stället hur mycket semester du har tjänat in den här månaden och totalt under den period det finns kördata för. Valet finns under Inställningar.']
   ]},
