@@ -28,7 +28,73 @@ let viewDriver = currentDriver;    // föraren som visas (kan väljas av ägaren
 let driverNames = {};              // id -> namn (om servern ger namn)
 let tripsByDriver = null;
 
-const goals = { dag: 4000, vecka: 25000, manad: 100000, ar: 1200000 };
+const GOAL_DEFAULTS = { dag: 4000, vecka: 25000, manad: 100000, ar: 1200000 };
+const goals = { dag: GOAL_DEFAULTS.dag, vecka: GOAL_DEFAULTS.vecka, manad: GOAL_DEFAULTS.manad, ar: GOAL_DEFAULTS.ar };
+const GOAL_KEYS = ['dag', 'vecka', 'manad', 'ar'];
+const GOAL_MAX = 10000000;
+// Förarens mål i Körpassdata: standardvärden (bl.a. 100 000 kr/månad) bodde bara i minnet,
+// så de hoppade tillbaka vid varje omladdning. Nu sparas de i telefonen och på kontot.
+function goalStorageKey() {
+  try { return 'taxi_korpass_mal:' + (localStorage.getItem('taxi_driver') || ''); }
+  catch (e) { return 'taxi_korpass_mal:'; }
+}
+function validGoalAmount(x) {
+  const n = Number(x);
+  return Number.isFinite(n) && n >= 0 && n <= GOAL_MAX;
+}
+function applyGoals(obj) {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return false;
+  let changed = false;
+  GOAL_KEYS.forEach(k => {
+    if (!validGoalAmount(obj[k])) return;
+    const n = Math.round(Number(obj[k]));
+    if (goals[k] !== n) { goals[k] = n; changed = true; }
+  });
+  return changed;
+}
+function readLocalGoals() {
+  try {
+    const o = JSON.parse(localStorage.getItem(goalStorageKey()) || 'null');
+    return o && typeof o === 'object' && !Array.isArray(o) ? o : null;
+  } catch (e) { return null; }
+}
+function writeLocalGoals() {
+  try {
+    localStorage.setItem(goalStorageKey(), JSON.stringify({
+      dag: goals.dag, vecka: goals.vecka, manad: goals.manad, ar: goals.ar
+    }));
+  } catch (e) {}
+}
+function hasSavedGoals(obj) {
+  return !!(obj && GOAL_KEYS.some(k => validGoalAmount(obj[k])));
+}
+function resetGoals() {
+  GOAL_KEYS.forEach(k => { goals[k] = GOAL_DEFAULTS[k]; });
+}
+function goalTabKey() {
+  return (!currentTab || currentTab === 'period') ? 'dag' : (GOAL_KEYS.includes(currentTab) ? currentTab : 'dag');
+}
+// Redan sparat i telefonen ska synas direkt, innan servern svarat.
+if (!COMPANY) {
+  const _g0 = readLocalGoals();
+  if (hasSavedGoals(_g0)) applyGoals(_g0);
+}
+async function loadKorpassMal() {
+  if (COMPANY) return;
+  const local = readLocalGoals();
+  if (hasSavedGoals(local)) applyGoals(local);
+  else resetGoals();   // ingen sparad rad för den här föraren (t.ex. byte på delad enhet)
+  try {
+    const srv = await tripRpc('korpass_mal_get');
+    if (hasSavedGoals(srv)) {
+      applyGoals(srv);
+      writeLocalGoals();
+    } else if (hasSavedGoals(local)) {
+      // Ingen rad på servern ännu (t.ex. precis efter att funktionen lagts till): skicka upp det som finns i telefonen.
+      await tripRpc('korpass_mal_set', { p_dag: goals.dag, p_vecka: goals.vecka, p_manad: goals.manad, p_ar: goals.ar });
+    }
+  } catch (e) { /* äldre server utan funktionen, eller nätfel: behåll det som finns i telefonen */ }
+}
 const typeMap = { '160': 'Kort', '283': 'Kredit', '163': 'Swish', '1': 'Kontant', '164': 'Uber', '161': 'Faktura', '185': 'Övrigt', '999': 'BOM' };
 const weekdays = ['Sö', 'Må', 'Ti', 'On', 'To', 'Fr', 'Lö'];
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
@@ -167,7 +233,10 @@ async function loadDataNow(keepOld) {
     // Förarnamn bara för ägaren; övriga får inga förar-id från servern.
     if (isOwnerRole()) await loadDriverNames();
     try { companyGoals = await tripRpc('get_company_goals'); } catch (e) { companyGoals = null; }
-  } else await setupDriverPicker();
+  } else {
+    await setupDriverPicker();
+    await loadKorpassMal();
+  }
 }
 
 // Hämtar förarnamn (servern ger bara namn till roller som får se dem)
@@ -1258,11 +1327,16 @@ function toggleTrip(el, ev) {
 }
 
 function editGoal() {
-  const val = prompt('Nytt mål (kr):', goals[currentTab]);
-  if (val && !isNaN(val)) {
-    goals[currentTab] = parseInt(val);
-    render();
-  }
+  const tab = goalTabKey();
+  const val = prompt('Nytt mål (kr):', goals[tab]);
+  if (val == null || String(val).trim() === '') return;
+  const n = parseInt(String(val).replace(/\s/g, '').replace(',', '.'), 10);
+  if (!validGoalAmount(n)) return;
+  goals[tab] = Math.round(n);
+  writeLocalGoals();
+  render();
+  tripRpc('korpass_mal_set', { p_dag: goals.dag, p_vecka: goals.vecka, p_manad: goals.manad, p_ar: goals.ar })
+    .catch(() => { /* sparat i telefonen; servern tar emot när funktionen finns */ });
 }
 
 function syncTabs() {
