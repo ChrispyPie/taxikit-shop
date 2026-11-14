@@ -6,6 +6,9 @@
  * 2026-11-12 bot1: står och pratar bara på sin plats längst ner, direkt efter sista ikonen (perchSpot).
  *   Ingen fri vandring. Ska den kolla något (t.ex. vädret) sveper den snabbt dit, går in, kommer ut,
  *   sveper tillbaka och pratar först då. Enda undantaget: när den leder dig någonstans (tips med guide).
+ * 2026-11-14 ladd1: när den inte pratar går den ner till sin egen station (robot: laddstation,
+ *   chaufför: liten taxi, diva: sminkbord). Stationen och figuren täcker inte ikoner eller sidprickar.
+ *   När den ska prata sveper den fram till sittplatsen och går tillbaka efteråt. Reducera rörelse: hoppar dit.
  */
 (function () {
   'use strict';
@@ -502,8 +505,8 @@
       '.hb-walker.hb-walk{transition-timing-function:linear}' +
       '.hb-walker.hb-walk .hb-btn svg{animation:hb-stride .36s ease-in-out infinite alternate}' +
       '@keyframes hb-stride{from{transform:translateY(0)}to{transform:translateY(-3px)}}' +
-      '.hb-station{position:fixed;left:0;top:0;width:120px;height:72px;z-index:44;pointer-events:none!important;will-change:transform;overflow:visible}' +
-      '.hb-station svg{width:120px;height:72px;display:block;overflow:visible;pointer-events:none!important}' +
+      '.hb-station{position:fixed;left:0;top:0;width:96px;height:56px;z-index:44;pointer-events:none!important;will-change:transform;overflow:visible}' +
+      '.hb-station svg{width:96px;height:56px;display:block;overflow:visible;pointer-events:none!important}' +
       '.hb-station.hb-hidden{display:none}' +
       '.hb-batt-fill{transform-box:fill-box;transform-origin:50% 100%}' +
       '.hb-station.hb-on .hb-batt-fill{animation:hb-batt 2.2s ease-in-out infinite alternate}' +
@@ -538,9 +541,9 @@
   var SIZE = 40, MARGIN = 8, PAD_TOP = 8;
   var WALK_SPEED = 40; // px/s, långsam gång
   var CELL = 8;
-  var ST_W = 120, ST_H = 72;
+  var ST_W = 96, ST_H = 56;
   var wanderTimer = 0, pos = { x: 8, y: 200 }, reduceMotion = false;
-  var walkGen = 0, nextVisitAt = 0, nextIconAt = 0, firstVisit = true;
+  var walkGen = 0, nextIconAt = 0;
   var USER_BUSY_MS = 3500;           // föraren trycker/scrollar: inga spontana resor eller pratbubblor
   var SWEEP_MIN = 0.45, SWEEP_MAX = 0.9; // sekunder för ett snabbt svep (till ikon, tillbaka, till station)
 
@@ -553,6 +556,32 @@
     if (!h) return 56;
     var r = h.getBoundingClientRect();
     return Math.max(48, Math.ceil(r.bottom) + PAD_TOP);
+  }
+  // Sidprickarna (och ev. väderrutan under dem) är reserverad yta längst ner.
+  // Sittplats och gång håller sig ovanför. Stationen får stå bredvid prickarna, inte på dem.
+  function reserveBottom() {
+    var vh = window.innerHeight || 0, top = vh, found = false, r;
+    function consider(node) {
+      if (!node || node.style.display === 'none') return;
+      if (node.classList && node.classList.contains('hb-hidden')) return;
+      r = node.getBoundingClientRect();
+      if (r.width < 4 || r.height < 4) return;
+      found = true;
+      if (r.top < top) top = r.top;
+    }
+    consider(document.getElementById('td-dots'));
+    consider(document.getElementById('animationer-vader-plats'));
+    if (!found) return MARGIN;
+    return Math.max(MARGIN, Math.round(vh - top + 8));
+  }
+  function visibleHomeRoot() {
+    var S = window.HEM_SIDOR, cur = '', node;
+    try { cur = S && S.current ? S.current() : ''; } catch (e) { cur = ''; }
+    if (cur && cur !== 'hem') {
+      node = document.querySelector('#app.is-home .td-sida.td-vis[data-sida="' + cur + '"]');
+      if (node) return node;
+    }
+    return document.querySelector('#app.is-home #content') || document.querySelector('#app.is-home');
   }
   // Rubriker som "Inloggade enheter" är blockelement över hela bredden: räkna bara själva texten.
   function nodeRect(node) {
@@ -574,7 +603,7 @@
       if (r.width < 8 || r.height < 8) return;
       out.push({ l: r.left - pad, t: r.top - pad, r: r.right + pad, b: r.bottom + pad });
     }
-    document.querySelectorAll('#app .grid .icon, #app .grid .td-slot-empty, #app .td-wrench, .home-devices-h, .home-dev, .home-dev-ask, .td-berra, #animationer-vader-plats').forEach(function (node) { add(node, 10); });
+    document.querySelectorAll('#app .grid .icon, #app .grid .td-folder, #app .grid .td-slot-empty, #app .td-wrench, .home-devices-h, .home-dev, .home-dev-ask, .td-berra, #animationer-vader-plats, #td-dots').forEach(function (node) { add(node, 10); });
     document.querySelectorAll('header, #profile-menu, .hb-panel').forEach(function (node) { add(node, 6); });
     return out;
   }
@@ -594,14 +623,22 @@
   // 3) annars närmaste fria plats längst ner på skärmen (rutnätet längre än skärmen, platta på tvären osv.)
   // Räknas om varje gång (storlek, vridning, scroll, moduler som läggs till/tas bort).
   function homeItems() {
-    var g = document.querySelector('#app.is-home .grid'), out = [];
-    if (!g) return out;
-    Array.prototype.forEach.call(g.children, function (n) {
-      if (!n.classList || !(n.classList.contains('icon') || n.classList.contains('td-slot-empty'))) return;
-      var r = n.getBoundingClientRect();
-      if (r.width < 8 || r.height < 8) return;
-      out.push(r);
-    });
+    var root = visibleHomeRoot(), out = [], grids, g, i;
+    grids = (root && root.querySelectorAll) ? root.querySelectorAll('.grid') : [];
+    if (!grids.length) {
+      g = document.querySelector('#app.is-home .grid');
+      if (g) grids = [g];
+      else if (root && root.classList && root.classList.contains('grid')) grids = [root];
+    }
+    for (i = 0; i < grids.length; i++) {
+      g = grids[i];
+      Array.prototype.forEach.call(g.children, function (n) {
+        if (!n.classList || !(n.classList.contains('icon') || n.classList.contains('td-folder') || n.classList.contains('td-slot-empty'))) return;
+        var r = n.getBoundingClientRect();
+        if (r.width < 8 || r.height < 8) return;
+        out.push(r);
+      });
+    }
     return out;
   }
   function lastItem(items) {
@@ -615,7 +652,7 @@
   }
   function perchObstacles() {
     var obs = obstacleRects({ ignoreStation: true });
-    document.querySelectorAll('#app.is-home .grid .icon, #app.is-home .grid .td-slot-empty, #app.is-home .td-wrench, .home-devices-h, .home-dev, .home-dev-ask, #animationer-vader-plats').forEach(function (n) {
+    document.querySelectorAll('#app.is-home .grid .icon, #app.is-home .grid .td-folder, #app.is-home .grid .td-slot-empty, #app.is-home .td-wrench, .home-devices-h, .home-dev, .home-dev-ask, #animationer-vader-plats, #td-dots').forEach(function (n) {
       var r = nodeRect(n);
       if (r.width < 4 || r.height < 4) return;
       obs.push({ l: r.left - 4, t: r.top - 4, r: r.right + 4, b: r.bottom + 4 });
@@ -625,7 +662,7 @@
   function perchSpot() {
     var vw = window.innerWidth, vh = window.innerHeight, obs = perchObstacles();
     var items = homeItems(), last = lastItem(items), grid = document.querySelector('#app.is-home .grid');
-    var floorY = vh - SIZE - MARGIN, x, y, w;
+    var floorY = vh - SIZE - reserveBottom(), x, y, w;
     if (!last) return nearestWalkable(vw - SIZE - MARGIN * 2, floorY, obs);
     var gr = grid ? grid.getBoundingClientRect() : last;
     var rowRight = Math.min(vw - MARGIN, (gr.right || vw) + 4);
@@ -854,7 +891,7 @@
       var p = extra || pad;
       out.push({ l: r.left - p, t: r.top - p, r: r.right + p, b: r.bottom + p });
     }
-    document.querySelectorAll('#app.is-home .grid .icon .emoji, #app.is-home .grid .td-slot-plus').forEach(function (n) {
+    document.querySelectorAll('#app.is-home .grid .icon .emoji, #app.is-home .grid .td-folder, #app.is-home .grid .td-slot-plus').forEach(function (n) {
       if (opts && opts.ignoreTool) {
         var ic = n.closest && n.closest('.icon');
         if (ic && ic.getAttribute('data-tool') === opts.ignoreTool) return;
@@ -870,6 +907,8 @@
       add(el.station, 4);
     }
     document.querySelectorAll('.td-berra').forEach(function (n) { add(n, 8); });
+    add(document.getElementById('td-dots'), 8);
+    add(document.getElementById('animationer-vader-plats'), 8);
     return out;
   }
   function overlaps(a, b) { return a.l < b.r && a.r > b.l && a.t < b.b && a.b > b.t; }
@@ -976,22 +1015,6 @@
       if (done) done();
     });
   }
-  // Liten lokal rörelse på sittplatsen i stället för att vandra runt bland ikonerna.
-  function fidget() {
-    var p = perchSpot(), dx = (Math.random() < 0.5 ? -1 : 1) * (6 + Math.round(Math.random() * 8));
-    if (blockedAt(p.x + dx, p.y, perchObstacles())) {
-      if (el.walker) el.walker.classList.toggle('hb-left');
-      scheduleWander();
-      return;
-    }
-    state.visiting = true;
-    walkPath([{ x: p.x + dx, y: p.y }, { x: p.x, y: p.y }], function () {
-      state.visiting = false;
-      if (el.walker) el.walker.classList.add('idle');
-      scheduleWander();
-    }, { noPause: true });
-  }
-
   function stopWalk() {
     walkGen += 1;
     clearTimeout(wanderTimer);
@@ -1039,35 +1062,85 @@
     go(0);
   }
 
+  function stationObstacles() {
+    var obs = [], pad = 6;
+    function add(node, extra) {
+      if (!node || (node.style && node.style.display === 'none')) return;
+      var r = node.getBoundingClientRect();
+      if (r.width < 4 || r.height < 4) return;
+      var p = extra == null ? pad : extra;
+      obs.push({ l: r.left - p, t: r.top - p, r: r.right + p, b: r.bottom + p });
+    }
+    var root = visibleHomeRoot();
+    if (root && root.querySelectorAll) {
+      root.querySelectorAll('.icon, .td-folder, .td-slot-empty, .td-slot-plus').forEach(function (n) { add(n, 4); });
+    }
+    document.querySelectorAll('.home-devices-h, .home-dev, .home-dev-ask, .td-berra, #animationer-vader-plats, #td-dots, #profile-menu, .hb-panel').forEach(function (n) { add(n, 8); });
+    var h = document.querySelector('#app header') || document.querySelector('header');
+    if (h) {
+      var r = h.getBoundingClientRect();
+      obs.push({ l: 0, t: -20, r: window.innerWidth, b: Math.ceil(r.bottom) + 4 });
+    }
+    return obs;
+  }
+  function stationFits(x, y, obs) {
+    var vw = window.innerWidth, vh = window.innerHeight;
+    if (x < 4 || y < headerBottom() || x + ST_W > vw - 4 || y + ST_H > vh - 2) return false;
+    var box = { l: x, t: y, r: x + ST_W, b: y + ST_H }, i;
+    for (i = 0; i < obs.length; i++) if (overlaps(box, obs[i])) return false;
+    return true;
+  }
   function stationRoom() {
     if (!document.getElementById('app') || !document.getElementById('app').classList.contains('is-home')) return null;
     var vw = window.innerWidth, vh = window.innerHeight;
-    var grid = document.querySelector('#app.is-home .grid');
-    var dev = document.getElementById('home-devices');
-    var bottom = headerBottom();
-    if (grid) bottom = Math.max(bottom, grid.getBoundingClientRect().bottom);
-    if (dev) bottom = Math.max(bottom, dev.getBoundingClientRect().bottom);
-    var y = vh - ST_H - 10;
-    var x = Math.max(MARGIN, Math.min(vw - ST_W - MARGIN, vw - ST_W - 16));
-    if (y < bottom + 6) y = bottom + 8;
-    if (y + ST_H > vh - 2) return null;
-    // får inte täcka en ikon
-    var box = { l: x, t: y, r: x + ST_W, b: y + ST_H };
-    var obs = [];
-    document.querySelectorAll('#app.is-home .grid .icon .emoji, #app.is-home .grid .td-slot-plus').forEach(function (n) {
-      var r = n.getBoundingClientRect();
-      obs.push({ l: r.left - 4, t: r.top - 4, r: r.right + 4, b: r.bottom + 4 });
-    });
-    var i;
-    for (i = 0; i < obs.length; i++) if (overlaps(box, obs[i])) return null;
-    return { x: x, y: y };
+    var obs = stationObstacles();
+    var floor = vh - 8, dots = document.getElementById('td-dots'), wr, i, lift, x, y;
+    var weather = document.getElementById('animationer-vader-plats');
+    if (weather && weather.getBoundingClientRect().height > 4) {
+      wr = weather.getBoundingClientRect();
+      if (wr.top > 0) floor = Math.min(floor, wr.top - 4);
+    }
+    y = Math.round(floor - ST_H);
+    var xs = [Math.max(MARGIN, vw - ST_W - 16), MARGIN];
+    if (dots && dots.style.display !== 'none') {
+      wr = dots.getBoundingClientRect();
+      if (wr.width > 4 && wr.height > 4) {
+        xs.push(Math.max(MARGIN, Math.round(wr.right + 8)));
+        xs.push(Math.min(vw - ST_W - MARGIN, Math.round(wr.left - 8 - ST_W)));
+      }
+    }
+    function tryY(yy, side) {
+      var seen = {}, k, xi;
+      for (i = 0; i < xs.length; i++) {
+        xi = xs[i];
+        if (xi < MARGIN || xi + ST_W > vw - 4) continue;
+        k = xi + ',' + yy;
+        if (seen[k]) continue;
+        seen[k] = 1;
+        if (stationFits(xi, yy, obs)) return { x: xi, y: yy, at: side };
+      }
+      return null;
+    }
+    var hit = tryY(y, 'hornet');
+    if (hit) return hit;
+    if (dots && dots.getBoundingClientRect().height > 4) {
+      y = Math.round(dots.getBoundingClientRect().top - 8 - ST_H);
+      hit = tryY(y, 'ovan');
+      if (hit) return hit;
+    }
+    for (lift = 8; lift <= 200; lift += 8) {
+      hit = tryY(Math.round(floor - ST_H - lift), 'lyft');
+      if (hit) return hit;
+    }
+    return null;
   }
   function standAtStation(room, id) {
     if (!room) return null;
-    var x = room.x + 8, y = room.y + ST_H - SIZE - 2;
-    if (id === 'diva') { x = room.x + 6; y = room.y + 20; }
-    if (id === 'chauffor') { x = room.x + 4; y = room.y + 16; }
-    if (id === 'robot') { x = room.x + 28; y = room.y + ST_H - SIZE - 2; }
+    var sx = ST_W / 120, sy = ST_H / 72;
+    var x = room.x + 8 * sx, y = room.y + ST_H - SIZE - 2;
+    if (id === 'diva') { x = room.x + 6 * sx; y = room.y + 20 * sy; }
+    if (id === 'chauffor') { x = room.x + 4 * sx; y = room.y + 16 * sy; }
+    if (id === 'robot') { x = room.x + 28 * sx; y = room.y + ST_H - SIZE - 2; }
     return nearestWalkable(x, y, obstacleRects({ ignoreStation: true }));
   }
   function paintStation() {
@@ -1100,37 +1173,36 @@
       el.walker.classList.add('idle', 'hb-at-home', 'hb-act-' + c);
     }
     if (el.station) el.station.classList.add('hb-on');
-    var stay = 8000 + Math.random() * 6000;
-    wanderTimer = setTimeout(function () {
-      if (el.walker) el.walker.classList.remove('hb-at-home', 'hb-act-robot', 'hb-act-diva', 'hb-act-chauffor');
-      if (el.station) el.station.classList.remove('hb-on');
-      state.atHome = false;
-      scheduleNextVisit();
-      returnToPerch(scheduleWander);
-    }, stay);
   }
-  function scheduleNextVisit() {
-    var ms = firstVisit ? (40000 + Math.random() * 50000) : (150000 + Math.random() * 120000);
-    firstVisit = false;
-    nextVisitAt = Date.now() + ms;
+  function atStation(tol) {
+    var stand = standAtStation(paintStation() || stationRoom(), charId());
+    if (!stand) return false;
+    return Math.hypot(stand.x - pos.x, stand.y - pos.y) <= (tol == null ? 8 : tol);
   }
   function goToStation() {
     var room = paintStation();
-    if (!room) { scheduleNextVisit(); scheduleWander(); return; }
     var stand = standAtStation(room, charId());
-    if (!stand) { scheduleNextVisit(); scheduleWander(); return; }
-    // tyst och snabbt dit, ingen bubbla på vägen; pratar den senare går den först tillbaka till sittplatsen
+    if (!stand) {
+      // ingen plats för stationsgrafiken: stå ändå längst ner, ovanför/bredvid prickarna
+      stand = nearestWalkable(window.innerWidth - SIZE - MARGIN, window.innerHeight - SIZE - reserveBottom(), obstacleRects({ ignoreStation: true }));
+      if (el.station) el.station.classList.add('hb-hidden');
+    }
+    if (bubbleOn()) hideBubble({ keepVisit: true });
     state.visiting = true;
-    sweepTo(stand, function () { state.visiting = false; arriveHome(); });
+    state.atHome = false;
+    sweepTo(stand, function () { state.visiting = false; arriveHome(); scheduleWander(); });
   }
 
 
   function iconNode(tool) {
-    return document.querySelector('#app.is-home .grid .icon[data-tool="' + tool + '"] .emoji');
+    var root = visibleHomeRoot() || document;
+    return (root.querySelector && root.querySelector('.grid .icon[data-tool="' + tool + '"] .emoji')) ||
+      document.querySelector('#app.is-home .grid .icon[data-tool="' + tool + '"] .emoji');
   }
   function visibleTools() {
-    var out = [];
-    document.querySelectorAll('#app.is-home .grid .icon[data-tool]').forEach(function (n) {
+    var out = [], root = visibleHomeRoot() || document;
+    var nodes = root.querySelectorAll ? root.querySelectorAll('.grid .icon[data-tool]') : [];
+    Array.prototype.forEach.call(nodes, function (n) {
       var id = n.getAttribute('data-tool');
       if (id && id !== 'installningar' && id !== 'om' && n.getBoundingClientRect().width > 8) out.push(id);
     });
@@ -1195,60 +1267,74 @@
     return true;
   }
 
-  // Vila på sittplatsen. Ingen fri vandring över ikonerna: bara en liten lokal rörelse,
-  // ibland en tyst tur till stationen (laddning/sminkbord längst ner) och ibland en snabb "kolla något"-resa.
+  // Vila vid stationen. Ingen fri vandring över ikonerna. När den ska prata sveper den
+  // fram till sittplatsen (efter sista ikonen) och går sedan tillbaka hit. Ibland en
+  // snabb "kolla något"-resa, därefter prat på sittplatsen och hem till stationen.
   function scheduleWander() {
     clearTimeout(wanderTimer);
     if (!el.walker || el.walker.style.display === 'none' || document.hidden) return;
     ensureStation();
     paintStation();
+    if (state.panel || state.visiting || state.guiding || state.exiting) return;
+    if (bubbleOn()) return;
     if (!canWalk()) {
-      var park = perchSpot();
+      var room = paintStation();
+      var park = standAtStation(room, charId()) || nearestWalkable(window.innerWidth - SIZE - MARGIN, window.innerHeight - SIZE - reserveBottom(), obstacleRects({ ignoreStation: true }));
       setPos(park.x, park.y, 0, pos.x);
       el.walker.classList.add('idle');
       el.walker.classList.remove('hb-walk');
+      if (room) arriveHome();
       return;
     }
-    if (state.panel || state.atHome || state.visiting || state.guiding || state.exiting) return;
-    if (!atPerch()) { returnToPerch(scheduleWander); return; }
+    if (!atStation()) { goToStation(); return; }
+    if (!state.atHome) arriveHome();
     el.walker.classList.add('idle');
-    if (!nextVisitAt) scheduleNextVisit();
     if (!nextIconAt) nextIconAt = Date.now() + 70000 + Math.random() * 50000;
-    var pause = 6000 + Math.random() * 6000;
+    var pause = 8000 + Math.random() * 8000;
     wanderTimer = setTimeout(function () {
-      if (!el.walker || el.walker.style.display === 'none' || state.panel || state.atHome || state.visiting || state.guiding) return;
+      if (!el.walker || el.walker.style.display === 'none' || state.panel || state.visiting || state.guiding || state.exiting) return;
       if (bubbleOn() || userBusy()) { scheduleWander(); return; }
-      if (Date.now() >= nextVisitAt && paintStation()) {
-        goToStation();
-        return;
-      }
       if (Date.now() >= nextIconAt && tryIconVisit()) return;
       maybeRandomComment();
-      if (bubbleOn()) { scheduleWander(); return; }
-      if (Math.random() < 0.5) fidget();
-      else scheduleWander();
+      scheduleWander();
     }, pause);
   }
 
   // Storlek, vridning, scroll eller ändrade moduler: sittplatsen räknas om och bubblan följer med.
   function onResize() {
     paintStation();
-    if (el.walker && el.walker.style.display !== 'none' && !state.visiting && !state.atHome && !state.guiding && !state.exiting) {
-      var p = perchSpot();
-      setPos(p.x, p.y, 0, pos.x);
+    if (el.walker && el.walker.style.display !== 'none' && !state.visiting && !state.guiding && !state.exiting) {
+      if (bubbleOn()) {
+        var p = perchSpot();
+        setPos(p.x, p.y, 0, pos.x);
+      } else {
+        var room = paintStation();
+        var stand = standAtStation(room, charId());
+        if (stand) setPos(stand.x, stand.y, 0, pos.x);
+        if (room) arriveHome();
+      }
     }
     if (bubbleOn()) placeChrome();
-    if (el.walker && el.walker.style.display !== 'none' && !state.visiting) scheduleWander();
+    if (el.walker && el.walker.style.display !== 'none' && !state.visiting && !bubbleOn()) scheduleWander();
   }
   function notePerchDrift() {
-    // anropas varje sekund från tick(): rutnätet kan ha flyttat sig (moduler, scroll, typsnitt)
+    // anropas varje sekund från tick(): rutnätet, sidan eller prickarna kan ha flyttat sig
     if (!el.walker || el.walker.style.display === 'none') return;
-    if (state.visiting || state.atHome || state.guiding || state.exiting || state.panel) return;
+    if (state.visiting || state.guiding || state.exiting || state.panel) return;
     if (el.walker.classList.contains('hb-walk')) return;
-    if (atPerch(4)) return;
-    var p = perchSpot();
-    setPos(p.x, p.y, canWalk() ? 0.3 : 0, pos.x);
-    if (bubbleOn()) followBubble();
+    if (bubbleOn()) {
+      if (atPerch(4)) { if (bubbleOn()) followBubble(); return; }
+      var p = perchSpot();
+      setPos(p.x, p.y, canWalk() ? 0.3 : 0, pos.x);
+      followBubble();
+      return;
+    }
+    paintStation();
+    if (atStation(6)) return;
+    var stand = standAtStation(stationRoom(), charId());
+    if (!stand) return;
+    setPos(stand.x, stand.y, canWalk() ? 0.3 : 0, pos.x);
+    arriveHome();
   }
 
 
@@ -1497,7 +1583,7 @@
     if (!opt.keepVisit) {
       clearTipHl();
       state.guiding = false;
-      if (!state.visiting) scheduleWander();
+      if (!state.visiting) scheduleWander(); // går tillbaka till stationen
     }
   }
   function pauseStickyBubble() {
@@ -1601,9 +1687,10 @@
     if (!on) { hideBubble(); closePanel(); stopWalk(); if (el.station) el.station.classList.add('hb-hidden'); }
     else if (!was) {
       ensureStation();
-      paintStation();
-      var startAt = perchSpot();
+      var room = paintStation();
+      var startAt = standAtStation(room, charId()) || perchSpot();
       setPos(startAt.x, startAt.y, 0);
+      if (room) arriveHome();
       scheduleWander();
     }
   }
@@ -1862,6 +1949,10 @@
     localStorage.setItem(driverKey(), c);
     if (c === 'off') { show(false); return; }
     drawChar(); wave(); tick();
+    if (el.walker && el.walker.style.display !== 'none' && !state.exiting) {
+      stopWalk();
+      if (!bubbleOn()) goToStation();
+    }
   }
 
   // Inställningar-sidan (hemskärmen → Inställningar)
@@ -1869,7 +1960,7 @@
     renderSettings: function (content) {
       var c = charId();
       content.innerHTML = '<div class="section"><h3 style="margin-top:0">Hjälpbot</h3>' +
-        '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">En liten figur på startskärmen som kan kommentera dina siffror. Den visas bara där, inte inne i andra verktyg. Den står längst ner, direkt efter sista ikonen, och pratar bara där. Ska den kolla till exempel vädret springer den snabbt in i ikonen och tillbaka, och berättar sedan. Tryck på den så gör den en kort reaktion. Finns en pratbubbla stängs den vid tryck. Hjälp finns under frågetecknet uppe till höger.</p>' +
+        '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">En liten figur på startskärmen som kan kommentera dina siffror. Den visas bara där, inte inne i andra verktyg. När den inte pratar står den vid sin station längst ner: roboten i en laddstation, Chauffören vid en liten taxi och Taxi-Diva vid sminkbordet. Ska den säga något går den fram till platsen efter sista ikonen och pratar där, och går sedan tillbaka. Stationen täcker inte ikoner eller sidprickarna. Ska den kolla till exempel vädret springer den snabbt in i ikonen och tillbaka, och berättar sedan. Tryck på den så gör den en kort reaktion. Finns en pratbubbla stängs den vid tryck. Hjälp finns under frågetecknet uppe till höger.</p>' +
         '<div class="hb-pick">' + charButtons('hb-pickbtn') + '<button class="hb-pickbtn' + (c === 'off' ? ' on' : '') + '" data-hb-char="off"><div style="height:56px;display:flex;align-items:center;justify-content:center;font-size:1.6rem">🚫</div>Av</button></div>' +
         (c !== 'off' ? '<p style="margin:.55rem 0 0"><button type="button" class="anim-try" data-hb-try="vader">Prova väderkollen</button></p>' : '') + '</div>';
       content.onclick = function (e) {
@@ -1997,7 +2088,13 @@
     }, 800);
     document.addEventListener('animationer-change', function () {
       drawChar();
-      if (!canWalk()) { stopWalk(); var park = nearestWalkable(pos.x, pos.y, obstacleRects()); setPos(park.x, park.y, 0); }
+      if (!canWalk()) {
+        stopWalk();
+        var room = paintStation();
+        var park = standAtStation(room, charId()) || nearestWalkable(pos.x, pos.y, obstacleRects({ ignoreStation: true }));
+        setPos(park.x, park.y, 0);
+        if (room) arriveHome();
+      }
       else if (el.walker && el.walker.style.display !== 'none') scheduleWander();
       if (window.HJALPBOT_HOGTID) {
         if (!animOn()) { if (HJALPBOT_HOGTID.stop) HJALPBOT_HOGTID.stop(); }
@@ -2086,6 +2183,10 @@
     window.HJALPBOT._previewPos = function (x, y, dur) { setPos(x, y, dur == null ? 0 : dur, pos.x); };
     window.HJALPBOT._pickSpot = function () { return perchSpot(); };
     window.HJALPBOT._perch = function () { return perchSpot(); };
+    window.HJALPBOT._station = function () { return stationRoom(); };
+    window.HJALPBOT._stand = function () { return standAtStation(stationRoom(), charId()); };
+    window.HJALPBOT._atHome = function () { return !!state.atHome; };
+    window.HJALPBOT._reserveBottom = function () { return reserveBottom(); };
     window.HJALPBOT._trip = function () { return state.tripLog.slice(); };
     window.HJALPBOT._bubbleAt = function () { return state.bubbleAt ? { l: state.bubbleAt.l, t: state.bubbleAt.t } : null; };
     window.HJALPBOT.visit = function (tool, text) {

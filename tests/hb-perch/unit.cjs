@@ -53,12 +53,13 @@ assert.match(src, /SWEEP_MIN = 0\.45, SWEEP_MAX = 0\.9/);
 assert.doesNotMatch(src, /function pickWalkTarget/);
 assert.doesNotMatch(src, /function pickSpot/);
 const wander = body('scheduleWander');
-assert.match(wander, /if \(!atPerch\(\)\) \{ returnToPerch\(scheduleWander\); return; \}/);
+assert.match(wander, /if \(!atStation\(\)\) \{ goToStation\(\); return; \}/);
 assert.match(wander, /bubbleOn\(\) \|\| userBusy\(\)/);
 assert.doesNotMatch(wander, /findPath|pickWalk/);
-// stationen: tyst svep dit, tillbaka till sittplatsen efteråt
+// stationen är viloläget: tyst svep dit, stannar där (ingen automatisk återgång till sittplatsen)
 assert.match(body('goToStation'), /sweepTo\(stand,/);
-assert.match(body('arriveHome'), /returnToPerch\(scheduleWander\)/);
+assert.match(body('goToStation'), /arriveHome\(\); scheduleWander\(\)/);
+assert.doesNotMatch(body('arriveHome'), /returnToPerch/);
 // spontant prat väntar när föraren håller på
 assert.match(body('maybeRandomComment'), /userBusy\(\)/);
 assert.match(body('maybeTimeComment'), /userBusy\(\)/);
@@ -86,8 +87,8 @@ assert.match(src, /state\.enteredTool = id;\s*state\.enteredAt = Date\.now\(\);\
 assert.match(body('poke'), /if \(bubbleOn\(\)\) \{\s*hideBubble\(\);/);
 
 // cache och nyheter
-assert.match(index, /hjalpbot\.js\?v=20261112bot1/);
-assert.match(lazy, /changelog\.js\?v=2026111[234](bot1|mapp1|ljud1|mod2|lasbar1|skroll1|chatt1|prick2|barn1|sedd1|hem1|avs1|kp1|sem1|sidor1)/);
+assert.match(index, /hjalpbot\.js\?v=20261114ladd1/);
+assert.match(lazy, /changelog\.js\?v=2026111[234](bot1|mapp1|ljud1|mod2|lasbar1|skroll1|chatt1|prick2|barn1|sedd1|hem1|avs1|kp1|sem1|sidor1|ladd1)/);
 assert.match(changelog, /id: '2026-11-12bot1'/);
 assert.ok(changelog.indexOf("'2026-11-12bot1'") < changelog.indexOf("'2026-11-12zon2'"), 'överst');
 assert.doesNotMatch(src + changelog.slice(0, 3000), /\bStig\b/);
