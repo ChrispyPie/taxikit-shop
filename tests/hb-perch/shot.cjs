@@ -1,5 +1,5 @@
 'use strict';
-// Hjälpboten pratar bara på sittplatsen efter sista ikonen (2026-11-12 bot1).
+// Hjälpboten vilar vid stationen och pratar på sittplatsen efter sista ikonen (2026-11-14 ladd1).
 // Kör: node tests/hb-perch/shot.cjs [utmapp]   (kräver puppeteer-core och /usr/bin/google-chrome)
 const fs = require('node:fs');
 const path = require('node:path');
@@ -53,17 +53,42 @@ function layoutInPage() {
     last: { l: last.left, t: last.top, r: last.right, b: last.bottom },
     bot: { l: w.left, t: w.top, r: w.right, b: w.bottom },
     perch: HJALPBOT._perch(),
+    stand: HJALPBOT._stand && HJALPBOT._stand(),
+    atHome: !!(HJALPBOT._atHome && HJALPBOT._atHome()),
+    stationBox: (function () {
+      const st = document.querySelector('.hb-station');
+      if (!st || st.classList.contains('hb-hidden') || st.style.display === 'none') return null;
+      const r = st.getBoundingClientRect();
+      return r.width ? { l: r.left, t: r.top, r: r.right, b: r.bottom } : null;
+    })(),
+    dots: (function () {
+      const d = document.getElementById('td-dots');
+      if (!d || d.style.display === 'none') return null;
+      const r = d.getBoundingClientRect();
+      return r.width ? { l: r.left, t: r.top, r: r.right, b: r.bottom } : null;
+    })(),
     botOnIcon: iconRects.some(r => hit(w, r)),
     bubble: b && { l: b.left, t: b.top, r: b.right, b: b.bottom, side: bub.getAttribute('data-side') },
     bubbleOnIcon: !!(b && iconRects.some(r => hit(b, r))),
     bubbleOnScreen: !!(b && b.left >= -1 && b.top >= -1 && b.right <= innerWidth + 1 && b.bottom <= innerHeight + 1)
   };
 }
+function hitBox(a, r) { return a && r && a.l < r.r && a.r > r.l && a.t < r.b && a.b > r.t; }
 function afterLast(L) {
-  // samma rad direkt till höger om sista ikonen, eller under den
-  const sameRow = L.bot.l >= L.last.r - 2 && L.bot.t < L.last.b && L.bot.b > L.last.t;
-  const below = L.bot.t >= L.last.b - 2;
+  // samma rad direkt till höger om sista ikonen, eller under den — för sittplatsen (pratar)
+  const p = L.perch, b = p ? { l: p.x, t: p.y, r: p.x + 40, b: p.y + 40 } : L.bot;
+  const sameRow = b.l >= L.last.r - 2 && b.t < L.last.b && b.b > L.last.t;
+  const below = b.t >= L.last.b - 2;
   return sameRow || below;
+}
+function atPt(bot, pt, tol) {
+  return !!(pt && Math.abs(bot.l - pt.x) <= (tol || 4) && Math.abs(bot.t - pt.y) <= (tol || 4));
+}
+function atStation(L) { return atPt(L.bot, L.stand, 6) || (L.atHome && !L.bubble); }
+function stationClear(L) {
+  if (!L.stationBox) return true;
+  if (L.dots && hitBox(L.stationBox, L.dots)) return false;
+  return true;
 }
 
 (async () => {
@@ -104,9 +129,10 @@ function afterLast(L) {
   {
     const p = await open({ width: 412, height: 780 });
     let L = await p.evaluate(layoutInPage);
-    ok('phone: bot at perch', Math.abs(L.bot.l - L.perch.x) < 2 && Math.abs(L.bot.t - L.perch.y) < 2, JSON.stringify([L.bot, L.perch]));
-    ok('phone: perch right after last icon', afterLast(L), JSON.stringify(L));
-    ok('phone: bot not on icons at perch', !L.botOnIcon);
+    ok('phone: bot at station', atStation(L), JSON.stringify([L.bot, L.stand, L.atHome, L.stationBox]));
+    ok('phone: perch right after last icon', afterLast(L), JSON.stringify({ perch: L.perch, last: L.last }));
+    ok('phone: bot not on icons at station', !L.botOnIcon);
+    ok('phone: station not on dots', stationClear(L) && !(L.dots && hitBox(L.bot, L.dots)), JSON.stringify({ station: L.stationBox, dots: L.dots, bot: L.bot }));
     await p.screenshot({ path: path.join(out, 'perch-412.png') });
 
     // väderresa: svep → in → ut → svep tillbaka → prata
@@ -204,10 +230,11 @@ function afterLast(L) {
     await sleep(1600);
     const L = await p.evaluate(layoutInPage);
     ok('fewer modules: perch moved', L.perch.y < before.y - 20, JSON.stringify([before, L.perch]));
-    ok('fewer modules: bot followed', Math.abs(L.bot.l - L.perch.x) < 2 && Math.abs(L.bot.t - L.perch.y) < 2, JSON.stringify([L.bot, L.perch]));
-    ok('fewer modules: after last icon', afterLast(L), JSON.stringify(L));
+    ok('fewer modules: bot stayed at station', atStation(L), JSON.stringify([L.bot, L.stand, L.perch]));
+    ok('fewer modules: perch after last icon', afterLast(L), JSON.stringify({ perch: L.perch, last: L.last }));
     await p.evaluate(t => HJALPBOT.previewSay(t), RAIN);
-    await sleep(300);
+    await p.waitForFunction(() => document.querySelector('.hb-bubble.show'), { timeout: 4000 });
+    await sleep(80);
     const L2 = await p.evaluate(layoutInPage);
     ok('fewer modules: bubble off icons', !L2.bubbleOnIcon, JSON.stringify(L2.bubble));
     await p.screenshot({ path: path.join(out, 'perch-412-farre.png') });
@@ -223,12 +250,14 @@ function afterLast(L) {
   ]) {
     const p = await open(v);
     let L = await p.evaluate(layoutInPage);
-    ok(v.name + ': bot at perch', Math.abs(L.bot.l - L.perch.x) < 2 && Math.abs(L.bot.t - L.perch.y) < 2, JSON.stringify([L.bot, L.perch]));
+    ok(v.name + ': bot at station', atStation(L), JSON.stringify([L.bot, L.stand, L.atHome]));
     ok(v.name + ': not on icons', !L.botOnIcon, JSON.stringify(L.bot));
-    if (L.last.b <= L.vh - 48) ok(v.name + ': after last icon', afterLast(L), JSON.stringify(L));
+    ok(v.name + ': station not on dots', stationClear(L), JSON.stringify({ station: L.stationBox, dots: L.dots }));
+    if (L.last.b <= L.vh - 48) ok(v.name + ': perch after last icon', afterLast(L), JSON.stringify({ perch: L.perch, last: L.last }));
     else console.log('INFO', v.name, 'grid längre än skärmen: sittplats längst ner', JSON.stringify(L.perch));
     await p.evaluate(t => HJALPBOT.previewSay(t), RAIN);
-    await sleep(300);
+    await p.waitForFunction(() => document.querySelector('.hb-bubble.show'), { timeout: 4000 });
+    await sleep(80);
     L = await p.evaluate(layoutInPage);
     ok(v.name + ': bubble on screen', L.bubbleOnScreen, JSON.stringify(L.bubble));
     if (L.last.b <= L.vh - 120) ok(v.name + ': bubble off icons', !L.bubbleOnIcon, JSON.stringify(L.bubble));
@@ -246,11 +275,11 @@ function afterLast(L) {
   // ---- 6. minskad rörelse: står still på sittplatsen ----
   {
     const p = await open({ width: 412, height: 780, reduce: true });
-    const a = await p.evaluate(() => [HJALPBOT._pos(), HJALPBOT._perch()]);
+    const a = await p.evaluate(() => [HJALPBOT._pos(), HJALPBOT._stand(), HJALPBOT._atHome()]);
     await sleep(1200);
     const b = await p.evaluate(() => HJALPBOT._pos());
-    ok('reduced motion: at perch', Math.abs(a[0].x - a[1].x) < 2 && Math.abs(a[0].y - a[1].y) < 2, JSON.stringify(a));
-    ok('reduced motion: still', a[0].x === b.x && a[0].y === b.y);
+    ok('reduced motion: at station', a[2] && Math.abs(a[0].x - a[1].x) <= 4 && Math.abs(a[0].y - a[1].y) <= 4, JSON.stringify(a));
+    ok('reduced motion: still', a[0].x === b.x && a[0].y === b.y, JSON.stringify([a[0], b]));
     await p.close();
   }
 
