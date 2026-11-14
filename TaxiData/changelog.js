@@ -15,7 +15,7 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-11-14', id: '2026-11-14sidor1', rader: [
+  { datum: '2026-11-14', id: '2026-11-14sidor1', tid: '14:34', rader: [
     ['Nytt', 'Startskärmen: flytta ikoner och mappar dit du vill. Håll in och dra till valfri ruta, tomma rutor får vara tomma och ingenting packas ihop. Släpper du på en ruta där något redan står byter de plats. Väljer du en layout i Inställningar sorteras allt en gång, sedan kan du flytta fritt igen.'],
     ['Nytt', 'Inställningar: 4 i bredd (tätare ikoner) och Ikonstorlek, Små eller Stora. Ikonstorleken är fristående från textstorleken.'],
     ['Nytt', 'Startskärmen har flera sidor. Svep åt vänster till sida 2, där du kan lägga ikoner och mappar. Dra en ikon till skärmkanten för att flytta den till sidan bredvid. Prickarna längst ned visar vilken sida du är på, och 🏠 tar dig alltid till startskärmen.'],
