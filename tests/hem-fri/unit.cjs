@@ -62,7 +62,7 @@ console.log('ok  modell');
   let PGlite;
   try { ({ PGlite } = require(process.env.PGLITE || '@electric-sql/pglite')); } catch (e) { console.log('SKIP SQL: PGlite saknas'); console.log('HEM_FRI_UNIT_OK'); return; }
   const db = new PGlite();
-  const sql = fs.readFileSync(path.join(root, 'supabase/migrations/20261114c_home_tool_pos.sql'), 'utf8');
+  const sql = fs.readFileSync(path.join(root, 'supabase/migrations/20261114e_home_tool_pos.sql'), 'utf8');
   const fn = sql.slice(sql.indexOf('create or replace function private.home_tool_pos_clean'), sql.indexOf('revoke all on function private.home_tool_pos_clean'));
   await db.exec('create schema private;' + fn);
   const q = async (j) => (await db.query('select private.home_tool_pos_clean($1::jsonb) r', [JSON.stringify(j)])).rows[0].r;

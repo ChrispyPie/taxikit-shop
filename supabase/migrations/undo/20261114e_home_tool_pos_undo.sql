@@ -1,4 +1,4 @@
--- Ångra 20261114c_home_tool_pos.sql
+-- Ångra 20261114e_home_tool_pos.sql
 -- Tar bort 5-arg-RPC:en, hjälpfunktionen och kolumnen pos. get återgår till versionen från 20261112b.
 drop function if exists public.home_tool_order_set(text, text[], text[], jsonb, jsonb);
 

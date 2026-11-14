@@ -1,4 +1,4 @@
--- 20261114c: fri placering på startskärmen (2026-11-14fri1). Additivt:
+-- 20261114e: fri placering på startskärmen (2026-11-14fri1). Additivt:
 --   * ny kolumn pos jsonb på private.home_tool_order (standard '{}', befintliga rader oförändrade)
 --     form: { "<kolumner>": { "<id>": [rad, kolumn] }, "e<kolumner>": {...}, "sida2": [id], "ute": [id] }
 --       t.ex. {"4": {"kordata": [0,0], "mapp-ab": [0,3]}, "e4": {"vader": [2,1]}, "sida2": ["vader"], "ute": ["om"]}
@@ -8,7 +8,7 @@
 --   * get-RPC returnerar även pos
 --   * ny 5-arg set-RPC med p_pos. 4-, 3- och 2-arg finns kvar och rör inte pos.
 -- Klienten klarar sig utan migrationen (positionerna sparas då bara på enheten).
--- Ångra: supabase/migrations/undo/20261114c_home_tool_pos_undo.sql
+-- Ångra: supabase/migrations/undo/20261114e_home_tool_pos_undo.sql
 
 alter table private.home_tool_order
   add column if not exists pos jsonb not null default '{}'::jsonb;

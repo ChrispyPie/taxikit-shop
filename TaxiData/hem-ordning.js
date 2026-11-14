@@ -396,7 +396,7 @@
     var base = { p_token: token(), p_ids: order || [], p_hidden: hidden || [] };
     var withF = { p_token: base.p_token, p_ids: base.p_ids, p_hidden: base.p_hidden, p_folders: folders };
     var withP = { p_token: base.p_token, p_ids: base.p_ids, p_hidden: base.p_hidden, p_folders: folders, p_pos: pos };
-    // 5-arg (med positioner) finns efter migration 20261114c, 4-arg (mappar) efter 20261112b. Saknas de faller vi
+    // 5-arg (med positioner) finns efter migration 20261114e, 4-arg (mappar) efter 20261112b. Saknas de faller vi
     // tillbaka; det som servern inte kan spara ligger kvar i localStorage.
     return rpc('home_tool_order_set', withP).then(function (r) {
       if (r != null || !token() || isDemo()) return r;
