@@ -52,7 +52,7 @@ assert.match(index, /hjalpbot-scenarier\.js\?v=20261114vkoll1/);
 assert.match(index, /lazy-views\.js\?v=20261114vkoll1/);
 assert.match(lazy, /changelog\.js\?v=20261114vkoll1/);
 assert.match(changelog, /id: '2026-11-14vkoll1'/);
-assert.doesNotMatch(changelog.split("id: '2026-11-14vkoll1'")[1].split(']},')[0], /\btid\b/);
+assert.match(changelog.split("id: '2026-11-14vkoll1'")[1].split('rader:')[0], /tid: '21:03'/);
 assert.ok(changelog.indexOf("'2026-11-14vkoll1'") < changelog.indexOf("'2026-11-14bil1'"), 'nyheten överst');
 const block = changelog.split("id: '2026-11-14vkoll1'")[1].split(']},')[0];
 assert.match(block, /väderkollen/i);
