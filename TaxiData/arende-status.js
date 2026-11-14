@@ -108,7 +108,13 @@
     var d = new Date(iso), p = function (n) { return (n < 10 ? '0' : '') + n; };
     return d.getDate() + '/' + (d.getMonth() + 1) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
   };
-  A.rpc = function (name, args) {
+  // PostgREST kör STABLE-RPC i en transaktion som bara får läsa. session_actor
+  // uppdaterar last_seen efter en minut och får då 25006 → HTTP 405. Säkert att
+  // försöka om en gång: skrivningen rullades tillbaka.
+  A.isReadOnlyTx = function (e) {
+    return !!(e && (e.code === '25006' || e.message === 'HTTP 405' || /read-only transaction/i.test(String(e && e.message || ''))));
+  };
+  A.rpcOnce = function (name, args) {
     args = args || {};
     args.p_token = localStorage.getItem('taxi_session') || '';
     /* global TRIP_API_URL, TRIP_API_KEY, SUPABASE_URL, SUPABASE_KEY */
@@ -124,6 +130,12 @@
         if (!r.ok) { var er = new Error((b && b.message) || ('HTTP ' + r.status)); er.code = b && b.code; throw er; }
         return b;
       });
+    });
+  };
+  A.rpc = function (name, args) {
+    return A.rpcOnce(name, args).catch(function (e) {
+      if (A.isReadOnlyTx(e)) return A.rpcOnce(name, args);
+      throw e;
     });
   };
   A.ERR = { need_text: 'Skriv något först.', msg_too_long: 'Texten är för lång.', comment_too_long: 'Texten är för lång.',
