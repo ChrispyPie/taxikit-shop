@@ -840,7 +840,18 @@
     saveServer();
   }
   var rsT = 0;
+  function relayoutNow() {
+    // Nytt kolumnantal (vridning): lägg om direkt, så att det som räknar på ikonerna (hjälpboten) ser den nya layouten.
+    // (gridCols räknar med rutor som ligger utanför det nya antalet, så vi lägger om när bredden ändrats.)
+    var w = window.innerWidth || 0;
+    if (dg || w === relW) return;
+    relW = w;
+    pageGrids().forEach(function (g) { if (freeOn() && fsOf(g)) layoutFree(g); });
+  }
+  var relW = window.innerWidth || 0;
+  window.addEventListener('orientationchange', relayoutNow, true);
   window.addEventListener('resize', function () {
+    relayoutNow();
     clearTimeout(rsT);
     rsT = setTimeout(function () {
       if (dg) return;
@@ -849,7 +860,7 @@
         layoutFree(g);   // kolumnantalet kan ha ändrats (vridning, Fyll bredd)
       });
     }, 150);
-  });
+  }, true);   // capture: före andra resize-lyssnare (hjälpboten räknar sin plats på den nya layouten)
 
   /* ---------- Mappar på startskärmen ---------- */
   function store() {

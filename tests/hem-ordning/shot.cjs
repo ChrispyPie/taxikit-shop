@@ -125,7 +125,8 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
       return {
         x: document.querySelectorAll('.grid.td-ordna .td-remove').length,
         noXCore: !document.querySelector('.icon[data-tool="installningar"] .td-remove') && !document.querySelector('.icon[data-tool="om"] .td-remove'),
-        plusLast: document.querySelector('.icon[data-tool="moduler"]') === document.querySelector('#app .grid').lastElementChild,
+        // fri placering (2026-11-14): tomma rutor (.td-cell) ritas efter ikonerna; Moduler ska vara sista ikonen
+        plusLast: document.querySelector('.icon[data-tool="moduler"]') === [...document.querySelector('#app .grid').children].filter(n => n.classList.contains('icon')).pop(),
         banner: !!(cs && cs.display !== 'none' && /Ändringsläge/.test(ban.textContent)),
         klar: !!document.querySelector('.td-andringslage [data-ordna="done"]'),
         reset: !!document.querySelector('.td-andringslage [data-ordna="reset"]'),
