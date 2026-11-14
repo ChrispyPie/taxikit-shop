@@ -20,7 +20,7 @@ assert.match(index, /hem-ordning\.js\?v=20261114lokal1/);
 assert.match(index, /lazy-views\.js\?v=20261114lokal1/);
 assert.match(lazy, /changelog\.js\?v=20261114lokal1/);
 assert.match(changelog, /id: '2026-11-14lokal1'/);
-assert.doesNotMatch(changelog.split("id: '2026-11-14lokal1'")[1].split(']},')[0], /\btid\b/);
+assert.match(changelog.split("id: '2026-11-14lokal1'")[1].split('rader:')[0], /tid: '22:02'/);
 assert.ok(changelog.indexOf("'2026-11-14lokal1'") < changelog.indexOf("'2026-11-14vkoll1'"), 'nyheten överst');
 const block = changelog.split("id: '2026-11-14lokal1'")[1].split(']},')[0];
 assert.match(block, /enheten/);
