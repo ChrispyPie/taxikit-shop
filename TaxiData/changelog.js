@@ -15,7 +15,7 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-11-13', id: '2026-11-13avs1', rader: [
+  { datum: '2026-11-13', id: '2026-11-13avs1', tid: '02:13', rader: [
     ['Fixat', 'Ärenden: rätt avsändare på svaren. Förut stod det Du på alla svar från någon med ägarroll, även när någon annan hade skrivit dem. Nu står Du bara på det du själv skrivit, och annars personens namn.']
   ]},
   { datum: '2026-11-13', id: '2026-11-13hem1', tid: '21:54', rader: [
