@@ -9,6 +9,9 @@
  * 2026-11-14 ladd1: när den inte pratar går den ner till sin egen station (robot: laddstation,
  *   chaufför: liten taxi, diva: sminkbord). Stationen och figuren täcker inte ikoner eller sidprickar.
  *   När den ska prata sveper den fram till sittplatsen och går tillbaka efteråt. Reducera rörelse: hoppar dit.
+ * 2026-11-14 vkoll1: väderkollen (och andra ikonbesök) fungerar även om ikonen är flyttad, i en mapp,
+ *   på en annan hemsida eller bara i applådan. Syns ikonen inte på den sida föraren tittar på
+ *   pratar boten från sittplatsen efter sista ikonen, utan att gå in i en dold eller avsveppt ikon.
  */
 (function () {
   'use strict';
@@ -1194,19 +1197,49 @@
   }
 
 
+  // Ikonen räknas som synlig bara om den faktiskt syns på den sida föraren tittar på.
+  // Dolda exemplar i mappförrådet, applådan eller en avsveppt hemsida räknas inte:
+  // då pratar boten från sittplatsen i stället för att gå in i en osynlig ikon.
+  function iconIsOnScreen(node) {
+    if (!node) return false;
+    var r, vw, vh, root;
+    if (node.closest) {
+      if (node.closest('#td-mapp-forrad') || node.closest('.td-lada') || node.closest('#td-mapp')) return false;
+      root = node.closest('.td-sida');
+      if (root && !root.classList.contains('td-vis')) return false;
+    }
+    r = node.getBoundingClientRect();
+    if (r.width < 8 || r.height < 8) return false;
+    vw = window.innerWidth || 0;
+    vh = window.innerHeight || 0;
+    if (r.right < 8 || r.left > vw - 8 || r.bottom < 8 || r.top > vh - 8) return false;
+    return true;
+  }
   function iconNode(tool) {
-    var root = visibleHomeRoot() || document;
-    return (root.querySelector && root.querySelector('.grid .icon[data-tool="' + tool + '"] .emoji')) ||
-      document.querySelector('#app.is-home .grid .icon[data-tool="' + tool + '"] .emoji');
+    var list = document.querySelectorAll('.icon[data-tool="' + tool + '"] .emoji'), i, n;
+    for (i = 0; i < list.length; i++) {
+      n = list[i];
+      if (iconIsOnScreen(n)) return n;
+    }
+    return null;
   }
   function visibleTools() {
-    var out = [], root = visibleHomeRoot() || document;
+    var out = [], seen = {}, root = visibleHomeRoot() || document;
     var nodes = root.querySelectorAll ? root.querySelectorAll('.grid .icon[data-tool]') : [];
     Array.prototype.forEach.call(nodes, function (n) {
       var id = n.getAttribute('data-tool');
-      if (id && id !== 'installningar' && id !== 'om' && n.getBoundingClientRect().width > 8) out.push(id);
+      var em = n.querySelector ? n.querySelector('.emoji') : null;
+      if (id && id !== 'installningar' && id !== 'om' && !seen[id] && iconIsOnScreen(em || n)) {
+        seen[id] = 1;
+        out.push(id);
+      }
     });
     return out;
+  }
+  function speakHit(hit, tool) {
+    if (!hit || !hit.text) { scheduleWander(); return false; }
+    say(hit.text, { tool: tool || hit.tool, mood: hit.mood });
+    return true;
   }
   function tryIconVisit() {
     if (userBusy() || bubbleOn()) return false;
@@ -1230,7 +1263,8 @@
   var TRIP_INSIDE_MS = 1100, TRIP_OUT_MS = 350;
   function visitIcon(tool, hit) {
     var node = iconNode(tool);
-    if (!node || !el.walker) return false;
+    if (!node || !el.walker || !canWalk()) return speakHit(hit, tool);
+    if (!hit || !hit.text) return speakHit(hit, tool);
     var r = node.getBoundingClientRect();
     var dest = { x: r.left + r.width / 2 - SIZE / 2, y: r.top + r.height / 2 - SIZE / 2 };
     if (bubbleOn()) hideBubble({ keepVisit: true });
@@ -1865,7 +1899,7 @@
   // Prova väderkollen (Inställningar → Hjälpbot): samma resa som annars, utan att vänta.
   function demoHit(tool) {
     var hit = pickScenario('home', tool, { skipCooldown: true, skipChance: true });
-    return hit && hit.tool === tool ? hit : null;
+    return hit && (hit.tool === tool || !hit.tool) ? hit : null;
   }
   function runDemoTrip() {
     var d = state.demoTrip;
@@ -1874,8 +1908,6 @@
     setTimeout(function () {
       if (page() !== 'hem' || charId() === 'off' || !el.walker || el.walker.style.display === 'none') return;
       var hit = demoHit(d.tool);
-      if (!iconNode(d.tool)) { if (hit) say(hit.text, { tool: d.tool, mood: hit.mood }); return; }
-      if (!canWalk()) { if (hit) say(hit.text, { tool: d.tool, mood: hit.mood }); return; }
       visitIcon(d.tool, hit);
     }, 700);
     return true;
@@ -1960,7 +1992,7 @@
     renderSettings: function (content) {
       var c = charId();
       content.innerHTML = '<div class="section"><h3 style="margin-top:0">Hjälpbot</h3>' +
-        '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">En liten figur på startskärmen som kan kommentera dina siffror. Den visas bara där, inte inne i andra verktyg. När den inte pratar står den vid sin station längst ner: roboten i en laddstation, Chauffören vid en liten taxi och Taxi-Diva vid sminkbordet. Ska den säga något går den fram till platsen efter sista ikonen och pratar där, och går sedan tillbaka. Stationen täcker inte ikoner eller sidprickarna. Ska den kolla till exempel vädret springer den snabbt in i ikonen och tillbaka, och berättar sedan. Tryck på den så gör den en kort reaktion. Finns en pratbubbla stängs den vid tryck. Hjälp finns under frågetecknet uppe till höger.</p>' +
+        '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">En liten figur på startskärmen som kan kommentera dina siffror. Den visas bara där, inte inne i andra verktyg. När den inte pratar står den vid sin station längst ner: roboten i en laddstation, Chauffören vid en liten taxi och Taxi-Diva vid sminkbordet. Ska den säga något går den fram till platsen efter sista ikonen och pratar där, och går sedan tillbaka. Stationen täcker inte ikoner eller sidprickarna. Ska den kolla till exempel vädret springer den snabbt in i ikonen och tillbaka, och berättar sedan. Ligger ikonen i en mapp, på en annan sida eller bara i applådan stannar den på sin vanliga plats och pratar där. Tryck på den så gör den en kort reaktion. Finns en pratbubbla stängs den vid tryck. Hjälp finns under frågetecknet uppe till höger.</p>' +
         '<div class="hb-pick">' + charButtons('hb-pickbtn') + '<button class="hb-pickbtn' + (c === 'off' ? ' on' : '') + '" data-hb-char="off"><div style="height:56px;display:flex;align-items:center;justify-content:center;font-size:1.6rem">🚫</div>Av</button></div>' +
         (c !== 'off' ? '<p style="margin:.55rem 0 0"><button type="button" class="anim-try" data-hb-try="vader">Prova väderkollen</button></p>' : '') + '</div>';
       content.onclick = function (e) {
@@ -2195,6 +2227,8 @@
       var hit = text ? { text: text } : demoHit(tool || 'vader');
       return visitIcon(tool || 'vader', hit);
     };
+    window.HJALPBOT._iconNode = function (tool) { return iconNode(tool); };
+    window.HJALPBOT._iconOnScreen = iconIsOnScreen;
     window.HJALPBOT.demoTrip = function (tool) { state.demoTrip = { tool: tool || 'vader', at: Date.now() }; return true; };
     window.HJALPBOT._pos = function () { return { x: pos.x, y: pos.y }; };
   }

@@ -28,7 +28,7 @@ vm.runInContext(src, ctx);
 const S = ctx.window.HJALPBOT_SCENARIER;
 assert.ok(S && S.all && S.pick);
 const ids = S.all().map(x => x.id);
-['vader-regn','kordata-over','kordata-42','prognos-landvetter','prognos-storbil','prognos-marvin',
+['vader-regn','vader-sno','vader-kallt','vader-sol','vader-annat','kordata-over','kordata-42','prognos-landvetter','prognos-storbil','prognos-marvin',
  'ankomster-nasta','topplistor-etta','robot-dont-panic','robot-marvin-planet','robot-handduk',
  'robot-aybabtu-slump','robot-skyrim-servo','robot-42-slump','tid-leet','tid-pi','tid-404',
  'tid-binar-01','tid-binar-10','tid-sekvens','tid-overflow','tid-1111','kalender-idag','kalender-vecka'].forEach(id => {
@@ -64,6 +64,16 @@ assert.notEqual(rRobot.text, rMan.text);
 assert.notEqual(rRobot.text, rDiva.text);
 assert.match(rMan.text, /paraply/i);
 assert.match(rDiva.text, /stjärna|😉/);
+
+// mulet/milt: tidigare tyst, nu vader-annat. Regn vinner fortfarande.
+windowObj.ANIMATIONER_VADER = { readCache(){ return { kind: 'cloud', temp: 12, symbol: 5, at: Date.now() }; } };
+const moln = S.pick({ context: 'home', tool: 'vader', char: 'robot', skipCooldown: true, skipChance: true });
+assert.equal(moln && moln.id, 'vader-annat');
+assert.match(moln.text, /12°/);
+windowObj.ANIMATIONER_VADER = { readCache(){ return { kind: 'rain', temp: 8, symbol: 9, at: Date.now() }; } };
+assert.equal(S.pick({ context: 'home', tool: 'vader', char: 'robot', skipCooldown: true, skipChance: true }).id, 'vader-regn');
+windowObj.ANIMATIONER_VADER = { readCache(){ return null; } };
+assert.equal(S.pick({ context: 'home', tool: 'vader', char: 'robot', skipCooldown: true, skipChance: true }), null);
 
 // Landvetter bookings exist; airline-storbil does not
 windowObj.ANIMATIONER_VADER = { readCache(){ return null; } };

@@ -252,6 +252,19 @@
         diva: 'Sol och stil, stjärna. Ett sånt pass klär dig. 😉'
       }
     },
+    {
+      id: 'vader-annat', tool: 'vader', context: ['home', 'page'], priority: 20, cooldownMs: 30 * 60 * 1000,
+      when: function () {
+        var s = vaderSnap();
+        if (!s) return null;
+        return { temp: s.temp != null ? Math.round(s.temp) : null };
+      },
+      lines: {
+        robot: function (a) { return a.temp != null ? 'Bip! ' + a.temp + '° just nu. Jag har kikat på vädret.' : 'Bip! Jag har kikat på vädret. Inget särskilt att varna för.'; },
+        chauffor: function (a) { return a.temp != null ? a.temp + ' grader. Inget dramatiskt väder, bara att köra på.' : 'Jag har kikat på vädret. Inget särskilt – vi kör.'; },
+        diva: function (a) { return a.temp != null ? a.temp + '°. Inget mer att anmärka på, stjärna. Vi rullar. 😉' : 'Jag har kikat på vädret, stjärna. Inget att oroa sig för. 😉'; }
+      }
+    },
 
     // ----- Körpassdata -----
     {
