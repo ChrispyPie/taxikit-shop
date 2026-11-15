@@ -1,8 +1,8 @@
 {
   "airport": "GOT",
-  "updated": "2026-11-15T20:15:37+01:00",
-  "arrivalsUpdated": "2026-11-15T20:15:38+01:00",
-  "departuresUpdated": "2026-11-15T19:25:27+01:00",
+  "updated": "2026-11-15T20:20:34+01:00",
+  "arrivalsUpdated": "2026-11-15T20:20:36+01:00",
+  "departuresUpdated": "2026-11-15T20:20:37+01:00",
   "yesterdayUpdated": "2026-11-15T05:10:35+01:00",
   "tomorrowUpdated": "2026-11-15T20:01:06+01:00",
   "error": null,
@@ -2104,8 +2104,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 21:59",
-      "reason": "Ankommer 21:59"
+      "rawStatus": "Ankommer 21:48",
+      "reason": "Ankommer 21:48"
     },
     {
       "id": "BLX434",
@@ -2156,7 +2156,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-11-15T21:05:00Z",
-      "est": "2026-11-15T20:43:00Z",
+      "est": "2026-11-15T20:47:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "23",
@@ -2493,19 +2493,19 @@
       "other": "Köpenhamn",
       "iata": "",
       "airline": "SAS Scandinavian Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 20:16",
       "sched": "2026-11-15T19:25:00Z",
       "est": "2026-11-15T19:14:00Z",
-      "act": "",
+      "act": "2026-11-15T19:16:00Z",
       "terminal": "T1",
       "gate": "13",
       "baggage": "5",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 20:14",
-      "reason": "Ankommer 20:14"
+      "rawStatus": "Landat 20:16",
+      "reason": "Landat 20:16"
     },
     {
       "id": "LH818",
@@ -4950,66 +4950,6 @@
       "reason": "Startat 15:52"
     },
     {
-      "id": "DK1932",
-      "dir": "AVG",
-      "other": "Gran Canaria",
-      "iata": "",
-      "airline": "Sunclass Airlines",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-11-14T07:00:00Z",
-      "est": "",
-      "act": "2026-11-14T07:06:32Z",
-      "terminal": "T1",
-      "gate": "19",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 08:17",
-      "reason": "Startat 08:17"
-    },
-    {
-      "id": "FR090",
-      "dir": "AVG",
-      "other": "Malaga",
-      "iata": "",
-      "airline": "Ryanair Ltd",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-11-14T06:45:00Z",
-      "est": "",
-      "act": "2026-11-14T06:40:11Z",
-      "terminal": "T1",
-      "gate": "13",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 07:48",
-      "reason": "Startat 07:48"
-    },
-    {
-      "id": "LO496",
-      "dir": "AVG",
-      "other": "Warszawa",
-      "iata": "",
-      "airline": "LOT",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-11-14T07:00:00Z",
-      "est": "",
-      "act": "2026-11-14T07:00:43Z",
-      "terminal": "T1",
-      "gate": "20A",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 08:09",
-      "reason": "Startat 08:09"
-    },
-    {
       "id": "SK2809",
       "dir": "AVG",
       "other": "Gran Canaria",
@@ -5188,26 +5128,6 @@
       "lastBag": "",
       "rawStatus": "Startat 14:30",
       "reason": "Startat 14:30"
-    },
-    {
-      "id": "SK2050",
-      "dir": "AVG",
-      "other": "Luleå",
-      "iata": "",
-      "airline": "SAS Scandinavian Airlines",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-11-14T06:55:00Z",
-      "est": "",
-      "act": "2026-11-14T06:56:00Z",
-      "terminal": "T1",
-      "gate": "24B",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 08:02",
-      "reason": "Startat 08:02"
     },
     {
       "id": "JTD433",
@@ -5615,19 +5535,19 @@
       "other": "Helsingfors",
       "iata": "",
       "airline": "Finnair",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-15T19:15:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-15T19:16:14Z",
       "terminal": "T1",
       "gate": "17",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Gate stängd",
+      "reason": "Gate stängd"
     },
     {
       "id": "FR965",
@@ -5746,8 +5666,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd",
-      "reason": "Gate stängd"
+      "rawStatus": "Startat 19:27",
+      "reason": "Startat 19:27"
     },
     {
       "id": "KL1236",
@@ -5786,8 +5706,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd",
-      "reason": "Gate stängd"
+      "rawStatus": "Startat 19:31",
+      "reason": "Startat 19:31"
     },
     {
       "id": "SN2318",
@@ -6046,8 +5966,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd",
-      "reason": "Gate stängd"
+      "rawStatus": "Startat 19:25",
+      "reason": "Startat 19:25"
     },
     {
       "id": "LH2429",
@@ -6146,8 +6066,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Försenad till 20:20",
-      "reason": "Försenad till 20:20"
+      "rawStatus": "Försenad till 20:20 · Gate stängd",
+      "reason": "Försenad till 20:20 · Gate stängd"
     },
     {
       "id": "EW9221",
@@ -6166,8 +6086,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Gate stängd",
+      "reason": "Gate stängd"
     },
     {
       "id": "W61736",
@@ -6386,8 +6306,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Försenad till 19:25 · Gate stängd",
-      "reason": "Försenad till 19:25 · Gate stängd"
+      "rawStatus": "Startat 19:29",
+      "reason": "Startat 19:29"
     },
     {
       "id": "MI7304",
