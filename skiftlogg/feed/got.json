@@ -1,8 +1,8 @@
 {
   "airport": "GOT",
-  "updated": "2026-11-18T12:25:26+01:00",
-  "arrivalsUpdated": "2026-11-18T12:25:26+01:00",
-  "departuresUpdated": "2026-11-18T11:30:58+01:00",
+  "updated": "2026-11-18T12:30:59+01:00",
+  "arrivalsUpdated": "2026-11-18T12:31:01+01:00",
+  "departuresUpdated": "2026-11-18T12:31:03+01:00",
   "yesterdayUpdated": "2026-11-18T05:01:03+01:00",
   "tomorrowUpdated": "2026-11-18T12:01:09+01:00",
   "error": null,
@@ -1596,7 +1596,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-11-18T13:00:00Z",
-      "est": "2026-11-18T12:54:00Z",
+      "est": "2026-11-18T12:52:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "17",
@@ -1604,8 +1604,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 13:54",
-      "reason": "Beräknad 13:54"
+      "rawStatus": "Beräknad 13:52",
+      "reason": "Beräknad 13:52"
     },
     {
       "id": "AF1452",
@@ -3530,26 +3530,6 @@
   ],
   "departures": [
     {
-      "id": "FR6094",
-      "dir": "AVG",
-      "other": "Gdansk",
-      "iata": "",
-      "airline": "Ryanair Ltd",
-      "status": "SCH",
-      "statusSv": "Planerad",
-      "sched": "2026-11-16T22:40:00Z",
-      "est": "",
-      "act": "",
-      "terminal": "T1",
-      "gate": "15",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Gate stängd",
-      "reason": "Gate stängd"
-    },
-    {
       "id": "JTD341",
       "dir": "AVG",
       "other": "Teneriffa",
@@ -5135,19 +5115,19 @@
       "other": "Frankfurt",
       "iata": "",
       "airline": "Lufthansa",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-18T10:55:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-18T10:40:00Z",
       "terminal": "T1",
       "gate": "16",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Omedelbar avgång",
-      "reason": "Omedelbar avgång"
+      "rawStatus": "Startat 11:49",
+      "reason": "Startat 11:49"
     },
     {
       "id": "LH2429",
@@ -5155,19 +5135,19 @@
       "other": "München",
       "iata": "",
       "airline": "Lufthansa",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-18T11:25:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-18T11:18:59Z",
       "terminal": "T1",
       "gate": "15",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gå till gate",
-      "reason": "Gå till gate"
+      "rawStatus": "Startat 12:27",
+      "reason": "Startat 12:27"
     },
     {
       "id": "LH819",
@@ -5235,19 +5215,19 @@
       "other": "Istanbul IST",
       "iata": "",
       "airline": "Turkish Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-18T10:25:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-18T10:48:14Z",
       "terminal": "T1",
       "gate": "23",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd",
-      "reason": "Gate stängd"
+      "rawStatus": "Startat 12:01",
+      "reason": "Startat 12:01"
     },
     {
       "id": "KL1232",
@@ -5255,19 +5235,19 @@
       "other": "Amsterdam",
       "iata": "",
       "airline": "KLM",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-18T11:00:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-18T10:51:00Z",
       "terminal": "T1",
       "gate": "17",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Boarding",
-      "reason": "Boarding"
+      "rawStatus": "Startat 11:59",
+      "reason": "Startat 11:59"
     },
     {
       "id": "AF1453",
@@ -5306,8 +5286,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Gate stängd",
+      "reason": "Gate stängd"
     },
     {
       "id": "KL1234",
@@ -5381,13 +5361,13 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "23",
+      "gate": "22",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Gate stängd",
+      "reason": "Gate stängd"
     },
     {
       "id": "FR4013",
@@ -5395,19 +5375,19 @@
       "other": "Alicante",
       "iata": "",
       "airline": "Ryanair Ltd",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-18T11:05:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-18T11:06:44Z",
       "terminal": "T1",
       "gate": "20A",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Boarding",
-      "reason": "Boarding"
+      "rawStatus": "Startat 12:17",
+      "reason": "Startat 12:17"
     },
     {
       "id": "AY864",
@@ -5426,8 +5406,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Boarding",
+      "reason": "Boarding"
     },
     {
       "id": "AY862",
