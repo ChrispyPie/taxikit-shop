@@ -1,8 +1,8 @@
 {
   "airport": "GOT",
-  "updated": "2026-11-18T05:25:23+01:00",
+  "updated": "2026-11-18T05:30:57+01:00",
   "arrivalsUpdated": "2026-11-18T05:01:01+01:00",
-  "departuresUpdated": "2026-11-18T04:30:50+01:00",
+  "departuresUpdated": "2026-11-18T05:30:58+01:00",
   "yesterdayUpdated": "2026-11-18T05:01:03+01:00",
   "tomorrowUpdated": "2026-11-17T23:01:02+01:00",
   "error": null,
@@ -2930,46 +2930,6 @@
   ],
   "departures": [
     {
-      "id": "W61736",
-      "dir": "AVG",
-      "other": "Gdansk",
-      "iata": "",
-      "airline": "Wizz Air",
-      "status": "DEL",
-      "statusSv": "Borttagen",
-      "sched": "2026-11-16T16:15:00Z",
-      "est": "",
-      "act": "",
-      "terminal": "T1",
-      "gate": "",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
-    },
-    {
-      "id": "FR4891",
-      "dir": "AVG",
-      "other": "Manchester",
-      "iata": "",
-      "airline": "Ryanair Ltd",
-      "status": "DEL",
-      "statusSv": "Borttagen",
-      "sched": "2026-11-16T16:30:00Z",
-      "est": "",
-      "act": "",
-      "terminal": "T1",
-      "gate": "",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
-    },
-    {
       "id": "W45220",
       "dir": "AVG",
       "other": "Tirana",
@@ -3110,46 +3070,6 @@
       "reason": "Startat 20:51"
     },
     {
-      "id": "AF1453",
-      "dir": "AVG",
-      "other": "Paris CDG",
-      "iata": "",
-      "airline": "Air France",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-11-16T16:10:00Z",
-      "est": "",
-      "act": "2026-11-16T16:02:13Z",
-      "terminal": "T1",
-      "gate": "14",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 17:10",
-      "reason": "Startat 17:10"
-    },
-    {
-      "id": "FR3089",
-      "dir": "AVG",
-      "other": "Manchester",
-      "iata": "",
-      "airline": "Ryanair Ltd",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-11-16T16:15:00Z",
-      "est": "",
-      "act": "2026-11-16T16:19:45Z",
-      "terminal": "T1",
-      "gate": "23",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 17:29",
-      "reason": "Startat 17:29"
-    },
-    {
       "id": "FR965",
       "dir": "AVG",
       "other": "London STN",
@@ -3230,26 +3150,6 @@
       "reason": "Startat 18:20"
     },
     {
-      "id": "KL1236",
-      "dir": "AVG",
-      "other": "Amsterdam",
-      "iata": "",
-      "airline": "KLM",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-11-16T16:20:00Z",
-      "est": "",
-      "act": "2026-11-16T16:18:32Z",
-      "terminal": "T1",
-      "gate": "17",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 17:26",
-      "reason": "Startat 17:26"
-    },
-    {
       "id": "FR4011",
       "dir": "AVG",
       "other": "Krakow",
@@ -3288,26 +3188,6 @@
       "lastBag": "",
       "rawStatus": "Startat 20:09",
       "reason": "Startat 20:09"
-    },
-    {
-      "id": "AY866",
-      "dir": "AVG",
-      "other": "Helsingfors",
-      "iata": "",
-      "airline": "Finnair",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-11-16T16:30:00Z",
-      "est": "",
-      "act": "2026-11-16T16:24:13Z",
-      "terminal": "T1",
-      "gate": "19",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 17:32",
-      "reason": "Startat 17:32"
     },
     {
       "id": "LH2431",
@@ -5426,8 +5306,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Gå till gate",
+      "reason": "Gå till gate"
     },
     {
       "id": "SN2324",
@@ -5486,8 +5366,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Boarding",
+      "reason": "Boarding"
     },
     {
       "id": "BLX233",
@@ -5546,8 +5426,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Gå till gate",
+      "reason": "Gå till gate"
     },
     {
       "id": "SK142",
@@ -5686,8 +5566,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Gå till gate",
+      "reason": "Gå till gate"
     },
     {
       "id": "SK431",
