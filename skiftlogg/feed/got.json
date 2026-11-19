@@ -1,8 +1,8 @@
 {
   "airport": "GOT",
-  "updated": "2026-11-19T12:10:39+01:00",
-  "arrivalsUpdated": "2026-11-19T12:10:40+01:00",
-  "departuresUpdated": "2026-11-19T11:20:40+01:00",
+  "updated": "2026-11-19T12:15:43+01:00",
+  "arrivalsUpdated": "2026-11-19T12:15:45+01:00",
+  "departuresUpdated": "2026-11-19T12:15:46+01:00",
   "yesterdayUpdated": "2026-11-19T05:10:37+01:00",
   "tomorrowUpdated": "2026-11-19T12:01:06+01:00",
   "error": null,
@@ -5515,19 +5515,19 @@
       "other": "Frankfurt",
       "iata": "",
       "airline": "Lufthansa",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-19T10:55:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-19T10:56:03Z",
       "terminal": "T1",
       "gate": "15",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Boarding",
-      "reason": "Boarding"
+      "rawStatus": "Startat 12:07",
+      "reason": "Startat 12:07"
     },
     {
       "id": "LH2429",
@@ -5546,8 +5546,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Gate stängd",
+      "reason": "Gate stängd"
     },
     {
       "id": "WF203",
@@ -5655,19 +5655,19 @@
       "other": "London LHR",
       "iata": "",
       "airline": "British Airways",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-19T10:35:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-19T10:37:50Z",
       "terminal": "T1",
       "gate": "23",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Omedelbar avgång",
-      "reason": "Omedelbar avgång"
+      "rawStatus": "Startat 11:51",
+      "reason": "Startat 11:51"
     },
     {
       "id": "KL1232",
@@ -5675,19 +5675,19 @@
       "other": "Amsterdam",
       "iata": "",
       "airline": "KLM",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-19T11:00:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-19T11:08:26Z",
       "terminal": "T1",
       "gate": "19",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gå till gate",
-      "reason": "Gå till gate"
+      "rawStatus": "Gate stängd",
+      "reason": "Gate stängd"
     },
     {
       "id": "KL1234",
@@ -5721,7 +5721,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "23",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -5806,8 +5806,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd",
-      "reason": "Gate stängd"
+      "rawStatus": "Startat 11:24",
+      "reason": "Startat 11:24"
     },
     {
       "id": "DK632",
@@ -5926,8 +5926,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Gå till gate",
+      "reason": "Gå till gate"
     },
     {
       "id": "AY866",
@@ -6155,19 +6155,19 @@
       "other": "Visby",
       "iata": "",
       "airline": "Nyxair",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-19T10:30:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-19T10:34:00Z",
       "terminal": "T1",
       "gate": "14",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Boarding",
-      "reason": "Boarding"
+      "rawStatus": "Startat 11:42",
+      "reason": "Startat 11:42"
     },
     {
       "id": "SK140",
@@ -6261,7 +6261,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "16",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
