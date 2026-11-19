@@ -1,8 +1,8 @@
 {
   "airport": "GOT",
-  "updated": "2026-11-19T13:10:42+01:00",
-  "arrivalsUpdated": "2026-11-19T13:10:43+01:00",
-  "departuresUpdated": "2026-11-19T12:15:46+01:00",
+  "updated": "2026-11-19T13:15:35+01:00",
+  "arrivalsUpdated": "2026-11-19T13:15:35+01:00",
+  "departuresUpdated": "2026-11-19T13:15:36+01:00",
   "yesterdayUpdated": "2026-11-19T05:10:37+01:00",
   "tomorrowUpdated": "2026-11-19T13:01:06+01:00",
   "error": null,
@@ -2004,8 +2004,8 @@
       "firstBag": "2026-11-19T12:07:29Z",
       "firstBagEst": "2026-11-19T12:20:00Z",
       "lastBag": "2026-11-19T12:09:04Z",
-      "rawStatus": "Första bagage · Landat 12:52",
-      "reason": "Första bagage · Landat 12:52"
+      "rawStatus": "Landat 12:52 · Sista bagage",
+      "reason": "Landat 12:52 · Sista bagage"
     },
     {
       "id": "LH816",
@@ -5535,19 +5535,19 @@
       "other": "München",
       "iata": "",
       "airline": "Lufthansa",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-19T11:25:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-19T11:25:52Z",
       "terminal": "T1",
       "gate": "16",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd",
-      "reason": "Gate stängd"
+      "rawStatus": "Startat 12:34",
+      "reason": "Startat 12:34"
     },
     {
       "id": "WF203",
@@ -5555,19 +5555,19 @@
       "other": "Bergen",
       "iata": "",
       "airline": "Wideroe",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-19T11:55:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-19T11:52:54Z",
       "terminal": "T1",
       "gate": "14",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Startat 13:00",
+      "reason": "Startat 13:00"
     },
     {
       "id": "LH2431",
@@ -5686,8 +5686,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd",
-      "reason": "Gate stängd"
+      "rawStatus": "Startat 12:19",
+      "reason": "Startat 12:19"
     },
     {
       "id": "KL1234",
@@ -5915,19 +5915,19 @@
       "other": "Helsingfors",
       "iata": "",
       "airline": "Finnair",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-19T12:00:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-19T11:47:45Z",
       "terminal": "T1",
       "gate": "17",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gå till gate",
-      "reason": "Gå till gate"
+      "rawStatus": "Startat 12:55",
+      "reason": "Startat 12:55"
     },
     {
       "id": "AY866",
@@ -6246,8 +6246,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Boarding",
+      "reason": "Boarding"
     },
     {
       "id": "SK158",
@@ -6341,7 +6341,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "13",
+      "gate": "19",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
