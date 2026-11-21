@@ -102,8 +102,8 @@ function setup() {
     assert.match(fs.readFileSync(path.join(root, 'TaxiData', f), 'utf8'), /swipe-back\.js\?v=(20261112swipe1|20261114sidor1|20261114ladd1|20261114vkoll1|20261114lokal1)/, f);
   }
   const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
-  assert.match(lv, /changelog\.js\?v=2026111[234](bot1|mapp1|ljud1|svar2|pgfix1|mod2|lasbar1|skroll1|chatt1|prick2|barn1|sedd1|hem1|avs1|kp1|sem1|sidor1|ladd1|bil1|vkoll1|lokal1)/);
-  assert.match(html, /lazy-views\.js\?v=2026111[234](swipe1|mapp1|ljud1|svar2|pgfix1|mod2|lasbar1|skroll1|chatt1|prick2|barn1|sedd1|hem1|avs1|kp1|sem1|sidor1|ladd1|bil1|vkoll1|lokal1)/);
+  assert.match(lv, /changelog\.js\?v=(?:2026111[234](bot1|mapp1|ljud1|svar2|pgfix1|mod2|lasbar1|skroll1|chatt1|prick2|barn1|sedd1|hem1|avs1|kp1|sem1|sidor1|ladd1|bil1|vkoll1|lokal1)|20261121login1)/);
+  assert.match(html, /lazy-views\.js\?v=(?:2026111[234](swipe1|mapp1|ljud1|svar2|pgfix1|mod2|lasbar1|skroll1|chatt1|prick2|barn1|sedd1|hem1|avs1|kp1|sem1|sidor1|ladd1|bil1|vkoll1|lokal1)|20261121login1)/);
   const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
   assert.ok(cl.indexOf("2026-11-12swipe1") < cl.indexOf("2026-11-12zon2"));
 }

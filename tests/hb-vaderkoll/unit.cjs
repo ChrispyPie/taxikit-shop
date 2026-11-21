@@ -49,8 +49,8 @@ assert.match(src, /Ligger ikonen i en mapp, på en annan sida eller bara i appl�
 // cache och nyhet, utan tid (sätts vid live)
 assert.match(index, /hjalpbot\.js\?v=20261114vkoll1/);
 assert.match(index, /hjalpbot-scenarier\.js\?v=20261114vkoll1/);
-assert.match(index, /lazy-views\.js\?v=20261114(vkoll1|lokal1)/);
-assert.match(lazy, /changelog\.js\?v=20261114(vkoll1|lokal1)/);
+assert.match(index, /lazy-views\.js\?v=(?:20261114(vkoll1|lokal1)|20261121login1)/);
+assert.match(lazy, /changelog\.js\?v=(?:20261114(vkoll1|lokal1)|20261121login1)/);
 assert.match(changelog, /id: '2026-11-14vkoll1'/);
 assert.match(changelog.split("id: '2026-11-14vkoll1'")[1].split('rader:')[0], /tid: '21:03'/);
 assert.ok(changelog.indexOf("'2026-11-14vkoll1'") < changelog.indexOf("'2026-11-14bil1'"), 'nyheten överst');

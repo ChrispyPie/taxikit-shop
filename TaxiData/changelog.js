@@ -18,6 +18,9 @@ window.CHANGELOG = [
   { datum: '2026-11-21', id: '2026-11-21val2', rader: [
     ['Nytt', 'Delad enhet: nu kan du välja om automatisk utloggning ska vara på, och du kan kryssa i Dölj privata moduler för att dölja kördata, lön, rapporter, ärenden, meddelanden, profil och admin på bilplattan. Mina bevakningar, Ankomster, Prognos, Väder, Nyheter och Kalender finns kvar. Inloggningen på en delad enhet ber heller inte om att spara lösenord.']
   ]},
+  { datum: '2026-11-21', id: '2026-11-21login1', tid: '15:45', rader: [
+    ['Fixat', 'Appen fastnar inte längre på "Kontrollerar inloggning" efter utloggning. Du kan logga in igen direkt.']
+  ]},
   { datum: '2026-11-14', id: '2026-11-14lokal1', tid: '22:02', rader: [
     ['Ändrat', 'Startskärmen: layouten (ikonernas plats, mappar och sidor) gäller bara på den här enheten. Telefon och platta kan ha olika layout, eftersom skärmarna är olika stora. Val av hur många ikoner i bredd och ikonstorlek var redan lokala och är det fortfarande. Det du redan har ställt in på enheten finns kvar.']
   ]},
