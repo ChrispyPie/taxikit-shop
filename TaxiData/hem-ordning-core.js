@@ -160,7 +160,7 @@
   }
 
   function ICO_MODULER() {
-    return '<svg viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">' +
+    return '<svg viewBox="0 0 32 32" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">' +
       '<path d="M5 11.5h8V7c0-1.7 1.3-3 3-3s3 1.3 3 3v4.5h8c1.5 0 2.5 1.2 2.5 2.6s-1 2.6-2.5 2.6H19v3.2c0 2-1.6 3.6-3.6 3.6h-.3V28c0 1.7-1.3 3-3 3s-3-1.3-3-3v-4.5h-.3c-2 0-3.6-1.6-3.6-3.6v-3.2H5c-1.5 0-2.5-1.2-2.5-2.6S3.5 11.5 5 11.5z"/>' +
       '<path d="M16 13.2v6.2M12.9 16.3h6.2"/>' +
       '</svg>';
