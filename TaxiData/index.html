@@ -9,15 +9,15 @@
   <script src="tema.js?v=20261114sidor1"></script>
   <script src="helskarm.js?v=20261111pwa1"></script>
   <script src="enhet.js?v=20261029d"></script>
-  <script src="delad-enhet.js?v=20261111delad3"></script>
+  <script src="delad-enhet.js?v=20261121delad1"></script>
   <script src="tag-villkor.js?v=20261112ljud1"></script>
   <script src="bevakning-ljud.js?v=20261112ljud1"></script>
   <script src="animationer.js?v=20261112zon2"></script>
   <script src="animationer-vader.js?v=20261111regn1"></script>
-  <script src="hjalpbot-scenarier.js?v=20261114vkoll1"></script>
-  <script src="hjalpbot-tips.js?v=20261111tipguide1"></script>
+  <script src="hjalpbot-scenarier.js?v=20261121delad1"></script>
+  <script src="hjalpbot-tips.js?v=20261121delad1"></script>
   <script src="hjalpbot-hogtid.js?v=20261111hogtid1"></script>
-  <script src="hjalpbot.js?v=20261114vkoll1"></script>
+  <script src="hjalpbot.js?v=20261121delad1"></script>
   <script src="berra.js?v=20261111poke1"></script>
   <script src="namn.js?v=20261028nm1"></script>
   <link rel="stylesheet" href="style.css?v=20261113barn1">
@@ -109,6 +109,20 @@
     .home-dev-ask-btns { display: flex; gap: 8px; justify-content: flex-end; }
     .home-dev-ask-btns button { font-size: 0.85rem; padding: 6px 12px; border-radius: 8px; }
     .home-dev-ask-go { background: #c53030; color: #fff; border: 0; font-weight: 700; }
+    input.pw-masked { -webkit-text-security: disc; }
+    .delad-sub { margin: 10px 0 0 12px; padding-left: 12px; border-left: 2px solid var(--border, #cbd5e0); display: flex; flex-direction: column; gap: 8px; }
+    .delad-chk { display: flex; align-items: flex-start; gap: 12px; min-height: 52px; padding: 10px 12px; border: 1px solid var(--c-cbd5e0); border-radius: 8px; background: var(--surface); cursor: pointer; font-size: calc(15px * var(--font-scale, 1)); }
+    .delad-chk.on { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+    .delad-chk input { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--primary); flex-shrink: 0; }
+    .delad-chk-t { font-weight: 600; display: block; }
+    .delad-chk-d { display: block; font-size: .82rem; color: var(--text-soft); margin-top: 2px; line-height: 1.3; font-weight: 400; }
+    html.delad-hide-private #notis-btn,
+    html.delad-hide-private .notis-btn,
+    html.delad-hide-private #menu-profile,
+    html.delad-hide-private #menu-inkorg,
+    html.delad-hide-private #full-name,
+    html.delad-hide-private #profile-reminder,
+    html.delad-hide-private #home-devices { display: none !important; }
   </style>
 </head>
 <body>
@@ -134,6 +148,7 @@
       <p style="margin-top:10px; text-align:center;"><a href="#" onclick="showForgot(false); return false;" style="color:var(--primary);">Tillbaka till inloggning</a></p>
     </div>
   </div>
+  <script>if (window.DELAD && DELAD.applyLoginForm) DELAD.applyLoginForm();</script>
 
   <div id="app" style="display:none;">
     <header>
@@ -205,9 +220,9 @@
   <script src="view-state.js?v=20261107lazy1"></script>
   <script src="hjalp.js?v=20261113mod2"></script>
   <script src="hem-ordning.js?v=20261114lokal1"></script>
-  <script src="hem-sidor.js?v=20261114sidor1"></script>
-  <script src="moduler.js?v=20261113mod2"></script>
-  <script src="lazy-views.js?v=20261118login1"></script>
+  <script src="hem-sidor.js?v=20261121delad1"></script>
+  <script src="moduler.js?v=20261121delad1"></script>
+  <script src="lazy-views.js?v=20261121delad1"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -361,14 +376,19 @@
       var pw = document.getElementById('password').value;
       if (!id || !pw) { showLoginError('Fyll i förar-ID och lösenord'); return; }
       try {
-        var deladOn = false;
-        try { deladOn = localStorage.getItem('taxi_delad_enhet') === '1'; } catch (e1) {}
+        var deladOn = (window.DELAD && DELAD.isAutoLogout) ? DELAD.isAutoLogout() : (function () { try { return localStorage.getItem('taxi_delad_enhet') === '1' && localStorage.getItem('taxi_delad_auto_logout') !== '0'; } catch (e1) { return false; } })();
         var r = await rpc('login', { p_id: id, p_password: pw, p_delad: deladOn });
         if (!r || !r.ok) { showLoginError(loginErrors[r && r.error] || 'Inloggningen misslyckades'); return; }
         localStorage.setItem('taxi_session', r.token);
         localStorage.setItem('taxi_logged_in', '1');
         localStorage.setItem('taxi_driver', r.driver.id);
-        if (window.DELAD) { DELAD.onLoginSuccess(); DELAD.markLogin(); }
+        if (window.DELAD) {
+          DELAD.onLoginSuccess();
+          DELAD.markLogin();
+          if (DELAD.isOn && DELAD.isOn()) {
+            try { document.getElementById('driver-id').value = ''; document.getElementById('password').value = ''; } catch (e2) {}
+          }
+        }
         try { sessionStorage.setItem('taxi_go_home', '1'); } catch (e) {}   // efter inloggning: alltid startskärmen
         location.reload();
       } catch (e) {
@@ -407,15 +427,33 @@
       try { window.dispatchEvent(new Event('taxi:features')); } catch (e) {}
     }
 
+    function hidePrivateOn() {
+      return !!(window.DELAD && DELAD.isHidePrivate && DELAD.isHidePrivate());
+    }
+    function isHiddenPrivateView(id) {
+      return !!(hidePrivateOn() && window.DELAD && DELAD.isPrivateView && DELAD.isPrivateView(id));
+    }
+
     function updateProfileReminder() {
+      if (hidePrivateOn()) {
+        window.INKORG_NEEDS_PROFILE = false;
+        window.INKORG_ROLE = '';
+        if (window.setBadge) { setBadge('profile', false); setBadge('profbtn', false); }
+        return;
+      }
       window.INKORG_NEEDS_PROFILE = !!driverData.needs_profile;   // inkorg.js lägger till sina olästa på samma prick
       window.INKORG_ROLE = driverData.category || '';   // inkorg.js: vem som är ägare/S admin (notislänkar)
       if (window.setBadge) { setBadge('profile', !!driverData.needs_profile); setBadge('profbtn', !!driverData.needs_profile || !!window.INKORG_HAS); }
     }
 
     function setFullName() {
-      var fullName = ((driverData.first_name || '') + ' ' + (driverData.last_name || '')).trim();
       var fn = document.getElementById('full-name');
+      if (hidePrivateOn()) {
+        fn.textContent = '';
+        if (window.PROFILBILD && PROFILBILD.reset) PROFILBILD.reset();
+        return;
+      }
+      var fullName = ((driverData.first_name || '') + ' ' + (driverData.last_name || '')).trim();
       fn.textContent = fullName || driverId;
       // Förar-id under namnet (bara det egna). Demo har inget riktigt id (t599u)
       if (fullName && driverId && driverId !== fullName && !(driverData && driverData.demo)) {
@@ -428,6 +466,13 @@
         PROFILBILD.init({ button: document.getElementById('profile-btn'), menu: pm, before: pm.lastElementChild });
       }
     }
+
+    window.onDeladModeChange = function () {
+      if (!driverId) return;
+      setFullName();
+      updateProfileReminder();
+      if (!hidePrivateOn() && window.LAZY && LAZY.refreshBadges) LAZY.refreshBadges();
+    };
 
     // Start (2026-11-13hem1, t1584u): vid ny start av appen (PWA, ny flik, kallstart) och direkt efter
     // inloggning hamnar man på startskärmen. Minnet av senaste sida (#view=…, sparad vy, taxi_view)
@@ -443,7 +488,15 @@
     function startView() {
       var afterLogin = false;
       try { afterLogin = sessionStorage.getItem('taxi_go_home') === '1'; sessionStorage.removeItem('taxi_go_home'); } catch (e) {}
-      if (isReload() && !afterLogin) return LAZY.restoreView() || localStorage.getItem('taxi_view');
+      if (isReload() && !afterLogin) {
+        var rv = LAZY.restoreView() || localStorage.getItem('taxi_view');
+        if (isHiddenPrivateView(rv)) {
+          try { localStorage.removeItem('taxi_view'); LAZY.save('view', null); } catch (e0) {}
+          if (location.hash) { try { history.replaceState(history.state, '', location.pathname + location.search); } catch (e3) {} }
+          return null;
+        }
+        return rv;
+      }
       try { localStorage.removeItem('taxi_view'); } catch (e) {}
       try { LAZY.save('view', null); } catch (e) {}
       if (location.hash) { try { history.replaceState(history.state, '', location.pathname + location.search); } catch (e) {} }
@@ -468,15 +521,16 @@
         document.getElementById('app').style.display = 'block';
         setFullName();
         showForcePassword();
-      } else if (driverData.needs_profile && !driverData.via_master && sessionStorage.getItem('taxi_profile_lock') === driverId) {
+      } else if (driverData.needs_profile && !driverData.via_master && !hidePrivateOn() && sessionStorage.getItem('taxi_profile_lock') === driverId) {
         localStorage.removeItem('taxi_view');
         document.getElementById('app').style.display = 'block';
         setFullName();
         openProfile();
-      } else if (savedView === 'kordata') {
+      } else if (savedView === 'kordata' && !isHiddenPrivateView('kordata')) {
         document.getElementById('app').style.display='block';
         await openItem('kordata');
       } else {
+        if (isHiddenPrivateView(savedView)) savedView = null;
         if (LAZY.has(savedView) && savedView !== 'notiser') {
           current = savedView;
           try { localStorage.setItem('taxi_view', savedView); } catch (e) {}
@@ -502,6 +556,7 @@
 
     // Inkorg (inkorg.js): mina ärenden och svaren på dem. Ligger under profilikonen, klockan är kvar för notiser.
     function openInbox(opts) {
+      if (hidePrivateOn()) return;
       if (lockBlocked()) return;
       try { if (window.HJALPBOT_TIPS && HJALPBOT_TIPS.markUsed) HJALPBOT_TIPS.markUsed('inkorg'); } catch (e) {}
       document.getElementById('profile-menu').classList.remove('show');
@@ -519,6 +574,7 @@
     }
 
     function openProfile(opts) {
+      if (hidePrivateOn()) return;
       if (forcePwLock) { lockBlocked(); return; }
       document.getElementById('profile-menu').classList.remove('show');
       if (current === 'profil') return;
@@ -940,6 +996,7 @@
       return ALLA.indexOf(c) >= 0 ? c : 'standard';  // som private.norm_cat()
     }
     function canSee(item) {
+      if (isHiddenPrivateView(item && item.id)) return false;
       return !item.roles || item.roles.indexOf(menuRole()) >= 0;
     }
     function findItem(id) {
@@ -948,6 +1005,11 @@
     }
 
     function renderMenu() {
+      if (isHiddenPrivateView(current)) {
+        current = null;
+        localStorage.removeItem('taxi_view');
+        LAZY.setView(null);
+      }
       if(current)LAZY.setView(current);
       if(current && LAZY.has(current) && !LAZY.ready(current)){var target=current;LAZY.loading(document.getElementById('content'),target,function(){if(current===target)renderMenu();});return;}
       var content = document.getElementById('content');
@@ -1021,7 +1083,7 @@
       } else {
         title.textContent = 'TaxiData';
         var html = '';
-        if (driverData.needs_profile) {
+        if (driverData.needs_profile && !hidePrivateOn()) {
           html += '<div class="profile-reminder" id="profile-reminder" role="button" onclick="openProfile()"><span class="dot"></span>Fyll i dina personuppgifter<span class="arrow">›</span></div>';
         }
         html += '<div class="grid">';
@@ -1059,6 +1121,7 @@
 
     async function openItem(id, opts) {
       if (id === 'hem' || !id) { goHome(opts); return; }
+      if (isHiddenPrivateView(id)) { goHome(opts); return; }
       if (lockBlocked()) return;
       var item = findItem(id);
       if (item && !canSee(item)) return;

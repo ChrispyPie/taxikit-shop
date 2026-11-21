@@ -29,9 +29,10 @@
     { id: 's-panel', icon: '🛡️', label: 'S admin-panelen', href: 'sadmin.html' }
   ];
 
+  function hidePriv() { return !!(window.DELAD && DELAD.isHidePrivate && DELAD.isHidePrivate()); }
   function role() { try { return typeof window.menuRole === 'function' ? String(window.menuRole() || '') : ''; } catch (e) { return ''; } }
-  function isAdmin() { return ADMIN.indexOf(role()) >= 0; }
-  function isS() { return role() === 'superadmin'; }
+  function isAdmin() { return !hidePriv() && ADMIN.indexOf(role()) >= 0; }
+  function isS() { return !hidePriv() && role() === 'superadmin'; }
   function pages() { var p = []; if (isS()) p.push('sadmin'); if (isAdmin()) p.push('admin'); p.push('hem', 'extra'); return p; }
   function idx(name) { return pages().indexOf(name); }
   function esc(x) { return String(x == null ? '' : x).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -235,7 +236,10 @@
     headerTop();
     var tom = document.querySelector('.td-sida[data-sida="extra"] .td-sida-tom'), g = extraGrid(false);
     if (tom && g) tom.style.display = g.querySelector('.icon') ? 'none' : '';
-    ['admin', 'sadmin'].forEach(function (n) { if (idx(n) >= 0) renderSide(n); });
+    ['admin', 'sadmin'].forEach(function (n) {
+      if (idx(n) >= 0) renderSide(n);
+      else { var old = panel(n, false); if (old && old.parentNode) old.parentNode.removeChild(old); }
+    });
     layout(0, false);
   }
   function reset() { st.cur = 'hem'; if (st.shown) layout(0, false); }

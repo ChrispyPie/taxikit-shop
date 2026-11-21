@@ -634,6 +634,7 @@
       sc = SCENARIOS[i];
       if (!matchesContext(sc, ctx)) continue;
       if (!allowedChar(sc, char)) continue;
+      if (sc.tool && window.DELAD && DELAD.isHidePrivate && DELAD.isHidePrivate() && DELAD.isPrivateView && DELAD.isPrivateView(sc.tool)) continue;
       if (tool && sc.tool && sc.tool !== tool) continue;
       if (tool && !sc.tool && ctx !== 'random' && ctx !== 'time') continue;
       if (!skipCd && !cooled(sc)) continue;

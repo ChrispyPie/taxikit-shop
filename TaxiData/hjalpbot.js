@@ -443,7 +443,8 @@
   function hemComment() {
     var n = firstName(), h = new Date().getHours();
     var a = { hi: h < 5 ? 'Nattpass' : h < 10 ? 'God morgon' : h < 17 ? 'Hej' : 'God kväll', name: n ? ' ' + n : '' };
-    return line((window.driverData || {}).needs_profile ? 'needsProfile' : 'hem', a);
+    var hidePriv = !!(window.DELAD && DELAD.isHidePrivate && DELAD.isHidePrivate());
+    return line(!hidePriv && (window.driverData || {}).needs_profile ? 'needsProfile' : 'hem', a);
   }
 
   // ---------- DOM ----------
@@ -1741,6 +1742,7 @@
   }
   function speakScenario(hit, delay) {
     if (!hit || !hit.text) return false;
+    if (hit.tool && window.DELAD && DELAD.isHidePrivate && DELAD.isHidePrivate() && DELAD.isPrivateView && DELAD.isPrivateView(hit.tool)) return false;
     function go() {
       if (window.HJALPBOT_SCENARIER && HJALPBOT_SCENARIER.mark && hit.scenario) HJALPBOT_SCENARIER.mark(hit.scenario);
       say(hit.text, { tool: hit.tool, mood: hit.mood });
@@ -1950,7 +1952,7 @@
     answer('…');
     if (q === 'losen') {
       answer(esc(line('losen')) + ' Tryck på 👤 uppe till höger → <b>Profil</b> → längst ner <b>Byt lösenord</b>. Skriv ditt nuvarande lösenord och det nya två gånger. ' +
-        'Glömt det? Logga ut och tryck <b>Glömt lösenord?</b> så kommer en länk till din e-post (gäller 1 timme).<br><button class="hb-link" data-hb-profil>Öppna Profil</button>');
+        'Glömt det? Logga ut och tryck <b>Glömt lösenord?</b> så kommer en länk till din e-post (gäller 1 timme).' + ((window.DELAD && DELAD.isHidePrivate && DELAD.isHidePrivate()) ? '' : '<br><button class="hb-link" data-hb-profil>Öppna Profil</button>'));
       return;
     }
     if (q === 'tag' || q === 'flyg') {
