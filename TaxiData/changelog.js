@@ -15,7 +15,7 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-11-21', id: '2026-11-21zhorn1', rader: [
+  { datum: '2026-11-21', id: '2026-11-21zhorn1', tid: '19:57', rader: [
     ['Ändrat', 'Hjälpboten står i sin laddstation i hörnet på startskärmen, med en liten strålkastare ovanför. Knappen visar bara På eller Av – inget kort och ingen extra text som täcker sidprickarna. När ljuset är släckt är det bara en stilla bild; när du tänder laddas hjälpboten och syns på samma plats.']
   ]},
   { datum: '2026-11-21', id: '2026-11-21zikon1', tid: '19:45', rader: [
