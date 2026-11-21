@@ -207,7 +207,7 @@
   <script src="hem-ordning.js?v=20261114lokal1"></script>
   <script src="hem-sidor.js?v=20261114sidor1"></script>
   <script src="moduler.js?v=20261113mod2"></script>
-  <script src="lazy-views.js?v=20261114lokal1"></script>
+  <script src="lazy-views.js?v=20261121login1"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -285,16 +285,19 @@
     }
 
     function clearSession() {
-      if (window.MINA_BEVAKNINGAR) MINA_BEVAKNINGAR.stop();
-      if (window.PROFILBILD) PROFILBILD.reset();
+      // Varje steg körs för sig: ett fel i ett verktyg (t.ex. ett ännu inte laddat) får aldrig stoppa utloggningen,
+      // annars fastnar appen på "Kontrollerar inloggning…" (t1633u).
+      function safe(fn) { try { fn(); } catch (e) {} }
+      safe(function () { if (window.MINA_BEVAKNINGAR && MINA_BEVAKNINGAR.stop) MINA_BEVAKNINGAR.stop(); });
+      safe(function () { if (window.PROFILBILD && PROFILBILD.reset) PROFILBILD.reset(); });
       localStorage.removeItem('taxi_session');
       localStorage.removeItem('taxi_logged_in');
       localStorage.removeItem('taxi_driver');
       localStorage.removeItem('taxi_view');
-      if (window.DEMO) DEMO.clear();
-      if (window.NOTIS) NOTIS.logout();
-      if (window.INKORG) INKORG.logout();
-      if (window.DELAD) DELAD.onClearSession();
+      safe(function () { if (window.DEMO && DEMO.clear) DEMO.clear(); });
+      safe(function () { if (window.NOTIS && NOTIS.logout) NOTIS.logout(); });
+      safe(function () { if (window.INKORG && INKORG.logout) INKORG.logout(); });
+      safe(function () { if (window.DELAD && DELAD.onClearSession) DELAD.onClearSession(); });
     }
 
     function expireSessionAndReload(afterClear) {

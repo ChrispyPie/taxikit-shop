@@ -83,7 +83,7 @@ assert.match(src, /if \(!atPerch\(\)\)/);
 assert.match(src, /returnToPerch\(function \(\) \{ if \(gen === state\.sayGen\) showSay\(text, opt\); \}\)/);
 assert.doesNotMatch(src, /function pickWalkTarget/);
 assert.match(index, /hjalpbot\.js\?v=20261114vkoll1/);
-assert.match(lazy, /changelog\.js\?v=(20261114ladd1|20261114bil1|20261114vkoll1|20261114lokal1)/);
+assert.match(lazy, /changelog\.js\?v=(20261114ladd1|20261114bil1|20261114vkoll1|20261114lokal1|20261121login1)/);
 assert.match(changelog, /id: '2026-11-14ladd1'/);
 assert.ok(changelog.indexOf("'2026-11-14ladd1'") < changelog.indexOf("'2026-11-14sidor1'"), 'nyheten överst');
 const block = changelog.split("id: '2026-11-14ladd1'")[1].split(']},')[0];
