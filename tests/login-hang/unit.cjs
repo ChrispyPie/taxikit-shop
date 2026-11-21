@@ -22,7 +22,6 @@ assert.match(block, /Kontrollerar inloggning/);
 assert.match(block, /\[.Fixat./);
 assert.doesNotMatch(block, /\bStig\b/);
 assert.doesNotMatch(block, /\bhen\b/);
-// tid sätts vid go-live
-assert.doesNotMatch(block.split('rader:')[0], /\btid\b/);
+assert.match(block.split('rader:')[0], /tid: '15:45'/);
 
 console.log('UNIT_OK');
