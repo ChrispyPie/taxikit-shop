@@ -20,7 +20,7 @@ window.KALENDER.openEvent=invoke('KALENDER','openEvent');window.ANKOMSTER.openWa
 window.SJUK={title:function(){return 'Anmälningar & ärenden';}};
 window.PROFILBILD={init:function(){},reset:function(){}};
 window.INKORG={title:'Meddelanden',id:'inkorg',show:invoke('INKORG','show'),has:function(){return false;},isAdmin:function(){return ['admin','agare','superadmin'].indexOf(window.menuRole?menuRole():'standard')>=0;},openCase:invoke('INKORG','openCase'),openThread:invoke('INKORG','openThread'),logout:function(){},back:function(){return false;}};
-window.NOTIS={toggle:invoke('NOTIS','toggle'),stop:function(){}};
+window.NOTIS={toggle:invoke('NOTIS','toggle'),stop:function(){},logout:function(){}};
 window.BEVAKNING={logout:invoke('BEVAKNING','logout'),localOff:invoke('BEVAKNING','localOff')};
 var badgeAt=0,badgePending=null,badgeEpoch=0;
 L.unreadChanged=function(){badgeEpoch++;badgeAt=0;};
