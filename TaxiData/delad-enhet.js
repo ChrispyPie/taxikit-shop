@@ -16,7 +16,7 @@
   var MSG = 'taxi_delad_logout';
   var PRIVATE_VIEWS = {
     kordata: 1, lonekoll: 1, verkstad: 1, topplistor: 1, forum: 1,
-    'mina-bevakningar': 1, profil: 1, inkorg: 1, notiser: 1, admin: 1, sadmin: 1
+    profil: 1, inkorg: 1, notiser: 1, admin: 1, sadmin: 1
   };
   var INTERVAL_MS = 5 * 60 * 1000;
   var timer = null;
@@ -445,7 +445,7 @@
         '<label class="delad-chk' + (hideOn ? ' on' : '') + '">' +
           '<input type="checkbox" name="delad-hide-private"' + (hideOn ? ' checked' : '') + '>' +
           '<span><span class="delad-chk-t">Dölj privata moduler</span>' +
-          '<span class="delad-chk-d">Döljer och laddar inte kördata, lön, rapporter, ärenden, meddelanden, profil och admin. Ankomster, Prognos, Väder, Nyheter och Kalender finns kvar.</span></span>' +
+          '<span class="delad-chk-d">Döljer och laddar inte kördata, lön, rapporter, ärenden, meddelanden, profil och admin. Ankomster, Prognos, Väder, Nyheter, Kalender och Mina bevakningar finns kvar.</span></span>' +
         '</label>' +
       '</div>' : '') +
       '</div>';
