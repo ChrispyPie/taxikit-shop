@@ -32,6 +32,12 @@
     .hl-prev.c4 { grid-template-columns: repeat(4, 1fr); } .hl-prev.c4 i { height: 7px; }
     .hl-prev.c5 { grid-template-columns: repeat(5, 1fr); } .hl-prev.c5 i { height: 5px; }
     .hl-prev.c6 { grid-template-columns: repeat(6, 1fr); } .hl-prev.c6 i { height: 4px; }
+    .hl-size { display: flex; align-items: center; gap: 16px; margin-top: 10px; }
+    .hl-size-ctrl { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
+    .hl-size-ctrl input[type="range"] { flex: 1; min-width: 0; height: 32px; margin: 0; accent-color: var(--primary); }
+    .hl-size-end { font-size: calc(12px * var(--font-scale, 1)); color: var(--text-soft); flex-shrink: 0; }
+    .hl-size-preview { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; min-width: 88px; min-height: 88px; }
+    .hl-size-preview .icon { min-width: var(--icon-cell, 78px); width: var(--icon-cell, 78px); pointer-events: none; }
     .td-hjalp-btn{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;margin:0;border:0;background:none;color:var(--primary,#2b6cb0);font:700 calc(18px * var(--font-scale,1))/1 system-ui,sans-serif;cursor:pointer;border-radius:10px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
     .td-hjalp-btn-float{position:fixed;top:max(8px,env(safe-area-inset-top,0px));right:max(8px,env(safe-area-inset-right,0px));z-index:80;border:1px solid var(--border,#cbd5e0);background:var(--surface,#fff);box-shadow:0 1px 3px rgba(0,0,0,.12)}
     .th-prev { margin-left: auto; width: 34px; height: 22px; border-radius: 5px; border: 1px solid var(--border); flex-shrink: 0; }
@@ -582,38 +588,36 @@
     }
 
     var toastTimer = null;
-    // Startskärm: välj rutnät (3×3, 4×4, 5×5 eller 6×6). Styr både kolumner och ikonstorlek.
-    var HOME_LAYOUTS = [
-      { v: '3', label: 'Stora ikoner (3×3)', prev: 'c3', n: 6 },
-      { v: '4', label: 'Standard (4×4)', prev: 'c4', n: 8 },
-      { v: '5', label: 'Kompakt (5×5)', prev: 'c5', n: 10 },
-      { v: '6', label: 'Extra kompakt (6×6)', prev: 'c6', n: 12 }
-    ];
+    // Startskärm: ett reglage för ikonstorlek (1=liten … 5=störst). Texten under ikonen följer samma steg.
+    // Antal kolumner räknas från skärmens bredd och vald storlek.
     function getHomeLayout() {
-      if (window.TEMA && TEMA.getLayout) return TEMA.getLayout();
-      var v = null; try { v = localStorage.getItem('taxi_home_layout'); } catch (e) {}
-      if (v === '3' || v === '4' || v === '5' || v === '6') return v;
-      return '4';
+      if (window.TEMA && TEMA.getIconSize) return TEMA.getIconSize();
+      var v = null; try { v = localStorage.getItem('taxi_icon_size'); } catch (e) {}
+      if (v === '1' || v === '2' || v === '3' || v === '4' || v === '5') return v;
+      return '3';
     }
     function setHomeLayout(v) {
-      if (window.HEM_ORDNING && HEM_ORDNING.resetPositions) HEM_ORDNING.resetPositions();
-      if (window.TEMA && TEMA.setLayout) { TEMA.setLayout(v); return; }
-      try { localStorage.setItem('taxi_home_layout', v); } catch (e) {}
-      document.documentElement.setAttribute('data-home', v);
+      if (window.TEMA && TEMA.setIconSize) { TEMA.setIconSize(v); return; }
+      try { localStorage.setItem('taxi_icon_size', v); } catch (e) {}
+      document.documentElement.setAttribute('data-icon-size', v);
     }
     function renderHomeLayoutSetting(box) {
-      var cur = getHomeLayout(), h = '<div class="section"><h3 style="margin-top:0">Startskärm</h3>' +
-        '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">Välj hur många ikoner som får plats i bredd på startskärmen. I liggande läge visas fler rutor bredvid varandra.</p><div class="hl-opts" role="radiogroup">';
-      HOME_LAYOUTS.forEach(function (o) {
-        h += '<label class="hl-opt' + (o.v === cur ? ' on' : '') + '"><input type="radio" name="home-layout" value="' + o.v + '"' + (o.v === cur ? ' checked' : '') + '>' +
-          '<span>' + o.label + '</span><span class="hl-prev ' + o.prev + '" aria-hidden="true">' + new Array(o.n + 1).join('<i></i>') + '</span></label>';
-      });
-      box.innerHTML = h + '</div></div>';
-      box.onchange = function (e) {
-        if (!e.target || e.target.name !== 'home-layout') return;
-        setHomeLayout(e.target.value);
-        renderHomeLayoutSetting(box);
-      };
+      if (!box) return;
+      var cur = getHomeLayout();
+      box.innerHTML = '<div class="section"><h3 style="margin-top:0">Ikonstorlek</h3>' +
+        '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">Dra för att välja storlek. Texten under ikonen följer med. Antalet ikoner i bredd anpassas efter skärmen.</p>' +
+        '<div class="hl-size">' +
+          '<div class="hl-size-ctrl">' +
+            '<span class="hl-size-end">Liten</span>' +
+            '<input type="range" id="hl-size-range" min="1" max="5" step="1" value="' + cur + '" aria-label="Ikonstorlek">' +
+            '<span class="hl-size-end">Störst</span>' +
+          '</div>' +
+          '<div class="hl-size-preview" aria-hidden="true">' +
+            '<div class="icon"><div class="emoji">🚕</div><div class="label">Taxi</div></div>' +
+          '</div>' +
+        '</div></div>';
+      var range = box.querySelector('#hl-size-range');
+      if (range) range.oninput = function () { setHomeLayout(range.value); };
     }
 
     // Tema och textstorlek (sparas och verkställs av tema.js, gäller alla sidor direkt utan omladdning)

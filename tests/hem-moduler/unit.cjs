@@ -67,6 +67,7 @@ assert.match(lv, /changelog\.js\?v=20261121zhorn1/);
 const help = fs.readFileSync(path.join(root, 'TaxiData/hjalp.js'), 'utf8');
 assert.match(help, /Rutan Moduler öppnar/);
 assert.match(help, /Inställningar, Om appen, Admin och Moduler stannar alltid kvar/);
+
 const tema = fs.readFileSync(path.join(root, 'TaxiData/tema.css'), 'utf8');
 assert.match(core, /width="1em" height="1em"/);
 assert.match(tema, /data-tool="moduler"\] \.emoji svg/);

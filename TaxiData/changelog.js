@@ -16,7 +16,10 @@
  */
 window.CHANGELOG = [
   { datum: '2026-11-21', id: '2026-11-21zhorn1', rader: [
-    ['Ändrat', 'Hjälpboten står i sin laddstation i hörnet på startskärmen, med en liten strålkastare ovanför. Knappen visar bara På eller Av – inget kort och ingen extra text som täcker sidprickarna. När ljuset är släckt är det bara en stilla bild; när du tänder laddas hjälpboten och syns på samma plats.'],
+    ['Ändrat', 'Hjälpboten står i sin laddstation i hörnet på startskärmen, med en liten strålkastare ovanför. Knappen visar bara På eller Av – inget kort och ingen extra text som täcker sidprickarna. När ljuset är släckt är det bara en stilla bild; när du tänder laddas hjälpboten och syns på samma plats.']
+  ]},
+  { datum: '2026-11-21', id: '2026-11-21zikon1', tid: '19:45', rader: [
+    ['Ändrat', 'I Inställningar finns nu ett reglage för ikonstorlek (liten till störst) med en förhandsvisning bredvid. Texten under ikonen följer samma storlek, och antalet ikoner i bredd anpassas efter skärmen – i liggande läge och på platta får du fler i rad. Ett tidigare val av 3×3, 4×4, 5×5 eller 6×6 flyttas till närmaste steg.'],
     ['Fixat', 'Rutan Moduler på startskärmen visar sin ikon igen.']
   ]},
   { datum: '2026-11-21', id: '2026-11-21zslim1', tid: '17:30', rader: [
