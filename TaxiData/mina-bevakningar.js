@@ -447,6 +447,12 @@
     // Tåg: ljud och villkor i en egen ruta (tag-villkor.js). Flyg och båt som förut.
     if (vbox && window.TAG_VILLKOR && TAG_VILLKOR.renderPanel) TAG_VILLKOR.renderPanel(vbox);
     if (ljud && window.BEV_LJUD && BEV_LJUD.renderCompact) BEV_LJUD.renderCompact(ljud, window.TAG_VILLKOR ? ['flyg', 'bat'] : ['tag', 'flyg', 'bat']);
+    if (ljud && window.NOTIS_ENHET && NOTIS_ENHET.renderCopyButton) {
+      var cp = document.createElement('div');
+      cp.id = 'mb-notis-copy';
+      ljud.insertAdjacentElement('afterend', cp);
+      NOTIS_ENHET.renderCopyButton(cp);
+    }
     bindHold(host, errors);
   }
   function bindHold(el, errors) {

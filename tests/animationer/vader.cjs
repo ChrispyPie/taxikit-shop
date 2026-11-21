@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const root = path.join(__dirname, '../..');
 const js = fs.readFileSync(path.join(root, 'TaxiData/animationer-vader.js'), 'utf8');
-const html = fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8');
+const html = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
 const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
 const anim = fs.readFileSync(path.join(root, 'TaxiData/animationer.js'), 'utf8');
 
@@ -18,8 +18,8 @@ assert.match(js, /taxi_animationer_vader_v2/);
 assert.match(js, /pointer-events:\s*none/);
 assert.match(js, /anim-wx-paused/);
 assert.match(js, /prefers-reduced-motion|reduceMotion/);
-assert.match(html, /animationer-vader\.js\?v=20261111regn1/);
-assert.match(html, /animationer\.js\?v=20261112zon2/);
+assert.match(html, /animationer-vader\.js\?v=20261121zslim1/);
+assert.match(html, /animationer\.js\?v=20261121zslim1/);
 assert.doesNotMatch(cl, /2026-11-11vader1|regnar eller snöar|snöflingor/);
 assert.match(anim, /ANIMATIONER\.layer|layer: ensureLayer/);
 

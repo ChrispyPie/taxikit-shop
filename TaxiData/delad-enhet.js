@@ -140,15 +140,72 @@
     currentEndpoint(send);
   }
 
+  var cachedLabel = '';
+  function cleanModel(m) {
+    m = String(m == null ? '' : m).replace(/[\x00-\x1f\x7f<>]+/g, '').replace(/\s+/g, ' ').trim();
+    if (!m || m.toUpperCase() === 'K' || /^(android|mobile|linux|unknown|generic)$/i.test(m)) return '';
+    return m.slice(0, 32);
+  }
+  function parseUaModel(ua) {
+    var m = /;\s*Android\s+[^;)]+;\s*([^;)]+?)(?:\s+Build\/|\))/i.exec(String(ua || ''));
+    return m ? cleanModel(m[1]) : '';
+  }
+  function detectDeviceKind(ua, w, h, touchPoints, uadMobile, deladOn) {
+    if (deladOn) return 'platta';
+    var u = String(ua || '').toLowerCase();
+    var tp = Number(touchPoints || 0);
+    if (/ipad|tablet|kindle|playbook|silk/.test(u) || (/macintosh/.test(u) && tp > 1)) return 'platta';
+    var sw = Number(w || 0), sh = Number(h || 0);
+    var shortSide = Math.min(sw, sh), longSide = Math.max(sw, sh);
+    if (/android/.test(u)) {
+      if (!/mobile/.test(u)) return 'platta';
+      if (uadMobile === false) return 'platta';
+      if (sw > 0 && sh > 0 && shortSide >= 580 && longSide >= 800) return 'platta';
+      return 'telefon';
+    }
+    if (/iphone|ipod/.test(u)) return 'telefon';
+    if (sw > 0 && sh > 0 && shortSide >= 580 && longSide >= 800 && (tp > 0 || shortSide < 900)) return 'platta';
+    if (/windows|macintosh|linux/.test(u) && !/mobile|android|iphone/.test(u) && tp <= 1) return 'dator';
+    if (sw >= 1024 && sh >= 680 && tp <= 1) return 'dator';
+    return (shortSide >= 580 && longSide >= 800) ? 'platta' : 'telefon';
+  }
+  function defaultLabelFor(kind, model) {
+    var ico = kind === 'platta' ? '🚕' : (kind === 'dator' ? '💻' : '📱');
+    var name = cleanModel(model) || (kind === 'platta' ? 'Platta' : (kind === 'dator' ? 'Dator' : 'Telefon'));
+    return ico + ' ' + name;
+  }
+  function getDeviceModel(ua) {
+    var fallback = parseUaModel(ua);
+    try {
+      var uad = navigator.userAgentData;
+      if (uad && typeof uad.getHighEntropyValues === 'function') {
+        return Promise.race([
+          uad.getHighEntropyValues(['model']).then(function (v) { return cleanModel(v && v.model) || fallback; }).catch(function () { return fallback; }),
+          new Promise(function (res) { setTimeout(function () { res(fallback); }, 400); })
+        ]);
+      }
+    } catch (e) {}
+    return Promise.resolve(fallback);
+  }
   function reportDevice() {
     var t = token();
-    if (!t || typeof window.rpc !== 'function') return;
-    var w = 0, h = 0;
+    if (!t || typeof window.rpc !== 'function') return Promise.resolve();
+    var w = 0, h = 0, tp = 0, uadMob = null;
     try { w = screen.width || window.innerWidth || 0; h = screen.height || window.innerHeight || 0; } catch (e) {}
+    try { tp = navigator.maxTouchPoints || 0; } catch (e1) {}
+    try { if (navigator.userAgentData && typeof navigator.userAgentData.mobile === 'boolean') uadMob = navigator.userAgentData.mobile; } catch (e2) {}
     var ua = '';
-    try { ua = (navigator.userAgent || '').slice(0, 200); } catch (e2) {}
-    Promise.resolve(window.rpc('session_set_device', { p_token: t, p_ua: ua, p_width: w, p_height: h }))
-      .catch(function () {});
+    try { ua = (navigator.userAgent || '').slice(0, 200); } catch (e3) {}
+    var kind = detectDeviceKind(ua, w, h, tp, uadMob, isOn());
+    return getDeviceModel(ua).then(function (model) {
+      cachedLabel = defaultLabelFor(kind, model);
+      var args = { p_token: t, p_ua: ua, p_width: w, p_height: h, p_model: model || null, p_kind: kind };
+      return Promise.resolve(window.rpc('session_set_device', args)).then(function (r) {
+        if (r && r.label) cachedLabel = r.label;
+      }).catch(function () {
+        return Promise.resolve(window.rpc('session_set_device', { p_token: t, p_ua: ua, p_width: w, p_height: h })).catch(function () {});
+      });
+    });
   }
 
   function applyPrivateMode() {
@@ -225,6 +282,8 @@
     }
     applyLoginForm();
     applyPrivateMode();
+    try { if (window.TEMA && TEMA.applyLayout) TEMA.applyLayout(); } catch (e) {}
+    reportDevice();
   }
 
   function setAutoLogout(on) {
@@ -369,19 +428,23 @@
     Promise.resolve(window.rpc('list_my_sessions', { p_token: token() }))
       .then(function (r) {
         var list = (r && r.devices) || [];
+        var byId = {};
         var row = '<div class="home-devices-h">Inloggade enheter</div>';
         row += '<div class="home-devices-row" role="list">';
         if (!list.length) {
-          row += '<div class="home-dev home-dev-this" role="listitem"><div class="home-dev-name">Denna enhet</div></div>';
+          row += '<div class="home-dev home-dev-this" role="listitem"><div class="home-dev-name">' + esc(cachedLabel || 'Denna enhet') + '</div></div>';
         } else {
           list.forEach(function (d) {
             var label = d.label || 'Enhet';
+            if (d.current) cachedLabel = label;
             var meta = seenLabel(d.last_seen);
             var cls = 'home-dev' + (d.current ? ' home-dev-this' : '');
             var id = d.id || '';
+            byId[id] = d;
             if (d.current) {
-              row += '<div class="' + cls + '" role="listitem"><div class="home-dev-name">' + esc(label) + '</div>' +
-                '<div class="home-dev-meta">' + (meta ? esc(meta) + ' · ' : '') + 'denna enhet</div></div>';
+              row += '<button type="button" class="' + cls + '" role="listitem" data-dev="' + esc(id) + '" data-label="' + esc(label) + '" data-cur="1">' +
+                '<div class="home-dev-name">' + esc(label) + ' <span aria-hidden="true" style="font-weight:400;opacity:.7">✏️</span></div>' +
+                '<div class="home-dev-meta">' + (meta ? esc(meta) + ' · ' : '') + 'denna enhet</div></button>';
             } else {
               row += '<button type="button" class="' + cls + '" role="listitem" data-dev="' + esc(id) + '" data-label="' + esc(label) + '">' +
                 '<div class="home-dev-name">' + esc(label) + '</div>' +
@@ -393,34 +456,60 @@
         box.innerHTML = row;
         box.onclick = function (e) {
           var btn = e.target && e.target.closest ? e.target.closest('[data-dev]') : null;
-          if (btn) askLogout(box, btn.getAttribute('data-dev'), btn.getAttribute('data-label'));
+          if (!btn) return;
+          var did = btn.getAttribute('data-dev');
+          var dev = byId[did] || { id: did, label: btn.getAttribute('data-label'), current: btn.getAttribute('data-cur') === '1' };
+          askDevice(box, dev);
         };
       })
       .catch(function () { box.innerHTML = ''; });
   }
 
-  function askLogout(box, id, label) {
+  function askDevice(box, dev) {
     var ask = box.querySelector('.home-dev-ask');
-    if (!ask || !id) return;
+    if (!ask || !dev || !dev.id) return;
     ask.hidden = false;
-    ask.innerHTML = '<p>Logga ut ' + esc(label || 'enheten') + '?</p>' +
-      '<p class="home-dev-ask-note">Nästa gång den öppnas visas att den loggats ut härifrån.</p>' +
+    var curVal = dev.custom_name || '';
+    var autoPh = dev.auto_label || dev.label || 'T.ex. Plattan i bilen';
+    ask.innerHTML =
+      '<p>' + esc(dev.label || 'Enhet') + (dev.current ? ' (denna enhet)' : '') + '</p>' +
+      '<div style="display:flex;gap:6px;margin:6px 0">' +
+        '<input type="text" maxlength="40" class="home-dev-name-inp" value="' + esc(curVal) + '" placeholder="' + esc(autoPh) + '" aria-label="Namn på enhet" style="flex:1;min-width:0;padding:7px 9px;border-radius:8px;border:1px solid var(--border,#cbd5e0);font:inherit">' +
+        '<button type="button" data-dev-save="' + esc(dev.id) + '" style="padding:7px 12px;border-radius:8px;background:var(--primary,#2b6cb0);color:#fff;border:0;font-weight:700">Spara</button>' +
+      '</div>' +
       '<div class="home-dev-ask-btns">' +
-        '<button type="button" data-dev-cancel>Avbryt</button>' +
-        '<button type="button" class="home-dev-ask-go" data-dev-go="' + esc(id) + '">Logga ut</button>' +
+        (curVal ? '<button type="button" data-dev-reset="' + esc(dev.id) + '">Återställ namn</button>' : '') +
+        (!dev.current ? '<button type="button" class="home-dev-ask-go" data-dev-logout="' + esc(dev.id) + '">Logga ut enhet</button>' : '') +
+        '<button type="button" data-dev-cancel>Stäng</button>' +
       '</div>';
     ask.onclick = function (e) {
       if (e.target.getAttribute('data-dev-cancel') !== null) { ask.hidden = true; ask.innerHTML = ''; return; }
-      var go = e.target.getAttribute('data-dev-go');
-      if (!go || devicesBusy) return;
-      devicesBusy = true;
-      Promise.resolve(window.rpc('logout_my_session', { p_token: token(), p_device_id: go }))
-        .then(function (r) {
-          devicesBusy = false;
-          ask.hidden = true;
-          if (r && r.ok) renderDevices(box);
-        })
-        .catch(function () { devicesBusy = false; ask.hidden = true; });
+      var saveId = e.target.getAttribute('data-dev-save');
+      var resetId = e.target.getAttribute('data-dev-reset');
+      var outId = e.target.getAttribute('data-dev-logout');
+      if ((saveId || resetId) && !devicesBusy) {
+        var inp = ask.querySelector('.home-dev-name-inp');
+        var newName = resetId ? '' : (inp ? inp.value.trim() : '');
+        devicesBusy = true;
+        Promise.resolve(window.rpc('session_rename_device', { p_token: token(), p_device_id: saveId || resetId, p_name: newName }))
+          .then(function (r) {
+            devicesBusy = false;
+            ask.hidden = true;
+            if (r && r.ok) renderDevices(box);
+          })
+          .catch(function () { devicesBusy = false; ask.hidden = true; });
+        return;
+      }
+      if (outId && !devicesBusy) {
+        devicesBusy = true;
+        Promise.resolve(window.rpc('logout_my_session', { p_token: token(), p_device_id: outId }))
+          .then(function (r) {
+            devicesBusy = false;
+            ask.hidden = true;
+            if (r && r.ok) renderDevices(box);
+          })
+          .catch(function () { devicesBusy = false; ask.hidden = true; });
+      }
     };
   }
 
@@ -484,6 +573,9 @@
     renderSettings: renderSettings,
     renderDevices: renderDevices,
     reportDevice: reportDevice,
+    detectDeviceKind: detectDeviceKind,
+    parseUaModel: parseUaModel,
+    currentLabel: function () { return cachedLabel || (isOn() ? '🚕 Platta' : 'Enhet'); },
     check: check
   };
 

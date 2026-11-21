@@ -6,22 +6,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaxiData</title>
-  <script src="tema.js?v=20261114sidor1"></script>
+  <script src="tema.js?v=20261121zslim1"></script>
   <script src="helskarm.js?v=20261111pwa1"></script>
   <script src="enhet.js?v=20261029d"></script>
-  <script src="delad-enhet.js?v=20261121val2"></script>
-  <script src="tag-villkor.js?v=20261112ljud1"></script>
-  <script src="bevakning-ljud.js?v=20261112ljud1"></script>
-  <script src="animationer.js?v=20261112zon2"></script>
-  <script src="animationer-vader.js?v=20261111regn1"></script>
-  <script src="hjalpbot-scenarier.js?v=20261121val2"></script>
-  <script src="hjalpbot-tips.js?v=20261121val2"></script>
-  <script src="hjalpbot-hogtid.js?v=20261111hogtid1"></script>
-  <script src="hjalpbot.js?v=20261121val2"></script>
-  <script src="berra.js?v=20261111poke1"></script>
+  <script src="delad-enhet.js?v=20261121zslim1"></script>
   <script src="namn.js?v=20261028nm1"></script>
   <link rel="stylesheet" href="style.css?v=20261113barn1">
-  <link rel="stylesheet" href="tema.css?v=20261114sidor1">
+  <link rel="stylesheet" href="tema.css?v=20261121zslim1">
   <link rel="manifest" href="manifest.webmanifest?v=20261111pwa1">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -37,12 +28,12 @@
     .hl-opt input { width: 20px; height: 20px; margin: 0; accent-color: var(--primary); flex-shrink: 0; }
     .hl-prev { margin-left: auto; display: grid; gap: 2px; width: 34px; flex-shrink: 0; }
     .hl-prev i { display: block; background: var(--c-a0aec0); border-radius: 2px; height: 8px; }
-    .hl-prev.c2 { grid-template-columns: repeat(2, 1fr); } .hl-prev.c2 i { height: 12px; }
-    .hl-prev.c3 { grid-template-columns: repeat(3, 1fr); }
-    .hl-prev.c4 { grid-template-columns: repeat(4, 1fr); } .hl-prev.c4 i { height: 6px; }
-    .is-prev { margin-left: auto; width: 40px; text-align: center; line-height: 1; flex-shrink: 0; }
-    .hl-prev.cl { grid-template-columns: 1fr; } .hl-prev.cl i { height: 5px; }
-    .hl-prev.cf { grid-template-columns: repeat(4, 1fr); } .hl-prev.cf i { height: 7px; }
+    .hl-prev.c3 { grid-template-columns: repeat(3, 1fr); } .hl-prev.c3 i { height: 9px; }
+    .hl-prev.c4 { grid-template-columns: repeat(4, 1fr); } .hl-prev.c4 i { height: 7px; }
+    .hl-prev.c5 { grid-template-columns: repeat(5, 1fr); } .hl-prev.c5 i { height: 5px; }
+    .hl-prev.c6 { grid-template-columns: repeat(6, 1fr); } .hl-prev.c6 i { height: 4px; }
+    .td-hjalp-btn{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;margin:0;border:0;background:none;color:var(--primary,#2b6cb0);font:700 calc(18px * var(--font-scale,1))/1 system-ui,sans-serif;cursor:pointer;border-radius:10px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+    .td-hjalp-btn-float{position:fixed;top:max(8px,env(safe-area-inset-top,0px));right:max(8px,env(safe-area-inset-right,0px));z-index:80;border:1px solid var(--border,#cbd5e0);background:var(--surface,#fff);box-shadow:0 1px 3px rgba(0,0,0,.12)}
     .th-prev { margin-left: auto; width: 34px; height: 22px; border-radius: 5px; border: 1px solid var(--border); flex-shrink: 0; }
     .th-prev.tl { background: #e8f1f8; box-shadow: inset 0 -8px 0 #ffffff; }
     .th-prev.td { background: #0f1720; box-shadow: inset 0 -8px 0 #1a2430; }
@@ -128,6 +119,7 @@
 <body>
   <div id="session-status" aria-live="polite"><p role="status">Kontrollerar inloggning…</p></div>
   <div id="login-screen">
+    <button type="button" class="td-hjalp-btn td-hjalp-btn-float" data-hjalp-stub aria-label="Hjälp" aria-expanded="false" onclick="openHelp(this)">?</button>
     <div class="login-box">
       <h2>TaxiData</h2>
       <input type="text" id="driver-id" placeholder="Förar-ID" inputmode="numeric" autocomplete="username" autocapitalize="off" autocorrect="off" autofocus>
@@ -157,6 +149,7 @@
       </div>
       <h1 id="title">TaxiData</h1>
       <div class="hdr-right">
+        <button type="button" class="td-hjalp-btn" data-hjalp-stub aria-label="Hjälp" aria-expanded="false" onclick="openHelp(this)">?</button>
         <button class="profile-btn notis-btn" id="notis-btn" data-badge="notiser" onclick="NOTIS.toggle()" aria-label="Notiser">🔔</button>
         <button class="profile-btn" id="profile-btn" data-badge="profbtn" onclick="toggleProfile()" aria-label="Profil">👤</button>
       </div>
@@ -187,6 +180,7 @@
       <h1>Körpassdata</h1>
       <div class="hdr-right">
         <span id="driver-label"></span><!-- bara ägarens förarväljare, inget förarnummer -->
+        <button type="button" class="td-hjalp-btn" data-hjalp-stub aria-label="Hjälp" aria-expanded="false" onclick="openHelp(this)">?</button>
         <button class="profile-btn notis-btn" data-badge="notiser" onclick="NOTIS.toggle()" aria-label="Notiser">🔔</button>
         <button class="profile-btn kp-profile-btn" data-badge="profbtn" onclick="toggleProfile()" aria-label="Profil">👤</button>
       </div>
@@ -218,11 +212,10 @@
   <script src="nav-historik.js?v=20261112swipe1"></script>
   <script src="swipe-back.js?v=20261114sidor1"></script>
   <script src="view-state.js?v=20261107lazy1"></script>
-  <script src="hjalp.js?v=20261113mod2"></script>
-  <script src="hem-ordning.js?v=20261114lokal1"></script>
-  <script src="hem-sidor.js?v=20261121val2"></script>
-  <script src="moduler.js?v=20261121val2"></script>
-  <script src="lazy-views.js?v=20261121val2"></script>
+  <script src="hem-ordning-core.js?v=20261121zslim1"></script>
+  <script src="hem-sidor.js?v=20261121zslim1"></script>
+  <script src="hb-stage.js?v=20261121zslim1"></script>
+  <script src="lazy-views.js?v=20261121zslim1"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -510,6 +503,7 @@
       driverId = localStorage.getItem('taxi_driver') || 'okänd';
       if (!(await loadDriverData())) return;
       document.getElementById('login-screen').style.display = 'none';
+      if (window.TEMA && TEMA.applyAll) TEMA.applyAll();
       if (window.DELAD) DELAD.start();
       SESSION_READY.finish();
       LAZY.refreshBadges();
@@ -588,31 +582,28 @@
     }
 
     var toastTimer = null;
-    // Startskärm: fyll bredd (osatt/auto på stor skärm), 2 i bredd, 3 i bredd eller lista. Sparas i telefonen.
+    // Startskärm: välj rutnät (3×3, 4×4, 5×5 eller 6×6). Styr både kolumner och ikonstorlek.
     var HOME_LAYOUTS = [
-      { v: 'fyll', label: 'Fyll bredd (stor skärm)', prev: 'cf', n: 8 },
-      { v: '2', label: 'Stora rutor (2 i bredd)', prev: 'c2', n: 4 },
-      { v: '3', label: 'Mellan (3 i bredd)', prev: 'c3', n: 6 },
-      { v: '4', label: 'Tätt (4 i bredd)', prev: 'c4', n: 8 },
-      { v: 'lista', label: 'Lista', prev: 'cl', n: 4 }
+      { v: '3', label: 'Stora ikoner (3×3)', prev: 'c3', n: 6 },
+      { v: '4', label: 'Standard (4×4)', prev: 'c4', n: 8 },
+      { v: '5', label: 'Kompakt (5×5)', prev: 'c5', n: 10 },
+      { v: '6', label: 'Extra kompakt (6×6)', prev: 'c6', n: 12 }
     ];
     function getHomeLayout() {
       if (window.TEMA && TEMA.getLayout) return TEMA.getLayout();
       var v = null; try { v = localStorage.getItem('taxi_home_layout'); } catch (e) {}
-      if (v === '2' || v === '3' || v === '4' || v === 'lista') return v;
-      return 'fyll';
+      if (v === '3' || v === '4' || v === '5' || v === '6') return v;
+      return '4';
     }
     function setHomeLayout(v) {
-      // Nytt val sorterar ikonerna en gång (fri placering nollställs), sedan kan de flyttas fritt igen (2026-11-14fri1).
       if (window.HEM_ORDNING && HEM_ORDNING.resetPositions) HEM_ORDNING.resetPositions();
       if (window.TEMA && TEMA.setLayout) { TEMA.setLayout(v); return; }
       try { localStorage.setItem('taxi_home_layout', v); } catch (e) {}
-      if (v === '2' || v === '3' || v === '4' || v === 'lista') document.documentElement.setAttribute('data-home', v);
-      else document.documentElement.removeAttribute('data-home');
+      document.documentElement.setAttribute('data-home', v);
     }
     function renderHomeLayoutSetting(box) {
       var cur = getHomeLayout(), h = '<div class="section"><h3 style="margin-top:0">Startskärm</h3>' +
-        '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">Välj hur knapparna på startsidan (och i adminmenyn) ska visas. Ett nytt val sorterar ikonerna; sedan kan du hålla in och flytta dem till valfri ruta igen.</p><div class="hl-opts" role="radiogroup">';
+        '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">Välj hur många ikoner som får plats i bredd på startskärmen. I liggande läge visas fler rutor bredvid varandra.</p><div class="hl-opts" role="radiogroup">';
       HOME_LAYOUTS.forEach(function (o) {
         h += '<label class="hl-opt' + (o.v === cur ? ' on' : '') + '"><input type="radio" name="home-layout" value="' + o.v + '"' + (o.v === cur ? ' checked' : '') + '>' +
           '<span>' + o.label + '</span><span class="hl-prev ' + o.prev + '" aria-hidden="true">' + new Array(o.n + 1).join('<i></i>') + '</span></label>';
@@ -662,15 +653,11 @@
         function (o) { return '<span class="ts-prev" aria-hidden="true" style="font-size:' + (15 * parseInt(o.v, 10) / 100) + 'px">Aa</span>'; }, TEMA.setSize);
     }
 
-    // Ikonstorlek (2026-11-14fri1): Små = som förut, Stora = 1,25x. Oberoende av Textstorlek.
-    var ICON_OPTS = [
-      { v: 'sma', label: 'Små' },
-      { v: 'stora', label: 'Stora' }
-    ];
-    function renderIconSizeSetting(box) {
-      if (!window.TEMA || !TEMA.getIcons) return;
-      renderChoiceSetting(box, 'Ikonstorlek', 'Gör ikonerna på startskärmen större eller mindre. Textstorleken ändras inte.', 'icon-size', ICON_OPTS, TEMA.getIcons(),
-        function (o) { return '<span class="is-prev" aria-hidden="true" style="font-size:' + (o.v === 'stora' ? 28 : 22) + 'px">🚗</span>'; }, TEMA.setIcons);
+    function openHelp() {
+      if (window.LAZY) LAZY.ensure('hjalp').then(function () {
+        if (window.HJALP && HJALP.sync) HJALP.sync();
+        if (window.HJALP && HJALP.open) HJALP.open();
+      }).catch(function () {});
     }
 
     function showToast(msg) {
@@ -1069,11 +1056,11 @@
       } else if (current === 'installningar') {
         title.textContent = 'Inställningar';
         content.onclick = null;
-        content.innerHTML = '<div id="home-layout-set"></div><div id="theme-set"></div><div id="text-size-set"></div><div id="icon-size-set"></div><div id="animationer-set"></div><div id="delad-enhet-set"></div><div id="hb-set"></div>';
+        content.innerHTML = '<div id="home-layout-set"></div><div id="theme-set"></div><div id="text-size-set"></div><div id="notis-enhet-set"></div><div id="animationer-set"></div><div id="delad-enhet-set"></div><div id="hb-set"></div>';
         renderHomeLayoutSetting(document.getElementById('home-layout-set'));
         renderThemeSetting(document.getElementById('theme-set'));
         renderTextSizeSetting(document.getElementById('text-size-set'));
-        renderIconSizeSetting(document.getElementById('icon-size-set'));
+        if (window.NOTIS_ENHET) NOTIS_ENHET.renderSettings(document.getElementById('notis-enhet-set'));
         if (window.ANIMATIONER) ANIMATIONER.renderSettings(document.getElementById('animationer-set'));
         if (window.DELAD) DELAD.renderSettings(document.getElementById('delad-enhet-set'));
         if (window.HJALPBOT) window.HJALPBOT.renderSettings(document.getElementById('hb-set'));
@@ -1102,9 +1089,11 @@
         }
         html += '</div>';
         html += '<div id="home-devices" class="home-devices"></div>';
+        html += '<div id="hb-stage-box"></div>';
         content.innerHTML = html;
         if (window.HEM_ORDNING) HEM_ORDNING.decorate(content);
         if (window.DELAD && DELAD.renderDevices) DELAD.renderDevices(document.getElementById('home-devices'));
+        if (window.HB_STAGE) HB_STAGE.render(document.getElementById('hb-stage-box'));
         refreshWorkshopBadge();
         refreshBilBadge();
         refreshForumBadge();
@@ -1190,6 +1179,32 @@
     } else if (localStorage.getItem('taxi_logged_in')) {
       // Gammal inloggning utan session – logga in på nytt
       clearSession();
+    }
+    if ('serviceWorker' in navigator && !/^file:/i.test(location.protocol)) {
+      (function () {
+        var swUpdAt = 0;
+        function safeReload(ver) {
+          try {
+            var act = document.activeElement;
+            if (act && /^(INPUT|TEXTAREA|SELECT)$/i.test(act.tagName)) return;
+            var key = 'taxi_sw_reloaded';
+            if (ver && sessionStorage.getItem(key) === String(ver)) return;
+            if (ver) sessionStorage.setItem(key, String(ver));
+          } catch (e) {}
+          location.reload();
+        }
+        navigator.serviceWorker.addEventListener('message', function (e) {
+          if (e.data && e.data.type === 'sw-updated') safeReload(e.data.version || '1');
+        });
+        navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(function (reg) {
+          document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'visible' && Date.now() - swUpdAt > 60000) {
+              swUpdAt = Date.now();
+              reg.update().catch(function () {});
+            }
+          });
+        }).catch(function () {});
+      })();
     }
   </script>
 </body>

@@ -1,11 +1,89 @@
-/* TaxiData service worker: webbnotiser (push) för bevakade flyg/tåg och prognos.
- * Ingen cache av sidor eller data här (appen hämtar alltid färsk data).
- * Varje push sparas också i telefonen (IndexedDB 'taxidata-notis') så att notis.js kan lägga in den i notisflödet
- * när appen öppnas – annars var notisen borta om man inte tryckte på den direkt.
- * Tryck på notisen öppnar det den gäller: Ankomster (flyg/tåg/båt-fliken) eller Prognos (rätt zon) (t551u).
- * Ångra: ta bort filen och avregistrera i bevakning.js (se UNDO-flygbevakning-2026-10-25.md). */
-self.addEventListener('install', function () { self.skipWaiting(); });
-self.addEventListener('activate', function (e) { e.waitUntil(self.clients.claim()); });
+/* TaxiData service worker:
+ * 1) Lokal cache av statiska appfiler (JS, CSS, bilder, ljud) under versionsnamnet CACHE_NAME.
+ *    Cachar ALDRIG Supabase/API-anrop, meddelanden, ärenden eller HTML över nätet (HTML kör network-first).
+ *    Vid ny version rensas gamla cachar automatiskt och öppna flikar får besked ('sw-updated').
+ * 2) Webbnotiser (push) för bevakade flyg/tåg/båtar och prognos (sparas i IndexedDB 'taxidata-notis').
+ * Ångra: återställ föregående sw.js via backup-branch eller ta bort fetch-lyssnaren. */
+var CACHE_VER = '20261121zslim1';
+var CACHE_PREFIX = 'taxidata-static-';
+var CACHE_NAME = CACHE_PREFIX + CACHE_VER;
+
+self.addEventListener('install', function () {
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', function (e) {
+  e.waitUntil((function () {
+    var clearedOld = false;
+    var p = (typeof caches !== 'undefined')
+      ? caches.keys().then(function (keys) {
+          var old = keys.filter(function (k) { return k.indexOf(CACHE_PREFIX) === 0 && k !== CACHE_NAME; });
+          clearedOld = old.length > 0;
+          return Promise.all(old.map(function (k) { return caches.delete(k); }));
+        })
+      : Promise.resolve();
+    return p.then(function () { return self.clients.claim(); }).then(function () {
+      if (!clearedOld) return;
+      return self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (cs) {
+        cs.forEach(function (c) {
+          try { c.postMessage({ type: 'sw-updated', version: CACHE_VER }); } catch (err) {}
+        });
+      });
+    });
+  })());
+});
+
+var STATIC_RE = /\.(?:js|css|png|jpe?g|webp|svg|ico|mp3|wav|woff2?|webmanifest)$/i;
+function isHtmlReq(req, rel) {
+  if (req.mode === 'navigate') return true;
+  if (rel === '' || rel.charAt(rel.length - 1) === '/' || /\.html?$/i.test(rel)) return true;
+  return false;
+}
+
+self.addEventListener('fetch', function (e) {
+  var req = e.request;
+  if (!req || req.method !== 'GET' || typeof caches === 'undefined') return;
+  var url, scopeUrl;
+  try {
+    url = new URL(req.url);
+    scopeUrl = new URL(self.registration.scope);
+  } catch (err) { return; }
+  if (url.origin !== scopeUrl.origin) return;
+  if (url.pathname.indexOf(scopeUrl.pathname) !== 0) return;
+  var rel = url.pathname.slice(scopeUrl.pathname.length);
+  if (rel === 'sw.js') return;
+  if (url.pathname.indexOf('/rest/v1/') >= 0 || url.pathname.indexOf('/functions/v1/') >= 0 || url.pathname.indexOf('/api/') >= 0) return;
+
+  if (isHtmlReq(req, rel)) {
+    e.respondWith(
+      fetch(req, { cache: 'no-cache' }).then(function (res) {
+        if (res && res.ok && res.type === 'basic') {
+          var copy = res.clone();
+          caches.open(CACHE_NAME).then(function (c) { c.put(req, copy); }).catch(function () {});
+        }
+        return res;
+      }).catch(function () {
+        return caches.open(CACHE_NAME).then(function (c) { return c.match(req); });
+      })
+    );
+    return;
+  }
+
+  if (!STATIC_RE.test(url.pathname)) return;
+  e.respondWith(
+    caches.open(CACHE_NAME).then(function (cache) {
+      return cache.match(req).then(function (hit) {
+        if (hit) return hit;
+        return fetch(req).then(function (res) {
+          if (res && res.ok && res.type === 'basic') {
+            cache.put(req, res.clone()).catch(function () {});
+          }
+          return res;
+        });
+      });
+    })
+  );
+});
 
 // ---------- spara push i telefonen (läses av notis.js) ----------
 // Samma nyckel räknas fram i notis.js (NOTIS.keyOf) så att en notis bara sparas en gång.

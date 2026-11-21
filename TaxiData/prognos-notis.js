@@ -68,7 +68,18 @@
   }
   var LANDVETTER = '293';
   // item: notisen (key, tag, target) -> rutan som ploppar upp går att trycka på och öppnar rätt zon (t551u)
+  function enhetAllowsPrognos() {
+    if (window.NOTIS_ENHET && NOTIS_ENHET.allows) return NOTIS_ENHET.allows('prognos');
+    try {
+      var delad = localStorage.getItem('taxi_delad_enhet') === '1';
+      var drv = localStorage.getItem('taxi_driver') || '';
+      var k = delad && drv ? 'taxi_notis_enhet:' + drv : 'taxi_notis_enhet';
+      var o = JSON.parse(localStorage.getItem(k) || 'null');
+      return !o || o.prognos !== false;
+    } catch (e) { return true; }
+  }
   function ring(title, body, item) {
+    if (!enhetAllowsPrognos()) return;
     var text = title + (body ? ' – ' + body : '');
     var zone = zoneOf(item);
     if (zone === LANDVETTER && window.BEV_LJUD && BEV_LJUD.play && window.BEVAKNING && BEVAKNING.toast) {

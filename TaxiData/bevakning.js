@@ -184,8 +184,12 @@
   function save(sub) {
     if (savedOnce || !token() || (window.DEMO && DEMO.on())) return Promise.resolve();
     var j = sub.toJSON();
-    return rpc('push_save', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth, p_ua: navigator.userAgent.slice(0, 200) })
-      .then(function () { savedOnce = true; });
+    var args = { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth, p_ua: navigator.userAgent.slice(0, 200) };
+    if (window.NOTIS_ENHET && NOTIS_ENHET.read) args.p_prefs = NOTIS_ENHET.read();
+    return rpc('push_save', args).catch(function () {
+      delete args.p_prefs;
+      return rpc('push_save', args);
+    }).then(function () { savedOnce = true; });
   }
   function enable(opts) {
     opts = opts || {};
@@ -256,6 +260,7 @@
   // Push medan appen är öppen: ljud + ruta. Rutan går att trycka på och öppnar det notisen gäller (t551u).
   B.alert = function (msg, key) {
     msg = msg || {};
+    if (window.NOTIS_ENHET && NOTIS_ENHET.allows && !NOTIS_ENHET.allows(msg.tag)) return;
     // Tyst notis (villkoren för tåg): inget ljud och ingen vibration.
     var quiet = msg.silent === true || (String(msg.tag || '').indexOf('tag') === 0 && window.TAG_VILLKOR && TAG_VILLKOR.shouldPlay && !TAG_VILLKOR.shouldPlay(msg, key));
     if (window.BEV_LJUD) BEV_LJUD.playFromMessage(msg, key);
@@ -484,6 +489,9 @@
   B.pushState = function () { return st.push; };
   B.checkPush = function () { return checkPush(); };
   B.enablePush = function () { return enable(); };
+  B.enable = function () { return enable(); };
+  B.disable = function () { return disable(); };
+  B.test = function () { return test(); };
   B.ensurePush = ensurePush;
   B.testPush = function () { return test(); };
   B.toggleWatch = toggle;

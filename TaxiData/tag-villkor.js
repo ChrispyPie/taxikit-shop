@@ -148,6 +148,7 @@
     st.data = d = clean(d);
     writeLocal(d); syncSound(d); changed();
     if (!token() || st.srv === 'missing' || (root.DEMO && DEMO.on && DEMO.on())) return Promise.resolve(d);
+    if (root.NOTIS_ENHET && NOTIS_ENHET.saveSnapshot) root.NOTIS_ENHET.saveSnapshot();
     return rpc('bev_villkor_save', { p_data: d }).then(function () { st.srv = 'ok'; return d; })
       .catch(function (e) { if (missing(e)) st.srv = 'missing'; return d; });
   }
@@ -162,9 +163,9 @@
       if (k !== lkey()) return get();
       var loc = get();
       if (srv && typeof srv === 'object' && srv.tag) {
-        if (!loc.updated_at || String(srv.updated_at || '') > String(loc.updated_at)) {
+        if (!loc.updated_at) {
           st.data = clean(srv); writeLocal(st.data); syncSound(st.data); changed();
-        } else if (String(srv.updated_at || '') < String(loc.updated_at)) return save();
+        }
       } else if (loc.updated_at) return save();
       return get();
     }).catch(function (e) { if (missing(e)) st.srv = 'missing'; return get(); })
