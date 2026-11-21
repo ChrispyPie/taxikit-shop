@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-21', id: '2026-11-21login1', rader: [
+    ['Fixat', 'Appen fastnar inte längre på "Kontrollerar inloggning" efter utloggning. Du kan logga in igen direkt.']
+  ]},
   { datum: '2026-11-14', id: '2026-11-14lokal1', tid: '22:02', rader: [
     ['Ändrat', 'Startskärmen: layouten (ikonernas plats, mappar och sidor) gäller bara på den här enheten. Telefon och platta kan ha olika layout, eftersom skärmarna är olika stora. Val av hur många ikoner i bredd och ikonstorlek var redan lokala och är det fortfarande. Det du redan har ställt in på enheten finns kvar.']
   ]},
