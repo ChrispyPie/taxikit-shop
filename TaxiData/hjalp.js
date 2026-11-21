@@ -14,19 +14,18 @@
       'Efter inloggning kommer du till startskärmen med alla verktyg.'
     ],
     hem: [
-      'Här öppnar du verktygen. En röd prick betyder att något nytt väntar. Hjälpboten syns bara här på startskärmen.',
-      'Håll in en ikon i ungefär en sekund. Den lyfts och en meny med Modulinfo, Flytta, Hjälp och Avinstallera visas. Dra ikonen för att flytta den. Inställningar, Om appen, Admin och Moduler går inte att ta bort.',
-      'Släpp en ikon på en annan för att göra en mapp. Tryck på mappen för att öppna den och på namnet för att byta namn. Håll in en ikon i mappen och dra ut den för att lägga den på startskärmen igen. Ta bort mapp (håll in mappen) lägger tillbaka ikonerna.',
-      'Rutan Moduler öppnar en lista där du kan installera verktyg igen. Du kan flytta den, men den stannar alltid på startskärmen och kan inte läggas i en mapp.',
-      'Flytta i menyn ger ordningsläget. Där drar du utan att hålla in, tar bort med krysset, och Återställ sätter tillbaka standardordningen. Valen sparas på ditt konto.',
-      'Inloggade enheter visar telefoner som är inne på ditt konto just nu.'
+      'Här öppnar du verktygen. En röd prick betyder att något nytt väntar. Tänd strålkastaren längst ner för att väcka hjälpboten.',
+      'Håll in en ikon i ungefär en sekund för att flytta den, öppna Modulinfo eller ta bort den från startskärmen. Inställningar, Om appen, Admin och Moduler stannar alltid kvar.',
+      'Dra en ikon till högerkanten för att lägga den på Sida 2. Väder och Nyheter finns i Moduler om du vill slå på dem.',
+      'Rutan Moduler öppnar listan över alla verktyg du kan lägga till eller ta bort.',
+      'Tryck på en enhet under Inloggade enheter för att ge den ett eget namn eller logga ut den.'
     ],
     moduler: [
       'Här ser du alla verktyg som hör till ditt konto.',
       'Varje rad visar en bild, namnet och en kort beskrivning.',
       'Installera lägger till verktyget på startskärmen. Installerad betyder att det redan finns där.',
-      'Inställningar, Om appen och Admin är alltid installerade och går inte att ta bort. Moduler finns alltid på startskärmen.',
-      'Från startskärmen kan du hålla in en ikon för Modulinfo, Flytta, Hjälp eller Avinstallera, och dra den till en ny plats eller in i en mapp. Moduler kan flyttas men inte läggas i en mapp eller avinstalleras.'
+      'Inställningar, Om appen, Admin och Moduler är alltid installerade och går inte att ta bort.',
+      'Från startskärmen kan du hålla in en ikon för att flytta den, läsa Modulinfo eller ta bort den.'
     ],
     kordata: [
       'Här ser du vad du kört in, per dag, vecka, månad eller år.',
@@ -224,7 +223,16 @@
     for (var i = 0; i < headers.length; i++) {
       var right = headers[i].querySelector('.hdr-right');
       if (!right) continue;
-      if (right.querySelector('.td-hjalp-btn')) continue;
+      var existing = right.querySelector('.td-hjalp-btn');
+      if (existing) {
+        if (existing.getAttribute('data-hjalp-stub') !== null) {
+          existing.removeAttribute('data-hjalp-stub');
+          existing.onclick = null;
+          existing.addEventListener('click', onToggle);
+          el.btns.push(existing);
+        }
+        continue;
+      }
       var b = document.createElement('button');
       b.type = 'button';
       b.className = 'td-hjalp-btn';

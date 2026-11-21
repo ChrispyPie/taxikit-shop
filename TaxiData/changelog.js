@@ -15,6 +15,14 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-21', id: '2026-11-21zslim1', rader: [
+    ['Förbättrat', 'Snabbare start: hjälpboten, hjälptexter, modulhantering, animationer och notisinställningar laddas först när du behöver dem, och appens statiska filer sparas lokalt av en service worker (utan att spara data från servern).'],
+    ['Ändrat', 'Startskärmen är förenklad till ett rent rutnät utan mappar eller fri placering (tidigare mappar flyttas automatiskt till startskärmen utan att något försvinner). Välj mellan 3×3, 4×4, 5×5 eller 6×6 i Inställningar – på bred eller liggande skärm visas fler rutor i bredd. På delad enhet sparas rutnätet per förare.'],
+    ['Ändrat', 'Väder och Nyheter är valfria och avstängda från start för nya enheter. Slå på dem i Moduler om du vill använda dem.'],
+    ['Nytt', 'Hjälpboten längst ner står släckt i sin lilla scen från start. Tryck på "Tänd strålkastare" när du vill väcka figuren.'],
+    ['Nytt', 'Notiser på den här enheten: i Inställningar väljer du nu vilka notiser som får låta eller plinga på just den här enheten (tåg, flyg, båt och prognos), och du kan kopiera inställningar från en annan enhet.'],
+    ['Fixat', 'Inloggade enheter: plattor känns nu igen som Platta i stället för Telefon även när automatisk utloggning är avstängd, och du kan ge varje enhet ett eget namn som syns på alla dina enheter.']
+  ]},
   { datum: '2026-11-21', id: '2026-11-21val2', tid: '16:12', rader: [
     ['Nytt', 'Delad enhet: nu kan du välja om automatisk utloggning ska vara på, och du kan kryssa i Dölj privata moduler för att dölja kördata, lön, rapporter, ärenden, meddelanden, profil och admin på bilplattan. Mina bevakningar, Ankomster, Prognos, Väder, Nyheter och Kalender finns kvar. Inloggningen på en delad enhet ber heller inte om att spara lösenord.']
   ]},

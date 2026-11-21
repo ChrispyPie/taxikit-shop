@@ -1872,7 +1872,8 @@
       hopOutThroughHome();
       return;
     }
-    var on = charId() !== 'off' && (!!state.preview || p === 'hem');
+    var lit = !window.HB_STAGE || !HB_STAGE.isLit || HB_STAGE.isLit();
+    var on = charId() !== 'off' && (!!state.preview || (p === 'hem' && lit));
     var wasOn = el.walker.style.display !== 'none';
     if (wasOn !== on) {
       show(on);
@@ -2001,6 +2002,7 @@
         var tr = e.target.closest('[data-hb-try]');
         if (tr) {
           e.preventDefault();
+          if (window.HB_STAGE && HB_STAGE.setLit) HB_STAGE.setLit(true);
           state.demoTrip = { tool: tr.getAttribute('data-hb-try') || 'vader', at: Date.now() };
           if (typeof window.goHome === 'function') window.goHome();
           return;
@@ -2011,6 +2013,7 @@
       };
     },
     say: function (t) { say(t); },
+    tick: tick,
     poke: poke,
     chars: CHARS,
     lines: L,

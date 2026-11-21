@@ -8,7 +8,7 @@ const assert = require('node:assert/strict');
 const root = path.resolve(__dirname, '../..');
 const src = fs.readFileSync(path.join(root, 'TaxiData/hjalpbot-hogtid.js'), 'utf8');
 const bot = fs.readFileSync(path.join(root, 'TaxiData/hjalpbot.js'), 'utf8');
-const idx = fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8');
+const idx = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
 const changelog = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
 const om = fs.readFileSync(path.join(root, 'TaxiData/om.js'), 'utf8') + fs.readFileSync(path.join(root, 'TaxiData/om-data.js'), 'utf8');
 const help = fs.readFileSync(path.join(root, 'TaxiData/hjalp.js'), 'utf8');
@@ -120,8 +120,8 @@ assert.equal(H.canStart(H.active(), { skipCap: true }), true);
 });
 
 // Wired into the app
-assert.match(idx, /hjalpbot-hogtid\.js\?v=20261111hogtid1/);
-assert.match(idx, /hjalpbot\.js\?v=20261111bubble1/);
+assert.match(idx, /hjalpbot-hogtid\.js\?v=20261121zslim1/);
+assert.match(idx, /hjalpbot\.js\?v=20261121zslim1/);
 assert.match(bot, /HJALPBOT_HOGTID/);
 assert.match(bot, /previewHoliday/);
 assert.match(bot, /pageVisible/);

@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const assert = require('node:assert/strict');
+const core = fs.readFileSync(path.resolve(__dirname, '../../TaxiData/hem-ordning-core.js'), 'utf8');
 const src = fs.readFileSync(path.resolve(__dirname, '../../TaxiData/hem-ordning.js'), 'utf8');
 const ls = { _s: {}, getItem(k){ return this._s[k] || null; }, setItem(k,v){ this._s[k]=String(v); }, removeItem(k){ delete this._s[k]; } };
 const documentStub = {
@@ -13,6 +14,7 @@ const documentStub = {
 const windowObj = { addEventListener(){}, driverData: {}, HEM_ORDNING: undefined };
 const ctx = { window: windowObj, document: documentStub, localStorage: ls, fetch(){ return Promise.resolve({ ok:false, text:()=>Promise.resolve('') }); }, addEventListener(){}, console };
 vm.createContext(ctx);
+vm.runInContext(core, ctx);
 vm.runInContext(src, ctx);
 const H = ctx.window.HEM_ORDNING;
 const menu = ['kordata','lonekoll','ankomster','prognos','vader','kalender','installningar','om'].map(id => ({ id, label: id, icon: 'x' }));
@@ -50,7 +52,8 @@ H.setCatalog(menu2);
 H.preview([], []);
 assert.ok(!H.isInstalled('nyheter'), 'nyheter default off');
 assert.ok(!H.arrange(menu2).map(x => x.id).includes('nyheter'));
-assert.ok(H.arrange(menu2).map(x => x.id).includes('vader'));
+assert.ok(!H.isInstalled('vader'), 'vader default off');
+assert.ok(!H.arrange(menu2).map(x => x.id).includes('vader'));
 H.install('nyheter');
 assert.ok(H.isInstalled('nyheter'));
 assert.ok(H.arrange(menu2).map(x => x.id).includes('nyheter'));

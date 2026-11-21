@@ -74,12 +74,13 @@ assert.equal(ls.getItem('taxi_train_stations_v1'), null);
 
 const help = fs.readFileSync(path.resolve(__dirname, '../../TaxiData/hjalp.js'), 'utf8');
 assert.match(help, /function openFor/);
-assert.match(help, /Modulinfo, Flytta, Hjälp/);
+assert.match(help, /flytta den, öppna Modulinfo eller ta bort den/);
 assert.match(help, /Rutan Moduler/);
 const ho = fs.readFileSync(path.resolve(__dirname, '../../TaxiData/hem-ordning.js'), 'utf8');
 assert.match(ho, /navigator\.vibrate\(10\)/);
 assert.match(ho, /data-lp="move"/);
 assert.match(ho, /data-lp="help"/);
 assert.doesNotMatch(ho, /border\s*:\s*2px dashed/);
-assert.match(ho, /aria-label', 'Moduler'/);
+const hoCore = fs.readFileSync(path.resolve(__dirname, '../../TaxiData/hem-ordning-core.js'), 'utf8');
+assert.match(hoCore, /label: 'Moduler'/);
 console.log('UNIT_OK');

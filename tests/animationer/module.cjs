@@ -6,6 +6,7 @@ const root = path.join(__dirname, '../..');
 
 const js = fs.readFileSync(path.join(root, 'TaxiData/animationer.js'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8');
+const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
 const ljud = fs.readFileSync(path.join(root, 'TaxiData/bevakning-ljud.js'), 'utf8');
 const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
 
@@ -18,9 +19,9 @@ assert.match(js, /bev-watch-fire/);
 assert.match(js, /Animationer/);
 assert.doesNotMatch(js, /localStorage\.getItem\('taxi_bev_ljud'\)/);
 assert.match(ljud, /bev-watch-fire/);
-assert.match(html, /animationer\.js\?v=20261112zon2/);
+assert.match(lv, /animationer\.js\?v=20261121zslim1/);
 assert.match(html, /id="animationer-set"/);
-assert.match(html, /bevakning-ljud\.js\?v=20261112ljud1/);
+assert.match(lv, /bevakning-ljud\.js\?v=20261121zslim1/);
 assert.match(cl, /2026-11-11anim1/);
 assert.match(cl, /Inställningar, Animationer/);
 assert.doesNotMatch(cl, /regnar eller snöar|snöflingor|droppar eller flingor/);
@@ -132,10 +133,10 @@ assert.ok(!L.isArrival({ title: '❌ SK1 är inställt' }));
 assert.ok(!L.isArrival({ title: '🧳 Bagaget rullar på band 4 – SK1' }));
 
 // ---- Prognoszoner, landande plan, Stena (2026-11-12zon2) ----
-assert.match(html, /lazy-views\.js\?v=(?:2026111[234](swipe1|mapp1|ljud1|svar2|pgfix1|mod2|lasbar1|skroll1|chatt1|prick2|barn1|sedd1|hem1|avs1|kp1|sem1|sidor1|ladd1|bil1|vkoll1|lokal1)|20261121login1)/);
-const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
-assert.match(lv, /prognos-notis\.js\?v=20261112zon2/);
-assert.match(lv, /changelog\.js\?v=(?:2026111[234](bot1|mapp1|ljud1|svar2|pgfix1|mod2|lasbar1|skroll1|chatt1|prick2|barn1|sedd1|hem1|avs1|kp1|sem1|sidor1|ladd1|bil1|vkoll1|lokal1)|20261121login1)/);
+assert.match(html, /lazy-views\.js\?v=20261121zslim1/);
+
+assert.match(lv, /prognos-notis\.js\?v=20261121zslim1/);
+assert.match(lv, /changelog\.js\?v=20261121zslim1/);
 assert.match(cl, /2026-11-12zon2/);
 assert.doesNotMatch(cl.split('window.CHANGELOG')[1].slice(0, 1600), /\bStig\b|BRASSERIE|Brasserie/);
 assert.doesNotMatch(js, /BRASSERIE/);

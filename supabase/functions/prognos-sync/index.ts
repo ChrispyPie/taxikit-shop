@@ -79,7 +79,8 @@ async function sendTo(driver: string, msg: { title: string; body: string; tag: s
   await ensureVapid();
   if (!vapidReady) return;
   const { data } = await sb.rpc("bev_svc_targets", { p_driver: driver });
-  const subs = (data || []) as { id: number; endpoint: string; p256dh: string; auth: string }[];
+  const subs = ((data || []) as { id: number; endpoint: string; p256dh: string; auth: string; prefs?: Record<string, boolean> }[])
+    .filter((s) => !s.prefs || s.prefs.prognos !== false);
   const payload = JSON.stringify({ ...msg, url: target ? notisUrl(msg, target) : APP_URL, ts, nkey, target });
   for (const s of subs) {
     try {

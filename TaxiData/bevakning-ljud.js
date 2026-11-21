@@ -38,6 +38,7 @@
   }
 
   function enabled(kind) {
+    if (window.NOTIS_ENHET && NOTIS_ENHET.allows && kind !== 'test' && !NOTIS_ENHET.allows(kind)) return false;
     var s = read();
     if (!s.on) return false;
     if (kind === 'test') return s.tag || s.flyg || s.bat;
@@ -302,6 +303,7 @@
       write(cur);
       // Tågljudet är samma som standardens Ljud på i villkoren (sparas även hos servern).
       if (k === 'tag' && window.TAG_VILLKOR && TAG_VILLKOR.setDefault) TAG_VILLKOR.setDefault({ sound: !!el.checked });
+      if (window.NOTIS_ENHET && NOTIS_ENHET.saveSnapshot) NOTIS_ENHET.saveSnapshot();
       notify();
     };
     box.onclick = function (e) {

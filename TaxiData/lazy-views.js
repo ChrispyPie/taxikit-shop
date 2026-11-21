@@ -1,7 +1,31 @@
 /* DRAFT: feature code is fetched only when invoked. State stores IDs/filters/dates, never content or tokens. */
 (function(){'use strict';
 var L=window.LAZY={}, files={}, groups={}, complete={};
-var manifest={"kordata": ["serverstatus.js?v=20261026tm1", "receipt-versions.js?v=20261110repl1", "kvittokopia.js?v=20261111kv1", "passrapport.js?v=20261111pr2", "script.js?v=20261114mal1"], "lonekoll": ["pay-data.js?v=20261107lazy1", "skattetabell-2026.js?v=20261114skatt1", "lonekoll.js?v=20261114sem1"], "ankomster": ["train-stations.js?v=20261108stations1", "arrival-data.js?v=20261111datatid1", "bevakning.js?v=20261112ljud1", "tagnotis.js?v=20261111bat1", "flygnotis.js?v=20261111bat1", "ankomster.js?v=20261111datatid1"], "prognos": ["train-stations.js?v=20261108stations1", "arrival-data.js?v=20261111datatid1", "bevakning.js?v=20261112ljud1", "prognos.js?v=20261114kvar1", "prognos-notis.js?v=20261112zon2"], "kalender": ["kalender.js?v=20261111maps1"], "topplistor": ["topplistor.js?v=20261114bil1"], "forum": ["forum.js?v=20261107lazy1"], "mina-bevakningar": ["train-stations.js?v=20261108stations1", "arrival-data.js?v=20261111datatid1", "bevakning.js?v=20261112ljud1", "tagnotis.js?v=20261111bat1", "flygnotis.js?v=20261111bat1", "mina-bevakningar.js?v=20261112ljud1"], "verkstad": ["sjuk.js?v=20261107inkorg1", "verkstad.js?v=20261111whmsg1"], "installningar": [], "om": ["om-data.js?v=20261111pgbot1", "changelog.js?v=20261121val2", "om.js?v=20261107omwatch1"], "profil": ["mailbox-api.js?v=20261107lazy1", "profilbild.js?v=20261105kh1", "profil-sprak.js?v=20261107p1", "profil-sida.js?v=20261107inkorg2b"], "inkorg": ["arende-status.js?v=20261114arfel1", "mailbox-ui.js?v=20261114arfel1", "inkorg.js?v=20261107arenden1"], "notiser": ["om-data.js?v=20261111pgbot1", "changelog.js?v=20261121val2", "om.js?v=20261107omwatch1", "notis.js?v=20261111bat1"], "bevakning": ["bevakning.js?v=20261112ljud1"], "vader": ["vader.js?v=20261111karta1"], "nyheter": ["nyheter.js?v=20261111nyheter1"]};
+var manifest={
+  "kordata": ["serverstatus.js?v=20261026tm1", "receipt-versions.js?v=20261110repl1", "kvittokopia.js?v=20261111kv1", "passrapport.js?v=20261111pr2", "script.js?v=20261114mal1"],
+  "lonekoll": ["pay-data.js?v=20261107lazy1", "skattetabell-2026.js?v=20261114skatt1", "lonekoll.js?v=20261114sem1"],
+  "ankomster": ["notis-enhet.js?v=20261121zslim1", "bevakning-ljud.js?v=20261121zslim1", "tag-villkor.js?v=20261121zslim1", "train-stations.js?v=20261108stations1", "arrival-data.js?v=20261111datatid1", "bevakning.js?v=20261121zslim1", "tagnotis.js?v=20261111bat1", "flygnotis.js?v=20261111bat1", "ankomster.js?v=20261111datatid1"],
+  "prognos": ["notis-enhet.js?v=20261121zslim1", "bevakning-ljud.js?v=20261121zslim1", "tag-villkor.js?v=20261121zslim1", "train-stations.js?v=20261108stations1", "arrival-data.js?v=20261111datatid1", "bevakning.js?v=20261121zslim1", "prognos.js?v=20261114kvar1", "prognos-notis.js?v=20261121zslim1"],
+  "kalender": ["kalender.js?v=20261111maps1"],
+  "topplistor": ["topplistor.js?v=20261114bil1"],
+  "forum": ["forum.js?v=20261107lazy1"],
+  "mina-bevakningar": ["notis-enhet.js?v=20261121zslim1", "bevakning-ljud.js?v=20261121zslim1", "tag-villkor.js?v=20261121zslim1", "train-stations.js?v=20261108stations1", "arrival-data.js?v=20261111datatid1", "bevakning.js?v=20261121zslim1", "tagnotis.js?v=20261111bat1", "flygnotis.js?v=20261111bat1", "mina-bevakningar.js?v=20261121zslim1"],
+  "verkstad": ["sjuk.js?v=20261107inkorg1", "verkstad.js?v=20261111whmsg1"],
+  "installningar": ["notis-enhet.js?v=20261121zslim1", "bevakning-ljud.js?v=20261121zslim1", "tag-villkor.js?v=20261121zslim1", "bevakning.js?v=20261121zslim1", "animationer.js?v=20261121zslim1", "animationer-vader.js?v=20261121zslim1", "berra.js?v=20261121zslim1", "hjalpbot-scenarier.js?v=20261121zslim1", "hjalpbot-tips.js?v=20261121zslim1", "hjalpbot-hogtid.js?v=20261121zslim1", "hjalpbot.js?v=20261121zslim1"],
+  "om": ["om-data.js?v=20261111pgbot1", "changelog.js?v=20261121zslim1", "om.js?v=20261107omwatch1"],
+  "profil": ["mailbox-api.js?v=20261107lazy1", "profilbild.js?v=20261105kh1", "profil-sprak.js?v=20261107p1", "profil-sida.js?v=20261107inkorg2b"],
+  "inkorg": ["arende-status.js?v=20261114arfel1", "mailbox-ui.js?v=20261114arfel1", "inkorg.js?v=20261107arenden1"],
+  "notiser": ["om-data.js?v=20261111pgbot1", "changelog.js?v=20261121zslim1", "om.js?v=20261107omwatch1", "notis.js?v=20261111bat1"],
+  "bevakning": ["notis-enhet.js?v=20261121zslim1", "bevakning-ljud.js?v=20261121zslim1", "tag-villkor.js?v=20261121zslim1", "bevakning.js?v=20261121zslim1"],
+  "vader": ["vader.js?v=20261111karta1"],
+  "nyheter": ["nyheter.js?v=20261111nyheter1"],
+  "moduler": ["moduler.js?v=20261121zslim1"],
+  "hjalp": ["hjalp.js?v=20261121zslim1"],
+  "hem-ordning": ["hem-ordning.js?v=20261121zslim1"],
+  "hjalpbot": ["animationer.js?v=20261121zslim1", "animationer-vader.js?v=20261121zslim1", "berra.js?v=20261121zslim1", "hjalpbot-scenarier.js?v=20261121zslim1", "hjalpbot-tips.js?v=20261121zslim1", "hjalpbot-hogtid.js?v=20261121zslim1", "hjalpbot.js?v=20261121zslim1"],
+  "animationer": ["animationer.js?v=20261121zslim1", "animationer-vader.js?v=20261121zslim1"],
+  "notis-enhet": ["notis-enhet.js?v=20261121zslim1", "bevakning-ljud.js?v=20261121zslim1", "tag-villkor.js?v=20261121zslim1"]
+};
 var identity='';L.navigation=0;
 L.get=VIEW_STATE.get;L.save=VIEW_STATE.save;
 L.has=function(id){return Object.prototype.hasOwnProperty.call(manifest,id);};
@@ -12,7 +36,7 @@ L.error=function(el,retry){el.innerHTML='<p role="alert">Verktyget kunde inte la
 L.loading=function(el,id,after){el.innerHTML='<p role="status">Laddar verktyget…</p>';L.ensure(id).then(after).catch(function(){L.error(el,function(){L.loading(el,id,after);});});};
 L.setView=function(id){L.save('view',id);var h=id?'#view='+encodeURIComponent(id):'';if(location.hash!==h)history.replaceState(history.state,'',location.pathname+location.search+h);};
 L.restoreView=function(){identity=localStorage.getItem('taxi_driver')||'';var h=new URLSearchParams(location.hash.slice(1)).get('view'),q=new URLSearchParams(location.search),v=h||q.get('sida')||L.get('view',null);if(q.get('flik'))localStorage.setItem('ank_tab',q.get('flik'));var res=L.has(v)?v:null;if(res&&window.DELAD&&DELAD.isHidePrivate&&DELAD.isHidePrivate()&&DELAD.isPrivateView&&DELAD.isPrivateView(res))return null;return res;};
-function invoke(global,method,args){return function(){var params=arguments.length?Array.from(arguments):args||[];return L.ensure(global==='INKORG'?'inkorg':global==='NOTIS'?'notiser':global==='BEVAKNING'?'bevakning':metadata[global][0]).then(function(){return window[global][method].apply(window[global],params);});};}
+function invoke(global,method,args){return function(){var params=arguments.length?Array.from(arguments):args||[];return L.ensure(global==='INKORG'?'inkorg':global==='NOTIS'?'notiser':global==='BEVAKNING'?'bevakning':global==='MODULER'?'moduler':global==='HJALP'?'hjalp':metadata[global][0]).then(function(){return window[global][method].apply(window[global],params);});};}
 var metadata={"ANKOMSTER": ["ankomster", "Ankomster", "🛬"], "LONEKOLL": ["lonekoll", "Lönekoll", "💰"], "TOPPLISTOR": ["topplistor", "Topplistor", "🏆"], "PROGNOS": ["prognos", "Prognos", "🔮"], "KALENDER": ["kalender", "Kalender", "📅"], "FORUM": ["forum", "Forum", "💬"], "OM": ["om", "Om appen", "ℹ️"], "MINA_BEVAKNINGAR": ["mina-bevakningar", "Mina bevakningar", "📌"], "VERKSTAD": ["verkstad", "Anmälningar & ärenden", "🛠️"], "VADER": ["vader", "Väder", "🌦️"], "NYHETER": ["nyheter", "Nyheter", "📰"]};
 Object.keys(metadata).forEach(function(g){var d=metadata[g];window[g]={id:d[0],title:d[1],icon:d[2],stop:function(){},refreshBadge:function(){}};});
 window.FORUM.openPost=invoke('FORUM','openPost');window.PROGNOS.focus=invoke('PROGNOS','focus');window.VERKSTAD.openTab=invoke('VERKSTAD','openTab');
@@ -22,6 +46,8 @@ window.PROFILBILD={init:function(){},reset:function(){}};
 window.INKORG={title:'Meddelanden',id:'inkorg',show:invoke('INKORG','show'),has:function(){return false;},isAdmin:function(){return ['admin','agare','superadmin'].indexOf(window.menuRole?menuRole():'standard')>=0;},openCase:invoke('INKORG','openCase'),openThread:invoke('INKORG','openThread'),logout:function(){},back:function(){return false;}};
 window.NOTIS={toggle:invoke('NOTIS','toggle'),stop:function(){},logout:function(){}};
 window.BEVAKNING={logout:invoke('BEVAKNING','logout'),localOff:invoke('BEVAKNING','localOff')};
+window.MODULER={title:'Moduler',openInfo:invoke('MODULER','openInfo')};
+window.HJALP={open:invoke('HJALP','open'),openFor:invoke('HJALP','openFor'),close:function(){},sync:function(){}};
 var badgeAt=0,badgePending=null,badgeEpoch=0;
 L.unreadChanged=function(){badgeEpoch++;badgeAt=0;};
 L.refreshBadges=function(force){if(window.DELAD&&DELAD.isHidePrivate&&DELAD.isHidePrivate())return Promise.resolve();if(badgePending)return badgePending;if(!force&&Date.now()-badgeAt<30000)return;badgeAt=Date.now();if(!identity)identity=localStorage.getItem('taxi_driver')||'';if(!window.rpc)return;var token=localStorage.getItem('taxi_session')||'';var epoch=badgeEpoch;badgePending=rpc('shell_badge_counts',{p_token:token},12000).then(function(d){if(epoch!==badgeEpoch||token!==(localStorage.getItem('taxi_session')||''))return;d=d||{};window.INKORG_HAS=!!d.messages;if(window.setBadge){setBadge('inkorg',d.messages||0);setBadge('profbtn',!!d.messages||!!window.INKORG_NEEDS_PROFILE);setBadge('notiser',d.notices||0);setBadge('forum',d.forum||0);setBadge('bil',d.bil||0);setBadge('prognos',d.prognos||0);setBadge('workshop',d.admin||0);setBadge('nyheter','2026-11-07k' > (d.news_seen||'1900-01-01'));}}).catch(function(){badgeAt=0;}).finally(function(){badgePending=null;});return badgePending;};

@@ -78,8 +78,10 @@ async function sendTo(driver: string, msg: Msg, opts: SendOpts = {}) {
   await vapid();
   const { data } = await sb.rpc("bev_svc_targets", { p_driver: driver });
   const skip = new Set((opts.skipEndpoints || []).filter(Boolean));
-  const subs = ((data || []) as { id: number; endpoint: string; p256dh: string; auth: string }[])
-    .filter((s) => !skip.has(s.endpoint));
+  const t = String(msg.tag || '');
+  const prefCat = t.startsWith('flyg') ? 'flyg' : (t.startsWith('tag') ? 'tag' : ((t.startsWith('bat') || t.startsWith('båt')) ? 'bat' : ''));
+  const subs = ((data || []) as { id: number; endpoint: string; p256dh: string; auth: string; prefs?: Record<string, boolean> }[])
+    .filter((s) => !skip.has(s.endpoint) && (!prefCat || !s.prefs || s.prefs[prefCat] !== false));
   let sent = 0, failed = 0;
   const ts = Date.now();
   const nkey = opts.nkey || notisKey(msg, ts);
