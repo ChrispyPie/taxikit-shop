@@ -150,7 +150,7 @@
   var MONTHS = ['jan', 'feb', 'mars', 'apr', 'maj', 'juni', 'juli', 'aug', 'sep', 'okt', 'nov', 'dec'];
   var PROTECTED_EXACT = {
     taxi_session: 1, taxi_driver: 1, taxi_logged_in: 1, taxi_theme: 1, taxi_animationer: 1,
-    taxi_enhet: 1, taxi_delad_enhet: 1, taxi_bev_ljud: 1, lk_settings: 1, taxi_kal_watches: 1
+    taxi_enhet: 1, taxi_delad_enhet: 1, taxi_delad_auto_logout: 1, taxi_delad_hide_private: 1, taxi_bev_ljud: 1, lk_settings: 1, taxi_kal_watches: 1
   };
   var PROTECTED_PREFIX = [
     'taxi_home_order', 'taxi_home_layout', 'hb_char_', 'hb_tips_', 'hb_tip_used_', 'forum_rules', 'taxi_bev',

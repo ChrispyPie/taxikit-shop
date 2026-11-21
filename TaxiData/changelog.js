@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-21', id: '2026-11-21val2', tid: '16:12', rader: [
+    ['Nytt', 'Delad enhet: nu kan du välja om automatisk utloggning ska vara på, och du kan kryssa i Dölj privata moduler för att dölja kördata, lön, rapporter, ärenden, meddelanden, profil och admin på bilplattan. Mina bevakningar, Ankomster, Prognos, Väder, Nyheter och Kalender finns kvar. Inloggningen på en delad enhet ber heller inte om att spara lösenord.']
+  ]},
   { datum: '2026-11-21', id: '2026-11-21login1', tid: '15:45', rader: [
     ['Fixat', 'Appen fastnar inte längre på "Kontrollerar inloggning" efter utloggning. Du kan logga in igen direkt.']
   ]},

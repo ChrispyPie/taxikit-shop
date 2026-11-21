@@ -10,8 +10,14 @@
  * Ångra: ta bort anropen i index.html, den här filen, inställningsrutan, ev. RPC:er och cron. */
 (function () {
   var KEY = 'taxi_delad_enhet';
+  var AUTO_KEY = 'taxi_delad_auto_logout';
+  var HIDE_KEY = 'taxi_delad_hide_private';
   var AT = 'taxi_delad_login_at';
   var MSG = 'taxi_delad_logout';
+  var PRIVATE_VIEWS = {
+    kordata: 1, lonekoll: 1, verkstad: 1, topplistor: 1, forum: 1,
+    profil: 1, inkorg: 1, notiser: 1, admin: 1, sadmin: 1
+  };
   var INTERVAL_MS = 5 * 60 * 1000;
   var timer = null;
   var busy = false;
@@ -22,6 +28,9 @@
   function put(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   function del(k) { try { localStorage.removeItem(k); } catch (e) {} }
   function isOn() { return get(KEY) === '1'; }
+  function isAutoLogout() { return isOn() && get(AUTO_KEY) !== '0'; }
+  function isHidePrivate() { return isOn() && get(HIDE_KEY) === '1'; }
+  function isPrivateView(id) { return !!(id && PRIVATE_VIEWS[String(id)]); }
   function loginAt() { return get(AT); }
   function token() { return get('taxi_session') || ''; }
 
@@ -142,22 +151,71 @@
       .catch(function () {});
   }
 
+  function applyPrivateMode() {
+    try { document.documentElement.classList.toggle('delad-hide-private', isHidePrivate()); } catch (e) {}
+    try { if (window.HEM_SIDOR && HEM_SIDOR.sync && window.NAV_VIEW) HEM_SIDOR.sync(window.NAV_VIEW() === ''); } catch (e2) {}
+    try { if (typeof window.onDeladModeChange === 'function') window.onDeladModeChange(); } catch (e3) {}
+  }
+
+  function applyLoginForm() {
+    var on = isOn();
+    var idEl = document.getElementById('driver-id');
+    var pwEl = document.getElementById('password');
+    var fgEl = document.getElementById('forgot-id');
+    if (idEl) {
+      idEl.setAttribute('autocomplete', on ? 'off' : 'username');
+      if (on) {
+        idEl.setAttribute('name', 'taxi_uid_nosave');
+        idEl.setAttribute('data-lpignore', 'true');
+        idEl.setAttribute('data-1p-ignore', 'true');
+        idEl.setAttribute('data-form-type', 'other');
+      } else {
+        idEl.removeAttribute('name');
+        idEl.removeAttribute('data-lpignore');
+        idEl.removeAttribute('data-1p-ignore');
+        idEl.removeAttribute('data-form-type');
+      }
+    }
+    if (pwEl) {
+      pwEl.type = on ? 'text' : 'password';
+      if (pwEl.classList) pwEl.classList.toggle('pw-masked', on);
+      pwEl.setAttribute('autocomplete', on ? 'off' : 'current-password');
+      if (on) {
+        pwEl.setAttribute('name', 'taxi_pw_nosave');
+        pwEl.setAttribute('data-lpignore', 'true');
+        pwEl.setAttribute('data-1p-ignore', 'true');
+        pwEl.setAttribute('data-form-type', 'other');
+      } else {
+        pwEl.removeAttribute('name');
+        pwEl.removeAttribute('data-lpignore');
+        pwEl.removeAttribute('data-1p-ignore');
+        pwEl.removeAttribute('data-form-type');
+      }
+    }
+    if (fgEl) fgEl.setAttribute('autocomplete', on ? 'off' : 'username');
+  }
+
   function markLogin() {
-    if (!isOn()) { del(AT); syncFlag(false); reportDevice(); return; }
+    if (!isAutoLogout()) { del(AT); syncFlag(false); reportDevice(); return; }
     put(AT, new Date().toISOString());
     syncFlag(true);
   }
 
   function ensureLoginAt() {
-    if (!isOn()) return;
+    if (!isAutoLogout()) return;
     if (!loginAt()) markLogin();
   }
 
   function setOn(on) {
     if (on) {
       put(KEY, '1');
-      if (!loginAt()) markLogin();
-      else syncFlag(true);
+      if (isAutoLogout()) {
+        if (!loginAt()) markLogin();
+        else syncFlag(true);
+      } else {
+        del(AT);
+        syncFlag(false);
+      }
       start();
     } else {
       del(KEY);
@@ -165,6 +223,28 @@
       syncFlag(false);
       stop();
     }
+    applyLoginForm();
+    applyPrivateMode();
+  }
+
+  function setAutoLogout(on) {
+    put(AUTO_KEY, on ? '1' : '0');
+    if (isOn()) {
+      if (on) {
+        if (!loginAt()) markLogin();
+        else syncFlag(true);
+        start();
+      } else {
+        del(AT);
+        syncFlag(false);
+        stop();
+      }
+    }
+  }
+
+  function setHidePrivate(on) {
+    put(HIDE_KEY, on ? '1' : '0');
+    applyPrivateMode();
   }
 
   function isDemo() {
@@ -172,7 +252,7 @@
   }
 
   function shouldWatch() {
-    return isOn() && !!token() && !!loginAt() && !isDemo();
+    return isAutoLogout() && !!token() && !!loginAt() && !isDemo();
   }
 
   function signOutForPass() {
@@ -234,10 +314,11 @@
 
   function start() {
     stopped = false;
+    applyPrivateMode();
     if (!token()) return;
-    showAfterLogin();
+    if (isHidePrivate()) hideAfterLoginMsg(); else showAfterLogin();
     reportDevice();
-    if (!isOn() || isDemo()) return;
+    if (!isAutoLogout() || isDemo()) { stop(); del(AT); return; }
     ensureLoginAt();
     syncFlag(true);
     if (timer) return;
@@ -280,7 +361,7 @@
 
   function renderDevices(box) {
     if (!box) return;
-    if (!token() || isDemo() || typeof window.rpc !== 'function') {
+    if (isHidePrivate() || !token() || isDemo() || typeof window.rpc !== 'function') {
       box.innerHTML = '';
       return;
     }
@@ -346,23 +427,53 @@
   function renderSettings(box) {
     if (!box) return;
     var on = isOn();
+    var autoOn = get(AUTO_KEY) !== '0';
+    var hideOn = get(HIDE_KEY) === '1';
     box.innerHTML = '<div class="section"><h3 style="margin-top:0">Delad enhet</h3>' +
       '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">' +
-      'Slå på det här på en platta som flera förare delar, till exempel i bilen. När ditt pass är slut loggas du ut automatiskt, även om skärmen varit av, så nästa förare inte kommer in på ditt konto. Om servern inte har uppdaterats på 1 timme loggas du också ut, även mitt i passet. På din egen telefon ska det vara av.</p>' +
+      'Slå på det här på en platta som flera förare delar, till exempel i bilen. Då ber inloggningen inte om att spara lösenord på enheten, och du kan välja hur kontot ska skyddas. På din egen telefon ska det vara av.</p>' +
       '<div class="hl-opts" role="radiogroup">' +
         '<label class="hl-opt' + (!on ? ' on' : '') + '"><input type="radio" name="delad-enhet" value="0"' + (!on ? ' checked' : '') + '><span>Av</span></label>' +
         '<label class="hl-opt' + (on ? ' on' : '') + '"><input type="radio" name="delad-enhet" value="1"' + (on ? ' checked' : '') + '><span>På</span></label>' +
-      '</div></div>';
+      '</div>' +
+      (on ? '<div class="delad-sub">' +
+        '<label class="delad-chk' + (autoOn ? ' on' : '') + '">' +
+          '<input type="checkbox" name="delad-auto-logout"' + (autoOn ? ' checked' : '') + '>' +
+          '<span><span class="delad-chk-t">Logga ut automatiskt</span>' +
+          '<span class="delad-chk-d">Loggar ut automatiskt när ditt pass är slut, eller om data inte uppdaterats på ett tag.</span></span>' +
+        '</label>' +
+        '<label class="delad-chk' + (hideOn ? ' on' : '') + '">' +
+          '<input type="checkbox" name="delad-hide-private"' + (hideOn ? ' checked' : '') + '>' +
+          '<span><span class="delad-chk-t">Dölj privata moduler</span>' +
+          '<span class="delad-chk-d">Döljer och laddar inte kördata, lön, rapporter, ärenden, meddelanden, profil och admin. Ankomster, Prognos, Väder, Nyheter, Kalender och Mina bevakningar finns kvar.</span></span>' +
+        '</label>' +
+      '</div>' : '') +
+      '</div>';
     box.onchange = function (e) {
-      if (!e.target || e.target.name !== 'delad-enhet') return;
-      setOn(e.target.value === '1');
-      renderSettings(box);
+      if (!e.target) return;
+      if (e.target.name === 'delad-enhet') {
+        setOn(e.target.value === '1');
+        renderSettings(box);
+      } else if (e.target.name === 'delad-auto-logout') {
+        setAutoLogout(!!e.target.checked);
+        renderSettings(box);
+      } else if (e.target.name === 'delad-hide-private') {
+        setHidePrivate(!!e.target.checked);
+        renderSettings(box);
+      }
     };
   }
 
   window.DELAD = {
     isOn: isOn,
+    isAutoLogout: isAutoLogout,
+    isHidePrivate: isHidePrivate,
+    isPrivateView: isPrivateView,
     setOn: setOn,
+    setAutoLogout: setAutoLogout,
+    setHidePrivate: setHidePrivate,
+    applyLoginForm: applyLoginForm,
+    applyPrivateMode: applyPrivateMode,
     markLogin: markLogin,
     start: start,
     stop: stop,
@@ -376,9 +487,11 @@
     check: check
   };
 
+  try { document.documentElement.classList.toggle('delad-hide-private', isHidePrivate()); } catch (e) {}
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', dropLegacyLogout);
+    document.addEventListener('DOMContentLoaded', function () { dropLegacyLogout(); applyLoginForm(); });
   } else {
     dropLegacyLogout();
+    applyLoginForm();
   }
 })();

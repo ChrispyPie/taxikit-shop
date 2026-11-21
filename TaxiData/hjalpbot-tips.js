@@ -163,6 +163,7 @@
   }
 
   function pick(opts) {
+    if (window.DELAD && DELAD.isHidePrivate && DELAD.isHidePrivate()) return null;
     opts = opts || {};
     var char = opts.char || 'robot', list = [], i, tip, aud;
     for (i = 0; i < TIPS.length; i++) {
