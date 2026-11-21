@@ -157,7 +157,7 @@ function testDefaultsAndChangelog() {
   assert.equal(H.isInstalled('nyheter'), false, 'nyheter off by default');
   const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
   const top = cl.split("id: '2026-11-21zslim1'")[1].split(']},')[0];
-  assert.doesNotMatch(top.split('rader:')[0], /tid:/, 'tid must remain unset until go-live');
+  assert.match(top.split('rader:')[0], /tid: '17:30'/, 'tid set at go-live');
   assert.doesNotMatch(top, /\b(Stig|hen)\b/i);
 }
 

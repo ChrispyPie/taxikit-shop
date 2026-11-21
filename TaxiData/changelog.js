@@ -15,7 +15,7 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-11-21', id: '2026-11-21zslim1', rader: [
+  { datum: '2026-11-21', id: '2026-11-21zslim1', tid: '17:30', rader: [
     ['Förbättrat', 'Snabbare start: hjälpboten, hjälptexter, modulhantering, animationer och notisinställningar laddas först när du behöver dem, och appens statiska filer sparas lokalt av en service worker (utan att spara data från servern).'],
     ['Ändrat', 'Startskärmen är förenklad till ett rent rutnät utan mappar eller fri placering (tidigare mappar flyttas automatiskt till startskärmen utan att något försvinner). Välj mellan 3×3, 4×4, 5×5 eller 6×6 i Inställningar – på bred eller liggande skärm visas fler rutor i bredd. På delad enhet sparas rutnätet per förare.'],
     ['Ändrat', 'Väder och Nyheter är valfria och avstängda från start för nya enheter. Slå på dem i Moduler om du vill använda dem.'],
