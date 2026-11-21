@@ -139,12 +139,16 @@ async function testNotisEnhet() {
 
 function testSpotlight() {
   const src = fs.readFileSync(path.join(root, 'TaxiData/hb-stage.js'), 'utf8');
+  assert.match(src, /position:fixed/, 'stage is a corner widget, not a flow card');
+  assert.match(src, /lit \? 'På' : 'Av'/);
+  assert.doesNotMatch(src, /Tänd strålkastare|Strålkastare: På|hb-stage-note|max-width:340px|title \+ '<\/span>'/);
   const ls = { _s: {}, getItem(k) { return Object.prototype.hasOwnProperty.call(this._s, k) ? this._s[k] : null; }, setItem(k, v) { this._s[k] = String(v); } };
   let ensured = [];
-  const win = { LAZY: { ensure(id) { ensured.push(id); return Promise.resolve(); } } };
+  const win = { LAZY: { ensure(id) { ensured.push(id); return Promise.resolve(); } }, addEventListener() {}, innerWidth: 800, innerHeight: 500 };
   const doc = {
-    getElementById: () => null, head: { appendChild() {} },
-    createElement: () => ({ id: '', textContent: '', style: {} })
+    getElementById: () => null, head: { appendChild() {} }, body: { appendChild() {} },
+    createElement: () => ({ id: '', textContent: '', style: {}, className: '', classList: { add(){}, remove(){} }, innerHTML: '' }),
+    querySelector: () => null, querySelectorAll: () => []
   };
   vm.runInNewContext(src, { window: win, LAZY: win.LAZY, document: doc, localStorage: ls });
   assert.equal(win.HB_STAGE.isLit(), false, 'spotlight defaults off');
@@ -164,11 +168,14 @@ function testDefaultsAndChangelog() {
   assert.equal(H.isInstalled('vader'), false, 'vader off by default');
   assert.equal(H.isInstalled('nyheter'), false, 'nyheter off by default');
   const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
-  const top = cl.split("id: '2026-11-21zikon1'")[1].split(']},')[0];
-  assert.match(top.split('rader:')[0], /tid: '19:45'/, 'tid set at go-live');
-  assert.match(top, /Ikonstorlek|ikonstorlek/);
-  assert.match(top, /Moduler/);
+  const top = cl.split("id: '2026-11-21zhorn1'")[1].split(']},')[0];
+  assert.match(top.split('rader:')[0], /tid: '19:57'/, 'tid set at go-live');
+  assert.match(top, /På eller Av/);
   assert.doesNotMatch(top, /\b(Stig|hen)\b/i);
+  const ikon = cl.split("id: '2026-11-21zikon1'")[1].split(']},')[0];
+  assert.match(ikon.split('rader:')[0], /tid: '19:45'/, 'ikonstorlek already live');
+  const css = fs.readFileSync(path.join(root, 'TaxiData/tema.css'), 'utf8');
+  assert.match(css, /\[data-tool="moduler"\] \.emoji svg/, 'Moduler SVG icon is sized without loading the editor');
   const html = fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8');
   assert.match(html, /id="hl-size-range"/);
   assert.match(html, /hl-size-preview/);

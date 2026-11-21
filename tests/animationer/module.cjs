@@ -19,9 +19,9 @@ assert.match(js, /bev-watch-fire/);
 assert.match(js, /Animationer/);
 assert.doesNotMatch(js, /localStorage\.getItem\('taxi_bev_ljud'\)/);
 assert.match(ljud, /bev-watch-fire/);
-assert.match(lv, /animationer\.js\?v=20261121zikon1/);
+assert.match(lv, /animationer\.js\?v=20261121zhorn1/);
 assert.match(html, /id="animationer-set"/);
-assert.match(lv, /bevakning-ljud\.js\?v=20261121zikon1/);
+assert.match(lv, /bevakning-ljud\.js\?v=20261121zhorn1/);
 assert.match(cl, /2026-11-11anim1/);
 assert.match(cl, /Inställningar, Animationer/);
 assert.doesNotMatch(cl, /regnar eller snöar|snöflingor|droppar eller flingor/);
@@ -133,10 +133,10 @@ assert.ok(!L.isArrival({ title: '❌ SK1 är inställt' }));
 assert.ok(!L.isArrival({ title: '🧳 Bagaget rullar på band 4 – SK1' }));
 
 // ---- Prognoszoner, landande plan, Stena (2026-11-12zon2) ----
-assert.match(html, /lazy-views\.js\?v=20261121zikon1/);
+assert.match(html, /lazy-views\.js\?v=20261121zhorn1/);
 
-assert.match(lv, /prognos-notis\.js\?v=20261121zikon1/);
-assert.match(lv, /changelog\.js\?v=20261121zikon1/);
+assert.match(lv, /prognos-notis\.js\?v=20261121zhorn1/);
+assert.match(lv, /changelog\.js\?v=20261121zhorn1/);
 assert.match(cl, /2026-11-12zon2/);
 assert.doesNotMatch(cl.split('window.CHANGELOG')[1].slice(0, 1600), /\bStig\b|BRASSERIE|Brasserie/);
 assert.doesNotMatch(js, /BRASSERIE/);
