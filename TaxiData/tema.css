@@ -143,7 +143,10 @@ html[data-theme="dark"] img.pfp-avatar, html[data-theme="dark"] .emoji { filter:
 /* Rutmenyn (startsidan och adminmenyn). Ikonstorlek under Inställningar sätter html[data-icon-size] = 1…5
    (1 = liten, 3 ≈ tidigare 4×4 på telefon, 5 = störst). Texten under ikonen följer samma steg.
    Antal kolumner räknas från tillgänglig bredd och vald ikonstorlek (portrait, landscape, telefon och platta). */
-:root { --icon-k: 1; --icon-tk: 1; --icon-cell: 78px; --icon-gap: 6px; --icon-gap-x: 4px; }
+:root { --icon-k: 1; --icon-tk: 1; --icon-cell: 78px; --icon-gap: 6px; --icon-gap-x: 4px;
+  /* Headern följer samma 5 steg, men lite mjukare så standard (steg 3) är oförändrat och TaxiData får plats på en vanlig telefon även i största steget. */
+  --hdr-k: calc(0.55 + 0.45 * var(--icon-k, 1));
+  --hdr-btn: calc(40px * var(--hdr-k, 1)); --hdr-ico: calc(20px * var(--hdr-k, 1)); --hdr-title: calc(1.1rem * var(--hdr-k, 1)); }
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--icon-cell, 78px), 1fr));
@@ -202,12 +205,14 @@ html body header {
   z-index: 60; /* under menyer/popups/modaler (100+) */
   background: var(--bg);
   /* Sidmarginal i px (inte rem) så den inte växer med textstorlek och stjäl plats från titeln. */
-  padding: max(0.5rem, env(safe-area-inset-top, 0px)) 4px 0.4rem;
+  padding: max(0.35rem, env(safe-area-inset-top, 0px)) 4px 0.3rem;
   display: grid;
-  grid-template-columns: minmax(80px, 1fr) minmax(0, auto) minmax(80px, 1fr);
+  /* Sidorna tar ikonernas bredd; titeln får resten och kortas med ellipsis så headern inte svämmar över. */
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   column-gap: 2px;
   gap: 0 2px;
+  min-width: 0;
 }
 @media (min-width: 700px) {
   html body header { padding-left: 8px; padding-right: 8px; }
@@ -221,18 +226,23 @@ html body header .app-fs-btn {
   border: none;
   box-shadow: none;
   color: var(--primary);
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
-  min-height: 40px;
+  width: var(--hdr-btn, 40px);
+  height: var(--hdr-btn, 40px);
+  min-width: var(--hdr-btn, 40px);
+  min-height: var(--hdr-btn, 40px);
+  max-width: var(--hdr-btn, 40px);
+  max-height: var(--hdr-btn, 40px);
   padding: 0;
+  margin: 0;
   box-sizing: border-box;
   border-radius: 10px;
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   -webkit-tap-highlight-color: transparent;
-  font-size: calc(20px * var(--font-scale, 1));
+  font-size: var(--hdr-ico, 20px);
+  line-height: 1;
 }
 html body header > button:hover,
 html body header .hdr-left button:hover,
@@ -265,6 +275,7 @@ html body header h1 {
   left: auto;
   transform: none;
   flex: 0 1 auto;
+  width: 100%;
   max-width: 100%;
   margin: 0;
   min-width: 0;
@@ -272,6 +283,8 @@ html body header h1 {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: var(--hdr-title, 1.1rem);
+  line-height: 1.2;
 }
 /* Notis-räknaren ska ligga på klockikonen, inte ta plats bredvid den. */
 html body header .badge-host,
@@ -282,15 +295,28 @@ html body header .badge-host.has-badge[data-badge-text]:not([data-badge-text=""]
 html body header .notis-btn.has-badge::after,
 html body header .profile-btn.has-badge::after {
   position: absolute;
-  top: -2px;
-  right: -2px;
+  top: calc(-2px * var(--icon-k, 1));
+  right: calc(-2px * var(--icon-k, 1));
   margin: 0;
   z-index: 2;
   pointer-events: none;
+  min-width: calc(12px * var(--icon-k, 1));
+  height: calc(12px * var(--icon-k, 1));
+  line-height: calc(12px * var(--icon-k, 1));
+  font-size: calc(10px * var(--icon-k, 1));
+  border-width: calc(2px * var(--icon-k, 1));
+}
+html body header .badge-host.has-badge[data-badge-text]:not([data-badge-text=""])::after,
+html body header .notis-btn.has-badge[data-badge-text]:not([data-badge-text=""])::after,
+html body header .profile-btn.has-badge[data-badge-text]:not([data-badge-text=""])::after {
+  min-width: calc(10px * var(--icon-k, 1));
+  height: calc(16px * var(--icon-k, 1));
+  line-height: calc(16px * var(--icon-k, 1));
+  padding: 0 calc(3px * var(--icon-k, 1));
 }
 
 /* Profilmenyn följer med den fasta headern */
-#profile-menu { position: fixed !important; top: calc(68px + env(safe-area-inset-top)) !important; }
+#profile-menu { position: fixed !important; top: calc(var(--hdr-btn, 40px) + 1.1rem + env(safe-area-inset-top, 0px)) !important; }
 
 
 /* Helskärm-knapp (helskarm.js): till höger om hemknappen i .hdr-left. Flytande bara utan header (inloggning). */

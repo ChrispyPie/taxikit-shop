@@ -6,12 +6,12 @@
   <style>.session-loading #login-screen,.session-loading #admin-app,.session-loading #app,.session-loading #dashboard-view{display:none!important}#session-status{display:none;text-align:center;padding:48px 16px}.session-loading #session-status{display:block}</style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="tema.js?v=20261121zhorn1"></script>
+  <script src="tema.js?v=20261121zhdr1"></script>
   <script src="helskarm.js?v=20261110hl2"></script>
   <script src="hjalp.js?v=20261111hjalp1"></script>
   <script src="enhet.js?v=20261029d"></script>
   <script src="namn.js?v=20261028nm1"></script>
-  <link rel="stylesheet" href="tema.css?v=20261121zhorn1">
+  <link rel="stylesheet" href="tema.css?v=20261121zhdr1">
   <title>Admin – TaxiData</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -150,9 +150,9 @@
 
   <div id="admin-app">
     <header>
-      <button onclick="goHome()" style="font-size:calc(20px * var(--font-scale, 1));">🏠</button>
+      <button onclick="goHome()" aria-label="Hem">🏠</button>
       <h1 id="title">Admin</h1>
-      <button id="profile-btn" onclick="toggleProfile()" style="font-size:calc(20px * var(--font-scale, 1));" aria-label="Profil">👤</button>
+      <button id="profile-btn" onclick="toggleProfile()" aria-label="Profil">👤</button>
     </header>
     <div class="profile-menu" id="profile-menu" style="display:none; position:absolute; top:60px; right:16px; background:var(--surface); border:1px solid var(--c-e2e8f0); border-radius:8px; padding:12px; z-index:100;">
       <div onclick="location.href='index.html'" style="padding:8px; cursor:pointer;">Förarapp</div>
