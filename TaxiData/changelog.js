@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-21', id: '2026-11-21zhdr1', tid: '20:02', rader: [
+    ['Ändrat', 'Ikonerna i headern (hem, helskärm, hjälp, notiser och profil) och rubriken följer nu samma ikonstorlek som du väljer i Inställningar. På en smal skärm kortas en lång rubrik med tre punkter så inget åker utanför.']
+  ]},
   { datum: '2026-11-21', id: '2026-11-21zhorn1', tid: '19:57', rader: [
     ['Ändrat', 'Hjälpboten står i sin laddstation i hörnet på startskärmen, med en liten strålkastare ovanför. Knappen visar bara På eller Av – inget kort och ingen extra text som täcker sidprickarna. När ljuset är släckt är det bara en stilla bild; när du tänder laddas hjälpboten och syns på samma plats.']
   ]},
