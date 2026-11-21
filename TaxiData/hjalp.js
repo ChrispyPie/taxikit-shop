@@ -14,7 +14,7 @@
       'Efter inloggning kommer du till startskärmen med alla verktyg.'
     ],
     hem: [
-      'Här öppnar du verktygen. En röd prick betyder att något nytt väntar. Tänd strålkastaren längst ner för att väcka hjälpboten.',
+      'Här öppnar du verktygen. En röd prick betyder att något nytt väntar. Tänd strålkastaren i hörnet (På) för att väcka hjälpboten.',
       'Håll in en ikon i ungefär en sekund för att flytta den, öppna Modulinfo eller ta bort den från startskärmen. Inställningar, Om appen, Admin och Moduler stannar alltid kvar.',
       'Dra en ikon till högerkanten för att lägga den på Sida 2. Väder och Nyheter finns i Moduler om du vill slå på dem.',
       'Rutan Moduler öppnar listan över alla verktyg du kan lägga till eller ta bort.',

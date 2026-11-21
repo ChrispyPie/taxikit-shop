@@ -153,6 +153,9 @@ html[data-theme="dark"] img.pfp-avatar, html[data-theme="dark"] .emoji { filter:
 }
 .icon, .icon * { -webkit-tap-highlight-color: transparent; }
 .icon .emoji { font-size: calc(28px * var(--icon-k, 1)); margin-bottom: 4px; line-height: 1; display: inline-block; transform-origin: 50% 50%; }
+.icon[data-tool="moduler"] .emoji { color: var(--text, #e2e8f0); }
+.icon[data-tool="moduler"] .emoji svg { width: 1em; height: 1em; display: block; margin: 0 auto; }
+html[data-home="lista"] .icon[data-tool="moduler"] .emoji svg { width: 1em; height: 1em; }
 .icon .label { font-size: calc(12.5px * min(var(--font-scale, 1), 1.15) * var(--icon-tk, 1)); line-height: 1.15; overflow-wrap: break-word; hyphens: manual; }
 .icon:active, .icon:focus {
   background: none; background-color: transparent; transform: none; outline: none;

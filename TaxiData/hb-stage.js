@@ -1,14 +1,20 @@
-/* Hjälpbotens scen & strålkastare (lätt platsmarkör vid start).
- * När strålkastaren är släkt laddas bara en statisk, nedtonad scenbild för vald figur
- * (robot i laddstation i skugga, chaufför i bil med släckt taxiskylt, eller diva vid sminkbord i skugga)
- * utan att hämta tunga hjalpbot*.js / berra.js vid uppstart.
- * När föraren tänder strålkastaren laddas hela Hjälpboten (LAZY.ensure('hjalpbot')) och scenen lyses upp. */
+/* Hjälpbotens station och strålkastare i startskärmens hörn.
+ * Inget kort: när strålkastaren är släckt visas bara en stilla, nedtonad bild
+ * (robot i laddstation, chaufför i bil, eller diva vid sminkbord) utan att
+ * hämta tunga hjalpbot*.js / berra.js. Knappen visar bara På eller Av.
+ * Ett tryck på knappen eller figuren tänder ljuset, laddar hjälpboten och
+ * visar den på samma plats (ingen dubblett). */
 (function () {
   'use strict';
   if (window.HB_STAGE) return;
 
   var CHAR_DEFAULT = 'robot';
   var VALID_CHARS = { robot: 1, chauffor: 1, diva: 1, off: 1 };
+  var WID = 112, SCENE_H = 64, LAMP_H = 30, TOT_H = SCENE_H + LAMP_H;
+  var MARGIN = 8;
+  var placed = null;
+  var host = null;
+  var bound = false;
 
   function driverId() { try { return localStorage.getItem('taxi_driver') || ''; } catch (e) { return ''; } }
   function charKey() { return 'hb_char_' + (driverId() || 'default'); }
@@ -26,110 +32,118 @@
   function setLitLocal(on) {
     try { localStorage.setItem(lightKey(), on ? '1' : '0'); } catch (e) {}
   }
+  function isHome() {
+    var app = document.getElementById('app');
+    return !!(app && app.classList && app.classList.contains('is-home') && app.style.display !== 'none');
+  }
 
   function css() {
     if (document.getElementById('hb-stage-css')) return;
     var s = document.createElement('style');
     s.id = 'hb-stage-css';
     s.textContent =
-      '.hb-stage{margin:14px auto 4px;max-width:340px;border-radius:14px;border:1px solid var(--border,#cbd5e0);' +
-        'background:linear-gradient(180deg,#111827 0%,#1a2232 100%);color:#e2e8f0;padding:8px 12px 10px;position:relative;overflow:hidden}' +
-      '.hb-stage.lit{background:linear-gradient(180deg,#1a2436 0%,#28374d 100%);border-color:#d69e2e}' +
-      '.hb-stage-top{display:flex;align-items:center;justify-content:space-between;gap:8px;position:relative;z-index:2}' +
-      '.hb-stage-lamp{display:flex;align-items:center;gap:6px}' +
-      '.hb-stage-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;border:1px solid rgba(255,255,255,.22);' +
-        'background:rgba(255,255,255,.08);color:#e2e8f0;font:600 .8rem inherit;cursor:pointer;min-height:32px}' +
+      '.hb-stage{position:fixed;left:0;top:0;width:' + WID + 'px;z-index:44;pointer-events:none;overflow:visible;background:none;border:0;padding:0;margin:0;color:#e2e8f0}' +
+      '.hb-stage.hb-hidden{display:none}' +
+      '.hb-stage-light{position:relative;height:' + LAMP_H + 'px;display:flex;align-items:flex-end;justify-content:center;gap:4px;z-index:2}' +
+      '.hb-stage-lamp{display:block;flex:0 0 auto;width:28px;height:22px}' +
+      '.hb-stage-btn{pointer-events:auto;display:inline-flex;align-items:center;justify-content:center;min-width:32px;min-height:24px;padding:2px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.28);' +
+        'background:rgba(15,23,42,.78);color:#e2e8f0;font:700 .72rem/1 inherit;cursor:pointer}' +
       '.hb-stage.lit .hb-stage-btn{background:#f5c518;color:#1a202c;border-color:#f5c518}' +
-      '.hb-stage-scene{position:relative;display:flex;flex-direction:column;align-items:center;padding-top:2px;cursor:pointer}' +
-      '.hb-stage-svg{width:100%;max-width:250px;height:112px;display:block}' +
-      '.hb-stage-note{font-size:.74rem;color:#94a3b8;text-align:center;margin-top:2px}' +
-      '.hb-stage.lit .hb-stage-note{color:#fde68a}';
+      '.hb-stage-scene{pointer-events:auto;cursor:pointer;position:relative;height:' + SCENE_H + 'px}' +
+      '.hb-stage-svg{width:100%;height:' + SCENE_H + 'px;display:block;overflow:visible}';
     document.head.appendChild(s);
   }
 
   function lampSvg(lit) {
-    // Scenstrålkastare ovanför figuren (par-kanna med klaffar + stativbygel)
-    return '<svg width="46" height="34" viewBox="0 0 64 48" aria-hidden="true">' +
-      '<path d="M18 4 h28 M32 4 v7" stroke="#94a3b8" stroke-width="2.6" stroke-linecap="round"/>' +
-      '<path d="M21 11 h22 v6 h-22 z" fill="#334155" stroke="#0f172a" stroke-width="1.5"/>' +
-      '<g transform="rotate(14 32 22)">' +
-        '<rect x="20" y="14" width="24" height="17" rx="4" fill="#1e293b" stroke="#0f172a" stroke-width="1.6"/>' +
-        '<path d="M20 31 l-5 7 h34 l-5 -7 z" fill="#0f172a" stroke="#334155" stroke-width="1.2"/>' +
-        '<ellipse cx="32" cy="31" rx="9" ry="2.8" fill="' + (lit ? '#fef08a' : '#334155') + '"/>' +
+    return '<svg class="hb-stage-lamp" viewBox="0 0 40 32" aria-hidden="true">' +
+      '<path d="M20 1 v7" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>' +
+      '<path d="M14 8 h12 v4 h-12 z" fill="#334155" stroke="#0f172a" stroke-width="1.2"/>' +
+      '<g transform="rotate(10 20 16)">' +
+        '<rect x="12" y="10" width="16" height="11" rx="3" fill="#1e293b" stroke="#0f172a" stroke-width="1.3"/>' +
+        '<path d="M12 21 l-3 6 h22 l-3 -6 z" fill="#0f172a" stroke="#334155" stroke-width="1"/>' +
+        '<ellipse cx="20" cy="21" rx="6" ry="2" fill="' + (lit ? '#fef08a' : '#334155') + '"/>' +
       '</g></svg>';
   }
 
   function sceneSvg(id, lit) {
     var beam = lit
-      ? '<polygon points="105,0 145,0 232,110 18,110" fill="url(#hbBeam)" opacity="0.55"/>'
+      ? '<polygon points="50,0 70,0 118,64 2,64" fill="url(#hbBeam)" opacity="0.5"/>'
       : '';
     var defs = '<defs><linearGradient id="hbBeam" x1="0" y1="0" x2="0" y2="1">' +
-      '<stop offset="0%" stop-color="#fef08a" stop-opacity="0.78"/>' +
-      '<stop offset="100%" stop-color="#fef08a" stop-opacity="0.04"/></linearGradient></defs>';
+      '<stop offset="0%" stop-color="#fef08a" stop-opacity="0.7"/>' +
+      '<stop offset="100%" stop-color="#fef08a" stop-opacity="0.03"/></linearGradient></defs>';
     var dimOp = lit ? '1' : '0.42';
-    var floor = '<ellipse cx="125" cy="102" rx="88" ry="8" fill="' + (lit ? '#fef08a' : '#0b1019') + '" opacity="' + (lit ? '0.22' : '0.65') + '"/>';
+    var floor = '<ellipse cx="60" cy="60" rx="48" ry="5" fill="' + (lit ? '#fef08a' : '#0b1019') + '" opacity="' + (lit ? '0.22' : '0.65') + '"/>';
     var art = '';
     if (id === 'chauffor') {
-      // Taxi i profil med chauffören i bilen; taxiskylten är släckt när strålkastaren är av
       var signFill = lit ? '#f5c518' : '#2d3748';
       var signTxt = lit ? '#1a202c' : '#4a5568';
       var hlFill = lit ? '#fef08a' : '#334155';
-      art =
+      var fig = lit ? '' :
         '<g opacity="' + dimOp + '">' +
-          '<rect x="97" y="25" width="38" height="11" rx="3" fill="' + signFill + '" stroke="#0f172a" stroke-width="1.4"/>' +
-          '<text x="116" y="33" text-anchor="middle" font-size="7" font-weight="800" font-family="Arial,sans-serif" fill="' + signTxt + '">TAXI</text>' +
-          '<path d="M56 64 l16 -24 h74 l22 24 h24 q10 0 10 10 v16 h-158 v-18 q0 -8 12 -8 z" fill="' + (lit ? '#334155' : '#1e293b') + '" stroke="#0f172a" stroke-width="2"/>' +
-          '<path d="M77 44 h30 v18 h-36 z M113 44 h28 l14 18 h-42 z" fill="#0f172a" opacity="0.85"/>' +
-          // Chaufför-silhuett i framsätet
-          '<circle cx="126" cy="52" r="6.5" fill="' + (lit ? '#f6d2b3' : '#475569') + '"/>' +
-          '<path d="M119 47 q7 -5 14 0 z" fill="' + signFill + '"/>' +
-          '<rect x="118" y="58" width="16" height="6" rx="2" fill="#1c1614"/>' +
-          // Rutig taxirand + strålkastare
-          '<rect x="64" y="72" width="112" height="6" fill="' + (lit ? '#f5c518' : '#334155') + '" opacity="0.85"/>' +
-          '<circle cx="196" cy="73" r="4.5" fill="' + hlFill + '"/>' +
-          '<circle cx="82" cy="91" r="11" fill="#0f172a" stroke="#475569" stroke-width="2"/><circle cx="82" cy="91" r="4.5" fill="#64748b"/>' +
-          '<circle cx="166" cy="91" r="11" fill="#0f172a" stroke="#475569" stroke-width="2"/><circle cx="166" cy="91" r="4.5" fill="#64748b"/>' +
+          '<rect x="44" y="6" width="28" height="8" rx="2" fill="' + signFill + '" stroke="#0f172a" stroke-width="1.2"/>' +
+          '<text x="58" y="12" text-anchor="middle" font-size="6" font-weight="800" font-family="Arial,sans-serif" fill="' + signTxt + '">TAXI</text>' +
+          '<path d="M18 36 l10 -16 h44 l14 16 h16 q6 0 6 7 v10 h-96 v-12 q0 -5 8 -5 z" fill="#1e293b" stroke="#0f172a" stroke-width="1.6"/>' +
+          '<path d="M32 22 h20 v12 h-24 z M56 22 h18 l10 12 h-28 z" fill="#0f172a" opacity="0.85"/>' +
+          '<circle cx="64" cy="28" r="4.5" fill="#475569"/>' +
+          '<path d="M59 25 q5 -4 10 0 z" fill="' + signFill + '"/>' +
+          '<rect x="28" y="40" width="68" height="4" fill="#334155" opacity="0.85"/>' +
+          '<circle cx="108" cy="40" r="3" fill="' + hlFill + '"/>' +
+          '<circle cx="36" cy="52" r="8" fill="#0f172a" stroke="#475569" stroke-width="1.6"/><circle cx="36" cy="52" r="3" fill="#64748b"/>' +
+          '<circle cx="86" cy="52" r="8" fill="#0f172a" stroke="#475569" stroke-width="1.6"/><circle cx="86" cy="52" r="3" fill="#64748b"/>' +
         '</g>';
+      var dock = !lit ? '' :
+        '<g opacity="1">' +
+          '<path d="M18 36 l10 -16 h44 l14 16 h16 q6 0 6 7 v10 h-96 v-12 q0 -5 8 -5 z" fill="#334155" stroke="#0f172a" stroke-width="1.6"/>' +
+          '<path d="M32 22 h20 v12 h-24 z M56 22 h18 l10 12 h-28 z" fill="#0f172a" opacity="0.85"/>' +
+          '<rect x="44" y="6" width="28" height="8" rx="2" fill="' + signFill + '" stroke="#0f172a" stroke-width="1.2"/>' +
+          '<text x="58" y="12" text-anchor="middle" font-size="6" font-weight="800" font-family="Arial,sans-serif" fill="' + signTxt + '">TAXI</text>' +
+          '<rect x="28" y="40" width="68" height="4" fill="#f5c518" opacity="0.85"/>' +
+          '<circle cx="108" cy="40" r="3" fill="' + hlFill + '"/>' +
+          '<circle cx="36" cy="52" r="8" fill="#0f172a" stroke="#475569" stroke-width="1.6"/><circle cx="36" cy="52" r="3" fill="#64748b"/>' +
+          '<circle cx="86" cy="52" r="8" fill="#0f172a" stroke="#475569" stroke-width="1.6"/><circle cx="86" cy="52" r="3" fill="#64748b"/>' +
+        '</g>';
+      art = fig || dock;
     } else if (id === 'diva') {
-      // Taxi-Diva vid sitt sminkbord i skuggan (släckta spegellampor när av)
       var bulb = lit ? '#fef08a' : '#334155';
-      var dress = lit ? '#f5c518' : '#3b4252';
-      art =
-        '<g opacity="' + dimOp + '">' +
-          '<rect x="74" y="22" width="54" height="44" rx="8" fill="#1e293b" stroke="#475569" stroke-width="2"/>' +
-          '<rect x="81" y="28" width="40" height="32" rx="5" fill="' + (lit ? '#7dd3fc' : '#0f172a') + '" opacity="0.7"/>' +
-          '<circle cx="82" cy="24" r="2.8" fill="' + bulb + '"/><circle cx="101" cy="22" r="2.8" fill="' + bulb + '"/><circle cx="120" cy="24" r="2.8" fill="' + bulb + '"/>' +
-          '<circle cx="75" cy="44" r="2.8" fill="' + bulb + '"/><circle cx="127" cy="44" r="2.8" fill="' + bulb + '"/>' +
-          '<rect x="64" y="66" width="78" height="8" rx="3" fill="#475569"/>' +
-          '<path d="M72 74 v24 M134 74 v24" stroke="#334155" stroke-width="3"/>' +
-          // Diva på pallen
-          '<circle cx="156" cy="46" r="9.5" fill="' + (lit ? '#f6d2b3' : '#475569') + '"/>' +
-          '<path d="M146 46 q0 -11 10 -11 q10 0 10 11 q-3 -5 -10 -4 q-7 1 -10 4 z" fill="#7c2d12"/>' +
-          '<path d="M144 64 q0 -8 12 -8 q12 0 12 8 l-3 14 h-18 z" fill="' + dress + '"/>' +
-          '<rect x="145" y="80" width="22" height="5" rx="2" fill="#e11d48"/>' +
-          '<path d="M156 85 v13 M148 98 h16" stroke="#475569" stroke-width="2.5"/>' +
+      var dress = '#3b4252';
+      var desk =
+        '<rect x="14" y="8" width="40" height="32" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1.6"/>' +
+        '<rect x="20" y="13" width="28" height="22" rx="4" fill="' + (lit ? '#7dd3fc' : '#0f172a') + '" opacity="0.7"/>' +
+        '<circle cx="20" cy="10" r="2" fill="' + bulb + '"/><circle cx="34" cy="8" r="2" fill="' + bulb + '"/><circle cx="48" cy="10" r="2" fill="' + bulb + '"/>' +
+        '<circle cx="16" cy="24" r="2" fill="' + bulb + '"/><circle cx="52" cy="24" r="2" fill="' + bulb + '"/>' +
+        '<rect x="8" y="40" width="54" height="6" rx="2" fill="#475569"/>' +
+        '<path d="M14 46 v12 M56 46 v12" stroke="#334155" stroke-width="2.4"/>';
+      var fig = lit ? '' :
+        '<g opacity="' + dimOp + '">' + desk +
+          '<circle cx="80" cy="24" r="7" fill="#475569"/>' +
+          '<path d="M73 24 q0 -8 7 -8 q7 0 7 8 q-2 -4 -7 -3 q-5 1 -7 3 z" fill="#7c2d12"/>' +
+          '<path d="M72 36 q0 -6 8 -6 q8 0 8 6 l-2 10 h-12 z" fill="' + dress + '"/>' +
+          '<rect x="73" y="48" width="16" height="4" rx="2" fill="#e11d48"/>' +
+          '<path d="M80 52 v8 M74 60 h12" stroke="#475569" stroke-width="2"/>' +
         '</g>';
+      art = fig || ('<g>' + desk + '</g>');
     } else {
-      // Robot i sin laddstation i skugga
       var batt = lit ? '#4ade80' : '#334155';
-      var visor = lit ? '#f5c518' : '#334155';
-      art =
-        '<g opacity="' + dimOp + '">' +
-          '<rect x="76" y="34" width="38" height="64" rx="7" fill="#1e293b" stroke="#475569" stroke-width="2"/>' +
-          '<rect x="85" y="42" width="20" height="8" rx="2" fill="' + batt + '"/>' +
-          '<rect x="85" y="54" width="20" height="8" rx="2" fill="' + batt + '" opacity="0.7"/>' +
-          '<path d="M114 78 q12 0 16 -10" fill="none" stroke="#64748b" stroke-width="3" stroke-linecap="round"/>' +
-          // Robot bredvid/i laddstationen
-          '<rect x="128" y="28" width="36" height="24" rx="10" fill="' + (lit ? '#f8fafc' : '#334155') + '" stroke="#0f172a" stroke-width="1.6"/>' +
-          '<rect x="133" y="33" width="26" height="14" rx="6" fill="#0f172a"/>' +
-          '<circle cx="140" cy="40" r="2.2" fill="' + visor + '"/><circle cx="152" cy="40" r="2.2" fill="' + visor + '"/>' +
-          '<rect x="137" y="22" width="18" height="6" rx="2" fill="' + visor + '"/>' +
-          '<rect x="131" y="53" width="30" height="26" rx="8" fill="' + (lit ? '#f8fafc' : '#334155') + '" stroke="#0f172a" stroke-width="1.6"/>' +
-          '<rect x="136" y="59" width="20" height="10" rx="3" fill="' + visor + '"/>' +
-          '<circle cx="139" cy="84" r="6" fill="#0f172a"/><circle cx="153" cy="84" r="6" fill="#0f172a"/>' +
+      var visor = '#334155';
+      var dock =
+        '<rect x="8" y="16" width="28" height="44" rx="5" fill="#1e293b" stroke="#475569" stroke-width="1.6"/>' +
+        '<rect x="14" y="22" width="16" height="6" rx="1.5" fill="' + batt + '"/>' +
+        '<rect x="14" y="31" width="16" height="6" rx="1.5" fill="' + batt + '" opacity="0.7"/>' +
+        '<path d="M36 48 q8 0 12 -8" fill="none" stroke="#64748b" stroke-width="2.4" stroke-linecap="round"/>';
+      var fig = lit ? '' :
+        '<g opacity="' + dimOp + '">' + dock +
+          '<rect x="52" y="14" width="26" height="18" rx="7" fill="#334155" stroke="#0f172a" stroke-width="1.3"/>' +
+          '<rect x="56" y="18" width="18" height="10" rx="4" fill="#0f172a"/>' +
+          '<circle cx="61" cy="23" r="1.6" fill="' + visor + '"/><circle cx="69" cy="23" r="1.6" fill="' + visor + '"/>' +
+          '<rect x="58" y="10" width="14" height="4" rx="1.5" fill="' + visor + '"/>' +
+          '<rect x="54" y="33" width="22" height="18" rx="6" fill="#334155" stroke="#0f172a" stroke-width="1.3"/>' +
+          '<rect x="58" y="37" width="14" height="7" rx="2" fill="' + visor + '"/>' +
+          '<circle cx="60" cy="54" r="4.5" fill="#0f172a"/><circle cx="70" cy="54" r="4.5" fill="#0f172a"/>' +
         '</g>';
+      art = fig || ('<g>' + dock + '</g>');
     }
-    return '<svg class="hb-stage-svg" viewBox="0 0 250 112" aria-hidden="true">' + defs + beam + floor + art + '</svg>';
+    return '<svg class="hb-stage-svg" viewBox="0 0 120 64" aria-hidden="true">' + defs + beam + floor + art + '</svg>';
   }
 
   function wakeBot() {
@@ -145,31 +159,131 @@
     return Promise.resolve();
   }
 
-  function render(host) {
-    if (!host) return;
-    var c = charId();
-    if (c === 'off') { host.innerHTML = ''; return; }
-    css();
-    var lit = isLit();
-    var title = c === 'chauffor' ? 'Chaufför' : (c === 'diva' ? 'Taxi-Diva' : 'Robot');
-    host.innerHTML =
-      '<div class="hb-stage' + (lit ? ' lit' : '') + '" id="hb-stage-card">' +
-        '<div class="hb-stage-top">' +
-          '<div class="hb-stage-lamp">' + lampSvg(lit) + '<span style="font-size:.82rem;font-weight:700">' + title + '</span></div>' +
-          '<button type="button" class="hb-stage-btn" id="hb-stage-toggle" aria-pressed="' + (lit ? 'true' : 'false') + '">' +
-            (lit ? '💡 Strålkastare: På' : '🔦 Tänd strålkastare') +
-          '</button>' +
-        '</div>' +
-        '<div class="hb-stage-scene" id="hb-stage-scene" role="button" tabindex="0" aria-label="' + (lit ? 'Släck strålkastaren' : 'Tänd strålkastaren och väck Hjälpboten') + '">' +
-          sceneSvg(c, lit) +
-          '<div class="hb-stage-note">' + (lit ? 'Strålkastaren är tänd · tryck på boten eller släck här' : 'Strålkastaren är släkt · tryck för att tända och väcka boten') + '</div>' +
-        '</div>' +
-      '</div>';
+  function overlaps(a, b) { return a.l < b.r && a.r > b.l && a.t < b.b && a.b > b.t; }
 
+  function obstacles() {
+    var obs = [];
+    function add(node, extra) {
+      if (!node || (node.style && node.style.display === 'none')) return;
+      if (node.classList && node.classList.contains('hb-hidden')) return;
+      var r = node.getBoundingClientRect();
+      if (r.width < 4 || r.height < 4) return;
+      var p = extra == null ? 6 : extra;
+      obs.push({ l: r.left - p, t: r.top - p, r: r.right + p, b: r.bottom + p });
+    }
+    var vis = document.querySelector('#app.is-home .td-sida.td-vis') ||
+      document.querySelector('#app.is-home #content') ||
+      document.querySelector('#app.is-home');
+    if (vis && vis.querySelectorAll) {
+      vis.querySelectorAll('.icon, .td-folder, .td-slot-empty, .td-slot-plus').forEach(function (n) { add(n, 4); });
+    }
+    document.querySelectorAll('.home-devices-h, .home-dev, .home-dev-ask, #animationer-vader-plats, #td-dots, #profile-menu').forEach(function (n) { add(n, 8); });
+    var h = document.querySelector('#app header') || document.querySelector('header');
+    if (h) {
+      var r = h.getBoundingClientRect();
+      obs.push({ l: 0, t: -20, r: window.innerWidth, b: Math.ceil(r.bottom) + 4 });
+    }
+    return obs;
+  }
+
+  function fits(x, y, obs) {
+    var vw = window.innerWidth, vh = window.innerHeight;
+    if (x < 4 || y < 4 || x + WID > vw - 4 || y + TOT_H > vh - 2) return false;
+    var box = { l: x, t: y, r: x + WID, b: y + TOT_H }, i;
+    for (i = 0; i < obs.length; i++) if (overlaps(box, obs[i])) return false;
+    return true;
+  }
+
+  function findPlace() {
+    if (!isHome() || charId() === 'off') return null;
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var obs = obstacles();
+    var floor = vh - 6, wr, dots = document.getElementById('td-dots'), weather = document.getElementById('animationer-vader-plats');
+    if (weather && weather.getBoundingClientRect().height > 4) {
+      wr = weather.getBoundingClientRect();
+      if (wr.top > 0) floor = Math.min(floor, wr.top - 4);
+    }
+    var y = Math.round(floor - TOT_H);
+    var right = Math.max(MARGIN, vw - WID - 12);
+    var xs = [right, MARGIN];
+    if (dots && dots.style.display !== 'none') {
+      wr = dots.getBoundingClientRect();
+      if (wr.width > 4 && wr.height > 4) {
+        xs.push(Math.max(MARGIN, Math.round(wr.right + 8)));
+        xs.push(Math.min(vw - WID - MARGIN, Math.round(wr.left - 8 - WID)));
+      }
+    }
+    function tryY(yy) {
+      var seen = {}, i, xi, k;
+      for (i = 0; i < xs.length; i++) {
+        xi = xs[i];
+        k = xi + ',' + yy;
+        if (seen[k]) continue;
+        seen[k] = 1;
+        if (fits(xi, yy, obs)) return { x: xi, y: yy };
+      }
+      return null;
+    }
+    var hit = tryY(y);
+    if (hit) return hit;
+    if (dots && dots.getBoundingClientRect().height > 4) {
+      hit = tryY(Math.round(dots.getBoundingClientRect().top - 8 - TOT_H));
+      if (hit) return hit;
+    }
+    var lift;
+    for (lift = 8; lift <= 200; lift += 8) {
+      hit = tryY(Math.round(floor - TOT_H - lift));
+      if (hit) return hit;
+    }
+    return { x: right, y: Math.max(MARGIN, Math.min(y, vh - TOT_H - 2)) };
+  }
+
+  function room() {
+    if (!placed) return null;
+    return { x: placed.x, y: placed.y + LAMP_H, w: WID, h: SCENE_H, at: 'hornet' };
+  }
+
+  function standPoint(id) {
+    var r = room();
+    if (!r) return null;
+    var sx = r.w / 120, sy = r.h / 72, SIZE = 40;
+    var x = r.x + 8 * sx, y = r.y + r.h - SIZE - 2;
+    if (id === 'diva') { x = r.x + 6 * sx; y = r.y + 20 * sy; }
+    if (id === 'chauffor') { x = r.x + 4 * sx; y = r.y + 16 * sy; }
+    if (id === 'robot') { x = r.x + 28 * sx; y = r.y + r.h - SIZE - 2; }
+    return { x: x, y: y };
+  }
+
+  function ensureHost() {
+    if (host && host.parentNode) return host;
+    host = document.createElement('div');
+    host.id = 'hb-stage';
+    host.className = 'hb-stage hb-hidden';
+    document.body.appendChild(host);
+    return host;
+  }
+
+  function hide() {
+    placed = null;
+    if (host) host.classList.add('hb-hidden');
+  }
+
+  function place() {
+    if (!host) return null;
+    var next = findPlace();
+    placed = next;
+    if (!next) { host.classList.add('hb-hidden'); return null; }
+    host.classList.remove('hb-hidden');
+    host.style.transform = 'translate3d(' + Math.round(next.x) + 'px,' + Math.round(next.y) + 'px,0)';
+    return next;
+  }
+
+  function wire() {
+    if (!host) return;
     function toggle() {
       var next = !isLit();
       setLitLocal(next);
-      render(host);
+      paint();
       if (next) wakeBot();
       else if (window.HJALPBOT && window.HJALPBOT.tick) window.HJALPBOT.tick();
     }
@@ -177,21 +291,76 @@
     var scn = document.getElementById('hb-stage-scene');
     if (btn) btn.onclick = function (e) { e.stopPropagation(); toggle(); };
     if (scn) {
-      scn.onclick = function () { if (!isLit()) toggle(); else if (window.HJALPBOT && window.HJALPBOT.poke) window.HJALPBOT.poke(); };
-      scn.onkeydown = function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } };
+      scn.onclick = function () {
+        if (!isLit()) toggle();
+        else if (window.HJALPBOT && window.HJALPBOT.poke) window.HJALPBOT.poke();
+      };
+      scn.onkeydown = function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+      };
     }
+  }
+
+  function paint() {
+    if (!host) return;
+    var c = charId();
+    if (c === 'off' || !isHome()) { hide(); return; }
+    css();
+    var lit = isLit();
+    host.className = 'hb-stage' + (lit ? ' lit' : '');
+    host.innerHTML =
+      '<div class="hb-stage-light">' +
+        lampSvg(lit) +
+        '<button type="button" class="hb-stage-btn" id="hb-stage-toggle" aria-pressed="' + (lit ? 'true' : 'false') + '">' +
+          (lit ? 'På' : 'Av') +
+        '</button>' +
+      '</div>' +
+      '<div class="hb-stage-scene" id="hb-stage-scene" role="button" tabindex="0">' +
+        sceneSvg(c, lit) +
+      '</div>';
+    wire();
+    place();
     if (lit && !window.HJALPBOT) {
       setTimeout(function () { if (isLit()) wakeBot(); }, 400);
     }
   }
 
+  function bind() {
+    if (bound || typeof window === 'undefined' || !window.addEventListener) return;
+    bound = true;
+    window.addEventListener('resize', function () { place(); });
+    window.addEventListener('orientationchange', function () { setTimeout(place, 60); });
+  }
+
+  function render() {
+    if (typeof document === 'undefined' || !document.body) return;
+    if (charId() === 'off' || !isHome()) {
+      if (host) hide();
+      return;
+    }
+    css();
+    ensureHost();
+    bind();
+    paint();
+  }
+
+  function sync() {
+    if (!isHome() || charId() === 'off') { hide(); return; }
+    if (!host) render();
+    else { if (!host.innerHTML) paint(); else place(); }
+  }
+
   window.HB_STAGE = {
     render: render,
+    sync: sync,
+    hide: hide,
+    place: place,
+    room: room,
+    standPoint: standPoint,
     isLit: isLit,
     setLit: function (on) {
       setLitLocal(!!on);
-      var box = document.getElementById('hb-stage-box');
-      if (box) render(box);
+      if (host && isHome()) paint();
       if (on) return wakeBot();
       if (window.HJALPBOT && window.HJALPBOT.tick) window.HJALPBOT.tick();
       return Promise.resolve();

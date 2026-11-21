@@ -6,13 +6,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaxiData</title>
-  <script src="tema.js?v=20261121zslim1"></script>
+  <script src="tema.js?v=20261121zhorn1"></script>
   <script src="helskarm.js?v=20261111pwa1"></script>
   <script src="enhet.js?v=20261029d"></script>
-  <script src="delad-enhet.js?v=20261121zslim1"></script>
+  <script src="delad-enhet.js?v=20261121zhorn1"></script>
   <script src="namn.js?v=20261028nm1"></script>
   <link rel="stylesheet" href="style.css?v=20261113barn1">
-  <link rel="stylesheet" href="tema.css?v=20261121zslim1">
+  <link rel="stylesheet" href="tema.css?v=20261121zhorn1">
   <link rel="manifest" href="manifest.webmanifest?v=20261111pwa1">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -212,10 +212,10 @@
   <script src="nav-historik.js?v=20261112swipe1"></script>
   <script src="swipe-back.js?v=20261114sidor1"></script>
   <script src="view-state.js?v=20261107lazy1"></script>
-  <script src="hem-ordning-core.js?v=20261121zslim1"></script>
-  <script src="hem-sidor.js?v=20261121zslim1"></script>
-  <script src="hb-stage.js?v=20261121zslim1"></script>
-  <script src="lazy-views.js?v=20261121zslim1"></script>
+  <script src="hem-ordning-core.js?v=20261121zhorn1"></script>
+  <script src="hem-sidor.js?v=20261121zhorn1"></script>
+  <script src="hb-stage.js?v=20261121zhorn1"></script>
+  <script src="lazy-views.js?v=20261121zhorn1"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -1089,17 +1089,16 @@
         }
         html += '</div>';
         html += '<div id="home-devices" class="home-devices"></div>';
-        html += '<div id="hb-stage-box"></div>';
         content.innerHTML = html;
         if (window.HEM_ORDNING) HEM_ORDNING.decorate(content);
         if (window.DELAD && DELAD.renderDevices) DELAD.renderDevices(document.getElementById('home-devices'));
-        if (window.HB_STAGE) HB_STAGE.render(document.getElementById('hb-stage-box'));
         refreshWorkshopBadge();
         refreshBilBadge();
         refreshForumBadge();
         LAZY.refreshBadges(); // lightweight counts, no feature imports
       }
       if (window.HEM_ORDNING) HEM_ORDNING.sync(!current && !!(content.querySelector && content.querySelector('.grid')));
+      if (window.HB_STAGE && HB_STAGE.sync) requestAnimationFrame(function () { HB_STAGE.sync(); });
       if (window.refreshBadges) refreshBadges();
     }
 
