@@ -15,6 +15,10 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-21', id: '2026-11-21zikon1', tid: '19:45', rader: [
+    ['Ändrat', 'I Inställningar finns nu ett reglage för ikonstorlek (liten till störst) med en förhandsvisning bredvid. Texten under ikonen följer samma storlek, och antalet ikoner i bredd anpassas efter skärmen – i liggande läge och på platta får du fler i rad. Ett tidigare val av 3×3, 4×4, 5×5 eller 6×6 flyttas till närmaste steg.'],
+    ['Fixat', 'Rutan Moduler på startskärmen visar sin ikon igen.']
+  ]},
   { datum: '2026-11-21', id: '2026-11-21zslim1', tid: '17:30', rader: [
     ['Förbättrat', 'Snabbare start: hjälpboten, hjälptexter, modulhantering, animationer och notisinställningar laddas först när du behöver dem, och appens statiska filer sparas lokalt av en service worker (utan att spara data från servern).'],
     ['Ändrat', 'Startskärmen är förenklad till ett rent rutnät utan mappar eller fri placering (tidigare mappar flyttas automatiskt till startskärmen utan att något försvinner). Välj mellan 3×3, 4×4, 5×5 eller 6×6 i Inställningar – på bred eller liggande skärm visas fler rutor i bredd. På delad enhet sparas rutnätet per förare.'],

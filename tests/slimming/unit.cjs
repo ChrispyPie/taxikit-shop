@@ -83,17 +83,25 @@ function testTema() {
     vm.runInNewContext(src, { window: win, LAZY: win.LAZY, document: doc, localStorage: ls });
     return { T: win.TEMA, ls, attrs };
   }
-  assert.equal(run({ taxi_home_layout: '2' }).T.getLayout(), '3', 'migrates 2 -> 3');
-  assert.equal(run({ taxi_home_layout: 'fyll' }).T.getLayout(), '4', 'migrates fyll -> 4');
-  assert.equal(run({ taxi_home_layout: 'lista' }).T.getLayout(), '4', 'migrates lista -> 4');
-  assert.equal(run({}).T.getLayout(), '4', 'default is 4');
-  const delad = run({ taxi_delad_enhet: '1', taxi_driver: '710022', taxi_home_layout: '5' });
-  delad.T.setLayout('6');
-  assert.equal(delad.ls.getItem('taxi_home_layout:710022'), '6', 'delad enhet saves layout per driver');
-  assert.equal(delad.ls.getItem('taxi_home_layout'), '5', 'device layout untouched on delad enhet');
+  assert.equal(run({ taxi_home_layout: '6' }).T.getIconSize(), '1', 'migrates 6x6 -> liten');
+  assert.equal(run({ taxi_home_layout: '5' }).T.getIconSize(), '2', 'migrates 5x5 -> steg 2');
+  assert.equal(run({ taxi_home_layout: '4' }).T.getIconSize(), '3', 'migrates 4x4 -> default steg 3');
+  assert.equal(run({ taxi_home_layout: '3' }).T.getIconSize(), '4', 'migrates 3x3 -> steg 4');
+  assert.equal(run({ taxi_home_layout: '2' }).T.getIconSize(), '4', 'migrates historic 2 -> steg 4');
+  assert.equal(run({ taxi_home_layout: 'lista' }).T.getIconSize(), '3', 'migrates lista -> default');
+  assert.equal(run({}).T.getIconSize(), '3', 'default is steg 3 (ungefär 4x4 på telefon)');
+  const saved = run({ taxi_icon_size: '5' });
+  assert.equal(saved.T.getIconSize(), '5', 'honors saved icon size');
+  const delad = run({ taxi_delad_enhet: '1', taxi_driver: '710022', 'taxi_home_layout:710022': '5' });
+  assert.equal(delad.T.getIconSize(), '2', 'migrates delad layout per driver');
+  delad.T.setIconSize('5');
+  assert.equal(delad.ls.getItem('taxi_icon_size:710022'), '5', 'delad enhet saves icon size per driver');
+  assert.equal(delad.ls.getItem('taxi_icon_size'), null, 'device icon size untouched on delad enhet');
   assert.equal(delad.T.getIcons, undefined, 'getIcons removed');
-  assert.match(css, /orientation:\s*landscape/);
-  assert.match(css, /data-home="6"/);
+  assert.match(css, /auto-fill/);
+  assert.match(css, /data-icon-size="3"/);
+  assert.match(css, /data-tool="moduler"\] \.emoji svg/);
+  assert.doesNotMatch(css, /data-home="6"/);
 }
 
 async function testNotisEnhet() {
@@ -156,9 +164,15 @@ function testDefaultsAndChangelog() {
   assert.equal(H.isInstalled('vader'), false, 'vader off by default');
   assert.equal(H.isInstalled('nyheter'), false, 'nyheter off by default');
   const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
-  const top = cl.split("id: '2026-11-21zslim1'")[1].split(']},')[0];
-  assert.match(top.split('rader:')[0], /tid: '17:30'/, 'tid set at go-live');
+  const top = cl.split("id: '2026-11-21zikon1'")[1].split(']},')[0];
+  assert.match(top.split('rader:')[0], /tid: '19:45'/, 'tid set at go-live');
+  assert.match(top, /Ikonstorlek|ikonstorlek/);
+  assert.match(top, /Moduler/);
   assert.doesNotMatch(top, /\b(Stig|hen)\b/i);
+  const html = fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8');
+  assert.match(html, /id="hl-size-range"/);
+  assert.match(html, /hl-size-preview/);
+  assert.doesNotMatch(html, /name="home-layout"/);
 }
 
 Promise.resolve()
