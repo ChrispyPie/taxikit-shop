@@ -26,17 +26,17 @@ assert.match(js, /juldatum/);
 assert.match(js, /jul-ljus-rad/);
 assert.match(js, /querySelector\('#app > header'\)/);
 assert.doesNotMatch(js, /document\.body \|\| document\.documentElement\)\.appendChild\(btn\)/);
-assert.match(html, /julpyssel\.css\?v=20261122zjul2/);
-assert.match(html, /julpyssel\.js\?v=20261122zjul2/);
-assert.match(sw, /CACHE_VER = '20261122zjul2'/);
+assert.match(html, /julpyssel\.css\?v=20261122zfly5/);
+assert.match(html, /julpyssel\.js\?v=20261122zfly5/);
+assert.match(sw, /CACHE_VER = '20261122zfly5'/);
 assert.match(css, /#jul-ljus-rad/);
 assert.match(css, /grid-area:\s*jul/);
 assert.doesNotMatch(css, /position:\s*fixed/);
 assert.doesNotMatch(css, /z-index:\s*28/);
 assert.doesNotMatch(css, /bottom:\s*calc\(8px/);
 assert.match(core, /LAZY\.ensure\('berra'\)/);
-assert.match(lazy, /"berra": \["berra\.js\?v=20261122zjul2"\]/);
-assert.match(lazy, /berra\.js\?v=20261122zjul2/);
+assert.match(lazy, /"berra": \["berra\.js\?v=20261122zfly5"\]/);
+assert.match(lazy, /berra\.js\?v=20261122zfly5/);
 assert.match(sid, /headerTop: headerTop/);
 
 function boot(opts) {
