@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-22', id: '2026-11-22zprof1', rader: [
+    ['Ändrat', 'När du döljer privata moduler på en delad enhet syns notiser och en begränsad profil igen. Klockan i headern är kvar. Under profilikonen visas namn, förarnummer och logga ut, men inte den fullständiga profilen, meddelanden eller andra personuppgifter. Notiser om meddelanden, forum, bil, sjuk och konto visas inte.']
+  ]},
   { datum: '2026-11-22', id: '2026-11-22zhide1', tid: '18:30', rader: [
     ['Ändrat', 'När du döljer privata moduler på en delad enhet är automatisk utloggning av (rutan är då grå). Den går tillbaka till ditt val när du visar modulerna igen, så du inte loggas ut bara för att servern är tyst.']
   ]},

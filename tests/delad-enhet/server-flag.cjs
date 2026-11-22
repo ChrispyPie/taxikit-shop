@@ -30,7 +30,7 @@ assert.match(js, /showAfterLogin/);
 assert.doesNotMatch(js, /showPendingMessage/);
 assert.match(html, /expireSessionAndReload/);
 assert.match(html, /home-devices/);
-assert.match(html, /delad-enhet\.js\?v=20261122zhide1/);
+assert.match(html, /delad-enhet\.js\?v=20261122zprof1/);
 assert.match(js, /delad-auto-logout/);
 assert.match(js, /delad-hide-private/);
 assert.match(js, /isAutoLogout/);
