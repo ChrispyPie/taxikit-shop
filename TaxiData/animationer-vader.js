@@ -303,6 +303,9 @@
       if (state === 'denied' || askedChoice() === 'nej') { cb(gbg); return; }
       cb(gbg);
       if (document.hidden) return;
+      // Inte över hjälpbotens station: skriptet laddas också när strålkastaren tänds.
+      var stage = document.getElementById('hb-stage');
+      if (stage && !stage.classList.contains('hb-hidden')) return;
       showAsk(function () {
         rememberChoice('ja');
         takePosition(cb, function () {});
