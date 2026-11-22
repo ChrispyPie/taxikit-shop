@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-22', id: '2026-11-22zfly1', rader: [
+    ['Nytt', 'På Landvetter följer en förbokning flygets nya tid när klockslaget stämmer med den planerade landningen och bara ett flyg passar. I rutan syns den ursprungliga tiden, och i förklaringen vilket flyg den följer.']
+  ]},
   { datum: '2026-11-22', id: '2026-11-22zdelad1', tid: '18:19', rader: [
     ['Fixat', 'På en delad enhet gick det inte att logga in om timkörningen varit tyst ett tag: inloggningen lyckades men appen gick genast tillbaka till inloggningsskärmen. En ny inloggning stängs inte längre av det.']
   ]},

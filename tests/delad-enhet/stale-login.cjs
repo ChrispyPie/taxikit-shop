@@ -22,5 +22,5 @@ assert.match(cl, /id: '2026-11-22zdelad1'/);
 assert.match(cl.split("id: '2026-11-22zdelad1'")[1].split(']},')[0].split('rader:')[0], /tid: '18:19'/);
 assert.match(cl.split("id: '2026-11-22zdelad1'")[1].split(']},')[0], /inloggningsskärmen/);
 assert.doesNotMatch(cl.split("id: '2026-11-22zdelad1'")[1].split(']},')[0], /\b(Stig|hen)\b/);
-assert.match(sw, /CACHE_VER = '20261122zdelad1'/);
+assert.match(sw, /CACHE_VER = '20261122zfly1'/);
 console.log('STALE_LOGIN_UNIT_OK');

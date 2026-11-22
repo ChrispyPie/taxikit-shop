@@ -9,7 +9,7 @@ const lazy = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
 const changelog = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
 
 assert.match(index, /lazy-views\.js\?v=20261122zdelad1/);
-assert.match(lazy, /changelog\.js\?v=20261122zdelad1/);
+assert.match(lazy, /changelog\.js\?v=20261122zfly1/);
 assert.match(lazy, /window\.NOTIS=\{[^;]*logout:function\(\)\{\}/);
 assert.match(index, /function safe\(fn\) \{ try \{ fn\(\); \} catch \(e\) \{\} \}/);
 assert.match(index, /safe\(function \(\) \{ if \(window\.NOTIS && NOTIS\.logout\) NOTIS\.logout\(\); \}\);/);
