@@ -18,7 +18,7 @@ assert.match(cl.split("id: '2026-11-22zhide1'")[1].split(']},')[0].split('rader:
 assert.match(cl.split("id: '2026-11-22zhide1'")[1].split(']},')[0], /automatisk utloggning/);
 assert.match(html, /delad-enhet\.js\?v=20261122zprof1/);
 assert.match(lv, /changelog\.js\?v=20261122zmod1/);
-assert.match(sw, /CACHE_VER = '20261122zmod1'/);
+assert.match(sw, /CACHE_VER = '20261122zjul1'/);
 assert.match(html, /\.delad-chk-disabled/);
 assert.match(html, /cursor:\s*not-allowed/);
 

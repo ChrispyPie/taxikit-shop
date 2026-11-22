@@ -24,7 +24,7 @@ assert.match(html, /delad-enhet\.js\?v=20261122zprof1/);
 assert.match(html, /lazy-views\.js\?v=20261122zmod1/);
 assert.match(lv, /changelog\.js\?v=20261122zmod1/);
 assert.match(lv, /notis\.js\?v=20261122zprof1/);
-assert.match(sw, /CACHE_VER = '20261122zmod1'/);
+assert.match(sw, /CACHE_VER = '20261122zjul1'/);
 
 // notiser är inte längre en dold vy, så klockan kan laddas
 const priv = js.split('var PRIVATE_VIEWS')[1].split(';')[0];
