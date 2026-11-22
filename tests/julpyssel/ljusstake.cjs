@@ -20,25 +20,29 @@ assert.doesNotMatch(cl, /id: '2026-11-22zjul1'/);
 assert.doesNotMatch(cl, /id: '2026-11-22zjul2'/);
 assert.doesNotMatch(cl, /id: '2026-11-22zjul3'/);
 assert.doesNotMatch(cl, /id: '2026-11-22zjul4'/);
+assert.doesNotMatch(cl, /id: '2026-11-22zjul5'/);
 assert.match(js, /ALLOW = \{ '710022': 1 \}/);
 assert.match(js, /JUL_ALLA = false/);
 assert.match(js, /ADVENT = \['2026-11-29', '2026-12-06', '2026-12-13', '2026-12-20'\]/);
 assert.match(js, /taxi_jul_ljus_preview/);
 assert.match(js, /juldatum/);
+assert.match(js, /class="jul-flame-pos"/);
+assert.match(js, /class="jul-wick"/);
+assert.doesNotMatch(js, /class="jul-flame" transform=/);
 assert.match(js, /jul-ljus-rad/);
 assert.match(js, /querySelector\('#app > header'\)/);
 assert.doesNotMatch(js, /document\.body \|\| document\.documentElement\)\.appendChild\(btn\)/);
-assert.match(html, /julpyssel\.css\?v=20261122zjul4/);
-assert.match(html, /julpyssel\.js\?v=20261122zjul4/);
-assert.match(sw, /CACHE_VER = '20261122zjul4'/);
+assert.match(html, /julpyssel\.css\?v=20261122zjul5/);
+assert.match(html, /julpyssel\.js\?v=20261122zjul5/);
+assert.match(sw, /CACHE_VER = '20261122zjul5'/);
 assert.match(css, /#jul-ljus-rad/);
 assert.match(css, /grid-area:\s*jul/);
 assert.doesNotMatch(css.split('Julgransbelysning')[0], /position:\s*fixed/);
 assert.doesNotMatch(css, /z-index:\s*28/);
 assert.doesNotMatch(css, /bottom:\s*calc\(8px/);
 assert.match(core, /LAZY\.ensure\('berra'\)/);
-assert.match(lazy, /"berra": \["berra\.js\?v=20261122zjul4"\]/);
-assert.match(lazy, /berra\.js\?v=20261122zjul4/);
+assert.match(lazy, /"berra": \["berra\.js\?v=20261122zjul5"\]/);
+assert.match(lazy, /berra\.js\?v=20261122zjul5/);
 assert.match(sid, /headerTop: headerTop/);
 
 function boot(opts) {
@@ -165,6 +169,39 @@ assert.equal(j.litOn('2027-01-01'), 4);
 function bodyHeights(html) {
   return [...String(html).matchAll(/class="jul-body"[^>]*height="([\d.]+)"/g)].map(m => +m[1]);
 }
+
+function wickYs(html) {
+  return [...String(html).matchAll(/class="jul-wick"[^>]*y="([\d.-]+)"/g)].map(m => +m[1]);
+}
+function flameYs(html) {
+  return [...String(html).matchAll(/class="jul-flame-pos" transform="translate\(([\d.-]+) ([\d.-]+)\)"/g)].map(m => +m[2]);
+}
+function assertFollowsBodies(html, lit, label) {
+  const hs = bodyHeights(html);
+  const wy = wickYs(html);
+  const fy = flameYs(html);
+  assert.equal(hs.length, 4, label + ' saknar ljus');
+  assert.equal(wy.length, 4, label + ' saknar vekar');
+  assert.equal(fy.length, lit, label + ' fel antal lågor ' + fy.length);
+  for (let i = 0; i < 4; i++) {
+    const bodyY = 34 - hs[i];
+    assert.ok(Math.abs(wy[i] - (bodyY - 2.5)) < 0.05, label + ' veke ' + i + ': ' + wy[i] + ' vs ' + (bodyY - 2.5));
+  }
+  for (let i = 0; i < lit; i++) {
+    const bodyY = 34 - hs[i];
+    assert.ok(Math.abs(fy[i] - (bodyY - 8)) < 0.05, label + ' låga ' + i + ': ' + fy[i] + ' vs ' + (bodyY - 8));
+  }
+  if (lit >= 2) {
+    for (let i = 1; i < lit; i++) {
+      if (hs[i] > hs[i - 1] + 0.05) {
+        assert.ok(fy[i] < fy[i - 1] - 0.05, label + ' lågor ska följa höjd ' + JSON.stringify({ fy, hs }));
+        assert.ok(wy[i] < wy[i - 1] - 0.05, label + ' vekar ska följa höjd ' + JSON.stringify({ wy, hs }));
+      }
+    }
+  }
+  return { hs, wy, fy };
+}
+
 function msDay(d) { return Date.parse(d + 'T00:00:00+01:00'); }
 
 assert.equal(j.candleFull, 18);
@@ -220,14 +257,15 @@ assert.equal(preview.J.litCount(), 2);
 preview.J.cyclePreview();
 assert.equal(preview.J.litCount(), 3);
 {
-  const hs = bodyHeights(el.innerHTML);
-  assert.equal(hs.length, 4, 'preview 3 saknar ljus');
-  assert.ok(hs[0] < hs[1] && hs[1] < hs[2], 'preview 3: höjder ' + JSON.stringify(hs));
-  assert.equal(hs[2], 18);
-  assert.equal(hs[3], 18);
+  const tops = assertFollowsBodies(el.innerHTML, 3, 'preview 3');
+  assert.ok(tops.hs[0] < tops.hs[1] && tops.hs[1] < tops.hs[2], 'preview 3: höjder ' + JSON.stringify(tops.hs));
+  assert.equal(tops.hs[2], 18);
+  assert.equal(tops.hs[3], 18);
+  assert.ok(tops.fy[0] > tops.fy[1] && tops.fy[1] > tops.fy[2], 'preview 3: lågor samma höjd? ' + JSON.stringify(tops.fy));
 }
 preview.J.cyclePreview();
 assert.equal(preview.J.litCount(), 4);
+assertFollowsBodies(el.innerHTML, 4, 'preview 4');
 preview.J.cyclePreview();
 assert.equal(preview.J.litCount(), 0);
 preview.J.cyclePreview();
@@ -238,11 +276,17 @@ assert.ok((preview.win._headerTop || 0) >= 1);
 const dated = boot({ driver: '710022', onHome: true, search: '?juldatum=2026-12-13' });
 assert.equal(dated.J.litCount(), 3);
 {
-  const hs = bodyHeights(dated.doc.getElementById('jul-ljusstake').innerHTML);
-  assert.equal(hs.length, 4);
-  assert.ok(hs[0] < hs[1] && hs[1] < hs[2], 'juldatum 13 dec: höjder ' + JSON.stringify(hs));
-  assert.equal(hs[2], 18);
-  assert.equal(hs[3], 18);
+  const tops = assertFollowsBodies(dated.doc.getElementById('jul-ljusstake').innerHTML, 3, 'juldatum 13 dec');
+  assert.ok(tops.hs[0] < tops.hs[1] && tops.hs[1] < tops.hs[2], 'juldatum 13 dec: höjder ' + JSON.stringify(tops.hs));
+  assert.equal(tops.hs[2], 18);
+  assert.equal(tops.hs[3], 18);
+  assert.ok(tops.fy[0] > tops.fy[1] && tops.fy[1] > tops.fy[2], 'juldatum: lågor samma höjd? ' + JSON.stringify(tops.fy));
+}
+
+{
+  const html = j.svg(3, msDay('2026-12-13'));
+  const tops = assertFollowsBodies(html, 3, 'svg 13 dec');
+  assert.ok(tops.fy[0] !== tops.fy[1] && tops.fy[1] !== tops.fy[2]);
 }
 
 const away = boot({ driver: '710022', onHome: false });
