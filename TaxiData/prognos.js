@@ -853,16 +853,83 @@
       (f.sched ? ', planerad ' + hm(new Date(f.sched)) : '') +
       (shown && lab ? ', ' + lab + ' ' + hm(new Date(shown)) : '');
   }
+  var FOLLOW_LOCK_KEY = 'taxi_pg_follow_lock';
+  var followLockMem = null;
+  function followStorage() {
+    try { if (typeof localStorage !== 'undefined') return localStorage; } catch (e) {}
+    if (!followLockMem) {
+      followLockMem = { _s: {} };
+      followLockMem.getItem = function (k) { return Object.prototype.hasOwnProperty.call(this._s, k) ? this._s[k] : null; };
+      followLockMem.setItem = function (k, v) { this._s[k] = String(v); };
+      followLockMem.removeItem = function (k) { delete this._s[k]; };
+    }
+    return followLockMem;
+  }
+  function followLockLoad() {
+    try {
+      var o = JSON.parse(followStorage().getItem(FOLLOW_LOCK_KEY) || '{}');
+      return o && typeof o === 'object' && !Array.isArray(o) ? o : {};
+    } catch (e) { return {}; }
+  }
+  function followLockSave(map) {
+    try { followStorage().setItem(FOLLOW_LOCK_KEY, JSON.stringify(map || {})); } catch (e) {}
+  }
+  function followLockClear() {
+    followLockMem = null;
+    try { followStorage().removeItem(FOLLOW_LOCK_KEY); } catch (e) {}
+  }
+  function followLockId(b) {
+    return b && b.id != null && b.id !== '' ? String(b.id) : '';
+  }
+  function followFindLocked(lock, flights) {
+    if (!lock || !lock.no || !flights) return null;
+    var i, f, byNo = null;
+    for (i = 0; i < flights.length; i++) {
+      f = flights[i];
+      if (!f || f.canceled || f.removed) continue;
+      if (f.no === lock.no && +f.sched === +lock.sched) return f;
+      if (!byNo && f.no === lock.no) byNo = f;
+    }
+    return byNo;
+  }
+  function followFromLock(b, flights, lock) {
+    var f = followFindLocked(lock, flights);
+    if (!f) return null;
+    var from = +lock.from;
+    if (!isFinite(from)) from = Date.parse(b && b.estimated_at);
+    if (!isFinite(from)) return null;
+    var shown = followShown(f);
+    if (!shown) return null;
+    var off = from - (+f.sched);
+    var at = shown + off;
+    if (round5(new Date(from)).getTime() === round5(new Date(at)).getTime()) return null;
+    return followHit({ flight: f, at: at, from: from, offset: off, shown: shown, why: lock.why || 'planned' });
+  }
   function applyFollows(list, flights) {
+    var locks = followLockLoad();
+    var dirty = false;
     (list || []).forEach(function (b) {
       if (!b) return;
       if (b._follow) delete b._follow;
       if (b._followCands) delete b._followCands;
+      var id = followLockId(b);
+      var lock = id ? locks[id] : null;
+      if (lock) {
+        var held = followFromLock(b, flights, lock);
+        if (held) { b._follow = held; return; }
+        delete locks[id];
+        dirty = true;
+      }
       var m = followMatch(b, flights);
       if (!m) return;
-      if (m.cands) b._followCands = m.cands;
-      else b._follow = m;
+      if (m.cands) { b._followCands = m.cands; return; }
+      b._follow = m;
+      if (id && (b.confidence || 'trolig') === 'saker' && m.flight) {
+        locks[id] = { no: m.flight.no || '', sched: +m.flight.sched, from: +m.from, why: m.why || '' };
+        dirty = true;
+      }
     });
+    if (dirty) followLockSave(locks);
     return list;
   }
   function bookingWhen(b) {
@@ -2611,5 +2678,6 @@
   P.followCandidates = followCandidates;
   P.followExplain = followExplain;
   P.applyFollows = applyFollows;
+  P.followLockClear = followLockClear;
   P.bookingWhen = bookingWhen;
 })();

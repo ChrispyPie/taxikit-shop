@@ -13,6 +13,11 @@ const html = fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8');
 assert.doesNotMatch(js, /\bStig\b/);
 assert.doesNotMatch(css, /\bStig\b/);
 assert.doesNotMatch(cl.split("id: '2026-11-22zfly5'")[1].split(']},')[0], /\b(Stig|hen)\b/);
+assert.match(cl, /id: '2026-11-22zfly6'/);
+assert.match(cl.split("id: '2026-11-22zfly6'")[1].split(']},')[0], /40-minutersgränsen/);
+assert.doesNotMatch(cl.split("id: '2026-11-22zfly6'")[1].split(']},')[0], /\b(Stig|hen)\b/);
+assert.match(js, /FOLLOW_LOCK_KEY = 'taxi_pg_follow_lock'/);
+assert.match(js, /function followFromLock\(/);
 assert.match(cl, /id: '2026-11-22zfly5'/);
 assert.match(cl.split("id: '2026-11-22zfly5'")[1].split(']},')[0].split('rader:')[0], /tid: '21:25'/);
 assert.match(cl.split("id: '2026-11-22zfly5'")[1].split(']},')[0], /Bokningarna följer/);
@@ -24,8 +29,8 @@ assert.match(cl, /id: '2026-11-22zfly3'/);
 assert.match(cl.split("id: '2026-11-22zfly3'")[1].split(']},')[0].split('rader:')[0], /tid: '21:05'/);
 assert.match(cl, /id: '2026-11-22zfly1'/);
 assert.match(cl.split("id: '2026-11-22zfly1'")[1].split(']},')[0].split('rader:')[0], /tid: '20:56'/);
-assert.match(lv, /prognos\.js\?v=20261122zjul4/);
-assert.match(html, /style\.css\?v=20261122zjul4/);
+assert.match(lv, /prognos\.js\?v=20261122zfly6/);
+assert.match(html, /style\.css\?v=20261122zfly6/);
 assert.doesNotMatch(css, /pg-fly-from/);
 assert.doesNotMatch(js, /pg-fly-from/);
 assert.match(js, /pg-fly-follow/);
@@ -63,7 +68,7 @@ const api = new Function(
   'var FOLLOW_NEAR_MS = 2 * 60000;\n' +
   'var FOLLOW_AFTER_MS = 20 * 60000;\n' +
   p2Src + '\n' + hmSrc + '\n' + roundBlock + '\n' + followBlock + '\n' +
-  'return { followMatch: followMatch, followCandidates: followCandidates, followExplain: followExplain, followCandLine: followCandLine, applyFollows: applyFollows, bookingWhen: bookingWhen, floor5: floor5, round5: round5, nearTime: nearTime, followPick: followPick };'
+  'return { followMatch: followMatch, followCandidates: followCandidates, followExplain: followExplain, followCandLine: followCandLine, applyFollows: applyFollows, followLockClear: followLockClear, bookingWhen: bookingWhen, floor5: floor5, round5: round5, nearTime: nearTime, followPick: followPick };'
 )();
 
 function t(iso) { return Date.parse(iso); }
@@ -258,5 +263,28 @@ assert.ok(tied[0]._followCands && tied[0]._followCands.length === 2);
 api.applyFollows(tied, []);
 assert.equal(tied[0]._follow, undefined);
 assert.equal(tied[0]._followCands, undefined);
+
+
+// 4013: första säkra match på DK1727 låses; 21:55 → 22:10 (40-min) ska inte hoppa till FR964.
+api.followLockClear();
+const lockDk = fl({ no: 'DK1727', from: 'Teneriffa', sched: t('2026-11-22T20:55:00Z'), est: t('2026-11-22T20:41:00Z') });
+const lockFr2 = fl({ no: 'FR964', from: 'London STN', sched: t('2026-11-22T21:05:00Z'), est: t('2026-11-22T21:13:00Z') });
+const lockLo2 = fl({ no: 'LO495', from: 'Warszawa', sched: t('2026-11-22T21:20:00Z'), est: t('2026-11-22T21:14:00Z') });
+const lockFlights = [lockDk, lockFr2, lockLo2];
+const b4013 = { id: 4013, zone_id: '293', category: 'ovrigt', confidence: 'saker', estimated_at: '2026-11-22T20:55:00.000Z' };
+api.applyFollows([b4013], lockFlights);
+assert.equal(b4013._follow.flight.no, 'DK1727');
+assert.equal(+b4013._follow.from, t('2026-11-22T20:55:00Z'));
+assert.equal(+b4013._follow.at, t('2026-11-22T20:41:00Z'));
+b4013.estimated_at = '2026-11-22T21:10:00.000Z';
+api.applyFollows([b4013], lockFlights);
+assert.equal(b4013._follow.flight.no, 'DK1727', '4013 kvar på DK1727 efter 22:10-resnap');
+assert.equal(+b4013._follow.from, t('2026-11-22T20:55:00Z'), 'offset från ursprunglig 21:55');
+assert.equal(+b4013._follow.at, t('2026-11-22T20:41:00Z'));
+assert.equal(+api.bookingWhen(b4013), t('2026-11-22T20:41:00Z'));
+api.followLockClear();
+const loose4013 = { id: 4013, zone_id: '293', confidence: 'saker', estimated_at: '2026-11-22T21:10:00.000Z' };
+api.applyFollows([loose4013], lockFlights);
+assert.equal(loose4013._follow.flight.no, 'FR964', 'utan lås skulle 22:10 följa FR964');
 
 console.log('FOLJ_FLYG_UNIT_OK');
