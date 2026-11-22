@@ -63,7 +63,7 @@ assert.match(html, /hem-ordning-core\.js\?v=20261122zmod1/);
 assert.match(lv, /hem-ordning\.js\?v=20261122zdelad1/);
 assert.match(lv, /hjalp\.js\?v=20261122zdelad1/);
 assert.match(lv, /moduler\.js\?v=20261122zdelad1/);
-assert.match(lv, /changelog\.js\?v=20261122zfly3/);
+assert.match(lv, /changelog\.js\?v=20261122zfly4/);
 const help = fs.readFileSync(path.join(root, 'TaxiData/hjalp.js'), 'utf8');
 assert.match(help, /Rutan Moduler öppnar/);
 assert.match(help, /Inställningar, Om appen, Admin och Moduler stannar alltid kvar/);
