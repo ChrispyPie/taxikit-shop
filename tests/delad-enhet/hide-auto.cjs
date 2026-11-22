@@ -17,8 +17,8 @@ assert.match(cl, /id: '2026-11-22zhide1'/);
 assert.match(cl.split("id: '2026-11-22zhide1'")[1].split(']},')[0].split('rader:')[0], /tid: '18:30'/);
 assert.match(cl.split("id: '2026-11-22zhide1'")[1].split(']},')[0], /automatisk utloggning/);
 assert.match(html, /delad-enhet\.js\?v=20261122zprof1/);
-assert.match(lv, /changelog\.js\?v=20261122zfly5/);
-assert.match(sw, /CACHE_VER = '20261122zfly5'/);
+assert.match(lv, /changelog\.js\?v=20261122zjul3/);
+assert.match(sw, /CACHE_VER = '20261122zjul3'/);
 assert.match(html, /\.delad-chk-disabled/);
 assert.match(html, /cursor:\s*not-allowed/);
 
