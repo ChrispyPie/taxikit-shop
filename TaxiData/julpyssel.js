@@ -106,10 +106,12 @@
   }
 
   function flame(x, y) {
-    return '<g class="jul-flame" transform="translate(' + x + ' ' + y + ')">' +
+    // Yttre g håller läget. CSS-animationen på .jul-flame får inte skriva över translate.
+    return '<g class="jul-flame-pos" transform="translate(' + Number(x).toFixed(2) + ' ' + Number(y).toFixed(2) + ')">' +
+      '<g class="jul-flame">' +
       '<path d="M0 8c2.2-2.4 3.2-4.2 2.2-6.4C1.6.4 0-1.2 0-1.2S-1.6.4-2.2 1.6C-3.2 3.8-2.2 5.6 0 8z" fill="#f6e05e"/>' +
       '<path d="M0 7c1.2-1.4 1.6-2.6 1-4.1C.6 1.8 0 .8 0 .8s-.6 1-1 2.1C-1.6 4.4-1.2 5.6 0 7z" fill="#ed8936"/>' +
-      '</g>';
+      '</g></g>';
   }
   function candle(n, lit, x, h) {
     var body = lit ? '#f7fafc' : '#cbd5e0';
@@ -119,7 +121,7 @@
     var wickY = bodyY - 2.5;
     return '<g class="jul-c' + n + (lit ? ' on' : '') + '" transform="translate(' + x + ' 0)">' +
       '<rect class="jul-body" x="-3" y="' + bodyY.toFixed(2) + '" width="6" height="' + h.toFixed(2) + '" rx="1.2" fill="' + body + '" stroke="' + stroke + '" stroke-width=".6"/>' +
-      '<rect x="-0.7" y="' + wickY.toFixed(2) + '" width="1.4" height="3" fill="' + (lit ? '#ed8936' : '#a0aec0') + '"/>' +
+      '<rect class="jul-wick" x="-0.7" y="' + wickY.toFixed(2) + '" width="1.4" height="3" fill="' + (lit ? '#ed8936' : '#a0aec0') + '"/>' +
       (lit ? flame(0, bodyY - 8) : '') +
       '</g>';
   }
@@ -370,6 +372,8 @@
     candleFull: CANDLE_FULL,
     candleStub: CANDLE_STUB,
     candleHeight: candleHeight,
+    bodyBottom: BODY_BOTTOM,
+    svg: svg,
     clockMs: clockMs,
     ymd: ymd,
     paint: paint,

@@ -90,12 +90,18 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
     const rr = rad.getBoundingClientRect();
     const br = berra.getBoundingClientRect();
     const overlapIcon = (r) => icons.some(i => r.left < i.right && r.right > i.left && r.top < i.bottom && r.bottom > i.top);
+    const box = (sel) => [...btn.querySelectorAll(sel)].map(n => {
+      const r = n.getBoundingClientRect();
+      return { top: +r.top.toFixed(2), bottom: +r.bottom.toFixed(2), mid: +((r.top + r.bottom) / 2).toFixed(2) };
+    });
     return {
       driver: localStorage.getItem('taxi_driver'),
       headerBottom: Math.round(hr.bottom),
       rad: { top: Math.round(rr.top), bottom: Math.round(rr.bottom), height: Math.round(rr.height), parent: rad.parentElement && rad.parentElement.tagName, inHeader: !!(hdr && hdr.contains(rad)) },
       btnHidden: !!btn.hidden,
       flames: !!btn.querySelector('.jul-flame'),
+      flameTops: box('.jul-flame'),
+      wickTops: box('.jul-wick'),
       berra: { top: Math.round(br.top), bottom: Math.round(br.bottom), width: Math.round(br.width), visible: br.width > 8 },
       overlapRadIcons: overlapIcon(rr),
       overlapBerraIcons: overlapIcon(br),
@@ -110,6 +116,13 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
   ok('no icon overlap', !info.overlapRadIcons);
   ok('berra visible at bottom', info.berra.visible && info.berra.bottom > 400);
   ok('flames for 13 dec', info.flames);
+  const ft = info.flameTops || [];
+  const wt = info.wickTops || [];
+  ok('three flames on 13 dec', ft.length === 3, JSON.stringify(ft));
+  ok('four wicks', wt.length === 4, JSON.stringify(wt));
+  ok('flames not same height', ft.length === 3 && ft[0].top > ft[1].top + 0.8 && ft[1].top > ft[2].top + 0.8, JSON.stringify(ft));
+  ok('wicks follow candle height', wt.length === 4 && wt[0].top > wt[1].top + 0.8 && wt[1].top > wt[2].top + 0.8 && Math.abs(wt[2].top - wt[3].top) < 0.8, JSON.stringify(wt));
+  ok('flame sits on its wick', ft.length === 3 && ft.every((f, i) => f.bottom + 2 >= wt[i].top && f.top < wt[i].top), JSON.stringify({ ft, wt }));
   fs.mkdirSync(path.dirname(out), { recursive: true });
   await p.screenshot({ path: out, fullPage: false });
   console.log('SHOT', out);

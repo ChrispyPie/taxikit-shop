@@ -40,6 +40,7 @@
 }
 #jul-ljusstake[hidden] { display: none; }
 #jul-ljusstake svg { display: block; width: 56px; height: 40px; overflow: visible; }
+/* Flicker-skalan sitter på inre .jul-flame, inte på lägesgruppen .jul-flame-pos. */
 #jul-ljusstake .jul-flame {
   transform-origin: 50% 85%;
   transform-box: fill-box;
