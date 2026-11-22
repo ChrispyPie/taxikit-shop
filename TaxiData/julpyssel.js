@@ -9,6 +9,11 @@
   var ALLOW = { '710022': 1 };
   var ADVENT = ['2026-11-29', '2026-12-06', '2026-12-13', '2026-12-20'];
   var PREVIEW_KEY = 'taxi_jul_ljus_preview';
+  var BURN_END = '2026-12-25';
+  var CANDLE_FULL = 18;
+  var CANDLE_STUB = 4.5;
+  var BODY_BOTTOM = 34;
+  var burnTimer = 0;
   var LABELS = [
     'Inget ljus tänt än (första advent är 29 nov)',
     '1:a advent',
@@ -69,6 +74,36 @@
   function isPreviewing() {
     return !dateOverride() && previewLevel() != null;
   }
+  // Advent 2026 är vintertid (UTC+1). Ett ljus tänds midnatt på sin adventssöndag
+  // och brinner ner till en kort stump vid jul (25 dec kl 00).
+  function atStockholm(day) {
+    return Date.parse(day + 'T00:00:00+01:00');
+  }
+  function clockMs(now) {
+    var over = dateOverride();
+    if (over) return atStockholm(over);
+    var prev = previewLevel();
+    if (prev != null) {
+      if (prev <= 0) return atStockholm('2026-11-28');
+      return atStockholm(ADVENT[Math.min(prev, ADVENT.length) - 1]);
+    }
+    if (now == null) return Date.now();
+    if (typeof now === 'number' && isFinite(now)) return now;
+    var t = +now;
+    return isFinite(t) ? t : Date.now();
+  }
+  function candleRemain(i, ms) {
+    var start = atStockholm(ADVENT[i]), end = atStockholm(BURN_END);
+    if (!(end > start)) return 1;
+    var t = (ms - start) / (end - start);
+    if (t <= 0) return 1;
+    if (t >= 1) return 0;
+    return 1 - t;
+  }
+  function candleHeight(i, lit, ms) {
+    if (!lit) return CANDLE_FULL;
+    return CANDLE_STUB + candleRemain(i, ms) * (CANDLE_FULL - CANDLE_STUB);
+  }
 
   function flame(x, y) {
     return '<g class="jul-flame" transform="translate(' + x + ' ' + y + ')">' +
@@ -76,18 +111,26 @@
       '<path d="M0 7c1.2-1.4 1.6-2.6 1-4.1C.6 1.8 0 .8 0 .8s-.6 1-1 2.1C-1.6 4.4-1.2 5.6 0 7z" fill="#ed8936"/>' +
       '</g>';
   }
-  function candle(n, lit, x) {
+  function candle(n, lit, x, h) {
     var body = lit ? '#f7fafc' : '#cbd5e0';
     var stroke = lit ? '#e2e8f0' : '#a0aec0';
+    if (h == null) h = CANDLE_FULL;
+    var bodyY = BODY_BOTTOM - h;
+    var wickY = bodyY - 2.5;
     return '<g class="jul-c' + n + (lit ? ' on' : '') + '" transform="translate(' + x + ' 0)">' +
-      '<rect x="-3" y="16" width="6" height="18" rx="1.2" fill="' + body + '" stroke="' + stroke + '" stroke-width=".6"/>' +
-      '<rect x="-0.7" y="13.5" width="1.4" height="3" fill="' + (lit ? '#ed8936' : '#a0aec0') + '"/>' +
-      (lit ? flame(0, 8) : '') +
+      '<rect class="jul-body" x="-3" y="' + bodyY.toFixed(2) + '" width="6" height="' + h.toFixed(2) + '" rx="1.2" fill="' + body + '" stroke="' + stroke + '" stroke-width=".6"/>' +
+      '<rect x="-0.7" y="' + wickY.toFixed(2) + '" width="1.4" height="3" fill="' + (lit ? '#ed8936' : '#a0aec0') + '"/>' +
+      (lit ? flame(0, bodyY - 8) : '') +
       '</g>';
   }
-  function svg(lit) {
-    var xs = [14, 28, 42, 56], h = '', i;
-    for (i = 0; i < 4; i++) h += candle(i + 1, i < lit, xs[i]);
+  function svg(lit, ms) {
+    var xs = [14, 28, 42, 56], h = '', i, on, height;
+    ms = ms == null ? clockMs() : ms;
+    for (i = 0; i < 4; i++) {
+      on = i < lit;
+      height = candleHeight(i, on, ms);
+      h += candle(i + 1, on, xs[i], height);
+    }
     return '<svg viewBox="0 0 70 50" width="72" height="52" aria-hidden="true">' +
       '<path d="M6 42h58l-3 5H9z" fill="#8b2942"/>' +
       '<path d="M8 40h54c1 0 2 1 2 2H6c0-1 1-2 2-2z" fill="#9b3a52"/>' +
@@ -133,7 +176,7 @@
     }
     var lit = litCount();
     var preview = isPreviewing() || !!dateOverride();
-    el.innerHTML = svg(lit) + '<span class="jul-hint">' + (preview ? 'Förhandsvisning' : '') + '</span>';
+    el.innerHTML = svg(lit, clockMs()) + '<span class="jul-hint">' + (preview ? 'Förhandsvisning' : '') + '</span>';
     el.classList.toggle('jul-preview', preview);
     el.classList.add('jul-on');
     el.hidden = false;
@@ -302,9 +345,11 @@
   var obs = null;
   var slingorResize = false;
   function start() {
+    if (burnTimer) { clearInterval(burnTimer); burnTimer = 0; }
     if (!allowed()) { paint(); return; }
     ensure();
     paint();
+    burnTimer = setInterval(function () { if (allowed()) paint(); }, 60000);
     if (!slingorResize) {
       slingorResize = true;
       window.addEventListener('resize', function () { if (onHome()) layoutLights(); });
@@ -321,6 +366,11 @@
     litCount: litCount,
     litOn: litOn,
     advent: ADVENT.slice(),
+    burnEnd: BURN_END,
+    candleFull: CANDLE_FULL,
+    candleStub: CANDLE_STUB,
+    candleHeight: candleHeight,
+    clockMs: clockMs,
     ymd: ymd,
     paint: paint,
     start: start,

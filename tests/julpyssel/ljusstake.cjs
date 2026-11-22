@@ -18,6 +18,8 @@ assert.doesNotMatch(js + css + cl, /\bStig\b/);
 assert.doesNotMatch(js, /\bhen\b/);
 assert.doesNotMatch(cl, /id: '2026-11-22zjul1'/);
 assert.doesNotMatch(cl, /id: '2026-11-22zjul2'/);
+assert.doesNotMatch(cl, /id: '2026-11-22zjul3'/);
+assert.doesNotMatch(cl, /id: '2026-11-22zjul4'/);
 assert.match(js, /ALLOW = \{ '710022': 1 \}/);
 assert.match(js, /JUL_ALLA = false/);
 assert.match(js, /ADVENT = \['2026-11-29', '2026-12-06', '2026-12-13', '2026-12-20'\]/);
@@ -26,17 +28,17 @@ assert.match(js, /juldatum/);
 assert.match(js, /jul-ljus-rad/);
 assert.match(js, /querySelector\('#app > header'\)/);
 assert.doesNotMatch(js, /document\.body \|\| document\.documentElement\)\.appendChild\(btn\)/);
-assert.match(html, /julpyssel\.css\?v=20261122zhb1/);
-assert.match(html, /julpyssel\.js\?v=20261122zhb1/);
-assert.match(sw, /CACHE_VER = '20261122zhb1'/);
+assert.match(html, /julpyssel\.css\?v=20261122zjul4/);
+assert.match(html, /julpyssel\.js\?v=20261122zjul4/);
+assert.match(sw, /CACHE_VER = '20261122zjul4'/);
 assert.match(css, /#jul-ljus-rad/);
 assert.match(css, /grid-area:\s*jul/);
 assert.doesNotMatch(css.split('Julgransbelysning')[0], /position:\s*fixed/);
 assert.doesNotMatch(css, /z-index:\s*28/);
 assert.doesNotMatch(css, /bottom:\s*calc\(8px/);
 assert.match(core, /LAZY\.ensure\('berra'\)/);
-assert.match(lazy, /"berra": \["berra\.js\?v=20261122zhb1"\]/);
-assert.match(lazy, /berra\.js\?v=20261122zhb1/);
+assert.match(lazy, /"berra": \["berra\.js\?v=20261122zjul4"\]/);
+assert.match(lazy, /berra\.js\?v=20261122zjul4/);
 assert.match(sid, /headerTop: headerTop/);
 
 function boot(opts) {
@@ -141,7 +143,7 @@ function boot(opts) {
     document: documentStub,
     localStorage: store,
     location: loc,
-    Intl, Date, URLSearchParams, console,
+    Intl, Date, URLSearchParams, console, setInterval() { return 0; }, clearInterval() {},
     MutationObserver: function () { return { observe() {} }; }
   };
   vm.createContext(ctx);
@@ -159,6 +161,40 @@ assert.equal(j.litOn('2026-12-06'), 2);
 assert.equal(j.litOn('2026-12-13'), 3);
 assert.equal(j.litOn('2026-12-20'), 4);
 assert.equal(j.litOn('2027-01-01'), 4);
+
+function bodyHeights(html) {
+  return [...String(html).matchAll(/class="jul-body"[^>]*height="([\d.]+)"/g)].map(m => +m[1]);
+}
+function msDay(d) { return Date.parse(d + 'T00:00:00+01:00'); }
+
+assert.equal(j.candleFull, 18);
+assert.ok(j.candleStub > 2 && j.candleStub < 8);
+assert.equal(j.burnEnd, '2026-12-25');
+assert.equal(j.candleHeight(0, false, msDay('2026-11-28')), j.candleFull);
+assert.equal(j.candleHeight(3, false, msDay('2026-12-13')), j.candleFull);
+assert.equal(j.candleHeight(0, true, msDay('2026-11-29')), j.candleFull);
+assert.equal(j.candleHeight(2, true, msDay('2026-12-13')), j.candleFull);
+{
+  const d13 = msDay('2026-12-13');
+  const h0 = j.candleHeight(0, true, d13);
+  const h1 = j.candleHeight(1, true, d13);
+  const h2 = j.candleHeight(2, true, d13);
+  assert.ok(h0 < h1 && h1 < h2, 'tredje advent: nyare ljus ska vara längre ' + JSON.stringify({ h0, h1, h2 }));
+  assert.equal(h2, j.candleFull);
+  const late = Date.parse('2026-12-13T18:00:00+01:00');
+  assert.ok(j.candleHeight(0, true, late) < h0, 'samma dag: kontinuerlig nersmältning');
+}
+assert.equal(j.candleHeight(0, true, msDay('2026-12-25')), j.candleStub);
+assert.equal(j.candleHeight(3, true, msDay('2026-12-25')), j.candleStub);
+{
+  const d24 = Date.parse('2026-12-24T18:00:00+01:00');
+  const s0 = j.candleHeight(0, true, d24);
+  const s3 = j.candleHeight(3, true, d24);
+  assert.ok(s0 > j.candleStub && s0 < j.candleFull);
+  assert.ok(s3 > s0, 'julafton: fjärde ljuset längre än första');
+  assert.ok(s0 < 8, 'nästan stump vid julafton');
+}
+
 
 const other = boot({ driver: '123456', onHome: true });
 assert.equal(other.J.allowed(), false);
@@ -182,6 +218,14 @@ assert.equal(preview.J.litCount(), 1);
 preview.J.cyclePreview();
 assert.equal(preview.J.litCount(), 2);
 preview.J.cyclePreview();
+assert.equal(preview.J.litCount(), 3);
+{
+  const hs = bodyHeights(el.innerHTML);
+  assert.equal(hs.length, 4, 'preview 3 saknar ljus');
+  assert.ok(hs[0] < hs[1] && hs[1] < hs[2], 'preview 3: höjder ' + JSON.stringify(hs));
+  assert.equal(hs[2], 18);
+  assert.equal(hs[3], 18);
+}
 preview.J.cyclePreview();
 assert.equal(preview.J.litCount(), 4);
 preview.J.cyclePreview();
@@ -193,6 +237,13 @@ assert.ok((preview.win._headerTop || 0) >= 1);
 
 const dated = boot({ driver: '710022', onHome: true, search: '?juldatum=2026-12-13' });
 assert.equal(dated.J.litCount(), 3);
+{
+  const hs = bodyHeights(dated.doc.getElementById('jul-ljusstake').innerHTML);
+  assert.equal(hs.length, 4);
+  assert.ok(hs[0] < hs[1] && hs[1] < hs[2], 'juldatum 13 dec: höjder ' + JSON.stringify(hs));
+  assert.equal(hs[2], 18);
+  assert.equal(hs[3], 18);
+}
 
 const away = boot({ driver: '710022', onHome: false });
 const awayBtn = away.doc.getElementById('jul-ljusstake');
