@@ -1,8 +1,8 @@
 {
   "airport": "GOT",
-  "updated": "2026-11-22T14:05:29+01:00",
-  "arrivalsUpdated": "2026-11-22T14:05:30+01:00",
-  "departuresUpdated": "2026-11-22T13:10:39+01:00",
+  "updated": "2026-11-22T14:10:41+01:00",
+  "arrivalsUpdated": "2026-11-22T14:10:42+01:00",
+  "departuresUpdated": "2026-11-22T14:10:43+01:00",
   "yesterdayUpdated": "2026-11-22T05:01:01+01:00",
   "tomorrowUpdated": "2026-11-22T14:01:04+01:00",
   "error": null,
@@ -1576,7 +1576,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-11-22T13:00:00Z",
-      "est": "2026-11-22T13:17:00Z",
+      "est": "2026-11-22T13:10:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "19",
@@ -1584,8 +1584,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 14:11",
-      "reason": "Ankommer 14:11"
+      "rawStatus": "Ankommer 14:10",
+      "reason": "Ankommer 14:10"
     },
     {
       "id": "EW8220",
@@ -2423,9 +2423,9 @@
       "baggage": "4",
       "firstBag": "2026-11-22T13:04:49Z",
       "firstBagEst": "2026-11-22T13:12:28Z",
-      "lastBag": "",
-      "rawStatus": "Landat 13:46",
-      "reason": "Landat 13:46"
+      "lastBag": "2026-11-22T13:07:46Z",
+      "rawStatus": "Landat 13:46 · Sista bagage",
+      "reason": "Landat 13:46 · Sista bagage"
     },
     {
       "id": "LH816",
@@ -2441,11 +2441,11 @@
       "terminal": "T1",
       "gate": "15",
       "baggage": "3",
-      "firstBag": "",
+      "firstBag": "2026-11-22T13:09:22Z",
       "firstBagEst": "2026-11-22T13:20:58Z",
       "lastBag": "",
-      "rawStatus": "Landat 13:56",
-      "reason": "Landat 13:56"
+      "rawStatus": "Första bagage · Landat 13:56",
+      "reason": "Första bagage · Landat 13:56"
     },
     {
       "id": "LH2430",
@@ -5706,8 +5706,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Försenad till 14:00 · Gå till gate",
-      "reason": "Försenad till 14:00 · Gå till gate"
+      "rawStatus": "Försenad till 14:00 · Gate stängd",
+      "reason": "Försenad till 14:00 · Gate stängd"
     },
     {
       "id": "OJ812",
@@ -5766,8 +5766,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Gå till gate",
+      "reason": "Gå till gate"
     },
     {
       "id": "LX1227",
@@ -5786,8 +5786,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Boarding",
+      "reason": "Boarding"
     },
     {
       "id": "LH2431",
@@ -5986,8 +5986,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Gå till gate",
+      "reason": "Gå till gate"
     },
     {
       "id": "KL1236",
@@ -6001,7 +6001,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "17",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6021,7 +6021,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "23",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6046,8 +6046,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Omedelbar avgång",
+      "reason": "Omedelbar avgång"
     },
     {
       "id": "AF1453",
@@ -6061,7 +6061,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "14",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6081,7 +6081,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "19",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -6515,19 +6515,19 @@
       "other": "Stockholm ARN",
       "iata": "",
       "airline": "SAS Scandinavian Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-22T12:50:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-22T12:56:20Z",
       "terminal": "T1",
       "gate": "16",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Startat 14:05",
+      "reason": "Startat 14:05"
     },
     {
       "id": "SK431",
