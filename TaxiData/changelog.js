@@ -15,8 +15,17 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-11-22', id: '2026-11-22zfly1', rader: [
+  { datum: '2026-11-22', id: '2026-11-22zfly1', tid: '20:56', rader: [
     ['Nytt', 'På Landvetter följer en förbokning flygets nya tid när den ligger från några minuter före upp till 20 min efter den planerade landningen, och bara ett flyg passar. Förskjutningen behålls (till exempel 20 min efter landning). I förklaringen står vilket flyg den följer. Om flera flyg kan passa flyttas tiden inte; då listas de i stället.']
+  ]},
+  { datum: '2026-11-22', id: '2026-11-22zmod1', tid: '19:01', rader: [
+    ['Ändrat', 'Väder och Nyheter är inte längre förinstallerade. De tas bort från startskärmen på alla konton, men du kan lägga tillbaka dem när du vill under Moduler.']
+  ]},
+  { datum: '2026-11-22', id: '2026-11-22zprof1', tid: '18:55', rader: [
+    ['Ändrat', 'När du döljer privata moduler på en delad enhet syns notiser och en begränsad profil igen. Klockan i headern är kvar. Under profilikonen visas namn, förarnummer och logga ut, men inte den fullständiga profilen, meddelanden eller andra personuppgifter. Notiser om meddelanden, forum, bil, sjuk och konto visas inte.']
+  ]},
+  { datum: '2026-11-22', id: '2026-11-22zhide1', tid: '18:30', rader: [
+    ['Ändrat', 'När du döljer privata moduler på en delad enhet är automatisk utloggning av (rutan är då grå). Den går tillbaka till ditt val när du visar modulerna igen, så du inte loggas ut bara för att servern är tyst.']
   ]},
   { datum: '2026-11-22', id: '2026-11-22zdelad1', tid: '18:19', rader: [
     ['Fixat', 'På en delad enhet gick det inte att logga in om timkörningen varit tyst ett tag: inloggningen lyckades men appen gick genast tillbaka till inloggningsskärmen. En ny inloggning stängs inte längre av det.']

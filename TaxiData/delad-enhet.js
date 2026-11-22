@@ -16,7 +16,7 @@
   var MSG = 'taxi_delad_logout';
   var PRIVATE_VIEWS = {
     kordata: 1, lonekoll: 1, verkstad: 1, topplistor: 1, forum: 1,
-    profil: 1, inkorg: 1, notiser: 1, admin: 1, sadmin: 1
+    profil: 1, inkorg: 1, admin: 1, sadmin: 1
   };
   var INTERVAL_MS = 5 * 60 * 1000;
   var timer = null;
@@ -28,7 +28,7 @@
   function put(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   function del(k) { try { localStorage.removeItem(k); } catch (e) {} }
   function isOn() { return get(KEY) === '1'; }
-  function isAutoLogout() { return isOn() && get(AUTO_KEY) !== '0'; }
+  function isAutoLogout() { return isOn() && get(AUTO_KEY) !== '0' && !isHidePrivate(); }
   function isHidePrivate() { return isOn() && get(HIDE_KEY) === '1'; }
   function isPrivateView(id) { return !!(id && PRIVATE_VIEWS[String(id)]); }
   function loginAt() { return get(AT); }
@@ -286,24 +286,28 @@
     reportDevice();
   }
 
+  function applyAutoLogoutState() {
+    if (!isOn()) return;
+    if (isAutoLogout()) {
+      if (!loginAt()) markLogin();
+      else syncFlag(true);
+      start();
+    } else {
+      del(AT);
+      syncFlag(false);
+      stop();
+    }
+  }
+
   function setAutoLogout(on) {
     put(AUTO_KEY, on ? '1' : '0');
-    if (isOn()) {
-      if (on) {
-        if (!loginAt()) markLogin();
-        else syncFlag(true);
-        start();
-      } else {
-        del(AT);
-        syncFlag(false);
-        stop();
-      }
-    }
+    applyAutoLogoutState();
   }
 
   function setHidePrivate(on) {
     put(HIDE_KEY, on ? '1' : '0');
     applyPrivateMode();
+    applyAutoLogoutState();
   }
 
   function isDemo() {
@@ -377,7 +381,7 @@
     if (!token()) return;
     if (isHidePrivate()) hideAfterLoginMsg(); else showAfterLogin();
     reportDevice();
-    if (!isAutoLogout() || isDemo()) { stop(); del(AT); return; }
+    if (!isAutoLogout() || isDemo()) { stop(); del(AT); if (!isDemo()) syncFlag(false); return; }
     ensureLoginAt();
     syncFlag(true);
     if (timer) return;
@@ -516,8 +520,9 @@
   function renderSettings(box) {
     if (!box) return;
     var on = isOn();
-    var autoOn = get(AUTO_KEY) !== '0';
+    var autoSaved = get(AUTO_KEY) !== '0';
     var hideOn = get(HIDE_KEY) === '1';
+    var autoLocked = hideOn;
     box.innerHTML = '<div class="section"><h3 style="margin-top:0">Delad enhet</h3>' +
       '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">' +
       'Slå på det här på en platta som flera förare delar, till exempel i bilen. Då ber inloggningen inte om att spara lösenord på enheten, och du kan välja hur kontot ska skyddas. På din egen telefon ska det vara av.</p>' +
@@ -526,15 +531,17 @@
         '<label class="hl-opt' + (on ? ' on' : '') + '"><input type="radio" name="delad-enhet" value="1"' + (on ? ' checked' : '') + '><span>På</span></label>' +
       '</div>' +
       (on ? '<div class="delad-sub">' +
-        '<label class="delad-chk' + (autoOn ? ' on' : '') + '">' +
-          '<input type="checkbox" name="delad-auto-logout"' + (autoOn ? ' checked' : '') + '>' +
+        '<label class="delad-chk' + (autoSaved && !autoLocked ? ' on' : '') + (autoLocked ? ' delad-chk-disabled' : '') + '">' +
+          '<input type="checkbox" name="delad-auto-logout"' + (autoSaved ? ' checked' : '') + (autoLocked ? ' disabled' : '') + '>' +
           '<span><span class="delad-chk-t">Logga ut automatiskt</span>' +
-          '<span class="delad-chk-d">Loggar ut automatiskt när ditt pass är slut, eller om data inte uppdaterats på ett tag.</span></span>' +
+          '<span class="delad-chk-d">' + (autoLocked
+            ? 'Av så länge privata moduler är dolda. Går tillbaka till ditt val när du visar dem igen.'
+            : 'Loggar ut automatiskt när ditt pass är slut, eller om data inte uppdaterats på ett tag.') + '</span></span>' +
         '</label>' +
         '<label class="delad-chk' + (hideOn ? ' on' : '') + '">' +
           '<input type="checkbox" name="delad-hide-private"' + (hideOn ? ' checked' : '') + '>' +
           '<span><span class="delad-chk-t">Dölj privata moduler</span>' +
-          '<span class="delad-chk-d">Döljer och laddar inte kördata, lön, rapporter, ärenden, meddelanden, profil och admin. Ankomster, Prognos, Väder, Nyheter, Kalender och Mina bevakningar finns kvar.</span></span>' +
+          '<span class="delad-chk-d">Döljer och laddar inte kördata, lön, rapporter, ärenden, meddelanden, den fullständiga profilen och admin. Notiser och en begränsad profil (namn, förarnummer och logga ut) finns kvar, liksom Ankomster, Prognos, Väder, Nyheter, Kalender och Mina bevakningar.</span></span>' +
         '</label>' +
       '</div>' : '') +
       '</div>';
