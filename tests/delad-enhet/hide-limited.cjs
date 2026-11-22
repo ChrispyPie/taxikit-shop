@@ -16,6 +16,7 @@ assert.doesNotMatch(html, /\bStig\b/);
 assert.doesNotMatch(notis, /\bStig\b/);
 assert.doesNotMatch(cl.split("id: '2026-11-22zprof1'")[1].split(']},')[0], /\b(Stig|hen)\b/);
 assert.match(cl, /id: '2026-11-22zprof1'/);
+assert.match(cl.split("id: '2026-11-22zprof1'")[1].split(']},')[0].split('rader:')[0], /tid: '18:55'/);
 assert.match(cl.split("id: '2026-11-22zprof1'")[1].split(']},')[0], /begränsad profil/);
 assert.match(cl.split("id: '2026-11-22zprof1'")[1].split(']},')[0], /notiser/i);
 
