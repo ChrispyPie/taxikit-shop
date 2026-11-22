@@ -121,7 +121,7 @@ assert.equal(H.canStart(H.active(), { skipCap: true }), true);
 
 // Wired into the app
 assert.match(idx, /hjalpbot-hogtid\.js\?v=20261122zdelad1/);
-assert.match(idx, /hjalpbot\.js\?v=20261122zhb1/);
+assert.match(idx, /hjalpbot\.js\?v=20261122zjul4/);
 assert.match(bot, /HJALPBOT_HOGTID/);
 assert.match(bot, /previewHoliday/);
 assert.match(bot, /pageVisible/);
