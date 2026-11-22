@@ -9,7 +9,7 @@
   <script src="tema.js?v=20261122zdelad1"></script>
   <script src="helskarm.js?v=20261111pwa1"></script>
   <script src="enhet.js?v=20261029d"></script>
-  <script src="delad-enhet.js?v=20261122zhide1"></script>
+  <script src="delad-enhet.js?v=20261122zprof1"></script>
   <script src="namn.js?v=20261028nm1"></script>
   <link rel="stylesheet" href="style.css?v=20261113barn1">
   <link rel="stylesheet" href="tema.css?v=20261122zdelad1">
@@ -116,11 +116,8 @@
     .delad-chk-disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; border-color: var(--border, #cbd5e0); background: var(--surface-soft, var(--surface)); }
     .delad-chk-disabled input { cursor: not-allowed; }
     html[data-theme="dark"] .delad-chk-disabled { opacity: 0.5; }
-    html.delad-hide-private #notis-btn,
-    html.delad-hide-private .notis-btn,
     html.delad-hide-private #menu-profile,
     html.delad-hide-private #menu-inkorg,
-    html.delad-hide-private #full-name,
     html.delad-hide-private #profile-reminder,
     html.delad-hide-private #home-devices { display: none !important; }
   </style>
@@ -224,7 +221,7 @@
   <script src="hem-ordning-core.js?v=20261122zdelad1"></script>
   <script src="hem-sidor.js?v=20261122zdelad1"></script>
   <script src="hb-stage.js?v=20261122zdelad1"></script>
-  <script src="lazy-views.js?v=20261122zdelad1"></script>
+  <script src="lazy-views.js?v=20261122zprof1"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -450,11 +447,6 @@
 
     function setFullName() {
       var fn = document.getElementById('full-name');
-      if (hidePrivateOn()) {
-        fn.textContent = '';
-        if (window.PROFILBILD && PROFILBILD.reset) PROFILBILD.reset();
-        return;
-      }
       var fullName = ((driverData.first_name || '') + ' ' + (driverData.last_name || '')).trim();
       fn.textContent = fullName || driverId;
       // Förar-id under namnet (bara det egna). Demo har inget riktigt id (t599u)
@@ -462,6 +454,11 @@
         var sm = document.createElement('div');
         sm.className = 'fid'; sm.textContent = 'Förar-ID ' + driverId;
         fn.appendChild(sm);
+      }
+      // Begränsad profil på delad enhet: namn och förarnummer, ingen profilbild eller personuppgifter.
+      if (hidePrivateOn()) {
+        if (window.PROFILBILD && PROFILBILD.reset) PROFILBILD.reset();
+        return;
       }
       if (window.PROFILBILD) {
         var pm = document.getElementById('profile-menu');
@@ -473,7 +470,7 @@
       if (!driverId) return;
       setFullName();
       updateProfileReminder();
-      if (!hidePrivateOn() && window.LAZY && LAZY.refreshBadges) LAZY.refreshBadges();
+      if (window.LAZY && LAZY.refreshBadges) LAZY.refreshBadges();
     };
 
     // Start (2026-11-13hem1, t1584u): vid ny start av appen (PWA, ny flik, kallstart) och direkt efter

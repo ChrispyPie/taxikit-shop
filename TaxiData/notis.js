@@ -229,6 +229,9 @@
     return out;
   }
   function unreadCount() {
+    if (hidePriv()) {
+      return allItems().filter(function (x) { return !x.read && !hiddenNotis(x); }).length;
+    }
     var n = st.unread || 0;
     var onServer = {}; (st.items || []).forEach(function (x) { if (x.nkey) onServer[x.nkey] = 1; });
     pendGet().forEach(function (x) { if (!x.read && !onServer[x.key]) n++; });
@@ -329,11 +332,25 @@
     try { localStorage.setItem(LS_CATS, JSON.stringify({ off: off })); } catch (e) {}
   }
   function catOn(id) { return catsOff().indexOf(id) < 0; }
+  // På delad enhet med dolda privata moduler: dölj notiser som leder till privat data
+  // (meddelanden, forum, bil/verkstad, sjuk inkl. sjuklön, konto). Övriga notiser syns som vanligt.
+  var PRIVATE_NOTIS_CATS = { meddelanden: 1, forum: 1, bil: 1, sjuk: 1, konto: 1 };
+  function hidePriv() {
+    return !!(window.DELAD && DELAD.isHidePrivate && DELAD.isHidePrivate());
+  }
+  function hiddenNotis(it) {
+    return hidePriv() && !!PRIVATE_NOTIS_CATS[catOf(it)];
+  }
+  N.hiddenNotis = hiddenNotis;
+  N.PRIVATE_NOTIS_CATS = PRIVATE_NOTIS_CATS;
   function visibleItems(items) {
     items = items || [];
     var off = catsOff();
-    if (!off.length) return items;
-    return items.filter(function (it) { return off.indexOf(catOf(it)) < 0; });
+    return items.filter(function (it) {
+      if (hiddenNotis(it)) return false;
+      if (off.length && off.indexOf(catOf(it)) >= 0) return false;
+      return true;
+    });
   }
   function paintCats(items) {
     var box = document.getElementById('np-cats'); if (!box) return;
@@ -350,7 +367,9 @@
 
   function paint() {
     var list = document.getElementById('np-list'); if (!list) return;
-    var items = allItems(), shown = visibleItems(items), h = '';
+    var items = allItems();
+    if (hidePriv()) items = items.filter(function (it) { return !hiddenNotis(it); });
+    var shown = visibleItems(items), h = '';
     paintCats(items);
     var all = document.getElementById('np-all'); if (all) all.disabled = !items.some(function (x) { return !x.read; });
     if (!items.length) {
@@ -407,6 +426,7 @@
     return null;
   }
   function go(it) {
+    if (hiddenNotis(it)) return;
     var k = String(it.kind || '');
     var open = window.openItem;
     if (typeof open !== 'function') return;
