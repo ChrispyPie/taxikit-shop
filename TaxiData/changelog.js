@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-22', id: '2026-11-22zfly1', tid: '20:56', rader: [
+    ['Nytt', 'På Landvetter följer en förbokning flygets nya tid när den ligger från några minuter före upp till 20 min efter den planerade landningen, och bara ett flyg passar. Förskjutningen behålls (till exempel 20 min efter landning). I förklaringen står vilket flyg den följer. Om flera flyg kan passa flyttas tiden inte; då listas de i stället.']
+  ]},
   { datum: '2026-11-22', id: '2026-11-22zmod1', tid: '19:01', rader: [
     ['Ändrat', 'Väder och Nyheter är inte längre förinstallerade. De tas bort från startskärmen på alla konton, men du kan lägga tillbaka dem när du vill under Moduler.']
   ]},
