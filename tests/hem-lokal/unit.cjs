@@ -15,7 +15,7 @@ assert.doesNotMatch(core + src, /rpc\('home_tool_order_set'/);
 assert.match(core, /home_tool_order_get/);
 assert.match(core, /if \(isSeeded\(\) \|\| readLocal\(\)/);
 assert.match(core, /markSeeded\(\)/);
-assert.match(index, /hem-ordning-core\.js\?v=20261122zdelad1/);
+assert.match(index, /hem-ordning-core\.js\?v=20261122zmod1/);
 assert.match(lazy, /hem-ordning\.js\?v=20261122zdelad1/);
 assert.match(changelog, /id: '2026-11-14lokal1'/);
 assert.doesNotMatch(core + src + changelog, /\bStig\b/);
@@ -71,6 +71,7 @@ function boot(opts) {
 }
 
 function orderKey(driver) { return 'taxi_home_order:' + (driver || '710022'); }
+function uninstKey(driver) { return 'taxi_mod_uninst_vader_nyheter:' + (driver || '710022'); }
 function parseOrder(store, driver) {
   const raw = store.getItem(orderKey(driver));
   return raw ? JSON.parse(raw) : null;
@@ -89,6 +90,7 @@ async function main() {
 
   const phoneLocal = {};
   phoneLocal[orderKey()] = JSON.stringify({ ids: ['vader', 'moduler'], hidden: [] });
+  phoneLocal[uninstKey()] = '1';
   const tabletLocal = {};
   tabletLocal[orderKey()] = JSON.stringify({
     ids: ['mapp-bb2', 'kordata', 'moduler'],
@@ -96,6 +98,7 @@ async function main() {
     folders: [{ id: 'mapp-bb2', name: 'Platta', items: ['vader', 'prognos'] }],
     pos: { sida2: ['lonekoll'] }
   });
+  tabletLocal[uninstKey()] = '1';
 
   const phone = boot({ local: phoneLocal, server: shared, readyState: 'complete' });
   await tick();
@@ -126,9 +129,14 @@ async function main() {
   fresh.H.load();
   await tick();
   assert.equal(shared.gets, 1);
-  assert.deepEqual(plain(fresh.H.order()), ['vader', 'kordata', 'prognos', 'ankomster', 'moduler']);
+  assert.deepEqual(plain(fresh.H.order()), ['kordata', 'prognos', 'ankomster', 'moduler']);
   assert.deepEqual(plain(fresh.H.extraIds()), ['kalender']);
   assert.equal(shared.sets.length, 0);
+  assert.ok(fresh.H.hidden().indexOf('vader') >= 0);
+  assert.ok(fresh.H.hidden().indexOf('nyheter') >= 0);
+  assert.equal(fresh.H.isInstalled('vader'), false);
+  assert.equal(fresh.H.isInstalled('nyheter'), false);
+  assert.equal(fresh.store.getItem(uninstKey()), '1');
 
   console.log('UNIT_OK');
 }
