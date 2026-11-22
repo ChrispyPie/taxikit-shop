@@ -217,7 +217,7 @@
     var info = { cat: cat, at: at, slot: null, hint: '' };
     var now = floor5(new Date()).getTime(), end = schedEnd(new Date()).getTime();
     if (at != null && isFinite(at)) {
-      var slot = floor5(new Date(at)).getTime();
+      var slot = round5(new Date(at)).getTime();
       if (slot >= now && slot < end) info.slot = slot + '|' + cat;
       else if (slot < now && b && isSnart(b, now)) info.slot = 'snart|' + cat;
       else if (slot < now) info.hint = 'Tiden har passerat.';
@@ -258,6 +258,13 @@
     var x = new Date(d);
     x.setSeconds(0, 0);
     x.setMinutes(Math.floor(x.getMinutes() / 5) * 5);
+    return x;
+  }
+  // Flygikoner och flyttade förbokningar: närmaste 5-minutersrad (22:14 → 22:15, inte 22:10).
+  function round5(d) {
+    var x = new Date(d);
+    x.setSeconds(0, 0);
+    x.setMinutes(Math.round(x.getMinutes() / 5) * 5);
     return x;
   }
   function addMin(d, m) { return new Date(d.getTime() + m * 60000); }
@@ -598,7 +605,7 @@
     (st.bookings || []).forEach(function (b) {
       if (CHILD_KEYS.indexOf(b.category) >= 0) return;
       if (!inCats(b, cats)) return;
-      var d = floor5(new Date(bookingWhen(b)));
+      var d = round5(new Date(bookingWhen(b)));
       if (d >= end || (d < now && !isSnart(b, now.getTime()))) return;
       out[b.zone_id] = (out[b.zone_id] || 0) + 1;
     });
@@ -719,22 +726,21 @@
   // Döljs aldrig så länge prognosen fortfarande har den (servern stänger den när den försvinner).
   function isSnart(b, nowSlot) {
     var t = bookingWhen(b);
-    return isFinite(t) && floor5(new Date(t)).getTime() < nowSlot && t >= Date.now() - SNART_BACK_MS;
+    return isFinite(t) && round5(new Date(t)).getTime() < nowSlot && t >= Date.now() - SNART_BACK_MS;
   }
   function addonText(b) {
     return addonsOf(b).map(function (a) { return (CAT_LABEL[a] || a).toLowerCase(); }).join(' + ');
   }
 
   // Landvetter (293): varna när flyg som landar runt bokningens tid är försenade (Ankomster-data).
-  // En förbokning kopplas till ett flyg om den ligger från 5 min före upp till 20 min efter
-  // planerad landning, och inget annat rimligt flyg finns i samma fönster. Då följer den
-  // flygets nya tid med samma förskjutning (bokning 20 min efter 19:25, flyg till 19:35 → 19:55).
-  // Flera tänkbara flyg: tiden flyttas inte, de listas i förklaringsrutan i stället.
+  // En förbokning följer ett flyg med samma förskjutning som flyget (planerad → beräknad).
+  // Urval när flera flyg finns: (1) planerad tid = bokningen (samma 5-minutersrad eller inom ±2 min),
+  // (2) annars beräknad tid = bokningen, (3) annars den planerade landning som ligger närmast före
+  // bokningen, högst 20 min före (troligen bagage). Vid lika träff på samma steg flyttas tiden inte.
   var FLIGHT_ZONE = '293';
   var FLIGHT_TXT = 'Flyg runt denna tid är försenade, tiden kan ändras';
-  var FOLLOW_BEFORE_MS = 5 * 60000;
+  var FOLLOW_NEAR_MS = 2 * 60000;
   var FOLLOW_AFTER_MS = 20 * 60000;
-  var FOLLOW_BAGAGE_MS = 5 * 60000;
 
   function followShown(f) {
     if (!f || f.canceled || f.removed) return 0;
@@ -750,6 +756,18 @@
     if (f.est) return 'beräknad';
     return '';
   }
+  function nearTime(a, b) {
+    a = +a; b = +b;
+    if (!isFinite(a) || !isFinite(b)) return false;
+    if (Math.abs(a - b) <= FOLLOW_NEAR_MS) return true;
+    return round5(new Date(a)).getTime() === round5(new Date(b)).getTime();
+  }
+  function followInPool(sched, shown, t) {
+    if (nearTime(sched, t)) return true;
+    if (shown && nearTime(shown, t)) return true;
+    if (sched < t && (t - sched) <= FOLLOW_AFTER_MS) return true;
+    return false;
+  }
   function followCandidates(b, flights) {
     if (!b || String(b.zone_id) !== FLIGHT_ZONE) return [];
     var t = Date.parse(b.estimated_at);
@@ -758,23 +776,53 @@
     for (var i = 0; i < flights.length; i++) {
       var f = flights[i];
       if (!f || !f.sched || f.canceled || f.removed) continue;
-      var off = t - (+f.sched);
-      if (off < -FOLLOW_BEFORE_MS || off > FOLLOW_AFTER_MS) continue;
+      var sched = +f.sched;
       var shown = followShown(f);
+      if (!followInPool(sched, shown, t)) continue;
+      var off = t - sched;
       cands.push({ flight: f, offset: off, shown: shown, from: t, at: shown ? shown + off : 0 });
     }
-    cands.sort(function (a, b) { return Math.abs(a.offset) - Math.abs(b.offset); });
     return cands;
   }
-  // Unik träff med ny tid i annan 5-minutersrad → flytta. Flera träffar → { cands } (ingen flytt).
+  // Stegvis val: planerad ≈ bokning, annars beräknad ≈ bokning, annars närmast före (bagage). Lika träff → tie.
+  function followPick(cands, t) {
+    if (!cands || !cands.length) return null;
+    function withWhy(c, why) {
+      return { flight: c.flight, offset: c.offset, shown: c.shown, from: c.from, at: c.at, why: why };
+    }
+    var s1 = cands.filter(function (c) { return nearTime(c.flight.sched, t); });
+    if (s1.length === 1) return withWhy(s1[0], 'planned');
+    if (s1.length > 1) return { cands: cands, tie: s1, step: 'planned' };
+    var s2 = cands.filter(function (c) { return c.shown && nearTime(c.shown, t); });
+    if (s2.length === 1) return withWhy(s2[0], 'estimated');
+    if (s2.length > 1) return { cands: cands, tie: s2, step: 'estimated' };
+    var s3 = cands.filter(function (c) {
+      var sched = +c.flight.sched;
+      return isFinite(sched) && sched < t && (t - sched) <= FOLLOW_AFTER_MS;
+    });
+    s3.sort(function (a, b) { return (+b.flight.sched) - (+a.flight.sched); });
+    if (!s3.length) return null;
+    var best = +s3[0].flight.sched;
+    var ties = s3.filter(function (c) { return +c.flight.sched === best; });
+    if (ties.length > 1) return { cands: cands, tie: ties, step: 'bagage' };
+    return withWhy(ties[0], 'bagage');
+  }
+  function followHit(hit) {
+    return {
+      flight: hit.flight, at: hit.at, from: hit.from, offset: hit.offset,
+      shown: hit.shown, later: hit.at > hit.from, why: hit.why || ''
+    };
+  }
   function followMatch(b, flights) {
+    var t = b ? Date.parse(b.estimated_at) : NaN;
     var cands = followCandidates(b, flights);
     if (!cands.length) return null;
-    if (cands.length > 1) return { cands: cands };
-    var hit = cands[0];
-    if (!hit.at) return null;
-    if (floor5(new Date(hit.from)).getTime() === floor5(new Date(hit.at)).getTime()) return null;
-    return { flight: hit.flight, at: hit.at, from: hit.from, offset: hit.offset, shown: hit.shown, later: hit.at > hit.from };
+    var picked = followPick(cands, t);
+    if (!picked) return null;
+    if (picked.tie) return { cands: picked.cands || picked.tie, tie: picked.tie, step: picked.step };
+    if (!picked.at) return null;
+    if (round5(new Date(picked.from)).getTime() === round5(new Date(picked.at)).getTime()) return null;
+    return followHit(picked);
   }
   function followExplain(fol) {
     if (!fol || !fol.flight) return '';
@@ -787,7 +835,7 @@
     var shownTxt = shown && shownLab ? shownLab + ' ' + hm(new Date(shown)) : '';
     var vis = isFinite(fol.at) ? hm(new Date(fol.at)) : '';
     var mid = no + (sched || shownTxt ? ' (' + (sched ? 'planerad ' + sched : '') + (sched && shownTxt ? ', ' : '') + shownTxt + ')' : '');
-    var bagage = (fol.offset || 0) > FOLLOW_BAGAGE_MS;
+    var bagage = fol.why === 'bagage';
     var ligga;
     if (offMin > 0) ligga = 'Bokningen ligger ' + offMin + ' min efter planerad landning' + (bagage ? ', troligen på grund av bagage,' : '') + ' för ' + mid;
     else if (offMin < 0) ligga = 'Bokningen ligger ' + Math.abs(offMin) + ' min före planerad landning för ' + mid;
@@ -866,11 +914,11 @@
   // GOT-ankomster i en 5-minutersrad. Beräknad tid om den finns, annars planerad. Inställda/borttagna hoppas över.
   function flightsInSlot(slotMs) {
     if (!st.flights || !st.flights.length || !slotMs) return [];
-    var to = slotMs + 5 * 60000, out = [];
+    var out = [];
     st.flights.forEach(function (f) {
       if (f.canceled || f.removed) return;
       var t = arrivalMs(f);
-      if (t >= slotMs && t < to) out.push(f);
+      if (t && round5(new Date(t)).getTime() === slotMs) out.push(f);
     });
     out.sort(function (a, b) { return arrivalMs(a) - arrivalMs(b); });
     return out;
@@ -1219,7 +1267,7 @@
         follows.slice(0, 3).map(function (b) { return esc(followExplain(b._follow)); }).join('<br>') + '</div>';
     }
     if (maybe.length) {
-      html += '<div class="pg-pop-follow-box">Flera flyg kan passa bokningen, så tiden är inte flyttad.<br>' +
+      html += '<div class="pg-pop-follow-box">Flera plan är möjliga, så tiden är inte flyttad.<br>' +
         maybe.slice(0, 2).map(function (b) {
           return b._followCands.slice(0, 4).map(function (c) { return esc(followCandLine(c)); }).join('<br>');
         }).join('<br>') + '</div>';
@@ -1811,7 +1859,7 @@
     var bySlot = {}, hasSnart = false, nowMs = now.getTime();
     (st.bookings || []).forEach(function (b) {
       if (String(b.zone_id) !== String(zoneId)) return;
-      var d = floor5(new Date(bookingWhen(b)));
+      var d = round5(new Date(bookingWhen(b)));
       var slot;
       if (d >= end) return;
       if (d < now) { if (!isSnart(b, nowMs)) return; slot = 'snart'; }

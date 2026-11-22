@@ -21,7 +21,7 @@ assert.match(js, /taxi_jul_ljus_preview/);
 assert.match(js, /juldatum/);
 assert.match(html, /julpyssel\.css\?v=20261122zjul1/);
 assert.match(html, /julpyssel\.js\?v=20261122zjul1/);
-assert.match(sw, /CACHE_VER = '20261122zfly3'/);
+assert.match(sw, /CACHE_VER = '20261122zfly4'/);
 assert.match(css, /#jul-ljusstake/);
 assert.match(css, /z-index:\s*28/);
 
