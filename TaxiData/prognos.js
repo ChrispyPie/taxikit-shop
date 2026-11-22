@@ -733,10 +733,12 @@
   }
 
   // Landvetter (293): varna när flyg som landar runt bokningens tid är försenade (Ankomster-data).
-  // En förbokning följer ett flyg med samma förskjutning som flyget (planerad → beräknad).
-  // Urval när flera flyg finns: (1) planerad tid = bokningen (samma 5-minutersrad eller inom ±2 min),
-  // (2) annars beräknad tid = bokningen, (3) annars den planerade landning som ligger närmast före
-  // bokningen, högst 20 min före (troligen bagage). Vid lika träff på samma steg flyttas tiden inte.
+  // En förbokning följer planet vars planerade landning matchar bokningens första visade tid
+  // (first_estimated_at från servern, annars nuvarande estimated_at).
+  // Urval: (1) planerad tid = första tiden (samma 5-minutersrad eller inom ±2 min),
+  // (2) annars den planerade landning som ligger närmast före, högst 20 min före (troligen bagage).
+  // Visas på planets beräknade/faktiska ankomst, utan extra förskjutning (samma rad som flygikonen).
+  // Vid lika träff på samma steg flyttas tiden inte.
   var FLIGHT_ZONE = '293';
   var FLIGHT_TXT = 'Flyg runt denna tid är försenade, tiden kan ändras';
   var FOLLOW_NEAR_MS = 2 * 60000;
@@ -762,15 +764,27 @@
     if (Math.abs(a - b) <= FOLLOW_NEAR_MS) return true;
     return round5(new Date(a)).getTime() === round5(new Date(b)).getTime();
   }
-  function followInPool(sched, shown, t) {
+  function followPlace(f) {
+    if (!f || f.canceled || f.removed) return 0;
+    var t = f.est || f.act;
+    if (!t) return 0;
+    var n = +t;
+    if (!n && t.getTime) n = +t.getTime();
+    return n || 0;
+  }
+  function followFirstTime(b) {
+    var first = b ? Date.parse(b.first_estimated_at) : NaN;
+    if (isFinite(first)) return first;
+    return b ? Date.parse(b.estimated_at) : NaN;
+  }
+  function followInPool(sched, t) {
     if (nearTime(sched, t)) return true;
-    if (shown && nearTime(shown, t)) return true;
     if (sched < t && (t - sched) <= FOLLOW_AFTER_MS) return true;
     return false;
   }
   function followCandidates(b, flights) {
     if (!b || String(b.zone_id) !== FLIGHT_ZONE) return [];
-    var t = Date.parse(b.estimated_at);
+    var t = followFirstTime(b);
     if (!isFinite(t) || !flights || !flights.length) return [];
     var cands = [];
     for (var i = 0; i < flights.length; i++) {
@@ -778,13 +792,13 @@
       if (!f || !f.sched || f.canceled || f.removed) continue;
       var sched = +f.sched;
       var shown = followShown(f);
-      if (!followInPool(sched, shown, t)) continue;
-      var off = t - sched;
-      cands.push({ flight: f, offset: off, shown: shown, from: t, at: shown ? shown + off : 0 });
+      if (!followInPool(sched, t)) continue;
+      var at = followPlace(f);
+      cands.push({ flight: f, offset: t - sched, shown: shown, from: t, at: at });
     }
     return cands;
   }
-  // Stegvis val: planerad ≈ bokning, annars beräknad ≈ bokning, annars närmast före (bagage). Lika träff → tie.
+  // Stegvis val på första visade tid: planerad ≈ tid, annars närmast före (bagage). Lika träff → tie.
   function followPick(cands, t) {
     if (!cands || !cands.length) return null;
     function withWhy(c, why) {
@@ -793,9 +807,6 @@
     var s1 = cands.filter(function (c) { return nearTime(c.flight.sched, t); });
     if (s1.length === 1) return withWhy(s1[0], 'planned');
     if (s1.length > 1) return { cands: cands, tie: s1, step: 'planned' };
-    var s2 = cands.filter(function (c) { return c.shown && nearTime(c.shown, t); });
-    if (s2.length === 1) return withWhy(s2[0], 'estimated');
-    if (s2.length > 1) return { cands: cands, tie: s2, step: 'estimated' };
     var s3 = cands.filter(function (c) {
       var sched = +c.flight.sched;
       return isFinite(sched) && sched < t && (t - sched) <= FOLLOW_AFTER_MS;
@@ -814,14 +825,13 @@
     };
   }
   function followMatch(b, flights) {
-    var t = b ? Date.parse(b.estimated_at) : NaN;
+    var t = followFirstTime(b);
     var cands = followCandidates(b, flights);
     if (!cands.length) return null;
     var picked = followPick(cands, t);
     if (!picked) return null;
     if (picked.tie) return { cands: picked.cands || picked.tie, tie: picked.tie, step: picked.step };
     if (!picked.at) return null;
-    if (round5(new Date(picked.from)).getTime() === round5(new Date(picked.at)).getTime()) return null;
     return followHit(picked);
   }
   function followExplain(fol, n) {
@@ -2611,5 +2621,6 @@
   P.followCandidates = followCandidates;
   P.followExplain = followExplain;
   P.applyFollows = applyFollows;
+  P.followFirstTime = followFirstTime;
   P.bookingWhen = bookingWhen;
 })();
