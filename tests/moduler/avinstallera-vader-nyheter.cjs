@@ -16,6 +16,7 @@ const undo = fs.readFileSync(path.join(root, 'supabase/migrations/undo/20261122b
 assert.doesNotMatch(core + cl + mig + undo, /\bStig\b/);
 assert.doesNotMatch(cl.split("id: '2026-11-22zmod1'")[1].split(']},')[0], /\b(Stig|hen)\b/);
 assert.match(cl, /id: '2026-11-22zmod1'/);
+assert.match(cl.split("id: '2026-11-22zmod1'")[1].split(']},')[0].split('rader:')[0], /tid: '19:01'/);
 assert.match(cl.split("id: '2026-11-22zmod1'")[1].split(']},')[0], /Väder och Nyheter/);
 assert.match(cl.split("id: '2026-11-22zmod1'")[1].split(']},')[0], /Moduler/);
 

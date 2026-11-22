@@ -15,7 +15,7 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-11-22', id: '2026-11-22zmod1', rader: [
+  { datum: '2026-11-22', id: '2026-11-22zmod1', tid: '19:01', rader: [
     ['Ändrat', 'Väder och Nyheter är inte längre förinstallerade. De tas bort från startskärmen på alla konton, men du kan lägga tillbaka dem när du vill under Moduler.']
   ]},
   { datum: '2026-11-22', id: '2026-11-22zprof1', tid: '18:55', rader: [
