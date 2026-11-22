@@ -49,7 +49,7 @@ const api = new Function(
   'var FOLLOW_BAGAGE_MS = 5 * 60000;\n' +
   p2Src + '\n' + hmSrc + '\n' + floorSrc + '\n' + shownSrc + '\n' + labSrc + '\n' +
   candSrc + '\n' + matchSrc + '\n' + explSrc + '\n' + lineSrc + '\n' + applySrc + '\n' + whenSrc + '\n' +
-  'return { followMatch: followMatch, followCandidates: followCandidates, followExplain: followExplain, followCandLine: followCandLine, applyFollows: applyFollows, bookingWhen: bookingWhen };'
+  'return { followMatch: followMatch, followCandidates: followCandidates, followExplain: followExplain, followCandLine: followCandLine, applyFollows: applyFollows, bookingWhen: bookingWhen, floor5: floor5 };'
 )();
 
 function t(iso) { return Date.parse(iso); }
@@ -114,6 +114,32 @@ const early = t('2026-11-22T18:15:00Z');
 const earlyHit = api.followMatch(book, [fl({ sched: sched, est: early })]);
 assert.ok(earlyHit && !earlyHit.cands, 'follows early arrival');
 assert.equal(earlyHit.at, early);
+assert.equal(earlyHit.offset, 0);
+assert.ok(earlyHit.at < earlyHit.from, 'moves earlier when the flight is early');
+assert.doesNotMatch(api.followExplain(earlyHit), /bagage/);
+
+// Tonight: DK1727 from Tenerife, planned 21:55, estimated 21:41, booking at 21:55 → shown 21:41 (~21:40 slot)
+const sched2155 = t('2026-11-22T20:55:00Z');
+const est2141 = t('2026-11-22T20:41:00Z');
+const book2155 = { id: 'dk', zone_id: '293', estimated_at: '2026-11-22T20:55:00.000Z' };
+const dk = api.followMatch(book2155, [fl({ no: 'DK1727', from: 'Tenerife', sched: sched2155, est: est2141 })]);
+assert.ok(dk && !dk.cands, 'early arrival of DK1727 moves the booking');
+assert.equal(dk.offset, 0);
+assert.equal(dk.at, est2141, 'same offset both directions: planned 21:55, now 21:41 → booking at 21:41');
+assert.equal(dk.from, sched2155);
+assert.equal(+api.floor5(new Date(dk.at)), t('2026-11-22T20:40:00Z'), 'grid slot ~21:40');
+assert.equal(api.bookingWhen(Object.assign({}, book2155, { _follow: dk })), est2141);
+const dkTxt = api.followExplain(dk);
+assert.match(dkTxt, /Bokningen följer DK1727 \(planerad 21:55, beräknad 21:41\) och visas kl 21:41\./);
+assert.doesNotMatch(dkTxt, /bagage/, 'bagage only when the booking is after planned landing');
+
+// Early flight, booking 10 min after planned (in the 0–20 after window): keep +10 offset, bagage applies
+const book2205 = { id: 'dk10', zone_id: '293', estimated_at: '2026-11-22T21:05:00.000Z' };
+const dk10 = api.followMatch(book2205, [fl({ no: 'DK1727', from: 'Tenerife', sched: sched2155, est: est2141 })]);
+assert.ok(dk10 && !dk10.cands);
+assert.equal(dk10.offset, 10 * 60000);
+assert.equal(dk10.at, t('2026-11-22T20:51:00Z'), '21:41 + 10 min → 21:51');
+assert.match(api.followExplain(dk10), /troligen på grund av bagage/);
 
 // On time (est = sched) → no move
 assert.equal(api.followMatch(book, [fl({ sched: sched, est: sched })]), null);
