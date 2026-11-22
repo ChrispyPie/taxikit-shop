@@ -140,7 +140,9 @@ async function testNotisEnhet() {
 function testSpotlight() {
   const src = fs.readFileSync(path.join(root, 'TaxiData/hb-stage.js'), 'utf8');
   assert.match(src, /position:fixed/, 'stage is a corner widget, not a flow card');
-  assert.match(src, /lit \? 'På' : 'Av'/);
+  assert.doesNotMatch(src, /hb-stage-toggle|lit \? 'På' : 'Av'/);
+  assert.match(src, /hb-stage-lamp-btn/);
+  assert.match(src, /beamOverlay/);
   assert.doesNotMatch(src, /Tänd strålkastare|Strålkastare: På|hb-stage-note|max-width:340px|title \+ '<\/span>'/);
   const ls = { _s: {}, getItem(k) { return Object.prototype.hasOwnProperty.call(this._s, k) ? this._s[k] : null; }, setItem(k, v) { this._s[k] = String(v); } };
   let ensured = [];

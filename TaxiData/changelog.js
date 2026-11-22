@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-22', id: '2026-11-22zhb1', tid: '22:12', rader: [
+    ['Fixat', 'Hjälpbotens strålkastare sitter i linje med lampan, och figuren står kvar på samma plats när du tänder eller släcker. Knappen På/Av är borta – tryck på lampan eller figuren i stället.']
+  ]},
   { datum: '2026-11-22', id: '2026-11-22zfly5', tid: '21:25', rader: [
     ['Fixat', 'När flera förbokningar på Landvetter följer samma flyg visas förklaringen bara en gång. Står det mer än en bokning används "Bokningarna följer".']
   ]},

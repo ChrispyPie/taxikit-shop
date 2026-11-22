@@ -1,9 +1,10 @@
 /* Hjälpbotens station och strålkastare i startskärmens hörn.
  * Inget kort: när strålkastaren är släckt visas bara en stilla, nedtonad bild
  * (robot i laddstation, chaufför i bil, eller diva vid sminkbord) utan att
- * hämta tunga hjalpbot*.js / berra.js. Knappen visar bara På eller Av.
- * Ett tryck på knappen eller figuren tänder ljuset, laddar hjälpboten och
- * visar den på samma plats (ingen dubblett). */
+ * hämta tunga hjalpbot*.js / berra.js. Ingen På/Av-knapp: tryck på lampan
+ * eller figuren för att tända och släcka (liten överraskning).
+ * Ett tryck tänder ljuset, laddar hjälpboten och visar den på samma plats
+ * (ingen dubblett, samma höjd som när ljuset är släckt). */
 (function () {
   'use strict';
   if (window.HB_STAGE) return;
@@ -38,20 +39,21 @@
   }
 
   function css() {
-    if (document.getElementById('hb-stage-css')) return;
-    var s = document.createElement('style');
-    s.id = 'hb-stage-css';
+    var s = document.getElementById('hb-stage-css');
+    if (!s) {
+      s = document.createElement('style');
+      s.id = 'hb-stage-css';
+    }
     s.textContent =
-      '.hb-stage{position:fixed;left:0;top:0;width:' + WID + 'px;z-index:44;pointer-events:none;overflow:visible;background:none;border:0;padding:0;margin:0;color:#e2e8f0}' +
+      '.hb-stage{position:fixed;left:0;top:0;width:' + WID + 'px;height:' + TOT_H + 'px;z-index:44;pointer-events:none;overflow:visible;background:none;border:0;padding:0;margin:0;color:#e2e8f0}' +
       '.hb-stage.hb-hidden{display:none}' +
-      '.hb-stage-light{position:relative;height:' + LAMP_H + 'px;display:flex;align-items:flex-end;justify-content:center;gap:4px;z-index:2}' +
-      '.hb-stage-lamp{display:block;flex:0 0 auto;width:28px;height:22px}' +
-      '.hb-stage-btn{pointer-events:auto;display:inline-flex;align-items:center;justify-content:center;min-width:32px;min-height:24px;padding:2px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.28);' +
-        'background:rgba(15,23,42,.78);color:#e2e8f0;font:700 .72rem/1 inherit;cursor:pointer}' +
-      '.hb-stage.lit .hb-stage-btn{background:#f5c518;color:#1a202c;border-color:#f5c518}' +
-      '.hb-stage-scene{pointer-events:auto;cursor:pointer;position:relative;height:' + SCENE_H + 'px}' +
+      '.hb-stage-beam{position:absolute;left:0;top:0;width:' + WID + 'px;height:' + TOT_H + 'px;pointer-events:none;z-index:1;display:block;overflow:visible}' +
+      '.hb-stage-light{position:relative;height:' + LAMP_H + 'px;width:100%;display:flex;align-items:flex-end;justify-content:center;z-index:2;' +
+        'pointer-events:auto;cursor:pointer;border:0;background:none;padding:0;margin:0;color:inherit}' +
+      '.hb-stage-lamp{display:block;flex:0 0 auto;width:28px;height:22px;pointer-events:none}' +
+      '.hb-stage-scene{pointer-events:auto;cursor:pointer;position:relative;height:' + SCENE_H + 'px;z-index:2}' +
       '.hb-stage-svg{width:100%;height:' + SCENE_H + 'px;display:block;overflow:visible}';
-    document.head.appendChild(s);
+    if (!s.parentNode) (document.head || document.documentElement).appendChild(s);
   }
 
   function lampSvg(lit) {
@@ -66,14 +68,8 @@
   }
 
   function sceneSvg(id, lit) {
-    var beam = lit
-      ? '<polygon points="50,0 70,0 118,64 2,64" fill="url(#hbBeam)" opacity="0.5"/>'
-      : '';
-    var defs = '<defs><linearGradient id="hbBeam" x1="0" y1="0" x2="0" y2="1">' +
-      '<stop offset="0%" stop-color="#fef08a" stop-opacity="0.7"/>' +
-      '<stop offset="100%" stop-color="#fef08a" stop-opacity="0.03"/></linearGradient></defs>';
     var dimOp = lit ? '1' : '0.42';
-    var floor = '<ellipse cx="60" cy="60" rx="48" ry="5" fill="' + (lit ? '#fef08a' : '#0b1019') + '" opacity="' + (lit ? '0.22' : '0.65') + '"/>';
+    var floor = lit ? '' : '<ellipse cx="60" cy="60" rx="48" ry="5" fill="#0b1019" opacity="0.65"/>';
     var art = '';
     if (id === 'chauffor') {
       var signFill = lit ? '#f5c518' : '#2d3748';
@@ -143,7 +139,7 @@
         '</g>';
       art = fig || ('<g>' + dock + '</g>');
     }
-    return '<svg class="hb-stage-svg" viewBox="0 0 120 64" aria-hidden="true">' + defs + beam + floor + art + '</svg>';
+    return '<svg class="hb-stage-svg" viewBox="0 0 120 64" aria-hidden="true">' + floor + art + '</svg>';
   }
 
   function wakeBot() {
@@ -177,7 +173,7 @@
     if (vis && vis.querySelectorAll) {
       vis.querySelectorAll('.icon, .td-folder, .td-slot-empty, .td-slot-plus').forEach(function (n) { add(n, 4); });
     }
-    document.querySelectorAll('.home-devices-h, .home-dev, .home-dev-ask, #animationer-vader-plats, #td-dots, #profile-menu').forEach(function (n) { add(n, 8); });
+    document.querySelectorAll('.home-devices-h, .home-dev, .home-dev-ask, #td-dots, #profile-menu').forEach(function (n) { add(n, 8); });
     var h = document.querySelector('#app header') || document.querySelector('header');
     if (h) {
       var r = h.getBoundingClientRect();
@@ -198,11 +194,7 @@
     if (!isHome() || charId() === 'off') return null;
     var vw = window.innerWidth, vh = window.innerHeight;
     var obs = obstacles();
-    var floor = vh - 6, wr, dots = document.getElementById('td-dots'), weather = document.getElementById('animationer-vader-plats');
-    if (weather && weather.getBoundingClientRect().height > 4) {
-      wr = weather.getBoundingClientRect();
-      if (wr.top > 0) floor = Math.min(floor, wr.top - 4);
-    }
+    var floor = vh - 6, wr, dots = document.getElementById('td-dots');
     var y = Math.round(floor - TOT_H);
     var right = Math.max(MARGIN, vw - WID - 12);
     var xs = [right, MARGIN];
@@ -243,15 +235,40 @@
     return { x: placed.x, y: placed.y + LAMP_H, w: WID, h: SCENE_H, at: 'hornet' };
   }
 
-  function standPoint(id) {
-    var r = room();
-    if (!r) return null;
-    var sx = r.w / 120, sy = r.h / 72, SIZE = 40;
-    var x = r.x + 8 * sx, y = r.y + r.h - SIZE - 2;
-    if (id === 'diva') { x = r.x + 6 * sx; y = r.y + 20 * sy; }
-    if (id === 'chauffor') { x = r.x + 4 * sx; y = r.y + 16 * sy; }
-    if (id === 'robot') { x = r.x + 28 * sx; y = r.y + r.h - SIZE - 2; }
+  // Ståplats i scenen, fötterna på golvet. Samma y oavsett tänd/släckt.
+  // x mittas under lampan (robot) eller vid figurens plats i den släckta bilden.
+  function standLocal(id) {
+    var sx = WID / 120, SIZE = 40;
+    var y = LAMP_H + SCENE_H - SIZE - 2;
+    var x;
+    if (id === 'diva') x = 80 * sx - SIZE / 2;
+    else if (id === 'chauffor') x = 36 * sx - SIZE / 2;
+    else x = 60 * sx - SIZE / 2;
+    if (x < 0) x = 0;
+    if (x + SIZE > WID) x = WID - SIZE;
     return { x: x, y: y };
+  }
+  function standPoint(id) {
+    if (!placed) return null;
+    var s = standLocal(id);
+    return { x: placed.x + s.x, y: placed.y + s.y };
+  }
+  // Konen utgår från lampans huvud och ljusfläcken ligger under figuren.
+  function beamOverlay(id) {
+    var s = standLocal(id || charId());
+    var cx = s.x + 20, cy = s.y + 34;
+    var hx = WID / 2, hy = 22;
+    var halfTop = 5, halfBot = 22;
+    return '<svg class="hb-stage-beam" viewBox="0 0 ' + WID + ' ' + TOT_H + '" aria-hidden="true">' +
+      '<defs><linearGradient id="hbBeam" x1="0" y1="0" x2="0" y2="1">' +
+        '<stop offset="0%" stop-color="#fef08a" stop-opacity="0.9"/>' +
+        '<stop offset="75%" stop-color="#fef08a" stop-opacity="0.18"/>' +
+        '<stop offset="100%" stop-color="#fef08a" stop-opacity="0.03"/>' +
+      '</linearGradient></defs>' +
+      '<polygon points="' + (hx - halfTop) + ',' + hy + ' ' + (hx + halfTop) + ',' + hy + ' ' +
+        (cx + halfBot) + ',' + cy + ' ' + (cx - halfBot) + ',' + cy + '" fill="url(#hbBeam)" opacity="0.62"/>' +
+      '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + halfBot + '" ry="6" fill="#fef08a" opacity="0.3"/>' +
+      '</svg>';
   }
 
   function ensureHost() {
@@ -268,9 +285,17 @@
     if (host) host.classList.add('hb-hidden');
   }
 
-  function place() {
+  function place(force) {
     if (!host) return null;
-    var next = findPlace();
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var next = null;
+    var sameView = placed && placed.vw === vw && placed.vh === vh;
+    if (!force && sameView && fits(placed.x, placed.y, obstacles())) {
+      next = { x: placed.x, y: placed.y, vw: vw, vh: vh };
+    } else {
+      next = findPlace();
+      if (next) { next.vw = vw; next.vh = vh; }
+    }
     placed = next;
     if (!next) { host.classList.add('hb-hidden'); return null; }
     host.classList.remove('hb-hidden');
@@ -278,25 +303,30 @@
     return next;
   }
 
+  function toggle() {
+    var next = !isLit();
+    setLitLocal(next);
+    paint();
+    if (next) wakeBot();
+    else if (window.HJALPBOT && window.HJALPBOT.tick) window.HJALPBOT.tick();
+  }
+  function onFigTap(e) {
+    if (e) e.stopPropagation();
+    if (isLit() && window.HJALPBOT && window.HJALPBOT.bubbleOn && window.HJALPBOT.bubbleOn()) {
+      if (window.HJALPBOT.poke) window.HJALPBOT.poke();
+      return;
+    }
+    toggle();
+  }
   function wire() {
     if (!host) return;
-    function toggle() {
-      var next = !isLit();
-      setLitLocal(next);
-      paint();
-      if (next) wakeBot();
-      else if (window.HJALPBOT && window.HJALPBOT.tick) window.HJALPBOT.tick();
-    }
-    var btn = document.getElementById('hb-stage-toggle');
+    var lamp = document.getElementById('hb-stage-lamp-btn');
     var scn = document.getElementById('hb-stage-scene');
-    if (btn) btn.onclick = function (e) { e.stopPropagation(); toggle(); };
+    if (lamp) lamp.onclick = function (e) { e.stopPropagation(); toggle(); };
     if (scn) {
-      scn.onclick = function () {
-        if (!isLit()) toggle();
-        else if (window.HJALPBOT && window.HJALPBOT.poke) window.HJALPBOT.poke();
-      };
+      scn.onclick = onFigTap;
       scn.onkeydown = function (e) {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onFigTap(e); }
       };
     }
   }
@@ -309,13 +339,11 @@
     var lit = isLit();
     host.className = 'hb-stage' + (lit ? ' lit' : '');
     host.innerHTML =
-      '<div class="hb-stage-light">' +
+      (lit ? beamOverlay(c) : '') +
+      '<button type="button" class="hb-stage-light" id="hb-stage-lamp-btn" aria-label="Strålkastare" aria-pressed="' + (lit ? 'true' : 'false') + '">' +
         lampSvg(lit) +
-        '<button type="button" class="hb-stage-btn" id="hb-stage-toggle" aria-pressed="' + (lit ? 'true' : 'false') + '">' +
-          (lit ? 'På' : 'Av') +
-        '</button>' +
-      '</div>' +
-      '<div class="hb-stage-scene" id="hb-stage-scene" role="button" tabindex="0">' +
+      '</button>' +
+      '<div class="hb-stage-scene" id="hb-stage-scene" role="button" tabindex="0" aria-label="Hjälpbot">' +
         sceneSvg(c, lit) +
       '</div>';
     wire();
@@ -328,8 +356,8 @@
   function bind() {
     if (bound || typeof window === 'undefined' || !window.addEventListener) return;
     bound = true;
-    window.addEventListener('resize', function () { place(); });
-    window.addEventListener('orientationchange', function () { setTimeout(place, 60); });
+    window.addEventListener('resize', function () { place(true); });
+    window.addEventListener('orientationchange', function () { setTimeout(function () { place(true); }, 60); });
   }
 
   function render() {
@@ -358,6 +386,8 @@
     room: room,
     standPoint: standPoint,
     isLit: isLit,
+    toggle: toggle,
+    onFigTap: onFigTap,
     setLit: function (on) {
       setLitLocal(!!on);
       if (host && isHome()) paint();

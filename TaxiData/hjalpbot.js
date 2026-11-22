@@ -1146,7 +1146,8 @@
   function standAtStation(room, id) {
     if (window.HB_STAGE && HB_STAGE.standPoint) {
       var stagedStand = HB_STAGE.standPoint(id);
-      if (stagedStand) return nearestWalkable(stagedStand.x, stagedStand.y, obstacleRects({ ignoreStation: true }));
+      // Exact stand under the lamp: do not nudge away, that jumped the bot up.
+      if (stagedStand) return stagedStand;
     }
     if (!room) return null;
     var sx = ST_W / 120, sy = ST_H / 72;
@@ -1411,6 +1412,8 @@
     el.btn.addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
+      if (bubbleOn()) { poke(); return; }
+      if (window.HB_STAGE && HB_STAGE.onFigTap) { HB_STAGE.onFigTap(e); return; }
       poke();
     });
     el.bubble.addEventListener('click', function (e) {
@@ -2010,7 +2013,7 @@
     renderSettings: function (content) {
       var c = charId();
       content.innerHTML = '<div class="section"><h3 style="margin-top:0">Hjälpbot</h3>' +
-        '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">En liten figur på startskärmen som kan kommentera dina siffror. Den visas bara där, inte inne i andra verktyg. När den inte pratar står den vid sin station i hörnet: roboten i en laddstation, Chauffören vid en liten taxi och Taxi-Diva vid sminkbordet. En liten strålkastare ovanför visar På eller Av. Ska den säga något går den fram till platsen efter sista ikonen och pratar där, och går sedan tillbaka. Stationen täcker inte ikoner eller sidprickarna. Ska den kolla till exempel vädret springer den snabbt in i ikonen och tillbaka, och berättar sedan. Ligger ikonen i en mapp, på en annan sida eller bara i applådan stannar den på sin vanliga plats och pratar där. Tryck på den så gör den en kort reaktion. Finns en pratbubbla stängs den vid tryck. Hjälp finns under frågetecknet uppe till höger.</p>' +
+        '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">En liten figur på startskärmen som kan kommentera dina siffror. Den visas bara där, inte inne i andra verktyg. När den inte pratar står den vid sin station i hörnet: roboten i en laddstation, Chauffören vid en liten taxi och Taxi-Diva vid sminkbordet. Tryck på lampan eller figuren för att tända och släcka strålkastaren. Ska den säga något går den fram till platsen efter sista ikonen och pratar där, och går sedan tillbaka. Stationen täcker inte ikoner eller sidprickarna. Ska den kolla till exempel vädret springer den snabbt in i ikonen och tillbaka, och berättar sedan. Ligger ikonen i en mapp, på en annan sida eller bara i applådan stannar den på sin vanliga plats och pratar där. Finns en pratbubbla stängs den vid första trycket; nästa tryck tänder eller släcker ljuset. Hjälp finns under frågetecknet uppe till höger.</p>' +
         '<div class="hb-pick">' + charButtons('hb-pickbtn') + '<button class="hb-pickbtn' + (c === 'off' ? ' on' : '') + '" data-hb-char="off"><div style="height:56px;display:flex;align-items:center;justify-content:center;font-size:1.6rem">🚫</div>Av</button></div>' +
         (c !== 'off' ? '<p style="margin:.55rem 0 0"><button type="button" class="anim-try" data-hb-try="vader">Prova väderkollen</button></p>' : '') + '</div>';
       content.onclick = function (e) {
@@ -2240,6 +2243,7 @@
     window.HJALPBOT._atHome = function () { return !!state.atHome; };
     window.HJALPBOT._reserveBottom = function () { return reserveBottom(); };
     window.HJALPBOT._trip = function () { return state.tripLog.slice(); };
+    window.HJALPBOT.bubbleOn = bubbleOn;
     window.HJALPBOT._bubbleAt = function () { return state.bubbleAt ? { l: state.bubbleAt.l, t: state.bubbleAt.t } : null; };
     window.HJALPBOT.visit = function (tool, text) {
       // samma resa som i vardagen (ingen förhandsvisning): bara på hemskärmen
