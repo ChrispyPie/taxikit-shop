@@ -728,11 +728,15 @@
   }
 
   // Landvetter (293): varna när flyg som landar runt bokningens tid är försenade (Ankomster-data).
-  // Om en förbokning stämmer med ett flygs planerade landning (inom 5 min, entydigt)
-  // visas den i stället vid flygets nya tid (försening eller tidigare ankomst).
+  // En förbokning kopplas till ett flyg om den ligger från 5 min före upp till 20 min efter
+  // planerad landning, och inget annat rimligt flyg finns i samma fönster. Då följer den
+  // flygets nya tid med samma förskjutning (bokning 20 min efter 19:25, flyg till 19:35 → 19:55).
+  // Flera tänkbara flyg: tiden flyttas inte, de listas i förklaringsrutan i stället.
   var FLIGHT_ZONE = '293';
   var FLIGHT_TXT = 'Flyg runt denna tid är försenade, tiden kan ändras';
-  var FOLLOW_MAX_MS = 5 * 60000;
+  var FOLLOW_BEFORE_MS = 5 * 60000;
+  var FOLLOW_AFTER_MS = 20 * 60000;
+  var FOLLOW_BAGAGE_MS = 5 * 60000;
 
   function followShown(f) {
     if (!f || f.canceled || f.removed) return 0;
@@ -742,34 +746,75 @@
     if (!n && t.getTime) n = +t.getTime();
     return n || 0;
   }
-  // Koppla en Landvetter-bokning till ett flyg vars planerade landning är samma klockslag
-  // (eller inom 5 min). Flera lika nära träffar → ingen koppling. Annars närmaste.
-  function followMatch(b, flights) {
-    if (!b || String(b.zone_id) !== FLIGHT_ZONE) return null;
+  function followNewLabel(f) {
+    if (!f) return '';
+    if (f.act) return 'landat';
+    if (f.est) return 'beräknad';
+    return '';
+  }
+  function followCandidates(b, flights) {
+    if (!b || String(b.zone_id) !== FLIGHT_ZONE) return [];
     var t = Date.parse(b.estimated_at);
-    if (!isFinite(t) || !flights || !flights.length) return null;
+    if (!isFinite(t) || !flights || !flights.length) return [];
     var cands = [];
     for (var i = 0; i < flights.length; i++) {
       var f = flights[i];
       if (!f || !f.sched || f.canceled || f.removed) continue;
+      var off = t - (+f.sched);
+      if (off < -FOLLOW_BEFORE_MS || off > FOLLOW_AFTER_MS) continue;
       var shown = followShown(f);
-      if (!shown) continue;
-      if (Math.abs(shown - (+f.sched)) < 60000) continue;
-      var diff = Math.abs(t - (+f.sched));
-      if (diff <= FOLLOW_MAX_MS) cands.push({ f: f, diff: diff, at: shown });
+      cands.push({ flight: f, offset: off, shown: shown, from: t, at: shown ? shown + off : 0 });
     }
+    cands.sort(function (a, b) { return Math.abs(a.offset) - Math.abs(b.offset); });
+    return cands;
+  }
+  // Unik träff med ny tid i annan 5-minutersrad → flytta. Flera träffar → { cands } (ingen flytt).
+  function followMatch(b, flights) {
+    var cands = followCandidates(b, flights);
     if (!cands.length) return null;
-    cands.sort(function (a, b) { return a.diff - b.diff; });
-    if (cands.length > 1 && cands[0].diff === cands[1].diff) return null;
+    if (cands.length > 1) return { cands: cands };
     var hit = cands[0];
-    if (floor5(new Date(t)).getTime() === floor5(new Date(hit.at)).getTime()) return null;
-    return { flight: hit.f, at: hit.at, from: t, later: hit.at > t };
+    if (!hit.at) return null;
+    if (floor5(new Date(hit.from)).getTime() === floor5(new Date(hit.at)).getTime()) return null;
+    return { flight: hit.flight, at: hit.at, from: hit.from, offset: hit.offset, shown: hit.shown, later: hit.at > hit.from };
+  }
+  function followExplain(fol) {
+    if (!fol || !fol.flight) return '';
+    var f = fol.flight;
+    var offMin = Math.round((fol.offset || 0) / 60000);
+    var no = f.no || 'flyg';
+    var sched = f.sched ? hm(new Date(f.sched)) : '';
+    var shown = fol.shown || followShown(f);
+    var shownLab = followNewLabel(f);
+    var shownTxt = shown && shownLab ? shownLab + ' ' + hm(new Date(shown)) : '';
+    var vis = isFinite(fol.at) ? hm(new Date(fol.at)) : '';
+    var mid = no + (sched || shownTxt ? ' (' + (sched ? 'planerad ' + sched : '') + (sched && shownTxt ? ', ' : '') + shownTxt + ')' : '');
+    var bagage = (fol.offset || 0) > FOLLOW_BAGAGE_MS;
+    var ligga;
+    if (offMin > 0) ligga = 'Bokningen ligger ' + offMin + ' min efter planerad landning' + (bagage ? ', troligen på grund av bagage,' : '') + ' för ' + mid;
+    else if (offMin < 0) ligga = 'Bokningen ligger ' + Math.abs(offMin) + ' min före planerad landning för ' + mid;
+    else ligga = 'Bokningen följer ' + mid;
+    if (vis) ligga += ' och visas kl ' + vis + '.';
+    else ligga += '.';
+    return ligga;
+  }
+  function followCandLine(c) {
+    var f = (c && c.flight) || {};
+    var shown = c && c.shown;
+    var lab = followNewLabel(f);
+    return (f.no || 'Flyg') + (f.from ? ' från ' + f.from : '') +
+      (f.sched ? ', planerad ' + hm(new Date(f.sched)) : '') +
+      (shown && lab ? ', ' + lab + ' ' + hm(new Date(shown)) : '');
   }
   function applyFollows(list, flights) {
     (list || []).forEach(function (b) {
+      if (!b) return;
+      if (b._follow) delete b._follow;
+      if (b._followCands) delete b._followCands;
       var m = followMatch(b, flights);
-      if (m) b._follow = m;
-      else if (b && b._follow) delete b._follow;
+      if (!m) return;
+      if (m.cands) b._followCands = m.cands;
+      else b._follow = m;
     });
     return list;
   }
@@ -797,7 +842,7 @@
 
   // Flygvarning för en bokning utifrån dess egen beräknade tid (null om den inte berörs)
   function bookingFlight(zoneId, b) {
-    if (b && b._follow) return null;
+    if (b && (b._follow || b._followCands)) return null;
     var t = Date.parse(b && b.estimated_at);
     return isFinite(t) ? flightInfo(zoneId, t) : null;
   }
@@ -1166,14 +1211,19 @@
       var rest = 0; groups.slice(8).forEach(function (g) { rest += g.n; });
       html += '<div class="pg-pop-meta">… +' + rest + ' till</div>';
     }
-    var follows = [];
-    (info.list || []).forEach(function (b) { if (b._follow && follows.indexOf(b) < 0) follows.push(b); });
+    var follows = [], maybe = [];
+    (info.list || []).forEach(function (b) {
+      if (b._follow && follows.indexOf(b) < 0) follows.push(b);
+      if (b._followCands && b._followCands.length && maybe.indexOf(b) < 0) maybe.push(b);
+    });
     if (follows.length) {
-      html += '<div class="pg-pop-follow-box">Bokningen följer flygets nya tid. ' +
-        follows.slice(0, 3).map(function (b) {
-          var fol = b._follow, f = fol.flight || {};
-          return esc((f.no || 'Flyg') + (f.from ? ' från ' + f.from : '') +
-            ' visas kl ' + hm(new Date(fol.at)) + ' (planerad ' + hm(new Date(fol.from)) + ')');
+      html += '<div class="pg-pop-follow-box">' +
+        follows.slice(0, 3).map(function (b) { return esc(followExplain(b._follow)); }).join('<br>') + '</div>';
+    }
+    if (maybe.length) {
+      html += '<div class="pg-pop-follow-box">Flera flyg kan passa bokningen, så tiden är inte flyttad.<br>' +
+        maybe.slice(0, 2).map(function (b) {
+          return b._followCands.slice(0, 4).map(function (c) { return esc(followCandLine(c)); }).join('<br>');
         }).join('<br>') + '</div>';
     }
     if (info.flight) {
@@ -2503,6 +2553,8 @@
   P.shouldLandAnim = shouldLandAnim;
   P.previewLanding = previewLanding;
   P.followMatch = followMatch;
+  P.followCandidates = followCandidates;
+  P.followExplain = followExplain;
   P.applyFollows = applyFollows;
   P.bookingWhen = bookingWhen;
 })();

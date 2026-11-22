@@ -16,7 +16,7 @@
  */
 window.CHANGELOG = [
   { datum: '2026-11-22', id: '2026-11-22zfly1', rader: [
-    ['Nytt', 'På Landvetter följer en förbokning flygets nya tid när klockslaget stämmer med den planerade landningen och bara ett flyg passar. I rutan syns den ursprungliga tiden, och i förklaringen vilket flyg den följer.']
+    ['Nytt', 'På Landvetter följer en förbokning flygets nya tid när den ligger från några minuter före upp till 20 min efter den planerade landningen, och bara ett flyg passar. Förskjutningen behålls (till exempel 20 min efter landning). I förklaringen står vilket flyg den följer. Om flera flyg kan passa flyttas tiden inte; då listas de i stället.']
   ]},
   { datum: '2026-11-22', id: '2026-11-22zdelad1', tid: '18:19', rader: [
     ['Fixat', 'På en delad enhet gick det inte att logga in om timkörningen varit tyst ett tag: inloggningen lyckades men appen gick genast tillbaka till inloggningsskärmen. En ny inloggning stängs inte längre av det.']
