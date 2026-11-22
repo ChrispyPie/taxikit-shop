@@ -696,10 +696,8 @@
   function countCell(sum) {
     if (!sum) return '';
     var tip = sum.tip + (sum.mixed ? ' · blandat → svagaste markering' : '');
-    var followMark = sum.follow ? '<span class="pg-fly-from" aria-hidden="true">' + esc(sum.followFrom || '') + '</span>' : '';
-    return '<span class="pg-n pg-c-' + sum.conf + (sum.mixed ? ' pg-mixed' : '') + (sum.flight ? ' pg-fly' : '') + (sum.follow ? ' pg-fly-follow' : '') + '"' +
-      (sum.follow ? ' title="Följer flyg, från ' + esc(sum.followFrom) + '"' : '') + '>' +
-      esc(sum.text) + followMark + '</span>';
+    return '<span class="pg-n pg-c-' + sum.conf + (sum.mixed ? ' pg-mixed' : '') + (sum.flight ? ' pg-fly' : '') + (sum.follow ? ' pg-fly-follow' : '') + '">' +
+      esc(sum.text) + '</span>';
   }
 
   // ---------- Prognos v2 (t833u): tillval, "Snart", flygvarning, tryck-och-håll-förklaring ----------
