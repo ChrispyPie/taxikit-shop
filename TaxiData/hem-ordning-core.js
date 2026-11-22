@@ -8,6 +8,7 @@
 
   var LS = 'taxi_home_order';
   var SEED = 'taxi_home_order_local';
+  var UNINST = 'taxi_mod_uninst_vader_nyheter';
   var CORE = { installningar: 1, om: 1, admin: 1, sadmin: 1 };
   var PINNED = { moduler: 1 };
   var DEFAULT_OFF = { nyheter: 1, vader: 1 };
@@ -47,6 +48,34 @@
   function seedKey() { return SEED + ':' + (driverId() || 'x'); }
   function isSeeded() { try { return localStorage.getItem(seedKey()) === '1'; } catch (e) { return false; } }
   function markSeeded() { try { localStorage.setItem(seedKey(), '1'); } catch (e) {} }
+  function uninstKey() { return UNINST + ':' + (driverId() || 'x'); }
+  function alreadySwept() { try { return localStorage.getItem(uninstKey()) === '1'; } catch (e) { return false; } }
+  // Engångsstädning: ta bort Väder och Nyheter från redan installerad layout (samma som Avinstallera i Moduler).
+  // Tidigare läge sparas i uninstKey()+':prev' så det går att lägga tillbaka dem för hand, eller vid ångring.
+  function sweepVaderNyheter() {
+    if (alreadySwept()) return;
+    var ids = ['vader', 'nyheter'], prev = {}, changed = false, i, id;
+    for (i = 0; i < ids.length; i++) {
+      id = ids[i];
+      prev[id] = {
+        inOrder: !!(st.order && st.order.indexOf(id) >= 0),
+        sida2: st.sida2.indexOf(id) >= 0,
+        hidden: st.hidden.indexOf(id) >= 0,
+        off: isOff(id)
+      };
+      if (optedIn(id)) changed = true;
+      if (isCore(id) || isPinned(id)) continue;
+      if (st.hidden.indexOf(id) < 0) st.hidden.push(id);
+      st.off = st.off.filter(function (x) { return x !== id; });
+      st.sida2 = st.sida2.filter(function (x) { return x !== id; });
+      if (st.order) st.order = st.order.filter(function (x) { return x !== id; });
+    }
+    try {
+      localStorage.setItem(uninstKey(), '1');
+      localStorage.setItem(uninstKey() + ':prev', JSON.stringify(prev));
+    } catch (e) {}
+    if (changed) writeLocal();
+  }
   function token() { try { return localStorage.getItem('taxi_session') || ''; } catch (e) { return ''; } }
   function optedIn(id) {
     return (Array.isArray(st.order) && st.order.indexOf(id) >= 0) ||
@@ -131,11 +160,12 @@
       applyClean(local);
       if (local.migrated) writeLocal();
       markSeeded();
+      sweepVaderNyheter();
       return;
     }
     st.order = null; st.hidden = []; st.sida2 = []; st.off = [];
     // Delad enhet: hämta aldrig gemensam serverlayout – varje förare får sin egen lokala layout på enheten.
-    if (isDelad() || isSeeded() || !token()) { markSeeded(); return; }
+    if (isDelad() || isSeeded() || !token()) { markSeeded(); sweepVaderNyheter(); return; }
     var apiUrl = (typeof TRIP_API_URL !== 'undefined' && TRIP_API_URL) || '';
     var apiKey = (typeof TRIP_API_KEY !== 'undefined' && TRIP_API_KEY) || '';
     if (!apiUrl || !apiKey || typeof fetch !== 'function') { markSeeded(); return; }
@@ -153,6 +183,7 @@
         return;
       }
       applyClean(mig);
+      sweepVaderNyheter();
       writeLocal();
       var onHome = !!(document.querySelector('#app.is-home .grid .icon') && !document.querySelector('.vd, .td-hjalp-panel.open'));
       if (onHome && !st.editing && typeof window.renderMenu === 'function') window.renderMenu();
