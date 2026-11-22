@@ -12,7 +12,10 @@ const html = fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8');
 
 assert.doesNotMatch(js, /\bStig\b/);
 assert.doesNotMatch(css, /\bStig\b/);
-assert.doesNotMatch(cl.split("id: '2026-11-22zfly4'")[1].split(']},')[0], /\b(Stig|hen)\b/);
+assert.doesNotMatch(cl.split("id: '2026-11-22zfly5'")[1].split(']},')[0], /\b(Stig|hen)\b/);
+assert.match(cl, /id: '2026-11-22zfly5'/);
+assert.match(cl.split("id: '2026-11-22zfly5'")[1].split(']},')[0].split('rader:')[0], /tid: '21:25'/);
+assert.match(cl.split("id: '2026-11-22zfly5'")[1].split(']},')[0], /Bokningarna följer/);
 assert.match(cl, /id: '2026-11-22zfly4'/);
 assert.match(cl.split("id: '2026-11-22zfly4'")[1].split(']},')[0].split('rader:')[0], /tid: '21:20'/);
 assert.match(cl.split("id: '2026-11-22zfly4'")[1].split(']},')[0], /närmaste fem minuter/);
@@ -21,13 +24,17 @@ assert.match(cl, /id: '2026-11-22zfly3'/);
 assert.match(cl.split("id: '2026-11-22zfly3'")[1].split(']},')[0].split('rader:')[0], /tid: '21:05'/);
 assert.match(cl, /id: '2026-11-22zfly1'/);
 assert.match(cl.split("id: '2026-11-22zfly1'")[1].split(']},')[0].split('rader:')[0], /tid: '20:56'/);
-assert.match(lv, /prognos\.js\?v=20261122zjul2/);
-assert.match(html, /style\.css\?v=20261122zjul2/);
+assert.match(lv, /prognos\.js\?v=20261122zfly5/);
+assert.match(html, /style\.css\?v=20261122zfly5/);
 assert.doesNotMatch(css, /pg-fly-from/);
 assert.doesNotMatch(js, /pg-fly-from/);
 assert.match(js, /pg-fly-follow/);
 assert.match(js, /\(från ' \+ hm\(new Date\(b\._follow\.from\)\)/);
 assert.match(css, /\.pg-pop-follow-box/);
+assert.match(js, /function followExplain\(fol, n\)/);
+assert.match(js, /who = \(n > 1\) \? 'Bokningarna' : 'Bokningen'/);
+assert.match(js, /folGroups/);
+assert.doesNotMatch(js, /follows\.slice\(0, 3\)\.map\(function \(b\) \{ return esc\(followExplain\(b\._follow\)\); \}/);
 assert.match(js, /function followMatch\(/);
 assert.match(js, /function round5\(/);
 assert.match(js, /FOLLOW_NEAR_MS = 2 \* 60000/);
@@ -84,6 +91,10 @@ assert.equal(hit.why, 'planned');
 assert.equal(hit.flight.no, 'EW8220');
 assert.equal(api.bookingWhen(Object.assign({}, book, { _follow: hit })), est10);
 assert.doesNotMatch(api.followExplain(hit), /bagage/);
+assert.match(api.followExplain(hit), /^Bokningen följer /);
+assert.match(api.followExplain(hit, 1), /^Bokningen följer /);
+assert.match(api.followExplain(hit, 4), /^Bokningarna följer EW8220 \(planerad 19:25, beräknad 19:35\) och visas kl 19:35\./);
+assert.doesNotMatch(api.followExplain(hit, 4), /Bokningen följer/);
 
 // Christian: booking 20 min after planned 19:25, flight now 19:35 → shown 19:55
 const book20 = { id: 'b20', zone_id: '293', estimated_at: '2026-11-22T18:45:00.000Z' };
@@ -94,6 +105,7 @@ assert.equal(late.at, t('2026-11-22T18:55:00Z'), 'keeps the 20 min offset');
 assert.equal(late.why, 'bagage');
 const txt20 = api.followExplain(late);
 assert.match(txt20, /Bokningen ligger 20 min efter planerad landning, troligen på grund av bagage, för EW8220 \(planerad 19:25, beräknad 19:35\) och visas kl 19:55\./);
+assert.match(api.followExplain(late, 3), /Bokningarna ligger 20 min efter planerad landning, troligen på grund av bagage, för EW8220 \(planerad 19:25, beräknad 19:35\) och visas kl 19:55\./);
 
 // Early arrival DK1727: planned 21:55, est 21:41, booking 21:55 → 21:41, slot 21:40, no bagage
 const sched2155 = t('2026-11-22T20:55:00Z');

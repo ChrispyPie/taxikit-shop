@@ -824,7 +824,7 @@
     if (round5(new Date(picked.from)).getTime() === round5(new Date(picked.at)).getTime()) return null;
     return followHit(picked);
   }
-  function followExplain(fol) {
+  function followExplain(fol, n) {
     if (!fol || !fol.flight) return '';
     var f = fol.flight;
     var offMin = Math.round((fol.offset || 0) / 60000);
@@ -836,10 +836,11 @@
     var vis = isFinite(fol.at) ? hm(new Date(fol.at)) : '';
     var mid = no + (sched || shownTxt ? ' (' + (sched ? 'planerad ' + sched : '') + (sched && shownTxt ? ', ' : '') + shownTxt + ')' : '');
     var bagage = fol.why === 'bagage';
+    var who = (n > 1) ? 'Bokningarna' : 'Bokningen';
     var ligga;
-    if (offMin > 0) ligga = 'Bokningen ligger ' + offMin + ' min efter planerad landning' + (bagage ? ', troligen på grund av bagage,' : '') + ' för ' + mid;
-    else if (offMin < 0) ligga = 'Bokningen ligger ' + Math.abs(offMin) + ' min före planerad landning för ' + mid;
-    else ligga = 'Bokningen följer ' + mid;
+    if (offMin > 0) ligga = who + ' ligger ' + offMin + ' min efter planerad landning' + (bagage ? ', troligen på grund av bagage,' : '') + ' för ' + mid;
+    else if (offMin < 0) ligga = who + ' ligger ' + Math.abs(offMin) + ' min före planerad landning för ' + mid;
+    else ligga = who + ' följer ' + mid;
     if (vis) ligga += ' och visas kl ' + vis + '.';
     else ligga += '.';
     return ligga;
@@ -1263,8 +1264,16 @@
       if (b._followCands && b._followCands.length && maybe.indexOf(b) < 0) maybe.push(b);
     });
     if (follows.length) {
+      var folGroups = [], folSeen = {};
+      follows.forEach(function (b) {
+        var fol = b._follow, f = fol && fol.flight;
+        var key = [(f && f.no) || '', fol.at || 0, fol.from || 0, fol.why || ''].join('|');
+        if (folSeen[key]) { folSeen[key].n++; return; }
+        folSeen[key] = { fol: fol, n: 1 };
+        folGroups.push(folSeen[key]);
+      });
       html += '<div class="pg-pop-follow-box">' +
-        follows.slice(0, 3).map(function (b) { return esc(followExplain(b._follow)); }).join('<br>') + '</div>';
+        folGroups.slice(0, 3).map(function (g) { return esc(followExplain(g.fol, g.n)); }).join('<br>') + '</div>';
     }
     if (maybe.length) {
       html += '<div class="pg-pop-follow-box">Flera plan är möjliga, så tiden är inte flyttad.<br>' +
