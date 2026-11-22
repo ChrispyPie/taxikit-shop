@@ -355,6 +355,9 @@
     if (!onHome) st.editing = false;
     if (editor && editor.sync) editor.sync(!!onHome);
     if (window.HEM_SIDOR && HEM_SIDOR.sync) HEM_SIDOR.sync(!!onHome);
+    if (onHome && window.LAZY && typeof LAZY.ensure === 'function') {
+      LAZY.ensure('berra').catch(function () {});
+    }
   }
 
   window.__HO = {

@@ -538,6 +538,7 @@
 
   window.HEM_SIDOR = {
     sync: sync,
+    headerTop: headerTop,
     reset: reset,
     go: go,
     goRel: goRel,
