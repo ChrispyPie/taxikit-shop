@@ -1,12 +1,36 @@
-/* Adventsljusstake på startskärmen (julpyssel, bara utvalda konton). Liten, nere till vänster, under menyer. */
-#jul-ljusstake {
-  position: fixed;
-  left: calc(8px + env(safe-area-inset-left, 0px));
-  bottom: calc(8px + env(safe-area-inset-bottom, 0px));
-  z-index: 28;
+/* Adventsljusstake: smal rad direkt under den vanliga headern på startskärmen (julpyssel, bara utvalda konton). */
+#jul-ljus-rad {
   display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0 1px;
   margin: 0;
-  padding: 4px 6px 2px;
+  min-height: 0;
+  min-width: 0;
+  line-height: 0;
+  pointer-events: none;
+}
+#app.is-home header:has(#jul-ljus-rad.jul-on) {
+  grid-template-areas:
+    "left title right"
+    "jul jul jul";
+}
+#app.is-home header:has(#jul-ljus-rad.jul-on) .hdr-left { grid-area: left; }
+#app.is-home header:has(#jul-ljus-rad.jul-on) #title { grid-area: title; }
+#app.is-home header:has(#jul-ljus-rad.jul-on) .hdr-right { grid-area: right; }
+#app.is-home header:has(#jul-ljus-rad.jul-on) #jul-ljus-rad { grid-area: jul; }
+#app.is-home #jul-ljus-rad.jul-on { display: flex; }
+#jul-ljusstake {
+  position: relative;
+  left: auto;
+  bottom: auto;
+  z-index: auto;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0 2px;
   border: 0;
   background: transparent;
   cursor: pointer;
@@ -14,8 +38,8 @@
   -webkit-tap-highlight-color: transparent;
   pointer-events: auto;
 }
-#app.is-home #jul-ljusstake.jul-on { display: block; }
-#jul-ljusstake svg { display: block; width: 72px; height: 52px; overflow: visible; }
+#jul-ljusstake[hidden] { display: none; }
+#jul-ljusstake svg { display: block; width: 56px; height: 40px; overflow: visible; }
 #jul-ljusstake .jul-flame {
   transform-origin: 50% 85%;
   transform-box: fill-box;
@@ -34,7 +58,7 @@
 }
 #jul-ljusstake .jul-hint {
   display: none;
-  margin-top: 2px;
+  margin: 0;
   font-size: 10px;
   line-height: 1.2;
   color: var(--text-soft, #718096);
@@ -42,4 +66,4 @@
   letter-spacing: .01em;
   white-space: nowrap;
 }
-#jul-ljusstake.jul-preview .jul-hint { display: block; }
+#jul-ljusstake.jul-preview .jul-hint { display: inline; }

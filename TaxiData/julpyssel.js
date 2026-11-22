@@ -108,12 +108,26 @@
     return base;
   }
 
+  function headerEl() {
+    return document.querySelector('#app > header') || document.querySelector('#app header') || document.querySelector('header');
+  }
+  function syncSidaTop() {
+    var hs = window.HEM_SIDOR;
+    if (hs && typeof hs.headerTop === 'function') hs.headerTop();
+  }
+
   function paint() {
     var el = document.getElementById('jul-ljusstake');
+    var rad = document.getElementById('jul-ljus-rad');
     if (!el) return;
     if (!allowed() || !onHome()) {
       el.classList.remove('jul-on', 'jul-preview');
       el.hidden = true;
+      if (rad) {
+        rad.classList.remove('jul-on', 'jul-preview');
+        rad.hidden = true;
+      }
+      syncSidaTop();
       return;
     }
     var lit = litCount();
@@ -122,10 +136,16 @@
     el.classList.toggle('jul-preview', preview);
     el.classList.add('jul-on');
     el.hidden = false;
+    if (rad) {
+      rad.classList.toggle('jul-preview', preview);
+      rad.classList.add('jul-on');
+      rad.hidden = false;
+    }
     el.setAttribute('aria-label', labelOf(lit, preview));
     el.title = preview
       ? ('Förhandsvisning: ' + (LABELS[lit] || '') + ' – tryck för att byta')
       : 'Adventsljusstake';
+    syncSidaTop();
   }
 
   function cyclePreview() {
@@ -139,13 +159,32 @@
   }
 
   function ensure() {
-    if (document.getElementById('jul-ljusstake')) return;
-    var btn = document.createElement('button');
-    btn.id = 'jul-ljusstake';
-    btn.type = 'button';
-    btn.hidden = true;
-    btn.addEventListener('click', cyclePreview);
-    (document.body || document.documentElement).appendChild(btn);
+    var rad = document.getElementById('jul-ljus-rad');
+    var btn = document.getElementById('jul-ljusstake');
+    if (!allowed()) {
+      if (rad && rad.parentNode) rad.parentNode.removeChild(rad);
+      else if (btn && btn.parentNode) btn.parentNode.removeChild(btn);
+      return null;
+    }
+    if (!rad) {
+      rad = document.createElement('div');
+      rad.id = 'jul-ljus-rad';
+    }
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.id = 'jul-ljusstake';
+      btn.type = 'button';
+      btn.hidden = true;
+      btn.addEventListener('click', cyclePreview);
+    }
+    if (btn.parentNode !== rad) rad.appendChild(btn);
+    var hdr = headerEl();
+    if (hdr) {
+      if (rad.parentNode !== hdr) hdr.appendChild(rad);
+    } else if (!rad.parentNode) {
+      (document.body || document.documentElement).appendChild(rad);
+    }
+    return btn;
   }
 
   var obs = null;
