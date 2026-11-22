@@ -1,5 +1,5 @@
 'use strict';
-// Landvetter-bokning följer flyget: planerad, annars beräknad, annars närmast före; närmaste 5 min.
+// Landvetter-bokning följer planet vid första visade tid (serverhistorik) och läggs på beräknad ankomst, utan extra förskjutning.
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
@@ -13,6 +13,14 @@ const html = fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8');
 assert.doesNotMatch(js, /\bStig\b/);
 assert.doesNotMatch(css, /\bStig\b/);
 assert.doesNotMatch(cl.split("id: '2026-11-22zfly5'")[1].split(']},')[0], /\b(Stig|hen)\b/);
+assert.match(cl, /id: '2026-11-22zfly6'/);
+assert.match(cl.split("id: '2026-11-22zfly6'")[1].split(']},')[0], /först visades/);
+assert.match(cl.split("id: '2026-11-22zfly6'")[1].split(']},')[0].split('rader:')[0], /tid: '/);
+assert.doesNotMatch(cl.split("id: '2026-11-22zfly6'")[1].split(']},')[0], /\b(Stig|hen)\b/);
+assert.match(js, /function followFirstTime\(/);
+assert.match(js, /b\.first_estimated_at/);
+assert.doesNotMatch(js, /taxi_pg_follow_lock|taxi_pg_follow_first/);
+assert.doesNotMatch(js, /FOLLOW_LOCK_KEY/);
 assert.match(cl, /id: '2026-11-22zfly5'/);
 assert.match(cl.split("id: '2026-11-22zfly5'")[1].split(']},')[0].split('rader:')[0], /tid: '21:25'/);
 assert.match(cl.split("id: '2026-11-22zfly5'")[1].split(']},')[0], /Bokningarna följer/);
@@ -24,8 +32,16 @@ assert.match(cl, /id: '2026-11-22zfly3'/);
 assert.match(cl.split("id: '2026-11-22zfly3'")[1].split(']},')[0].split('rader:')[0], /tid: '21:05'/);
 assert.match(cl, /id: '2026-11-22zfly1'/);
 assert.match(cl.split("id: '2026-11-22zfly1'")[1].split(']},')[0].split('rader:')[0], /tid: '20:56'/);
-assert.match(lv, /prognos\.js\?v=20261122zjul5/);
-assert.match(html, /style\.css\?v=20261122zjul5/);
+assert.match(lv, /prognos\.js\?v=20261122zfly6/);
+assert.match(html, /style\.css\?v=20261122zfly6/);
+
+const mig = fs.readFileSync(path.join(root, 'supabase/migrations/20261122c_prognos_list_first_estimated.sql'), 'utf8');
+const undo = fs.readFileSync(path.join(root, 'supabase/migrations/undo/20261122c_prognos_list_first_estimated_undo.sql'), 'utf8');
+assert.match(mig, /first_estimated_at/);
+assert.match(mig, /prognos_booking_history/);
+assert.match(undo, /20261103a/);
+assert.doesNotMatch(undo.split('create or replace')[1], /first_estimated_at/);
+
 assert.doesNotMatch(css, /pg-fly-from/);
 assert.doesNotMatch(js, /pg-fly-from/);
 assert.match(js, /pg-fly-follow/);
@@ -63,7 +79,7 @@ const api = new Function(
   'var FOLLOW_NEAR_MS = 2 * 60000;\n' +
   'var FOLLOW_AFTER_MS = 20 * 60000;\n' +
   p2Src + '\n' + hmSrc + '\n' + roundBlock + '\n' + followBlock + '\n' +
-  'return { followMatch: followMatch, followCandidates: followCandidates, followExplain: followExplain, followCandLine: followCandLine, applyFollows: applyFollows, bookingWhen: bookingWhen, floor5: floor5, round5: round5, nearTime: nearTime, followPick: followPick };'
+  'return { followMatch: followMatch, followCandidates: followCandidates, followExplain: followExplain, followCandLine: followCandLine, applyFollows: applyFollows, followFirstTime: followFirstTime, followPlace: followPlace, bookingWhen: bookingWhen, floor5: floor5, round5: round5, nearTime: nearTime, followPick: followPick };'
 )();
 
 function t(iso) { return Date.parse(iso); }
@@ -96,16 +112,16 @@ assert.match(api.followExplain(hit, 1), /^Bokningen följer /);
 assert.match(api.followExplain(hit, 4), /^Bokningarna följer EW8220 \(planerad 19:25, beräknad 19:35\) och visas kl 19:35\./);
 assert.doesNotMatch(api.followExplain(hit, 4), /Bokningen följer/);
 
-// Christian: booking 20 min after planned 19:25, flight now 19:35 → shown 19:55
+// Christian: booking 20 min after planned 19:25, flight now 19:35 → same row as flight (19:35), no extra offset
 const book20 = { id: 'b20', zone_id: '293', estimated_at: '2026-11-22T18:45:00.000Z' };
 const late = api.followMatch(book20, [fl({ sched: sched, est: est10 })]);
 assert.ok(late && !late.cands, 'matches booking 20 min after scheduled landing');
 assert.equal(late.offset, 20 * 60000);
-assert.equal(late.at, t('2026-11-22T18:55:00Z'), 'keeps the 20 min offset');
+assert.equal(late.at, est10, 'visas på planets beräknade tid, utan extra förskjutning');
 assert.equal(late.why, 'bagage');
 const txt20 = api.followExplain(late);
-assert.match(txt20, /Bokningen ligger 20 min efter planerad landning, troligen på grund av bagage, för EW8220 \(planerad 19:25, beräknad 19:35\) och visas kl 19:55\./);
-assert.match(api.followExplain(late, 3), /Bokningarna ligger 20 min efter planerad landning, troligen på grund av bagage, för EW8220 \(planerad 19:25, beräknad 19:35\) och visas kl 19:55\./);
+assert.match(txt20, /Bokningen ligger 20 min efter planerad landning, troligen på grund av bagage, för EW8220 \(planerad 19:25, beräknad 19:35\) och visas kl 19:35\./);
+assert.match(api.followExplain(late, 3), /Bokningarna ligger 20 min efter planerad landning, troligen på grund av bagage, för EW8220 \(planerad 19:25, beräknad 19:35\) och visas kl 19:35\./);
 
 // Early arrival DK1727: planned 21:55, est 21:41, booking 21:55 → 21:41, slot 21:40, no bagage
 const sched2155 = t('2026-11-22T20:55:00Z');
@@ -126,15 +142,23 @@ const book2205 = { id: 'dk10', zone_id: '293', estimated_at: '2026-11-22T21:05:0
 const dk10 = api.followMatch(book2205, [fl({ no: 'DK1727', from: 'Tenerife', sched: sched2155, est: est2141 })]);
 assert.ok(dk10 && !dk10.cands);
 assert.equal(dk10.offset, 10 * 60000);
-assert.equal(dk10.at, t('2026-11-22T20:51:00Z'), '21:41 + 10 min → 21:51');
+assert.equal(dk10.at, est2141, 'ingen extra förskjutning: samma rad som DK1727');
 assert.equal(dk10.why, 'bagage');
 assert.match(api.followExplain(dk10), /troligen på grund av bagage/);
+assert.match(api.followExplain(dk10), /visas kl 21:41/);
 
-// On time (est = sched) → no move
-assert.equal(api.followMatch(book, [fl({ sched: sched, est: sched })]), null);
+// On time (est = sched): still follows, same row as the flight
+const onTime = api.followMatch(book, [fl({ sched: sched, est: sched })]);
+assert.ok(onTime && !onTime.cands);
+assert.equal(onTime.at, sched);
+assert.equal(onTime.why, 'planned');
+assert.equal(+api.round5(new Date(onTime.at)), +api.round5(new Date(sched)));
 
-// 2 min delay still same rounded slot (19:27 → 19:25) → no visual move
-assert.equal(api.followMatch(book, [fl({ sched: sched, est: t('2026-11-22T18:27:00Z') })]), null);
+// 2 min delay still same rounded slot (19:27 → 19:25): follows, same row
+const tiny = api.followMatch(book, [fl({ sched: sched, est: t('2026-11-22T18:27:00Z') })]);
+assert.ok(tiny && !tiny.cands);
+assert.equal(tiny.at, t('2026-11-22T18:27:00Z'));
+assert.equal(+api.round5(new Date(tiny.at)), t('2026-11-22T18:25:00Z'));
 
 // 3 min delay rounds to next slot (19:28 → 19:30) → move
 const slight = api.followMatch(book, [fl({ sched: sched, est: t('2026-11-22T18:28:00Z') })]);
@@ -160,16 +184,16 @@ const tie = api.followMatch(book, [
 ]);
 assert.ok(tie && tie.cands && tie.cands.length === 2 && !tie.flight, 'same planned time is a true tie');
 
-// Rule 2: no planned match, estimated time equals booking
+// Ingen planerad träff: närmast före inom 20 min (bagage), visas på planets beräknade tid
 const book1935 = { id: 'be', zone_id: '293', estimated_at: '2026-11-22T18:35:00.000Z' };
-const byEst = api.followMatch(book1935, [
+const byBefore = api.followMatch(book1935, [
   fl({ no: 'EW8220', sched: sched, est: t('2026-11-22T18:35:00Z') }),
   fl({ no: 'BA1', from: 'London LHR', sched: t('2026-11-22T18:20:00Z'), est: t('2026-11-22T18:22:00Z') })
 ]);
-assert.ok(byEst && !byEst.cands);
-assert.equal(byEst.flight.no, 'EW8220');
-assert.equal(byEst.why, 'estimated');
-assert.equal(byEst.at, t('2026-11-22T18:45:00Z'), 'keeps 10 min offset on estimated match');
+assert.ok(byBefore && !byBefore.cands);
+assert.equal(byBefore.flight.no, 'EW8220');
+assert.equal(byBefore.why, 'bagage');
+assert.equal(byBefore.at, t('2026-11-22T18:35:00Z'), 'samma rad som flyget, utan extra förskjutning');
 
 // Tonight 22:20: LO495 planned 22:20 est 22:14 wins over FR964 London 22:05/22:13 and KL1239 22:25/22:30
 const sched2220 = t('2026-11-22T21:20:00Z');
@@ -191,7 +215,7 @@ const onlyBefore = api.followMatch(book2220, [fr964, kl1239]);
 assert.ok(onlyBefore && !onlyBefore.cands);
 assert.equal(onlyBefore.flight.no, 'FR964');
 assert.equal(onlyBefore.why, 'bagage');
-assert.equal(onlyBefore.at, t('2026-11-22T21:28:00Z'), '22:13 + 15 min → 22:28');
+assert.equal(onlyBefore.at, t('2026-11-22T21:13:00Z'), 'samma rad som FR964 (22:13), utan +15');
 assert.match(api.followExplain(onlyBefore), /troligen på grund av bagage/);
 
 // True tie at bagage step: two flights with the same planned time before the booking
@@ -211,12 +235,13 @@ assert.equal(api.followMatch(book, [fl({ sched: sched, est: est10, removed: true
 // No estimated/actual time
 assert.equal(api.followMatch(book, [fl({ sched: sched })]), null);
 
-// Landing already happened (act) still moves to that time + offset
+// Landat: ikonen ligger på beräknad tid, bokningen samma rad (est före act)
 const act = t('2026-11-22T18:36:00Z');
 const landed = api.followMatch(book, [fl({ sched: sched, est: est10, act: act })]);
 assert.ok(landed && !landed.cands);
-assert.equal(landed.at, act, 'actual landing wins over estimate');
+assert.equal(landed.at, est10, 'samma rad som flygikonen (beräknad tid)');
 assert.match(api.followExplain(landed), /landat 19:36/);
+assert.match(api.followExplain(landed), /visas kl 19:35/);
 
 // applyFollows: planned match wins among several, other zone skipped, bagage unique, tie listed
 const list = [
@@ -238,7 +263,7 @@ assert.equal(list[3]._followCands, undefined);
 const onlyLate = [Object.assign({}, book20)];
 api.applyFollows(onlyLate, [fl({ sched: sched, est: est10 })]);
 assert.ok(onlyLate[0]._follow);
-assert.equal(onlyLate[0]._follow.at, t('2026-11-22T18:55:00Z'));
+assert.equal(onlyLate[0]._follow.at, est10);
 assert.equal(onlyLate[0]._follow.why, 'bagage');
 assert.equal(onlyLate[0]._followCands, undefined);
 
@@ -258,5 +283,43 @@ assert.ok(tied[0]._followCands && tied[0]._followCands.length === 2);
 api.applyFollows(tied, []);
 assert.equal(tied[0]._follow, undefined);
 assert.equal(tied[0]._followCands, undefined);
+
+
+// LO495: bokningar som först visades 22:20 läggs på beräknad 22:14 (rad 22:15), samma rad som flyget.
+const loGroup = [1, 2, 3, 4].map((n) => ({
+  id: 'lo-g' + n, zone_id: '293', estimated_at: '2026-11-22T21:20:00.000Z',
+  first_estimated_at: '2026-11-22T21:20:00.000Z'
+}));
+api.applyFollows(loGroup, [fr964, lo495, kl1239]);
+loGroup.forEach((b) => {
+  assert.equal(b._follow.flight.no, 'LO495');
+  assert.equal(b._follow.at, est2214);
+  assert.equal(+api.round5(new Date(b._follow.at)), t('2026-11-22T21:15:00Z'));
+  assert.equal(b._follow.why, 'planned');
+});
+
+// 4013: första visade tid 21:55 från servern, nuvarande tid 22:10 (40-min-resnap) → kvar på DK1727, rad 21:40.
+const dk1727b = fl({ no: 'DK1727', from: 'Teneriffa', sched: t('2026-11-22T20:55:00Z'), est: t('2026-11-22T20:41:00Z'), act: t('2026-11-22T20:38:00Z') });
+const fr964b = fl({ no: 'FR964', from: 'London STN', sched: t('2026-11-22T21:05:00Z'), est: t('2026-11-22T21:13:00Z') });
+const lo495b = fl({ no: 'LO495', from: 'Warszawa', sched: t('2026-11-22T21:20:00Z'), est: t('2026-11-22T21:14:00Z') });
+const b4013 = {
+  id: 4013, zone_id: '293', category: 'ovrigt', confidence: 'saker',
+  estimated_at: '2026-11-22T21:10:00.000Z',
+  first_estimated_at: '2026-11-22T20:55:00.000Z'
+};
+assert.equal(api.followFirstTime(b4013), t('2026-11-22T20:55:00Z'));
+api.applyFollows([b4013], [dk1727b, fr964b, lo495b]);
+assert.equal(b4013._follow.flight.no, 'DK1727', '4013 stannar på DK1727 efter 22:10-resnap');
+assert.equal(+b4013._follow.from, t('2026-11-22T20:55:00Z'));
+assert.equal(+b4013._follow.at, t('2026-11-22T20:41:00Z'), 'samma rad som DK1727:s beräknade tid');
+assert.equal(+api.round5(new Date(b4013._follow.at)), t('2026-11-22T20:40:00Z'));
+assert.equal(+api.bookingWhen(b4013), t('2026-11-22T20:41:00Z'));
+
+// Utan historik: bara nuvarande 22:10 → FR964 (närmast före), visas kl 22:13
+const loose4013 = { id: 4013, zone_id: '293', confidence: 'saker', estimated_at: '2026-11-22T21:10:00.000Z' };
+assert.equal(api.followFirstTime(loose4013), t('2026-11-22T21:10:00.000Z'));
+api.applyFollows([loose4013], [dk1727b, fr964b, lo495b]);
+assert.equal(loose4013._follow.flight.no, 'FR964', 'utan first_estimated_at följs 22:10 till FR964');
+assert.equal(+loose4013._follow.at, t('2026-11-22T21:13:00Z'));
 
 console.log('FOLJ_FLYG_UNIT_OK');

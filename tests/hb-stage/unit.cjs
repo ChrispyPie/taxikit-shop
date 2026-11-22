@@ -13,10 +13,10 @@ const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
 const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
 const hem = fs.readFileSync(path.join(root, 'TaxiData/hem-ordning-core.js'), 'utf8');
 
-assert.match(sw, /CACHE_VER = '20261122zjul5'/);
-assert.match(html, /hb-stage\.js\?v=20261122zjul5/);
-assert.match(lv, /hjalpbot\.js\?v=20261122zjul5/);
-assert.match(lv, /"berra":\s*\["berra\.js\?v=20261122zjul5"\]/);
+assert.match(sw, /CACHE_VER = '20261122zfly6'/);
+assert.match(html, /hb-stage\.js\?v=20261122zfly6/);
+assert.match(lv, /hjalpbot\.js\?v=20261122zfly6/);
+assert.match(lv, /"berra":\s*\["berra\.js\?v=20261122zfly6"\]/);
 assert.match(hem, /LAZY\.ensure\('berra'\)/);
 assert.match(cl, /id: '2026-11-22zhb1'/);
 assert.match(cl.split("id: '2026-11-22zhb1'")[1].split(']},')[0], /strålkastare|lampan/);
