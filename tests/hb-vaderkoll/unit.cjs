@@ -50,7 +50,7 @@ assert.match(src, /Ligger ikonen i en mapp, på en annan sida eller bara i appl�
 assert.match(lazy, /hjalpbot\.js\?v=20261122zdelad1/);
 assert.match(lazy, /hjalpbot-scenarier\.js\?v=20261122zdelad1/);
 assert.match(index, /lazy-views\.js\?v=20261122zdelad1/);
-assert.match(lazy, /changelog\.js\?v=20261122zdelad1/);
+assert.match(lazy, /changelog\.js\?v=20261122zhide1/);
 assert.match(changelog, /id: '2026-11-14vkoll1'/);
 assert.match(changelog.split("id: '2026-11-14vkoll1'")[1].split('rader:')[0], /tid: '21:03'/);
 assert.ok(changelog.indexOf("'2026-11-14vkoll1'") < changelog.indexOf("'2026-11-14bil1'"), 'nyheten överst');

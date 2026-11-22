@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-22', id: '2026-11-22zhide1', tid: '18:30', rader: [
+    ['Ändrat', 'När du döljer privata moduler på en delad enhet är automatisk utloggning av (rutan är då grå). Den går tillbaka till ditt val när du visar modulerna igen, så du inte loggas ut bara för att servern är tyst.']
+  ]},
   { datum: '2026-11-22', id: '2026-11-22zdelad1', tid: '18:19', rader: [
     ['Fixat', 'På en delad enhet gick det inte att logga in om timkörningen varit tyst ett tag: inloggningen lyckades men appen gick genast tillbaka till inloggningsskärmen. En ny inloggning stängs inte längre av det.']
   ]},
