@@ -67,3 +67,51 @@
   white-space: nowrap;
 }
 #jul-ljusstake.jul-preview .jul-hint { display: inline; }
+
+/* Julgransbelysning: smala ljusslingor i vänster och höger marginal på hemskärmen. */
+#jul-slingor {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 8;
+  pointer-events: none;
+  overflow: hidden;
+}
+#jul-slingor.jul-on { display: block; }
+#jul-slingor .jul-slinga {
+  position: absolute;
+  width: 12px;
+  overflow: visible;
+  pointer-events: none;
+}
+#jul-slingor .jul-slinga-v { left: max(2px, env(safe-area-inset-left, 0px)); }
+#jul-slingor .jul-slinga-h { right: max(2px, env(safe-area-inset-right, 0px)); left: auto; }
+#jul-slingor .jul-trad {
+  fill: none;
+  stroke: #c6a36a;
+  stroke-width: 0.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.7;
+}
+#jul-slingor .jul-lampa {
+  transform-origin: center;
+  transform-box: fill-box;
+  filter: drop-shadow(0 0 1.8px rgba(255, 220, 120, 0.9));
+}
+@media (prefers-reduced-motion: no-preference) {
+  #jul-slingor .jul-lampa {
+    animation: jul-twinkle 2.6s ease-in-out infinite;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #jul-slingor .jul-lampa { animation: none; }
+}
+@keyframes jul-twinkle {
+  0%, 100% { opacity: 0.72; filter: brightness(0.95) drop-shadow(0 0 1.4px rgba(255, 220, 120, 0.7)); }
+  45% { opacity: 1; filter: brightness(1.35) drop-shadow(0 0 2.4px rgba(255, 236, 160, 1)); }
+  55% { opacity: 1; filter: brightness(1.4) drop-shadow(0 0 2.6px rgba(255, 236, 160, 1)); }
+}
