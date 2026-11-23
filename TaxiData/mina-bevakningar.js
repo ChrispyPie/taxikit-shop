@@ -48,7 +48,8 @@
     var kind = kindOf(w, it), key = it ? it.key : kindPrefix(kind) + w.ident + '|' + w.sched;
     var info = [], flag = 'ontime';
     if ((it && it.canceled) || s.canceled) { info.push('Inställt'); flag = 'canceled'; }
-    if (it && it.removed) { info.push('Borttagen'); flag = 'removed'; }
+    if (it && it.removed && it.replacedBy) flag = it.info && it.info.indexOf('Landat') >= 0 ? 'arrived' : 'ontime';  // info: "Ersatt av BLX284 · ..."
+    else if (it && it.removed) { info.push('Borttagen'); flag = 'removed'; }
     var sched = it ? +it.sched : Date.parse(w.sched), late = Math.round((at - sched) / 60000);
     if ((it && it.act) || s.landed || s.arrived || s.firstBag || s.lastBag) {
       if (flag === 'ontime' || flag === 'late') flag = 'arrived';
@@ -131,6 +132,7 @@
       if (Date.parse(w.expires_at) <= now) return;
       var list = w.kind === 'flyg' ? flights : w.kind === 'bat' ? boats : trains;
       var it = list.find(function (x) { return x.key.charAt(0) === kindPrefix(w.kind) && x.key.split('|')[0].slice(1) === String(w.ident) && Math.abs(+x.sched - Date.parse(w.sched)) < 60000; });
+      if (it && it.hidden && !it.replacedBy) return;  // gammal tidtabellsrest som aldrig skulle flyga
       var r = arrival(w, it);
       // Regeln visas också, så Sluta bevaka kan förklara om tåget eller flyget har flera källor.
       if (it && w.kind === 'tag') r.rules = rules.filter(function (q) { return q.enabled && TAGNOTIS.matches(q, it) && inWindow(q, r.at); });
@@ -144,7 +146,7 @@
       if (matches.length) out.push(arrival(null, it, matches));
     });
     flights.forEach(function (it) {
-      if (used[it.key] || !window.FLYGNOTIS) return;
+      if (used[it.key] || !window.FLYGNOTIS || it.hidden) return;
       var at = +(it.act || it.est || it.sched);
       var matches = flightRules.filter(function (w) { return w.enabled && FLYGNOTIS.matches(w, it) && inWindow(w, at); });
       if (matches.length) out.push(arrival(null, it, matches));

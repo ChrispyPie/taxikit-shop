@@ -185,6 +185,16 @@ def merge_keep(old, new):
         if ts and ts < cutoff:
             continue
         key = (f.get("id"), f.get("dir"), f.get("sched"))
+        # wasLive: flyget har någon gång haft en annan status än DEL (planerat, på väg, landat ...).
+        # Appen döljer DEL-rader som aldrig varit aktiva (gamla tidtabellsrester hos Swedavia)
+        # och visar "Borttagen" bara när ett aktivt flyg plockas bort.
+        prev = by.get(key) or {}
+        st = str(f.get("status") or "").strip().upper()
+        f = dict(f)
+        if prev.get("wasLive") or f.get("wasLive") or (st and st != "DEL"):
+            f["wasLive"] = True
+        else:
+            f.pop("wasLive", None)
         by[key] = f
     return list(by.values())
 

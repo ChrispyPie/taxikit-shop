@@ -300,6 +300,7 @@
       var from = now - (state.showPast ? A.pastMoreMin : A.pastMin) * 60000, to = now + A.aheadHours * 3600000;
       var list = data.filter(function (it) {
         var w = when(it); if (!w) return false;
+        if (it.hidden && it.key !== state.watchHighlight) return false;  // DEL som aldrig flugit eller ersatts (se markFlights)
         var ref = it.act ? it.act : (it.canceled ? it.sched : w);
         return it.key === state.watchHighlight || (ref >= from && w <= to);
       }).sort(function (a, b) { return when(a) - when(b); });
