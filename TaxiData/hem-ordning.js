@@ -145,7 +145,7 @@
           el.appendChild(h);
         } else if (!st.editing && h && h.parentNode) h.parentNode.removeChild(h);
         var rm = el.querySelector('.td-remove');
-        if (st.editing && !HO.isCore(id) && !HO.isPinned(id)) {
+        if (st.editing) {
           if (!rm) {
             rm = document.createElement('button');
             rm.type = 'button'; rm.className = 'td-remove';
@@ -207,8 +207,8 @@
     h += '<button type="button" role="menuitem" data-lp="move">' + icoSvg('<path d="M12 3v18M3 12h18M7 7l5-5 5 5M7 17l5 5 5-5M7 7L2 12l5 5M17 7l5 5-5 5"/>') + '<span>Flytta ikoner</span></button>';
     h += '<button type="button" role="menuitem" data-lp="info">' + icoSvg('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/>') + '<span>Modulinfo</span></button>';
     h += '<button type="button" role="menuitem" data-lp="help">' + icoSvg('<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.6-2.5 2-2.5 3.5M12 16.5h.01"/>') + '<span>Hjälp</span></button>';
+    h += '<button type="button" role="menuitem" data-lp="off">' + icoSvg('<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 9l6 6M15 9l-6 6"/>') + '<span>Ta bort genväg</span></button>';
     if (!HO.isCore(id) && !HO.isPinned(id)) {
-      h += '<button type="button" role="menuitem" data-lp="off">' + icoSvg('<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 9l6 6M15 9l-6 6"/>') + '<span>Ta bort genväg</span></button>';
       h += '<button type="button" role="menuitem" class="td-lp-danger" data-lp="uninstall">' + icoSvg('<path d="M5 7h14M10 7V5h4v2M8 7l1 13h6l1-13"/>') + '<span>Avinstallera</span></button>';
     }
     m.innerHTML = h;
@@ -268,7 +268,7 @@
     dg.el.classList.add('td-ph');
     dg.ghost = makeGhost(dg.el);
     document.body.classList.add('td-drag-on');
-    if (!HO.isPinned(dg.id)) showTrash(true, false);
+    showTrash(true, false);
   }
 
   function placeGhost() {

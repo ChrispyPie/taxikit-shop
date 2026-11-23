@@ -53,7 +53,10 @@
       s.id = 'hb-stage-css';
     }
     s.textContent =
-      '.hb-stage{position:fixed;left:0;top:0;width:' + WID + 'px;height:' + TOT_H + 'px;z-index:44;pointer-events:none;overflow:visible;background:none;border:0;padding:0;margin:0;color:#e2e8f0}' +
+      '#td-hem-scen,.td-hem-scen{display:flex;flex-direction:row;align-items:flex-end;justify-content:space-between;gap:4px 8px;width:100%;box-sizing:border-box;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));position:relative;pointer-events:none;z-index:5}' +
+      '#td-hem-scen>*,.td-hem-scen>*{pointer-events:auto;flex-shrink:0}' +
+      '#td-hem-scen #jul-scen,.td-hem-scen #jul-scen{position:relative;left:auto;bottom:auto;transform:none;margin:0;flex:1 1 auto;width:auto;max-width:240px;min-width:120px;height:auto;aspect-ratio:240/168}' +
+      '.hb-stage{position:relative;left:auto;top:auto;width:' + WID + 'px;height:' + TOT_H + 'px;z-index:6;pointer-events:none;overflow:visible;background:none;border:0;padding:0;margin:0;color:#e2e8f0;transform:none;flex:0 0 auto}' +
       '.hb-stage.hb-hidden{display:none}' +
       '.hb-stage-beam{position:absolute;left:0;top:0;width:' + WID + 'px;height:' + TOT_H + 'px;pointer-events:none;z-index:1;display:block;overflow:visible}' +
       '.hb-stage-light{position:relative;height:' + LAMP_H + 'px;width:100%;display:flex;align-items:flex-end;justify-content:center;z-index:2;' +
@@ -241,9 +244,16 @@
     return { x: x, y: Math.max(4, Math.min(y, vh - TOT_H - Math.max(2, safeB))) };
   }
 
+  function stageOrigin() {
+    var r = liveRect();
+    if (r) return { x: r.left, y: r.top };
+    if (placed) return { x: placed.x, y: placed.y };
+    return null;
+  }
   function room() {
-    if (!placed) return null;
-    return { x: placed.x, y: placed.y + LAMP_H, w: WID, h: SCENE_H, at: 'hornet' };
+    var o = stageOrigin();
+    if (!o) return null;
+    return { x: o.x, y: o.y + LAMP_H, w: WID, h: SCENE_H, at: 'hem' };
   }
 
   // Ståplats i scenen, fötterna på golvet. Samma y oavsett tänd/släckt.
@@ -260,9 +270,10 @@
     return { x: x, y: y };
   }
   function standPoint(id) {
-    if (!placed) return null;
+    var o = stageOrigin();
+    if (!o) return null;
     var s = standLocal(id);
-    return { x: placed.x + s.x, y: placed.y + s.y };
+    return { x: o.x + s.x, y: o.y + s.y };
   }
   // Konen utgår från lampans huvud och ljusfläcken ligger under figuren.
   function beamOverlay(id) {
@@ -282,12 +293,34 @@
       '</svg>';
   }
 
+  function ensureHemScen() {
+    var row = document.getElementById('td-hem-scen');
+    if (row) return row;
+    var content = document.getElementById('content');
+    if (!content) return null;
+    row = document.createElement('div');
+    row.id = 'td-hem-scen';
+    row.className = 'td-berra-slot td-hem-scen';
+    content.appendChild(row);
+    return row;
+  }
+  function orderHemScen(row) {
+    if (!row) return;
+    var berra = row.querySelector('.td-berra');
+    var scen = row.querySelector('#jul-scen');
+    var bot = row.querySelector('#hb-stage');
+    if (berra) row.appendChild(berra);
+    if (scen) row.appendChild(scen);
+    if (bot) row.appendChild(bot);
+  }
   function ensureHost() {
     if (host && host.parentNode) return host;
     host = document.createElement('div');
     host.id = 'hb-stage';
     host.className = 'hb-stage hb-hidden';
-    document.body.appendChild(host);
+    var row = ensureHemScen();
+    (row || document.body).appendChild(host);
+    if (row) orderHemScen(row);
     return host;
   }
 
@@ -299,20 +332,26 @@
   function place(force) {
     if (!isHome() || charId() === 'off') { hide(); return null; }
     if (!host) return null;
-    var vw = window.innerWidth, vh = window.innerHeight;
-    var next = null;
-    var sameView = placed && placed.vw === vw && placed.vh === vh;
-    if (!force && sameView && fits(placed.x, placed.y, obstacles())) {
-      next = { x: placed.x, y: placed.y, vw: vw, vh: vh };
-    } else {
-      next = findPlace();
-      if (next) { next.vw = vw; next.vh = vh; }
+    var row = ensureHemScen();
+    if (row) {
+      if (host.parentNode !== row) row.appendChild(host);
+      orderHemScen(row);
     }
-    placed = next;
-    if (!next) { host.classList.add('hb-hidden'); return null; }
     host.classList.remove('hb-hidden');
-    host.style.transform = 'translate3d(' + Math.round(next.x) + 'px,' + Math.round(next.y) + 'px,0)';
-    return next;
+    host.style.left = '';
+    host.style.top = '';
+    host.style.bottom = '';
+    host.style.transform = '';
+    var r = host.getBoundingClientRect ? host.getBoundingClientRect() : { left: 0, top: 0, width: WID, height: TOT_H };
+    placed = { x: r.left, y: r.top, vw: window.innerWidth, vh: window.innerHeight, flow: 1 };
+    return placed;
+  }
+  function liveRect() {
+    if (!host || host.classList.contains('hb-hidden')) return null;
+    var r = host.getBoundingClientRect ? host.getBoundingClientRect() : null;
+    if (r && r.width >= 4 && r.height >= 4) return r;
+    if (placed && placed.flow) return { left: placed.x, top: placed.y, width: WID, height: TOT_H };
+    return null;
   }
 
   function toggle() {
@@ -393,6 +432,7 @@
     else { if (!host.innerHTML) paint(); else place(); }
   }
 
+  window.ensureHemScen = ensureHemScen;
   window.HB_STAGE = {
     render: render,
     sync: sync,
@@ -400,6 +440,7 @@
     place: place,
     room: room,
     standPoint: standPoint,
+    ensureHemScen: ensureHemScen,
     isLit: isLit,
     toggle: toggle,
     onFigTap: onFigTap,

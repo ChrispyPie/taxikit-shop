@@ -13,7 +13,7 @@ const pageHtml = `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Körpassdata kvitto</title>
-<link rel="stylesheet" href="/TaxiData/style.css?v=20261123adv3">
+<link rel="stylesheet" href="/TaxiData/style.css?v=20261123adv4">
 <style>
   html, body { margin: 0; background: var(--bg); color: var(--text); }
   .shot-note { text-align: center; font-size: 11px; color: var(--muted); padding: 8px 10px 0; }

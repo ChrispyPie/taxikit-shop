@@ -65,4 +65,41 @@ const nyh = help.split('nyheter: [')[1].split('],')[0];
 assert.doesNotMatch(nyh, /\bStig\b|\bhen\b/);
 assert.match(help, /Göteborg från SVT Väst/);
 
+// Ta bort genväg funkar på alla hemskärmsikoner, även kärn- och pin-moduler.
+// Avinstallera är oförändrat: kärna och pin kan inte avinstalleras.
+H.preview(['kordata', 'installningar', 'om', 'moduler'], []);
+H.removeShortcut('installningar');
+H.removeShortcut('om');
+assert.ok(!H.arrange(menu).map(x => x.id).includes('installningar'), 'installningar kvar som genväg');
+assert.ok(!H.arrange(menu).map(x => x.id).includes('om'), 'om kvar som genväg');
+assert.ok(H.isInstalled('installningar') && H.isInstalled('om'), 'kärnmoduler ska vara kvar i appen');
+H.uninstall('installningar');
+assert.ok(H.isInstalled('installningar'), 'Avinstallera ska inte gälla kärnmoduler');
+H.addToHome('installningar', { force: true });
+assert.ok(H.arrange(menu).map(x => x.id).includes('installningar'), 'kan lägga tillbaka genväg');
+
+ctx.window.ADVENT_GATE = {
+  allowed() { return true; },
+  today() { return { y: 2026, m: 12, d: 5, iso: '2026-12-05' }; }
+};
+assert.ok(H.isPinned('advent'));
+H.uninstall('advent');
+assert.ok(H.isInstalled('advent'), 'advent kan inte avinstalleras i december');
+const menuAdv = menu.concat([{ id: 'advent', label: 'Adventskalender', icon: 'x' }]);
+H.setCatalog(menuAdv);
+H.preview(['kordata', 'advent', 'moduler'], []);
+H.removeShortcut('advent');
+H.removeShortcut('moduler');
+assert.ok(!H.arrange(menuAdv).map(x => x.id).includes('advent'), 'advent-genväg kan tas bort');
+assert.ok(!H.arrange(menuAdv).map(x => x.id).includes('moduler'), 'moduler-genväg kan tas bort');
+assert.ok(H.isInstalled('advent') && H.isPinned('advent'));
+H.addToHome('advent', { force: true });
+assert.ok(H.arrange(menuAdv).map(x => x.id).includes('advent'));
+
+const ordna = fs.readFileSync(path.resolve(__dirname, '../../TaxiData/hem-ordning.js'), 'utf8');
+assert.match(ordna, /data-lp="off"/);
+assert.match(ordna, /Ta bort genväg/);
+assert.match(ordna, /if \(!HO\.isCore\(id\) && !HO\.isPinned\(id\)\)/);
+assert.match(ordna, /data-lp="uninstall"/);
+
 console.log('UNIT_OK', hiddenOut.join(','));

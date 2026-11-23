@@ -39,17 +39,24 @@
   font-size:calc(12px * min(var(--font-scale,1),1.15));opacity:.85}
 .td-pk-winner-name{margin:0 0 8px;font-size:calc(28px * min(var(--font-scale,1),1.1));line-height:1.15}
 
-/* Kompakt räknare i headern, utan att ta ikonernas 40px-ruta. */
-html body header .hdr-right button.td-pk-hdr{
+/* Polkagrisräknare högst upp i body, till höger om ljusstaken. */
+button.td-pk-hdr{
   appearance:none;border:0;background:transparent;box-shadow:none;
-  width:auto;min-width:0;max-width:none;height:auto;min-height:28px;max-height:none;
-  padding:3px 6px;margin:0 2px 0 0;border-radius:8px;flex-shrink:0;
-  color:var(--primary,#2b6cb0);
-  font:600 calc(11px * min(var(--font-scale,1),1.1))/1.2 system-ui,sans-serif;
+  width:auto;min-width:0;max-width:none;height:auto;min-height:32px;max-height:none;
+  padding:2px 8px 2px 4px;margin:0;border-radius:10px;flex-shrink:0;
+  display:inline-flex;align-items:flex-end;justify-content:flex-end;gap:4px;
+  color:var(--text,#1a202c);
+  font:700 calc(16px * min(var(--font-scale,1),1.15))/1 system-ui,sans-serif;
   letter-spacing:0;white-space:nowrap;cursor:pointer;
   -webkit-tap-highlight-color:transparent;
+  pointer-events:auto;
 }
-html body header .hdr-right button.td-pk-hdr:hover,
-html body header .hdr-right button.td-pk-hdr:active{
-  background:rgba(127,127,127,.14);color:var(--primary,#2b6cb0);transform:none;
+button.td-pk-hdr:hover,
+button.td-pk-hdr:active{
+  background:rgba(127,127,127,.14);transform:none;
 }
+.td-pk-hdr .td-pk-cane-svg{display:block;width:22px;height:28px;flex:0 0 auto}
+.td-pk-hdr-n{font-variant-numeric:tabular-nums;padding-bottom:2px}
+.td-pk-cane-ico .td-pk-cane-svg{width:28px;height:36px;display:block}
+.td-pk-cane-ico{font-size:0;display:block;transform-origin:50% 80%;
+  animation:td-pk-wiggle 1.8s ease-in-out infinite;}

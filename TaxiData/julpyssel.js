@@ -221,6 +221,7 @@
       markHem(false);
       syncSidaTop();
       paintSlingor(); paintMys();
+      maybeMountAdvent();
       return;
     }
     var lit = litCount();
@@ -244,6 +245,7 @@
     if (window.BERRA && typeof BERRA.refresh === 'function') {
       try { BERRA.refresh(); } catch (e2) {}
     }
+    maybeMountAdvent();
   }
 
   function cyclePreview() {
@@ -261,8 +263,9 @@
     var btn = document.getElementById('jul-ljusstake');
     if (!allowed()) {
       markHem(false);
-      if (rad && rad.parentNode) rad.parentNode.removeChild(rad);
-      else if (btn && btn.parentNode) btn.parentNode.removeChild(btn);
+      if (btn && btn.parentNode) btn.parentNode.removeChild(btn);
+      var keep = rad && rad.querySelector && rad.querySelector('#td-adv-mini, #td-pk-count, .td-adv-mini');
+      if (rad && rad.parentNode && !keep) rad.parentNode.removeChild(rad);
       var sl0 = document.getElementById('jul-slingor');
       if (sl0 && sl0.parentNode) sl0.parentNode.removeChild(sl0);
       var mys0 = document.getElementById('jul-mys');
@@ -271,12 +274,16 @@
       if (g0 && g0.parentNode) g0.parentNode.removeChild(g0);
       var sc0 = document.getElementById('jul-scen');
       if (sc0 && sc0.parentNode) sc0.parentNode.removeChild(sc0);
+      maybeMountAdvent();
+      if (window.POLKAGRIS && POLKAGRIS.mountCount) POLKAGRIS.mountCount();
       return null;
     }
+    if (window.ensureJulTop) rad = window.ensureJulTop() || rad;
     if (!rad) {
       rad = document.createElement('div');
       rad.id = 'jul-ljus-rad';
     }
+    rad.classList.add('td-jul-top');
     if (!btn) {
       btn = document.createElement('button');
       btn.id = 'jul-ljusstake';
@@ -284,7 +291,10 @@
       btn.hidden = true;
       btn.addEventListener('click', cyclePreview);
     }
-    if (btn.parentNode !== rad) rad.appendChild(btn);
+    var mid = rad.querySelector && rad.querySelector('.td-jul-top-mid');
+    if (mid) {
+      if (btn.parentNode !== mid) mid.appendChild(btn);
+    } else if (btn.parentNode !== rad) rad.appendChild(btn);
     var content = contentEl();
     var gir = document.getElementById('jul-girlang');
     if (!gir) {
@@ -637,21 +647,44 @@
     }
     return scen;
   }
+  function hemRow() {
+    if (window.ensureHemScen) return window.ensureHemScen();
+    if (window.HB_STAGE && window.HB_STAGE.ensureHemScen) return window.HB_STAGE.ensureHemScen();
+    return document.getElementById('td-hem-scen') || document.querySelector('.td-berra-slot');
+  }
   function layoutScen(scen) {
     scen = scen || document.getElementById('jul-scen');
     if (!scen || !allowed() || !onHome()) return;
-    var slot = document.querySelector('.td-berra-slot');
+    var row = hemRow();
     var content = contentEl();
-    if (slot && slot.appendChild) {
-      if (scen.parentNode !== slot) slot.appendChild(scen);
+    if (row && row.appendChild) {
+      if (scen.parentNode !== row) row.appendChild(scen);
       if (scen.style) scen.style.minHeight = '';
+      var berra = row.querySelector('.td-berra');
+      var bot = row.querySelector('#hb-stage');
+      if (berra) row.insertBefore(berra, row.firstChild);
+      if (scen) {
+        if (bot) row.insertBefore(scen, bot);
+        else row.appendChild(scen);
+      }
+      if (bot) row.appendChild(bot);
     } else if (content) {
       if (scen.parentNode !== content) content.appendChild(scen);
-      var top = 0;
-      if (scen.getBoundingClientRect) top = scen.getBoundingClientRect().top + (window.scrollY || 0);
-      var leftover = (window.innerHeight || 600) - top;
-      if (scen.style) scen.style.minHeight = Math.max(168, leftover) + 'px';
+      if (scen.style) scen.style.minHeight = '';
     }
+  }
+  function maybeMountAdvent() {
+    if (window.ADVENT && typeof window.ADVENT.mountMini === 'function') {
+      window.ADVENT.mountMini();
+      return;
+    }
+    var g = window.ADVENT_GATE;
+    if (!g || !g.allowed || !g.allowed() || !window.LAZY || !LAZY.ensure) return;
+    var t = g.today ? g.today() : null;
+    if (!t || !(t.m === 12 || (t.m === 1 && t.d <= 6))) return;
+    LAZY.ensure('advent').then(function () {
+      if (window.ADVENT && ADVENT.mountMini) ADVENT.mountMini();
+    }).catch(function () {});
   }
   function paintScen() {
     var scen = ensureScen();
@@ -682,6 +715,7 @@
     if (!allowed()) { paint(); return; }
     ensure();
     paint();
+    maybeMountAdvent();
     burnTimer = setInterval(function () { if (allowed()) paint(); }, 60000);
     if (!slingorResize) {
       slingorResize = true;

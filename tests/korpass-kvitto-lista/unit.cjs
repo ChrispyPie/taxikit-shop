@@ -29,11 +29,11 @@ assert.match(cl, /starttiden på varje resa i listan/);
 assert.match(cl, /i linje med kvittonumret/);
 assert.ok(cl.indexOf("'2026-11-23ztid1'") < cl.indexOf("'2026-11-23zink1'"), 'nyheten överst');
 
-assert.match(sw, /CACHE_VER = '20261123adv3'/);
-assert.match(html, /style\.css\?v=20261123adv3/);
-assert.match(html, /lazy-views\.js\?v=20261123adv3/);
-assert.match(lv, /script\.js\?v=20261123adv3/);
-assert.match(lv, /changelog\.js\?v=20261123adv3/);
+assert.match(sw, /CACHE_VER = '20261123adv4'/);
+assert.match(html, /style\.css\?v=20261123adv4/);
+assert.match(html, /lazy-views\.js\?v=20261123adv4/);
+assert.match(lv, /script\.js\?v=20261123adv4/);
+assert.match(lv, /changelog\.js\?v=20261123adv4/);
 
 assert.match(css, /\.kv-scroll \.kv-nr/);
 assert.match(css, /\.trip-body > \.sub,\s*\n\.trip-body > \.trip-detail/);
