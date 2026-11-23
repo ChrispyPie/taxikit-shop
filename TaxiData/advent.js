@@ -15,15 +15,21 @@
   var els = { overlay: null, board: null, factWrap: null, fact: null, mini: null };
   var stopFw = null;
   var DOOR_ORDER = [17, 3, 24, 8, 1, 12, 19, 6, 22, 4, 15, 9, 23, 2, 14, 11, 20, 7, 18, 5, 21, 10, 16, 13];
-  var DOOR_LAYOUT = [
-    { c: 1, r: 1, w: 1, h: 2 }, { c: 2, r: 1, w: 2, h: 1 }, { c: 4, r: 1, w: 1, h: 1 }, { c: 5, r: 1, w: 2, h: 1 },
-    { c: 2, r: 2, w: 1, h: 1 }, { c: 3, r: 2, w: 1, h: 1 }, { c: 4, r: 2, w: 1, h: 2 }, { c: 5, r: 2, w: 1, h: 1 }, { c: 6, r: 2, w: 1, h: 1 },
-    { c: 1, r: 3, w: 2, h: 1 }, { c: 3, r: 3, w: 1, h: 1 }, { c: 5, r: 3, w: 2, h: 1 },
-    { c: 1, r: 4, w: 1, h: 1 }, { c: 2, r: 4, w: 1, h: 2 }, { c: 3, r: 4, w: 2, h: 1 }, { c: 5, r: 4, w: 1, h: 1 }, { c: 6, r: 4, w: 1, h: 2 },
-    { c: 1, r: 5, w: 1, h: 1 }, { c: 3, r: 5, w: 1, h: 1 }, { c: 4, r: 5, w: 1, h: 1 }, { c: 5, r: 5, w: 1, h: 1 },
-    { c: 1, r: 6, w: 2, h: 1 }, { c: 3, r: 6, w: 2, h: 1 }, { c: 5, r: 6, w: 1, h: 1 }
+  /* Irregular positions in % of the painting (no overlap, min ~40px on a 390px board). */
+  var DOOR_POS = [
+    { x: 2.6, y: 8.4, w: 13.8, h: 10.8 }, { x: 19.0, y: 11.0, w: 13.0, h: 11.2 },
+    { x: 35.0, y: 8.0, w: 15.0, h: 9.8 }, { x: 53.2, y: 9.6, w: 13.2, h: 11.0 },
+    { x: 69.2, y: 8.2, w: 13.0, h: 10.4 }, { x: 84.6, y: 10.6, w: 12.6, h: 11.0 },
+    { x: 3.4, y: 24.6, w: 12.2, h: 13.0 }, { x: 19.2, y: 26.8, w: 15.4, h: 10.0 },
+    { x: 37.0, y: 20.8, w: 13.2, h: 11.2 }, { x: 54.0, y: 24.8, w: 14.2, h: 9.8 },
+    { x: 70.0, y: 23.8, w: 12.0, h: 12.2 }, { x: 85.4, y: 25.8, w: 12.0, h: 11.4 },
+    { x: 2.8, y: 41.0, w: 14.0, h: 10.4 }, { x: 20.5, y: 40.0, w: 12.4, h: 12.0 },
+    { x: 37.2, y: 36.0, w: 13.6, h: 11.0 }, { x: 54.8, y: 37.4, w: 13.8, h: 9.8 },
+    { x: 71.0, y: 40.0, w: 12.0, h: 11.2 }, { x: 85.4, y: 42.0, w: 12.0, h: 11.0 },
+    { x: 3.6, y: 56.2, w: 18.0, h: 12.0 }, { x: 32.0, y: 54.6, w: 18.4, h: 12.2 },
+    { x: 64.0, y: 55.4, w: 17.0, h: 11.8 }, { x: 6.0, y: 73.0, w: 18.4, h: 12.0 },
+    { x: 35.0, y: 71.0, w: 18.8, h: 12.4 }, { x: 73.0, y: 72.2, w: 16.6, h: 12.0 }
   ];
-  var DOOR_TONE = ['rod', 'gron', 'guld', 'gran', 'krem', 'vin'];
 
   function gate() { return window.ADVENT_GATE || {}; }
   function allowed() { return !!(gate().allowed && gate().allowed()); }
@@ -51,7 +57,7 @@
     var l = document.createElement('link');
     l.id = 'td-advent-css';
     l.rel = 'stylesheet';
-    l.href = 'advent.css?v=20261123adv8';
+    l.href = 'advent.css?v=20261123adv9';
     document.head.appendChild(l);
   }
   function reducedMotion() {
@@ -188,13 +194,12 @@
     var html = '<div class="td-adv-doors" role="list">';
     for (var i = 0; i < 24; i++) {
       var d = DOOR_ORDER[i];
-      var lay = DOOR_LAYOUT[i];
+      var pos = DOOR_POS[i];
       var opened = isOpen(d), ok = canOpen(d);
-      var tone = DOOR_TONE[i % DOOR_TONE.length];
-      var cls = 'td-adv-door td-adv-door--' + tone + (opened ? ' open' : ok ? ' ready' : ' locked');
+      var cls = 'td-adv-door' + (opened ? ' open' : ok ? ' ready' : ' locked');
       var label = opened ? 'Lucka ' + d + ', öppnad' : ok ? 'Öppna lucka ' + d : 'Lucka ' + d + ', låst till den ' + d + ' december';
       html += '<button type="button" class="' + cls + '" data-lucka="' + d + '" aria-label="' + esc(label) + '"' +
-        ' style="grid-column:' + lay.c + ' / span ' + lay.w + ';grid-row:' + lay.r + ' / span ' + lay.h + '">' +
+        ' style="left:' + pos.x + '%;top:' + pos.y + '%;width:' + pos.w + '%;height:' + pos.h + '%">' +
         '<span class="td-adv-num">' + d + '</span>' +
         (opened ? '<span class="td-adv-check" aria-hidden="true">★</span>' : '') +
         '</button>';
@@ -203,34 +208,16 @@
     return html;
   }
 
-  function boardDecor() {
-    return '<div class="td-adv-deco" aria-hidden="true">' +
-      '<span class="td-adv-star">★</span>' +
-      '<span class="td-adv-holly td-adv-holly-l"></span>' +
-      '<span class="td-adv-holly td-adv-holly-r"></span>' +
-      '<span class="td-adv-flake td-adv-flake-a">✦</span>' +
-      '<span class="td-adv-flake td-adv-flake-b">✧</span>' +
-      '<span class="td-adv-bell"></span>' +
-      '<span class="td-adv-gift"></span>' +
-      '</div>';
-  }
+  function boardDecor() { return ''; }
 
-  function miniSvg() {
-    return '<svg class="td-adv-mini-svg" viewBox="0 0 72 90" width="72" height="90" aria-hidden="true">' +
-      '<rect x="4" y="14" width="64" height="72" rx="6" fill="#6b1c1c" stroke="#d4a017" stroke-width="2"/>' +
-      '<rect x="8" y="18" width="56" height="12" rx="2" fill="#8b2424"/>' +
-      '<text x="36" y="27" text-anchor="middle" fill="#f7e7b0" font-size="7" font-family="Georgia,serif">Advent</text>' +
-      '<g fill="#3d1a12">' +
-      '<rect x="11" y="34" width="10" height="12" rx="1" fill="#c53030"/><rect x="23" y="34" width="14" height="12" rx="1" fill="#276749"/>' +
-      '<rect x="39" y="34" width="10" height="12" rx="1" fill="#c9a227"/><rect x="51" y="34" width="10" height="12" rx="1" fill="#7b1e1e"/>' +
-      '<rect x="11" y="48" width="16" height="12" rx="1" fill="#2f855a"/><rect x="29" y="48" width="10" height="12" rx="1" fill="#c53030"/>' +
-      '<rect x="41" y="48" width="10" height="18" rx="1" fill="#744210"/><rect x="53" y="48" width="8" height="12" rx="1" fill="#f3e6c4"/>' +
-      '<rect x="11" y="62" width="10" height="12" rx="1" fill="#f3e6c4"/><rect x="23" y="62" width="16" height="12" rx="1" fill="#9b2c2c"/>' +
-      '<rect x="53" y="62" width="8" height="18" rx="1" fill="#276749"/>' +
-      '<rect x="11" y="76" width="20" height="6" rx="1" fill="#c9a227"/><rect x="33" y="76" width="18" height="6" rx="1" fill="#c53030"/>' +
-      '</g>' +
-      '<polygon points="36,3 39,11 47,11 40.5,16 43,24 36,19 29,24 31.5,16 25,11 33,11" fill="#f6e05e" stroke="#d69e2e" stroke-width=".6"/>' +
-      '</svg>';
+  function miniHtml() {
+    var html = '<span class="td-adv-mini-face" aria-hidden="true">';
+    for (var i = 0; i < 24; i++) {
+      var pos = DOOR_POS[i];
+      html += '<span class="td-adv-mini-door" style="left:' + pos.x + '%;top:' + pos.y + '%;width:' + pos.w + '%;height:' + pos.h + '%"></span>';
+    }
+    html += '</span>';
+    return html;
   }
 
   function mountMini() {
@@ -261,7 +248,7 @@
       });
     }
     mini.setAttribute('aria-label', 'Adventskalender');
-    if (!mini.querySelector('.td-adv-mini-svg')) mini.innerHTML = miniSvg();
+    if (!mini.querySelector('.td-adv-mini-face')) mini.innerHTML = miniHtml();
     if (mini.parentNode !== left) left.insertBefore(mini, left.firstChild);
     els.mini = mini;
     if (window.POLKAGRIS && POLKAGRIS.mountCount) POLKAGRIS.mountCount();
