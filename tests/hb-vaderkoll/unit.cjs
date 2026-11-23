@@ -47,10 +47,10 @@ assert.doesNotMatch(demo, /if \(!iconNode/);
 assert.match(src, /Ligger ikonen i en mapp, på en annan sida eller bara i applådan stannar den på sin vanliga plats och pratar där/);
 
 // cache och nyhet, utan tid (sätts vid live)
-assert.match(lazy, /hjalpbot\.js\?v=20261123adv1/);
+assert.match(lazy, /hjalpbot\.js\?v=20261123adv2/);
 assert.match(lazy, /hjalpbot-scenarier\.js\?v=20261122zdelad1/);
-assert.match(index, /lazy-views\.js\?v=20261123adv1/);
-assert.match(lazy, /changelog\.js\?v=20261123adv1/);
+assert.match(index, /lazy-views\.js\?v=20261123adv2/);
+assert.match(lazy, /changelog\.js\?v=20261123adv2/);
 assert.match(changelog, /id: '2026-11-14vkoll1'/);
 assert.match(changelog.split("id: '2026-11-14vkoll1'")[1].split('rader:')[0], /tid: '21:03'/);
 assert.ok(changelog.indexOf("'2026-11-14vkoll1'") < changelog.indexOf("'2026-11-14bil1'"), 'nyheten överst');

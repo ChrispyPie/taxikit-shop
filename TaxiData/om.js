@@ -46,9 +46,28 @@
     try { if (window.DEMO && DEMO.on && DEMO.on()) return false; } catch (e) {}
     return (window.TAXI_FEATURES || []).indexOf(String(aud).slice(7)) >= 0;
   }
+  // En dag med datum (och ev. tid) i framtiden, svensk tid, visas inte förrän den gått live.
+  function nyhLive(dag) {
+    var d = String((dag && dag.datum) || '');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return true;
+    var fmt = new Intl.DateTimeFormat('sv-SE', {
+      timeZone: 'Europe/Stockholm', year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hour12: false
+    });
+    var parts = {};
+    fmt.formatToParts(new Date()).forEach(function (x) { parts[x.type] = x.value; });
+    var iso = parts.year + '-' + parts.month + '-' + parts.day;
+    if (d < iso) return true;
+    if (d > iso) return false;
+    var t = /^(\d{1,2}):(\d{2})$/.exec(String((dag && dag.tid) || ''));
+    if (!t) return true;
+    var hm = ('0' + t[1]).slice(-2) + ':' + t[2];
+    return hm <= (parts.hour + ':' + parts.minute);
+  }
   function lista() {
     var roll = minRoll(), ut = [];
     (window.CHANGELOG || []).forEach(function (dag) {
+      if (!nyhLive(dag)) return;
       var rader = [];
       (dag.rader || []).forEach(function (r) {
         var aud = r[2] || dag.aud;

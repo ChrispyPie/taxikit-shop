@@ -32,6 +32,19 @@ assert.match(core, /id === 'advent'/);
 assert.match(core, /ADVENT_GATE/);
 assert.match(index, /ADVENT\.id/);
 assert.match(index, /item\.id === 'advent'/);
+assert.match(fs.readFileSync(path.join(root, 'TaxiData/polkagris.js'), 'utf8'), /LIVE_FROM = '2026-12-01'/);
+assert.match(sql, /not_open_yet/);
+assert.match(sql, /advent_is_test/);
+assert.match(sql, /return 0;/); // test season/year
+const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
+assert.match(cl, /id: '2026-12-01zadv1'/);
+assert.match(cl, /datum: '2026-12-01'/);
+assert.match(cl, /tid: '00:00'/);
+assert.doesNotMatch(cl, /\bStig\b|\bhen\b/);
+const om = fs.readFileSync(path.join(root, 'TaxiData/om.js'), 'utf8');
+assert.match(om, /function nyhLive/);
+assert.match(om, /if \(!nyhLive\(dag\)\) return;/);
+
 assert.match(lazy, /"advent":/);
 assert.match(lazy, /"ADVENT":/);
 

@@ -1,8 +1,10 @@
 -- Adventskalender (öppnade luckor per förare och år) och polkagrisjakt
 -- (en klubba i taget för alla, först till kvarn, nästa 5–60 min senare).
 -- Topplistan visar namn medvetet: det är en tävling, inte taxidata.
--- Applicera inte förrän Christian ger kör. Klienten är grindad till 710022
--- tills dess; p_as_of (testdatum) godkänns bara för 710022.
+-- Öppnas automatiskt för alla från 2026-12-01 00:00 Europe/Stockholm.
+-- Före det: bara 710022 (p_as_of/testdatum). Testtrafik skrivs i säsong/år 0
+-- och räknas inte på den riktiga topplistan. Ev. förhandskörningar i säsong 2026
+-- rensas när det blir 1 december.
 -- Ångra: undo/20261123b_advent_polkagris_undo.sql
 
 create table if not exists public.advent_opens (
@@ -48,6 +50,75 @@ begin
     return p_as_of;
   end if;
   return (now() at time zone 'Europe/Stockholm')::date;
+end;
+$$;
+
+
+create or replace function private.advent_live_at()
+returns timestamptz
+language sql
+immutable
+as $$
+  -- 1 december 2026 kl. 00:00 svensk tid, oavsett sommar-/vintertid.
+  select timezone('Europe/Stockholm', timestamp '2026-12-01 00:00:00');
+$$;
+
+create or replace function private.advent_is_live()
+returns boolean
+language sql
+stable
+as $$
+  select now() >= private.advent_live_at();
+$$;
+
+create or replace function private.advent_may_use(p_driver text)
+returns boolean
+language sql
+stable
+as $$
+  select p_driver = '710022' or private.advent_is_live();
+$$;
+
+create or replace function private.advent_is_test(p_as_of date, p_driver text)
+returns boolean
+language sql
+stable
+as $$
+  -- Testdatum och allt före 1 dec 2026 räknas inte på den riktiga topplistan.
+  select (p_as_of is not null and p_driver = '710022') or not private.advent_is_live();
+$$;
+
+create or replace function private.advent_season_year(p_today date, p_as_of date, p_driver text)
+returns smallint
+language plpgsql
+stable
+set search_path to 'pg_catalog', 'public', 'pg_temp'
+as $$
+begin
+  if private.advent_is_test(p_as_of, p_driver) then
+    return 0;
+  end if;
+  if extract(month from p_today)::int = 1 then
+    return (extract(year from p_today)::int - 1)::smallint;
+  end if;
+  return extract(year from p_today)::smallint;
+end;
+$$;
+
+create or replace function private.advent_purge_prelive()
+returns void
+language plpgsql
+security definer
+set search_path to 'pg_catalog', 'public', 'pg_temp'
+as $$
+begin
+  if not private.advent_is_live() then return; end if;
+  delete from public.polkagris_canes
+   where season <> 0
+     and (appears_at < private.advent_live_at()
+          or (claimed_at is not null and claimed_at < private.advent_live_at()));
+  delete from public.advent_opens
+   where year <> 0 and opened_at < private.advent_live_at();
 end;
 $$;
 
@@ -153,11 +224,12 @@ declare
   v_opens jsonb;
 begin
   select * into a from private.session_actor(p_token);
-  v_today := private.advent_today(p_as_of, a.driver_id);
-  v_year := extract(year from v_today)::smallint;
-  if extract(month from v_today)::int = 1 and extract(day from v_today)::int <= 6 then
-    v_year := (v_year - 1)::smallint;
+  if not private.advent_may_use(a.driver_id) then
+    raise exception 'not_open_yet' using errcode = '42501';
   end if;
+  perform private.advent_purge_prelive();
+  v_today := private.advent_today(p_as_of, a.driver_id);
+  v_year := private.advent_season_year(v_today, p_as_of, a.driver_id);
   select coalesce(jsonb_agg(o.day order by o.day), '[]'::jsonb) into v_opens
     from public.advent_opens o
    where o.year = v_year and o.driver_id = a.driver_id;
@@ -184,14 +256,18 @@ declare
   v_already boolean := false;
 begin
   select * into a from private.session_actor(p_token);
+  if not private.advent_may_use(a.driver_id) then
+    raise exception 'not_open_yet' using errcode = '42501';
+  end if;
   if coalesce(current_setting('taxi.demo', true), '') <> '' or coalesce(a.via_master, false) then
     raise exception 'demo_read_only' using errcode = '42501';
   end if;
   if p_day is null or p_day < 1 or p_day > 24 then
     raise exception 'bad_day' using errcode = '22023';
   end if;
+  perform private.advent_purge_prelive();
   v_today := private.advent_today(p_as_of, a.driver_id);
-  v_year := extract(year from v_today)::smallint;
+  v_year := private.advent_season_year(v_today, p_as_of, a.driver_id);
   if extract(month from v_today)::int <> 12 or p_day > extract(day from v_today)::int then
     raise exception 'too_early' using errcode = '42501';
   end if;
@@ -224,16 +300,14 @@ declare
   v_winner jsonb;
 begin
   select * into a from private.session_actor(p_token);
+  if not private.advent_may_use(a.driver_id) then
+    raise exception 'not_open_yet' using errcode = '42501';
+  end if;
+  perform private.advent_purge_prelive();
   v_today := private.advent_today(p_as_of, a.driver_id);
   v_month := extract(month from v_today)::int;
   v_day := extract(day from v_today)::int;
-  if v_month = 12 then
-    v_season := extract(year from v_today)::smallint;
-  elsif v_month = 1 then
-    v_season := (extract(year from v_today)::int - 1)::smallint;
-  else
-    v_season := extract(year from v_today)::smallint;
-  end if;
+  v_season := private.advent_season_year(v_today, p_as_of, a.driver_id);
   v_hunt := (v_month = 12);
   v_show_win := (v_month = 12 and v_day >= 31) or (v_month = 1 and v_day <= 6);
 
@@ -298,15 +372,19 @@ declare
   v_name text;
 begin
   select * into a from private.session_actor(p_token);
+  if not private.advent_may_use(a.driver_id) then
+    raise exception 'not_open_yet' using errcode = '42501';
+  end if;
   if coalesce(current_setting('taxi.demo', true), '') <> '' or coalesce(a.via_master, false) then
     raise exception 'demo_read_only' using errcode = '42501';
   end if;
+  perform private.advent_purge_prelive();
   v_today := private.advent_today(p_as_of, a.driver_id);
   v_month := extract(month from v_today)::int;
   if v_month <> 12 then
     raise exception 'not_in_season' using errcode = '42501';
   end if;
-  v_season := extract(year from v_today)::smallint;
+  v_season := private.advent_season_year(v_today, p_as_of, a.driver_id);
   if p_cane_id is null then
     raise exception 'bad_cane' using errcode = '22023';
   end if;

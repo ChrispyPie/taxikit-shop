@@ -1,6 +1,7 @@
 /* Adventskalender i december: 24 luckor med verifierade taxifakta.
  * Permanent modul som inte kan avinstalleras medan den är i säsong.
- * Bara luckor upp till dagens datum kan öppnas. Grind: 710022 tills vidare.
+ * Bara luckor upp till dagens datum kan öppnas.
+ * Öppnas automatiskt för alla från 2026-12-01 00:00 Europe/Stockholm; före det bara 710022.
  * Testdatum: ?adventdatum=YYYY-MM-DD eller ?juldatum=YYYY-MM-DD. */
 (function () {
   'use strict';
@@ -37,7 +38,7 @@
     var l = document.createElement('link');
     l.id = 'td-advent-css';
     l.rel = 'stylesheet';
-    l.href = 'advent.css?v=20261123adv1';
+    l.href = 'advent.css?v=20261123adv2';
     document.head.appendChild(l);
   }
 

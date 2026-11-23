@@ -1,11 +1,11 @@
 /* Polkagrisjakt i december: en klubba i taget någonstans i appen.
  * Först som trycker tar den. Nästa dyker upp 5–60 min senare på en annan plats.
- * Grind: samma som advent (ALLOW 710022 tills Christian öppnar för alla).
- * Testdatum: ?adventdatum=YYYY-MM-DD eller ?juldatum=YYYY-MM-DD (bara 710022 på servern). */
+ * Öppnas automatiskt för alla från 2026-12-01 00:00 Europe/Stockholm.
+ * Före det syns den bara för 710022 (testdatum: ?adventdatum= eller ?juldatum=). */
 (function () {
   'use strict';
 
-  var ALLA = false;
+  var LIVE_FROM = '2026-12-01'; // 00:00 Europe/Stockholm, ingen manuell omkoppling
   var ALLOW = { '710022': 1 };
 
   var PLACES = {
@@ -32,9 +32,27 @@
   function token() {
     try { return localStorage.getItem('taxi_session') || ''; } catch (e) { return ''; }
   }
+  function stockholmParts() {
+    var fmt = new Intl.DateTimeFormat('sv-SE', {
+      timeZone: 'Europe/Stockholm', year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hour12: false
+    });
+    var parts = {};
+    fmt.formatToParts(new Date()).forEach(function (x) { parts[x.type] = x.value; });
+    return parts;
+  }
+  function realToday() {
+    var parts = stockholmParts();
+    return { y: +parts.year, m: +parts.month, d: +parts.day, iso: parts.year + '-' + parts.month + '-' + parts.day };
+  }
+  function isLive() { return realToday().iso >= LIVE_FROM; }
+  function inSeasonReal(t) {
+    t = t || realToday();
+    return t.m === 12 || (t.m === 1 && t.d <= 6);
+  }
   function allowed() {
-    if (ALLA) return true;
-    return !!ALLOW[driverId()];
+    if (ALLOW[driverId()]) return true;
+    return isLive() && inSeasonReal();
   }
   function queryDate() {
     try {
@@ -48,12 +66,7 @@
       var p = q.split('-');
       return { y: +p[0], m: +p[1], d: +p[2], iso: q };
     }
-    var fmt = new Intl.DateTimeFormat('sv-SE', {
-      timeZone: 'Europe/Stockholm', year: 'numeric', month: '2-digit', day: '2-digit'
-    });
-    var parts = {};
-    fmt.formatToParts(new Date()).forEach(function (x) { parts[x.type] = x.value; });
-    return { y: +parts.year, m: +parts.month, d: +parts.day, iso: parts.year + '-' + parts.month + '-' + parts.day };
+    return realToday();
   }
   function inDecember(t) { t = t || today(); return t.m === 12; }
   function showWinner(t) { t = t || today(); return (t.m === 12 && t.d >= 31) || (t.m === 1 && t.d <= 6); }
@@ -75,9 +88,11 @@
   }
 
   window.ADVENT_GATE = {
-    ALLA: ALLA,
+    LIVE_FROM: LIVE_FROM,
     ALLOW: ALLOW,
     allowed: allowed,
+    isLive: isLive,
+    realToday: realToday,
     today: today,
     queryDate: queryDate,
     inDecember: inDecember,
@@ -95,7 +110,7 @@
     var l = document.createElement('link');
     l.id = 'td-polkagris-css-link';
     l.rel = 'stylesheet';
-    l.href = 'polkagris.css?v=20261123adv1';
+    l.href = 'polkagris.css?v=20261123adv2';
     document.head.appendChild(l);
   }
 
