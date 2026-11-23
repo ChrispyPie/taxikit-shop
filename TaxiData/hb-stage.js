@@ -34,6 +34,13 @@
     try { localStorage.setItem(lightKey(), on ? '1' : '0'); } catch (e) {}
   }
   function isHome() {
+    var login = document.getElementById('login-screen');
+    if (login && login.style.display !== 'none') return false;
+    var dv = document.getElementById('dashboard-view');
+    if (dv && !dv.classList.contains('hidden')) return false;
+    if (typeof window.NAV_VIEW === 'function') {
+      try { if (window.NAV_VIEW()) return false; } catch (e) {}
+    }
     var app = document.getElementById('app');
     return !!(app && app.classList && app.classList.contains('is-home') && app.style.display !== 'none');
   }
@@ -286,6 +293,7 @@
   }
 
   function place(force) {
+    if (!isHome() || charId() === 'off') { hide(); return null; }
     if (!host) return null;
     var vw = window.innerWidth, vh = window.innerHeight;
     var next = null;

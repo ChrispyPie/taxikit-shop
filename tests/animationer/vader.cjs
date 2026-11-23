@@ -18,7 +18,7 @@ assert.match(js, /taxi_animationer_vader_v2/);
 assert.match(js, /pointer-events:\s*none/);
 assert.match(js, /anim-wx-paused/);
 assert.match(js, /prefers-reduced-motion|reduceMotion/);
-assert.match(html, /animationer-vader\.js\?v=20261123zmys1/);
+assert.match(html, /animationer-vader\.js\?v=20261123zstg1/);
 assert.match(html, /animationer\.js\?v=20261122zdelad1/);
 assert.doesNotMatch(cl, /2026-11-11vader1|regnar eller snöar|snöflingor/);
 assert.match(anim, /ANIMATIONER\.layer|layer: ensureLayer/);
