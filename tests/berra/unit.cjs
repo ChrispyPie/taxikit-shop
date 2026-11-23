@@ -90,3 +90,13 @@ assert.match(cl, /2026-11-11berra1/);
 assert.match(cl, /På startskärmen finns Berra/);
 
 console.log('UNIT_OK', jokes.length);
+
+assert.match(src, /function startSkate/);
+assert.match(src, /function skateBump/);
+assert.match(src, /Kolla in mina skills/);
+assert.match(src, /Olympiaklass/);
+assert.match(src, /Vem flyttade granen/);
+assert.match(src, /td-berra-skate/);
+assert.doesNotMatch(src, /\bhen\b/);
+assert.ok(!src.includes('if (berra) r.appendChild(berra);'));
+console.log('berra skate unit extra ok');

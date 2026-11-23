@@ -589,18 +589,26 @@
   }
 
 
-  function scenSvg() {
-    return '<svg class="jul-scen-svg" viewBox="0 0 240 168" width="240" height="168" aria-hidden="true">' +
-      '<defs><linearGradient id="jul-is" x1="0" y1="0" x2="0" y2="1">' +
+  /* Större gran + is (~1.85×). Koordinater i original 240×168, skalas i SVG-gruppen. */
+  var SCEN_VB_W = 280, SCEN_VB_H = 262, SCEN_SCALE = 1.85, SCEN_CX = 140, SCEN_CY = 219;
+  /* Åk-ellips inom synlig is (viewBox klipper 94×1.85). */
+  var SCEN_RINK = { cx: SCEN_CX, cy: SCEN_CY, rx: 118, ry: 20 * SCEN_SCALE, vbW: SCEN_VB_W, vbH: SCEN_VB_H };
+  function scenGroup(inner, cls) {
+    var tr = 'translate(' + SCEN_CX + ' ' + SCEN_CY + ') scale(' + SCEN_SCALE + ') translate(-120 -136)';
+    return '<svg class="jul-scen-svg ' + cls + '" viewBox="0 0 ' + SCEN_VB_W + ' ' + SCEN_VB_H + '" aria-hidden="true">' +
+      '<g transform="' + tr + '">' + inner + '</g></svg>';
+  }
+  function iceSvg() {
+    return '<defs><linearGradient id="jul-is" x1="0" y1="0" x2="0" y2="1">' +
       '<stop offset="0%" stop-color="#e8f4ff"/><stop offset="55%" stop-color="#c9e4f7"/><stop offset="100%" stop-color="#a9d2ea"/>' +
       '</linearGradient></defs>' +
-      // Isbana med sarg
       '<ellipse class="jul-sarg" cx="120" cy="138" rx="102" ry="24" fill="#8a5a32" stroke="#5c3a1e" stroke-width="2"/>' +
       '<ellipse class="jul-is" cx="120" cy="136" rx="94" ry="20" fill="url(#jul-is)" stroke="#9ec5dc" stroke-width="1.2"/>' +
       '<path class="jul-skaren" d="M70 132 q18 -6 34 2 q16 8 36 -2 q14 -6 30 3" fill="none" stroke="#7ea8c0" stroke-width="1.1" opacity="0.7"/>' +
-      '<path class="jul-skaren" d="M86 140 q22 5 40 -3 q20 -8 38 1" fill="none" stroke="#7ea8c0" stroke-width="0.9" opacity="0.55"/>' +
-      // Gran
-      '<rect class="jul-stam" x="114" y="118" width="12" height="18" rx="1.5" fill="#6b3f1a" stroke="#4a2a10" stroke-width="0.8"/>' +
+      '<path class="jul-skaren" d="M86 140 q22 5 40 -3 q20 -8 38 1" fill="none" stroke="#7ea8c0" stroke-width="0.9" opacity="0.55"/>';
+  }
+  function treeSvg() {
+    return '<rect class="jul-stam" x="114" y="118" width="12" height="18" rx="1.5" fill="#6b3f1a" stroke="#4a2a10" stroke-width="0.8"/>' +
       '<polygon class="jul-barr2" points="120,78 86,122 154,122" fill="#1a5c34" stroke="#0f3d22" stroke-width="0.8"/>' +
       '<polygon class="jul-barr" points="120,58 92,100 148,100" fill="#217a44" stroke="#14532d" stroke-width="0.8"/>' +
       '<polygon class="jul-barr" points="120,40 100,78 140,78" fill="#2a8f52" stroke="#166534" stroke-width="0.8"/>' +
@@ -613,15 +621,19 @@
       '<g class="jul-gran-ljus">' +
       '<circle cx="120" cy="54" r="1.6" fill="#ffe08a"/><circle cx="112" cy="96" r="1.5" fill="#ffd36a"/>' +
       '<circle cx="128" cy="110" r="1.5" fill="#ffe08a"/><circle cx="100" cy="112" r="1.4" fill="#ffd36a"/>' +
-      '</g>' +
-      '<g transform="translate(168 118)"><g class="jul-akare">' +
-      '<ellipse cx="0" cy="16" rx="7" ry="2.2" fill="#7aa0b8" opacity="0.45"/>' +
-      '<rect x="-3.2" y="2" width="6.4" height="8" rx="2" fill="#c0392b"/>' +
-      '<circle cx="0" cy="0" r="3.1" fill="#f6d2b3" stroke="#1a1a1a" stroke-width="0.5"/>' +
-      '<path d="M-4 -1 L0 -9 L4 -1" fill="#c62828" stroke="#7a1212" stroke-width="0.5"/>' +
-      '<circle cx="0" cy="-9.2" r="1.3" fill="#f5f0e6"/>' +
-      '<path d="M-4 12 L6 12" stroke="#4a5568" stroke-width="1.2" stroke-linecap="round"/>' +
-      '</g></g></svg>';
+      '</g>';
+  }
+  function scenHtml() {
+    return scenGroup(iceSvg(), 'jul-scen-ice') + scenGroup(treeSvg(), 'jul-scen-tree');
+  }
+  function tagRink(scen) {
+    if (!scen || !scen.setAttribute) return;
+    scen.setAttribute('data-rink-cx', String(SCEN_RINK.cx));
+    scen.setAttribute('data-rink-cy', String(SCEN_RINK.cy));
+    scen.setAttribute('data-rink-rx', String(SCEN_RINK.rx));
+    scen.setAttribute('data-rink-ry', String(SCEN_RINK.ry));
+    scen.setAttribute('data-rink-vb-w', String(SCEN_VB_W));
+    scen.setAttribute('data-rink-vb-h', String(SCEN_VB_H));
   }
   function ensureScen() {
     var scen = document.getElementById('jul-scen');
@@ -634,11 +646,17 @@
       scen.id = 'jul-scen';
       scen.setAttribute('aria-hidden', 'true');
       scen.hidden = true;
-      scen.innerHTML = scenSvg() +
+      scen.innerHTML = scenHtml() +
         '<button type="button" class="jul-scen-hit" aria-label="Julgran"> </button>';
+      tagRink(scen);
       var hit = scen.querySelector && scen.querySelector('.jul-scen-hit');
       if (hit) {
-        hit.addEventListener('click', function () {
+        hit.addEventListener('click', function (e) {
+          if (window.BERRA && BERRA.isSkating && BERRA.isSkating()) {
+            e.preventDefault();
+            if (BERRA.skateBump) BERRA.skateBump('scen');
+            return;
+          }
           scen.classList.remove('jul-scen-pling');
           void scen.offsetWidth;
           scen.classList.add('jul-scen-pling');
@@ -653,6 +671,21 @@
     if (window.HB_STAGE && window.HB_STAGE.ensureHemScen) return window.HB_STAGE.ensureHemScen();
     return document.getElementById('td-hem-scen') || document.querySelector('.td-berra-slot');
   }
+  function hemOrder(row) {
+    if (!row) return;
+    var spacer = row.querySelector('.td-berra-spacer');
+    var berra = row.querySelector('.td-berra');
+    var scen = row.querySelector('#jul-scen');
+    var bot = row.querySelector('#hb-stage');
+    var want = [], i;
+    if (spacer && spacer.parentNode === row) want.push(spacer);
+    if (berra) want.push(berra);
+    if (scen) want.push(scen);
+    if (bot) want.push(bot);
+    for (i = 0; i < want.length; i++) {
+      if (row.children[i] !== want[i]) row.insertBefore(want[i], row.children[i] || null);
+    }
+  }
   function layoutScen(scen) {
     scen = scen || document.getElementById('jul-scen');
     if (!scen || !allowed() || !onHome()) return;
@@ -661,14 +694,7 @@
     if (row && row.appendChild) {
       if (scen.parentNode !== row) row.appendChild(scen);
       if (scen.style) scen.style.minHeight = '';
-      var berra = row.querySelector('.td-berra');
-      var bot = row.querySelector('#hb-stage');
-      if (berra) row.insertBefore(berra, row.firstChild);
-      if (scen) {
-        if (bot) row.insertBefore(scen, bot);
-        else row.appendChild(scen);
-      }
-      if (bot) row.appendChild(bot);
+      hemOrder(row);
     } else if (content) {
       if (scen.parentNode !== content) content.appendChild(scen);
       if (scen.style) scen.style.minHeight = '';
@@ -700,12 +726,22 @@
     if (scen.querySelector && !scen.querySelector('.jul-scen-svg')) {
       var hit = scen.querySelector && scen.querySelector('.jul-scen-hit');
       if (scen.insertAdjacentHTML) {
-        scen.insertAdjacentHTML('afterbegin', scenSvg());
+        scen.insertAdjacentHTML('afterbegin', scenHtml());
       } else if (!String(scen.innerHTML || '').includes('jul-scen-svg')) {
-        scen.innerHTML = scenSvg() + (scen.innerHTML || '');
+        scen.innerHTML = scenHtml() + (scen.innerHTML || '');
       }
       if (hit && !hit.parentNode) scen.appendChild(hit);
     }
+    /* Byt ut ev. gammal ensam-svg (med skridskoåkaren) mot is+gran-lager. */
+    if (scen.querySelector && scen.querySelector('.jul-scen-svg') && !scen.querySelector('.jul-scen-ice')) {
+      var hit2 = scen.querySelector('.jul-scen-hit');
+      var olds = scen.querySelectorAll('.jul-scen-svg');
+      var oi;
+      for (oi = 0; oi < olds.length; oi++) if (olds[oi].parentNode) olds[oi].parentNode.removeChild(olds[oi]);
+      if (scen.insertAdjacentHTML) scen.insertAdjacentHTML('afterbegin', scenHtml());
+      if (hit2 && !hit2.parentNode) scen.appendChild(hit2);
+    }
+    tagRink(scen);
     layoutScen(scen);
   }
 
@@ -756,7 +792,9 @@
     paint: paint,
     start: start,
     cyclePreview: cyclePreview,
-    previewKey: PREVIEW_KEY
+    previewKey: PREVIEW_KEY,
+    rink: SCEN_RINK,
+    hemOrder: hemOrder
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);

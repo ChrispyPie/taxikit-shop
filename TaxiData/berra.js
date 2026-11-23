@@ -353,7 +353,30 @@
       '.td-berra-bubble-tail{position:absolute;width:12px;height:12px;background:var(--surface);border:2px solid var(--text);' +
       'left:var(--tail-left,50%);transform:translateX(-50%) rotate(45deg);pointer-events:none}' +
       '.td-berra-bubble[data-side="above"] .td-berra-bubble-tail{bottom:-7px;border-top:0;border-left:0}' +
-      '.td-berra-bubble[data-side="below"] .td-berra-bubble-tail{top:-7px;border-bottom:0;border-right:0}';
+      '.td-berra-bubble[data-side="below"] .td-berra-bubble-tail{top:-7px;border-bottom:0;border-right:0}' +
+      '.td-berra-spacer{flex:0 0 auto;width:' + W + 'px;height:' + H + 'px;pointer-events:none;visibility:hidden;margin:0;padding:0;border:0}' +
+      '#td-hem-scen > .td-berra.td-berra-skate,.td-hem-scen > .td-berra.td-berra-skate{position:absolute;margin:0;z-index:5;will-change:left,top,transform}' +
+      '#td-hem-scen > .td-berra.td-berra-skate.td-berra-behind,.td-hem-scen > .td-berra.td-berra-skate.td-berra-behind{z-index:2}' +
+      '#td-hem-scen > .td-berra.td-berra-skate.td-berra-front,.td-hem-scen > .td-berra.td-berra-skate.td-berra-front{z-index:7}' +
+      '.td-berra.td-berra-skate svg{transform-origin:50% 100%}' +
+      '.td-berra-bubble.td-berra-skatbub{background:rgba(255,255,255,.55);border:1px solid rgba(30,30,30,.28);' +
+      'box-shadow:none;padding:5px 8px 6px;font-size:calc(13px * min(var(--font-scale,1),1.15));z-index:20}' +
+      'html[data-theme="dark"] .td-berra-bubble.td-berra-skatbub{background:rgba(20,24,30,.55);color:#f1f5f9;border-color:rgba(255,255,255,.22)}' +
+      '.td-berra-bubble.td-berra-skatbub .td-berra-bubble-tail{background:rgba(255,255,255,.55);border-color:rgba(30,30,30,.28)}' +
+      'html[data-theme="dark"] .td-berra-bubble.td-berra-skatbub .td-berra-bubble-tail{background:rgba(20,24,30,.55);border-color:rgba(255,255,255,.22)}' +
+      '@media (prefers-reduced-motion:no-preference){' +
+      '.td-berra-fall svg{animation:td-berra-fall 1.25s ease-in-out;transform-origin:50% 100%}' +
+      '.td-berra-crash svg{animation:td-berra-crash 1.15s ease-in-out;transform-origin:50% 80%}' +
+      '.td-berra-wobble svg{animation:td-berra-wobble .95s ease-in-out;transform-origin:50% 100%}' +
+      '.td-berra-wobble .td-berra-arm{animation:td-berra-windmill .32s linear 3;transform-box:fill-box;transform-origin:90% 80%}' +
+      '}' +
+      '@keyframes td-berra-fall{0%{transform:rotate(0) translate(0,0)}28%{transform:rotate(-62deg) translate(5px,10px)}' +
+      '48%{transform:rotate(-82deg) translate(7px,14px)}72%{transform:rotate(-82deg) translate(7px,14px)}100%{transform:rotate(0) translate(0,0)}}' +
+      '@keyframes td-berra-crash{0%{transform:translate(0,0) rotate(0)}22%{transform:translate(12px,-8px) rotate(-18deg)}' +
+      '40%{transform:translate(-2px,9px) rotate(22deg)}65%{transform:translate(-6px,3px) rotate(-8deg)}100%{transform:translate(0,0) rotate(0)}}' +
+      '@keyframes td-berra-wobble{0%,100%{transform:rotate(0)}18%{transform:rotate(-18deg)}40%{transform:rotate(16deg)}62%{transform:rotate(-12deg)}82%{transform:rotate(7deg)}}' +
+      '@keyframes td-berra-windmill{to{transform:rotate(-360deg)}}' +
+      '@media (prefers-reduced-motion:reduce){.td-berra-fall svg,.td-berra-crash svg,.td-berra-wobble svg,.td-berra-wobble .td-berra-arm{animation:none}}';
     document.head.appendChild(s);
   }
 
@@ -375,6 +398,7 @@
   }
 
   function unmount() {
+    stopSkate(true);
     if (el.btn && el.btn.parentNode) el.btn.parentNode.removeChild(el.btn);
     if (el.btn) el.btn.style.display = 'none';
   }
@@ -398,24 +422,23 @@
       }
       if (el.slot.parentNode !== content || content.lastElementChild !== el.slot) content.appendChild(el.slot);
     }
+    if (skate.on) {
+      if (el.btn.style.display === 'none') el.btn.style.display = '';
+      sizeSlot();
+      if (el.bubble && el.bubble.classList.contains('show')) placeBubble();
+      return;
+    }
     if (el.btn.parentNode !== el.slot) {
       if (el.slot.firstChild) el.slot.insertBefore(el.btn, el.slot.firstChild);
       else el.slot.appendChild(el.btn);
     }
-    if (window.HB_STAGE && window.HB_STAGE.ensureHemScen) {
-      var r = hemRow();
-      if (r) {
-        var berra = r.querySelector('.td-berra');
-        var scen = r.querySelector('#jul-scen');
-        var bot = r.querySelector('#hb-stage');
-        if (berra) r.appendChild(berra);
-        if (scen) r.appendChild(scen);
-        if (bot) r.appendChild(bot);
-      }
+    if (window.JULPYSSEL && JULPYSSEL.hemOrder) JULPYSSEL.hemOrder(el.slot);
+    else if (window.HB_STAGE && window.HB_STAGE.ensureHemScen) {
+      /* Säker ordning utan appendChild varje gång (det startade om CSS-animationer). */
     }
     el.btn.style.display = '';
-    el.btn.style.transform = '';
-    el.btn.innerHTML = svg();
+    if (!skate.on) el.btn.style.transform = '';
+    syncSvg();
     sizeSlot();
     if (el.bubble && el.bubble.classList.contains('show')) placeBubble();
   }
@@ -483,11 +506,15 @@
 
   function hideBubble() {
     clearTimeout(hideT);
-    if (el.bubble) el.bubble.classList.remove('show');
+    if (el.bubble) {
+      el.bubble.classList.remove('show');
+      el.bubble.classList.remove('td-berra-skatbub');
+    }
   }
 
   function say(text) {
     if (!el.bubble || !el.txt) return;
+    if (!skate.on) el.bubble.classList.remove('td-berra-skatbub');
     el.txt.textContent = text;
     el.bubble.classList.add('show');
     placeBubble();
@@ -497,6 +524,7 @@
 
   function poke() {
     if (!onHome() || !el.btn || el.btn.style.display === 'none') return;
+    if (skate.on) { skateBump('berra'); return; }
     if (Date.now() - lastAt < 400) return;
     lastAt = Date.now();
     if (animOn() && !reduceMotion()) {
@@ -535,7 +563,294 @@
     });
   }
 
-  function tick() { place(); }
+
+  var SKATE_LINES = [
+    'Wiiiieee..',
+    'Wiiieee…',
+    'Titta mamma, utan händer!',
+    'Titta mamma, inga händer!',
+    'Hoppsan!',
+    'Piruett!',
+    'Piruett-proffs',
+    'Kallt om näsan',
+    'Hoho!',
+    'Kolla in mina skills',
+    'Kolla in mina skills 😎',
+    'Olympiaklass!',
+    'Se hit!',
+    'En dubbelaxel... nästan!',
+    'Isen är som glas!',
+    'Åk om ni kan!',
+    'Kolla svängen!',
+    'Friskt hut!',
+    'Jag flyger!'
+  ];
+  var STUNT_LINES = {
+    fall: ['Aj!', 'Aj aj aj!', 'Halt som smör!', 'Så där ja… upp igen!'],
+    crash: ['Vem flyttade granen?!', 'Förlåt granen!', 'Oj, ursäkta!'],
+    wobble: ['Oj oj oj…', 'Nästan!', 'Balansen sitter!']
+  };
+  var skate = { on: false, raf: 0, timer: 0, bubT: 0, t0: 0, pauseAt: 0, pauseMs: 0, dur: 0, enter: 1200, exit: 1400, ang: 0, lastX: 0, flip: 1, stuntUntil: 0, lastStunt: 0, frozenAng: 0 };
+  var lastKlad = null;
+
+  function syncSvg(force) {
+    if (!el.btn) return;
+    var k = julKlad();
+    if (!force && lastKlad === k && el.btn.querySelector('svg')) return;
+    lastKlad = k;
+    el.btn.innerHTML = svg();
+  }
+  function canSkate() {
+    if (reduceMotion()) return false;
+    return true;
+  }
+  function fxPaused() {
+    return !!(document.hidden || document.visibilityState === 'hidden' ||
+      (document.documentElement && document.documentElement.classList.contains('td-fx-pause')));
+  }
+  function rand(a, b) { return a + Math.random() * (b - a); }
+  function pickArr(a) { return a[Math.floor(Math.random() * a.length)]; }
+  function ensureSpacer() {
+    if (el.spacer && el.spacer.parentNode) return el.spacer;
+    var sp = document.createElement('div');
+    sp.className = 'td-berra-spacer';
+    sp.setAttribute('aria-hidden', 'true');
+    el.spacer = sp;
+    return sp;
+  }
+  function rinkGeom() {
+    var scen = document.getElementById('jul-scen');
+    var slot = hemRow() || el.slot;
+    if (!scen || !slot || scen.hidden || !scen.classList.contains('jul-on')) return null;
+    var sr = scen.getBoundingClientRect();
+    var sl = slot.getBoundingClientRect();
+    if (sr.width < 8 || sr.height < 8) return null;
+    var cx = parseFloat(scen.getAttribute('data-rink-cx') || '140');
+    var cy = parseFloat(scen.getAttribute('data-rink-cy') || '219');
+    var rx = parseFloat(scen.getAttribute('data-rink-rx') || '118');
+    var ry = parseFloat(scen.getAttribute('data-rink-ry') || '37');
+    var vbW = parseFloat(scen.getAttribute('data-rink-vb-w') || '280');
+    var vbH = parseFloat(scen.getAttribute('data-rink-vb-h') || '262');
+    function toSlot(sx, sy) {
+      return {
+        x: sr.left - sl.left + (sx / vbW) * sr.width,
+        y: sr.top - sl.top + (sy / vbH) * sr.height
+      };
+    }
+    return { cx: cx, cy: cy, rx: rx, ry: ry, toSlot: toSlot, sr: sr, sl: sl };
+  }
+  function ellipsePt(g, ang) {
+    return g.toSlot(g.cx + g.rx * Math.cos(ang), g.cy + g.ry * Math.sin(ang));
+  }
+  function cornerPt() {
+    var slot = hemRow() || el.slot;
+    var sp = el.spacer;
+    if (!slot || !sp) return null;
+    var sl = slot.getBoundingClientRect();
+    var r = sp.getBoundingClientRect();
+    return { x: r.left - sl.left + r.width / 2, y: r.top - sl.top + r.height };
+  }
+  function applySkatePos(x, y, front, flip) {
+    if (!el.btn) return;
+    skate.lastX = x;
+    skate.flip = flip;
+    el.btn.style.left = (x - W / 2) + 'px';
+    el.btn.style.top = (y - H + 5) + 'px';
+    el.btn.style.transform = 'scale(' + (flip * 0.92) + ', 0.92)';
+    el.btn.classList.toggle('td-berra-behind', !front);
+    el.btn.classList.toggle('td-berra-front', !!front);
+  }
+  function saySkate(text) {
+    if (!el.bubble) return;
+    el.bubble.classList.add('td-berra-skatbub');
+    say(text);
+    clearTimeout(hideT);
+    hideT = setTimeout(hideBubble, 2200);
+  }
+  function stopSkate(instant) {
+    if (skate.raf) { cancelAnimationFrame(skate.raf); skate.raf = 0; }
+    if (skate.bubT) { clearTimeout(skate.bubT); skate.bubT = 0; }
+    var was = skate.on;
+    skate.on = false;
+    skate.stuntUntil = 0;
+    if (el.btn) {
+      el.btn.classList.remove('td-berra-skate', 'td-berra-behind', 'td-berra-front', 'td-berra-fall', 'td-berra-crash', 'td-berra-wobble');
+      el.btn.style.left = '';
+      el.btn.style.top = '';
+      el.btn.style.transform = '';
+    }
+    if (el.spacer) el.spacer.style.display = 'none';
+    if (was && !instant && el.btn && el.slot && el.btn.parentNode === el.slot) {
+      if (el.spacer && el.spacer.parentNode === el.slot) el.slot.insertBefore(el.btn, el.spacer);
+      else el.slot.insertBefore(el.btn, el.slot.firstChild);
+    }
+    if (window.JULPYSSEL && JULPYSSEL.hemOrder && el.slot) JULPYSSEL.hemOrder(el.slot);
+    scheduleSkate();
+  }
+
+  function scheduleSkate() {
+    if (skate.timer) { clearTimeout(skate.timer); skate.timer = 0; }
+    if (reduceMotion()) return;
+    var q = '';
+    try { q = new URLSearchParams(location.search).get('berraskridsko') || ''; } catch (e) {}
+    var wait;
+    if (q === '1' || q === 'mid' || q === 'ja') wait = 500;
+    else wait = rand(3, 8) * 60 * 1000;
+    skate.timer = setTimeout(function () {
+      skate.timer = 0;
+      startSkate(q === 'mid' ? { mid: true } : null);
+    }, wait);
+  }
+
+  function startSkate(opts) {
+    opts = opts || {};
+    if (skate.on || !canSkate() || !onHome() || !el.btn) return false;
+    var g = rinkGeom();
+    if (!g) { scheduleSkate(); return false; }
+    if (fxPaused()) { scheduleSkate(); return false; }
+    var sp = ensureSpacer();
+    if (el.btn.parentNode) el.btn.parentNode.insertBefore(sp, el.btn.parentNode.firstChild);
+    sp.style.display = '';
+    skate.on = true;
+    skate.dur = opts.ms || rand(20, 40) * 1000;
+    skate.enter = 1100;
+    skate.exit = 1300;
+    skate.t0 = performance.now();
+    skate.pauseAt = 0;
+    skate.pauseMs = 0;
+    skate.ang = Math.PI; /* vänster sida, närmast Berras hörn */
+    skate.laps = (Math.PI * 2 / 7000) * Math.max(4000, skate.dur - skate.enter - skate.exit);
+    if (opts.mid) {
+      /* Framför granen, mitt på närmre långsidan (sin > 0). */
+      skate.t0 -= skate.enter + 5250;
+    }
+    el.btn.classList.add('td-berra-skate');
+    el.btn.classList.remove('td-berra-poke');
+    if (el.bubble) el.bubble.classList.remove('show');
+    if (skate.raf) cancelAnimationFrame(skate.raf);
+    skate.raf = requestAnimationFrame(skateTick);
+    scheduleSkateBubbles();
+    return true;
+  }
+
+  function scheduleSkateBubbles() {
+    if (skate.bubT) { clearTimeout(skate.bubT); skate.bubT = 0; }
+    if (!skate.on) return;
+    skate.bubT = setTimeout(function () {
+      skate.bubT = 0;
+      if (!skate.on || skate.stuntUntil) { scheduleSkateBubbles(); return; }
+      saySkate(pickArr(SKATE_LINES));
+      scheduleSkateBubbles();
+    }, rand(5000, 9000));
+  }
+
+  function skateTick(ts) {
+    skate.raf = requestAnimationFrame(skateTick);
+    if (!skate.on) return;
+    if (fxPaused()) {
+      if (!skate.pauseAt) skate.pauseAt = ts;
+      return;
+    }
+    if (skate.pauseAt) {
+      skate.pauseMs += ts - skate.pauseAt;
+      skate.pauseAt = 0;
+    }
+    if (skate.stuntUntil && ts < skate.stuntUntil) {
+      if (el.bubble && el.bubble.classList.contains('show')) placeBubble();
+      return;
+    }
+    if (skate.stuntUntil && ts >= skate.stuntUntil) finishStunt();
+    var t = ts - skate.t0 - skate.pauseMs;
+    var g = rinkGeom();
+    if (!g) { stopSkate(true); return; }
+    var enter = skate.enter, exit = skate.exit, mid = skate.dur - enter - exit;
+    if (mid < 3000) mid = 3000;
+    var total = enter + mid + exit;
+    var p, front, flip, ang, dest, u, from;
+    if (t >= total) { stopSkate(); return; }
+    if (t < enter) {
+      u = t / enter;
+      u = u * u * (3 - 2 * u);
+      from = cornerPt() || ellipsePt(g, Math.PI);
+      dest = ellipsePt(g, Math.PI);
+      p = { x: from.x + (dest.x - from.x) * u, y: from.y + (dest.y - from.y) * u };
+      front = true;
+      flip = dest.x >= from.x ? 1 : -1;
+      skate.ang = Math.PI;
+    } else if (t > enter + mid) {
+      u = (t - enter - mid) / exit;
+      u = u * u * (3 - 2 * u);
+      ang = skate.ang;
+      from = ellipsePt(g, ang);
+      dest = cornerPt() || from;
+      p = { x: from.x + (dest.x - from.x) * u, y: from.y + (dest.y - from.y) * u };
+      front = true;
+      flip = dest.x >= from.x ? 1 : -1;
+    } else {
+      var speed = (Math.PI * 2) / 7000;
+      ang = Math.PI + (t - enter) * speed;
+      skate.ang = ang;
+      p = ellipsePt(g, ang);
+      /* sin>0 = närmre kanten (framför granen). */
+      front = Math.sin(ang) > 0;
+      var next = ellipsePt(g, ang + 0.05);
+      flip = next.x >= p.x ? 1 : -1;
+    }
+    applySkatePos(p.x, p.y, front, flip);
+    if (el.bubble && el.bubble.classList.contains('show')) placeBubble();
+  }
+
+  function snowPuff() {
+    var scen = document.getElementById('jul-scen');
+    if (!scen) return;
+    var i, s, n = 8;
+    for (i = 0; i < n; i++) {
+      s = document.createElement('span');
+      s.className = 'jul-scen-sno';
+      s.style.left = (40 + Math.random() * 22) + '%';
+      s.style.top = (16 + Math.random() * 28) + '%';
+      s.style.setProperty('--dx', ((Math.random() * 24) - 8) + 'px');
+      s.style.animationDelay = (i * 0.03) + 's';
+      scen.appendChild(s);
+      setTimeout((function (el) { return function () { if (el && el.parentNode) el.parentNode.removeChild(el); }; })(s), 950);
+    }
+  }
+  function shakeTree() {
+    var scen = document.getElementById('jul-scen');
+    if (!scen) return;
+    scen.classList.remove('jul-scen-skak');
+    void scen.offsetWidth;
+    scen.classList.add('jul-scen-skak');
+    setTimeout(function () { if (scen) scen.classList.remove('jul-scen-skak'); }, 600);
+    snowPuff();
+  }
+  function finishStunt() {
+    skate.stuntUntil = 0;
+    if (el.btn) el.btn.classList.remove('td-berra-fall', 'td-berra-crash', 'td-berra-wobble');
+  }
+  function skateBump(why) {
+    if (!skate.on || !el.btn) return false;
+    if (reduceMotion()) {
+      saySkate(pickArr(STUNT_LINES.wobble));
+      return true;
+    }
+    var now = Date.now();
+    if (now - skate.lastStunt < 2800) return false;
+    if (skate.stuntUntil && performance.now() < skate.stuntUntil) return false;
+    skate.lastStunt = now;
+    var kinds = ['fall', 'crash', 'wobble'];
+    var kind = pickArr(kinds);
+    var ms = kind === 'fall' ? 1300 : kind === 'crash' ? 1150 : 1000;
+    finishStunt();
+    skate.stuntUntil = performance.now() + ms;
+    if (kind === 'fall') el.btn.classList.add('td-berra-fall');
+    else if (kind === 'crash') { el.btn.classList.add('td-berra-crash'); shakeTree(); }
+    else el.btn.classList.add('td-berra-wobble');
+    saySkate(pickArr(STUNT_LINES[kind]));
+    return true;
+  }
+
+  function tick() { if (!skate.on) place(); }
 
   function start() {
     build();
@@ -549,6 +864,7 @@
       else place();
     });
     setInterval(tick, 1000);
+    scheduleSkate();
     var app = document.getElementById('app');
     if (app && window.MutationObserver) {
       new MutationObserver(function () { place(); }).observe(app, { attributes: true, attributeFilter: ['class', 'style'] });
@@ -560,7 +876,8 @@
   }
 
   function refresh() {
-    if (el.btn) el.btn.innerHTML = svg();
+    if (skate.on) return;
+    syncSvg(true);
   }
 
   window.BERRA = {
@@ -569,6 +886,14 @@
     poke: poke,
     place: place,
     refresh: refresh,
+    skateNow: function (opts) {
+      opts = opts || {};
+      if (skate.on && (opts.mid || opts.restart)) stopSkate(true);
+      return startSkate(opts);
+    },
+    isSkating: function () { return !!skate.on; },
+    skateBump: skateBump,
+    skateLines: function () { return SKATE_LINES.slice(); },
     preview: function (text) {
       place();
       say(text || pickJoke());
