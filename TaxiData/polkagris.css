@@ -93,3 +93,11 @@ button.td-pk-hdr.td-pk-hdr-pulse{animation:td-pk-pulse .65s ease-in-out 2}
   .td-pk-cane--golden .td-pk-cane-ico{animation:none}
   button.td-pk-hdr.td-pk-hdr-pulse{animation:none}
 }
+
+button.td-pk-hdr.td-pk-hdr-hunt .td-pk-cane-svg{
+  filter:drop-shadow(0 0 5px rgba(196,30,42,.9));
+  animation:td-pk-pulse 1.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion:reduce){
+  button.td-pk-hdr.td-pk-hdr-hunt .td-pk-cane-svg{animation:none}
+}
