@@ -112,7 +112,7 @@
     var l = document.createElement('link');
     l.id = 'td-polkagris-css-link';
     l.rel = 'stylesheet';
-    l.href = 'polkagris.css?v=20261123adv12';
+    l.href = 'polkagris.css?v=20261123adv13';
     document.head.appendChild(l);
   }
 
@@ -163,27 +163,47 @@
     }, 1600);
   }
 
+  function caneOnThisPage(cane) {
+    if (!cane || !cane.place_key) return false;
+    var spec = PLACES[cane.place_key];
+    if (!spec) return false;
+    if (spec.view != null && spec.view !== currentView()) return false;
+    return !!document.querySelector(spec.sel);
+  }
+
+  function hiddenCanes(list) {
+    return (list || []).filter(function (c) { return c && !caneOnThisPage(c); });
+  }
+
+  function syncHuntHint() {
+    var el = document.getElementById('td-pk-count');
+    if (!el) return;
+    var hidden = hiddenCanes(st.canes || []).length > 0;
+    el.classList.toggle('td-pk-hdr-hunt', hidden);
+    var n = st.mine || 0;
+    var label = 'Polkagrisar: ' + n + ' poäng. Öppna ställningen.';
+    if (hidden) label = 'En polkagris väntar någonstans i appen. ' + label;
+    el.setAttribute('aria-label', label);
+  }
+
   function noteNewCanes(list) {
     list = list || [];
-    if (!toastReady) {
-      list.forEach(function (c) { if (c && c.id != null) seenCaneIds[c.id] = true; });
-      toastReady = true;
-      return;
-    }
     var added = [];
     list.forEach(function (c) {
       if (!c || c.id == null) return;
-      if (!seenCaneIds[c.id]) {
-        seenCaneIds[c.id] = true;
-        if (c.kind !== 'personal') added.push(c);
-      }
+      if (seenCaneIds[c.id]) return;
+      seenCaneIds[c.id] = true;
+      if (!caneOnThisPage(c)) added.push(c);
     });
-    if (!added.length) return;
-    var hasG = added.some(function (c) { return c.kind === 'golden'; });
-    if (hasG) toast('En gyllene polkagris har dykt upp någonstans i appen.');
-    else if (added.length > 1) toast('Nya polkagrisar har dykt upp någonstans i appen.');
-    else toast('En polkagris har dykt upp någonstans i appen.');
-    pulseCount();
+    toastReady = true;
+    if (added.length) {
+      var hasG = added.some(function (c) { return c.kind === 'golden'; });
+      if (hasG) toast('En gyllene polkagris har dykt upp någonstans i appen.');
+      else if (added.length > 1) toast('Nya polkagrisar har dykt upp någonstans i appen.');
+      else toast('En polkagris har dykt upp någonstans i appen.');
+      pulseCount();
+    }
+    syncHuntHint();
   }
 
   /* Samma polkagris som jakten: rödvit krokklubba, inte en lolly. */
@@ -297,6 +317,7 @@
     var n = st.mine || 0;
     el.innerHTML = caneIconHtml() + '<span class="td-pk-hdr-n">' + n + '</span>';
     el.setAttribute('aria-label', 'Polkagrisar: ' + n + ' poäng. Öppna ställningen.');
+    syncHuntHint();
     syncJulTopOn();
   }
 
@@ -346,6 +367,7 @@
     Object.keys(elCanes).forEach(function (k) {
       if (!wanted[k]) hideCane(k);
     });
+    syncHuntHint();
   }
 
   function applyClaimScores(r) {
