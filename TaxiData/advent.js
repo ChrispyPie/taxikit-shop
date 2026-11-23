@@ -47,13 +47,21 @@
     return Promise.reject(new Error('no_rpc'));
   }
 
+  /* Testdatum (?adventdatum=) och allt före 1 dec 2026 sparas i år 0,
+   * så öppnade luckor i förhand inte räknas i den riktiga decemberkalendern. */
+  function storageYear(t) {
+    if (asOfArg()) return 0;
+    if (gate().isLive && !gate().isLive()) return 0;
+    t = t || today();
+    return t.m === 1 ? t.y - 1 : t.y;
+  }
   function loadState() {
     var args = { p_token: token() };
     var asOf = asOfArg();
     if (asOf) args.p_as_of = asOf;
     return rpc('advent_state', args).then(function (r) {
       var t = today();
-      st.year = (r && r.year) || t.y;
+      st.year = (r && r.year != null) ? r.year : storageYear(t);
       st.today = (r && r.today) || t.iso;
       st.month = (r && r.month) || t.m;
       st.day = (r && r.day) || t.d;
@@ -61,7 +69,7 @@
       return r;
     }).catch(function () {
       var t = today();
-      st.year = t.m === 1 ? t.y - 1 : t.y;
+      st.year = storageYear(t);
       st.today = t.iso;
       st.month = t.m;
       st.day = t.d;
@@ -174,6 +182,9 @@
     var t = today();
     var html = '<div class="td-adv-page">';
     html += '<p class="td-adv-lead">24 luckor med taxifakta, en för varje dag i december. Öppna dagens lucka – och alla du missat hittills.</p>';
+    if (asOfArg()) {
+      html += '<p class="td-adv-muted">Testdatum ' + esc(asOfArg()) + ': du kan öppna luckorna t.o.m. den dagen. Öppningar i det här läget räknas inte när kalendern startar på riktigt 1 december.</p>';
+    }
     html += tabsHtml();
     if (st.err) html += '<p class="td-adv-err" role="alert">' + esc(st.err) + '</p>';
     if (st.tab === 'jakt') {

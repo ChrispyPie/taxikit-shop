@@ -27,6 +27,11 @@ assert.match(advent, /24 luckor/);
 assert.match(advent, /function canOpen/);
 assert.match(advent, /d <= st\.day/);
 assert.match(advent, /st\.month !== 12/);
+assert.match(advent, /function storageYear/);
+assert.match(advent, /if \(asOfArg\(\)\) return 0/);
+assert.match(advent, /r\.year != null/);
+assert.match(advent, /Testdatum/);
+
 
 assert.match(core, /id === 'advent'/);
 assert.match(core, /ADVENT_GATE/);

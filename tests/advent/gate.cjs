@@ -60,6 +60,12 @@ assert.equal(g.today().iso, '2026-12-01');
 assert.equal(g.realToday().iso, '2026-11-23');
 assert.equal(g.allowed(), true);
 
+g = loadGate(nov, '710022', '?adventdatum=2026-12-24');
+assert.equal(g.today().iso, '2026-12-24', 'unlocks all 24 luckor');
+assert.equal(g.today().d, 24);
+assert.equal(g.asOfArg(), '2026-12-24');
+assert.equal(g.realToday().iso, '2026-11-23');
+
 // nyhLive via om.js lista
 const omSrc = fs.readFileSync(path.join(root, 'TaxiData/om.js'), 'utf8');
 const clSrc = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
