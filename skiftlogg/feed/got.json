@@ -1,8 +1,8 @@
 {
   "airport": "GOT",
-  "updated": "2026-11-23T10:05:35+01:00",
-  "arrivalsUpdated": "2026-11-23T10:05:37+01:00",
-  "departuresUpdated": "2026-11-23T09:10:41+01:00",
+  "updated": "2026-11-23T10:10:39+01:00",
+  "arrivalsUpdated": "2026-11-23T10:10:40+01:00",
+  "departuresUpdated": "2026-11-23T10:10:41+01:00",
   "yesterdayUpdated": "2026-11-23T05:30:52+01:00",
   "tomorrowUpdated": "2026-11-22T23:01:04+01:00",
   "error": null,
@@ -2364,8 +2364,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Beräknad 11:12",
-      "reason": "Beräknad 11:12"
+      "rawStatus": "Ankommer 10:56",
+      "reason": "Ankommer 10:56"
     },
     {
       "id": "FR4012",
@@ -2396,7 +2396,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-11-23T12:20:00Z",
-      "est": "",
+      "est": "2026-11-23T12:07:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "",
@@ -2404,8 +2404,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Beräknad 13:07",
+      "reason": "Beräknad 13:07"
     },
     {
       "id": "KL1231",
@@ -2776,7 +2776,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-11-23T10:40:00Z",
-      "est": "2026-11-23T10:45:00Z",
+      "est": "2026-11-23T10:41:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "12",
@@ -2908,26 +2908,6 @@
       "lastBag": "",
       "rawStatus": "Gate stängd",
       "reason": "Gate stängd"
-    },
-    {
-      "id": "IV6931",
-      "dir": "AVG",
-      "other": "Pristina",
-      "iata": "",
-      "airline": "GP Aviation",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-11-21T19:50:00Z",
-      "est": "2026-11-21T20:00:00Z",
-      "act": "2026-11-21T20:45:00Z",
-      "terminal": "T1",
-      "gate": "23",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 21:57",
-      "reason": "Startat 21:57"
     },
     {
       "id": "JTD433",
@@ -4566,8 +4546,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Boarding",
+      "reason": "Boarding"
     },
     {
       "id": "KL1234",
@@ -4641,7 +4621,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "22",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -4741,13 +4721,13 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "23",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Gå till gate",
+      "reason": "Gå till gate"
     },
     {
       "id": "FR965",
@@ -4786,8 +4766,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Försenad till 08:45 · Gate stängd",
-      "reason": "Försenad till 08:45 · Gate stängd"
+      "rawStatus": "Startat 09:14",
+      "reason": "Startat 09:14"
     },
     {
       "id": "BA791",
@@ -4821,7 +4801,7 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "14",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
@@ -4955,19 +4935,19 @@
       "other": "Lanzarote",
       "iata": "",
       "airline": "Tui Fly Nordic",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-23T08:25:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-23T08:32:17Z",
       "terminal": "T1",
       "gate": "12",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd",
-      "reason": "Gate stängd"
+      "rawStatus": "Startat 09:46",
+      "reason": "Startat 09:46"
     },
     {
       "id": "DK844",
@@ -4975,19 +4955,19 @@
       "other": "Hurghada",
       "iata": "",
       "airline": "Sunclass Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-23T08:40:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-23T08:49:25Z",
       "terminal": "T1",
       "gate": "22",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Boarding",
-      "reason": "Boarding"
+      "rawStatus": "Startat 10:00",
+      "reason": "Startat 10:00"
     },
     {
       "id": "SN2324",
@@ -5206,8 +5186,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Gate stängd",
+      "reason": "Gate stängd"
     },
     {
       "id": "SK146",
@@ -5226,8 +5206,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Försenad till 10:15",
-      "reason": "Försenad till 10:15"
+      "rawStatus": "Försenad till 10:15 · Gate stängd",
+      "reason": "Försenad till 10:15 · Gate stängd"
     },
     {
       "id": "SK449",
@@ -5458,7 +5438,7 @@
       "status": "SCH",
       "statusSv": "Planerad",
       "sched": "2026-11-23T09:10:00Z",
-      "est": "2026-11-23T10:05:00Z",
+      "est": "2026-11-23T10:50:00Z",
       "act": "",
       "terminal": "T1",
       "gate": "15",
@@ -5466,8 +5446,8 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Försenad till 11:05",
-      "reason": "Försenad till 11:05"
+      "rawStatus": "Försenad till 11:50",
+      "reason": "Försenad till 11:50"
     },
     {
       "id": "SK166",
