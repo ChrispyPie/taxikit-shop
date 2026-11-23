@@ -108,6 +108,7 @@
   function flame(x, y) {
     // Yttre g håller läget. CSS-animationen på .jul-flame får inte skriva över translate.
     return '<g class="jul-flame-pos" transform="translate(' + Number(x).toFixed(2) + ' ' + Number(y).toFixed(2) + ')">' +
+      '<ellipse class="jul-glow" cx="0" cy="5" rx="7.5" ry="9"/>' +
       '<g class="jul-flame">' +
       '<path d="M0 8c2.2-2.4 3.2-4.2 2.2-6.4C1.6.4 0-1.2 0-1.2S-1.6.4-2.2 1.6C-3.2 3.8-2.2 5.6 0 8z" fill="#f6e05e"/>' +
       '<path d="M0 7c1.2-1.4 1.6-2.6 1-4.1C.6 1.8 0 .8 0 .8s-.6 1-1 2.1C-1.6 4.4-1.2 5.6 0 7z" fill="#ed8936"/>' +
@@ -710,7 +711,18 @@
 
   var obs = null;
   var slingorResize = false;
+  function syncFxPause() {
+    var off = !!document.hidden || document.visibilityState === 'hidden';
+    var root = document.documentElement;
+    if (root && root.classList && root.classList.toggle) root.classList.toggle('td-fx-pause', off);
+  }
+  var fxPauseBound = false;
   function start() {
+    if (!fxPauseBound) {
+      fxPauseBound = true;
+      syncFxPause();
+      document.addEventListener('visibilitychange', syncFxPause);
+    }
     if (burnTimer) { clearInterval(burnTimer); burnTimer = 0; }
     if (!allowed()) { paint(); return; }
     ensure();

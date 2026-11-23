@@ -126,4 +126,28 @@ assert.match(julcss, /td-jul-top-left \{ justify-content: center; \}/);
 assert.match(julcss, /td-jul-top-right \{ justify-content: center; \}/);
 assert.match(core, /x\.id === 'advent'\) return false/);
 
+
+assert.match(advent, /data-adv-zoom/);
+assert.match(advent, /function openZoom/);
+assert.match(advent, /function closeZoom/);
+assert.match(advent, /function browseFact/);
+assert.match(advent, /function openedDays/);
+assert.match(advent, /data-swipe-ignore/);
+assert.match(advent, /A\.back = onBack/);
+assert.match(css, /td-adv-zoom/);
+assert.match(css, /background:#000/);
+assert.match(css, /object-fit:contain/);
+assert.match(css, /td-adv-zoombtn/);
+
+
+assert.match(advent, /function lightsHtml/);
+assert.match(advent, /var LIGHTS/);
+assert.match(advent, /td-adv-fx/);
+assert.match(advent, /function syncFxPause/);
+assert.match(advent, /visibilitychange/);
+assert.doesNotMatch(advent.split('function miniHtml')[1].split('function mountMini')[0], /lightsHtml|td-adv-fx/);
+assert.match(css, /td-adv-glow-l/);
+assert.match(css, /td-fx-pause/);
+assert.match(css, /prefers-reduced-motion:\s*reduce/);
+
 console.log('advent unit ok');
