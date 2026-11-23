@@ -17,7 +17,7 @@
 window.CHANGELOG = [
   { datum: '2026-12-01', id: '2026-12-01zadv1', tid: '00:00', rader: [
     ['Nytt', 'Adventskalender: 24 luckor med taxifakta, en för varje dag i december. Kalendern sitter litet uppe till vänster på startsidan. Tryck så växer den fram i mitten. Öppna dagens lucka – och alla du missat hittills.'],
-    ['Nytt', 'Polkagrisjakt: en polkagris i taget dyker upp någonstans i appen. Den som trycker först tar den. Nästa kommer 5–60 minuter senare. Antalet du samlat syns som en polkagris med siffra högst upp på startsidan, till höger om ljusstaken. Tryck där för att se din placering (inga andras namn visas). På nyårsafton presenteras vinnaren för alla.']
+    ['Nytt', 'Polkagrisjakt: du får två egna polkagrisar per arbetspass, som bara du kan ta. Samtidigt kan upp till tre delade polkagrisar vara ute i appen; en ny kan dyka upp även om de gamla inte är tagna, och den som trycker först tar den. De försvinner efter 45 minuter om ingen tar dem, och kommer oftare på natten. Ibland syns en gyllene polkagris värd tre poäng. Dina poäng syns som en polkagris med siffra högst upp på startsidan, till höger om ljusstaken. Tryck där för att se din placering (inga andras namn visas). På nyårsafton presenteras vinnaren för alla.']
   ]},
   { datum: '2026-11-23', id: '2026-11-23zflyg9', tid: '21:34', rader: [
     ['Fixat', 'Ankomster: flyg som Swedavia strukit ur tidtabellen i förväg och som aldrig skulle flyga visas inte längre som Borttagen. Byter ett flyg bolag men har samma nummer och avgångsort (till exempel Lanzarote JTD284 som blev BLX284) syns bara det riktiga flyget, med texten "Ersätter JTD284". Borttagen visas bara om ett flyg som faktiskt var planerat plockas bort. Samma sak gäller i Mina bevakningar.']
