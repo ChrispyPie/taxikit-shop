@@ -79,3 +79,17 @@ button.td-pk-hdr:active{
   padding:11px 14px;border:0;border-radius:10px;cursor:pointer;
   background:#2b6cb0;color:#fff;font:600 15px/1.2 system-ui,sans-serif;
 }
+
+.td-pk-cane--golden{
+  filter:drop-shadow(0 0 8px rgba(255,196,60,.95)) drop-shadow(0 2px 6px rgba(0,0,0,.28));
+}
+.td-pk-cane--golden .td-pk-cane-ico{animation:td-pk-wiggle 1.2s ease-in-out infinite}
+@keyframes td-pk-pulse{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.14)}
+}
+button.td-pk-hdr.td-pk-hdr-pulse{animation:td-pk-pulse .65s ease-in-out 2}
+@media (prefers-reduced-motion:reduce){
+  .td-pk-cane--golden .td-pk-cane-ico{animation:none}
+  button.td-pk-hdr.td-pk-hdr-pulse{animation:none}
+}

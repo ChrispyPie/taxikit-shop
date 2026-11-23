@@ -804,8 +804,11 @@
     var body = window.POLKAGRIS && POLKAGRIS.boardHtml ? POLKAGRIS.boardHtml() : '<p class="td-adv-muted">Topplistan laddas…</p>';
     return '<section class="td-adv-jakt">' +
       '<h2>Polkagrisjakten</h2>' +
-      '<p>En polkagris i taget dyker upp någonstans i appen. Den som trycker först tar den. Nästa kommer på en ny plats, 5–60 minuter senare. Här ser du bara din egen placering och ditt eget antal – inga andras namn.</p>' +
-      '<p class="td-adv-muted">Flest polkagrisar vinner (vid lika antal vinner den som nådde dit först). På nyårsafton presenteras vinnaren för alla med förnamn och första bokstaven i efternamnet, till exempel Christian P.</p>' +
+      '<p>Du får två egna polkagrisar per arbetspass (natt 17–06 och dag 06–17). De syns bara för dig.</p>' +
+      '<p>Upp till tre delade polkagrisar kan vara ute samtidigt. En ny kan dyka upp även om de gamla inte är tagna. Den som trycker först tar den. De försvinner efter 45 minuter om ingen tar dem, och dyker upp oftare på natten än på dagen. Du kan ta högst tre delade per pass.</p>' +
+      '<p>Ibland dyker en gyllene polkagris upp. Den är värd tre poäng, och du kan ta högst en guld per dygn. Extra guld finns bland annat på Lucia, julafton och nyårsafton.</p>' +
+      '<p>Här ser du bara din egen placering och dina poäng – inga andras namn.</p>' +
+      '<p class="td-adv-muted">Flest poäng vinner (vid lika poäng vinner den som nådde dit först). På nyårsafton presenteras vinnaren för alla med förnamn och första bokstaven i efternamnet, till exempel Christian P.</p>' +
       body +
       '</section>';
   }

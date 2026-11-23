@@ -1,5 +1,5 @@
-/* Polkagrisjakt i december: en klubba i taget någonstans i appen.
- * Först som trycker tar den. Nästa dyker upp 5–60 min senare på en annan plats.
+/* Polkagrisjakt i december: egna klubbor per pass, upp till tre delade samtidigt
+ * och sällsynta gyllene (3 poäng). Först som trycker tar en delad/guld.
  * Öppnas automatiskt för alla från 2026-12-01 00:00 Europe/Stockholm.
  * Före det syns den bara för 710022 (testdatum: ?adventdatum= eller ?juldatum=). */
 (function () {
@@ -102,15 +102,17 @@
     places: Object.keys(PLACES)
   };
 
-  var st = { cane: null, board: [], mine: 0, myRank: 1, collectors: 0, totalRanked: 1, winner: null, hunt: false, showWin: false, season: null, me: '', flash: '', busy: false, timer: 0 };
-  var elCane = null;
+  var st = { cane: null, canes: [], board: [], mine: 0, myRank: 1, collectors: 0, totalRanked: 1, winner: null, hunt: false, showWin: false, season: null, me: '', flash: '', busy: false, timer: 0 };
+  var elCanes = {};
+  var seenCaneIds = {};
+  var toastReady = false;
 
   function css() {
     if (document.getElementById('td-polkagris-css-link')) return;
     var l = document.createElement('link');
     l.id = 'td-polkagris-css-link';
     l.rel = 'stylesheet';
-    l.href = 'polkagris.css?v=20261123adv6';
+    l.href = 'polkagris.css?v=20261123adv12';
     document.head.appendChild(l);
   }
 
@@ -134,9 +136,54 @@
     if (st.flash) toast._t = setTimeout(function () { toast(''); }, 4200);
   }
 
-  function hideCane() {
-    if (elCane && elCane.parentNode) elCane.parentNode.removeChild(elCane);
-    elCane = null;
+  function hideCane(id) {
+    if (id) {
+      var el = elCanes[id] || document.getElementById('td-pk-cane-' + id);
+      if (el && el.parentNode) el.parentNode.removeChild(el);
+      delete elCanes[id];
+      return;
+    }
+    Object.keys(elCanes).forEach(function (k) { hideCane(k); });
+    var leftovers = document.querySelectorAll('.td-pk-cane');
+    for (var i = 0; i < leftovers.length; i++) {
+      if (leftovers[i].parentNode) leftovers[i].parentNode.removeChild(leftovers[i]);
+    }
+    elCanes = {};
+  }
+
+  function pulseCount() {
+    var el = document.getElementById('td-pk-count');
+    if (!el) return;
+    el.classList.remove('td-pk-hdr-pulse');
+    void el.offsetWidth;
+    el.classList.add('td-pk-hdr-pulse');
+    clearTimeout(pulseCount._t);
+    pulseCount._t = setTimeout(function () {
+      if (el) el.classList.remove('td-pk-hdr-pulse');
+    }, 1600);
+  }
+
+  function noteNewCanes(list) {
+    list = list || [];
+    if (!toastReady) {
+      list.forEach(function (c) { if (c && c.id != null) seenCaneIds[c.id] = true; });
+      toastReady = true;
+      return;
+    }
+    var added = [];
+    list.forEach(function (c) {
+      if (!c || c.id == null) return;
+      if (!seenCaneIds[c.id]) {
+        seenCaneIds[c.id] = true;
+        if (c.kind !== 'personal') added.push(c);
+      }
+    });
+    if (!added.length) return;
+    var hasG = added.some(function (c) { return c.kind === 'golden'; });
+    if (hasG) toast('En gyllene polkagris har dykt upp någonstans i appen.');
+    else if (added.length > 1) toast('Nya polkagrisar har dykt upp någonstans i appen.');
+    else toast('En polkagris har dykt upp någonstans i appen.');
+    pulseCount();
   }
 
   /* Samma polkagris som jakten: rödvit krokklubba, inte en lolly. */
@@ -249,65 +296,113 @@
     if (el.parentNode !== right) right.appendChild(el);
     var n = st.mine || 0;
     el.innerHTML = caneIconHtml() + '<span class="td-pk-hdr-n">' + n + '</span>';
-    el.setAttribute('aria-label', 'Polkagrisar: ' + n + '. Öppna ställningen.');
+    el.setAttribute('aria-label', 'Polkagrisar: ' + n + ' poäng. Öppna ställningen.');
     syncJulTopOn();
   }
 
   function mountCane() {
-    hideCane();
-    if (!allowed() || !st.cane || !st.cane.place_key) return;
-    var spec = PLACES[st.cane.place_key];
-    if (!spec) return;
-    if (spec.view != null && spec.view !== currentView()) return;
-    var host = document.querySelector(spec.sel);
-    if (!host) return;
-    elCane = document.createElement('button');
-    elCane.type = 'button';
-    elCane.id = 'td-pk-cane';
-    elCane.className = 'td-pk-cane td-pk-cane--' + (spec.pos || 'corner');
-    elCane.setAttribute('aria-label', 'En polkagris! Tryck för att ta den.');
-    elCane.innerHTML = '<span class="td-pk-cane-ico" aria-hidden="true">' + caneIconHtml() + '</span>';
-    elCane.addEventListener('click', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      claim();
-    });
-    if (spec.pos === 'after') {
-      host.style.position = host.style.position || 'relative';
-      host.appendChild(elCane);
-    } else if (spec.pos === 'hb') {
-      document.body.appendChild(elCane);
-    } else {
-      var box = host;
-      if (getComputedStyle(box).position === 'static') box.style.position = 'relative';
-      box.appendChild(elCane);
+    if (!allowed()) { hideCane(); return; }
+    var list = st.canes && st.canes.length ? st.canes : (st.cane ? [st.cane] : []);
+    var wanted = {};
+    for (var i = 0; i < list.length; i++) {
+      var cane = list[i];
+      if (!cane || cane.id == null || !cane.place_key) continue;
+      var spec = PLACES[cane.place_key];
+      if (!spec) continue;
+      if (spec.view != null && spec.view !== currentView()) continue;
+      var host = document.querySelector(spec.sel);
+      if (!host) continue;
+      wanted[cane.id] = true;
+      if (elCanes[cane.id] && document.body.contains(elCanes[cane.id])) continue;
+      hideCane(cane.id);
+      var el = document.createElement('button');
+      el.type = 'button';
+      el.id = 'td-pk-cane-' + cane.id;
+      el.className = 'td-pk-cane td-pk-cane--' + (spec.pos || 'corner') +
+        (cane.kind === 'golden' ? ' td-pk-cane--golden' : '');
+      el.setAttribute('aria-label', cane.kind === 'golden'
+        ? 'En gyllene polkagris! Tryck för att ta den.'
+        : (cane.kind === 'personal' ? 'Din polkagris! Tryck för att ta den.' : 'En polkagris! Tryck för att ta den.'));
+      el.innerHTML = '<span class="td-pk-cane-ico" aria-hidden="true">' + caneIconHtml() + '</span>';
+      el.addEventListener('click', (function (cid) {
+        return function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          claim(cid);
+        };
+      })(cane.id));
+      if (spec.pos === 'after') {
+        host.style.position = host.style.position || 'relative';
+        host.appendChild(el);
+      } else if (spec.pos === 'hb') {
+        document.body.appendChild(el);
+      } else {
+        var box = host;
+        if (getComputedStyle(box).position === 'static') box.style.position = 'relative';
+        box.appendChild(el);
+      }
+      elCanes[cane.id] = el;
     }
+    Object.keys(elCanes).forEach(function (k) {
+      if (!wanted[k]) hideCane(k);
+    });
   }
 
-  function claim() {
-    if (st.busy || !st.cane) return;
+  function applyClaimScores(r) {
+    if (!r) return;
+    if (r.mine != null) st.mine = r.mine;
+    if (r.my_rank != null) st.myRank = r.my_rank;
+    if (r.collectors != null) st.collectors = r.collectors;
+    if (r.total_ranked != null) st.totalRanked = r.total_ranked;
+    if (r.board) st.board = r.board;
+  }
+
+  function dropCane(id) {
+    st.canes = (st.canes || []).filter(function (c) { return c && c.id !== id; });
+    if (st.cane && st.cane.id === id) st.cane = st.canes[0] || null;
+    hideCane(id);
+  }
+
+  function claim(id, retried) {
+    if (st.busy) return;
+    id = id != null ? id : (st.cane && st.cane.id);
+    if (id == null) return;
     st.busy = true;
-    var id = st.cane.id;
     var args = { p_token: token(), p_cane_id: id };
     var asOf = asOfArg();
     if (asOf) args.p_as_of = asOf;
     rpc('polkagris_claim', args).then(function (r) {
       st.busy = false;
+      applyClaimScores(r);
       if (r && r.ok) {
-        st.mine = r.mine || (st.mine + 1);
-        if (r.my_rank != null) st.myRank = r.my_rank;
-        if (r.collectors != null) st.collectors = r.collectors;
-        if (r.total_ranked != null) st.totalRanked = r.total_ranked;
-        st.board = r.board || st.board;
-        st.cane = null;
-        hideCane();
+        dropCane(id);
         mountCount();
-        toast('Du tog polkagrisen! Du har ' + st.mine + (st.mine === 1 ? ' klubba.' : ' klubbor.'));
-      } else if (r && r.already) {
-        st.cane = null;
-        hideCane();
+        var pts = r.points || 1;
+        if (r.kind === 'golden') {
+          toast('Du tog en gyllene polkagris! +' + pts + ' poäng. Du har ' + st.mine + ' poäng.');
+        } else if (r.kind === 'personal') {
+          toast('Du tog din polkagris! Du har ' + st.mine + ' poäng.');
+        } else {
+          toast('Du tog polkagrisen! Du har ' + st.mine + ' poäng.');
+        }
+      } else if (r && (r.already || r.reason === 'already')) {
+        dropCane(id);
         mountCount();
         toast('En annan förare hann före.');
+      } else if (r && r.reason === 'cap_shared') {
+        toast('Du har redan tagit tre delade polkagrisar det här passet.');
+      } else if (r && r.reason === 'cap_golden') {
+        toast('Du har redan tagit en gyllene polkagris idag.');
+      } else if (r && r.reason === 'expired') {
+        dropCane(id);
+        mountCount();
+        toast('Polkagrisen hann försvinna.');
+      } else if (r && r.reason === 'not_yours') {
+        dropCane(id);
+        toast('Den polkagrisen är inte din.');
+      } else if (r && r.reason === 'stale' && !retried) {
+        refresh().then(function () { claim(id, true); });
+        return;
       } else {
         toast('Det gick inte att ta klubban just nu.');
       }
@@ -330,8 +425,10 @@
       st.season = r.season;
       st.hunt = !!r.hunt;
       st.showWin = !!r.show_winner;
-      st.cane = r.cane || null;
+      st.canes = r.canes || (r.cane ? [r.cane] : []);
+      st.cane = st.canes[0] || null;
       st.board = r.board || [];
+      noteNewCanes(st.canes);
       st.mine = r.mine || 0;
       st.myRank = r.my_rank != null ? r.my_rank : 1;
       st.collectors = r.collectors != null ? r.collectors : 0;
@@ -382,11 +479,11 @@
       '<li class="td-pk-row mine">' +
         '<span class="td-pk-rank">' + badge + '</span>' +
         '<span class="td-pk-name">Du (plats ' + rank + ' av ' + total + ')</span>' +
-        '<span class="td-pk-count">' + esc(String(count)) + (count === 1 ? ' klubba' : ' klubbor') + '</span>' +
+        '<span class="td-pk-count">' + esc(String(count)) + ' poäng</span>' +
       '</li>' +
     '</ol>';
     if (!collectors) {
-      html += '<p class="td-adv-muted">Ingen har tagit någon polkagris ännu. Håll ögonen öppna i appen – en klubba i taget dyker upp på en slumpad plats.</p>';
+      html += '<p class="td-adv-muted">Ingen har tagit någon polkagris ännu. Håll ögonen öppna i appen – egna, delade och ibland gyllene klubbor dyker upp på olika sidor.</p>';
     } else {
       html += '<p class="td-adv-muted">' + collectors + ' förare har samlat minst en polkagris hittills. Andras namn visas inte.</p>';
     }
@@ -521,7 +618,7 @@
       '<div class="td-pk-winner-card">' +
       '<p class="td-pk-winner-kicker">Gott nytt år! Vinnare ' + esc(yr) + '</p>' +
       '<h2 class="td-pk-winner-name">' + esc(w.namn || 'Förare') + '</h2>' +
-      '<p class="td-pk-winner-sub">' + esc(String(n)) + (n === 1 ? ' polkagris' : ' polkagrisar') + '</p>' +
+      '<p class="td-pk-winner-sub">' + esc(String(n)) + ' poäng' + '</p>' +
       note +
       '</div></div>';
   }
