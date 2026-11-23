@@ -141,6 +141,47 @@ body.pg-open main, main:has(.pg) { padding-left: 5px; padding-right: 5px; }
   color: var(--muted);
 }
 .trip-detail.visible { display: flex; justify-content: space-between; }
+
+/* Kvitto i listan: uppgifter i linje med kvittonumret, utan lucka under numret.
+   Starttid visas ihopfällt (liten grå tid). */
+.trip-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.trip-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  min-width: 0;
+}
+.trip-head .kv-nr {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.45rem;
+  row-gap: 0;
+}
+.trip-tid {
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--text-soft);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.trip-head .value { margin-left: auto; flex-shrink: 0; white-space: nowrap; }
+.trip-body > .sub,
+.trip-body > .trip-detail {
+  padding-left: 0;
+  padding-right: 0;
+  margin: 0;
+}
+.trip-body > .sub:first-of-type,
+.trip-body > .trip-detail:first-of-type { padding-top: 0; }
+.shift-trip,
+.stat-row.trip-row { align-items: flex-start; }
 /* Förarväljare (ägare) i rubriken */
 #driver-label select { max-width: 104px; font-size: 0.8rem; padding: 0.3rem 0.3rem; }
 .shift-who { display: block; font-size: 0.8rem; font-weight: 400; color: var(--muted); margin-top: 2px; }
@@ -1127,7 +1168,7 @@ body.pg-land-tablet .pg-table-land .pg-land-fly th {
   filter: drop-shadow(0 1px 1.4px rgba(0,0,0,.32));
 }
 .shift-trip .kv-nr,
-.stat-row .kv-nr { flex: 1; min-width: 0; }
+.stat-row .kv-nr { flex: 1; min-width: 0; margin: 0; }
 .shift-trip span.kv-ico { flex: 0 0 auto; }
 html body.kv-open { overflow: hidden; }
 .kv-overlay {
@@ -1226,7 +1267,7 @@ html:not([data-theme="dark"]) .kv-close { background: #1a1a1a; }
   letter-spacing: 0.02em;
   margin: 0.55rem 0 0.15rem;
 }
-.kv-nr {
+.kv-scroll .kv-nr {
   font-family: "Times New Roman", Times, "Noto Serif", serif;
   font-size: 16px;
   font-weight: 700;
@@ -1526,6 +1567,23 @@ button.kv-ico { background-repeat: no-repeat; background-position: center; backg
   #dashboard-view .trip-detail {
     padding-right: 0.4rem;
     padding-left: 2.2rem;
+  }
+  #dashboard-view .trip-body > .sub,
+  #dashboard-view .trip-body > .trip-detail {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  #dashboard-view .trip-head {
+    align-items: flex-start;
+  }
+  #dashboard-view .trip-head .kv-nr {
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.2;
+  }
+  #dashboard-view .trip-tid {
+    margin-left: 0;
+    font-size: 0.75rem;
   }
 }
 

@@ -514,6 +514,13 @@ function formatShiftDate(str) {
   return d.slice(6,8) + '/' + d.slice(4,6);
 }
 
+function formatTripHm(t) {
+  const raw = String((t && t.starttid) || '').trim();
+  const m = raw.match(/^(\d{1,2}):(\d{2})/);
+  if (!m) return '';
+  return String(m[1]).padStart(2, '0') + ':' + m[2];
+}
+
 function replacedPool() {
   return (data && data.replaced) || [];
 }
@@ -528,30 +535,31 @@ function tripEntryHtml(t, kind) {
   const dd = kind === "loose"
     ? ((t.startdatum || "").slice(8, 10) + "/" + (t.startdatum || "").slice(5, 7) + " ")
     : "";
-  const rowClass = (kind === "day" ? "stat-row" : "sub shift-trip") + (replaced ? " trip-replaced" : "");
-  const detClass = replaced ? "trip-detail trip-replaced-detail" : (kind === "day" ? "" : "trip-detail");
+  const rowClass = (kind === "day" ? "stat-row trip-row" : "sub shift-trip") + (replaced ? " trip-replaced" : "");
+  const detCls = replaced ? "trip-replaced-detail" : "";
   const keyPref = kind === "day" ? "trip" : kind === "loose" ? "lt" : "st";
   const style = isBom && !replaced ? ' style="opacity:0.6;"' : "";
   const rowClick = kind === "day" ? "toggle(this)" : "toggleTrip(this, event)";
   const tog = kind === "day" ? "toggle(this.parentNode)" : "toggleTrip(this.parentNode, event)";
   const kvAttr = ` data-kvittonr="${escHtml(t.kvittonr)}" data-forar="${escHtml(t.forar || defForar())}" data-startdatum="${escHtml(t.startdatum || '')}"`;
-  const row = `<div class="${rowClass}" data-key="${keyPref}:${escHtml(t.kvittonr)}|${escHtml(t.forar || defForar())}|${escHtml(t.startdatum || '')}"${kvAttr} onclick="${rowClick}"${style}><span class="toggle" onclick="event.stopPropagation();${tog}">+</span><button type="button" class="kv-ico" title="Kvittokopia" aria-label="Kvittokopia" onclick="event.stopPropagation();KVITTO.openFromRow(this.closest('.stat-row, .shift-trip'),event)"></button><span${kind === "day" ? ' class="label kv-nr"' : ' class="kv-nr"'}>${dd}${escHtml(t.kvittonr)}${isBom ? " (BOM)" : ""}</span><span${kind === "day" ? ' class="value"' : ""}>${formatSEK(parseAmount(t.belopp))}</span></div>`;
-  const details = kind === "day"
-    ? tripDetailRows(t, replaced ? "trip-replaced-detail" : "")
-    : `<div class="sub ${detClass}"><span>Start</span><span>${t.starttid || "00:00"} – zon ${t.startzon || "?"}</span></div>
-          <div class="sub ${detClass}"><span>Slut</span><span>${t.sluttid || "00:00"} – zon ${t.slutzon || "?"}</span></div>
-          <div class="sub ${detClass}"><span>Typ</span><span>${typeMap[t.kredittyp] || t.kredittyp || "?"}</span></div>
-          <div class="sub ${detClass}"><span>Dricks</span><span>${formatSEK(parseAmount(t.dricks))}</span></div>`;
+  const hm = formatTripHm(t);
+  const tidHtml = hm ? `<span class="trip-tid">${escHtml(hm)}</span>` : "";
+  const details = tripDetailRows(t, detCls, { betalt: kind === "day" });
+  const row = `<div class="${rowClass}" data-key="${keyPref}:${escHtml(t.kvittonr)}|${escHtml(t.forar || defForar())}|${escHtml(t.startdatum || '')}"${kvAttr} onclick="${rowClick}"${style}><span class="toggle" onclick="event.stopPropagation();${tog}">+</span><button type="button" class="kv-ico" title="Kvittokopia" aria-label="Kvittokopia" onclick="event.stopPropagation();KVITTO.openFromRow(this.closest('.stat-row, .shift-trip'),event)"></button><div class="trip-body"><div class="trip-head"><span class="label kv-nr">${dd}${escHtml(t.kvittonr)}${isBom ? " (BOM)" : ""}${tidHtml}</span><span class="value">${formatSEK(parseAmount(t.belopp))}</span></div>${details}</div></div>`;
   const old = replaced ? [] : olderReceipts(t).map(r => tripEntryHtml(Object.assign({}, r, { _replaced: true }), kind)).join("");
-  return row + details + old;
+  return row + old;
 }
 
-function tripDetailRows(t, cls) {
-  return `<div class="sub ${cls}"><span>Start</span><span>${t.starttid || '00:00'} – zon ${t.startzon || '?'}</span></div>
-          <div class="sub ${cls}"><span>Slut</span><span>${t.sluttid || '00:00'} – zon ${t.slutzon || '?'}</span></div>
-          <div class="sub ${cls}"><span>Betalt</span><span>${formatSEK(parseAmount(t.belopp))}</span></div>
-          <div class="sub ${cls}"><span>Typ</span><span>${typeMap[t.kredittyp] || t.kredittyp || '?'}</span></div>
-          <div class="sub ${cls}"><span>Dricks</span><span>${formatSEK(parseAmount(t.dricks))}</span></div>`;
+function tripDetailRows(t, cls, opt) {
+  const c = ("sub trip-detail " + (cls || "")).trim();
+  const betalt = opt && opt.betalt
+    ? `<div class="${c}"><span>Betalt</span><span>${formatSEK(parseAmount(t.belopp))}</span></div>`
+    : "";
+  return `<div class="${c}"><span>Start</span><span>${t.starttid || "00:00"} – zon ${t.startzon || "?"}</span></div>
+          <div class="${c}"><span>Slut</span><span>${t.sluttid || "00:00"} – zon ${t.slutzon || "?"}</span></div>
+          ${betalt}
+          <div class="${c}"><span>Typ</span><span>${typeMap[t.kredittyp] || t.kredittyp || "?"}</span></div>
+          <div class="${c}"><span>Dricks</span><span>${formatSEK(parseAmount(t.dricks))}</span></div>`;
 }
 
 // En rad i skiftlistan med resor som inte hör till något pass
@@ -1271,6 +1279,11 @@ function setOpen(el, isOpen) {
   el.classList.toggle('open', isOpen);
   const icon = el.querySelector('.toggle');
   if (icon && icon.textContent) icon.textContent = isOpen ? '−' : '+';
+  const inner = el.querySelectorAll(':scope > .trip-body > .sub');
+  if (inner.length) {
+    inner.forEach(n => n.classList.toggle('visible', isOpen));
+    return;
+  }
   let next = el.nextElementSibling;
   while (next && next.classList.contains('sub')) {
     next.classList.toggle('visible', isOpen);
@@ -1288,6 +1301,11 @@ function setTripOpen(el, isOpen) {
   el.classList.toggle('open', isOpen);
   const icon = el.querySelector('.toggle');
   if (icon) icon.textContent = isOpen ? '−' : '+';
+  const inner = el.querySelectorAll(':scope > .trip-body > .trip-detail');
+  if (inner.length) {
+    inner.forEach(n => n.classList.toggle('visible', isOpen));
+    return;
+  }
   let next = el.nextElementSibling;
   while (next && next.classList.contains('trip-detail')) {
     next.classList.toggle('visible', isOpen);
