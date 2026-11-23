@@ -27,7 +27,16 @@
   var editor = null;
 
   function isCore(id) { return !!CORE[id]; }
-  function isPinned(id) { return !!PINNED[id]; }
+  function isPinned(id) {
+    if (PINNED[id]) return true;
+    if (id === 'advent') {
+      var g = window.ADVENT_GATE;
+      if (!g || !g.allowed || !g.allowed()) return false;
+      var t = g.today ? g.today() : null;
+      return !!(t && (t.m === 12 || (t.m === 1 && t.d <= 6)));
+    }
+    return false;
+  }
   function isDefaultOff(id) { return !!DEFAULT_OFF[id]; }
   function okId(id) { return typeof id === 'string' && /^[a-z0-9-]{1,40}$/.test(id); }
   function isFolderId(id) { return typeof id === 'string' && /^mapp-[a-z0-9]{1,30}$/.test(id); }

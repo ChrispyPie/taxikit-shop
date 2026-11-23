@@ -1,0 +1,33 @@
+/* Adventskalender: 24 luckor, fakta och flikar till polkagrisjakten. */
+.td-adv-page{margin:0;padding:0 0 20px}
+.td-adv-lead{margin:0 0 12px;font-size:calc(13px * min(var(--font-scale,1),1.2));line-height:1.4;color:var(--text-soft,#718096)}
+.td-adv-muted{margin:8px 0;font-size:calc(13px * min(var(--font-scale,1),1.2));color:var(--text-soft,#718096);line-height:1.4}
+.td-adv-err{margin:0 0 8px;color:#c53030;font-size:calc(13px * min(var(--font-scale,1),1.2))}
+.td-adv-tabs{display:flex;gap:6px;margin:0 0 12px;flex-wrap:wrap}
+.td-adv-tab{appearance:none;border:1px solid var(--border,#cbd5e0);background:transparent;color:inherit;
+  border-radius:999px;padding:6px 12px;min-height:36px;font:600 calc(13px * min(var(--font-scale,1),1.15))/1 inherit;cursor:pointer}
+.td-adv-tab.on{background:var(--primary,#9b2c2c);border-color:transparent;color:#fff}
+.td-adv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.td-adv-door{position:relative;appearance:none;border:0;border-radius:12px;min-height:64px;
+  background:linear-gradient(180deg,#8b1e1e,#6b1414);color:#f7e7b0;font:700 18px/1 Georgia,serif;
+  box-shadow:inset 0 0 0 2px rgba(247,231,176,.35),0 2px 6px rgba(0,0,0,.18);cursor:pointer;
+  -webkit-tap-highlight-color:transparent}
+.td-adv-door.ready{background:linear-gradient(180deg,#b83232,#8b1e1e)}
+.td-adv-door.open{background:linear-gradient(180deg,#276749,#1c4532);color:#f0fff4;
+  box-shadow:inset 0 0 0 2px rgba(240,255,244,.3)}
+.td-adv-door.locked{opacity:.55;cursor:default}
+.td-adv-num{display:block}
+.td-adv-check{position:absolute;top:4px;right:6px;font-size:12px}
+.td-adv-fact{margin:14px 0 0;padding:12px 14px;border-radius:14px;
+  background:var(--surface,#fff);border:1px solid var(--border,#cbd5e0)}
+.td-adv-fact h2{margin:0 0 8px;font-size:calc(18px * min(var(--font-scale,1),1.1));line-height:1.25}
+.td-adv-fact p{margin:0 0 8px;font-size:calc(14px * min(var(--font-scale,1),1.15));line-height:1.45}
+.td-adv-kicker{margin:0 0 4px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-soft,#718096)}
+.td-adv-src{font-size:calc(12px * min(var(--font-scale,1),1.2))!important;color:var(--text-soft,#718096)}
+.td-adv-close{appearance:none;margin-top:4px;min-height:40px;padding:6px 12px;border-radius:10px;border:0;
+  background:var(--primary,#2b6cb0);color:#fff;font:600 14px/1 inherit;cursor:pointer}
+.td-adv-jakt h2{margin:0 0 8px;font-size:calc(18px * min(var(--font-scale,1),1.1))}
+.td-adv-jakt p{margin:0 0 8px;font-size:calc(14px * min(var(--font-scale,1),1.15));line-height:1.45}
+html.theme-dark .td-adv-door,
+body.theme-dark .td-adv-door{box-shadow:inset 0 0 0 2px rgba(247,231,176,.28),0 2px 8px rgba(0,0,0,.4)}
+@media (min-width:520px){.td-adv-grid{grid-template-columns:repeat(6,1fr)}}

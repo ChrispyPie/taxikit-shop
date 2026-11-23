@@ -24,9 +24,9 @@ assert.doesNotMatch(cl.split("id: '2026-11-14bil1'")[1].split(']},')[0], /anonym
 assert.match(cl.split("id: '2026-11-14bil1'")[1].split('rader:')[0], /tid: '20:33'/);
 assert.ok(cl.indexOf("'2026-11-14bil1'") < cl.indexOf("'2026-11-14ladd1'"), 'nyheten överst');
 
-assert.match(lv, /topplistor\.js\?v=20261123zhb2/);
-assert.match(lv, /changelog\.js\?v=20261123zhb2/);
-assert.match(html, /lazy-views\.js\?v=20261123zhb2/);
+assert.match(lv, /topplistor\.js\?v=20261123adv1/);
+assert.match(lv, /changelog\.js\?v=20261123adv1/);
+assert.match(html, /lazy-views\.js\?v=20261123adv1/);
 
 assert.match(mig, /get_topplista_metric/);
 assert.match(mig, /get_rekord_metric/);
