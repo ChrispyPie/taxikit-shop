@@ -109,10 +109,10 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
     };
   });
   console.log(JSON.stringify(info, null, 2));
-  ok('row in header', info.rad.inHeader);
-  ok('row is second header row', info.rad.top > 30 && info.rad.bottom <= info.headerBottom + 2 && info.rad.top < info.headerBottom);
-  ok('row not at bottom', info.rad.bottom < 200);
-  ok('row slim', info.rad.height > 8 && info.rad.height <= 56);
+  ok('row not in header', !info.rad.inHeader && info.rad.parent === 'DIV');
+  ok('row just under header', info.rad.top >= info.headerBottom - 2 && info.rad.top <= info.headerBottom + 40);
+  ok('row not at bottom', info.rad.bottom < 220);
+  ok('row compact', info.rad.height > 8 && info.rad.height <= 90);
   ok('no icon overlap', !info.overlapRadIcons);
   ok('berra visible at bottom', info.berra.visible && info.berra.bottom > 400);
   ok('flames for 13 dec', info.flames);

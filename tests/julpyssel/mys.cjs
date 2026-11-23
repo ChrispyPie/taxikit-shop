@@ -14,6 +14,7 @@ const sw = fs.readFileSync(path.join(root, 'TaxiData/sw.js'), 'utf8');
 assert.doesNotMatch(js + css + cl, /\bStig\b/);
 assert.doesNotMatch(js + css, /\bhen\b/);
 assert.doesNotMatch(cl, /id: '2026-11-23zmys1'/);
+assert.doesNotMatch(cl, /id: '2026-11-23zscn1'/);
 assert.doesNotMatch(cl, /girlang|julgransbelysning|snöfall|juldekoration/i);
 assert.match(js, /ALLOW = \{ '710022': 1 \}/);
 assert.match(js, /JUL_ALLA = false/);
@@ -34,9 +35,9 @@ assert.match(css, /html:not\(\[data-theme="dark"\]\) #jul-mys \.jul-vignette/);
 assert.match(css, /html\[data-theme="dark"\] #jul-mys \.jul-vignette/);
 assert.match(css, /#jul-ljusstake/);
 assert.match(css, /#jul-slingor/);
-assert.match(html, /julpyssel\.css\?v=20261123zstg1/);
-assert.match(html, /julpyssel\.js\?v=20261123zstg1/);
-assert.match(sw, /CACHE_VER = '20261123zstg1'/);
+assert.match(html, /julpyssel\.css\?v=20261123zscn1/);
+assert.match(html, /julpyssel\.js\?v=20261123zscn1/);
+assert.match(sw, /CACHE_VER = '20261123zscn1'/);
 
 function boot(opts) {
   opts = opts || {};
@@ -66,9 +67,35 @@ function boot(opts) {
     id: 'app',
     className: opts.onHome ? 'is-home' : '',
     style: { display: opts.onHome ? 'block' : 'none' },
-    classList: { contains(c) { return (' ' + app.className + ' ').indexOf(' ' + c + ' ') >= 0; } }
+    classList: { contains(c) { return (' ' + app.className + ' ').indexOf(' ' + c + ' ') >= 0; }, add(c) { if (!this.contains(c)) app.className = (app.className + ' ' + c).trim(); }, remove(c) { app.className = (' ' + app.className + ' ').replace(' ' + c + ' ', ' ').trim(); } }
   };
   els.app = app;
+  const content = { id: 'content', children: [], parentNode: null, appendChild(n) { attach(this, n); return n; }, removeChild(n) {
+    const i = this.children.indexOf(n); if (i >= 0) this.children.splice(i, 1);
+    if (n.parentNode === this) n.parentNode = null;
+    if (n.id && els[n.id] === n) delete els[n.id]; return n;
+  } };
+  els.content = content;
+  app.children = [];
+  app.appendChild = function (n) { attach(app, n); return n; };
+  app.removeChild = function (n) {
+    const i = app.children.indexOf(n); if (i >= 0) app.children.splice(i, 1);
+    if (n.parentNode === app) n.parentNode = null;
+    if (n.id && els[n.id] === n) delete els[n.id]; return n;
+  };
+  app.insertBefore = function (n, ref) {
+    if (n.parentNode && n.parentNode !== app && n.parentNode.removeChild) n.parentNode.removeChild(n);
+    if (n.parentNode === app) {
+      const j = app.children.indexOf(n); if (j >= 0) app.children.splice(j, 1);
+    }
+    n.parentNode = app;
+    if (n.id) els[n.id] = n;
+    const i = ref ? app.children.indexOf(ref) : -1;
+    if (i >= 0) app.children.splice(i, 0, n);
+    else app.children.push(n);
+    return n;
+  };
+  app.appendChild(content);
   const body = { children: [], appendChild(n) { attach(this, n); return n; }, removeChild(n) {
     const i = this.children.indexOf(n); if (i >= 0) this.children.splice(i, 1);
     if (n.parentNode === this) n.parentNode = null;
@@ -136,7 +163,9 @@ assert.equal(mys.attributes['aria-hidden'], 'true');
 assert.match(String(mys.innerHTML || ''), /jul-vignette/);
 assert.match(String(mys.innerHTML || ''), /jul-flinga/);
 const gir = home.doc.getElementById('jul-girlang');
-assert.ok(gir, 'girlang i ljusraden');
+assert.ok(gir, 'girlang som avskiljare');
+assert.ok(home.els.app.children.includes(gir), 'girlang ska inte ligga i ljusraden');
+assert.ok(gir.classList.contains('jul-on'));
 assert.equal(gir.hidden, false);
 assert.match(String(gir.innerHTML || ''), /jul-barr/);
 assert.match(String(gir.innerHTML || ''), /jul-stjarna/);
@@ -144,6 +173,13 @@ assert.match(String(gir.innerHTML || ''), /jul-kula-rod/);
 assert.match(String(gir.innerHTML || ''), /#8a4b1f/); // pepparkaka
 assert.match(String(gir.innerHTML || ''), /#c53030/); // tomte
 assert.ok(home.doc.getElementById('jul-ljusstake'), 'ljusstake kvar');
+assert.ok(home.els.app.children.includes(home.doc.getElementById('jul-ljus-rad')), 'ljusstake i body');
+const scen = home.doc.getElementById('jul-scen');
+assert.ok(scen, 'isbana och julgran');
+assert.ok(scen.classList.contains('jul-on'));
+assert.match(String(scen.innerHTML || ''), /jul-is/);
+assert.match(String(scen.innerHTML || ''), /jul-stjarna-topp/);
+assert.match(css, /#jul-scen/);
 assert.ok(home.doc.getElementById('jul-slingor'), 'slingor kvar');
 
 const away = boot({ driver: '710022', onHome: false });

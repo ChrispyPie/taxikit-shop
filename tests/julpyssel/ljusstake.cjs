@@ -32,17 +32,19 @@ assert.doesNotMatch(js, /class="jul-flame" transform=/);
 assert.match(js, /jul-ljus-rad/);
 assert.match(js, /querySelector\('#app > header'\)/);
 assert.doesNotMatch(js, /document\.body \|\| document\.documentElement\)\.appendChild\(btn\)/);
-assert.match(html, /julpyssel\.css\?v=20261123zstg1/);
-assert.match(html, /julpyssel\.js\?v=20261123zstg1/);
-assert.match(sw, /CACHE_VER = '20261123zstg1'/);
+assert.match(html, /julpyssel\.css\?v=20261123zscn1/);
+assert.match(html, /julpyssel\.js\?v=20261123zscn1/);
+assert.match(sw, /CACHE_VER = '20261123zscn1'/);
 assert.match(css, /#jul-ljus-rad/);
-assert.match(css, /grid-area:\s*jul/);
+assert.doesNotMatch(css, /grid-area:\s*jul/);
+assert.match(css, /border-bottom:\s*none/);
+assert.match(js, /putInApp\(gir, rad/);
 assert.doesNotMatch(css.split('Julgransbelysning')[0], /position:\s*fixed/);
 assert.doesNotMatch(css, /z-index:\s*28/);
 assert.doesNotMatch(css, /bottom:\s*calc\(8px/);
 assert.match(core, /LAZY\.ensure\('berra'\)/);
-assert.match(lazy, /"berra": \["berra\.js\?v=20261123zstg1"\]/);
-assert.match(lazy, /berra\.js\?v=20261123zstg1/);
+assert.match(lazy, /"berra": \["berra\.js\?v=20261123zscn1"\]/);
+assert.match(lazy, /berra\.js\?v=20261123zscn1/);
 assert.match(sid, /headerTop: headerTop/);
 
 function boot(opts) {
@@ -81,10 +83,42 @@ function boot(opts) {
     className: opts.onHome ? 'is-home' : '',
     style: { display: opts.onHome ? 'block' : 'none' },
     classList: {
-      contains(c) { return (' ' + app.className + ' ').indexOf(' ' + c + ' ') >= 0; }
+      contains(c) { return (' ' + app.className + ' ').indexOf(' ' + c + ' ') >= 0; },
+      add(c) { if (!this.contains(c)) app.className = (app.className + ' ' + c).trim(); },
+      remove(c) { app.className = (' ' + app.className + ' ').replace(' ' + c + ' ', ' ').trim(); }
     }
   };
   els.app = app;
+
+  const content = { id: 'content', children: [], parentNode: null, appendChild(n) { attach(this, n); return n; }, removeChild(n) {
+    const i = this.children.indexOf(n); if (i >= 0) this.children.splice(i, 1);
+    if (n.parentNode === this) n.parentNode = null;
+    if (n.id && els[n.id] === n) delete els[n.id]; return n;
+  } };
+  els.content = content;
+  function installContainer(node) {
+    node.children = node.children || [];
+    node.appendChild = function (n) { attach(node, n); return n; };
+    node.removeChild = function (n) {
+      const i = node.children.indexOf(n); if (i >= 0) node.children.splice(i, 1);
+      if (n.parentNode === node) n.parentNode = null;
+      if (n.id && els[n.id] === n) delete els[n.id]; return n;
+    };
+    node.insertBefore = function (n, ref) {
+      if (n.parentNode && n.parentNode !== node && n.parentNode.removeChild) n.parentNode.removeChild(n);
+      if (n.parentNode === node) {
+        const j = node.children.indexOf(n); if (j >= 0) node.children.splice(j, 1);
+      }
+      n.parentNode = node;
+      if (n.id) els[n.id] = n;
+      const i = ref ? node.children.indexOf(ref) : -1;
+      if (i >= 0) node.children.splice(i, 0, n);
+      else node.children.push(n);
+      return n;
+    };
+  }
+  installContainer(app);
+  app.appendChild(content);
   const body = {
     children: [],
     appendChild(n) { attach(this, n); return n; },
@@ -245,7 +279,12 @@ const el = preview.doc.getElementById('jul-ljusstake');
 assert.ok(rad);
 assert.ok(el);
 assert.equal(el.parentNode, rad);
-assert.ok(preview.header.children.includes(rad));
+assert.ok(preview.els.app.children.includes(rad), 'ljusstaken ska ligga i body, inte i headern');
+assert.ok(!preview.header.children.includes(rad), 'ljusstaken kvar i headern');
+const girPrev = preview.doc.getElementById('jul-girlang');
+assert.ok(girPrev, 'girlang som avskiljare');
+assert.ok(preview.els.app.children.includes(girPrev));
+assert.ok(preview.els.app.children.indexOf(girPrev) < preview.els.app.children.indexOf(rad), 'girlang ovanför ljusstaken');
 assert.ok(el.classList.contains('jul-on'));
 assert.ok(rad.classList.contains('jul-on'));
 assert.equal(el.hidden, false);
