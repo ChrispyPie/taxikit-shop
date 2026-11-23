@@ -55,7 +55,8 @@
     s.textContent =
       '#td-hem-scen,.td-hem-scen{display:flex;flex-direction:row;align-items:flex-end;justify-content:space-between;gap:4px 8px;width:100%;box-sizing:border-box;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));position:relative;pointer-events:none;z-index:5}' +
       '#td-hem-scen>*,.td-hem-scen>*{pointer-events:auto;flex-shrink:0}' +
-      '#td-hem-scen #jul-scen,.td-hem-scen #jul-scen{position:relative;left:auto;bottom:auto;transform:none;margin:0;flex:1 1 auto;width:auto;max-width:240px;min-width:120px;height:auto;aspect-ratio:240/168}' +
+      '#td-hem-scen:has(#jul-scen.jul-on),.td-hem-scen:has(#jul-scen.jul-on){min-height:calc(min(340px, 100vw - 24px) * 262 / 280 + 16px + env(safe-area-inset-bottom, 0px))}' +
+      '#td-hem-scen #jul-scen,.td-hem-scen #jul-scen{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom, 0px) + 8px);transform:translateX(-50%);margin:0;flex:none;width:min(340px, calc(100% - 12px));max-width:none;min-width:0;height:auto;aspect-ratio:280/262;z-index:1}' +
       '.hb-stage{position:relative;left:auto;top:auto;width:' + WID + 'px;height:' + TOT_H + 'px;z-index:6;pointer-events:none;overflow:visible;background:none;border:0;padding:0;margin:0;color:#e2e8f0;transform:none;flex:0 0 auto}' +
       '.hb-stage.hb-hidden{display:none}' +
       '.hb-stage-beam{position:absolute;left:0;top:0;width:' + WID + 'px;height:' + TOT_H + 'px;pointer-events:none;z-index:1;display:block;overflow:visible}' +
@@ -306,12 +307,19 @@
   }
   function orderHemScen(row) {
     if (!row) return;
+    if (window.JULPYSSEL && JULPYSSEL.hemOrder) { JULPYSSEL.hemOrder(row); return; }
+    var spacer = row.querySelector('.td-berra-spacer');
     var berra = row.querySelector('.td-berra');
     var scen = row.querySelector('#jul-scen');
     var bot = row.querySelector('#hb-stage');
-    if (berra) row.appendChild(berra);
-    if (scen) row.appendChild(scen);
-    if (bot) row.appendChild(bot);
+    var want = [], i;
+    if (spacer) want.push(spacer);
+    if (berra) want.push(berra);
+    if (scen) want.push(scen);
+    if (bot) want.push(bot);
+    for (i = 0; i < want.length; i++) {
+      if (row.children[i] !== want[i]) row.insertBefore(want[i], row.children[i] || null);
+    }
   }
   function ensureHost() {
     if (host && host.parentNode) return host;

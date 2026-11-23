@@ -43,9 +43,9 @@ assert.match(css, /html:not\(\[data-theme="dark"\]\) #jul-mys \.jul-vignette/);
 assert.match(css, /html\[data-theme="dark"\] #jul-mys \.jul-vignette/);
 assert.match(css, /#jul-ljusstake/);
 assert.match(css, /#jul-slingor/);
-assert.match(html, /julpyssel\.css\?v=20261123adv11/);
-assert.match(html, /julpyssel\.js\?v=20261123adv11/);
-assert.match(sw, /CACHE_VER = '20261123adv11'/);
+assert.match(html, /julpyssel\.css\?v=20261123adv14/);
+assert.match(html, /julpyssel\.js\?v=20261123adv14/);
+assert.match(sw, /CACHE_VER = '20261123adv14'/);
 
 function boot(opts) {
   opts = opts || {};
@@ -190,6 +190,13 @@ assert.ok(scen.classList.contains('jul-on'));
 assert.match(String(scen.innerHTML || ''), /jul-is/);
 assert.match(String(scen.innerHTML || ''), /jul-stjarna-topp/);
 assert.match(css, /#jul-scen/);
+assert.doesNotMatch(js, /jul-akare/);
+assert.doesNotMatch(css, /jul-aka/);
+assert.match(js, /jul-scen-ice/);
+assert.match(js, /jul-scen-tree/);
+assert.match(js, /SCEN_SCALE/);
+assert.match(css, /aspect-ratio:\s*280 \/ 262/);
+
 assert.ok(home.doc.getElementById('jul-slingor'), 'slingor kvar');
 
 const away = boot({ driver: '710022', onHome: false });
