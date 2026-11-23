@@ -51,7 +51,7 @@
     var l = document.createElement('link');
     l.id = 'td-advent-css';
     l.rel = 'stylesheet';
-    l.href = 'advent.css?v=20261123adv5';
+    l.href = 'advent.css?v=20261123adv6';
     document.head.appendChild(l);
   }
   function reducedMotion() {
@@ -492,8 +492,8 @@
     var body = window.POLKAGRIS && POLKAGRIS.boardHtml ? POLKAGRIS.boardHtml() : '<p class="td-adv-muted">Topplistan laddas…</p>';
     return '<section class="td-adv-jakt">' +
       '<h2>Polkagrisjakten</h2>' +
-      '<p>En polkagris i taget dyker upp någonstans i appen. Den som trycker först tar den. Nästa kommer på en ny plats, 5–60 minuter senare. På nyårsafton presenteras vinnaren.</p>' +
-      '<p class="td-adv-muted">På den här listan syns namn, för det är en tävling och inte taxidata.</p>' +
+      '<p>En polkagris i taget dyker upp någonstans i appen. Den som trycker först tar den. Nästa kommer på en ny plats, 5–60 minuter senare. Här ser du bara din egen placering och ditt eget antal – inga andras namn.</p>' +
+      '<p class="td-adv-muted">Flest polkagrisar vinner (vid lika antal vinner den som nådde dit först). På nyårsafton presenteras vinnaren för alla med förnamn och första bokstaven i efternamnet, till exempel Christian P.</p>' +
       body +
       '</section>';
   }

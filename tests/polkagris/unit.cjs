@@ -24,7 +24,7 @@ assert.match(css, /prefers-reduced-motion/);
 assert.match(js, /td-pk-board/);
 assert.match(advent, /data-tab="jakt"/);
 assert.match(advent, /data-tab="vinnare"/);
-assert.match(index, /polkagris\.js\?v=20261123adv5/);
+assert.match(index, /polkagris\.js\?v=20261123adv6/);
 
 const places = [...js.matchAll(/^\s+(hem|kordata|lonekoll|ankomster|prognos|kalender|topplistor|forum|installningar|om|vader|nyheter|advent|inkorg|hb):/gm)].map((m) => m[1]);
 assert.ok(places.length >= 12, 'enough places, got ' + places.length);
@@ -59,7 +59,18 @@ assert.match(css, /button\.td-pk-hdr/);
 assert.match(css, /width:\s*auto/);
 assert.match(advent, /5–60 minuter senare/);
 assert.match(advent, /På nyårsafton presenteras vinnaren/);
+assert.match(advent, /förnamn och första bokstaven i efternamnet/);
+assert.match(advent, /inga andras namn/);
 assert.match(advent, /function openTab/);
+const sql2 = fs.readFileSync(path.join(root, 'supabase/migrations/20261123c_polkagris_privacy_winner.sql'), 'utf8');
+assert.match(sql2, /left\(btrim\(d\.last_name\), 1\) \|\| '\.'/);
+assert.match(sql2, /'board', '\[\]'::jsonb/);
+assert.match(sql2, /my_rank/);
+assert.match(sql2, /tied_count/);
+assert.match(js, /td-pk-win-modal/);
+assert.match(js, /maybeShowWinnerModal/);
+assert.match(js, /Din? \(plats|Du \(plats/);
+assert.doesNotMatch(js, /r\.namn \? r\.namn/);
 assert.doesNotMatch(js + advent + css, /\bStig\b|\bhen\b/);
 console.log('polkagris unit ok');
 

@@ -17,7 +17,7 @@
 window.CHANGELOG = [
   { datum: '2026-12-01', id: '2026-12-01zadv1', tid: '00:00', rader: [
     ['Nytt', 'Adventskalender: 24 luckor med taxifakta, en för varje dag i december. Kalendern sitter litet uppe till vänster på startsidan. Tryck så växer den fram i mitten. Öppna dagens lucka – och alla du missat hittills.'],
-    ['Nytt', 'Polkagrisjakt: en polkagris i taget dyker upp någonstans i appen. Den som trycker först tar den. Nästa kommer 5–60 minuter senare. Antalet du samlat syns som en polkagris med siffra högst upp på startsidan, till höger om ljusstaken. Tryck där för att öppna ställningen. På nyårsafton utses en vinnare.']
+    ['Nytt', 'Polkagrisjakt: en polkagris i taget dyker upp någonstans i appen. Den som trycker först tar den. Nästa kommer 5–60 minuter senare. Antalet du samlat syns som en polkagris med siffra högst upp på startsidan, till höger om ljusstaken. Tryck där för att se din placering (inga andras namn visas). På nyårsafton presenteras vinnaren för alla.']
   ]},
   { datum: '2026-11-23', id: '2026-11-23zhem2', tid: '19:15', rader: [
     ['Ändrat', 'Du kan ta bort genvägen från startsidan för alla ikoner, även Inställningar, Om, Admin, S admin, Adventskalender och Moduler. Modulerna finns kvar i applådan och när du sveper upp. Avinstallera fungerar som tidigare.']

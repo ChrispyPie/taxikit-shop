@@ -60,3 +60,22 @@ button.td-pk-hdr:active{
 .td-pk-cane-ico .td-pk-cane-svg{width:28px;height:36px;display:block}
 .td-pk-cane-ico{font-size:0;display:block;transform-origin:50% 80%;
   animation:td-pk-wiggle 1.8s ease-in-out infinite;}
+
+.td-pk-win-modal{
+  position:fixed;inset:0;z-index:190;
+  display:flex;align-items:center;justify-content:center;
+  padding:16px;background:rgba(8,12,24,.72);
+}
+.td-pk-win-dialog{
+  width:min(92vw,360px);border-radius:18px;overflow:hidden;
+  background:#0b1020;box-shadow:0 20px 56px rgba(0,0,0,.55);
+  padding:0 0 14px;
+}
+.td-pk-win-dialog .td-pk-winner{margin:0 0 10px;border-radius:0}
+.td-pk-winner-sub{margin:0 0 6px;font-size:16px;color:#e2e8f0}
+.td-pk-tie{margin:6px 0 0;font-size:13px;color:#cbd5e0}
+.td-pk-win-close{
+  appearance:none;display:block;width:calc(100% - 28px);margin:0 14px;
+  padding:11px 14px;border:0;border-radius:10px;cursor:pointer;
+  background:#2b6cb0;color:#fff;font:600 15px/1.2 system-ui,sans-serif;
+}

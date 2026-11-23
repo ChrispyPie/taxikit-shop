@@ -102,7 +102,7 @@
     places: Object.keys(PLACES)
   };
 
-  var st = { cane: null, board: [], mine: 0, winner: null, hunt: false, showWin: false, season: null, me: '', flash: '', busy: false, timer: 0 };
+  var st = { cane: null, board: [], mine: 0, myRank: 1, collectors: 0, totalRanked: 1, winner: null, hunt: false, showWin: false, season: null, me: '', flash: '', busy: false, timer: 0 };
   var elCane = null;
 
   function css() {
@@ -110,7 +110,7 @@
     var l = document.createElement('link');
     l.id = 'td-polkagris-css-link';
     l.rel = 'stylesheet';
-    l.href = 'polkagris.css?v=20261123adv5';
+    l.href = 'polkagris.css?v=20261123adv6';
     document.head.appendChild(l);
   }
 
@@ -295,6 +295,9 @@
       st.busy = false;
       if (r && r.ok) {
         st.mine = r.mine || (st.mine + 1);
+        if (r.my_rank != null) st.myRank = r.my_rank;
+        if (r.collectors != null) st.collectors = r.collectors;
+        if (r.total_ranked != null) st.totalRanked = r.total_ranked;
         st.board = r.board || st.board;
         st.cane = null;
         hideCane();
@@ -304,7 +307,7 @@
         st.cane = null;
         hideCane();
         mountCount();
-        toast((r.namn ? r.namn : 'En annan förare') + ' hann före.');
+        toast('En annan förare hann före.');
       } else {
         toast('Det gick inte att ta klubban just nu.');
       }
@@ -330,10 +333,14 @@
       st.cane = r.cane || null;
       st.board = r.board || [];
       st.mine = r.mine || 0;
+      st.myRank = r.my_rank != null ? r.my_rank : 1;
+      st.collectors = r.collectors != null ? r.collectors : 0;
+      st.totalRanked = r.total_ranked != null ? r.total_ranked : Math.max(st.myRank, 1);
       st.winner = r.winner || null;
       st.me = r.me || driverId();
       mountCane();
       mountCount();
+      maybeShowWinnerModal();
       return r;
     }).catch(function () { return null; });
   }
@@ -366,25 +373,98 @@
   }
 
   function boardHtml() {
-    var rows = Array.isArray(st.board) ? st.board.slice() : [];
-    if (!rows.length) {
-      return '<p class="td-adv-muted">Ingen har tagit någon polkagris ännu. Håll ögonen öppna i appen – en klubba i taget dyker upp på en slumpad plats.</p>';
+    var rank = st.myRank || 1;
+    var count = st.mine || 0;
+    var total = st.totalRanked || Math.max(rank, 1);
+    var collectors = st.collectors || 0;
+    var badge = (count > 0 && rank <= 3) ? ['🥇', '🥈', '🥉'][rank - 1] : (rank + '.');
+    var html = '<ol class="td-pk-board td-pk-own">' +
+      '<li class="td-pk-row mine">' +
+        '<span class="td-pk-rank">' + badge + '</span>' +
+        '<span class="td-pk-name">Du (plats ' + rank + ' av ' + total + ')</span>' +
+        '<span class="td-pk-count">' + esc(String(count)) + (count === 1 ? ' klubba' : ' klubbor') + '</span>' +
+      '</li>' +
+    '</ol>';
+    if (!collectors) {
+      html += '<p class="td-adv-muted">Ingen har tagit någon polkagris ännu. Håll ögonen öppna i appen – en klubba i taget dyker upp på en slumpad plats.</p>';
+    } else {
+      html += '<p class="td-adv-muted">' + collectors + ' förare har samlat minst en polkagris hittills. Andras namn visas inte.</p>';
     }
-    var html = '<ol class="td-pk-board">';
-    rows.forEach(function (r, i) {
-      var mine = r.driver_id === st.me;
-      html += '<li class="td-pk-row' + (mine ? ' mine' : '') + '">' +
-        '<span class="td-pk-rank">' + (i + 1) + '</span>' +
-        '<span class="td-pk-name">' + esc(r.namn || 'Förare') + '</span>' +
-        '<span class="td-pk-count">' + esc(String(r.antal || 0)) + '</span></li>';
-    });
-    html += '</ol>';
-    if (st.mine) html += '<p class="td-adv-muted">Du har ' + st.mine + (st.mine === 1 ? ' klubba' : ' klubbor') + '.</p>';
     return html;
   }
 
+  function winSeenKey() {
+    var d = driverId() || 'x';
+    var q = asOfArg();
+    if (q) return 'td_pk_win_seen:' + d + ':test:' + q;
+    return 'td_pk_win_seen:' + d + ':' + (st.season || seasonYear());
+  }
+  function hasSeenWin() {
+    try {
+      var store = asOfArg() ? sessionStorage : localStorage;
+      return store.getItem(winSeenKey()) === '1';
+    } catch (e) { return false; }
+  }
+  function markSeenWin() {
+    try {
+      var store = asOfArg() ? sessionStorage : localStorage;
+      store.setItem(winSeenKey(), '1');
+    } catch (e) {}
+  }
+
+  var stopWinFw = null;
+  function closeWinnerModal() {
+    markSeenWin();
+    if (stopWinFw) { stopWinFw(); stopWinFw = null; }
+    var m = document.getElementById('td-pk-win-modal');
+    if (m && m.parentNode) m.parentNode.removeChild(m);
+  }
+  function maybeShowWinnerModal() {
+    if (!allowed() || !st.showWin || !st.winner) return;
+    if (hasSeenWin()) return;
+    if (document.getElementById('td-pk-win-modal')) return;
+    css();
+    markSeenWin();
+    var m = document.createElement('div');
+    m.id = 'td-pk-win-modal';
+    m.className = 'td-pk-win-modal';
+    m.setAttribute('role', 'dialog');
+    m.setAttribute('aria-modal', 'true');
+    m.setAttribute('aria-label', 'Vinnare av polkagrisjakten');
+    m.innerHTML = '<div class="td-pk-win-dialog">' +
+      winnerHtml() +
+      '<button type="button" class="td-pk-win-close">Stäng</button>' +
+      '</div>';
+    m.addEventListener('click', function (e) {
+      if (e.target === m || (e.target.closest && e.target.closest('.td-pk-win-close'))) {
+        closeWinnerModal();
+      }
+    });
+    document.body.appendChild(m);
+    var cv = m.querySelector('.td-pk-fw');
+    if (cv) stopWinFw = fireworks(cv);
+  }
+
   function fireworks(canvas) {
-    if (!canvas || reducedMotion()) return function () {};
+    if (!canvas) return function () {};
+    if (reducedMotion()) {
+      try {
+        var sctx = canvas.getContext('2d');
+        var sw = canvas.width = (canvas.clientWidth || 320);
+        var sh = canvas.height = (canvas.clientHeight || 260);
+        [0.25, 0.5, 0.78].forEach(function (fx, k) {
+          var cx = sw * fx, cy = sh * (0.25 + k * 0.08);
+          for (var i = 0; i < 16; i++) {
+            var a = (Math.PI * 2 * i) / 16;
+            sctx.fillStyle = 'hsl(' + ((k * 90 + i * 22) % 360) + ' 90% 65%)';
+            sctx.beginPath();
+            sctx.arc(cx + Math.cos(a) * 26, cy + Math.sin(a) * 26, 2.2, 0, Math.PI * 2);
+            sctx.fill();
+          }
+        });
+      } catch (e) {}
+      return function () {};
+    }
     var ctx = canvas.getContext('2d');
     var w, h, bits = [], running = true, raf;
     function size() {
@@ -430,13 +510,19 @@
 
   function winnerHtml() {
     var w = st.winner;
-    if (!w) return '<p class="td-adv-muted">När tävlingen är slut visas vinnaren här, med fyrverkeri.</p>';
+    if (!w) return '<p class="td-adv-muted">På nyårsafton visas vinnaren här, med fyrverkeri.</p>';
+    var n = w.antal || 0;
+    var note = '';
+    if (w.test_preview) note = '<p class="td-pk-tie">Förhandsvisning (inga testklubbor tagna än).</p>';
+    else if (w.tied_count && w.tied_count > 1) note = '<p class="td-pk-tie">Delat antal (' + esc(String(n)) + ') – den som nådde dit först vann.</p>';
+    var yr = st.season ? String(st.season) : String((today().y) || 2026);
     return '<div class="td-pk-winner">' +
       '<canvas class="td-pk-fw" aria-hidden="true"></canvas>' +
       '<div class="td-pk-winner-card">' +
-      '<p class="td-pk-winner-kicker">Vinnare av polkagrisjakten ' + esc(String(st.season || '')) + '</p>' +
+      '<p class="td-pk-winner-kicker">Gott nytt år! Vinnare ' + esc(yr) + '</p>' +
       '<h2 class="td-pk-winner-name">' + esc(w.namn || 'Förare') + '</h2>' +
-      '<p class="td-adv-muted">' + esc(String(w.antal || 0)) + ' polkagrisar.</p>' +
+      '<p class="td-pk-winner-sub">' + esc(String(n)) + (n === 1 ? ' polkagris' : ' polkagrisar') + '</p>' +
+      note +
       '</div></div>';
   }
 
