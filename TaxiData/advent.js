@@ -11,8 +11,8 @@
   A.title = 'Adventskalender';
   A.icon = '🎄';
 
-  var st = { el: null, tab: 'luckor', opens: [], year: null, today: null, day: 0, month: 0, open: null, err: '', busy: false, calOpen: false, factOpen: false, locking: false };
-  var els = { overlay: null, board: null, fact: null, mini: null };
+  var st = { el: null, tab: 'luckor', opens: [], year: null, today: null, day: 0, month: 0, open: null, err: '', busy: false, calOpen: false, factOpen: false, factClosedAt: 0, locking: false };
+  var els = { overlay: null, board: null, factWrap: null, fact: null, mini: null };
   var stopFw = null;
   var DOOR_ORDER = [17, 3, 24, 8, 1, 12, 19, 6, 22, 4, 15, 9, 23, 2, 14, 11, 20, 7, 18, 5, 21, 10, 16, 13];
   var DOOR_LAYOUT = [
@@ -51,7 +51,7 @@
     var l = document.createElement('link');
     l.id = 'td-advent-css';
     l.rel = 'stylesheet';
-    l.href = 'advent.css?v=20261123adv4';
+    l.href = 'advent.css?v=20261123adv5';
     document.head.appendChild(l);
   }
   function reducedMotion() {
@@ -294,6 +294,7 @@
 
   function flipFromTo(el, fromRect, toRect, back, done) {
     if (!el) { if (done) done(); return; }
+    if (el._advCleanup) { el._advCleanup(); el._advCleanup = null; }
     if (reducedMotion() || !fromRect || !toRect || fromRect.width < 4 || toRect.width < 4) {
       el.style.transform = '';
       el.style.transition = '';
@@ -311,13 +312,28 @@
     void el.offsetWidth;
     el.style.transition = 'transform .45s cubic-bezier(.2,.7,.2,1)';
     el.style.transform = back ? start : 'none';
-    var fin = function () {
+    var finished = false;
+    var timer = 0;
+    function cleanup() {
+      if (timer) { clearTimeout(timer); timer = 0; }
+      el.removeEventListener('transitionend', onEnd);
+      if (el._advCleanup === cleanup) el._advCleanup = null;
+    }
+    function fin() {
+      if (finished) return;
+      finished = true;
+      cleanup();
       el.style.transition = '';
       if (!back) el.style.transform = '';
       if (done) done();
-    };
-    el.addEventListener('transitionend', fin, { once: true });
-    setTimeout(fin, 520);
+    }
+    function onEnd(e) {
+      if (e && e.target !== el) return;
+      fin();
+    }
+    el._advCleanup = cleanup;
+    el.addEventListener('transitionend', onEnd);
+    timer = setTimeout(fin, 520);
   }
 
   function ensureOverlay() {
@@ -335,46 +351,58 @@
         doorsHtml() +
       '</div>' +
       '</div>' +
-      '<div class="td-adv-factbox" id="td-adv-factbox" hidden></div>';
-    ov.addEventListener('pointerdown', onOverlayPointer);
+      '<div class="td-adv-factwrap" id="td-adv-factwrap" hidden>' +
+        '<div class="td-adv-factbox" id="td-adv-factbox" role="dialog" aria-modal="true"></div>' +
+      '</div>';
     ov.addEventListener('click', onOverlayClick);
     document.body.appendChild(ov);
     els.overlay = ov;
     els.board = ov.querySelector('#td-adv-board');
+    els.factWrap = ov.querySelector('#td-adv-factwrap');
     els.fact = ov.querySelector('#td-adv-factbox');
+    if (els.factWrap) {
+      els.factWrap.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (!st.factOpen) return;
+        var closeBtn = e.target && e.target.closest && e.target.closest('[data-adv-close]');
+        if (closeBtn) { e.preventDefault(); closeFact(); return; }
+        if (e.target && e.target.closest && e.target.closest('.td-adv-factbox')) return;
+        e.preventDefault();
+        closeFact();
+      });
+    }
     if (els.fact) {
       els.fact.addEventListener('wheel', function (e) { e.stopPropagation(); }, { passive: true });
       els.fact.addEventListener('touchmove', function (e) { e.stopPropagation(); }, { passive: true });
     }
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape' || !st.calOpen) return;
+      if (st.factOpen) closeFact();
+      else closeCalendar();
+    });
     return ov;
   }
 
-  function onOverlayPointer(e) {
+  function onOverlayClick(e) {
     if (!st.calOpen) return;
     if (st.factOpen) {
-      if (e.target && e.target.closest && e.target.closest('.td-adv-factbox, .td-adv-close')) return;
+      var closeBtn = e.target && e.target.closest && e.target.closest('[data-adv-close]');
+      if (closeBtn) { e.preventDefault(); e.stopPropagation(); closeFact(); return; }
+      if (e.target && e.target.closest && e.target.closest('.td-adv-factbox')) return;
       e.preventDefault();
       e.stopPropagation();
       closeFact();
       return;
     }
-  }
-  function onOverlayClick(e) {
-    if (!st.calOpen) return;
-    var t = e.target && e.target.closest && e.target.closest('[data-lucka],[data-adv-close]');
-    if (t && t.getAttribute('data-adv-close')) {
-      e.preventDefault();
-      closeFact();
-      return;
-    }
-    if (t && t.getAttribute('data-lucka')) {
+    var t = e.target && e.target.closest && e.target.closest('[data-lucka]');
+    if (t) {
       e.preventDefault();
       var d = +t.getAttribute('data-lucka');
       if (d) openDoor(d, t);
       return;
     }
-    if (st.factOpen) return;
     if (e.target && e.target.closest && e.target.closest('.td-adv-board')) return;
+    if (Date.now() - (st.factClosedAt || 0) < 350) return;
     closeCalendar();
   }
 
@@ -393,6 +421,7 @@
       if (mini) mini.setAttribute('aria-expanded', 'true');
       st.calOpen = true;
       st.factOpen = false;
+      if (els.factWrap) els.factWrap.hidden = true;
       if (els.fact) els.fact.hidden = true;
       lockScroll(true);
       var board = els.board;
@@ -429,6 +458,7 @@
     st.factOpen = true;
     var box = els.fact;
     if (!box) return;
+    if (els.factWrap) els.factWrap.hidden = false;
     box.innerHTML = factHtml(d);
     box.hidden = false;
     box.scrollTop = 0;
@@ -440,11 +470,14 @@
   function closeFact() {
     if (!st.factOpen) return;
     st.factOpen = false;
+    st.factClosedAt = Date.now();
     st.open = null;
+    if (els.factWrap) els.factWrap.hidden = true;
     if (els.fact) {
       els.fact.hidden = true;
       els.fact.innerHTML = '';
       els.fact.style.transform = '';
+      els.fact.style.transition = '';
     }
   }
 
