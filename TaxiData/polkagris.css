@@ -38,3 +38,18 @@
 .td-pk-winner-kicker{margin:0 0 8px;letter-spacing:.04em;text-transform:uppercase;
   font-size:calc(12px * min(var(--font-scale,1),1.15));opacity:.85}
 .td-pk-winner-name{margin:0 0 8px;font-size:calc(28px * min(var(--font-scale,1),1.1));line-height:1.15}
+
+/* Kompakt räknare i headern, utan att ta ikonernas 40px-ruta. */
+html body header .hdr-right button.td-pk-hdr{
+  appearance:none;border:0;background:transparent;box-shadow:none;
+  width:auto;min-width:0;max-width:none;height:auto;min-height:28px;max-height:none;
+  padding:3px 6px;margin:0 2px 0 0;border-radius:8px;flex-shrink:0;
+  color:var(--primary,#2b6cb0);
+  font:600 calc(11px * min(var(--font-scale,1),1.1))/1.2 system-ui,sans-serif;
+  letter-spacing:0;white-space:nowrap;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+html body header .hdr-right button.td-pk-hdr:hover,
+html body header .hdr-right button.td-pk-hdr:active{
+  background:rgba(127,127,127,.14);color:var(--primary,#2b6cb0);transform:none;
+}

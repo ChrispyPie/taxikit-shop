@@ -13,7 +13,7 @@ function loadGate(nowIso, driver, search) {
   const noop = () => {};
   const ctx = {
     window: {},
-    document: { readyState: 'complete', getElementById: () => null, createElement: () => ({ setAttribute: noop, addEventListener: noop, style: {} }), head: { appendChild: noop }, addEventListener: noop, documentElement: {} },
+    document: { readyState: 'complete', getElementById: () => null, createElement: () => ({ setAttribute: noop, addEventListener: noop, style: {} }), head: { appendChild: noop }, addEventListener: noop, querySelectorAll: () => [], querySelector: () => null, documentElement: {} },
     addEventListener: noop,
 
     localStorage: { getItem: (k) => store[k] || null, setItem: (k, v) => { store[k] = String(v); }, removeItem: (k) => { delete store[k]; } },

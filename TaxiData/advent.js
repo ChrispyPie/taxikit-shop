@@ -38,7 +38,7 @@
     var l = document.createElement('link');
     l.id = 'td-advent-css';
     l.rel = 'stylesheet';
-    l.href = 'advent.css?v=20261123adv2';
+    l.href = 'advent.css?v=20261123adv3';
     document.head.appendChild(l);
   }
 
@@ -169,7 +169,7 @@
     var body = window.POLKAGRIS && POLKAGRIS.boardHtml ? POLKAGRIS.boardHtml() : '<p class="td-adv-muted">Topplistan laddas…</p>';
     return '<section class="td-adv-jakt">' +
       '<h2>Polkagrisjakten</h2>' +
-      '<p>En polkagrisklubba i taget dyker upp någonstans i appen. Den som trycker först tar den. Nästa klubba kommer på en ny plats, 5–60 minuter senare. Tävlingen pågår i december. På nyårsafton presenteras vinnaren.</p>' +
+      '<p>En polkagris i taget dyker upp någonstans i appen. Den som trycker först tar den. Nästa kommer på en ny plats, 5–60 minuter senare. På nyårsafton presenteras vinnaren.</p>' +
       '<p class="td-adv-muted">På den här listan syns namn, för det är en tävling och inte taxidata.</p>' +
       body +
       '</section>';
@@ -225,7 +225,13 @@
     if (d) openDoor(d);
   }
 
+  function openTab(tab) {
+    st.tab = tab || 'jakt';
+    if (typeof window.openItem === 'function') window.openItem('advent');
+    else if (st.el) paint();
+  }
   function render(el) {
+    if (window._adventTab) { st.tab = window._adventTab; window._adventTab = null; }
     st.el = el;
     if (!allowed()) {
       el.innerHTML = '<p>Adventskalendern är inte öppen ännu.</p>';
@@ -245,6 +251,7 @@
   }
 
   A.render = render;
+  A.openTab = openTab;
   A.refresh = refresh;
   A.isPinned = isPinned;
   A.allowed = allowed;

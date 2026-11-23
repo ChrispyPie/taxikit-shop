@@ -110,7 +110,7 @@
     var l = document.createElement('link');
     l.id = 'td-polkagris-css-link';
     l.rel = 'stylesheet';
-    l.href = 'polkagris.css?v=20261123adv2';
+    l.href = 'polkagris.css?v=20261123adv3';
     document.head.appendChild(l);
   }
 
@@ -137,6 +137,42 @@
   function hideCane() {
     if (elCane && elCane.parentNode) elCane.parentNode.removeChild(elCane);
     elCane = null;
+  }
+
+  function huntVisible() {
+    return allowed() && (inDecember(today()) || showWinner(today()));
+  }
+  function openBoard() {
+    window._adventTab = 'jakt';
+    if (window.ADVENT && typeof ADVENT.openTab === 'function') ADVENT.openTab('jakt');
+    else if (typeof window.openItem === 'function') window.openItem('advent');
+  }
+  function mountCount() {
+    if (!document.querySelectorAll) return;
+    var rights = document.querySelectorAll('.hdr-right');
+    var show = huntVisible();
+    for (var i = 0; i < rights.length; i++) {
+      var right = rights[i];
+      var el = right.querySelector('.td-pk-hdr');
+      if (!show) {
+        if (el && el.parentNode) el.parentNode.removeChild(el);
+        continue;
+      }
+      if (!el) {
+        el = document.createElement('button');
+        el.type = 'button';
+        el.className = 'td-pk-hdr';
+        el.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          openBoard();
+        });
+        right.insertBefore(el, right.firstChild);
+      }
+      var n = st.mine || 0;
+      el.textContent = 'Polkagrisar: ' + n;
+      el.setAttribute('aria-label', 'Polkagrisar: ' + n + '. Öppna ställningen.');
+    }
   }
 
   function mountCane() {
@@ -184,10 +220,12 @@
         st.board = r.board || st.board;
         st.cane = null;
         hideCane();
+        mountCount();
         toast('Du tog polkagrisen! Du har ' + st.mine + (st.mine === 1 ? ' klubba.' : ' klubbor.'));
       } else if (r && r.already) {
         st.cane = null;
         hideCane();
+        mountCount();
         toast((r.namn ? r.namn : 'En annan förare') + ' hann före.');
       } else {
         toast('Det gick inte att ta klubban just nu.');
@@ -200,9 +238,9 @@
   }
 
   function refresh() {
-    if (!allowed() || !token()) { hideCane(); return Promise.resolve(null); }
+    if (!allowed() || !token()) { hideCane(); mountCount(); return Promise.resolve(null); }
     var t = today();
-    if (!inDecember(t) && !showWinner(t)) { hideCane(); return Promise.resolve(null); }
+    if (!inDecember(t) && !showWinner(t)) { hideCane(); mountCount(); return Promise.resolve(null); }
     var args = { p_token: token() };
     var asOf = asOfArg();
     if (asOf) args.p_as_of = asOf;
@@ -217,6 +255,7 @@
       st.winner = r.winner || null;
       st.me = r.me || driverId();
       mountCane();
+      mountCount();
       return r;
     }).catch(function () { return null; });
   }
@@ -224,6 +263,7 @@
   function tick() {
     refresh();
     mountCane();
+    mountCount();
   }
 
   function start() {
@@ -244,6 +284,7 @@
   function stop() {
     if (st.timer) { clearInterval(st.timer); st.timer = 0; }
     hideCane();
+    mountCount();
   }
 
   function boardHtml() {
@@ -333,6 +374,8 @@
     refresh: refresh,
     tick: tick,
     mountCane: mountCane,
+    mountCount: mountCount,
+    openBoard: openBoard,
     boardHtml: boardHtml,
     winnerHtml: winnerHtml,
     fireworks: fireworks,

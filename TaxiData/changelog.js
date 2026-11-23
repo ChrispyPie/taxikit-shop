@@ -17,7 +17,7 @@
 window.CHANGELOG = [
   { datum: '2026-12-01', id: '2026-12-01zadv1', tid: '00:00', rader: [
     ['Nytt', 'Adventskalender: 24 luckor med taxifakta, en för varje dag i december. Öppna dagens lucka – och alla du missat hittills. Rutan ligger kvar på startskärmen i december.'],
-    ['Nytt', 'Polkagrisjakt: en polkagris i taget dyker upp någonstans i appen. Den som trycker först tar den. Samla klubbor under december, följ ställningen i kalendern, och på nyårsafton utses en vinnare.']
+    ['Nytt', 'Polkagrisjakt: en polkagris i taget dyker upp någonstans i appen. Den som trycker först tar den. Nästa kommer 5–60 minuter senare. Antalet du samlat syns uppe till höger, där du också öppnar ställningen. På nyårsafton utses en vinnare.']
   ]},
   { datum: '2026-11-23', id: '2026-11-23zhb2', tid: '18:30', rader: [
     ['Ändrat', 'Hjälpbotens lampa tänds och släcks bara när du trycker på själva lampan. Trycker du på figuren svarar den alltid med en replik, och en öppen pratbubbla stängs vid första trycket.'],

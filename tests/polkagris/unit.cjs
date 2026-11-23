@@ -24,7 +24,7 @@ assert.match(css, /prefers-reduced-motion/);
 assert.match(js, /td-pk-board/);
 assert.match(advent, /data-tab="jakt"/);
 assert.match(advent, /data-tab="vinnare"/);
-assert.match(index, /polkagris\.js\?v=20261123adv2/);
+assert.match(index, /polkagris\.js\?v=20261123adv3/);
 
 const places = [...js.matchAll(/^\s+(hem|kordata|lonekoll|ankomster|prognos|kalender|topplistor|forum|installningar|om|vader|nyheter|advent|inkorg|hb):/gm)].map((m) => m[1]);
 assert.ok(places.length >= 12, 'enough places, got ' + places.length);
@@ -51,4 +51,15 @@ assert.match(sql, /season <> 0/);
 assert.match(js, /isLive\(\) && inSeasonReal/);
 
 
+assert.match(js, /Polkagrisar: /);
+assert.match(js, /function mountCount/);
+assert.match(js, /function openBoard/);
+assert.match(js, /_adventTab = 'jakt'/);
+assert.match(css, /button\.td-pk-hdr/);
+assert.match(css, /width:\s*auto/);
+assert.match(advent, /5–60 minuter senare/);
+assert.match(advent, /På nyårsafton presenteras vinnaren/);
+assert.match(advent, /function openTab/);
+assert.doesNotMatch(js + advent + css, /\bStig\b|\bhen\b/);
 console.log('polkagris unit ok');
+
