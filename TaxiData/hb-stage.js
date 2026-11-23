@@ -57,14 +57,28 @@
       '#td-hem-scen>*,.td-hem-scen>*{pointer-events:auto;flex-shrink:0}' +
       '#td-hem-scen:has(#jul-scen.jul-on),.td-hem-scen:has(#jul-scen.jul-on){min-height:calc(min(340px, 100vw - 24px) * 262 / 280 + 16px + env(safe-area-inset-bottom, 0px))}' +
       '#td-hem-scen #jul-scen,.td-hem-scen #jul-scen{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom, 0px) + 8px);transform:translateX(-50%);margin:0;flex:none;width:min(340px, calc(100% - 12px));max-width:none;min-width:0;height:auto;aspect-ratio:280/262;z-index:1}' +
-      '.hb-stage{position:relative;left:auto;top:auto;width:' + WID + 'px;height:' + TOT_H + 'px;z-index:6;pointer-events:none;overflow:visible;background:none;border:0;padding:0;margin:0;color:#e2e8f0;transform:none;flex:0 0 auto}' +
+      '.hb-stage{position:relative;left:auto;top:auto;width:' + WID + 'px;height:' + TOT_H + 'px;z-index:6;pointer-events:none;overflow:visible;background:none;border:0;padding:0;margin:0 -8px 0 0;color:#e2e8f0;transform:none;flex:0 0 auto}' +
       '.hb-stage.hb-hidden{display:none}' +
       '.hb-stage-beam{position:absolute;left:0;top:0;width:' + WID + 'px;height:' + TOT_H + 'px;pointer-events:none;z-index:1;display:block;overflow:visible}' +
       '.hb-stage-light{position:relative;height:' + LAMP_H + 'px;width:100%;display:flex;align-items:flex-end;justify-content:center;z-index:2;' +
         'pointer-events:auto;cursor:pointer;border:0;background:none;padding:0;margin:0;color:inherit}' +
       '.hb-stage-lamp{display:block;flex:0 0 auto;width:28px;height:22px;pointer-events:none}' +
       '.hb-stage-scene{pointer-events:auto;cursor:pointer;position:relative;height:' + SCENE_H + 'px;z-index:2}' +
-      '.hb-stage-svg{width:100%;height:' + SCENE_H + 'px;display:block;overflow:visible}';
+      '.hb-stage-svg{width:100%;height:' + SCENE_H + 'px;display:block;overflow:visible}' +
+      '@media (max-width: 600px){' +
+      '#td-hem-scen:has(#jul-scen.jul-on),.td-hem-scen:has(#jul-scen.jul-on){min-height:calc(min(340px, 100vw - 24px) * 262 / 280 + 16px + 52px + env(safe-area-inset-bottom, 0px))}' +
+      '#td-hem-scen #jul-scen,.td-hem-scen #jul-scen{bottom:calc(env(safe-area-inset-bottom, 0px) + 8px + 52px)}' +
+      '}' +
+      '@media (max-width: 600px) and (max-height: 899px){' +
+      '#td-hem-scen:has(#jul-scen.jul-on),.td-hem-scen:has(#jul-scen.jul-on){min-height:calc(min(286px, 100vw - 24px) * 262 / 280 + 16px + 52px + env(safe-area-inset-bottom, 0px))}' +
+      '#td-hem-scen #jul-scen,.td-hem-scen #jul-scen{width:min(286px, calc(100% - 12px))}' +
+      '}' +
+      '@media (max-width: 600px) and (min-height: 900px){' +
+      '#app.is-home:has(#jul-scen.jul-on) #content{display:flex;flex-direction:column}' +
+      '#app.is-home:has(#jul-scen.jul-on) #content .grid{order:0}' +
+      '#app.is-home:has(#jul-scen.jul-on) #content #td-hem-scen,#app.is-home:has(#jul-scen.jul-on) #content .td-hem-scen{order:1}' +
+      '#app.is-home:has(#jul-scen.jul-on) #content #home-devices{order:2}' +
+      '}'
     if (!s.parentNode) (document.head || document.documentElement).appendChild(s);
   }
 
@@ -149,7 +163,8 @@
           '<rect x="58" y="37" width="14" height="7" rx="2" fill="' + visor + '"/>' +
           '<circle cx="60" cy="54" r="4.5" fill="#0f172a"/><circle cx="70" cy="54" r="4.5" fill="#0f172a"/>' +
         '</g>';
-      art = fig || ('<g>' + dock + '</g>');
+      /* Spegelvänd så stolpen pekar mot höger skärmkant. */
+      art = '<g class="hb-dock-flip" transform="translate(120,0) scale(-1,1)">' + (fig || ('<g>' + dock + '</g>')) + '</g>';
     }
     return '<svg class="hb-stage-svg" viewBox="0 0 120 64" aria-hidden="true">' + floor + art + '</svg>';
   }
@@ -258,14 +273,14 @@
   }
 
   // Ståplats i scenen, fötterna på golvet. Samma y oavsett tänd/släckt.
-  // x mittas under lampan (robot) eller vid figurens plats i den släckta bilden.
+  // x vid laddstolpen (robot, spegelvänd station) eller vid figurens plats i den släckta bilden.
   function standLocal(id) {
     var sx = WID / 120, SIZE = 40;
     var y = LAMP_H + SCENE_H - SIZE - 2;
     var x;
     if (id === 'diva') x = 80 * sx - SIZE / 2;
     else if (id === 'chauffor') x = 36 * sx - SIZE / 2;
-    else x = 60 * sx - SIZE / 2;
+    else x = 55 * sx - SIZE / 2; /* robot vid spegelvänd laddstolpe */
     if (x < 0) x = 0;
     if (x + SIZE > WID) x = WID - SIZE;
     return { x: x, y: y };

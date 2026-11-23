@@ -13,8 +13,8 @@ const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
 const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
 const hem = fs.readFileSync(path.join(root, 'TaxiData/hem-ordning-core.js'), 'utf8');
 
-assert.match(sw, /CACHE_VER = '20261123adv14'/);
-assert.match(html, /hb-stage\.js\?v=20261123adv14/);
+assert.match(sw, /CACHE_VER = '20261123adv15'/);
+assert.match(html, /hb-stage\.js\?v=20261123adv15/);
 assert.match(lv, /hjalpbot\.js\?v=20261123adv6/);
 assert.match(lv, /"berra":\s*\["berra\.js\?v=20261123adv14"\]/);
 assert.match(hem, /LAZY\.ensure\('berra'\)/);
@@ -27,6 +27,8 @@ assert.doesNotMatch(stage, /lit \? 'På' : 'Av'/);
 assert.match(stage, /hb-stage-lamp-btn/);
 assert.match(stage, /beamOverlay/);
 assert.match(stage, /standLocal/);
+assert.match(stage, /hb-dock-flip/);
+assert.match(stage, /translate\(120,0\) scale\(-1,1\)/);
 assert.match(stage, /ensureHemScen/);
 assert.match(stage, /td-hem-scen/);
 assert.match(stage, /\.hb-stage\{position:relative/);
@@ -159,7 +161,7 @@ assert.ok(stand, 'ståplats saknas');
 assert.equal(Math.round(stand.y), Math.round(yOn + 64 - 40 - 2), 'fötterna inte på golvet ' + JSON.stringify({ stand, yOn }));
 // ljusfläck ungefär under roboten (mitt i scenen / lampan)
 const localX = stand.x - r.S.room().x;
-assert.ok(Math.abs(localX + 20 - 56) <= 3, 'roboten inte under lampan ' + localX);
+assert.ok(Math.abs(localX + 20 - (55 * 112 / 120)) <= 3, 'roboten inte vid laddstolpen ' + localX);
 r.S.setLit(false);
 assert.equal(r.S.isLit(), false);
 assert.ok(r.host.innerHTML.indexOf('hb-stage-beam') < 0, 'stråle kvar när släckt');
