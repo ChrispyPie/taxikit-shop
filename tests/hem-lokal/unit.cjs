@@ -15,7 +15,7 @@ assert.doesNotMatch(core + src, /rpc\('home_tool_order_set'/);
 assert.match(core, /home_tool_order_get/);
 assert.match(core, /if \(isSeeded\(\) \|\| readLocal\(\)/);
 assert.match(core, /markSeeded\(\)/);
-assert.match(index, /hem-ordning-core\.js\?v=20261122zfly6/);
+assert.match(index, /hem-ordning-core\.js\?v=20261123zfly7/);
 assert.match(lazy, /hem-ordning\.js\?v=20261122zdelad1/);
 assert.match(changelog, /id: '2026-11-14lokal1'/);
 assert.doesNotMatch(core + src + changelog, /\bStig\b/);
