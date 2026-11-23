@@ -15,6 +15,10 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-23', id: '2026-11-23zhb2', tid: '18:30', rader: [
+    ['Ändrat', 'Hjälpbotens lampa tänds och släcks bara när du trycker på själva lampan. Trycker du på figuren svarar den alltid med en replik, och en öppen pratbubbla stängs vid första trycket.'],
+    ['Förbättrat', 'Roboten har många fler suckande repliker, och de visas oftare både när du trycker och när den pratar av sig själv. Chauffören och Taxi-Diva har också fler egna svar.']
+  ]},
   { datum: '2026-11-23', id: '2026-11-23ztid1', tid: '14:47', rader: [
     ['Förbättrat', 'I Körpassdata visas starttiden på varje resa i listan, även när kvittot är ihopfällt. Uppgifterna under ett öppet kvitto ligger i linje med kvittonumret, utan extra mellanrum.']
   ]},

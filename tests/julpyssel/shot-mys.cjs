@@ -109,7 +109,7 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
         theme,
         mysOn: mys.classList.contains('jul-on') && !mys.hidden,
         pe: getComputedStyle(mys).pointerEvents,
-        flakes: mys.querySelectorAll('.jul-flinga').length,
+        stars: mys.querySelectorAll('.jul-glitter').length,
         vignette: !!mys.querySelector('.jul-vignette'),
         girlang: !!g.querySelector('svg'),
         girlangAfterHeader: !!(hdr && g.compareDocumentPosition(hdr) & Node.DOCUMENT_POSITION_PRECEDING) && !hdr.contains(g),
@@ -131,7 +131,7 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
     ok(theme + ' theme attr', info.theme === theme);
     ok(theme + ' mys on', info.mysOn);
     ok(theme + ' pointer-events none', info.pe === 'none');
-    ok(theme + ' snow flakes', info.flakes >= 8);
+    ok(theme + ' twinkling stars', info.stars >= 40);
     ok(theme + ' vignette', info.vignette);
     ok(theme + ' girlang separator', info.girlang && info.girlangAfterHeader && info.noHeaderLine);
     ok(theme + ' candle in body above grid', info.candles && info.candlesAboveGrid);

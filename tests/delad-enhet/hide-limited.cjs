@@ -21,10 +21,10 @@ assert.match(cl.split("id: '2026-11-22zprof1'")[1].split(']},')[0], /begränsad 
 assert.match(cl.split("id: '2026-11-22zprof1'")[1].split(']},')[0], /notiser/i);
 
 assert.match(html, /delad-enhet\.js\?v=20261122zprof1/);
-assert.match(html, /lazy-views\.js\?v=20261123zscn1/);
-assert.match(lv, /changelog\.js\?v=20261123zscn1/);
+assert.match(html, /lazy-views\.js\?v=20261123zhb2/);
+assert.match(lv, /changelog\.js\?v=20261123zhb2/);
 assert.match(lv, /notis\.js\?v=20261122zprof1/);
-assert.match(sw, /CACHE_VER = '20261123zscn1'/);
+assert.match(sw, /CACHE_VER = '20261123zhb2'/);
 
 // notiser är inte längre en dold vy, så klockan kan laddas
 const priv = js.split('var PRIVATE_VIEWS')[1].split(';')[0];

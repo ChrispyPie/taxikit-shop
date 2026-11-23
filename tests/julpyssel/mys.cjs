@@ -1,5 +1,5 @@
 'use strict';
-// Julpyssel mys: girlang, snö, vignett. Bara 710022, hemskärm, ingen Nyheter-rad, reduced-motion.
+// Julpyssel mys: girlang, stjärnhimmel, vignett. Bara 710022, hemskärm, ingen Nyheter-rad, reduced-motion.
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
@@ -21,23 +21,31 @@ assert.match(js, /JUL_ALLA = false/);
 assert.match(js, /function ensureMys/);
 assert.match(js, /function paintMys/);
 assert.match(js, /function girlangSvg/);
-assert.match(js, /function snowHtml/);
+assert.match(js, /function starsHtml/);
 assert.match(js, /jul-girlang/);
 assert.match(js, /jul-vignette/);
-assert.match(js, /jul-flinga/);
+assert.match(js, /jul-glitter/);
+assert.match(js, /jul-himmel/);
+assert.doesNotMatch(js, /function snowHtml/);
+assert.doesNotMatch(js, /jul-flinga/);
 assert.match(js, /peppar|tomte/);
 assert.match(css, /#jul-mys/);
 assert.match(css, /#jul-girlang/);
 assert.match(css, /pointer-events:\s*none/);
 assert.match(css, /prefers-reduced-motion:\s*reduce/);
-assert.match(css, /jul-fall/);
+assert.match(css, /jul-twinkle/);
+assert.match(css, /jul-himmel/);
+assert.match(css, /jul-glitter/);
+assert.doesNotMatch(css, /jul-fall/);
+assert.doesNotMatch(css, /jul-flinga/);
+assert.match(css, /prefers-reduced-motion:\s*reduce/);
 assert.match(css, /html:not\(\[data-theme="dark"\]\) #jul-mys \.jul-vignette/);
 assert.match(css, /html\[data-theme="dark"\] #jul-mys \.jul-vignette/);
 assert.match(css, /#jul-ljusstake/);
 assert.match(css, /#jul-slingor/);
-assert.match(html, /julpyssel\.css\?v=20261123zscn1/);
-assert.match(html, /julpyssel\.js\?v=20261123zscn1/);
-assert.match(sw, /CACHE_VER = '20261123zscn1'/);
+assert.match(html, /julpyssel\.css\?v=20261123zhb2/);
+assert.match(html, /julpyssel\.js\?v=20261123zhb2/);
+assert.match(sw, /CACHE_VER = '20261123zhb2'/);
 
 function boot(opts) {
   opts = opts || {};
@@ -161,7 +169,9 @@ assert.ok(mys.classList.contains('jul-on'));
 assert.equal(mys.hidden, false);
 assert.equal(mys.attributes['aria-hidden'], 'true');
 assert.match(String(mys.innerHTML || ''), /jul-vignette/);
-assert.match(String(mys.innerHTML || ''), /jul-flinga/);
+assert.match(String(mys.innerHTML || ''), /jul-glitter/);
+assert.match(String(mys.innerHTML || ''), /jul-himmel/);
+assert.doesNotMatch(String(mys.innerHTML || ''), /jul-flinga/);
 const gir = home.doc.getElementById('jul-girlang');
 assert.ok(gir, 'girlang som avskiljare');
 assert.ok(home.els.app.children.includes(gir), 'girlang ska inte ligga i ljusraden');

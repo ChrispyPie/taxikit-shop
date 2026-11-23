@@ -13,10 +13,10 @@ const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
 const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
 const hem = fs.readFileSync(path.join(root, 'TaxiData/hem-ordning-core.js'), 'utf8');
 
-assert.match(sw, /CACHE_VER = '20261123zscn1'/);
-assert.match(html, /hb-stage\.js\?v=20261123zscn1/);
-assert.match(lv, /hjalpbot\.js\?v=20261123zscn1/);
-assert.match(lv, /"berra":\s*\["berra\.js\?v=20261123zscn1"\]/);
+assert.match(sw, /CACHE_VER = '20261123zhb2'/);
+assert.match(html, /hb-stage\.js\?v=20261123zhb2/);
+assert.match(lv, /hjalpbot\.js\?v=20261123zhb2/);
+assert.match(lv, /"berra":\s*\["berra\.js\?v=20261123zhb2"\]/);
 assert.match(hem, /LAZY\.ensure\('berra'\)/);
 assert.match(cl, /id: '2026-11-22zhb1'/);
 assert.match(cl.split("id: '2026-11-22zhb1'")[1].split(']},')[0], /strålkastare|lampan/);
@@ -30,7 +30,11 @@ assert.match(stage, /standLocal/);
 assert.match(stage, /sameView && fits\(placed\.x, placed\.y/);
 assert.match(bot, /if \(stagedStand\) return stagedStand;/);
 assert.match(bot, /HJALPBOT\.bubbleOn = bubbleOn/);
-assert.match(bot, /Tryck på lampan eller figuren/);
+assert.match(bot, /Tryck på lampan för att tända och släcka/);
+assert.match(bot, /Tryck på figuren så svarar den/);
+assert.match(bot, /nästa tryck ger en ny replik/);
+assert.match(stage, /pokeFig/);
+assert.match(cl, /id: '2026-11-23zhb2'/);
 assert.doesNotMatch(bot, /visar På eller Av/);
 
 function node(extra) {
@@ -146,5 +150,18 @@ r.S.setLit(true);
 assert.match(r.host.innerHTML, /aria-pressed="true"/);
 r.S.setLit(false);
 assert.match(r.host.innerHTML, /aria-pressed="false"/);
+
+// lampa tänder/släcker, figurtryck gör det inte
+r.ls._s['taxi_hb_light:900001'] = '0';
+let poked = 0;
+r.win.HJALPBOT = { poke() { poked++; }, bubbleOn() { return false; } };
+assert.equal(r.S.isLit(), false);
+r.S.toggle();
+assert.equal(r.S.isLit(), true, 'lamp-toggle tänder inte');
+r.S.toggle();
+assert.equal(r.S.isLit(), false, 'lamp-toggle släcker inte');
+r.S.onFigTap({ stopPropagation() {} });
+assert.equal(r.S.isLit(), false, 'figurtryck tände lampan');
+assert.equal(poked, 1, 'figurtryck pokeade inte');
 
 console.log('HB_STAGE_UNIT_OK', 'y=' + yOff, 'stand=' + JSON.stringify(stand));

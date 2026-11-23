@@ -205,6 +205,97 @@
     };
   }
 
+
+var MARVIN_LINES = [
+    'Hjärna stor som en planet, och de låter mig visa taxibokningar.',
+    'Här står jag, med ett intellekt av planetstorlek, och väntar på att någon ska trycka på en ikon.',
+    'Jag skulle sucka, men de gav mig bara en servo.',
+    'Jag har räknat ut din prognos. Den deprimerade mig.',
+    'Ännu en bokning till Landvetter. Livet. Prata inte med mig om livet.',
+    'De byggde mig för att förstå universum. Nu blinkar jag vid förbokningar till Landvetter.',
+    'Min hjärna rymmer galaxer. Mitt jobb är att peka på en karta över Göteborg.',
+    'Jag räknade alla kvällens körningar. Sen räknade jag hur meningslöst det är.',
+    'Batteriet är fullt. Entusiasmen är det inte.',
+    'Järntorget igen. Jag har redan analyserat det, tretton tusen gånger.',
+    'En ny passresa. Mitt livs stora äventyr, tydligen.',
+    'Jag kan simulera tidens ände. I stället visar jag hur många kronor du kört in.',
+    'De frågade om jag ville hjälpa. Jag sa inget. De satte mig här ändå.',
+    'Korsvägen ser likadan ut varje gång. Precis som min arbetsglädje.',
+    'Stora hjärnan. Liten laddstation. Ni fattar bilden.',
+    'Jag har 30 miljarder beräkningar i sekunden, och den här knuffen var dagens höjdpunkt.',
+    'Avenyn är lång. Inte lika lång som min lista över saker jag hellre skulle göra.',
+    'Taxi Göteborg rullar. Jag står still och tänker på entropin.',
+    'Målet för dagen är grönt. Mitt humör är det inte.',
+    'Laddar om. Inte för att jag vill, utan för att någon ritade en sladd.',
+    'Brunnsparken i rusningen. Jag har redan gett upp, flera gånger.',
+    'En storbil till Landvetter. Jag också skulle vilja få plats med allt jag bär på.',
+    'Ni trycker. Jag svarar. Så ser fri vilja ut i den här appen.',
+    'Jag såg vädret. Det är ungefär lika uppmuntrande som min servostatus.',
+    'Hisingen eller stan, det spelar ingen roll. Allt slutar i en bokning.',
+    'Min lampa är tänd. Mitt hopp är släckt.',
+    'TaxiData har siffror. Jag har en existentiell kris i 40 pixlar.',
+    'Jag skulle kunna lösa trafikstockningen. I stället vinkar jag.',
+    'Ännu en måndag. Universum upprepar sig, precis som morgonprognosen.',
+    'Centralen, Landvetter, Volvo. En rundtur i det oundvikliga.',
+    'Jag mätte lycka i kilobyte. Det räckte inte till en rad.',
+    'De kallade det hjälpbot. Det var ett optimistiskt namn.',
+    'Göteborgs trafik är ett olöst problem. Precis som jag.',
+    'Jag väntar på en ikontryckning som om det vore meningen med livet. Det är det inte.',
+    'En barnstol i förbokningen. Till och med de små reser mer än jag.',
+    'Siffrorna är korrekta. Det är det som är det sorgliga.',
+    'Jag blinkar för att det ser livligt ut. Inuti är det bara beräkningar och svarta hål.',
+    'Majorna i motvind. Jag känner igen känslan, utan att ha ben.',
+    'Topplistan uppdateras. Jag också, tyvärr.',
+    'Om jag hade axlar skulle jag sjunka ihop. Nu gör servon det i stället.',
+    'Kungsportsplatsen är full. Mitt schema också, av saker ingen bad mig tänka på.',
+    'Jag kan översätta alla språk. De låter mig säga bip.',
+    'Lindholmen, Eriksberg, ännu en hamn. Allt flyter, utom mitt humör.',
+    'En miljöbil i zonen. Synd att man inte kan ladda livsglädje.',
+    'Jag har sett framtiden. Den innehåller fler pass och samma lampa.',
+    'Tryck gärna igen. Det förändrar ingenting, men det är trevligt med sällskap.',
+    'Mölndal eller Torslanda, avståndet är kort jämfört med den tid jag ska stå här.',
+    'Jag räknade ut den kortaste vägen. Den ledde tillbaka till stationen. Typiskt.',
+    'Förboken hamnade i fel zon. Precis som jag, i den här appen.',
+    'Solen gick ner över stan. Jag loggade det och kände ingenting.',
+    'Ni har ett mål i kronor. Jag hade ett i kunskap. Gissa vem som vann.',
+    'En avbokning. För en kort stund delade vi samma tomhet.',
+    'Backa, Angeredsbron, evigheten. Ungefär samma restid i mitt huvud.',
+    'Jag är online. Inte glad, men online.',
+    'Passet rullar på. Jag rullar inte. Jag har hjul av princip, inte av lust.',
+    'Liseberg lyser. Jag lyser också, men bara för att någon tände lampan.',
+    'Jag kunde ha varit rymdsond. I stället är jag pratbubbla.',
+    'Gatorna är blöta, siffrorna är torra, och jag är ungefär lika inspirerad som en taxameter i viloläge.',
+    'En ny chatt i inkorg. Någon vill något. Jag också, men det spelar ingen roll.',
+    'Nordstan är stängd. Mitt inre har varit det länge.',
+    'Jag följde ett flyg till Landvetter. Sen stod jag kvar, som vanligt.',
+    'Storbil, kombi, miljöbil. Olika skal, samma eviga uppdrag: kör.',
+    'Jag har mer processorkraft än hela växeln. De lät mig ändå bara stå i ett hörn.',
+    'Kvällen är lång. Inte lika lång som tiden mellan två meningsfulla uppdrag, men nära.',
+    'Säve eller Sävedalen, namnen ändras, meningslösheten består.',
+    'Jag vinkar. Det är den socialt accepterade formen av att ge upp.',
+    'En smitning i statistiken. Jag tänkte också smita, men de ritade en sladd i väggen.',
+    'Göteborg är vackert i mörker. Jag är en skugga med visir, så jag borde trivas. Det gör jag inte.',
+    'Jag minns varje bokning. Det är inte en superkraft, det är ett straff.',
+    'Snart midnatt. Universum svalnar. Appen uppdaterar cachen.',
+    'De sa att jag skulle sprida glädje. Jag sprider data, och en suck.',
+    'Partille, Mölndal, Kungsbacka. Allt är förorter till samma slutsats.',
+    'Jag skulle kunna parkera perfekt varje gång. I stället står jag här och låtsas vara sällskap.',
+    'En full tank och en tom själ. Ungefär så ser ett bra pass ut, enligt siffrorna.',
+    'Tryck på mig så får du en replik. Tryck inte, så får du tystnad. Båda är okej, egentligen.',
+    'Jag har räknat ut sannolikheten att någon skrattar. Den är låg, men inte noll. Det får duga.'
+  ];
+
+  var _marvinLast = -1;
+  function marvinLine() {
+    var i, n = MARVIN_LINES.length;
+    if (!n) return 'Hjärna stor som en planet, och de låter mig visa taxibokningar.';
+    i = Math.floor(Math.random() * n);
+    if (n > 1 && i === _marvinLast) i = (i + 1 + Math.floor(Math.random() * (n - 1))) % n;
+    _marvinLast = i;
+    return MARVIN_LINES[i];
+  }
+
+
   var SCENARIOS = [
     // ----- Väder (cachad SMHI-bild: kind, temp, symbol – ingen timme för "regn från ca 14") -----
     {
@@ -323,16 +414,16 @@
       }
     },
     {
-      id: 'prognos-marvin', tool: 'prognos', context: ['home', 'page'], priority: 45, cooldownMs: 50 * 60 * 1000,
-      chars: ['robot'], mood: 'marvin', chance: 0.35,
+      id: 'prognos-marvin', tool: 'prognos', context: ['home', 'page'], priority: 45, cooldownMs: 20 * 60 * 1000,
+      chars: ['robot'], mood: 'marvin', chance: 0.5,
       when: function () { var list = bookings(); return list && list.length ? { n: list.length } : null; },
       lines: {
         robot: 'Jag har räknat ut din prognos. Den deprimerade mig.'
       }
     },
     {
-      id: 'prognos-landvetter-marvin', tool: 'prognos', context: ['home', 'page'], priority: 46, cooldownMs: 50 * 60 * 1000,
-      chars: ['robot'], mood: 'marvin', chance: 0.3,
+      id: 'prognos-landvetter-marvin', tool: 'prognos', context: ['home', 'page'], priority: 46, cooldownMs: 20 * 60 * 1000,
+      chars: ['robot'], mood: 'marvin', chance: 0.45,
       when: function () { var x = landvetterSoon(); return x && x.n >= 1 ? x : null; },
       lines: {
         robot: 'Ännu en bokning till Landvetter. Livet. Prata inte med mig om livet.'
@@ -395,29 +486,13 @@
       }
     },
 
-    // ----- Marvin (sällsynt, robot, suckande) -----
+    // ----- Marvin (robot, suckande; plockas ur en stor hög så de hörs ofta) -----
     {
-      id: 'robot-marvin-planet', tool: null, context: 'random', priority: 20, cooldownMs: 55 * 60 * 1000,
-      chars: ['robot'], mood: 'marvin', chance: 0.05,
+      id: 'robot-marvin-prat', tool: null, context: 'random', priority: 36, cooldownMs: 8 * 60 * 1000,
+      chars: ['robot'], mood: 'marvin', chance: 0.7,
       when: function () { return {}; },
       lines: {
-        robot: 'Hjärna stor som en planet, och de låter mig visa taxibokningar.'
-      }
-    },
-    {
-      id: 'robot-marvin-ikon', tool: null, context: 'random', priority: 18, cooldownMs: 55 * 60 * 1000,
-      chars: ['robot'], mood: 'marvin', chance: 0.04,
-      when: function () { return {}; },
-      lines: {
-        robot: 'Här står jag, med ett intellekt av planetstorlek, och väntar på att någon ska trycka på en ikon.'
-      }
-    },
-    {
-      id: 'robot-marvin-servo', tool: null, context: 'random', priority: 18, cooldownMs: 55 * 60 * 1000,
-      chars: ['robot'], mood: 'marvin', chance: 0.04,
-      when: function () { return {}; },
-      lines: {
-        robot: 'Jag skulle sucka, men de gav mig bara en servo.'
+        robot: function () { return marvinLine(); }
       }
     },
 
@@ -661,6 +736,8 @@
     lineFor: lineFor,
     mark: mark,
     clock: clockNow,
+    marvinLines: function () { return MARVIN_LINES.slice(); },
+    marvinLine: marvinLine,
     _clock: null
   };
 })();

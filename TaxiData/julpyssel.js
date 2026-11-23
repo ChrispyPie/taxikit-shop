@@ -410,16 +410,17 @@
   }
 
 
-  function snowHtml() {
-    var h = '', i, x, s, dur, del, dx;
-    for (i = 0; i < 12; i++) {
-      x = (6 + (i * 7.7 + (i % 3) * 3) % 88).toFixed(1);
-      s = (2.4 + (i % 4) * 1.1).toFixed(1) + 'px';
-      dur = (14 + (i % 5) * 2.2).toFixed(1) + 's';
-      del = (-(i * 1.7)).toFixed(1) + 's';
-      dx = ((i % 2 ? 18 : -16) + (i % 3) * 4) + 'px';
-      h += '<span class="jul-flinga" style="--x:' + x + ';--s:' + s + ';--dur:' + dur +
-        ';--del:' + del + ';--dx:' + dx + '"></span>';
+  function starsHtml() {
+    var h = '', i, x, y, s, dur, del, kind;
+    for (i = 0; i < 52; i++) {
+      x = ((i * 17.3 + (i % 4) * 5.1) % 100).toFixed(1);
+      y = ((i * 13.7 + (i % 5) * 8.3) % 100).toFixed(1);
+      s = (1.3 + (i % 5) * 0.7).toFixed(1) + 'px';
+      dur = (2.6 + (i % 7) * 0.5).toFixed(1) + 's';
+      del = (-(i * 0.41)).toFixed(1) + 's';
+      kind = (i % 4 === 0) ? 'jul-glitter-kors' : 'jul-glitter-prick';
+      h += '<span class="jul-glitter ' + kind + '" style="--x:' + x + ';--y:' + y +
+        ';--s:' + s + ';--dur:' + dur + ';--del:' + del + '"></span>';
     }
     return h;
   }
@@ -436,7 +437,7 @@
       wrap.id = 'jul-mys';
       wrap.setAttribute('aria-hidden', 'true');
       wrap.hidden = true;
-      wrap.innerHTML = '<div class="jul-vignette"></div><div class="jul-sno">' + snowHtml() + '</div>';
+      wrap.innerHTML = '<div class="jul-vignette"></div><div class="jul-himmel">' + starsHtml() + '</div>';
       (document.body || document.documentElement).appendChild(wrap);
     }
     return wrap;

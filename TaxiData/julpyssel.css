@@ -142,12 +142,12 @@ html[data-theme="dark"] #jul-ljusstake .jul-hint {
 }
 
 
-/* Mys: girlang som avskiljare, kulor, lätt snö och varm vignett. Bara hemskärm. */
+/* Mys: girlang som avskiljare, kulor, glittrande stjärnhimmel och varm vignett. Bara hemskärm. */
 #jul-mys {
   display: none;
   position: fixed;
   inset: 0;
-  z-index: 7;
+  z-index: 0;
   pointer-events: none;
   overflow: hidden;
 }
@@ -157,34 +157,44 @@ html[data-theme="dark"] #jul-ljusstake .jul-hint {
   inset: 0;
   pointer-events: none;
 }
-#jul-mys .jul-sno { position: absolute; inset: 0; pointer-events: none; }
-#jul-mys .jul-flinga {
+#jul-mys .jul-himmel { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+#jul-mys .jul-glitter {
   position: absolute;
-  top: -10px;
+  top: calc(var(--y) * 1%);
   left: calc(var(--x) * 1%);
   width: var(--s);
   height: var(--s);
   margin: 0;
+  padding: 0;
+  pointer-events: none;
+  opacity: 0.45;
+  background: #fff6c8;
+}
+#jul-mys .jul-glitter-prick {
   border-radius: 50%;
-  background: #fff;
-  opacity: 0.5;
-  box-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 2px 0.5px rgba(255, 236, 170, 0.7);
+}
+#jul-mys .jul-glitter-kors {
+  background: #ffe9a8;
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+  box-shadow: 0 0 3px 0.5px rgba(255, 230, 150, 0.75);
 }
 @media (prefers-reduced-motion: no-preference) {
-  #jul-mys .jul-flinga {
-    animation: jul-fall var(--dur) linear infinite;
+  #jul-mys .jul-glitter {
+    animation: jul-twinkle var(--dur) ease-in-out infinite;
     animation-delay: var(--del);
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  #jul-mys .jul-flinga { display: none; }
+  #jul-mys .jul-glitter { animation: none; opacity: 0.4; }
   #jul-girlang .jul-kula,
   #jul-girlang .jul-stjarna { animation: none; }
 }
-@keyframes jul-fall {
-  0% { transform: translate3d(0, -8px, 0); opacity: 0; }
-  8% { opacity: 0.55; }
-  100% { transform: translate3d(var(--dx), 110vh, 0); opacity: 0.12; }
+@keyframes jul-twinkle {
+  0%, 100% { opacity: 0.18; transform: scale(0.75); }
+  40% { opacity: 0.8; transform: scale(1); }
+  55% { opacity: 0.95; transform: scale(1.15); }
+  70% { opacity: 0.45; transform: scale(0.9); }
 }
 
 /* Ljust tema: djup rött/grönt/guld mot ljus bakgrund, rimfrost i kanterna. */
@@ -205,10 +215,15 @@ html:not([data-theme="dark"]) #jul-mys .jul-vignette {
     radial-gradient(ellipse 50% 40% at 100% 100%, rgba(140, 80, 10, 0.07), transparent 70%);
   box-shadow: inset 0 0 48px 10px rgba(255, 255, 255, 0.42), inset 0 0 0 1px rgba(255, 255, 255, 0.35);
 }
-html:not([data-theme="dark"]) #jul-mys .jul-flinga {
-  background: #fff;
-  box-shadow: 0 0 1px rgba(120, 140, 160, 0.7);
-  opacity: 0.7;
+html:not([data-theme="dark"]) #jul-mys .jul-glitter-prick {
+  background: #c9a227;
+  box-shadow: 0 0 2px 0.5px rgba(180, 140, 30, 0.45);
+  opacity: 0.55;
+}
+html:not([data-theme="dark"]) #jul-mys .jul-glitter-kors {
+  background: #d4af37;
+  box-shadow: none;
+  opacity: 0.5;
 }
 html:not([data-theme="dark"]) #app.is-home.jul-hem > header {
   background: linear-gradient(180deg, var(--bg) 0%, #eef4fa 55%, #f7efe4 100%);
@@ -233,9 +248,14 @@ html[data-theme="dark"] #jul-mys .jul-vignette {
     radial-gradient(ellipse 45% 40% at 0% 100%, rgba(120, 30, 10, 0.16), transparent 70%),
     radial-gradient(ellipse 45% 40% at 100% 100%, rgba(20, 70, 40, 0.14), transparent 70%);
 }
-html[data-theme="dark"] #jul-mys .jul-flinga {
+html[data-theme="dark"] #jul-mys .jul-glitter-prick {
+  background: #fff6d2;
+  box-shadow: 0 0 3px 0.5px rgba(255, 240, 180, 0.7);
+  opacity: 0.7;
+}
+html[data-theme="dark"] #jul-mys .jul-glitter-kors {
+  background: #ffe9a8;
   opacity: 0.75;
-  box-shadow: 0 0 3px rgba(255, 255, 255, 0.9);
 }
 html[data-theme="dark"] #app.is-home.jul-hem > header {
   box-shadow: 0 10px 22px -12px rgba(255, 160, 70, 0.35);
