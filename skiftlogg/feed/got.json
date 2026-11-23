@@ -1,32 +1,12 @@
 {
   "airport": "GOT",
-  "updated": "2026-11-23T11:01:04+01:00",
-  "arrivalsUpdated": "2026-11-23T11:01:07+01:00",
+  "updated": "2026-11-23T11:05:29+01:00",
+  "arrivalsUpdated": "2026-11-23T11:05:31+01:00",
   "departuresUpdated": "2026-11-23T10:10:41+01:00",
   "yesterdayUpdated": "2026-11-23T05:30:52+01:00",
   "tomorrowUpdated": "2026-11-22T23:01:04+01:00",
   "error": null,
   "arrivals": [
-    {
-      "id": "FR6095",
-      "dir": "ANK",
-      "other": "Gdansk",
-      "iata": "",
-      "airline": "Ryanair Ltd",
-      "status": "DEL",
-      "statusSv": "Borttagen",
-      "sched": "2026-11-21T22:05:00Z",
-      "est": "",
-      "act": "",
-      "terminal": "T1",
-      "gate": "",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
-    },
     {
       "id": "SK448",
       "dir": "ANK",
@@ -66,26 +46,6 @@
       "lastBag": "2026-11-21T23:33:49Z",
       "rawStatus": "Landat 00:02 · Sista bagage",
       "reason": "Landat 00:02 · Sista bagage"
-    },
-    {
-      "id": "LH2432",
-      "dir": "ANK",
-      "other": "München",
-      "iata": "",
-      "airline": "Lufthansa",
-      "status": "LAN",
-      "statusSv": "Landat 23:03",
-      "sched": "2026-11-21T22:20:00Z",
-      "est": "2026-11-21T22:01:00Z",
-      "act": "2026-11-21T22:03:00Z",
-      "terminal": "T1",
-      "gate": "12",
-      "baggage": "3",
-      "firstBag": "2026-11-21T22:20:13Z",
-      "firstBagEst": "2026-11-21T22:28:57Z",
-      "lastBag": "2026-11-21T22:23:59Z",
-      "rawStatus": "Landat 23:03 · Sista bagage",
-      "reason": "Landat 23:03 · Sista bagage"
     },
     {
       "id": "JTD434",
@@ -2041,7 +2001,7 @@
       "terminal": "T1",
       "gate": "22",
       "baggage": "1",
-      "firstBag": "",
+      "firstBag": "2026-11-23T10:03:46Z",
       "firstBagEst": "2026-11-23T10:10:15Z",
       "lastBag": "",
       "rawStatus": "Landat 10:48",
@@ -2121,11 +2081,11 @@
       "terminal": "T1",
       "gate": "21B",
       "baggage": "4",
-      "firstBag": "",
+      "firstBag": "2026-11-23T10:03:49Z",
       "firstBagEst": "2026-11-23T09:51:33Z",
       "lastBag": "",
-      "rawStatus": "Landat 10:31",
-      "reason": "Landat 10:31"
+      "rawStatus": "Första bagage · Landat 10:31",
+      "reason": "Första bagage · Landat 10:31"
     },
     {
       "id": "BA792",
@@ -2313,19 +2273,19 @@
       "other": "Stockholm ARN",
       "iata": "",
       "airline": "SAS Scandinavian Airlines",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "LAN",
+      "statusSv": "Landat 11:02",
       "sched": "2026-11-23T09:45:00Z",
       "est": "2026-11-23T10:02:00Z",
-      "act": "",
+      "act": "2026-11-23T10:02:00Z",
       "terminal": "T1",
       "gate": "16",
       "baggage": "2",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Ankommer 11:02",
-      "reason": "Ankommer 11:02"
+      "rawStatus": "Landat 11:02",
+      "reason": "Landat 11:02"
     },
     {
       "id": "FR4012",
@@ -2423,9 +2383,9 @@
       "baggage": "3",
       "firstBag": "2026-11-23T09:49:59Z",
       "firstBagEst": "2026-11-23T10:02:19Z",
-      "lastBag": "",
-      "rawStatus": "Första bagage · Landat 10:33",
-      "reason": "Första bagage · Landat 10:33"
+      "lastBag": "2026-11-23T10:03:38Z",
+      "rawStatus": "Landat 10:33 · Sista bagage",
+      "reason": "Landat 10:33 · Sista bagage"
     },
     {
       "id": "KL1239",
