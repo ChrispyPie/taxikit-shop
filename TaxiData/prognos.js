@@ -738,7 +738,8 @@
   // Urval: (1) planerad tid = första tiden (samma 5-minutersrad eller inom ±2 min),
   // (2) annars den planerade landning som ligger närmast före, högst 20 min före (troligen bagage).
   // Visas på planets beräknade/faktiska ankomst, utan extra förskjutning (samma rad som flygikonen).
-  // Vid lika träff på samma steg flyttas tiden inte.
+  // Vid lika träff (samma planerade tid, olika beräknad tid) läggs bokningen mitt emellan
+  // de beräknade ankomsterna, avrundat till närmaste 5 min, och infoboxen listar planen.
   var FLIGHT_ZONE = '293';
   var FLIGHT_TXT = 'Flyg runt denna tid är försenade, tiden kan ändras';
   var FOLLOW_NEAR_MS = 2 * 60000;
@@ -821,8 +822,52 @@
   function followHit(hit) {
     return {
       flight: hit.flight, at: hit.at, from: hit.from, offset: hit.offset,
-      shown: hit.shown, later: hit.at > hit.from, why: hit.why || ''
+      shown: hit.shown, later: hit.at > hit.from, why: hit.why || '',
+      ties: hit.ties || null, step: hit.step || ''
     };
+  }
+  function followMidpoint(ties) {
+    var sum = 0, n = 0, i, at;
+    if (!ties || !ties.length) return 0;
+    for (i = 0; i < ties.length; i++) {
+      at = ties[i] && (ties[i].at || followPlace(ties[i].flight));
+      if (!at) continue;
+      sum += +at;
+      n++;
+    }
+    if (n < 1) return 0;
+    return +round5(new Date(sum / n));
+  }
+  function followTieKey(fol) {
+    var list = (fol && fol.ties) ? fol.ties : null;
+    if (!list || !list.length) return (fol && fol.flight && fol.flight.no) || '';
+    return list.map(function (c) { return (c.flight && c.flight.no) || ''; }).slice().sort().join(',');
+  }
+  function followJoin(lines) {
+    if (!lines || !lines.length) return '';
+    if (lines.length === 1) return lines[0];
+    if (lines.length === 2) return lines[0] + ' och ' + lines[1];
+    return lines.slice(0, -1).join(', ') + ' och ' + lines[lines.length - 1];
+  }
+  function followFromTie(ties, t, step) {
+    var at = followMidpoint(ties);
+    if (!at) return { cands: ties, tie: ties, step: step };
+    var sorted = ties.slice().sort(function (a, b) {
+      var da = (a.at || 0) - (b.at || 0);
+      if (da) return da;
+      return String((a.flight && a.flight.no) || '').localeCompare(String((b.flight && b.flight.no) || ''));
+    });
+    var first = sorted[0] || ties[0];
+    return followHit({
+      flight: first.flight,
+      at: at,
+      from: t,
+      offset: first && first.flight ? t - (+first.flight.sched) : 0,
+      shown: at,
+      why: 'flera',
+      ties: sorted,
+      step: step || ''
+    });
   }
   function followMatch(b, flights) {
     var t = followFirstTime(b);
@@ -830,12 +875,22 @@
     if (!cands.length) return null;
     var picked = followPick(cands, t);
     if (!picked) return null;
-    if (picked.tie) return { cands: picked.cands || picked.tie, tie: picked.tie, step: picked.step };
+    if (picked.tie) return followFromTie(picked.tie, t, picked.step);
     if (!picked.at) return null;
     return followHit(picked);
   }
   function followExplain(fol, n) {
-    if (!fol || !fol.flight) return '';
+    if (!fol) return '';
+    var who = (n > 1) ? 'Bokningarna' : 'Bokningen';
+    var vis = isFinite(fol.at) ? hm(new Date(fol.at)) : '';
+    if (fol.why === 'flera' && fol.ties && fol.ties.length > 1) {
+      var list = followJoin(fol.ties.map(function (c) { return followCandLine(c); }));
+      var s = who + ' följer flera plan: ' + list;
+      if (vis) s += ' och visas kl ' + vis + '.';
+      else s += '.';
+      return s;
+    }
+    if (!fol.flight) return '';
     var f = fol.flight;
     var offMin = Math.round((fol.offset || 0) / 60000);
     var no = f.no || 'flyg';
@@ -1229,12 +1284,56 @@
     }
     if (snart) why += ' Tiden har passerat men bokningen finns kvar i prognosen – kan komma när som helst.';
     if (b._follow && isFinite(b._follow.at)) {
-      when = 'ca ' + hm(new Date(b._follow.at)) + ' (från ' + hm(new Date(b._follow.from)) + ', följer ' + ((b._follow.flight && b._follow.flight.no) || 'flyg') + ')';
+      when = 'ca ' + hm(new Date(b._follow.at)) + ' (från ' + hm(new Date(b._follow.from)) + ', följer ' +
+        ((b._follow.why === 'flera' && b._follow.ties && b._follow.ties.length > 1) ? 'flera plan' : ((b._follow.flight && b._follow.flight.no) || 'flyg')) + ')';
     } else if (!when && isFinite(est)) when = 'ca ' + hm(new Date(est));
     if (!b._follow && b._ut && isFinite(est) && c !== 'osaker') when = 'kund ca ' + hm(new Date(est)) + ' (ut till bil ca ' + hm(new Date(Date.parse(b._ut))) + ')';
     return { conf: c, why: why, when: when, first: isFinite(obs) ? hm(new Date(obs)) : '–' };
   }
 
+  function followNoBtn(f) {
+    var no = (f && f.no) || 'flyg';
+    if (!f) return esc(no);
+    var key = flyKeyOf(f);
+    try { if (st.flyMap) st.flyMap[key] = st.flyMap[key] || f; } catch (e) {}
+    return '<button type="button" class="pg-fly-no" data-pg-fly="' + esc(key) + '" aria-label="Visa ' + esc(no) + '">' + esc(no) + '</button>';
+  }
+  function followCandLineHtml(c) {
+    var f = (c && c.flight) || {};
+    var shown = c && c.shown;
+    var lab = followNewLabel(f);
+    return followNoBtn(f) + (f.from ? ' från ' + esc(f.from) : '') +
+      (f.sched ? ', planerad ' + esc(hm(new Date(f.sched))) : '') +
+      (shown && lab ? ', ' + esc(lab + ' ' + hm(new Date(shown))) : '');
+  }
+  function followExplainHtml(fol, n) {
+    if (!fol) return '';
+    var who = (n > 1) ? 'Bokningarna' : 'Bokningen';
+    var vis = isFinite(fol.at) ? hm(new Date(fol.at)) : '';
+    if (fol.why === 'flera' && fol.ties && fol.ties.length > 1) {
+      var list = followJoin(fol.ties.map(function (c) { return followCandLineHtml(c); }));
+      var s = esc(who) + ' följer flera plan: ' + list;
+      if (vis) s += ' och visas kl ' + esc(vis) + '.';
+      else s += '.';
+      return s;
+    }
+    if (!fol.flight) return esc(followExplain(fol, n));
+    var f = fol.flight;
+    var offMin = Math.round((fol.offset || 0) / 60000);
+    var sched = f.sched ? hm(new Date(f.sched)) : '';
+    var shown = fol.shown || followShown(f);
+    var shownLab = followNewLabel(f);
+    var shownTxt = shown && shownLab ? shownLab + ' ' + hm(new Date(shown)) : '';
+    var mid = followNoBtn(f) + (sched || shownTxt ? ' (' + esc((sched ? 'planerad ' + sched : '') + (sched && shownTxt ? ', ' : '') + shownTxt) + ')' : '');
+    var bagage = fol.why === 'bagage';
+    var ligga;
+    if (offMin > 0) ligga = esc(who) + ' ligger ' + offMin + ' min efter planerad landning' + (bagage ? ', troligen på grund av bagage,' : '') + ' för ' + mid;
+    else if (offMin < 0) ligga = esc(who) + ' ligger ' + Math.abs(offMin) + ' min före planerad landning för ' + mid;
+    else ligga = esc(who) + ' följer ' + mid;
+    if (vis) ligga += ' och visas kl ' + esc(vis) + '.';
+    else ligga += '.';
+    return ligga;
+  }
   // Cellinnehåll för förklaringsrutan: rad (tid eller "Snart"), spalt, bokningar, ev. flygvarning
   function popHtml(info) {
     var html = '<div class="pg-pop-head"><strong>' + esc(info.rowTxt) + ' · ' + esc(CAT_LABEL[info.cat] || info.cat) + '</strong>' +
@@ -1250,7 +1349,7 @@
       var add = !child && addonsOf(b).length ? ' + ' + addonText(b) : '';
       var fly = !!(info.flight && info.flight.ids && info.flight.ids[b.id]);
       var fol = b._follow || null;
-      var key = [w.conf, what + add, w.why, w.when, w.first, fly ? 1 : 0, fol ? (fol.flight && fol.flight.no) + '|' + fol.at : ''].join('\u0001');
+      var key = [w.conf, what + add, w.why, w.when, w.first, fly ? 1 : 0, fol ? followTieKey(fol) + '|' + fol.at : ''].join('\u0001');
       if (gmap[key]) { gmap[key].n++; return; }
       gmap[key] = { w: w, label: what + add, fly: fly, fol: fol, n: 1 };
       groups.push(gmap[key]);
@@ -1260,7 +1359,7 @@
       html += '<div class="pg-pop-b"><div><span class="pg-n pg-c-' + esc(w.conf) + '">' + esc(CONF_TXT[w.conf] || w.conf) + '</span> ' +
         '<strong>' + esc(g.label) + '</strong>' + (g.n > 1 ? ' <span class="pg-pop-n">' + g.n + ' st</span>' : '') +
         (g.fly ? ' <span class="pg-pop-flyb" title="' + esc(FLIGHT_TXT) + '">✈</span>' : '') +
-        (g.fol ? ' <span class="pg-pop-follow">följer ' + esc((g.fol.flight && g.fol.flight.no) || 'flyg') + '</span>' : '') + '</div>' +
+        (g.fol ? ' <span class="pg-pop-follow">följer ' + ((g.fol.why === 'flera' && g.fol.ties && g.fol.ties.length > 1) ? 'flera plan' : followNoBtn(g.fol.flight)) + '</span>' : '') + '</div>' +
         '<div class="pg-pop-why">' + esc(w.why) + '</div>' +
         '<div class="pg-pop-meta">Tid: ' + esc(w.when) + ' · Först sedd ' + esc(w.first) + '</div></div>';
     });
@@ -1277,24 +1376,24 @@
       var folGroups = [], folSeen = {};
       follows.forEach(function (b) {
         var fol = b._follow, f = fol && fol.flight;
-        var key = [(f && f.no) || '', fol.at || 0, fol.from || 0, fol.why || ''].join('|');
+        var key = [followTieKey(fol), fol.at || 0, fol.from || 0, fol.why || ''].join('|');
         if (folSeen[key]) { folSeen[key].n++; return; }
         folSeen[key] = { fol: fol, n: 1 };
         folGroups.push(folSeen[key]);
       });
       html += '<div class="pg-pop-follow-box">' +
-        folGroups.slice(0, 3).map(function (g) { return esc(followExplain(g.fol, g.n)); }).join('<br>') + '</div>';
+        folGroups.slice(0, 3).map(function (g) { return followExplainHtml(g.fol, g.n); }).join('<br>') + '</div>';
     }
     if (maybe.length) {
       html += '<div class="pg-pop-follow-box">Flera plan är möjliga, så tiden är inte flyttad.<br>' +
         maybe.slice(0, 2).map(function (b) {
-          return b._followCands.slice(0, 4).map(function (c) { return esc(followCandLine(c)); }).join('<br>');
+          return b._followCands.slice(0, 4).map(function (c) { return followCandLineHtml(c); }).join('<br>');
         }).join('<br>') + '</div>';
     }
     if (info.flight) {
       html += '<div class="pg-pop-fly">✈ ' + esc(FLIGHT_TXT) + '<span class="pg-pop-meta">' +
         info.flight.list.slice(0, 3).map(function (x) {
-          return esc((x.f.no || '') + (x.f.from ? ' från ' + x.f.from : '') + ' ' + hm(x.f.sched) + ' ' + x.txt);
+          return followNoBtn(x.f) + esc((x.f.from ? ' från ' + x.f.from : '') + ' ' + hm(x.f.sched) + ' ' + x.txt);
         }).join('<br>') + '</span></div>';
     }
     return html;
@@ -1629,6 +1728,7 @@
           sum.addon = !meta.child && list.some(function (b) { return addonsOf(b).length > 0; });
           sum.flight = !!fly;
           sum.follow = list.some(function (b) { return !!b._follow; });
+          sum.followFlera = list.some(function (b) { return !!(b._follow && b._follow.why === 'flera'); });
           sum.followFrom = '';
           if (sum.follow) {
             list.forEach(function (b) {
@@ -1638,7 +1738,7 @@
           var nwc = list.some(isNewB);
           if (nwc) tdCls += ' pg-td-new';
           attrs = ' data-pg-cell="' + esc(key) + '" tabindex="0" aria-label="' + esc(rowTxt + ', ' + (meta.label || k) + ': ' + sum.n + ' st, ' + sum.tip +
-            (sum.addon ? ', med tillval' : '') + (fly ? ', ' + FLIGHT_TXT : '') + (sum.follow ? ', följer flyg, från ' + sum.followFrom : '') + (nwc ? ', ny' : '') + '. Håll för förklaring.') + '"';
+            (sum.addon ? ', med tillval' : '') + (fly ? ', ' + FLIGHT_TXT : '') + (sum.follow ? (sum.followFlera ? ', följer flera plan, från ' : ', följer flyg, från ') + sum.followFrom : '') + (nwc ? ', ny' : '') + '. Håll för förklaring.') + '"';
         }
         html += '<td class="' + tdCls + '"' + (isF ? ' id="pg-focus-cell"' : '') + attrs + '>' + countCell(sum) + (sum && list.some(isNewB) ? NEW_DOT : '') + '</td>';
       });
@@ -1950,6 +2050,7 @@
           sum.addon = !meta.child && list.some(function (b) { return addonsOf(b).length > 0; });
           sum.flight = !!fly;
           sum.follow = list.some(function (b) { return !!b._follow; });
+          sum.followFlera = list.some(function (b) { return !!(b._follow && b._follow.why === 'flera'); });
           sum.followFrom = '';
           if (sum.follow) {
             list.forEach(function (b) {
@@ -1959,7 +2060,7 @@
           var nwc = list.some(isNewB);
           if (nwc) tdCls += ' pg-td-new';
           attrs = ' data-pg-cell="' + esc(key) + '" tabindex="0" aria-label="' + esc(rowTxt + ', ' + (meta.label || k) + ': ' + sum.n + ' st, ' + sum.tip +
-            (sum.addon ? ', med tillval' : '') + (fly ? ', ' + FLIGHT_TXT : '') + (sum.follow ? ', följer flyg, från ' + sum.followFrom : '') + (nwc ? ', ny' : '') + '. Håll för förklaring.') + '"';
+            (sum.addon ? ', med tillval' : '') + (fly ? ', ' + FLIGHT_TXT : '') + (sum.follow ? (sum.followFlera ? ', följer flera plan, från ' : ', följer flyg, från ') + sum.followFrom : '') + (nwc ? ', ny' : '') + '. Håll för förklaring.') + '"';
         }
         html += '<td class="' + tdCls + '"' + (isF ? ' id="pg-focus-cell"' : '') + attrs + '>' + countCell(sum) + (sum && list.some(isNewB) ? NEW_DOT : '') + '</td>';
       });
@@ -2622,5 +2723,6 @@
   P.followExplain = followExplain;
   P.applyFollows = applyFollows;
   P.followFirstTime = followFirstTime;
+  P.followMidpoint = followMidpoint;
   P.bookingWhen = bookingWhen;
 })();

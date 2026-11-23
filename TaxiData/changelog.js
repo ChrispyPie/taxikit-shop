@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-23', id: '2026-11-23zfly7', tid: '06:29', rader: [
+    ['Förbättrat', 'När flera plan till Landvetter har samma planerade landning läggs förbokningen mitt emellan de beräknade ankomsterna. Infoboxen talar om vilka plan det gäller, och du kan trycka på ett flygnummer för mer uppgifter.']
+  ]},
   { datum: '2026-11-22', id: '2026-11-22zfly6', tid: '23:21', rader: [
     ['Fixat', 'En förbokning på Landvetter följer det plan som var planerat att landa vid den tid bokningen först visades, och läggs i schemat på samma rad som planets beräknade ankomst.']
   ]},

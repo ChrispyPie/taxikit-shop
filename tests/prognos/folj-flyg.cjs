@@ -1,5 +1,5 @@
 'use strict';
-// Landvetter-bokning följer planet vid första visade tid (serverhistorik) och läggs på beräknad ankomst, utan extra förskjutning.
+// Landvetter-bokning följer planet vid första visade tid; vid lika planerad tid läggs den mitt emellan de beräknade ankomsterna.
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
@@ -13,6 +13,19 @@ const html = fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8');
 assert.doesNotMatch(js, /\bStig\b/);
 assert.doesNotMatch(css, /\bStig\b/);
 assert.doesNotMatch(cl.split("id: '2026-11-22zfly5'")[1].split(']},')[0], /\b(Stig|hen)\b/);
+assert.match(cl, /id: '2026-11-23zfly7'/);
+assert.match(cl.split("id: '2026-11-23zfly7'")[1].split(']},')[0], /mitt emellan/);
+assert.match(cl.split("id: '2026-11-23zfly7'")[1].split(']},')[0].split('rader:')[0], /tid: '/);
+assert.doesNotMatch(cl.split("id: '2026-11-23zfly7'")[1].split(']},')[0], /\b(Stig|hen)\b/);
+assert.match(js, /function followMidpoint\(/);
+assert.match(js, /följer flera plan/);
+assert.match(js, /why: 'flera'/);
+assert.match(js, /function followExplainHtml\(/);
+assert.match(js, /function followNoBtn\(/);
+assert.match(js, /class="pg-fly-no"/);
+assert.match(css, /\.pg-pop \.pg-fly-no/);
+assert.match(cl.split("id: '2026-11-23zfly7'")[1].split(']},')[0], /flygnummer/);
+
 assert.match(cl, /id: '2026-11-22zfly6'/);
 assert.match(cl.split("id: '2026-11-22zfly6'")[1].split(']},')[0], /först visades/);
 assert.match(cl.split("id: '2026-11-22zfly6'")[1].split(']},')[0].split('rader:')[0], /tid: '/);
@@ -32,8 +45,8 @@ assert.match(cl, /id: '2026-11-22zfly3'/);
 assert.match(cl.split("id: '2026-11-22zfly3'")[1].split(']},')[0].split('rader:')[0], /tid: '21:05'/);
 assert.match(cl, /id: '2026-11-22zfly1'/);
 assert.match(cl.split("id: '2026-11-22zfly1'")[1].split(']},')[0].split('rader:')[0], /tid: '20:56'/);
-assert.match(lv, /prognos\.js\?v=20261122zfly6/);
-assert.match(html, /style\.css\?v=20261122zfly6/);
+assert.match(lv, /prognos\.js\?v=20261123zfly7/);
+assert.match(html, /style\.css\?v=20261123zfly7/);
 
 const mig = fs.readFileSync(path.join(root, 'supabase/migrations/20261122c_prognos_list_first_estimated.sql'), 'utf8');
 const undo = fs.readFileSync(path.join(root, 'supabase/migrations/undo/20261122c_prognos_list_first_estimated_undo.sql'), 'utf8');
@@ -79,7 +92,7 @@ const api = new Function(
   'var FOLLOW_NEAR_MS = 2 * 60000;\n' +
   'var FOLLOW_AFTER_MS = 20 * 60000;\n' +
   p2Src + '\n' + hmSrc + '\n' + roundBlock + '\n' + followBlock + '\n' +
-  'return { followMatch: followMatch, followCandidates: followCandidates, followExplain: followExplain, followCandLine: followCandLine, applyFollows: applyFollows, followFirstTime: followFirstTime, followPlace: followPlace, bookingWhen: bookingWhen, floor5: floor5, round5: round5, nearTime: nearTime, followPick: followPick };'
+  'return { followMatch: followMatch, followCandidates: followCandidates, followExplain: followExplain, followCandLine: followCandLine, applyFollows: applyFollows, followFirstTime: followFirstTime, followPlace: followPlace, followMidpoint: followMidpoint, bookingWhen: bookingWhen, floor5: floor5, round5: round5, nearTime: nearTime, followPick: followPick };'
 )();
 
 function t(iso) { return Date.parse(iso); }
@@ -177,12 +190,20 @@ assert.equal(prefer.flight.no, 'EW8220');
 assert.equal(prefer.why, 'planned');
 assert.equal(prefer.at, est10);
 
-// Two flights with the same scheduled time → true tie, no move
+// Two flights with the same planned time, different est → midpoint, rounded to 5 min
 const tie = api.followMatch(book, [
   fl({ no: 'EW8220', sched: sched, est: est10 }),
   fl({ no: 'AY867', from: 'Helsingfors', sched: sched, est: t('2026-11-22T18:40:00Z') })
 ]);
-assert.ok(tie && tie.cands && tie.cands.length === 2 && !tie.flight, 'same planned time is a true tie');
+assert.ok(tie && !tie.cands && tie.why === 'flera' && tie.ties && tie.ties.length === 2);
+// est 19:35 and 19:40 → mid 19:37:30 → round5 (sekunder nollställs) 19:35? 19:37 → 19:35 or 19:40
+// 19:35 + 19:40 = mid 19:37:30; setSeconds 0 → 19:37; Math.round(37/5)*5 = 35 → 19:35
+assert.equal(+tie.at, +api.round5(new Date((est10 + t('2026-11-22T18:40:00Z')) / 2)));
+assert.match(api.followExplain(tie), /^Bokningen följer flera plan:/);
+assert.match(api.followExplain(tie), /EW8220 från Berlin, planerad 19:25, beräknad 19:35/);
+assert.match(api.followExplain(tie), /AY867 från Helsingfors, planerad 19:25, beräknad 19:40/);
+assert.match(api.followExplain(tie, 2), /^Bokningarna följer flera plan:/);
+assert.doesNotMatch(api.followExplain(tie, 2), /Bokningen följer/);
 
 // Ingen planerad träff: närmast före inom 20 min (bagage), visas på planets beräknade tid
 const book1935 = { id: 'be', zone_id: '293', estimated_at: '2026-11-22T18:35:00.000Z' };
@@ -218,12 +239,14 @@ assert.equal(onlyBefore.why, 'bagage');
 assert.equal(onlyBefore.at, t('2026-11-22T21:13:00Z'), 'samma rad som FR964 (22:13), utan +15');
 assert.match(api.followExplain(onlyBefore), /troligen på grund av bagage/);
 
-// True tie at bagage step: two flights with the same planned time before the booking
+// Bagage-steg med samma planerade tid, olika beräknad: också mittpunkt
 const bagTie = api.followMatch(book2220, [
   fl({ no: 'AA1', from: 'Paris', sched: t('2026-11-22T21:10:00Z'), est: t('2026-11-22T21:08:00Z') }),
   fl({ no: 'BB2', from: 'Rom', sched: t('2026-11-22T21:10:00Z'), est: t('2026-11-22T21:12:00Z') })
 ]);
-assert.ok(bagTie && bagTie.cands && !bagTie.flight, 'equal planned-before is a tie');
+assert.ok(bagTie && bagTie.why === 'flera' && bagTie.ties && bagTie.ties.length === 2 && !bagTie.cands);
+assert.equal(+bagTie.at, +api.round5(new Date((t('2026-11-22T21:08:00Z') + t('2026-11-22T21:12:00Z')) / 2)));
+assert.equal(+bagTie.at, t('2026-11-22T21:10:00Z')); // 22:08 och 22:12 → 22:10
 
 // Other zone: no
 assert.equal(api.followMatch({ zone_id: '147', estimated_at: book.estimated_at }, [fl({ sched: sched, est: est10 })]), null);
@@ -278,8 +301,10 @@ api.applyFollows(tied, [
   fl({ no: 'EW8220', sched: sched, est: est10 }),
   fl({ no: 'AY867', sched: sched, est: t('2026-11-22T18:40:00Z') })
 ]);
-assert.equal(tied[0]._follow, undefined);
-assert.ok(tied[0]._followCands && tied[0]._followCands.length === 2);
+assert.ok(tied[0]._follow);
+assert.equal(tied[0]._follow.why, 'flera');
+assert.equal(tied[0]._followCands, undefined);
+assert.equal(+api.bookingWhen(tied[0]), +tied[0]._follow.at);
 api.applyFollows(tied, []);
 assert.equal(tied[0]._follow, undefined);
 assert.equal(tied[0]._followCands, undefined);
@@ -321,5 +346,37 @@ assert.equal(api.followFirstTime(loose4013), t('2026-11-22T21:10:00.000Z'));
 api.applyFollows([loose4013], [dk1727b, fr964b, lo495b]);
 assert.equal(loose4013._follow.flight.no, 'FR964', 'utan first_estimated_at följs 22:10 till FR964');
 assert.equal(+loose4013._follow.at, t('2026-11-22T21:13:00Z'));
+
+
+// Ikväll 22 nov: SK167+LH2432 planerad 23:20 (est 00:02 och 23:36) → mitt 23:49 → rad 23:50.
+const sk167 = fl({ no: 'SK167', from: 'Stockholm ARN', sched: t('2026-11-22T22:20:00Z'), est: t('2026-11-22T23:02:00Z') });
+const lh2432 = fl({ no: 'LH2432', from: 'München', sched: t('2026-11-22T22:20:00Z'), est: t('2026-11-22T22:36:00Z') });
+const b2320 = { id: 's2320', zone_id: '293', first_estimated_at: '2026-11-22T22:20:00.000Z', estimated_at: '2026-11-22T22:30:00.000Z' };
+api.applyFollows([b2320], [sk167, lh2432]);
+assert.equal(b2320._follow.why, 'flera');
+assert.equal(b2320._follow.ties.length, 2);
+assert.equal(+b2320._follow.at, t('2026-11-22T22:50:00Z'), 'mitt 23:49 → 23:50');
+assert.equal(+api.round5(new Date(b2320._follow.at)), t('2026-11-22T22:50:00Z'));
+const txt2320 = api.followExplain(b2320._follow, 3);
+assert.match(txt2320, /^Bokningarna följer flera plan:/);
+assert.match(txt2320, /LH2432 från München, planerad 23:20, beräknad 23:36/);
+assert.match(txt2320, /SK167 från Stockholm ARN, planerad 23:20, beräknad 00:02/);
+assert.match(txt2320, /visas kl 23:50/);
+assert.doesNotMatch(txt2320, /Flera plan är möjliga, så tiden är inte flyttad/);
+
+// SK448+LH820 planerad 23:55 (est 00:08 och 00:03) → mitt 00:05:30 → rad 00:05.
+const sk448 = fl({ no: 'SK448', from: 'Köpenhamn', sched: t('2026-11-22T22:55:00Z'), est: t('2026-11-22T23:08:00Z') });
+const lh820 = fl({ no: 'LH820', from: 'Frankfurt', sched: t('2026-11-22T22:55:00Z'), est: t('2026-11-22T23:03:00Z') });
+const b2355a = { id: 'c1', zone_id: '293', first_estimated_at: '2026-11-22T22:55:00.000Z', estimated_at: '2026-11-22T22:55:00.000Z' };
+const b2355b = { id: 'c2', zone_id: '293', first_estimated_at: '2026-11-22T22:55:00.000Z', estimated_at: '2026-11-23T00:05:00+01:00' };
+api.applyFollows([b2355a, b2355b], [sk448, lh820]);
+assert.equal(b2355a._follow.why, 'flera');
+assert.equal(+b2355a._follow.at, t('2026-11-22T23:05:00Z'), 'mitt 00:05:30 → 00:05');
+assert.equal(+b2355b._follow.at, +b2355a._follow.at);
+const txt2355 = api.followExplain(b2355a._follow, 2);
+assert.match(txt2355, /^Bokningarna följer flera plan:/);
+assert.match(txt2355, /LH820 från Frankfurt, planerad 23:55, beräknad 00:03/);
+assert.match(txt2355, /SK448 från Köpenhamn, planerad 23:55, beräknad 00:08/);
+assert.match(txt2355, /visas kl 00:05/);
 
 console.log('FOLJ_FLYG_UNIT_OK');
