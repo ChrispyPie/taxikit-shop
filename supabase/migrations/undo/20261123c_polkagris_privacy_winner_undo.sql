@@ -1,0 +1,1 @@
+-- Ångra 20261123c_polkagris_privacy_winner.sql: kör tillbaka funktionerna från 20261123b_advent_polkagris.sql.

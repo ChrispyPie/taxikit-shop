@@ -11,9 +11,9 @@ const sw = fs.readFileSync(path.join(root, 'TaxiData/sw.js'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'TaxiData/index.html'), 'utf8');
 const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
 
-assert.match(sw, /CACHE_VER = '20261123adv5'/);
-assert.match(html, /hb-stage\.js\?v=20261123adv5/);
-assert.match(lv, /hjalpbot\.js\?v=20261123adv5/);
+assert.match(sw, /CACHE_VER = '20261123adv6'/);
+assert.match(html, /hb-stage\.js\?v=20261123adv6/);
+assert.match(lv, /hjalpbot\.js\?v=20261123adv6/);
 assert.doesNotMatch(stageSrc + botSrc, /\bStig\b|\bhen\b/);
 
 // Stage stays hidden off the start screen, and place() must not un-hide it.
