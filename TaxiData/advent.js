@@ -51,7 +51,7 @@
     var l = document.createElement('link');
     l.id = 'td-advent-css';
     l.rel = 'stylesheet';
-    l.href = 'advent.css?v=20261123adv7';
+    l.href = 'advent.css?v=20261123adv8';
     document.head.appendChild(l);
   }
   function reducedMotion() {
