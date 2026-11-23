@@ -25,6 +25,13 @@ assert.match(js, /function followNoBtn\(/);
 assert.match(js, /class="pg-fly-no"/);
 assert.match(css, /\.pg-pop \.pg-fly-no/);
 assert.match(cl.split("id: '2026-11-23zfly7'")[1].split(']},')[0], /flygnummer/);
+assert.match(cl, /id: '2026-11-23zfly8'/);
+assert.match(cl.split("id: '2026-11-23zfly8'")[1].split(']},')[0], /Låg från början/);
+assert.match(cl.split("id: '2026-11-23zfly8'")[1].split(']},')[0].split('rader:')[0], /tid: '/);
+assert.doesNotMatch(cl.split("id: '2026-11-23zfly8'")[1].split(']},')[0], /\b(Stig|hen)\b/);
+assert.match(js, /function bookingOrigHm\(/);
+assert.match(js, /Låg från början /);
+
 
 assert.match(cl, /id: '2026-11-22zfly6'/);
 assert.match(cl.split("id: '2026-11-22zfly6'")[1].split(']},')[0], /först visades/);
@@ -45,8 +52,8 @@ assert.match(cl, /id: '2026-11-22zfly3'/);
 assert.match(cl.split("id: '2026-11-22zfly3'")[1].split(']},')[0].split('rader:')[0], /tid: '21:05'/);
 assert.match(cl, /id: '2026-11-22zfly1'/);
 assert.match(cl.split("id: '2026-11-22zfly1'")[1].split(']},')[0].split('rader:')[0], /tid: '20:56'/);
-assert.match(lv, /prognos\.js\?v=20261123zfly7/);
-assert.match(html, /style\.css\?v=20261123zfly7/);
+assert.match(lv, /prognos\.js\?v=20261123zfly8/);
+assert.match(html, /style\.css\?v=20261123zfly8/);
 
 const mig = fs.readFileSync(path.join(root, 'supabase/migrations/20261122c_prognos_list_first_estimated.sql'), 'utf8');
 const undo = fs.readFileSync(path.join(root, 'supabase/migrations/undo/20261122c_prognos_list_first_estimated_undo.sql'), 'utf8');
@@ -92,7 +99,7 @@ const api = new Function(
   'var FOLLOW_NEAR_MS = 2 * 60000;\n' +
   'var FOLLOW_AFTER_MS = 20 * 60000;\n' +
   p2Src + '\n' + hmSrc + '\n' + roundBlock + '\n' + followBlock + '\n' +
-  'return { followMatch: followMatch, followCandidates: followCandidates, followExplain: followExplain, followCandLine: followCandLine, applyFollows: applyFollows, followFirstTime: followFirstTime, followPlace: followPlace, followMidpoint: followMidpoint, bookingWhen: bookingWhen, floor5: floor5, round5: round5, nearTime: nearTime, followPick: followPick };'
+  'return { followMatch: followMatch, followCandidates: followCandidates, followExplain: followExplain, followCandLine: followCandLine, applyFollows: applyFollows, followFirstTime: followFirstTime, followPlace: followPlace, followMidpoint: followMidpoint, bookingWhen: bookingWhen, bookingOrigHm: bookingOrigHm, floor5: floor5, round5: round5, nearTime: nearTime, followPick: followPick };'
 )();
 
 function t(iso) { return Date.parse(iso); }
@@ -378,5 +385,13 @@ assert.match(txt2355, /^Bokningarna följer flera plan:/);
 assert.match(txt2355, /LH820 från Frankfurt, planerad 23:55, beräknad 00:03/);
 assert.match(txt2355, /SK448 från Köpenhamn, planerad 23:55, beräknad 00:08/);
 assert.match(txt2355, /visas kl 00:05/);
+
+
+assert.equal(api.bookingOrigHm({ zone_id: '293', estimated_at: '2026-11-22T20:55:00.000Z', first_estimated_at: '2026-11-22T20:55:00.000Z' }), '');
+assert.equal(api.bookingOrigHm({ zone_id: '293', estimated_at: '2026-11-22T21:20:00.000Z', first_estimated_at: '2026-11-22T20:55:00.000Z' }), '21:55');
+assert.equal(api.bookingOrigHm({ zone_id: '293', estimated_at: '2026-11-22T20:55:00.000Z', first_estimated_at: '2026-11-22T20:53:00.000Z' }), '', 'samma 5-minutersrad räknas inte som flyttad');
+assert.equal(api.bookingOrigHm(b4013), '21:55');
+assert.equal(api.bookingOrigHm(b2320), '23:20');
+assert.equal(api.bookingOrigHm(b2355a), '23:55');
 
 console.log('FOLJ_FLYG_UNIT_OK');
