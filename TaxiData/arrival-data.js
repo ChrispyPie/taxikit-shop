@@ -179,6 +179,9 @@
       firstBagEst: d(f.firstBagEst),
       canceled: st === 'CAN',
       removed: st === 'DEL',
+      wasLive: f.wasLive === true,
+      hidden: false,       // sätts av markFlights: DEL-rad som aldrig varit aktiv eller som ersatts av ett annat flyg
+      replacedBy: '',
       special: special || '',
       info: line,
       note: '',  // statusen står nu i statusraden (info)
@@ -186,10 +189,35 @@
       reasonInfo: ''
     };
   }
+  // DEL (borttagen ur tidtabellen) är oftast gamla tidtabellsrester som aldrig skulle flyga.
+  // - Samma siffror i flygnumret + samma startplats inom 30 min som ett aktivt flyg (t.ex. JTD284 -> BLX284
+  //   när bolaget byts): DEL-raden döljs, det aktiva flyget får "Ersätter JTD284".
+  // - DEL som aldrig varit aktiv (wasLive saknas i got.json): döljs.
+  // - DEL efter att flyget varit aktivt: visas som Borttagen (röd), som förut.
+  // removed ligger kvar på dolda rader, så Prognos, hjälpboten och notiserna räknar precis som förut.
+  function flightDigits(no) { var m = String(no || '').toUpperCase().match(/(\d+)[A-Z]?$/); return m ? String(+m[1]) : ''; }
+  function markFlights(items) {
+    items.forEach(function (it) {
+      if (!it.removed) return;
+      var dg = flightDigits(it.no), t = +it.sched;
+      var rep = dg && t ? items.filter(function (o) {
+        return o !== it && !o.removed && !o.canceled && flightDigits(o.no) === dg && o.from === it.from &&
+          o.sched && Math.abs(+o.sched - t) <= 30 * 60000;
+      }).sort(function (a, b) { return Math.abs(+a.sched - t) - Math.abs(+b.sched - t); })[0] : null;
+      if (rep) {
+        it.hidden = true; it.replacedBy = rep.no;
+        it.info = 'Ersatt av ' + rep.no + (rep.info ? ' · ' + rep.info : '');
+        if (!rep.note) rep.note = 'Ersätter ' + it.no + (it.sub && it.sub !== rep.sub ? ' (' + it.sub + ')' : '');
+      } else if (!it.wasLive) {
+        it.hidden = true;
+      }
+    });
+    return items;
+  }
   function loadFlights() {
     return getJson(FLIGHT_URLS, true).then(function (j) {
       return { updated: j.arrivalsUpdated || j.updated,
-               items: (j.arrivals || []).map(flightItem) };
+               items: markFlights((j.arrivals || []).map(flightItem)) };
     });
   }
 
@@ -286,5 +314,5 @@ function feedPack(c){return c?{items:c.items||[],updated:c.updated||null}:{items
     return watchItems('flyg').then(function(){return feedPack(cache.flyg);}).catch(function(){return cache.flyg?feedPack(cache.flyg):{items:[],updated:null};});
   }
   function flightItems(age){return flightFeed(age).then(function(r){return r.items;});}
-window.ARRIVAL_DATA={date:d,hm:hm,hms:hms,trainLine:trainLine,stationCatalog:stationCatalog,loadTrains:loadTrains,loadTrainDelta:loadTrainDelta,mergeTrainDeltas:mergeTrainDeltas,loadFlights:loadFlights,loadBoats:loadBoats,trainGroups:trainGroups,boatGroups:boatGroups,watchItems:watchItems,flightDetailHtml:flightDetailHtml,flightFeed:flightFeed,flightItems:flightItems};
+window.ARRIVAL_DATA={date:d,hm:hm,hms:hms,trainLine:trainLine,stationCatalog:stationCatalog,loadTrains:loadTrains,loadTrainDelta:loadTrainDelta,mergeTrainDeltas:mergeTrainDeltas,loadFlights:loadFlights,loadBoats:loadBoats,trainGroups:trainGroups,boatGroups:boatGroups,watchItems:watchItems,flightDetailHtml:flightDetailHtml,flightFeed:flightFeed,flightItems:flightItems,markFlights:markFlights};
 })();

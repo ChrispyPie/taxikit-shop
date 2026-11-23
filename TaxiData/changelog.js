@@ -19,6 +19,9 @@ window.CHANGELOG = [
     ['Nytt', 'Adventskalender: 24 luckor med taxifakta, en för varje dag i december. Kalendern sitter litet uppe till vänster på startsidan. Tryck så växer den fram i mitten. Öppna dagens lucka – och alla du missat hittills.'],
     ['Nytt', 'Polkagrisjakt: en polkagris i taget dyker upp någonstans i appen. Den som trycker först tar den. Nästa kommer 5–60 minuter senare. Antalet du samlat syns som en polkagris med siffra högst upp på startsidan, till höger om ljusstaken. Tryck där för att se din placering (inga andras namn visas). På nyårsafton presenteras vinnaren för alla.']
   ]},
+  { datum: '2026-11-23', id: '2026-11-23zflyg9', tid: '21:34', rader: [
+    ['Fixat', 'Ankomster: flyg som Swedavia strukit ur tidtabellen i förväg och som aldrig skulle flyga visas inte längre som Borttagen. Byter ett flyg bolag men har samma nummer och avgångsort (till exempel Lanzarote JTD284 som blev BLX284) syns bara det riktiga flyget, med texten "Ersätter JTD284". Borttagen visas bara om ett flyg som faktiskt var planerat plockas bort. Samma sak gäller i Mina bevakningar.']
+  ]},
   { datum: '2026-11-23', id: '2026-11-23zhem2', tid: '19:15', rader: [
     ['Ändrat', 'Du kan ta bort genvägen från startsidan för alla ikoner, även Inställningar, Om, Admin, S admin, Adventskalender och Moduler. Modulerna finns kvar i applådan och när du sveper upp. Avinstallera fungerar som tidigare.']
   ]},
