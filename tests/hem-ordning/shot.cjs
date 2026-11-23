@@ -124,7 +124,7 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
       const cs = ban ? getComputedStyle(ban) : null;
       return {
         x: document.querySelectorAll('.grid.td-ordna .td-remove').length,
-        noXCore: !document.querySelector('.icon[data-tool="installningar"] .td-remove') && !document.querySelector('.icon[data-tool="om"] .td-remove'),
+        hasXCore: !!document.querySelector('.icon[data-tool="installningar"] .td-remove') && !!document.querySelector('.icon[data-tool="om"] .td-remove'),
         // fri placering (2026-11-14): tomma rutor (.td-cell) ritas efter ikonerna; Moduler ska vara sista ikonen
         plusLast: document.querySelector('.icon[data-tool="moduler"]') === [...document.querySelector('#app .grid').children].filter(n => n.classList.contains('icon')).pop(),
         banner: !!(cs && cs.display !== 'none' && /Ändringsläge/.test(ban.textContent)),
@@ -134,7 +134,7 @@ const ok = (n, c, e) => { if (!c) fails.push(n + (e ? ': ' + e : '')); else cons
       };
     });
     ok('x badges on removable', editM.x >= 6, 'x=' + editM.x);
-    ok('no x on core', editM.noXCore);
+    ok('x on core too', editM.hasXCore);
     ok('plus last in ordna', editM.plusLast);
     ok('banner + klar + aterstall', editM.banner && editM.klar && editM.reset, JSON.stringify(editM));
     await p.screenshot({ path: path.join(out, 'ordna-kryss-412-scale14-dark.png') });

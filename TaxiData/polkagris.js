@@ -110,7 +110,7 @@
     var l = document.createElement('link');
     l.id = 'td-polkagris-css-link';
     l.rel = 'stylesheet';
-    l.href = 'polkagris.css?v=20261123adv3';
+    l.href = 'polkagris.css?v=20261123adv4';
     document.head.appendChild(l);
   }
 
@@ -139,6 +139,14 @@
     elCane = null;
   }
 
+  /* Samma polkagris som jakten: rödvit krokklubba, inte en lolly. */
+  function caneIconHtml() {
+    return '<svg class="td-pk-cane-svg" viewBox="0 0 32 40" width="22" height="28" aria-hidden="true">' +
+      '<path d="M16 5c-6.2 0-11 4.4-11 10.2 0 3.2 2.2 5.6 5.2 5.6 2.6 0 5-2 5-4.6 0-1.5 1.1-2.6 2.6-2.6s2.7 1.1 2.7 2.7V34" fill="none" stroke="#c41e2a" stroke-width="7" stroke-linecap="round"/>' +
+      '<path d="M16 5c-6.2 0-11 4.4-11 10.2 0 3.2 2.2 5.6 5.2 5.6 2.6 0 5-2 5-4.6 0-1.5 1.1-2.6 2.6-2.6s2.7 1.1 2.7 2.7V34" fill="none" stroke="#f7f3ea" stroke-width="7" stroke-linecap="round" stroke-dasharray="3.2 5.2" stroke-dashoffset="1"/>' +
+      '<path d="M16 5c-6.2 0-11 4.4-11 10.2 0 3.2 2.2 5.6 5.2 5.6 2.6 0 5-2 5-4.6 0-1.5 1.1-2.6 2.6-2.6s2.7 1.1 2.7 2.7V34" fill="none" stroke="#8a1520" stroke-width="1.2" stroke-linecap="round" opacity=".35"/>' +
+      '</svg>';
+  }
   function huntVisible() {
     return allowed() && (inDecember(today()) || showWinner(today()));
   }
@@ -147,32 +155,102 @@
     if (window.ADVENT && typeof ADVENT.openTab === 'function') ADVENT.openTab('jakt');
     else if (typeof window.openItem === 'function') window.openItem('advent');
   }
+  function isHome() {
+    var app = document.getElementById('app');
+    return !!(app && app.classList && app.classList.contains('is-home') && app.style.display !== 'none');
+  }
+  function ensureJulTop() {
+    var app = document.getElementById('app');
+    var content = document.getElementById('content');
+    var rad = document.getElementById('jul-ljus-rad');
+    if (!rad) {
+      rad = document.createElement('div');
+      rad.id = 'jul-ljus-rad';
+    }
+    rad.classList.add('td-jul-top');
+    var left = rad.querySelector('.td-jul-top-left');
+    var mid = rad.querySelector('.td-jul-top-mid');
+    var right = rad.querySelector('.td-jul-top-right');
+    if (!left || !mid || !right) {
+      left = left || document.createElement('div');
+      mid = mid || document.createElement('div');
+      right = right || document.createElement('div');
+      left.className = 'td-jul-top-left';
+      mid.className = 'td-jul-top-mid';
+      right.className = 'td-jul-top-right';
+      var keep = [];
+      for (var i = 0; i < rad.childNodes.length; i++) keep.push(rad.childNodes[i]);
+      rad.appendChild(left);
+      rad.appendChild(mid);
+      rad.appendChild(right);
+      keep.forEach(function (n) {
+        if (n === left || n === mid || n === right) return;
+        if (n.id === 'jul-ljusstake') mid.appendChild(n);
+        else if (n.id === 'td-pk-count' || (n.classList && n.classList.contains('td-pk-hdr'))) right.appendChild(n);
+        else if (n.id === 'td-adv-mini' || n.id === 'td-adv-hem' || (n.classList && n.classList.contains('td-adv-mini'))) left.appendChild(n);
+        else if (n.id === 'jul-girlang') return;
+        else mid.appendChild(n);
+      });
+    }
+    if (app && content && content.parentNode === app) {
+      var gir = document.getElementById('jul-girlang');
+      if (gir && gir.parentNode === app) {
+        if (rad.parentNode !== app || rad.previousSibling !== gir) {
+          if (gir.nextSibling) app.insertBefore(rad, gir.nextSibling);
+          else app.insertBefore(rad, content);
+        }
+      } else if (rad.parentNode !== app || (rad.nextSibling !== content && content.previousSibling !== rad)) {
+        app.insertBefore(rad, content);
+      }
+    } else if (app && rad.parentNode !== app) {
+      app.appendChild(rad);
+    }
+    return rad;
+  }
+  function syncJulTopOn() {
+    var rad = document.getElementById('jul-ljus-rad');
+    if (!rad) return;
+    var hasMini = !!rad.querySelector('#td-adv-mini, .td-adv-mini');
+    var hasCount = !!document.getElementById('td-pk-count');
+    var candle = document.getElementById('jul-ljusstake');
+    var hasCandle = !!(candle && !candle.hidden && candle.classList && candle.classList.contains('jul-on'));
+    var on = !!(hasMini || hasCount || hasCandle);
+    rad.classList.toggle('td-jul-top-on', on);
+    if (!isHome()) rad.classList.remove('td-jul-top-on');
+  }
   function mountCount() {
     if (!document.querySelectorAll) return;
-    var rights = document.querySelectorAll('.hdr-right');
-    var show = huntVisible();
-    for (var i = 0; i < rights.length; i++) {
-      var right = rights[i];
-      var el = right.querySelector('.td-pk-hdr');
-      if (!show) {
-        if (el && el.parentNode) el.parentNode.removeChild(el);
-        continue;
-      }
-      if (!el) {
-        el = document.createElement('button');
-        el.type = 'button';
-        el.className = 'td-pk-hdr';
-        el.addEventListener('click', function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-          openBoard();
-        });
-        right.insertBefore(el, right.firstChild);
-      }
-      var n = st.mine || 0;
-      el.textContent = 'Polkagrisar: ' + n;
-      el.setAttribute('aria-label', 'Polkagrisar: ' + n + '. Öppna ställningen.');
+    var leftovers = document.querySelectorAll('header .td-pk-hdr, .hdr-right .td-pk-hdr');
+    for (var i = 0; i < leftovers.length; i++) {
+      if (leftovers[i].id === 'td-pk-count') continue;
+      if (leftovers[i].parentNode) leftovers[i].parentNode.removeChild(leftovers[i]);
     }
+    var show = huntVisible() && isHome();
+    var el = document.getElementById('td-pk-count');
+    if (!show) {
+      if (el && el.parentNode) el.parentNode.removeChild(el);
+      syncJulTopOn();
+      return;
+    }
+    var rad = ensureJulTop();
+    var right = rad && rad.querySelector('.td-jul-top-right');
+    if (!right) return;
+    if (!el) {
+      el = document.createElement('button');
+      el.type = 'button';
+      el.id = 'td-pk-count';
+      el.className = 'td-pk-hdr';
+      el.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        openBoard();
+      });
+    }
+    if (el.parentNode !== right) right.appendChild(el);
+    var n = st.mine || 0;
+    el.innerHTML = caneIconHtml() + '<span class="td-pk-hdr-n">' + n + '</span>';
+    el.setAttribute('aria-label', 'Polkagrisar: ' + n + '. Öppna ställningen.');
+    syncJulTopOn();
   }
 
   function mountCane() {
@@ -188,7 +266,7 @@
     elCane.id = 'td-pk-cane';
     elCane.className = 'td-pk-cane td-pk-cane--' + (spec.pos || 'corner');
     elCane.setAttribute('aria-label', 'En polkagris! Tryck för att ta den.');
-    elCane.innerHTML = '<span class="td-pk-cane-ico" aria-hidden="true">🍭</span>';
+    elCane.innerHTML = '<span class="td-pk-cane-ico" aria-hidden="true">' + caneIconHtml() + '</span>';
     elCane.addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -368,6 +446,7 @@
     });
   }
 
+  window.ensureJulTop = ensureJulTop;
   window.POLKAGRIS = {
     start: start,
     stop: stop,
@@ -376,6 +455,8 @@
     mountCane: mountCane,
     mountCount: mountCount,
     openBoard: openBoard,
+    ensureJulTop: ensureJulTop,
+    caneIconHtml: caneIconHtml,
     boardHtml: boardHtml,
     winnerHtml: winnerHtml,
     fireworks: fireworks,

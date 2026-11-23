@@ -24,7 +24,7 @@ assert.match(css, /prefers-reduced-motion/);
 assert.match(js, /td-pk-board/);
 assert.match(advent, /data-tab="jakt"/);
 assert.match(advent, /data-tab="vinnare"/);
-assert.match(index, /polkagris\.js\?v=20261123adv3/);
+assert.match(index, /polkagris\.js\?v=20261123adv4/);
 
 const places = [...js.matchAll(/^\s+(hem|kordata|lonekoll|ankomster|prognos|kalender|topplistor|forum|installningar|om|vader|nyheter|advent|inkorg|hb):/gm)].map((m) => m[1]);
 assert.ok(places.length >= 12, 'enough places, got ' + places.length);

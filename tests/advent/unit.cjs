@@ -53,6 +53,23 @@ assert.match(om, /if \(!nyhLive\(dag\)\) return;/);
 assert.match(lazy, /"advent":/);
 assert.match(lazy, /"ADVENT":/);
 
+const css = fs.readFileSync(path.join(root, 'TaxiData/advent.css'), 'utf8');
+assert.match(advent, /function mountMini/);
+assert.match(advent, /td-adv-mini/);
+assert.match(advent, /td-adv-overlay/);
+assert.match(advent, /td-adv-factbox/);
+assert.match(advent, /DOOR_ORDER/);
+assert.match(css, /overflow-y:\s*auto/);
+assert.match(css, /overscroll-behavior:\s*contain/);
+assert.match(css, /max-height:\s*min\(78vh/);
+assert.match(advent, /prefers-reduced-motion/);
+assert.strictEqual((fakta.match(/bild:/g) || []).length, 24);
+assert.strictEqual((fakta.match(/bildtyp: 'illustration'/g) || []).length, 24);
+const bilder = fs.readdirSync(path.join(root, 'TaxiData/advent-bilder')).filter((f) => /\.(svg|jpe?g|png|webp)$/i.test(f));
+assert.strictEqual(bilder.length, 24);
+assert.doesNotMatch(css, /\bStig\b|\bhen\b/);
+
+
 assert.match(sql, /create table if not exists public\.advent_opens/);
 assert.match(sql, /too_early/);
 assert.match(sql, /p_driver = '710022'/);

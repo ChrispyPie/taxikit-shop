@@ -190,14 +190,15 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   // Håll in -> Ta bort genväg
   let e0 = await emo(p, 'vader');
   await p.touchscreen.touchStart(e0.x, e0.y); await sleep(1100); await p.touchscreen.touchEnd(); await sleep(300);
-  ok('menyn har Ta bort genväg', await p.evaluate(() => !!document.querySelector('#td-lp-menu [data-lp="shortcut"]')));
+  ok('menyn har Ta bort genväg', await p.evaluate(() => !!document.querySelector('#td-lp-menu [data-lp="off"]')));
   await p.screenshot({ path: path.join(out, '4-meny-ta-bort-genvag.png') });
-  await p.click('#td-lp-menu [data-lp="shortcut"]'); await sleep(300);
+  await p.click('#td-lp-menu [data-lp="off"]'); await sleep(300);
   st = await stored(p);
   ok('genvägen borta, modulen kvar', await p.evaluate(() => !document.querySelector('#app .grid [data-tool="vader"]') && HEM_ORDNING.isInstalled('vader')) && (st.pos.ute || []).includes('vader') && !(st.hidden || []).includes('vader'), JSON.stringify(st));
   e0 = await emo(p, 'moduler');
   await p.touchscreen.touchStart(e0.x, e0.y); await sleep(1100); await p.touchscreen.touchEnd(); await sleep(300);
-  ok('Moduler har ingen Ta bort genväg', await p.evaluate(() => !!document.querySelector('#td-lp-menu') && !document.querySelector('#td-lp-menu [data-lp="shortcut"]')));
+  ok('Moduler har Ta bort genväg', await p.evaluate(() => !!document.querySelector('#td-lp-menu [data-lp="off"]')));
+  ok('Moduler har ingen Avinstallera', await p.evaluate(() => !!document.querySelector('#td-lp-menu') && !document.querySelector('#td-lp-menu [data-lp="uninstall"]')));
   await p.keyboard.press('Escape'); await sleep(150);
 
   // Släpp-ytan Ta bort högst upp

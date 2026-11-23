@@ -13,10 +13,10 @@ const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
 const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
 const hem = fs.readFileSync(path.join(root, 'TaxiData/hem-ordning-core.js'), 'utf8');
 
-assert.match(sw, /CACHE_VER = '20261123adv3'/);
-assert.match(html, /hb-stage\.js\?v=20261123adv3/);
-assert.match(lv, /hjalpbot\.js\?v=20261123adv3/);
-assert.match(lv, /"berra":\s*\["berra\.js\?v=20261123adv3"\]/);
+assert.match(sw, /CACHE_VER = '20261123adv4'/);
+assert.match(html, /hb-stage\.js\?v=20261123adv4/);
+assert.match(lv, /hjalpbot\.js\?v=20261123adv4/);
+assert.match(lv, /"berra":\s*\["berra\.js\?v=20261123adv4"\]/);
 assert.match(hem, /LAZY\.ensure\('berra'\)/);
 assert.match(cl, /id: '2026-11-22zhb1'/);
 assert.match(cl.split("id: '2026-11-22zhb1'")[1].split(']},')[0], /strålkastare|lampan/);
@@ -27,7 +27,10 @@ assert.doesNotMatch(stage, /lit \? 'På' : 'Av'/);
 assert.match(stage, /hb-stage-lamp-btn/);
 assert.match(stage, /beamOverlay/);
 assert.match(stage, /standLocal/);
-assert.match(stage, /sameView && fits\(placed\.x, placed\.y/);
+assert.match(stage, /ensureHemScen/);
+assert.match(stage, /td-hem-scen/);
+assert.match(stage, /\.hb-stage\{position:relative/);
+assert.doesNotMatch(stage, /\.hb-stage\{position:fixed/);
 assert.match(bot, /if \(stagedStand\) return stagedStand;/);
 assert.match(bot, /HJALPBOT\.bubbleOn = bubbleOn/);
 assert.match(bot, /Tryck på lampan för att tända och släcka/);
@@ -67,20 +70,22 @@ function boot(opts) {
     querySelector() { return null; },
     querySelectorAll() { return []; }
   });
-  const host = node({ id: 'hb-stage', style: { display: '', transform: '' }, classList: { _s: {}, add(k){ this._s[k]=1; }, remove(k){ delete this._s[k]; }, contains(k){ return !!this._s[k]; } } });
   const cssEl = node({ id: 'hb-stage-css' });
   const created = [];
+  function byId(id) { return created.find(n => n.id === id) || null; }
+  const content = node({ id: 'content', children: [], appendChild(el) { this.children.push(el); el.parentNode = this; return el; }, querySelector() { return null; } });
+  created.push(content);
   const doc = {
     getElementById(id) {
       if (id === 'app') return app;
+      if (id === 'content') return content;
       if (id === 'td-dots') return dots;
-      if (id === 'hb-stage') return host.parentNode ? host : null;
       if (id === 'hb-stage-css') return cssEl.id ? cssEl : null;
       if (id === 'hb-stage-lamp-btn') return lampBtn;
       if (id === 'hb-stage-scene') return scene;
       if (id === 'animationer-vader-plats') return null;
       if (id === 'profile-menu') return null;
-      return null;
+      return byId(id);
     },
     querySelector(sel) {
       if (sel === '#app header' || sel === 'header') return header;
@@ -93,8 +98,22 @@ function boot(opts) {
     },
     createElement(tag) {
       if (tag === 'style') { cssEl.id = 'hb-stage-css'; created.push(cssEl); return cssEl; }
-      if (tag === 'div' && !host.parentNode) { created.push(host); return host; }
-      const n = node();
+      const n = node({
+        children: [],
+        classList: { _s: {}, add(k){ this._s[k]=1; }, remove(k){ delete this._s[k]; }, contains(k){ return !!this._s[k]; } },
+        appendChild(el) { this.children.push(el); el.parentNode = this; return el; },
+        querySelector(sel) {
+          return (this.children || []).find(c =>
+            (sel === '#hb-stage' && c.id === 'hb-stage') ||
+            (sel === '#jul-scen' && c.id === 'jul-scen') ||
+            (sel === '.td-berra' && String(c.className || '').indexOf('td-berra') >= 0)
+          ) || null;
+        },
+        getBoundingClientRect() {
+          if (this.id === 'hb-stage') return { left: 300, top: 700, right: 412, bottom: 794, width: 112, height: 94 };
+          return { left: 0, top: 0, right: 0, bottom: 0, width: 0, height: 0 };
+        }
+      });
       created.push(n);
       return n;
     },
@@ -118,6 +137,7 @@ function boot(opts) {
   // render needs host append – hook ensureHost via render
   // force app as home and body append
   S.render();
+  const host = byId('hb-stage');
   return { S, host, ls, win, ctx, lampBtn, scene, dotsR, vw, vh };
 }
 

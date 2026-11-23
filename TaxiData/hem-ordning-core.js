@@ -120,7 +120,7 @@
     var ids = unpack(raw.ids);
     var p = raw.pos && typeof raw.pos === 'object' ? raw.pos : {};
     var sida2 = unpack(Array.isArray(raw.sida2) ? raw.sida2 : p.sida2).filter(function (x) { return !isPinned(x); });
-    var off = cleanList(Array.isArray(raw.off) ? raw.off : p.ute).filter(function (x) { return !isCore(x) && !isPinned(x); });
+    var off = cleanList(Array.isArray(raw.off) ? raw.off : p.ute).filter(function (x) { return okId(x); });
     var hidden = cleanList(raw.hidden).filter(function (x) { return !isCore(x) && !isPinned(x); });
     // Eventuella mapp-verktyg vars mapp-id saknades i ids läggs in före moduler
     Object.keys(fmap).forEach(function (fid) {
@@ -212,16 +212,16 @@
     list.forEach(function (x) { if (x && x.id) byId[x.id] = x; });
     var active = list.filter(function (x) {
       if (!x || !x.id) return false;
+      if (isOff(x.id)) return false;
       if (isCore(x.id) || isPinned(x.id)) return true;
       if (st.hidden.indexOf(x.id) >= 0) return false;
-      if (isOff(x.id)) return false;
       if (isDefaultOff(x.id) && !optedIn(x.id)) return false;
       return true;
     });
     if (!byId.moduler) {
       var modItem = { id: 'moduler', icon: ICO_MODULER(), label: 'Moduler' };
       byId.moduler = modItem;
-      active.push(modItem);
+      if (!isOff('moduler')) active.push(modItem);
     }
     var activeIds = active.map(function (x) { return x.id; });
     var seq = [];
@@ -233,8 +233,8 @@
     activeIds.forEach(function (id) {
       if (seq.indexOf(id) < 0) seq.push(id);
     });
-    // Moduler stannar alltid på hemskärmen; om den inte finns i sparad ordning läggs den sist.
-    if (byId.moduler && seq.indexOf('moduler') < 0) seq.push('moduler');
+    // Moduler ligger sist på hemskärmen om genvägen inte är borttagen.
+    if (byId.moduler && !isOff('moduler') && seq.indexOf('moduler') < 0) seq.push('moduler');
     st.lastTop = seq.slice();
     st.lastLayout = seq.map(function (id) { return { type: 'tool', id: id }; });
     return seq.map(function (id) { return byId[id]; }).filter(Boolean);
@@ -273,7 +273,7 @@
   }
 
   function addToHome(id, opts) {
-    if (!okId(id) || isPinned(id)) return false;
+    if (!okId(id)) return false;
     var onHomeNow = !isOff(id) && st.hidden.indexOf(id) < 0 && (!isDefaultOff(id) || optedIn(id));
     if (onHomeNow && (!opts || !opts.force)) return false;
     st.hidden = st.hidden.filter(function (x) { return x !== id; });
@@ -285,7 +285,7 @@
   }
 
   function removeShortcut(id) {
-    if (isCore(id) || isPinned(id)) return;
+    if (!okId(id)) return;
     if (st.off.indexOf(id) < 0) st.off.push(id);
     st.sida2 = st.sida2.filter(function (x) { return x !== id; });
     writeLocal();
@@ -366,6 +366,15 @@
     if (window.HEM_SIDOR && HEM_SIDOR.sync) HEM_SIDOR.sync(!!onHome);
     if (onHome && window.LAZY && typeof LAZY.ensure === 'function') {
       LAZY.ensure('berra').catch(function () {});
+      var g = window.ADVENT_GATE;
+      if (g && g.allowed && g.allowed()) {
+        var t = g.today ? g.today() : null;
+        if (t && (t.m === 12 || (t.m === 1 && t.d <= 6))) {
+          LAZY.ensure('advent').then(function () {
+            if (window.ADVENT && ADVENT.mountMini) ADVENT.mountMini();
+          }).catch(function () {});
+        }
+      }
     }
   }
 

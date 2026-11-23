@@ -338,7 +338,7 @@
     var s = document.createElement('style');
     s.id = 'td-berra-css';
     s.textContent =
-      '.td-berra-slot{display:flex;justify-content:flex-start;align-items:flex-end;padding:8px 2px 16px;box-sizing:border-box;pointer-events:none}' +
+      '.td-berra-slot{display:flex;justify-content:space-between;align-items:flex-end;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));box-sizing:border-box;pointer-events:none}' +
       '.td-berra{position:relative;width:' + W + 'px;height:' + H + 'px;margin:0;padding:0;border:0;background:none;cursor:pointer;' +
       'pointer-events:auto;flex:0 0 auto;-webkit-tap-highlight-color:transparent;overflow:visible;z-index:2}' +
       '.td-berra svg{width:' + W + 'px;height:' + H + 'px;display:block;overflow:visible;transform-origin:50% 100%}' +
@@ -364,21 +364,18 @@
     return r;
   }
 
+  function hemRow() {
+    if (window.ensureHemScen) return window.ensureHemScen();
+    if (window.HB_STAGE && window.HB_STAGE.ensureHemScen) return window.HB_STAGE.ensureHemScen();
+    return document.getElementById('td-hem-scen');
+  }
   function sizeSlot() {
-    if (!el.slot) return;
-    el.slot.style.minHeight = '0px';
-    var rect = el.slot.getBoundingClientRect();
-    var topDoc = rect.top + (window.scrollY || window.pageYOffset || 0);
-    // Fyll ut utrymmet under rutorna så Berra sitter längst ner på startskärmen.
-    // Om innehållet redan är högre än skärmen räcker det med plats för figuren —
-    // då når man honom genom att skrolla ner.
-    var leftover = window.innerHeight - topDoc;
-    var h = Math.max(H + 32, leftover);
-    el.slot.style.minHeight = h + 'px';
+    var row = hemRow() || el.slot;
+    if (row) row.style.minHeight = '';
   }
 
   function unmount() {
-    if (el.slot && el.slot.parentNode) el.slot.parentNode.removeChild(el.slot);
+    if (el.btn && el.btn.parentNode) el.btn.parentNode.removeChild(el.btn);
     if (el.btn) el.btn.style.display = 'none';
   }
 
@@ -389,14 +386,33 @@
       hideBubble();
       return;
     }
+    var row = hemRow();
     var content = document.getElementById('content');
-    if (!content) return;
-    if (!el.slot) {
-      el.slot = document.createElement('div');
-      el.slot.className = 'td-berra-slot';
+    if (!row && !content) return;
+    if (row) el.slot = row;
+    else {
+      if (!el.slot) {
+        el.slot = document.createElement('div');
+        el.slot.className = 'td-berra-slot td-hem-scen';
+        el.slot.id = el.slot.id || 'td-hem-scen';
+      }
+      if (el.slot.parentNode !== content || content.lastElementChild !== el.slot) content.appendChild(el.slot);
     }
-    if (el.btn.parentNode !== el.slot) el.slot.appendChild(el.btn);
-    if (el.slot.parentNode !== content || content.lastElementChild !== el.slot) content.appendChild(el.slot);
+    if (el.btn.parentNode !== el.slot) {
+      if (el.slot.firstChild) el.slot.insertBefore(el.btn, el.slot.firstChild);
+      else el.slot.appendChild(el.btn);
+    }
+    if (window.HB_STAGE && window.HB_STAGE.ensureHemScen) {
+      var r = hemRow();
+      if (r) {
+        var berra = r.querySelector('.td-berra');
+        var scen = r.querySelector('#jul-scen');
+        var bot = r.querySelector('#hb-stage');
+        if (berra) r.appendChild(berra);
+        if (scen) r.appendChild(scen);
+        if (bot) r.appendChild(bot);
+      }
+    }
     el.btn.style.display = '';
     el.btn.style.transform = '';
     el.btn.innerHTML = svg();

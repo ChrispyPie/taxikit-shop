@@ -1458,7 +1458,15 @@
     window.addEventListener('scroll', function () {
       state.lastUserAt = Date.now();
       if (scrollRaf || typeof requestAnimationFrame !== 'function') return;
-      scrollRaf = requestAnimationFrame(function () { scrollRaf = 0; notePerchDrift(); if (bubbleOn()) placeChrome(); });
+      scrollRaf = requestAnimationFrame(function () {
+        scrollRaf = 0;
+        notePerchDrift();
+        if (state.atHome && !state.visiting && !state.exiting && !state.guiding && !state.leadWalking) {
+          var stand = standAtStation(paintStation() || stationRoom(), charId());
+          if (stand) setPos(stand.x, stand.y, 0);
+        }
+        if (bubbleOn()) placeChrome();
+      });
     }, { passive: true, capture: true });
     ['pointerdown', 'touchstart', 'keydown'].forEach(function (ev) {
       document.addEventListener(ev, function (e) {
