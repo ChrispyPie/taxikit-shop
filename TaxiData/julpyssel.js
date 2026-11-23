@@ -142,8 +142,48 @@
   }
 
   function onHome() {
+    var login = document.getElementById('login-screen');
+    if (login && login.style.display !== 'none') return false;
+    var dv = document.getElementById('dashboard-view');
+    if (dv && !dv.classList.contains('hidden')) return false;
+    if (typeof window.NAV_VIEW === 'function') {
+      try { if (window.NAV_VIEW()) return false; } catch (e) {}
+    }
     var app = document.getElementById('app');
     return !!(app && app.classList.contains('is-home') && app.style.display !== 'none' && !window.current);
+  }
+  function appEl() { return document.getElementById('app'); }
+  function contentEl() { return document.getElementById('content'); }
+  function markHem(on) {
+    var app = appEl();
+    if (!app || !app.classList) return;
+    if (on) {
+      if (app.classList.contains && app.classList.contains('jul-hem')) return;
+      if (app.classList.add) app.classList.add('jul-hem');
+    } else if (app.classList.contains && app.classList.contains('jul-hem') && app.classList.remove) {
+      app.classList.remove('jul-hem');
+    }
+  }
+  function putInApp(node, before) {
+    var app = appEl();
+    if (!node) return;
+    if (!app) {
+      var host = document.body || document.documentElement;
+      if (!node.parentNode && host && host.appendChild) host.appendChild(node);
+      return;
+    }
+    if (before && before.parentNode === app && typeof app.insertBefore === 'function') {
+      if (node.parentNode !== app || (node.nextSibling !== before && before.previousSibling !== node)) {
+        app.insertBefore(node, before);
+      }
+      return;
+    }
+    if (typeof app.appendChild === 'function') {
+      if (node.parentNode !== app) app.appendChild(node);
+      return;
+    }
+    var host2 = document.body || document.documentElement;
+    if (!node.parentNode && host2 && host2.appendChild) host2.appendChild(node);
   }
 
   function labelOf(lit, preview) {
@@ -161,7 +201,13 @@
     if (hs && typeof hs.headerTop === 'function') hs.headerTop();
   }
 
+  var painting = false;
   function paint() {
+    if (painting) return;
+    painting = true;
+    try { paintInner(); } finally { painting = false; }
+  }
+  function paintInner() {
     var el = document.getElementById('jul-ljusstake');
     var rad = document.getElementById('jul-ljus-rad');
     if (!el) { paintSlingor(); paintMys(); return; }
@@ -172,6 +218,7 @@
         rad.classList.remove('jul-on', 'jul-preview');
         rad.hidden = true;
       }
+      markHem(false);
       syncSidaTop();
       paintSlingor(); paintMys();
       return;
@@ -191,8 +238,12 @@
     el.title = preview
       ? ('Förhandsvisning: ' + (LABELS[lit] || '') + ' – tryck för att byta')
       : 'Adventsljusstake';
+    markHem(true);
     syncSidaTop();
     paintSlingor(); paintMys();
+    if (window.BERRA && typeof BERRA.refresh === 'function') {
+      try { BERRA.refresh(); } catch (e2) {}
+    }
   }
 
   function cyclePreview() {
@@ -209,6 +260,7 @@
     var rad = document.getElementById('jul-ljus-rad');
     var btn = document.getElementById('jul-ljusstake');
     if (!allowed()) {
+      markHem(false);
       if (rad && rad.parentNode) rad.parentNode.removeChild(rad);
       else if (btn && btn.parentNode) btn.parentNode.removeChild(btn);
       var sl0 = document.getElementById('jul-slingor');
@@ -217,6 +269,8 @@
       if (mys0 && mys0.parentNode) mys0.parentNode.removeChild(mys0);
       var g0 = document.getElementById('jul-girlang');
       if (g0 && g0.parentNode) g0.parentNode.removeChild(g0);
+      var sc0 = document.getElementById('jul-scen');
+      if (sc0 && sc0.parentNode) sc0.parentNode.removeChild(sc0);
       return null;
     }
     if (!rad) {
@@ -231,14 +285,20 @@
       btn.addEventListener('click', cyclePreview);
     }
     if (btn.parentNode !== rad) rad.appendChild(btn);
-    var hdr = headerEl();
-    if (hdr) {
-      if (rad.parentNode !== hdr) hdr.appendChild(rad);
-    } else if (!rad.parentNode) {
-      (document.body || document.documentElement).appendChild(rad);
+    var content = contentEl();
+    var gir = document.getElementById('jul-girlang');
+    if (!gir) {
+      gir = document.createElement('div');
+      gir.id = 'jul-girlang';
+      gir.setAttribute('aria-hidden', 'true');
     }
+    putInApp(gir, content);
+    putInApp(rad, content);
+    // Girlangen är avskiljaren mellan header och body, ljusstaken ligger ovanför rutnätet.
+    putInApp(gir, rad);
     ensureSlingor();
     ensureMys();
+    ensureScen();
     return btn;
   }
 
@@ -469,26 +529,32 @@
       leaves + berries + hang + '</svg>';
   }
   function layoutGirlang() {
-    var rad = document.getElementById('jul-ljus-rad');
-    if (!rad || !allowed() || !onHome()) {
+    if (!allowed() || !onHome()) {
       var g0 = document.getElementById('jul-girlang');
-      if (g0) g0.hidden = true;
+      if (g0) {
+        g0.hidden = true;
+        g0.classList.remove('jul-on');
+      }
       return;
     }
     var g = document.getElementById('jul-girlang');
+    var rad = document.getElementById('jul-ljus-rad');
+    var content = contentEl();
     if (!g) {
       g = document.createElement('div');
       g.id = 'jul-girlang';
       g.setAttribute('aria-hidden', 'true');
-      rad.appendChild(g);
-    } else if (g.parentNode !== rad && rad.appendChild) {
-      rad.appendChild(g);
     }
+    putInApp(g, rad || content);
     g.hidden = false;
+    g.classList.add('jul-on');
     var w = 390;
-    if (rad.getBoundingClientRect) {
-      var r = rad.getBoundingClientRect();
+    var src = headerEl() || g || appEl();
+    if (src && src.getBoundingClientRect) {
+      var r = src.getBoundingClientRect();
       if (r.width) w = Math.max(280, Math.round(r.width));
+    } else if (window.innerWidth) {
+      w = Math.max(280, Math.round(window.innerWidth));
     }
     g.innerHTML = girlangSvg(w);
   }
@@ -499,12 +565,113 @@
       wrap.classList.remove('jul-on');
       wrap.hidden = true;
       var g0 = document.getElementById('jul-girlang');
-      if (g0) g0.hidden = true;
+      if (g0) { g0.hidden = true; g0.classList.remove('jul-on'); }
+      var sc0 = document.getElementById('jul-scen');
+      if (sc0) { sc0.hidden = true; sc0.classList.remove('jul-on'); }
       return;
     }
     wrap.hidden = false;
     wrap.classList.add('jul-on');
     layoutGirlang();
+    paintScen();
+  }
+
+
+  function scenSvg() {
+    return '<svg class="jul-scen-svg" viewBox="0 0 240 168" width="240" height="168" aria-hidden="true">' +
+      '<defs><linearGradient id="jul-is" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0%" stop-color="#e8f4ff"/><stop offset="55%" stop-color="#c9e4f7"/><stop offset="100%" stop-color="#a9d2ea"/>' +
+      '</linearGradient></defs>' +
+      // Isbana med sarg
+      '<ellipse class="jul-sarg" cx="120" cy="138" rx="102" ry="24" fill="#8a5a32" stroke="#5c3a1e" stroke-width="2"/>' +
+      '<ellipse class="jul-is" cx="120" cy="136" rx="94" ry="20" fill="url(#jul-is)" stroke="#9ec5dc" stroke-width="1.2"/>' +
+      '<path class="jul-skaren" d="M70 132 q18 -6 34 2 q16 8 36 -2 q14 -6 30 3" fill="none" stroke="#7ea8c0" stroke-width="1.1" opacity="0.7"/>' +
+      '<path class="jul-skaren" d="M86 140 q22 5 40 -3 q20 -8 38 1" fill="none" stroke="#7ea8c0" stroke-width="0.9" opacity="0.55"/>' +
+      // Gran
+      '<rect class="jul-stam" x="114" y="118" width="12" height="18" rx="1.5" fill="#6b3f1a" stroke="#4a2a10" stroke-width="0.8"/>' +
+      '<polygon class="jul-barr2" points="120,78 86,122 154,122" fill="#1a5c34" stroke="#0f3d22" stroke-width="0.8"/>' +
+      '<polygon class="jul-barr" points="120,58 92,100 148,100" fill="#217a44" stroke="#14532d" stroke-width="0.8"/>' +
+      '<polygon class="jul-barr" points="120,40 100,78 140,78" fill="#2a8f52" stroke="#166534" stroke-width="0.8"/>' +
+      '<polygon class="jul-stjarna-topp" points="120,24 123.2,33.4 133,33.8 125.4,39.6 128.2,49 120,43.8 111.8,49 114.6,39.6 107,33.8 116.8,33.4" fill="#e6c35c" stroke="#9a7310" stroke-width="0.7"/>' +
+      '<circle class="jul-kula-rod" cx="108" cy="86" r="3.2" fill="#b42222" stroke="#7a1212" stroke-width="0.6"/>' +
+      '<circle class="jul-kula-guld" cx="132" cy="92" r="3" fill="#d4a017" stroke="#8a6a0c" stroke-width="0.6"/>' +
+      '<circle class="jul-kula-gron" cx="118" cy="104" r="2.8" fill="#1f6b3a" stroke="#0f3d22" stroke-width="0.6"/>' +
+      '<circle class="jul-kula-rod" cx="136" cy="70" r="2.6" fill="#b42222" stroke="#7a1212" stroke-width="0.6"/>' +
+      '<circle class="jul-kula-guld" cx="106" cy="68" r="2.5" fill="#d4a017" stroke="#8a6a0c" stroke-width="0.6"/>' +
+      '<g class="jul-gran-ljus">' +
+      '<circle cx="120" cy="54" r="1.6" fill="#ffe08a"/><circle cx="112" cy="96" r="1.5" fill="#ffd36a"/>' +
+      '<circle cx="128" cy="110" r="1.5" fill="#ffe08a"/><circle cx="100" cy="112" r="1.4" fill="#ffd36a"/>' +
+      '</g>' +
+      '<g transform="translate(168 118)"><g class="jul-akare">' +
+      '<ellipse cx="0" cy="16" rx="7" ry="2.2" fill="#7aa0b8" opacity="0.45"/>' +
+      '<rect x="-3.2" y="2" width="6.4" height="8" rx="2" fill="#c0392b"/>' +
+      '<circle cx="0" cy="0" r="3.1" fill="#f6d2b3" stroke="#1a1a1a" stroke-width="0.5"/>' +
+      '<path d="M-4 -1 L0 -9 L4 -1" fill="#c62828" stroke="#7a1212" stroke-width="0.5"/>' +
+      '<circle cx="0" cy="-9.2" r="1.3" fill="#f5f0e6"/>' +
+      '<path d="M-4 12 L6 12" stroke="#4a5568" stroke-width="1.2" stroke-linecap="round"/>' +
+      '</g></g></svg>';
+  }
+  function ensureScen() {
+    var scen = document.getElementById('jul-scen');
+    if (!allowed()) {
+      if (scen && scen.parentNode) scen.parentNode.removeChild(scen);
+      return null;
+    }
+    if (!scen) {
+      scen = document.createElement('div');
+      scen.id = 'jul-scen';
+      scen.setAttribute('aria-hidden', 'true');
+      scen.hidden = true;
+      scen.innerHTML = scenSvg() +
+        '<button type="button" class="jul-scen-hit" aria-label="Julgran"> </button>';
+      var hit = scen.querySelector && scen.querySelector('.jul-scen-hit');
+      if (hit) {
+        hit.addEventListener('click', function () {
+          scen.classList.remove('jul-scen-pling');
+          void scen.offsetWidth;
+          scen.classList.add('jul-scen-pling');
+          setTimeout(function () { if (scen) scen.classList.remove('jul-scen-pling'); }, 700);
+        });
+      }
+    }
+    return scen;
+  }
+  function layoutScen(scen) {
+    scen = scen || document.getElementById('jul-scen');
+    if (!scen || !allowed() || !onHome()) return;
+    var slot = document.querySelector('.td-berra-slot');
+    var content = contentEl();
+    if (slot && slot.appendChild) {
+      if (scen.parentNode !== slot) slot.appendChild(scen);
+      if (scen.style) scen.style.minHeight = '';
+    } else if (content) {
+      if (scen.parentNode !== content) content.appendChild(scen);
+      var top = 0;
+      if (scen.getBoundingClientRect) top = scen.getBoundingClientRect().top + (window.scrollY || 0);
+      var leftover = (window.innerHeight || 600) - top;
+      if (scen.style) scen.style.minHeight = Math.max(168, leftover) + 'px';
+    }
+  }
+  function paintScen() {
+    var scen = ensureScen();
+    if (!scen) return;
+    if (!allowed() || !onHome()) {
+      scen.classList.remove('jul-on');
+      scen.hidden = true;
+      return;
+    }
+    scen.hidden = false;
+    scen.classList.add('jul-on');
+    if (scen.querySelector && !scen.querySelector('.jul-scen-svg')) {
+      var hit = scen.querySelector && scen.querySelector('.jul-scen-hit');
+      if (scen.insertAdjacentHTML) {
+        scen.insertAdjacentHTML('afterbegin', scenSvg());
+      } else if (!String(scen.innerHTML || '').includes('jul-scen-svg')) {
+        scen.innerHTML = scenSvg() + (scen.innerHTML || '');
+      }
+      if (hit && !hit.parentNode) scen.appendChild(hit);
+    }
+    layoutScen(scen);
   }
 
   var obs = null;
@@ -517,7 +684,7 @@
     burnTimer = setInterval(function () { if (allowed()) paint(); }, 60000);
     if (!slingorResize) {
       slingorResize = true;
-      window.addEventListener('resize', function () { if (onHome()) { layoutLights(); layoutGirlang(); } });
+      window.addEventListener('resize', function () { if (onHome()) { layoutLights(); layoutGirlang(); layoutScen(); } });
     }
     if (obs || typeof MutationObserver !== 'function') return;
     var app = document.getElementById('app');

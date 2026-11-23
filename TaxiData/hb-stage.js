@@ -177,10 +177,8 @@
     var vis = document.querySelector('#app.is-home .td-sida.td-vis') ||
       document.querySelector('#app.is-home #content') ||
       document.querySelector('#app.is-home');
-    if (vis && vis.querySelectorAll) {
-      vis.querySelectorAll('.icon, .td-folder, .td-slot-empty, .td-slot-plus').forEach(function (n) { add(n, 4); });
-    }
-    document.querySelectorAll('.home-devices-h, .home-dev, .home-dev-ask, #td-dots, #profile-menu').forEach(function (n) { add(n, 8); });
+    // Ikoner skrollar; stationen är ett hörn-HUD och ska inte lyftas av rutnätet.
+    document.querySelectorAll('#td-dots, #profile-menu').forEach(function (n) { add(n, 6); });
     var h = document.querySelector('#app header') || document.querySelector('header');
     if (h) {
       var r = h.getBoundingClientRect();
@@ -197,44 +195,49 @@
     return true;
   }
 
+  function safeInset(side) {
+    try {
+      var probe = document.getElementById('hb-safe-probe');
+      if (!probe && document.body) {
+        probe = document.createElement('div');
+        probe.id = 'hb-safe-probe';
+        probe.setAttribute('aria-hidden', 'true');
+        probe.style.cssText = 'position:fixed;left:0;right:0;bottom:0;height:0;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);pointer-events:none;visibility:hidden';
+        document.body.appendChild(probe);
+      }
+      if (!probe || !window.getComputedStyle) return 0;
+      var pad = { top: 'paddingTop', right: 'paddingRight', bottom: 'paddingBottom', left: 'paddingLeft' };
+      return parseFloat(getComputedStyle(probe)[pad[side] || 'paddingBottom']) || 0;
+    } catch (e) { return 0; }
+  }
   function findPlace() {
     if (!isHome() || charId() === 'off') return null;
     var vw = window.innerWidth, vh = window.innerHeight;
     var obs = obstacles();
-    var floor = vh - 6, wr, dots = document.getElementById('td-dots');
+    var safeR = safeInset('right'), safeB = safeInset('bottom'), safeL = safeInset('left');
+    var floor = vh - Math.max(2, safeB);
     var y = Math.round(floor - TOT_H);
-    var right = Math.max(MARGIN, vw - WID - 12);
-    var xs = [right, MARGIN];
-    if (dots && dots.style.display !== 'none') {
-      wr = dots.getBoundingClientRect();
+    var right = Math.max(MARGIN + safeL, vw - WID - Math.max(MARGIN, safeR));
+    var x = right;
+    var dots = document.getElementById('td-dots');
+    if (dots && dots.style.display !== 'none' && dots.getBoundingClientRect) {
+      var wr = dots.getBoundingClientRect();
       if (wr.width > 4 && wr.height > 4) {
-        xs.push(Math.max(MARGIN, Math.round(wr.right + 8)));
-        xs.push(Math.min(vw - WID - MARGIN, Math.round(wr.left - 8 - WID)));
+        var pad = 6;
+        var box = { l: x, t: y, r: x + WID, b: y + TOT_H };
+        var dbox = { l: wr.left - pad, t: wr.top - pad, r: wr.right + pad, b: wr.bottom + pad };
+        if (overlaps(box, dbox)) {
+          var xRight = Math.round(wr.right + pad);
+          var xLeft = Math.round(wr.left - pad - WID);
+          if (xRight >= MARGIN + safeL && xRight + WID <= vw - Math.max(4, safeR)) x = xRight;
+          else if (xLeft >= Math.max(MARGIN, safeL)) x = xLeft;
+          else y = Math.round(Math.min(y, wr.top - pad - TOT_H));
+        }
       }
     }
-    function tryY(yy) {
-      var seen = {}, i, xi, k;
-      for (i = 0; i < xs.length; i++) {
-        xi = xs[i];
-        k = xi + ',' + yy;
-        if (seen[k]) continue;
-        seen[k] = 1;
-        if (fits(xi, yy, obs)) return { x: xi, y: yy };
-      }
-      return null;
-    }
-    var hit = tryY(y);
-    if (hit) return hit;
-    if (dots && dots.getBoundingClientRect().height > 4) {
-      hit = tryY(Math.round(dots.getBoundingClientRect().top - 8 - TOT_H));
-      if (hit) return hit;
-    }
-    var lift;
-    for (lift = 8; lift <= 200; lift += 8) {
-      hit = tryY(Math.round(floor - TOT_H - lift));
-      if (hit) return hit;
-    }
-    return { x: right, y: Math.max(MARGIN, Math.min(y, vh - TOT_H - 2)) };
+    if (y < 4) y = 4;
+    if (fits(x, y, obs)) return { x: x, y: y };
+    return { x: x, y: Math.max(4, Math.min(y, vh - TOT_H - Math.max(2, safeB))) };
   }
 
   function room() {

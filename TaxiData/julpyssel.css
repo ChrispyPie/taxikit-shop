@@ -1,24 +1,38 @@
-/* Adventsljusstake: smal rad direkt under den vanliga headern på startskärmen (julpyssel, bara utvalda konton). */
+/* Adventsljusstake: rad högst upp i body, ovanför modulrutnätet (julpyssel, bara utvalda konton).
+   Girlangen är avskiljaren mellan header och body istället för header-linjen. */
+#app.is-home.jul-hem > header,
+#app.is-home:has(#jul-girlang.jul-on) > header {
+  border-bottom: none;
+  overflow: visible;
+}
+#jul-girlang {
+  display: none;
+  position: relative;
+  z-index: 9;
+  height: 28px;
+  margin: -8px 0 0;
+  padding: 0;
+  pointer-events: none;
+  overflow: visible;
+  line-height: 0;
+  flex: 0 0 auto;
+}
+#app.is-home #jul-girlang.jul-on { display: block; }
+#jul-girlang svg { display: block; width: 100%; height: 40px; overflow: visible; }
 #jul-ljus-rad {
   display: none;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 0 0 1px;
+  justify-content: flex-start;
+  padding: 4px 8px 8px;
   margin: 0;
   min-height: 0;
   min-width: 0;
   line-height: 0;
   pointer-events: none;
+  position: relative;
+  z-index: 1;
 }
-#app.is-home header:has(#jul-ljus-rad.jul-on) {
-  grid-template-areas:
-    "left title right"
-    "jul jul jul";
-}
-#app.is-home header:has(#jul-ljus-rad.jul-on) .hdr-left { grid-area: left; }
-#app.is-home header:has(#jul-ljus-rad.jul-on) #title { grid-area: title; }
-#app.is-home header:has(#jul-ljus-rad.jul-on) .hdr-right { grid-area: right; }
-#app.is-home header:has(#jul-ljus-rad.jul-on) #jul-ljus-rad { grid-area: jul; }
 #app.is-home #jul-ljus-rad.jul-on { display: flex; }
 #jul-ljusstake {
   position: relative;
@@ -26,9 +40,9 @@
   bottom: auto;
   z-index: auto;
   display: inline-flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 3px;
   margin: 0;
   padding: 0 2px;
   border: 0;
@@ -37,6 +51,7 @@
   line-height: 0;
   -webkit-tap-highlight-color: transparent;
   pointer-events: auto;
+  max-width: 100%;
 }
 #jul-ljusstake[hidden] { display: none; }
 #jul-ljusstake svg { display: block; width: 56px; height: 40px; overflow: visible; }
@@ -65,7 +80,9 @@
   color: var(--text-soft, #718096);
   font-weight: 600;
   letter-spacing: .01em;
-  white-space: nowrap;
+  white-space: normal;
+  text-align: center;
+  max-width: min(220px, calc(100vw - 32px));
   background: rgba(255, 255, 255, 0.82);
   padding: 1px 5px;
   border-radius: 6px;
@@ -125,20 +142,7 @@ html[data-theme="dark"] #jul-ljusstake .jul-hint {
 }
 
 
-/* Mys: girlang, kulor, lätt snö och varm vignett. Bara hemskärm, peka inte. */
-#jul-ljus-rad { position: relative; overflow: visible; }
-#jul-girlang {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 40px;
-  pointer-events: none;
-  z-index: 0;
-  overflow: visible;
-}
-#jul-girlang svg { display: block; width: 100%; height: 40px; overflow: visible; }
-#jul-ljusstake { position: relative; z-index: 1; }
+/* Mys: girlang som avskiljare, kulor, lätt snö och varm vignett. Bara hemskärm. */
 #jul-mys {
   display: none;
   position: fixed;
@@ -206,7 +210,7 @@ html:not([data-theme="dark"]) #jul-mys .jul-flinga {
   box-shadow: 0 0 1px rgba(120, 140, 160, 0.7);
   opacity: 0.7;
 }
-html:not([data-theme="dark"]) #app.is-home header:has(#jul-ljus-rad.jul-on) {
+html:not([data-theme="dark"]) #app.is-home.jul-hem > header {
   background: linear-gradient(180deg, var(--bg) 0%, #eef4fa 55%, #f7efe4 100%);
 }
 html:not([data-theme="dark"]) #jul-girlang .jul-gren { stroke: #2f4a28; }
@@ -233,7 +237,7 @@ html[data-theme="dark"] #jul-mys .jul-flinga {
   opacity: 0.75;
   box-shadow: 0 0 3px rgba(255, 255, 255, 0.9);
 }
-html[data-theme="dark"] #app.is-home header:has(#jul-ljus-rad.jul-on) {
+html[data-theme="dark"] #app.is-home.jul-hem > header {
   box-shadow: 0 10px 22px -12px rgba(255, 160, 70, 0.35);
 }
 html[data-theme="dark"] #jul-girlang .jul-gren { stroke: #c9a36a; }
@@ -264,4 +268,66 @@ html[data-theme="dark"] #jul-girlang .jul-stjarna {
 @keyframes jul-glim {
   0%, 100% { opacity: 0.85; }
   50% { opacity: 1; }
+}
+
+/* Isbana och julgran längst ner på hemskärmen, under ikonerna (kan kräva skroll). */
+#jul-scen {
+  display: none;
+  position: relative;
+  width: min(240px, 72vw);
+  height: 168px;
+  margin: 8px auto 12px;
+  pointer-events: none;
+  z-index: 1;
+  overflow: visible;
+}
+#jul-scen.jul-on { display: block; }
+#jul-scen .jul-scen-svg { display: block; width: 100%; height: 168px; overflow: visible; }
+#jul-scen .jul-scen-hit {
+  position: absolute;
+  left: 28%;
+  top: 18%;
+  width: 44%;
+  height: 58%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+.td-berra-slot { position: relative; padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
+.td-berra-slot #jul-scen {
+  position: absolute;
+  left: 50%;
+  bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  margin: 0;
+}
+#jul-scen .jul-akare { transform-box: fill-box; transform-origin: 50% 80%; }
+@media (prefers-reduced-motion: no-preference) {
+  #jul-scen .jul-gran-ljus circle {
+    animation: jul-glim 2.8s ease-in-out infinite;
+  }
+  #jul-scen .jul-akare {
+    animation: jul-aka 7s ease-in-out infinite;
+  }
+  #jul-scen.jul-scen-pling .jul-stjarna-topp {
+    animation: jul-glim 0.35s ease-in-out 2;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #jul-scen .jul-gran-ljus circle,
+  #jul-scen .jul-akare { animation: none; }
+}
+@keyframes jul-aka {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-28px, 1px); }
+}
+html:not([data-theme="dark"]) #jul-scen .jul-is { filter: drop-shadow(0 1px 0 rgba(255,255,255,0.8)); }
+html[data-theme="dark"] #jul-scen .jul-is { filter: drop-shadow(0 0 6px rgba(160, 210, 255, 0.35)); }
+html[data-theme="dark"] #jul-scen .jul-stjarna-topp,
+html[data-theme="dark"] #jul-scen .jul-gran-ljus circle {
+  filter: drop-shadow(0 0 2px rgba(255, 210, 80, 0.7));
 }

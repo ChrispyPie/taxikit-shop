@@ -52,8 +52,8 @@ assert.match(cl, /id: '2026-11-22zfly3'/);
 assert.match(cl.split("id: '2026-11-22zfly3'")[1].split(']},')[0].split('rader:')[0], /tid: '21:05'/);
 assert.match(cl, /id: '2026-11-22zfly1'/);
 assert.match(cl.split("id: '2026-11-22zfly1'")[1].split(']},')[0].split('rader:')[0], /tid: '20:56'/);
-assert.match(lv, /prognos\.js\?v=20261123zstg1/);
-assert.match(html, /style\.css\?v=20261123zstg1/);
+assert.match(lv, /prognos\.js\?v=20261123zscn1/);
+assert.match(html, /style\.css\?v=20261123zscn1/);
 
 const mig = fs.readFileSync(path.join(root, 'supabase/migrations/20261122c_prognos_list_first_estimated.sql'), 'utf8');
 const undo = fs.readFileSync(path.join(root, 'supabase/migrations/undo/20261122c_prognos_list_first_estimated_undo.sql'), 'utf8');

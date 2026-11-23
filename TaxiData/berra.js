@@ -270,9 +270,27 @@
     return !!(app && app.classList.contains('is-home') && app.style.display !== 'none');
   }
 
-  function svg() {
-    // Blond mycket kort hår med lätt sidbena, isblå ögon, stort leende,
-    // lätt rund mage men fortfarande atletisk. Ingen skäggstubb, inga glasögon, inga kläddetaljer.
+  function julKlad() {
+    try { return !!(window.JULPYSSEL && JULPYSSEL.allowed && JULPYSSEL.allowed() && onHome()); } catch (e) { return false; }
+  }
+  function faceSvg() {
+    // Blond mycket kort hår, isblå ögon, stort leende. Ingen skäggstubb, inga glasögon.
+    return '<ellipse cx="32" cy="24.2" rx="13.2" ry="13.6" fill="' + HAIR + '"/>' +
+      '<ellipse cx="32" cy="22.8" rx="11.5" ry="7.5" fill="' + HAIR_DARK + '" opacity="0.2"/>' +
+      '<circle cx="32" cy="28.2" r="11.7" fill="' + SKIN + '"/>' +
+      '<path d="M29.2 12.8 q-0.2 5.2 0.5 9.4" fill="none" stroke="' + SKIN + '" stroke-width="1.45"/>' +
+      '<circle cx="20.2" cy="28.6" r="2.25" fill="' + SKIN + '"/>' +
+      '<circle cx="43.8" cy="28.6" r="2.25" fill="' + SKIN + '"/>' +
+      '<g class="td-berra-eyes" stroke="none">' +
+      '<circle cx="27.1" cy="28.6" r="2.5" fill="#eef8fc"/><circle cx="36.9" cy="28.6" r="2.5" fill="#eef8fc"/>' +
+      '<circle cx="27.1" cy="28.7" r="1.65" fill="' + EYE + '"/><circle cx="36.9" cy="28.7" r="1.65" fill="' + EYE + '"/>' +
+      '<circle cx="27.1" cy="28.7" r="0.74" fill="' + EYE_IN + '"/><circle cx="36.9" cy="28.7" r="0.74" fill="' + EYE_IN + '"/>' +
+      '<circle cx="27.55" cy="28.15" r="0.55" fill="#fff"/><circle cx="37.35" cy="28.15" r="0.55" fill="#fff"/>' +
+      '</g>' +
+      '<path d="M23.2 34.4 q8.8 8.4 17.6 0" fill="none" stroke="' + K + '" stroke-width="2.1"/>';
+  }
+  function everydaySvg() {
+    // Lätt rund mage men fortfarande atletisk. Inga kläddetaljer.
     return '<svg viewBox="0 0 64 64" aria-hidden="true"><g stroke="' + K + '" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">' +
       '<rect x="21" y="55.5" width="8.5" height="5.5" rx="2" fill="' + K + '"/>' +
       '<rect x="34.5" y="55.5" width="8.5" height="5.5" rx="2" fill="' + K + '"/>' +
@@ -285,23 +303,34 @@
       '<circle cx="10.8" cy="33.3" r="2.6" fill="' + SKIN + '"/></g>' +
       // Hals bakom huvudet, ingen skugglinje som liknar skägg.
       '<path d="M27.5 36 v4 q4.5 1.6 9 0 v-4" fill="' + SKIN + '" stroke="none"/>' +
-      // Kort blont hår som täcker hjässan, lätt sidbena.
-      '<ellipse cx="32" cy="24.2" rx="13.2" ry="13.6" fill="' + HAIR + '"/>' +
-      '<ellipse cx="32" cy="22.8" rx="11.5" ry="7.5" fill="' + HAIR_DARK + '" opacity="0.2"/>' +
-      '<circle cx="32" cy="28.2" r="11.7" fill="' + SKIN + '"/>' +
-      '<path d="M29.2 12.8 q-0.2 5.2 0.5 9.4" fill="none" stroke="' + SKIN + '" stroke-width="1.45"/>' +
-      '<circle cx="20.2" cy="28.6" r="2.25" fill="' + SKIN + '"/>' +
-      '<circle cx="43.8" cy="28.6" r="2.25" fill="' + SKIN + '"/>' +
-      // Isblå ögon, inga glasögon.
-      '<g class="td-berra-eyes" stroke="none">' +
-      '<circle cx="27.1" cy="28.6" r="2.5" fill="#eef8fc"/><circle cx="36.9" cy="28.6" r="2.5" fill="#eef8fc"/>' +
-      '<circle cx="27.1" cy="28.7" r="1.65" fill="' + EYE + '"/><circle cx="36.9" cy="28.7" r="1.65" fill="' + EYE + '"/>' +
-      '<circle cx="27.1" cy="28.7" r="0.74" fill="' + EYE_IN + '"/><circle cx="36.9" cy="28.7" r="0.74" fill="' + EYE_IN + '"/>' +
-      '<circle cx="27.55" cy="28.15" r="0.55" fill="#fff"/><circle cx="37.35" cy="28.15" r="0.55" fill="#fff"/>' +
-      '</g>' +
-      // Stort leende.
-      '<path d="M23.2 34.4 q8.8 8.4 17.6 0" fill="none" stroke="' + K + '" stroke-width="2.1"/>' +
+      faceSvg() +
       '</g></svg>';
+  }
+  function tomteSvg() {
+    var HAT = '#c62828', FUR = '#f5f0e6', COAT = '#c0392b', BELT = '#1a1a1a', GOLD = '#d4a017';
+    return '<svg viewBox="0 -6 64 70" aria-hidden="true"><g stroke="' + K + '" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">' +
+      '<rect x="21" y="55.5" width="8.5" height="5.5" rx="2" fill="' + K + '"/>' +
+      '<rect x="34.5" y="55.5" width="8.5" height="5.5" rx="2" fill="' + K + '"/>' +
+      '<path d="M22.5 51 h8 l0.8 5.5 h-8.2 z M33.5 51 h8 l0.2 5.5 h-8.5 z" fill="#7a1f1f"/>' +
+      // Röd jacka, lätt rund mage, vitt pälsbräm och svart skärp.
+      '<path d="M18.2 40.2 q0 -2.8 5.2 -4 h17.2 q5.2 1.2 5.2 4 q1 5.6 -1.4 10.2 q-2.2 3.2 -11.4 3.2 q-9.2 0 -11.4 -3.2 q-2.4 -4.6 -1.4 -10.2 z" fill="' + COAT + '"/>' +
+      '<path d="M20.4 51.2 q11.6 2 23.2 0" fill="none" stroke="' + FUR + '" stroke-width="2.4"/>' +
+      '<rect x="22.5" y="45.2" width="19" height="3.4" rx="0.8" fill="' + BELT + '" stroke="none"/>' +
+      '<rect x="30.2" y="44.7" width="3.8" height="4.4" rx="0.5" fill="' + GOLD + '" stroke="' + K + '" stroke-width="0.7"/>' +
+      '<path d="M47.2 43 L51.8 50.2" stroke-width="5"/><path d="M47.2 43 L51.8 50.2" stroke="' + COAT + '" stroke-width="3"/>' +
+      '<circle cx="52.3" cy="51.2" r="2.5" fill="' + SKIN + '"/>' +
+      '<g class="td-berra-arm"><path d="M18.6 42.8 L11.6 34.6" stroke-width="5"/><path d="M18.6 42.8 L11.6 34.6" stroke="' + COAT + '" stroke-width="3"/>' +
+      '<circle cx="10.8" cy="33.3" r="2.6" fill="' + SKIN + '"/></g>' +
+      '<path d="M27.5 36 v4 q4.5 1.6 9 0 v-4" fill="' + SKIN + '" stroke="none"/>' +
+      faceSvg() +
+      // Tomteluva med vit päls och tofs, över det korta blonda håret. Ingen mustasch.
+      '<path d="M20.4 18.5 q2 -16 12.2 -22.2 q8.8 6.2 11.6 22.2 q-11.2 3.2 -23.8 0 z" fill="' + HAT + '"/>' +
+      '<path d="M19.2 17.6 q12.8 5 25.6 0 q0.6 3.4 -1.2 4.6 q-11.2 3.2 -23.4 0 q-1.8 -1.2 -1 -4.6 z" fill="' + FUR + '" stroke="' + K + '" stroke-width="0.9"/>' +
+      '<circle cx="32.4" cy="-4.2" r="3.1" fill="' + FUR + '"/>' +
+      '</g></svg>';
+  }
+  function svg() {
+    return julKlad() ? tomteSvg() : everydaySvg();
   }
 
   function css() {
@@ -370,6 +399,7 @@
     if (el.slot.parentNode !== content || content.lastElementChild !== el.slot) content.appendChild(el.slot);
     el.btn.style.display = '';
     el.btn.style.transform = '';
+    el.btn.innerHTML = svg();
     sizeSlot();
     if (el.bubble && el.bubble.classList.contains('show')) placeBubble();
   }
@@ -513,11 +543,16 @@
     }
   }
 
+  function refresh() {
+    if (el.btn) el.btn.innerHTML = svg();
+  }
+
   window.BERRA = {
     jokes: function () { return JOKES.slice(); },
     pickJoke: pickJoke,
     poke: poke,
     place: place,
+    refresh: refresh,
     preview: function (text) {
       place();
       say(text || pickJoke());

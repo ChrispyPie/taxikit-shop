@@ -55,8 +55,14 @@ jokes.forEach((j, i) => {
 assert.doesNotMatch(src, /\bStig\b|\bhen\b/);
 assert.match(src, /EYE/);
 assert.match(src, /HAIR/);
-const svgRet = src.slice(src.indexOf("return '<svg"), src.indexOf('function css'));
-assert.doesNotMatch(svgRet, /badge|glasses|beard|zip/i);
+const everyday = src.slice(src.indexOf('function everydaySvg'), src.indexOf('function tomteSvg'));
+assert.doesNotMatch(everyday, /badge|glasses|beard|zip/i);
+assert.match(src, /function tomteSvg/);
+assert.match(src, /function julKlad/);
+assert.match(src, /JULPYSSEL && JULPYSSEL.allowed/);
+assert.doesNotMatch(src.slice(src.indexOf('function tomteSvg'), src.indexOf('function svg()')), /glasses|beard|skägg\b|glasögon/i);
+assert.match(src, /#c62828/); // tomteluva
+assert.match(src, /#c0392b/); // jacka
 
 const seen = new Set();
 for (let i = 0; i < 8; i++) {
