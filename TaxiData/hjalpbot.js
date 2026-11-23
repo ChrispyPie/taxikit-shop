@@ -355,18 +355,25 @@
   function page() {
     var login = document.getElementById('login-screen');
     if (login && login.style.display !== 'none') return null;
-    var dv = document.getElementById('dashboard-view');
-    if (dv && !dv.classList.contains('hidden')) return 'kordata';
+    var v = '';
+    if (typeof window.NAV_VIEW === 'function') {
+      try { v = window.NAV_VIEW() || ''; } catch (e1) { v = ''; }
+    }
+    if (!v) {
+      var dv = document.getElementById('dashboard-view');
+      if (dv && !dv.classList.contains('hidden')) return 'kordata';
+      if (window.current) v = window.current;
+    }
+    if (v === 'nytt-losenord') return null;
+    if (v === 'profil') return 'profil';
+    if (window.ANKOMSTER && v === window.ANKOMSTER.id) return 'ankomster';
+    if (window.TOPPLISTOR && v === window.TOPPLISTOR.id) return 'topplistor';
+    if (window.VERKSTAD && v === window.VERKSTAD.id) return 'verkstad';
+    if (v) return v;
     var app = document.getElementById('app');
     if (!app || app.style.display === 'none') return null;
-    var c = window.current;
-    if (c === 'nytt-losenord') return null;
-    if (c === 'profil') return 'profil';
-    if (window.ANKOMSTER && c === window.ANKOMSTER.id) return 'ankomster';
-    if (window.TOPPLISTOR && c === window.TOPPLISTOR.id) return 'topplistor';
-    if (window.VERKSTAD && c === window.VERKSTAD.id) return 'verkstad';
-    if (!c) return 'hem';
-    return c;
+    if (app.classList && !app.classList.contains('is-home')) return null;
+    return 'hem';
   }
 
   // ---------- vad boten säger (bara riktiga siffror) ----------
@@ -1096,6 +1103,7 @@
   }
   function stationRoom() {
     if (window.HB_STAGE && HB_STAGE.sync) HB_STAGE.sync();
+    if (page() !== 'hem') return null;
     if (window.HB_STAGE && HB_STAGE.room) {
       var staged = HB_STAGE.room();
       if (staged) return staged;
@@ -1160,7 +1168,11 @@
   function paintStation() {
     if (!el.station) return;
     var c = charId();
-    if (c === 'off') { el.station.classList.add('hb-hidden'); return; }
+    if (c === 'off' || page() !== 'hem') {
+      el.station.classList.add('hb-hidden');
+      el.station.style.display = 'none';
+      return;
+    }
     var room = stationRoom();
     // Stationen ritas av strålkastarscenen i hörnet: rita inte en andra station.
     if (window.HB_STAGE && HB_STAGE.room && HB_STAGE.room()) {
@@ -1735,12 +1747,16 @@
   }
   function show(on) {
     var was = el.walker && el.walker.style.display !== 'none';
+    var stationOn = on && page() === 'hem';
     if (el.walker) el.walker.style.display = on ? '' : 'none';
-    if (el.station) el.station.style.display = on ? '' : 'none';
-    if (!on) { hideBubble(); closePanel(); stopWalk(); if (el.station) el.station.classList.add('hb-hidden'); }
+    if (el.station) {
+      el.station.style.display = stationOn ? '' : 'none';
+      if (!stationOn) el.station.classList.add('hb-hidden');
+    }
+    if (!on) { hideBubble(); closePanel(); stopWalk(); }
     else if (!was) {
       ensureStation();
-      var room = paintStation();
+      var room = stationOn ? paintStation() : null;
       var startAt = standAtStation(room, charId()) || perchSpot();
       setPos(startAt.x, startAt.y, 0);
       if (room) arriveHome();
