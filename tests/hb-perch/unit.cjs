@@ -87,8 +87,8 @@ assert.match(src, /state\.enteredTool = id;\s*state\.enteredAt = Date\.now\(\);\
 assert.match(body('poke'), /if \(bubbleOn\(\)\) \{\s*hideBubble\(\);/);
 
 // cache och nyheter
-assert.match(lazy, /hjalpbot\.js\?v=20261123zfly7/);
-assert.match(lazy, /changelog\.js\?v=20261123zfly7/);
+assert.match(lazy, /hjalpbot\.js\?v=20261123zfly8/);
+assert.match(lazy, /changelog\.js\?v=20261123zfly8/);
 assert.match(changelog, /id: '2026-11-12bot1'/);
 assert.ok(changelog.indexOf("'2026-11-12bot1'") < changelog.indexOf("'2026-11-12zon2'"), 'överst');
 assert.doesNotMatch(src + changelog.slice(0, 3000), /\bStig\b/);
