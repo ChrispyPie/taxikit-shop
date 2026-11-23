@@ -75,4 +75,13 @@ assert.match(sql, /too_early/);
 assert.match(sql, /p_driver = '710022'/);
 assert.match(sql, /Europe\/Stockholm/);
 
+
+assert.match(advent, /td-adv-factwrap/);
+assert.match(advent, /factClosedAt/);
+assert.doesNotMatch(advent, /onOverlayPointer/);
+assert.doesNotMatch(css, /--card/);
+assert.match(css, /var\(--surface/);
+assert.match(css, /html\[data-theme="dark"\] \.td-adv-factbox/);
+assert.match(css, /var\(--primary-bg/);
+
 console.log('advent unit ok');

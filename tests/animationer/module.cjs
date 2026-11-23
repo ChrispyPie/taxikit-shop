@@ -133,10 +133,10 @@ assert.ok(!L.isArrival({ title: '❌ SK1 är inställt' }));
 assert.ok(!L.isArrival({ title: '🧳 Bagaget rullar på band 4 – SK1' }));
 
 // ---- Prognoszoner, landande plan, Stena (2026-11-12zon2) ----
-assert.match(html, /lazy-views\.js\?v=20261123adv4/);
+assert.match(html, /lazy-views\.js\?v=20261123adv5/);
 
 assert.match(lv, /prognos-notis\.js\?v=20261122zdelad1/);
-assert.match(lv, /changelog\.js\?v=20261123adv4/);
+assert.match(lv, /changelog\.js\?v=20261123adv5/);
 assert.match(cl, /2026-11-12zon2/);
 assert.doesNotMatch(cl.split('window.CHANGELOG')[1].slice(0, 1600), /\bStig\b|BRASSERIE|Brasserie/);
 assert.doesNotMatch(js, /BRASSERIE/);

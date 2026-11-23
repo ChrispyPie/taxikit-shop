@@ -110,7 +110,7 @@
     var l = document.createElement('link');
     l.id = 'td-polkagris-css-link';
     l.rel = 'stylesheet';
-    l.href = 'polkagris.css?v=20261123adv4';
+    l.href = 'polkagris.css?v=20261123adv5';
     document.head.appendChild(l);
   }
 
