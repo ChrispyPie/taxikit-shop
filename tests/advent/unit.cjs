@@ -64,9 +64,13 @@ assert.match(css, /overscroll-behavior:\s*contain/);
 assert.match(css, /max-height:\s*min\(78vh/);
 assert.match(advent, /prefers-reduced-motion/);
 assert.strictEqual((fakta.match(/bild:/g) || []).length, 24);
-assert.strictEqual((fakta.match(/bildtyp: 'illustration'/g) || []).length, 24);
+assert.strictEqual((fakta.match(/bildtyp: 'foto'/g) || []).length, 22);
+assert.strictEqual((fakta.match(/bildtyp: 'illustration'/g) || []).length, 2);
+assert.strictEqual((fakta.match(/attrib:/g) || []).length, 24);
 const bilder = fs.readdirSync(path.join(root, 'TaxiData/advent-bilder')).filter((f) => /\.(svg|jpe?g|png|webp)$/i.test(f));
-assert.strictEqual(bilder.length, 24);
+assert.strictEqual(bilder.length, 25);
+assert.ok(bilder.includes('bakgrund-jul.svg'));
+assert.match(css, /bakgrund-jul\.svg/);
 assert.doesNotMatch(css, /\bStig\b|\bhen\b/);
 
 

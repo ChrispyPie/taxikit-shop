@@ -51,7 +51,7 @@
     var l = document.createElement('link');
     l.id = 'td-advent-css';
     l.rel = 'stylesheet';
-    l.href = 'advent.css?v=20261123adv6';
+    l.href = 'advent.css?v=20261123adv7';
     document.head.appendChild(l);
   }
   function reducedMotion() {
@@ -168,7 +168,7 @@
     var img = '';
     if (f.bild) {
       img = '<figure class="td-adv-bild">' +
-        '<img src="' + esc(f.bild) + '" alt="' + esc(f.bildalt || '') + '" width="320" height="180" decoding="async">' +
+        '<img src="' + esc(f.bild) + '" alt="' + esc(f.bildalt || '') + '" decoding="async">' +
         (f.attrib ? '<figcaption class="td-adv-attrib">' + esc(f.attrib) + '</figcaption>' : '') +
         '</figure>';
     }
