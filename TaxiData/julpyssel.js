@@ -164,7 +164,7 @@
   function paint() {
     var el = document.getElementById('jul-ljusstake');
     var rad = document.getElementById('jul-ljus-rad');
-    if (!el) { paintSlingor(); return; }
+    if (!el) { paintSlingor(); paintMys(); return; }
     if (!allowed() || !onHome()) {
       el.classList.remove('jul-on', 'jul-preview');
       el.hidden = true;
@@ -173,7 +173,7 @@
         rad.hidden = true;
       }
       syncSidaTop();
-      paintSlingor();
+      paintSlingor(); paintMys();
       return;
     }
     var lit = litCount();
@@ -192,7 +192,7 @@
       ? ('Förhandsvisning: ' + (LABELS[lit] || '') + ' – tryck för att byta')
       : 'Adventsljusstake';
     syncSidaTop();
-    paintSlingor();
+    paintSlingor(); paintMys();
   }
 
   function cyclePreview() {
@@ -213,6 +213,10 @@
       else if (btn && btn.parentNode) btn.parentNode.removeChild(btn);
       var sl0 = document.getElementById('jul-slingor');
       if (sl0 && sl0.parentNode) sl0.parentNode.removeChild(sl0);
+      var mys0 = document.getElementById('jul-mys');
+      if (mys0 && mys0.parentNode) mys0.parentNode.removeChild(mys0);
+      var g0 = document.getElementById('jul-girlang');
+      if (g0 && g0.parentNode) g0.parentNode.removeChild(g0);
       return null;
     }
     if (!rad) {
@@ -234,6 +238,7 @@
       (document.body || document.documentElement).appendChild(rad);
     }
     ensureSlingor();
+    ensureMys();
     return btn;
   }
 
@@ -344,6 +349,164 @@
     layoutLights();
   }
 
+
+  function snowHtml() {
+    var h = '', i, x, s, dur, del, dx;
+    for (i = 0; i < 12; i++) {
+      x = (6 + (i * 7.7 + (i % 3) * 3) % 88).toFixed(1);
+      s = (2.4 + (i % 4) * 1.1).toFixed(1) + 'px';
+      dur = (14 + (i % 5) * 2.2).toFixed(1) + 's';
+      del = (-(i * 1.7)).toFixed(1) + 's';
+      dx = ((i % 2 ? 18 : -16) + (i % 3) * 4) + 'px';
+      h += '<span class="jul-flinga" style="--x:' + x + ';--s:' + s + ';--dur:' + dur +
+        ';--del:' + del + ';--dx:' + dx + '"></span>';
+    }
+    return h;
+  }
+  function ensureMys() {
+    var wrap = document.getElementById('jul-mys');
+    if (!allowed()) {
+      if (wrap && wrap.parentNode) wrap.parentNode.removeChild(wrap);
+      var g0 = document.getElementById('jul-girlang');
+      if (g0 && g0.parentNode) g0.parentNode.removeChild(g0);
+      return null;
+    }
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.id = 'jul-mys';
+      wrap.setAttribute('aria-hidden', 'true');
+      wrap.hidden = true;
+      wrap.innerHTML = '<div class="jul-vignette"></div><div class="jul-sno">' + snowHtml() + '</div>';
+      (document.body || document.documentElement).appendChild(wrap);
+    }
+    return wrap;
+  }
+  function girlangSvg(w) {
+    w = Math.max(280, Math.round(w || 390));
+    var i, t, x, y, a, x2, y2, d = '', leaves = '', berries = '', hang = '';
+    var n = 28;
+    for (i = 0; i <= n * 3; i++) {
+      t = i / (n * 3);
+      y = 9 + 2.4 * Math.sin(t * Math.PI * 5.5);
+      x = t * w;
+      d += (i ? ' L ' : 'M ') + x.toFixed(2) + ' ' + y.toFixed(2);
+    }
+    for (i = 0; i < 70; i++) {
+      t = (i + 0.4) / 70;
+      x = t * w;
+      y = 9 + 2.4 * Math.sin(t * Math.PI * 5.5);
+      a = ((i % 2) ? -58 : 56) * Math.PI / 180;
+      x2 = x + 7 * Math.cos(a);
+      y2 = y + 7 * Math.sin(a);
+      leaves += '<ellipse class="' + (i % 3 ? 'jul-barr' : 'jul-barr2') + '" cx="' +
+        ((x + x2) / 2).toFixed(1) + '" cy="' + ((y + y2) / 2).toFixed(1) +
+        '" rx="4.2" ry="1.7" transform="rotate(' + (a * 180 / Math.PI).toFixed(0) + ' ' +
+        ((x + x2) / 2).toFixed(1) + ' ' + ((y + y2) / 2).toFixed(1) + ')"/>';
+    }
+    for (i = 0; i < 11; i++) {
+      t = (i + 0.6) / 11;
+      x = t * w;
+      y = 9 + 2.4 * Math.sin(t * Math.PI * 5.5) + 1.2;
+      berries += '<circle class="jul-bar" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="1.35"/>';
+    }
+    function snore(x0, y0, y1) {
+      return '<path class="jul-snore" d="M' + x0.toFixed(1) + ' ' + y0.toFixed(1) +
+        ' Q ' + (x0 + 1.5).toFixed(1) + ' ' + ((y0 + y1) / 2).toFixed(1) + ' ' +
+        x0.toFixed(1) + ' ' + y1.toFixed(1) + '"/>';
+    }
+    function star(cx, cy, r) {
+      var pts = '', k, ang, rr;
+      for (k = 0; k < 10; k++) {
+        ang = -Math.PI / 2 + k * Math.PI / 5;
+        rr = k % 2 ? r * 0.42 : r;
+        pts += (k ? ' ' : '') + (cx + rr * Math.cos(ang)).toFixed(1) + ',' + (cy + rr * Math.sin(ang)).toFixed(1);
+      }
+      return '<polygon class="jul-stjarna" points="' + pts + '"/>';
+    }
+    function ball(cx, cy, r, klass) {
+      return '<g class="jul-kula">' + snore(cx, 11, cy - r) +
+        '<circle class="' + klass + '" cx="' + cx + '" cy="' + cy + '" r="' + r + '"/>' +
+        '<circle cx="' + (cx - r * 0.3) + '" cy="' + (cy - r * 0.35) + '" r="' + (r * 0.28) +
+        '" fill="#fff" opacity="0.35"/>' +
+        '<rect class="jul-trad-guld" x="' + (cx - 1.3) + '" y="' + (cy - r - 2.2) +
+        '" width="2.6" height="2.2" rx="0.4"/></g>';
+    }
+    function peppar(cx, cy) {
+      return '<g class="jul-kula">' + snore(cx, 11, cy - 6) +
+        '<path fill="#8a4b1f" stroke="#6b3512" stroke-width="0.6" d="M' + cx + ' ' + (cy + 6.2) +
+        ' C ' + (cx + 7) + ' ' + (cy + 1) + ' ' + (cx + 6) + ' ' + (cy - 5) + ' ' + cx + ' ' + (cy - 2.2) +
+        ' C ' + (cx - 6) + ' ' + (cy - 5) + ' ' + (cx - 7) + ' ' + (cy + 1) + ' ' + cx + ' ' + (cy + 6.2) + 'Z"/>' +
+        '<circle fill="#f4efe6" cx="' + (cx - 1.8) + '" cy="' + (cy - 0.2) + '" r="0.7"/>' +
+        '<circle fill="#f4efe6" cx="' + (cx + 1.8) + '" cy="' + (cy - 0.2) + '" r="0.7"/>' +
+        '<circle fill="#f4efe6" cx="' + cx + '" cy="' + (cy + 2.2) + '" r="0.7"/></g>';
+    }
+    function tomte(cx, cy) {
+      return '<g class="jul-kula">' + snore(cx, 11, cy - 8) +
+        '<circle fill="#f0d5b8" cx="' + cx + '" cy="' + (cy + 0.4) + '" r="3.1"/>' +
+        '<path fill="#c53030" d="M' + (cx - 3.4) + ' ' + (cy - 1) + ' L ' + cx + ' ' + (cy - 8.2) +
+        ' L ' + (cx + 3.4) + ' ' + (cy - 1) + ' Z"/>' +
+        '<circle fill="#f7f3ea" cx="' + cx + '" cy="' + (cy - 8.2) + '" r="1.05"/>' +
+        '<circle fill="#1a202c" cx="' + (cx - 1.05) + '" cy="' + (cy + 0.2) + '" r="0.45"/>' +
+        '<circle fill="#1a202c" cx="' + (cx + 1.05) + '" cy="' + (cy + 0.2) + '" r="0.45"/>' +
+        '<ellipse fill="#c53030" cx="' + cx + '" cy="' + (cy + 6.4) + '" rx="3.3" ry="3.1"/>' +
+        '<ellipse fill="#f7f3ea" cx="' + cx + '" cy="' + (cy + 3.3) + '" rx="2.4" ry="1.1"/></g>';
+    }
+    var spots = [
+      [0.10, 'star'], [0.20, 'ball-rod'], [0.30, 'peppar'],
+      [0.70, 'tomte'], [0.80, 'ball-gron'], [0.90, 'ball-guld']
+    ];
+    for (i = 0; i < spots.length; i++) {
+      x = spots[i][0] * w;
+      if (spots[i][1] === 'star') hang += '<g>' + snore(x, 11, 20) + star(x, 25, 5.2) + '</g>';
+      else if (spots[i][1] === 'ball-rod') hang += ball(x, 24, 4.2, 'jul-kula-rod');
+      else if (spots[i][1] === 'ball-gron') hang += ball(x, 25, 4.0, 'jul-kula-gron');
+      else if (spots[i][1] === 'ball-guld') hang += ball(x, 23, 3.8, 'jul-kula-guld');
+      else if (spots[i][1] === 'peppar') hang += peppar(x, 24);
+      else if (spots[i][1] === 'tomte') hang += tomte(x, 24);
+    }
+    return '<svg viewBox="0 0 ' + w + ' 40" width="' + w + '" height="40" preserveAspectRatio="xMidYMin meet" aria-hidden="true">' +
+      '<path class="jul-gren" d="' + d + '" fill="none" stroke-width="1.6" stroke-linecap="round"/>' +
+      leaves + berries + hang + '</svg>';
+  }
+  function layoutGirlang() {
+    var rad = document.getElementById('jul-ljus-rad');
+    if (!rad || !allowed() || !onHome()) {
+      var g0 = document.getElementById('jul-girlang');
+      if (g0) g0.hidden = true;
+      return;
+    }
+    var g = document.getElementById('jul-girlang');
+    if (!g) {
+      g = document.createElement('div');
+      g.id = 'jul-girlang';
+      g.setAttribute('aria-hidden', 'true');
+      rad.appendChild(g);
+    } else if (g.parentNode !== rad && rad.appendChild) {
+      rad.appendChild(g);
+    }
+    g.hidden = false;
+    var w = 390;
+    if (rad.getBoundingClientRect) {
+      var r = rad.getBoundingClientRect();
+      if (r.width) w = Math.max(280, Math.round(r.width));
+    }
+    g.innerHTML = girlangSvg(w);
+  }
+  function paintMys() {
+    var wrap = ensureMys();
+    if (!wrap) return;
+    if (!allowed() || !onHome()) {
+      wrap.classList.remove('jul-on');
+      wrap.hidden = true;
+      var g0 = document.getElementById('jul-girlang');
+      if (g0) g0.hidden = true;
+      return;
+    }
+    wrap.hidden = false;
+    wrap.classList.add('jul-on');
+    layoutGirlang();
+  }
+
   var obs = null;
   var slingorResize = false;
   function start() {
@@ -354,7 +517,7 @@
     burnTimer = setInterval(function () { if (allowed()) paint(); }, 60000);
     if (!slingorResize) {
       slingorResize = true;
-      window.addEventListener('resize', function () { if (onHome()) layoutLights(); });
+      window.addEventListener('resize', function () { if (onHome()) { layoutLights(); layoutGirlang(); } });
     }
     if (obs || typeof MutationObserver !== 'function') return;
     var app = document.getElementById('app');
