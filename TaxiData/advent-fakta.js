@@ -132,7 +132,7 @@
       text: 'År 1952 delade Länsstyrelsen i Göteborgs och Bohus län in Göteborg i fyra taxizoner. Zontänkandet är alltså inte en modern appidé – förare och växel har arbetat med zoner i staden i över sjuttio år.',
       kalla: 'Taxi Göteborgs historik (Wikipedia, avsnittet Historia).',
       url: 'https://sv.wikipedia.org/wiki/Taxi_G%C3%B6teborg',
-      bild: 'advent-bilder/12-zoner.svg',
+      bild: 'advent-bilder/12-zoner.webp',
       bildalt: 'Illustration av Göteborgs fyra taxizoner 1952 som ringar på en karta',
       bildtyp: 'illustration',
       attrib: 'Illustration: TaxiData'
@@ -253,7 +253,7 @@
       text: 'De tidiga droskbilarna byggdes ofta efter hästvagnmakarnas tradition: inte alltid med väggar och dörrar, men med mattor, gardiner och askkopp. Takhöjden skulle räcka för att kunderna skulle kunna sitta kvar med hög hatt. Bekvämlighet var en del av yrket redan då.',
       kalla: 'Gert Ekström i SvD, “Med taxi genom historien”.',
       url: 'https://www.svd.se/a/8b499346-24ab-334a-8eff-adf71db183ad/med-taxi-genom-historien',
-      bild: 'advent-bilder/23-hatt.svg',
+      bild: 'advent-bilder/23-hatt.webp',
       bildalt: 'Illustration av en resenär i hög hatt i kupén på en tidig droskbil',
       bildtyp: 'illustration',
       attrib: 'Illustration: TaxiData'

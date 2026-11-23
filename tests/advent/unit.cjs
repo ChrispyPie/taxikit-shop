@@ -69,8 +69,10 @@ assert.strictEqual((fakta.match(/bildtyp: 'illustration'/g) || []).length, 2);
 assert.strictEqual((fakta.match(/attrib:/g) || []).length, 24);
 const bilder = fs.readdirSync(path.join(root, 'TaxiData/advent-bilder')).filter((f) => /\.(svg|jpe?g|png|webp)$/i.test(f));
 assert.strictEqual(bilder.length, 25);
-assert.ok(bilder.includes('bakgrund-jul.svg'));
-assert.match(css, /bakgrund-jul\.svg/);
+assert.ok(bilder.includes('bakgrund-jul.webp'));
+assert.ok(bilder.includes('12-zoner.webp'));
+assert.ok(bilder.includes('23-hatt.webp'));
+assert.match(css, /bakgrund-jul\.webp/);
 assert.doesNotMatch(css, /\bStig\b|\bhen\b/);
 
 
