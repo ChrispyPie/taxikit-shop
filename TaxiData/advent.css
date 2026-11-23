@@ -13,8 +13,8 @@
 .td-adv-mini-face{position:absolute;inset:0;display:block}
 .td-adv-mini-door{
   position:absolute;box-sizing:border-box;pointer-events:none;
-  border:1px solid rgba(247,231,176,.72);border-radius:1px;
-  box-shadow:0 0.5px 1px rgba(0,0,0,.25);
+  border:0.5px solid rgba(247,231,176,.38);border-radius:1px;
+  box-shadow:none;
   background:transparent;
 }
 html.td-adv-lock,html.td-adv-lock body,body.td-adv-lock{
@@ -65,23 +65,40 @@ html.td-adv-lock,html.td-adv-lock body,body.td-adv-lock{
   box-sizing:border-box;
   border-radius:3px;cursor:pointer;
   background:transparent;
-  border:1px solid rgba(237,214,150,.82);
-  box-shadow:0 1px 2px rgba(0,0,0,.28);
-  color:#fff8e4;
-  font:700 0.8rem/1 Georgia, "Times New Roman", serif;
-  text-shadow:0 1px 2px rgba(0,0,0,.95), 0 0 6px rgba(0,0,0,.8), 0 0 2px rgba(0,0,0,1);
+  border:1px solid rgba(237,214,150,.38);
+  box-shadow:none;
+  color:#fff6d8;
+  font:700 0.68rem/1 Georgia, "Times New Roman", serif;
+  text-shadow:0 1px 2px rgba(0,0,0,.7), 0 0 4px rgba(0,0,0,.45);
   backdrop-filter:none;-webkit-backdrop-filter:none;
   -webkit-tap-highlight-color:transparent;
 }
 .td-adv-door.locked{cursor:default;filter:none;opacity:1}
-.td-adv-door.ready{border-color:rgba(247,231,176,.95)}
-.td-adv-door.open{border-color:rgba(247,231,176,.9)}
+.td-adv-door.ready{border-color:rgba(247,231,176,.5)}
+.td-adv-door.open{border-color:rgba(247,231,176,.48)}
 .td-adv-num{pointer-events:none}
 .td-adv-check{
-  position:absolute;right:2px;top:1px;font-size:9px;line-height:1;
-  color:#f6e05e;pointer-events:none;
-  text-shadow:0 0 4px rgba(0,0,0,.8);
+  position:absolute;right:2px;top:1px;font-size:8px;line-height:1;
+  color:#f6e05e;pointer-events:none;opacity:.85;
+  text-shadow:0 0 3px rgba(0,0,0,.7);
 }
+.td-adv-board.td-adv-hid .td-adv-door{
+  opacity:0;pointer-events:none;visibility:hidden;
+}
+.td-adv-stage{
+  display:flex;flex-direction:column;align-items:center;
+  gap:8px;max-width:100%;cursor:default;
+}
+.td-adv-vislink{
+  appearance:none;border:0;background:none;margin:0;
+  padding:8px 12px;cursor:pointer;
+  color:#f7e7b0;font:600 0.82rem/1.2 system-ui,sans-serif;
+  text-decoration:underline;text-underline-offset:2px;
+  text-shadow:0 1px 2px rgba(0,0,0,.85);
+  -webkit-tap-highlight-color:transparent;
+}
+.td-adv-vislink:focus-visible{outline:2px solid rgba(247,231,176,.7);outline-offset:2px;border-radius:4px}
+
 .td-adv-board-err{
   position:absolute;left:8px;right:8px;bottom:8px;z-index:3;
   margin:0;text-align:center;pointer-events:none;

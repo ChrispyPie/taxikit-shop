@@ -212,6 +212,8 @@
     list.forEach(function (x) { if (x && x.id) byId[x.id] = x; });
     var active = list.filter(function (x) {
       if (!x || !x.id) return false;
+      /* Mini-kalendern ersätter trädikonen på startskärmen; advent finns kvar i applådan. */
+      if (x.id === 'advent') return false;
       if (isOff(x.id)) return false;
       if (isCore(x.id) || isPinned(x.id)) return true;
       if (st.hidden.indexOf(x.id) >= 0) return false;

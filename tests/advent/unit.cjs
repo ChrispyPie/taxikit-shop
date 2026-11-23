@@ -113,4 +113,17 @@ pos.forEach((a, i) => {
   });
 });
 
+
+assert.match(advent, /data-adv-vis/);
+assert.match(advent, /function toggleDoorVis/);
+assert.match(advent, /Dölj luckor/);
+assert.match(advent, /Visa luckor/);
+assert.match(advent, /td-adv-stage/);
+assert.match(css, /td-adv-hid/);
+assert.match(css, /td-adv-vislink/);
+const julcss = fs.readFileSync(path.join(root, 'TaxiData/julpyssel.css'), 'utf8');
+assert.match(julcss, /td-jul-top-left \{ justify-content: center; \}/);
+assert.match(julcss, /td-jul-top-right \{ justify-content: center; \}/);
+assert.match(core, /x\.id === 'advent'\) return false/);
+
 console.log('advent unit ok');

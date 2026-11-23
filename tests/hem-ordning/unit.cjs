@@ -94,7 +94,8 @@ assert.ok(!H.arrange(menuAdv).map(x => x.id).includes('advent'), 'advent-genväg
 assert.ok(!H.arrange(menuAdv).map(x => x.id).includes('moduler'), 'moduler-genväg kan tas bort');
 assert.ok(H.isInstalled('advent') && H.isPinned('advent'));
 H.addToHome('advent', { force: true });
-assert.ok(H.arrange(menuAdv).map(x => x.id).includes('advent'));
+assert.ok(!H.arrange(menuAdv).map(x => x.id).includes('advent'), 'advent-ikonen hör inte hemma på startytan (mini-kalendern ersätter den)');
+assert.ok(H.isInstalled('advent'), 'advent finns kvar i applådan');
 
 const ordna = fs.readFileSync(path.resolve(__dirname, '../../TaxiData/hem-ordning.js'), 'utf8');
 assert.match(ordna, /data-lp="off"/);
