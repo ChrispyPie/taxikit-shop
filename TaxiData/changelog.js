@@ -15,6 +15,9 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-23', id: '2026-11-23ztid1', tid: '14:55', rader: [
+    ['Förbättrat', 'I Körpassdata visas starttiden på varje resa i listan, även när kvittot är ihopfällt. Uppgifterna under ett öppet kvitto ligger i linje med kvittonumret, utan extra mellanrum.']
+  ]},
   { datum: '2026-11-23', id: '2026-11-23zink1', tid: '14:36', rader: [
     ['Fixat', 'Uberavgiften är 25 % av kundpriset inklusive moms överallt, samma som i Lönekoll.'],
     ['Fixat', 'Inkört i Topplistor är samma som i Körpassdata. 0 km-resor på minst 500 kr räknas inte bara på jämförande mått som kr/mil och kr/timme.'],
