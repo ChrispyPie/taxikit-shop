@@ -2,8 +2,9 @@
  * Inget kort: när strålkastaren är släckt visas bara en stilla, nedtonad bild
  * (robot i laddstation, chaufför i bil, eller diva vid sminkbord) utan att
  * hämta tunga hjalpbot*.js / berra.js. Ingen På/Av-knapp: tryck på lampan
- * eller figuren för att tända och släcka (liten överraskning).
- * Ett tryck tänder ljuset, laddar hjälpboten och visar den på samma plats
+ * för att tända och släcka. Tryck på figuren så svarar den med en replik
+ * (pratbubbla stängs om den redan visas). Lampan styr bara ljuset.
+ * Ett tryck på lampan tänder ljuset, laddar hjälpboten och visar den på samma plats
  * (ingen dubblett, samma höjd som när ljuset är släckt). */
 (function () {
   'use strict';
@@ -321,13 +322,16 @@
     if (next) wakeBot();
     else if (window.HJALPBOT && window.HJALPBOT.tick) window.HJALPBOT.tick();
   }
+  function pokeFig() {
+    function go() {
+      if (window.HJALPBOT && window.HJALPBOT.poke) window.HJALPBOT.poke();
+    }
+    if (window.HJALPBOT && window.HJALPBOT.poke) { go(); return; }
+    wakeBot().then(go);
+  }
   function onFigTap(e) {
     if (e) e.stopPropagation();
-    if (isLit() && window.HJALPBOT && window.HJALPBOT.bubbleOn && window.HJALPBOT.bubbleOn()) {
-      if (window.HJALPBOT.poke) window.HJALPBOT.poke();
-      return;
-    }
-    toggle();
+    pokeFig();
   }
   function wire() {
     if (!host) return;

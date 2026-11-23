@@ -18,6 +18,7 @@ assert.match(bot, /if \(bubbleOn\(\)\)/);
 assert.match(bot, /hideBubble\(\);/);
 assert.match(bot, /el\.btn\.addEventListener\('click'/);
 assert.match(bot, /poke\(\);/);
+assert.doesNotMatch(bot, /HB_STAGE\.onFigTap/);
 assert.match(bot, /el\.bubble\.addEventListener\('click'/);
 assert.doesNotMatch(bot, /if \(!tip && !id\) return;/);
 assert.doesNotMatch(bot, /state\.panel \? closePanel\(\) : openPanel\(\)/);

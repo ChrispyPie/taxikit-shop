@@ -1424,8 +1424,6 @@
     el.btn.addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
-      if (bubbleOn()) { poke(); return; }
-      if (window.HB_STAGE && HB_STAGE.onFigTap) { HB_STAGE.onFigTap(e); return; }
       poke();
     });
     el.bubble.addEventListener('click', function (e) {
@@ -1519,7 +1517,15 @@
       'Jag stannar när du knuffar. Mer än man kan säga om vissa i rusningen.',
       'Pappa sa att man inte petar på chauffören. Pappa körde inte natt.',
       'Mjukt där, precis som ett bra baksäte.',
-      'Vad sa däcket till asfalten? Vi sitter ihop i det här.'
+      'Vad sa däcket till asfalten? Vi sitter ihop i det här.',
+      'Knuffa du, jag har pausat taxametern i själen.',
+      'En kopp kaffe och en knuff, sen är nattpasset igång igen.',
+      'Jag har kört längre sträckor för sämre hälsningar.',
+      'Göteborg i rusning, och du petar på chauffören. Stilrent.',
+      'Tack, det var bättre än en tom körning till Landvetter och tillbaka.',
+      'Jag nickar i backspegeln. Det får räcka som applåd.',
+      'Sätt i säkerhetsbältet på skämten, nu rullar vi.',
+      'Den här knuffen går in som en bra lucka vid Centralen.'
     ],
     diva: [
       'Aj då, du tar i. Jag gillar stilen ändå.',
@@ -1529,10 +1535,21 @@
       'Knuffa på, älskling. Jag ramlar inte.',
       'Så du ville säga något? Jag lyssnar. Med stil.',
       'En knuff från dig? Då stannar jag gärna en stund.',
-      'Var rädd om lacken. Den är jobbig att laga i nattljus.'
+      'Var rädd om lacken. Den är jobbig att laga i nattljus.',
+      'Avenyn har sett sämre entréer, men den här duger.',
+      'Pudra inte av mig, bara säg hej så där igen.',
+      'Jag blinkar till, men det är sminket, inte förvirring.',
+      'En scenlampa vore snyggt. Du får duga som publik just nu.',
+      'Tack för hälsningen. Jag tar den som en recension med tre stjärnor.',
+      'Kör fint, stjärna. Jag håller stilen även när du petar.',
+      'Det där var nästan en invit till en extra sväng längs älven.',
+      'Jag sitter fortfarande rak i ryggen. Intrycket sitter, älskling.'
     ]
   };
   function pokeLine() {
+    if (charId() === 'robot' && window.HJALPBOT_SCENARIER && typeof HJALPBOT_SCENARIER.marvinLine === 'function') {
+      return HJALPBOT_SCENARIER.marvinLine();
+    }
     var list = POKE[charId()] || POKE.robot;
     return pick(list);
   }
@@ -1540,7 +1557,13 @@
     return !!(el.bubble && el.bubble.classList.contains('show'));
   }
   function poke() {
-    if (charId() === 'off' || !el.walker || el.walker.style.display === 'none') return;
+    if (charId() === 'off' || !el.walker) return;
+    var stageLit = !window.HB_STAGE || !HB_STAGE.isLit || HB_STAGE.isLit();
+    if (!stageLit) {
+      state.pokeUnlit = true;
+      if (el.walker.style.display === 'none') show(true);
+    }
+    if (el.walker.style.display === 'none') return;
     if (bubbleOn()) {
       hideBubble();
       lastPoke = 0;
@@ -1551,7 +1574,7 @@
     if (animOn() && !reduceMotion) wave();
     // mitt i en resa eller på väg hem: bara vinka, ingen bubbla på vägen
     if ((state.visiting && !state.guiding) || state.exiting) return;
-    say(pokeLine());
+    say(pokeLine(), charId() === 'robot' ? { mood: 'marvin' } : {});
   }
   function pageVisible() {
     try { return document.visibilityState === 'visible'; } catch (e) { return true; }
@@ -1645,6 +1668,10 @@
     state.tipCounted = false;
     state.pausedTip = null;
     if (el.walker) el.walker.classList.remove('hb-marvin');
+    if (state.pokeUnlit && !opt.keepVisit) {
+      state.pokeUnlit = false;
+      tick();
+    }
     if (!opt.keepVisit) {
       clearTipHl();
       state.guiding = false;
@@ -1851,7 +1878,7 @@
     if (!scenarioAnimOn() || document.hidden) return;
     if (state.panel || state.visiting || state.guiding || userBusy() || !el.walker || el.walker.style.display === 'none') return;
     var last = +(sessionStorage.getItem('hb_last') || 0);
-    if (Date.now() - last < COMMENT_GAP_MS * 3) return;
+    if (Date.now() - last < COMMENT_GAP_MS * 2) return;
     var hit = pickScenario('random');
     if (hit) speakScenario(hit);
   }
@@ -1906,7 +1933,7 @@
       hopOutThroughHome();
       return;
     }
-    var lit = !window.HB_STAGE || !HB_STAGE.isLit || HB_STAGE.isLit();
+    var lit = !window.HB_STAGE || !HB_STAGE.isLit || HB_STAGE.isLit() || !!state.pokeUnlit;
     var on = charId() !== 'off' && (!!state.preview || (p === 'hem' && lit));
     var wasOn = el.walker.style.display !== 'none';
     if (wasOn !== on) {
@@ -2029,7 +2056,7 @@
     renderSettings: function (content) {
       var c = charId();
       content.innerHTML = '<div class="section"><h3 style="margin-top:0">Hjälpbot</h3>' +
-        '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">En liten figur på startskärmen som kan kommentera dina siffror. Den visas bara där, inte inne i andra verktyg. När den inte pratar står den vid sin station i hörnet: roboten i en laddstation, Chauffören vid en liten taxi och Taxi-Diva vid sminkbordet. Tryck på lampan eller figuren för att tända och släcka strålkastaren. Ska den säga något går den fram till platsen efter sista ikonen och pratar där, och går sedan tillbaka. Stationen täcker inte ikoner eller sidprickarna. Ska den kolla till exempel vädret springer den snabbt in i ikonen och tillbaka, och berättar sedan. Ligger ikonen i en mapp, på en annan sida eller bara i applådan stannar den på sin vanliga plats och pratar där. Finns en pratbubbla stängs den vid första trycket; nästa tryck tänder eller släcker ljuset. Hjälp finns under frågetecknet uppe till höger.</p>' +
+        '<p style="font-size:.9rem;color:var(--text-soft);margin:.3rem 0">En liten figur på startskärmen som kan kommentera dina siffror. Den visas bara där, inte inne i andra verktyg. När den inte pratar står den vid sin station i hörnet: roboten i en laddstation, Chauffören vid en liten taxi och Taxi-Diva vid sminkbordet. Tryck på lampan för att tända och släcka strålkastaren. Tryck på figuren så svarar den – roboten med en suckande replik, de andra med sina egna. Ska den säga något går den fram till platsen efter sista ikonen och pratar där, och går sedan tillbaka. Stationen täcker inte ikoner eller sidprickarna. Ska den kolla till exempel vädret springer den snabbt in i ikonen och tillbaka, och berättar sedan. Ligger ikonen i en mapp, på en annan sida eller bara i applådan stannar den på sin vanliga plats och pratar där. Finns en pratbubbla stängs den vid första trycket; nästa tryck ger en ny replik. Hjälp finns under frågetecknet uppe till höger.</p>' +
         '<div class="hb-pick">' + charButtons('hb-pickbtn') + '<button class="hb-pickbtn' + (c === 'off' ? ' on' : '') + '" data-hb-char="off"><div style="height:56px;display:flex;align-items:center;justify-content:center;font-size:1.6rem">🚫</div>Av</button></div>' +
         (c !== 'off' ? '<p style="margin:.55rem 0 0"><button type="button" class="anim-try" data-hb-try="vader">Prova väderkollen</button></p>' : '') + '</div>';
       content.onclick = function (e) {
@@ -2049,6 +2076,9 @@
     say: function (t) { say(t); },
     tick: tick,
     poke: poke,
+    marvinLine: function () {
+      return (window.HJALPBOT_SCENARIER && HJALPBOT_SCENARIER.marvinLine) ? HJALPBOT_SCENARIER.marvinLine() : pokeLine();
+    },
     chars: CHARS,
     lines: L,
     previewOutfit: function (outfit) {
