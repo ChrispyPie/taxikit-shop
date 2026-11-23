@@ -291,6 +291,7 @@
     h += '<div class="tl-card"><div class="lk-sub">Inkört hittills (pass som startar i ' + esc(MON[p.m]) + ')</div>' +
       '<div class="lk-big">' + kr(r.nettoInkl) + '</div>' +
       '<div class="lk-sub">' + d.shifts.length + ' pass · ' + x.antal + ' körningar · BOM ' + kr(x.bom) + ' borträknat</div>' +
+      '<div class="lk-sub">I Inkört hittills ingår Uber i sin helhet. Avgiften på 25 % dras av i stegen nedan.</div>' +
       '<div class="lk-pair" style="margin-top:.6rem"><div><span>Beräknad utbetalning hittills</span><b>' + kr(r.utbetalt) + '</b></div>' +
       (proj ? '<div><span>Om du kör i samma takt hela månaden</span><b>' + kr(proj.utbetalt) + '</b></div>' : '') + '</div>' +
       '<div class="lk-sub" style="margin-top:.5rem">Lönen för ' + esc(MON[p.m]) + ' betalas ut runt <b>' + pdTxt + '</b></div></div>';

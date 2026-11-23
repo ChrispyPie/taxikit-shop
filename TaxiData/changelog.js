@@ -15,6 +15,11 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
+  { datum: '2026-11-23', id: '2026-11-23zink1', tid: '14:36', rader: [
+    ['Fixat', 'Uberavgiften är 25 % av kundpriset inklusive moms överallt, samma som i Lönekoll.'],
+    ['Fixat', 'Inkört i Topplistor är samma som i Körpassdata. 0 km-resor på minst 500 kr räknas inte bara på jämförande mått som kr/mil och kr/timme.'],
+    ['Fixat', 'I Körpassdata visas under en dag bara pass som börjar den dagen, samma som i summeringen.']
+  ]},
   { datum: '2026-11-23', id: '2026-11-23zfly8', tid: '06:32', rader: [
     ['Förbättrat', 'När en förbokning har flyttats visas den ursprungliga tiden tydligt, till exempel "Låg från början 21:55".']
   ]},

@@ -52,8 +52,10 @@ Gäller snittmåtten Kr/körning, Kr/pass, Dricks %, Kr/mil, Kr/timme. Topplista
 | År | 100 |
 
 ### Outliers
-- Resor med ≈0 km och belopp ≥ 500 kr filtreras bort.
-- Pass längre än 16 h filtreras bort.
+- 0 km-resor på minst 500 kr filtreras bara i jämförande mått (kr/mil, kr/timme, kr/körning, kr/pass, dricks %, samt belopp och körningar/pass). Summor (inkört, dricks, km, antal, flyg) räknas som i Körpassdata och tar med alla resor.
+- Pass längre än 16 h filtreras inte. Pass stängs automatiskt efter 13 h, och riktiga längre resor (t.ex. i Europa) kan överstiga 16 h.
+- Fee: Uber räknas som 75 % av kundpris inklusive moms (samma som Körpassdata).
+- SQL: `supabase/migrations/20261123a_inkort_enhetlig.sql` (ångra: `undo/20261123a_inkort_enhetlig_undo.sql`).
 
 ## SQL (additivt)
 - `supabase/migrations/20261106e_topplistor_rekord.sql`

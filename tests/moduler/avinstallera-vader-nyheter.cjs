@@ -20,10 +20,10 @@ assert.match(cl.split("id: '2026-11-22zmod1'")[1].split(']},')[0].split('rader:'
 assert.match(cl.split("id: '2026-11-22zmod1'")[1].split(']},')[0], /Väder och Nyheter/);
 assert.match(cl.split("id: '2026-11-22zmod1'")[1].split(']},')[0], /Moduler/);
 
-assert.match(html, /hem-ordning-core\.js\?v=20261123zfly8/);
-assert.match(html, /lazy-views\.js\?v=20261123zfly8/);
-assert.match(lv, /changelog\.js\?v=20261123zfly8/);
-assert.match(sw, /CACHE_VER = '20261123zfly8'/);
+assert.match(html, /hem-ordning-core\.js\?v=20261123zink1/);
+assert.match(html, /lazy-views\.js\?v=20261123zink1/);
+assert.match(lv, /changelog\.js\?v=20261123zink1/);
+assert.match(sw, /CACHE_VER = '20261123zink1'/);
 
 assert.match(core, /DEFAULT_OFF = \{ nyheter: 1, vader: 1 \}/);
 assert.match(core, /var UNINST = 'taxi_mod_uninst_vader_nyheter'/);
