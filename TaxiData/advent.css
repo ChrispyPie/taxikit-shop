@@ -28,8 +28,9 @@ html.td-adv-lock,html.td-adv-lock body,body.td-adv-lock{
   display:flex;flex-direction:column;
   transform-origin:center center;
   background:
-    radial-gradient(ellipse at 20% 0%, rgba(255,220,140,.18), transparent 50%),
-    linear-gradient(180deg, #7a1f1f 0%, #5c1616 40%, #3d1010 100%);
+    linear-gradient(180deg, rgba(10,18,34,.22) 0%, rgba(10,18,34,.36) 100%),
+    url('advent-bilder/bakgrund-jul.svg') center/cover no-repeat,
+    linear-gradient(180deg, #1b2d4a 0%, #101d32 100%);
   border:3px solid #d4a017;
   border-radius:16px;
   box-shadow:0 16px 48px rgba(0,0,0,.45), inset 0 0 0 2px #8a2424;
@@ -56,15 +57,18 @@ html.td-adv-lock,html.td-adv-lock body,body.td-adv-lock{
   position:relative;display:flex;align-items:center;justify-content:center;
   border-radius:6px;cursor:pointer;color:#f7f0dc;
   font:700 0.95rem/1 Georgia, "Times New Roman", serif;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.22), 0 1px 2px rgba(0,0,0,.3);
+  border:1px solid rgba(247,231,176,.34);
+  backdrop-filter:blur(1.5px);-webkit-backdrop-filter:blur(1.5px);
+  text-shadow:0 1px 2px rgba(0,0,0,.45);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.24), 0 2px 5px rgba(0,0,0,.32);
   -webkit-tap-highlight-color:transparent;
 }
-.td-adv-door--rod{background:linear-gradient(180deg,#c53030,#9b2c2c)}
-.td-adv-door--gron{background:linear-gradient(180deg,#2f855a,#276749)}
-.td-adv-door--guld{background:linear-gradient(180deg,#d4a017,#b7791f);color:#3d2a08}
-.td-adv-door--gran{background:linear-gradient(180deg,#1a4731,#234e3a)}
-.td-adv-door--krem{background:linear-gradient(180deg,#f3e6c4,#e4d5a8);color:#5c2a1a}
-.td-adv-door--vin{background:linear-gradient(180deg,#742a2a,#5c1a1a)}
+.td-adv-door--rod{background:linear-gradient(180deg,rgba(182,42,42,.74),rgba(138,32,32,.78))}
+.td-adv-door--gron{background:linear-gradient(180deg,rgba(41,116,80,.74),rgba(32,89,62,.78))}
+.td-adv-door--guld{background:linear-gradient(180deg,rgba(202,150,24,.78),rgba(166,110,24,.82));color:#2a1c04;text-shadow:0 1px 0 rgba(255,244,200,.35)}
+.td-adv-door--gran{background:linear-gradient(180deg,rgba(24,68,48,.74),rgba(32,74,56,.78))}
+.td-adv-door--krem{background:linear-gradient(180deg,rgba(243,230,196,.82),rgba(224,206,160,.86));color:#451f12;text-shadow:none}
+.td-adv-door--vin{background:linear-gradient(180deg,rgba(108,36,36,.74),rgba(82,22,22,.78))}
 .td-adv-door.locked{filter:saturate(.75) brightness(.82);cursor:default}
 .td-adv-door.ready{outline:1px solid rgba(247,231,176,.45)}
 .td-adv-door.open{filter:brightness(.95);box-shadow:inset 0 0 0 2px rgba(247,231,176,.55)}
@@ -121,7 +125,8 @@ html.td-adv-lock,html.td-adv-lock body,body.td-adv-lock{
 .td-adv-src{font-size:0.8rem;color:var(--text-soft,#4a5568) !important}
 .td-adv-src a{color:var(--primary,#1a365d);text-decoration:underline}
 .td-adv-bild{margin:0 0 12px}
-.td-adv-bild img{display:block;width:100%;height:auto;border-radius:10px;background:var(--surface-soft,#edf2f7)}
+.td-adv-bild img{display:block;width:100%;height:auto;max-height:240px;object-fit:contain;border-radius:10px;background:var(--surface-soft,#edf2f7)}
+html[data-theme="dark"] .td-adv-bild img{background:rgba(255,255,255,.06)}
 .td-adv-attrib{margin:6px 0 0;font:400 0.7rem/1.3 system-ui,sans-serif;color:var(--text-soft,#4a5568)}
 .td-adv-close{
   appearance:none;display:block;width:100%;margin-top:8px;
