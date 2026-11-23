@@ -41,12 +41,12 @@ assert.doesNotMatch(cl, /\bhen\b/);
 assert.doesNotMatch(lonekoll, /\bhen\b/);
 assert.doesNotMatch(topplistor, /\bhen\b/);
 
-assert.match(sw, /CACHE_VER = '20261123zhb2'/);
-assert.match(html, /lazy-views\.js\?v=20261123zhb2/);
-assert.match(lv, /script\.js\?v=20261123zhb2/);
-assert.match(lv, /lonekoll\.js\?v=20261123zhb2/);
-assert.match(lv, /topplistor\.js\?v=20261123zhb2/);
-assert.match(lv, /changelog\.js\?v=20261123zhb2/);
+assert.match(sw, /CACHE_VER = '20261123adv2'/);
+assert.match(html, /lazy-views\.js\?v=20261123adv2/);
+assert.match(lv, /script\.js\?v=20261123adv2/);
+assert.match(lv, /lonekoll\.js\?v=20261123adv2/);
+assert.match(lv, /topplistor\.js\?v=20261123adv2/);
+assert.match(lv, /changelog\.js\?v=20261123adv2/);
 
 assert.match(mig, /amt \* 0\.75/);
 assert.match(mig, /tp_ratio/);
