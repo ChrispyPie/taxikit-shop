@@ -90,4 +90,27 @@ assert.match(css, /var\(--surface/);
 assert.match(css, /html\[data-theme="dark"\] \.td-adv-factbox/);
 assert.match(css, /var\(--primary-bg/);
 
+
+assert.match(advent, /DOOR_POS/);
+assert.match(advent, /td-adv-mini-face/);
+assert.match(advent, /function miniHtml/);
+assert.doesNotMatch(advent, /DOOR_LAYOUT|DOOR_TONE|miniSvg/);
+assert.match(css, /background:\s*transparent/);
+assert.match(css, /#td-adv-mini[\s\S]*bakgrund-jul\.webp/);
+assert.doesNotMatch(css, /td-adv-door--rod|td-adv-door--gron|td-adv-door--guld/);
+
+const pos = [...advent.matchAll(/\{\s*x:\s*([\d.]+),\s*y:\s*([\d.]+),\s*w:\s*([\d.]+),\s*h:\s*([\d.]+)\s*\}/g)]
+  .map((m) => ({ x: +m[1], y: +m[2], w: +m[3], h: +m[4] }));
+assert.strictEqual(pos.length, 24);
+const innerW = 0.94 * 390 - 6;
+const innerH = innerW * 853 / 640;
+pos.forEach((a, i) => {
+  assert.ok((a.w / 100) * innerW >= 39.5, 'door ' + i + ' width ' + ((a.w / 100) * innerW));
+  assert.ok((a.h / 100) * innerH >= 39.5, 'door ' + i + ' height ' + ((a.h / 100) * innerH));
+  pos.slice(0, i).forEach((b, j) => {
+    const noOverlap = a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y;
+    assert.ok(noOverlap, 'overlap ' + i + '/' + j);
+  });
+});
+
 console.log('advent unit ok');
