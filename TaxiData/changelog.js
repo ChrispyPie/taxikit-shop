@@ -15,7 +15,7 @@
  *   Används i notisflödet ("5 min sedan"). Utan tid visas bara dagen ("i dag", "i går", "12/10").
  */
 window.CHANGELOG = [
-  { datum: '2026-11-23', id: '2026-11-23ztid1', tid: '14:55', rader: [
+  { datum: '2026-11-23', id: '2026-11-23ztid1', tid: '14:47', rader: [
     ['Förbättrat', 'I Körpassdata visas starttiden på varje resa i listan, även när kvittot är ihopfällt. Uppgifterna under ett öppet kvitto ligger i linje med kvittonumret, utan extra mellanrum.']
   ]},
   { datum: '2026-11-23', id: '2026-11-23zink1', tid: '14:36', rader: [
