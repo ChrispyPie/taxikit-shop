@@ -11,7 +11,7 @@
   A.title = 'Adventskalender';
   A.icon = '🎄';
 
-  var st = { el: null, tab: 'luckor', opens: [], year: null, today: null, day: 0, month: 0, open: null, err: '', busy: false, calOpen: false, factOpen: false, factClosedAt: 0, locking: false };
+  var st = { el: null, tab: 'luckor', opens: [], year: null, today: null, day: 0, month: 0, open: null, err: '', busy: false, calOpen: false, factOpen: false, factClosedAt: 0, locking: false, hideDoors: false };
   var els = { overlay: null, board: null, factWrap: null, fact: null, mini: null };
   var stopFw = null;
   var DOOR_ORDER = [17, 3, 24, 8, 1, 12, 19, 6, 22, 4, 15, 9, 23, 2, 14, 11, 20, 7, 18, 5, 21, 10, 16, 13];
@@ -57,7 +57,7 @@
     var l = document.createElement('link');
     l.id = 'td-advent-css';
     l.rel = 'stylesheet';
-    l.href = 'advent.css?v=20261123adv9';
+    l.href = 'advent.css?v=20261123adv10';
     document.head.appendChild(l);
   }
   function reducedMotion() {
@@ -331,12 +331,15 @@
     ov.setAttribute('role', 'dialog');
     ov.setAttribute('aria-modal', 'true');
     ov.setAttribute('aria-label', 'Adventskalender');
-    ov.innerHTML = '<div class="td-adv-board" id="td-adv-board">' +
+    ov.innerHTML = '<div class="td-adv-stage">' +
+      '<div class="td-adv-board" id="td-adv-board">' +
       boardDecor() +
       '<div class="td-adv-board-face">' +
         '<h2 class="td-adv-board-title">Adventskalender</h2>' +
         doorsHtml() +
       '</div>' +
+      '</div>' +
+      '<button type="button" class="td-adv-vislink" data-adv-vis="1" aria-pressed="false">Dölj luckor</button>' +
       '</div>' +
       '<div class="td-adv-factwrap" id="td-adv-factwrap" hidden>' +
         '<div class="td-adv-factbox" id="td-adv-factbox" role="dialog" aria-modal="true"></div>' +
@@ -370,6 +373,20 @@
     return ov;
   }
 
+  function visLabel() { return st.hideDoors ? 'Visa luckor' : 'Dölj luckor'; }
+  function syncDoorVis() {
+    if (els.board) els.board.classList.toggle('td-adv-hid', !!st.hideDoors);
+    var btn = els.overlay && els.overlay.querySelector('[data-adv-vis]');
+    if (btn) {
+      btn.textContent = visLabel();
+      btn.setAttribute('aria-pressed', st.hideDoors ? 'true' : 'false');
+    }
+  }
+  function toggleDoorVis() {
+    st.hideDoors = !st.hideDoors;
+    syncDoorVis();
+  }
+
   function onOverlayClick(e) {
     if (!st.calOpen) return;
     if (st.factOpen) {
@@ -381,14 +398,26 @@
       closeFact();
       return;
     }
-    var t = e.target && e.target.closest && e.target.closest('[data-lucka]');
-    if (t) {
+    var visBtn = e.target && e.target.closest && e.target.closest('[data-adv-vis]');
+    if (visBtn) {
       e.preventDefault();
-      var d = +t.getAttribute('data-lucka');
-      if (d) openDoor(d, t);
+      e.stopPropagation();
+      toggleDoorVis();
       return;
     }
-    if (e.target && e.target.closest && e.target.closest('.td-adv-board')) return;
+    if (st.hideDoors) {
+      if (e.target && e.target.closest && e.target.closest('.td-adv-board')) return;
+    } else {
+      var t = e.target && e.target.closest && e.target.closest('[data-lucka]');
+      if (t) {
+        e.preventDefault();
+        var d = +t.getAttribute('data-lucka');
+        if (d) openDoor(d, t);
+        return;
+      }
+      if (e.target && e.target.closest && e.target.closest('.td-adv-board')) return;
+    }
+    if (e.target && e.target.closest && e.target.closest('.td-adv-stage')) return;
     if (Date.now() - (st.factClosedAt || 0) < 350) return;
     closeCalendar();
   }
@@ -403,6 +432,7 @@
       var ov = ensureOverlay();
       paintDoors();
       paintBoardErr();
+      syncDoorVis();
       ov.hidden = false;
       ov.classList.add('on');
       if (mini) mini.setAttribute('aria-expanded', 'true');
