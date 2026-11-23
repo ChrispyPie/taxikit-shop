@@ -348,7 +348,7 @@
           '<span class="tl-who">' + who + '</span><span class="tl-val">' + fmt(r.v, L.f) + cnt(r) + '</span></div>';
       });
       h += '</div>';
-      h += '<div class="tl-foot">Kr/mil kräver minst 1 mil, kr/timme minst 30 min. Inkört som i Körpassdata. ' +
+      h += '<div class="tl-foot">Kr/mil kräver minst 1 mil, kr/timme minst 30 min. Inkört räknas som i Körpassdata. På jämförande mått (kr/mil, kr/timme, kr/körning, kr/pass, dricks %) räknas inte 0 km-resor på minst 500 kr. ' +
         (rek && d.min_trips ? 'Rekord kräver minst ' + d.min_trips + ' resor i perioden (gäller inte Topplista). ' : '') +
         'Störst först — läs nerifrån för minst. Km/körning: minst 0,5 km.</div>';
     }

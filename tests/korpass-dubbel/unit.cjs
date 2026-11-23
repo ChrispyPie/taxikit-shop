@@ -1,6 +1,7 @@
 'use strict';
 // Körpassdata: nattpass räknas bara på sin startdag (2026-11-14kp1, t1590u).
-// Fall: förare 710022 kör ~17–06; dagsvyn visade 25 h/dygn eftersom kvällens och föregående natts pass båda räknades.
+// Dagsvyn listar också bara pass som startar den dagen (2026-11-23zink1), samma som summeringen.
+// Fall: förare 710022 kör ~17–06; tidigare visades 25 h/dygn i summan, och listan visade även nattpasset från kvällen innan.
 // Offline-DOM (jsdom) via tests/lazy-views/dom.cjs. Kör: node tests/korpass-dubbel/unit.cjs
 const assert = require('node:assert/strict');
 const { boot } = require('../lazy-views/dom.cjs');
@@ -30,11 +31,14 @@ async function day(date) {
   const d11 = await day('2026-11-11T12:00:00');
   assert.ok(d11.hours, 'Arbetade timmar visas: ' + d11.text.slice(0, 300));
   assert.match(d11.hours, /^12\D+45|^12:45/, '11/11 = bara passet som startade 11/11 (12:45), inte 25 h: ' + d11.hours);
-  assert.deepEqual(d11.passes.sort(), ['4184', '4186'], 'dagsvyn listar fortfarande nattpasset från kvällen innan');
-  assert.match(d11.text, /10\/11 #4184/, 'passet från kvällen innan har datum');
-  assert.match(d11.text, /räknas på den dagen/);
+  assert.deepEqual(d11.passes, ['4186'], 'dagsvyn listar bara passet som startade 11/11, inte nattpasset från 10/11: ' + d11.passes.join(','));
+  assert.doesNotMatch(d11.text, /4184/);
+  assert.doesNotMatch(d11.text, /räknas på den dagen|började dagen innan/);
   const d12 = await day('2026-11-12T12:00:00');
   assert.match(d12.hours, /^12\D+0?0?|^12:00/, '12/11 = 12 h: ' + d12.hours);
+  assert.deepEqual(d12.passes, ['4188'], '12/11 listar bara passet som startade den dagen: ' + d12.passes.join(','));
+  assert.doesNotMatch(d12.text, /4186/);
   assert.deepEqual(d11.errors, []);
-  console.log('KORPASS_DUBBEL_OK', d11.hours, d12.hours);
+  assert.deepEqual(d12.errors, []);
+  console.log('KORPASS_DUBBEL_OK', d11.hours, d12.hours, d11.passes, d12.passes);
 })().catch(e => { console.error(e); process.exit(1); });
