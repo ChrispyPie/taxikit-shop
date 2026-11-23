@@ -1,8 +1,8 @@
 {
   "airport": "GOT",
-  "updated": "2026-11-23T22:05:28+01:00",
-  "arrivalsUpdated": "2026-11-23T22:05:31+01:00",
-  "departuresUpdated": "2026-11-23T21:10:44+01:00",
+  "updated": "2026-11-23T22:10:36+01:00",
+  "arrivalsUpdated": "2026-11-23T22:10:37+01:00",
+  "departuresUpdated": "2026-11-23T22:10:39+01:00",
   "yesterdayUpdated": "2026-11-23T05:30:52+01:00",
   "tomorrowUpdated": "2026-11-23T22:01:05+01:00",
   "error": null,
@@ -2283,9 +2283,9 @@
       "baggage": "3",
       "firstBag": "2026-11-23T20:56:10Z",
       "firstBagEst": "2026-11-23T20:52:06Z",
-      "lastBag": "",
-      "rawStatus": "Första bagage · Landat 21:33",
-      "reason": "Första bagage · Landat 21:33",
+      "lastBag": "2026-11-23T21:06:09Z",
+      "rawStatus": "Landat 21:33 · Sista bagage",
+      "reason": "Landat 21:33 · Sista bagage",
       "wasLive": true
     },
     {
@@ -3872,46 +3872,6 @@
   ],
   "departures": [
     {
-      "id": "JTD433",
-      "dir": "AVG",
-      "other": "Gran Canaria",
-      "iata": "",
-      "airline": "Jettime",
-      "status": "DEL",
-      "statusSv": "Borttagen",
-      "sched": "2026-11-22T08:15:00Z",
-      "est": "",
-      "act": "",
-      "terminal": "T1",
-      "gate": "",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
-    },
-    {
-      "id": "FR7988A",
-      "dir": "AVG",
-      "other": "Dublin",
-      "iata": "",
-      "airline": "Ryanair Ltd",
-      "status": "DEL",
-      "statusSv": "Borttagen",
-      "sched": "2026-11-22T08:45:00Z",
-      "est": "",
-      "act": "",
-      "terminal": "T1",
-      "gate": "",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
-    },
-    {
       "id": "FR7333A",
       "dir": "AVG",
       "other": "London STN",
@@ -4109,7 +4069,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 20:15",
-      "reason": "Startat 20:15"
+      "reason": "Startat 20:15",
+      "wasLive": true
     },
     {
       "id": "EW9221",
@@ -4129,7 +4090,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 21:29",
-      "reason": "Startat 21:29"
+      "reason": "Startat 21:29",
+      "wasLive": true
     },
     {
       "id": "MI7304",
@@ -4149,7 +4111,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 14:30",
-      "reason": "Startat 14:30"
+      "reason": "Startat 14:30",
+      "wasLive": true
     },
     {
       "id": "OJ812",
@@ -4169,7 +4132,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 15:56",
-      "reason": "Startat 15:56"
+      "reason": "Startat 15:56",
+      "wasLive": true
     },
     {
       "id": "LH2429",
@@ -4189,7 +4153,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 12:33",
-      "reason": "Startat 12:33"
+      "reason": "Startat 12:33",
+      "wasLive": true
     },
     {
       "id": "LH817",
@@ -4209,7 +4174,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 14:56",
-      "reason": "Startat 14:56"
+      "reason": "Startat 14:56",
+      "wasLive": true
     },
     {
       "id": "LX1227",
@@ -4229,7 +4195,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 14:47",
-      "reason": "Startat 14:47"
+      "reason": "Startat 14:47",
+      "wasLive": true
     },
     {
       "id": "LH2431",
@@ -4249,7 +4216,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 18:21",
-      "reason": "Startat 18:21"
+      "reason": "Startat 18:21",
+      "wasLive": true
     },
     {
       "id": "LH819",
@@ -4269,7 +4237,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 18:49",
-      "reason": "Startat 18:49"
+      "reason": "Startat 18:49",
+      "wasLive": true
     },
     {
       "id": "SN2318",
@@ -4289,7 +4258,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 18:33",
-      "reason": "Startat 18:33"
+      "reason": "Startat 18:33",
+      "wasLive": true
     },
     {
       "id": "WF203",
@@ -4309,27 +4279,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 12:55",
-      "reason": "Startat 12:55"
-    },
-    {
-      "id": "KL1230",
-      "dir": "AVG",
-      "other": "Amsterdam",
-      "iata": "",
-      "airline": "KLM",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-11-22T09:05:00Z",
-      "est": "",
-      "act": "2026-11-22T08:59:46Z",
-      "terminal": "T1",
-      "gate": "17",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 10:09",
-      "reason": "Startat 10:09"
+      "reason": "Startat 12:55",
+      "wasLive": true
     },
     {
       "id": "FR5737",
@@ -4349,7 +4300,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 11:04",
-      "reason": "Startat 11:04"
+      "reason": "Startat 11:04",
+      "wasLive": true
     },
     {
       "id": "KL1232",
@@ -4369,7 +4321,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 12:00",
-      "reason": "Startat 12:00"
+      "reason": "Startat 12:00",
+      "wasLive": true
     },
     {
       "id": "AY864",
@@ -4389,7 +4342,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 12:54",
-      "reason": "Startat 12:54"
+      "reason": "Startat 12:54",
+      "wasLive": true
     },
     {
       "id": "KL1234",
@@ -4409,7 +4363,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 14:53",
-      "reason": "Startat 14:53"
+      "reason": "Startat 14:53",
+      "wasLive": true
     },
     {
       "id": "KL1236",
@@ -4429,7 +4384,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 18:04",
-      "reason": "Startat 18:04"
+      "reason": "Startat 18:04",
+      "wasLive": true
     },
     {
       "id": "FR3089",
@@ -4449,7 +4405,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 18:19",
-      "reason": "Startat 18:19"
+      "reason": "Startat 18:19",
+      "wasLive": true
     },
     {
       "id": "FR6749",
@@ -4469,7 +4426,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 14:32",
-      "reason": "Startat 14:32"
+      "reason": "Startat 14:32",
+      "wasLive": true
     },
     {
       "id": "AF1453",
@@ -4489,7 +4447,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 17:18",
-      "reason": "Startat 17:18"
+      "reason": "Startat 17:18",
+      "wasLive": true
     },
     {
       "id": "AY866",
@@ -4509,7 +4468,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 17:33",
-      "reason": "Startat 17:33"
+      "reason": "Startat 17:33",
+      "wasLive": true
     },
     {
       "id": "FR090",
@@ -4529,7 +4489,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 15:51",
-      "reason": "Startat 15:51"
+      "reason": "Startat 15:51",
+      "wasLive": true
     },
     {
       "id": "FR6094",
@@ -4549,7 +4510,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 17:24",
-      "reason": "Startat 17:24"
+      "reason": "Startat 17:24",
+      "wasLive": true
     },
     {
       "id": "BA793",
@@ -4569,7 +4531,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 19:43",
-      "reason": "Startat 19:43"
+      "reason": "Startat 19:43",
+      "wasLive": true
     },
     {
       "id": "AY868",
@@ -4589,7 +4552,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 20:23",
-      "reason": "Startat 20:23"
+      "reason": "Startat 20:23",
+      "wasLive": true
     },
     {
       "id": "FR4011",
@@ -4609,7 +4573,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 19:38",
-      "reason": "Startat 19:38"
+      "reason": "Startat 19:38",
+      "wasLive": true
     },
     {
       "id": "FR965",
@@ -4629,7 +4594,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Gate stängd",
-      "reason": "Gate stängd"
+      "reason": "Gate stängd",
+      "wasLive": true
     },
     {
       "id": "LH815",
@@ -4649,7 +4615,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 11:52",
-      "reason": "Startat 11:52"
+      "reason": "Startat 11:52",
+      "wasLive": true
     },
     {
       "id": "D85359",
@@ -4669,7 +4636,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 19:27",
-      "reason": "Startat 19:27"
+      "reason": "Startat 19:27",
+      "wasLive": true
     },
     {
       "id": "D82027",
@@ -4689,7 +4657,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 11:37",
-      "reason": "Startat 11:37"
+      "reason": "Startat 11:37",
+      "wasLive": true
     },
     {
       "id": "SK168",
@@ -4709,7 +4678,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 20:04",
-      "reason": "Startat 20:04"
+      "reason": "Startat 20:04",
+      "wasLive": true
     },
     {
       "id": "W61736",
@@ -4729,27 +4699,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 16:56",
-      "reason": "Startat 16:56"
-    },
-    {
-      "id": "DK1726",
-      "dir": "AVG",
-      "other": "Teneriffa",
-      "iata": "",
-      "airline": "Sunclass Airlines",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-11-22T08:40:00Z",
-      "est": "",
-      "act": "2026-11-22T08:35:53Z",
-      "terminal": "T1",
-      "gate": "20A",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 09:45",
-      "reason": "Startat 09:45"
+      "reason": "Startat 16:56",
+      "wasLive": true
     },
     {
       "id": "SK146",
@@ -4769,7 +4720,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 12:17",
-      "reason": "Startat 12:17"
+      "reason": "Startat 12:17",
+      "wasLive": true
     },
     {
       "id": "SK162",
@@ -4789,7 +4741,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 14:05",
-      "reason": "Startat 14:05"
+      "reason": "Startat 14:05",
+      "wasLive": true
     },
     {
       "id": "SK431",
@@ -4809,27 +4762,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 15:31",
-      "reason": "Startat 15:31"
-    },
-    {
-      "id": "SK443",
-      "dir": "AVG",
-      "other": "Köpenhamn",
-      "iata": "",
-      "airline": "SAS Scandinavian Airlines",
-      "status": "ACT",
-      "statusSv": "Startat",
-      "sched": "2026-11-22T09:00:00Z",
-      "est": "",
-      "act": "2026-11-22T08:49:01Z",
-      "terminal": "T1",
-      "gate": "16",
-      "baggage": "",
-      "firstBag": "",
-      "firstBagEst": "",
-      "lastBag": "",
-      "rawStatus": "Startat 10:00",
-      "reason": "Startat 10:00"
+      "reason": "Startat 15:31",
+      "wasLive": true
     },
     {
       "id": "SK449",
@@ -4849,7 +4783,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 21:04",
-      "reason": "Startat 21:04"
+      "reason": "Startat 21:04",
+      "wasLive": true
     },
     {
       "id": "SK2050",
@@ -4869,7 +4804,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 20:02",
-      "reason": "Startat 20:02"
+      "reason": "Startat 20:02",
+      "wasLive": true
     },
     {
       "id": "TK1798",
@@ -4889,7 +4825,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 12:06",
-      "reason": "Startat 12:06"
+      "reason": "Startat 12:06",
+      "wasLive": true
     },
     {
       "id": "JTD283",
@@ -5249,7 +5186,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 18:23",
-      "reason": "Startat 18:23"
+      "reason": "Startat 18:23",
+      "wasLive": true
     },
     {
       "id": "KL1230",
@@ -5269,7 +5207,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 10:35",
-      "reason": "Startat 10:35"
+      "reason": "Startat 10:35",
+      "wasLive": true
     },
     {
       "id": "KL1234",
@@ -5289,7 +5228,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 15:41",
-      "reason": "Startat 15:41"
+      "reason": "Startat 15:41",
+      "wasLive": true
     },
     {
       "id": "KL1236",
@@ -5309,7 +5249,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 17:26",
-      "reason": "Startat 17:26"
+      "reason": "Startat 17:26",
+      "wasLive": true
     },
     {
       "id": "KL1232",
@@ -5329,7 +5270,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 12:11",
-      "reason": "Startat 12:11"
+      "reason": "Startat 12:11",
+      "wasLive": true
     },
     {
       "id": "FR5636",
@@ -5349,7 +5291,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 11:40",
-      "reason": "Startat 11:40"
+      "reason": "Startat 11:40",
+      "wasLive": true
     },
     {
       "id": "FR4013",
@@ -5369,7 +5312,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 13:05",
-      "reason": "Startat 13:05"
+      "reason": "Startat 13:05",
+      "wasLive": true
     },
     {
       "id": "FR8790",
@@ -5389,7 +5333,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 13:48",
-      "reason": "Startat 13:48"
+      "reason": "Startat 13:48",
+      "wasLive": true
     },
     {
       "id": "FR3089",
@@ -5409,7 +5354,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 17:21",
-      "reason": "Startat 17:21"
+      "reason": "Startat 17:21",
+      "wasLive": true
     },
     {
       "id": "FR4011",
@@ -5429,7 +5375,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 17:29",
-      "reason": "Startat 17:29"
+      "reason": "Startat 17:29",
+      "wasLive": true
     },
     {
       "id": "TK1798",
@@ -5449,7 +5396,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 10:50",
-      "reason": "Startat 10:50"
+      "reason": "Startat 10:50",
+      "wasLive": true
     },
     {
       "id": "FR965",
@@ -5468,8 +5416,9 @@
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "",
-      "reason": ""
+      "rawStatus": "Omedelbar avgång",
+      "reason": "Omedelbar avgång",
+      "wasLive": true
     },
     {
       "id": "AY862",
@@ -5489,7 +5438,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 09:14",
-      "reason": "Startat 09:14"
+      "reason": "Startat 09:14",
+      "wasLive": true
     },
     {
       "id": "BA791",
@@ -5509,7 +5459,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 12:02",
-      "reason": "Startat 12:02"
+      "reason": "Startat 12:02",
+      "wasLive": true
     },
     {
       "id": "AY864",
@@ -5529,7 +5480,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 13:00",
-      "reason": "Startat 13:00"
+      "reason": "Startat 13:00",
+      "wasLive": true
     },
     {
       "id": "FR6094",
@@ -5543,13 +5495,14 @@
       "est": "",
       "act": "",
       "terminal": "T1",
-      "gate": "",
+      "gate": "20A",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "",
-      "reason": ""
+      "reason": "",
+      "wasLive": true
     },
     {
       "id": "AY866",
@@ -5569,7 +5522,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 17:31",
-      "reason": "Startat 17:31"
+      "reason": "Startat 17:31",
+      "wasLive": true
     },
     {
       "id": "FR090",
@@ -5589,7 +5543,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 20:20",
-      "reason": "Startat 20:20"
+      "reason": "Startat 20:20",
+      "wasLive": true
     },
     {
       "id": "BA793",
@@ -5609,7 +5564,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 20:15",
-      "reason": "Startat 20:15"
+      "reason": "Startat 20:15",
+      "wasLive": true
     },
     {
       "id": "AY868",
@@ -5629,7 +5585,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 20:55",
-      "reason": "Startat 20:55"
+      "reason": "Startat 20:55",
+      "wasLive": true
     },
     {
       "id": "FR4526",
@@ -5637,19 +5594,20 @@
       "other": "Malta",
       "iata": "",
       "airline": "Ryanair Ltd",
-      "status": "SCH",
-      "statusSv": "Planerad",
+      "status": "ACT",
+      "statusSv": "Startat",
       "sched": "2026-11-23T20:10:00Z",
       "est": "",
-      "act": "",
+      "act": "2026-11-23T20:16:32Z",
       "terminal": "T1",
       "gate": "20A",
       "baggage": "",
       "firstBag": "",
       "firstBagEst": "",
       "lastBag": "",
-      "rawStatus": "Gate stängd",
-      "reason": "Gate stängd"
+      "rawStatus": "Startat 21:30",
+      "reason": "Startat 21:30",
+      "wasLive": true
     },
     {
       "id": "BLX283",
@@ -5669,7 +5627,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 09:46",
-      "reason": "Startat 09:46"
+      "reason": "Startat 09:46",
+      "wasLive": true
     },
     {
       "id": "DK844",
@@ -5689,7 +5648,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 10:00",
-      "reason": "Startat 10:00"
+      "reason": "Startat 10:00",
+      "wasLive": true
     },
     {
       "id": "SN2324",
@@ -5709,7 +5669,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Inställd",
-      "reason": "Inställd"
+      "reason": "Inställd",
+      "wasLive": true
     },
     {
       "id": "SN2318",
@@ -5729,7 +5690,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Inställd",
-      "reason": "Inställd"
+      "reason": "Inställd",
+      "wasLive": true
     },
     {
       "id": "AF1553",
@@ -5749,7 +5711,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 06:26",
-      "reason": "Startat 06:26"
+      "reason": "Startat 06:26",
+      "wasLive": true
     },
     {
       "id": "KL1228",
@@ -5769,7 +5732,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 05:58",
-      "reason": "Startat 05:58"
+      "reason": "Startat 05:58",
+      "wasLive": true
     },
     {
       "id": "LH2433",
@@ -5789,7 +5753,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 06:01",
-      "reason": "Startat 06:01"
+      "reason": "Startat 06:01",
+      "wasLive": true
     },
     {
       "id": "LO496",
@@ -5809,7 +5774,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 08:15",
-      "reason": "Startat 08:15"
+      "reason": "Startat 08:15",
+      "wasLive": true
     },
     {
       "id": "FR967",
@@ -5829,7 +5795,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 06:56",
-      "reason": "Startat 06:56"
+      "reason": "Startat 06:56",
+      "wasLive": true
     },
     {
       "id": "FR8057",
@@ -5849,7 +5816,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 06:03",
-      "reason": "Startat 06:03"
+      "reason": "Startat 06:03",
+      "wasLive": true
     },
     {
       "id": "OJ812",
@@ -5869,7 +5837,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 11:23",
-      "reason": "Startat 11:23"
+      "reason": "Startat 11:23",
+      "wasLive": true
     },
     {
       "id": "SK158",
@@ -5889,7 +5858,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 16:25",
-      "reason": "Startat 16:25"
+      "reason": "Startat 16:25",
+      "wasLive": true
     },
     {
       "id": "SK443",
@@ -5909,7 +5879,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 10:21",
-      "reason": "Startat 10:21"
+      "reason": "Startat 10:21",
+      "wasLive": true
     },
     {
       "id": "SK146",
@@ -5929,7 +5900,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 10:24",
-      "reason": "Startat 10:24"
+      "reason": "Startat 10:24",
+      "wasLive": true
     },
     {
       "id": "SK449",
@@ -5949,7 +5921,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 21:03",
-      "reason": "Startat 21:03"
+      "reason": "Startat 21:03",
+      "wasLive": true
     },
     {
       "id": "SK142",
@@ -5969,7 +5942,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 07:16",
-      "reason": "Startat 07:16"
+      "reason": "Startat 07:16",
+      "wasLive": true
     },
     {
       "id": "SK1439",
@@ -5989,7 +5963,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 06:20",
-      "reason": "Startat 06:20"
+      "reason": "Startat 06:20",
+      "wasLive": true
     },
     {
       "id": "SK431",
@@ -6009,7 +5984,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 15:55",
-      "reason": "Startat 15:55"
+      "reason": "Startat 15:55",
+      "wasLive": true
     },
     {
       "id": "SK140",
@@ -6029,7 +6005,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 06:22",
-      "reason": "Startat 06:22"
+      "reason": "Startat 06:22",
+      "wasLive": true
     },
     {
       "id": "AF1453",
@@ -6049,7 +6026,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 17:23",
-      "reason": "Startat 17:23"
+      "reason": "Startat 17:23",
+      "wasLive": true
     },
     {
       "id": "LH819",
@@ -6069,7 +6047,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 18:42",
-      "reason": "Startat 18:42"
+      "reason": "Startat 18:42",
+      "wasLive": true
     },
     {
       "id": "LH2429",
@@ -6089,7 +6068,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 12:46",
-      "reason": "Startat 12:46"
+      "reason": "Startat 12:46",
+      "wasLive": true
     },
     {
       "id": "LH815",
@@ -6109,7 +6089,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 12:59",
-      "reason": "Startat 12:59"
+      "reason": "Startat 12:59",
+      "wasLive": true
     },
     {
       "id": "LH817",
@@ -6129,7 +6110,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 14:53",
-      "reason": "Startat 14:53"
+      "reason": "Startat 14:53",
+      "wasLive": true
     },
     {
       "id": "SK148",
@@ -6149,7 +6131,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 11:42",
-      "reason": "Startat 11:42"
+      "reason": "Startat 11:42",
+      "wasLive": true
     },
     {
       "id": "EW9221",
@@ -6169,7 +6152,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 12:21",
-      "reason": "Startat 12:21"
+      "reason": "Startat 12:21",
+      "wasLive": true
     },
     {
       "id": "SK166",
@@ -6189,7 +6173,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 20:05",
-      "reason": "Startat 20:05"
+      "reason": "Startat 20:05",
+      "wasLive": true
     },
     {
       "id": "LH821",
@@ -6209,7 +6194,8 @@
       "firstBagEst": "",
       "lastBag": "",
       "rawStatus": "Startat 07:14",
-      "reason": "Startat 07:14"
+      "reason": "Startat 07:14",
+      "wasLive": true
     }
   ]
 }
