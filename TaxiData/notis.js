@@ -28,11 +28,11 @@
     '.np-head button{background:none;border:none;color:var(--primary);font-size:.9rem;font-weight:600;padding:.35rem .4rem;cursor:pointer}' +
     '.np-head button:disabled{color:var(--text-soft);opacity:.6;cursor:default}' +
     '#np-close{font-size:1.25rem;color:var(--text)}' +
-    '.np-cats{display:flex;flex-wrap:nowrap;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;' +
-      'padding:.35rem .6rem .4rem;border-bottom:1px solid var(--border);scrollbar-width:thin}' +
+    '.np-cats{display:flex;flex-wrap:wrap;gap:6px;padding:.5rem .7rem .55rem;border-bottom:1px solid var(--border);background:var(--surface-soft,var(--surface))}' +
     '.np-cat{flex:none;border:1px solid var(--border);background:var(--surface);color:var(--text-soft);border-radius:999px;' +
-      'padding:3px 9px;min-height:28px;font:inherit;font-size:calc(12px * var(--font-scale, 1));line-height:1.2;cursor:pointer;white-space:nowrap}' +
-    '.np-cat.on{background:var(--surface-soft,var(--surface));color:var(--text);border-color:var(--primary);font-weight:600}' +
+      'padding:4px 11px;min-height:30px;font:inherit;font-size:calc(13px * var(--font-scale, 1));line-height:1.2;cursor:pointer;white-space:nowrap}' +
+    '.np-cat.on{background:var(--primary);color:var(--on-primary,#fff);border-color:var(--primary);font-weight:700}' +
+    '.np-cat .np-cn{margin-left:4px;font-size:.85em;opacity:.75;font-weight:400}' +
     '.np-cat:focus-visible{outline:2px solid var(--primary);outline-offset:2px}' +
     '#np-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:.4rem .5rem 1rem}' +
     '.np-item{display:flex;gap:.65rem;align-items:flex-start;width:100%;text-align:left;background:var(--surface);color:var(--text);border:1px solid var(--border);' +
@@ -253,7 +253,7 @@
     st.loading = true;
     return sync().then(function () {
       if (demo()) { st.items = []; st.unread = 0; st.err = false; return; }
-      return rpc('notis_feed', { p_limit: 80 }).then(function (r) {
+      return rpc('notis_feed', { p_limit: st.wide ? 150 : 80 }).then(function (r) {
         st.items = (r && r.items) || []; st.unread = (r && r.unread) || 0; st.err = false; st.at = Date.now();
       });
     }).catch(function (e) { st.err = true; if (e && e.code === '28000') { st.items = []; st.unread = 0; } })
@@ -288,18 +288,20 @@
   }
 
 
-  var LS_CATS = 'taxi_notis_cats';
+  // Filterchips (t1820u, 2026-11-24): välj vad som ska visas. 'Allt' = inget valt (förval).
+  // Flera val går bra. Tåg och båt räknas till Flyg & tåg (trafik du bevakar i Ankomster).
+  // Tidigare sparades vilka kategorier som var AVSTÄNGDA (taxi_notis_cats) – det tas bort.
+  var LS_SEL = 'taxi_notis_sel';
+  try { localStorage.removeItem('taxi_notis_cats'); } catch (e) {}
   var CAT_ORDER = [
-    { id: 'tag', label: 'Tåg' },
-    { id: 'flyg', label: 'Flyg' },
-    { id: 'bat', label: 'Båt' },
+    { id: 'trafik', label: 'Flyg & tåg', fixed: true },
+    { id: 'prognos', label: 'Prognos', fixed: true },
+    { id: 'meddelanden', label: 'Meddelanden', fixed: true },
+    { id: 'konto', label: 'Konto', fixed: true },
+    { id: 'nyheter', label: 'Uppdateringar', fixed: true },
     { id: 'event', label: 'Evenemang' },
-    { id: 'nyheter', label: 'Uppdateringar' },
-    { id: 'konto', label: 'Konto' },
-    { id: 'prognos', label: 'Prognos' },
     { id: 'forum', label: 'Forum' },
     { id: 'bil', label: 'Bil' },
-    { id: 'meddelanden', label: 'Meddelanden' },
     { id: 'sjuk', label: 'Sjuk' },
     { id: 'test', label: 'Test' },
     { id: 'other', label: 'Övrigt' }
@@ -307,13 +309,11 @@
   function catOf(it) {
     if (!it) return 'other';
     if (it.case_kind && it.case_id) return 'meddelanden';
-    var k = String(it.kind || '');
-    if (k === 'tag') return 'tag';
-    if (k === 'flyg') return 'flyg';
-    if (k === 'bat') return 'bat';
+    var k = String(it.kind || kindOf(it.tag) || '');
+    if (k === 'tag' || k === 'flyg' || k === 'bat') return 'trafik';
     if (k === 'reminder' || k === 'event' || k.indexOf('kal') === 0) return 'event';
     if (k === 'nyheter') return 'nyheter';
-    if (k === 'konto') return 'konto';
+    if (k === 'konto' || String(it.tag || '').indexOf('konto') === 0) return 'konto';
     if (k === 'prognos') return 'prognos';
     if (k.indexOf('forum') === 0) return 'forum';
     if (k.indexOf('bil') === 0) return 'bil';
@@ -321,17 +321,16 @@
     if (k === 'test') return 'test';
     return 'other';
   }
-  function catsOff() {
+  function catsSel() {
     try {
-      var v = JSON.parse(localStorage.getItem(LS_CATS) || 'null');
-      if (v && Array.isArray(v.off)) return v.off.map(String);
+      var v = JSON.parse(localStorage.getItem(LS_SEL) || 'null');
+      if (Array.isArray(v)) return v.map(String).filter(function (id) { return CAT_ORDER.some(function (c) { return c.id === id; }); });
     } catch (e) {}
     return [];
   }
-  function setCatsOff(off) {
-    try { localStorage.setItem(LS_CATS, JSON.stringify({ off: off })); } catch (e) {}
+  function setCatsSel(sel) {
+    try { if (sel.length) localStorage.setItem(LS_SEL, JSON.stringify(sel)); else localStorage.removeItem(LS_SEL); } catch (e) {}
   }
-  function catOn(id) { return catsOff().indexOf(id) < 0; }
   // På delad enhet med dolda privata moduler: dölj notiser som leder till privat data
   // (meddelanden, forum, bil/verkstad, sjuk inkl. sjuklön, konto). Övriga notiser syns som vanligt.
   var PRIVATE_NOTIS_CATS = { meddelanden: 1, forum: 1, bil: 1, sjuk: 1, konto: 1 };
@@ -345,39 +344,65 @@
   N.PRIVATE_NOTIS_CATS = PRIVATE_NOTIS_CATS;
   function visibleItems(items) {
     items = items || [];
-    var off = catsOff();
+    var sel = catsSel();
     return items.filter(function (it) {
       if (hiddenNotis(it)) return false;
-      if (off.length && off.indexOf(catOf(it)) >= 0) return false;
+      if (sel.length && sel.indexOf(catOf(it)) < 0) return false;
       return true;
     });
   }
   function paintCats(items) {
     var box = document.getElementById('np-cats'); if (!box) return;
-    var present = {};
-    (items || []).forEach(function (it) { present[catOf(it)] = true; });
-    var cats = CAT_ORDER.filter(function (c) { return present[c.id]; });
-    if (!cats.length) { box.innerHTML = ''; box.hidden = true; return; }
+    var cnt = {}, sel = catsSel();
+    (items || []).forEach(function (it) { var c = catOf(it); cnt[c] = (cnt[c] || 0) + 1; });
+    var cats = CAT_ORDER.filter(function (c) {
+      if (hidePriv() && PRIVATE_NOTIS_CATS[c.id]) return false;
+      return c.fixed || cnt[c.id] || sel.indexOf(c.id) >= 0;
+    });
     box.hidden = false;
-    box.innerHTML = cats.map(function (c) {
-      var on = catOn(c.id);
-      return '<button type="button" class="np-cat' + (on ? ' on' : '') + '" data-np-cat="' + c.id + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(c.label) + '</button>';
-    }).join('');
+    box.innerHTML = '<button type="button" class="np-cat' + (sel.length ? '' : ' on') + '" data-np-cat="" aria-pressed="' + (sel.length ? 'false' : 'true') + '">Allt</button>' +
+      cats.map(function (c) {
+        var on = sel.indexOf(c.id) >= 0;
+        return '<button type="button" class="np-cat' + (on ? ' on' : '') + '" data-np-cat="' + c.id + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(c.label) + '</button>';
+      }).join('');
+  }
+
+  // Uppdateringar: när filtret är valt visas även tidigare nyheter (senaste 30 dagarna), inte bara den osedda.
+  function nyhetsHistorik() {
+    if (!window.OM || !OM.lista || !OM.when) return [];
+    var ny = nyheter(), out = [], lim = Date.now() - 30 * 864e5;
+    try {
+      OM.lista().forEach(function (dag) {
+        var w = OM.when(dag), r = (dag.rader || [])[0];
+        if (!r || Date.parse(w.at) < lim) return;
+        var id = dag.id || dag.datum;
+        if (ny && ny.id === id) return;
+        var t = String(r[1] || '');
+        if (t.length > 110) t = t.slice(0, 105).replace(/\s+\S*$/, '') + ' …';
+        out.push({ src: 'h', id: id, kind: 'nyheter', title: 'Nyheter i appen', body: t, created_at: w.at, day_only: !!w.day, read: true });
+      });
+    } catch (e) {}
+    return out;
   }
 
   function paint() {
     var list = document.getElementById('np-list'); if (!list) return;
     var items = allItems();
     if (hidePriv()) items = items.filter(function (it) { return !hiddenNotis(it); });
+    var sel = catsSel();
+    if (sel.indexOf('nyheter') >= 0) {
+      items = items.concat(nyhetsHistorik()).sort(function (a, b) { return Date.parse(b.created_at) - Date.parse(a.created_at); });
+    }
     var shown = visibleItems(items), h = '';
     paintCats(items);
+    if (sel.length && !st.wide && !st.loading) { st.wide = true; refresh(true); }
     var all = document.getElementById('np-all'); if (all) all.disabled = !items.some(function (x) { return !x.read; });
     if (!items.length) {
       h = st.items === null && st.loading ? '<div class="np-msg">Laddar…</div>'
         : st.err ? '<div class="np-msg">Kunde inte hämta notiserna. Kontrollera nätet och försök igen.</div>'
         : '<div class="np-msg">Inga notiser än.<br>Här samlas notiser om bevakade flyg och tåg, Prognos, ' + esc(window.VERKSTAD ? VERKSTAD.title : 'Bil & verkstad') + ', Forum och Kalender.</div>';
     } else if (!shown.length) {
-      h = '<div class="np-msg">Inga notiser i de valda kategorierna.</div>';
+      h = '<div class="np-msg">Inga notiser här just nu.<br>Tryck på <b>Allt</b> för att se alla notiser.</div>';
     } else {
       shown.forEach(function (it, i) {
         var v = view(it);
@@ -519,10 +544,12 @@
     };
     document.getElementById('np-cats').onclick = function (e) {
       var b = e.target.closest('[data-np-cat]'); if (!b) return;
-      var id = b.getAttribute('data-np-cat'), off = catsOff(), i = off.indexOf(id);
-      if (i < 0) off.push(id); else off.splice(i, 1);
-      setCatsOff(off);
+      var id = b.getAttribute('data-np-cat'), sel = catsSel(), i = sel.indexOf(id);
+      if (!id) sel = [];                       // Allt: nollställ
+      else if (i < 0) sel.push(id); else sel.splice(i, 1);
+      setCatsSel(sel);
       paint();
+      var l = document.getElementById('np-list'); if (l) l.scrollTop = 0;
     };
   }
   function canOpen() {
