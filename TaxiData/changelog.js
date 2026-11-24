@@ -19,6 +19,12 @@ window.CHANGELOG = [
     ['Nytt', 'Adventskalender: 24 luckor med taxifakta, en för varje dag i december. Kalendern sitter litet uppe till vänster på startsidan. Tryck så växer den fram i mitten. Öppna dagens lucka – och alla du missat hittills.'],
     ['Nytt', 'Polkagrisjakt: du får två egna polkagrisar per arbetspass, som bara du kan ta. Samtidigt kan upp till tre delade polkagrisar vara ute i appen; en ny kan dyka upp även om de gamla inte är tagna, och den som trycker först tar den. De försvinner efter 45 minuter om ingen tar dem, och kommer oftare på natten. Ibland syns en gyllene polkagris värd tre poäng. Dina poäng syns som en polkagris med siffra högst upp på startsidan, till höger om ljusstaken. Tryck där för att se din placering (inga andras namn visas). På nyårsafton presenteras vinnaren för alla.']
   ]},
+  { datum: '2026-11-24', id: '2026-11-24zmbv1', tid: '20:09', rader: [
+    ['Förbättrat', 'Mina bevakningar: tryck på en bevakning så får du all info i en ruta direkt på sidan – tåg, spår, försening, flyg, evenemang och bokningar. Länken i rutan tar dig till Ankomster eller Kalender om du vill.'],
+    ['Förbättrat', 'Mina bevakningar har nu en enda vy som du byter med knappen uppe till höger: Dag, Vecka eller Månad, som i en vanlig kalender. Tryck på en dag i vecka eller månad för att se dagen, och Tillbaka för att komma tillbaka.'],
+    ['Förbättrat', 'Ljud och notiser för tåg, flyg, båt och prognos ligger nu samlat i en ruta, med Notis, Ljud och Testa på en rad per sort. Dina inställningar är kvar.'],
+    ['Fixat', 'Flygbevakningarna gick inte att hämta sedan i kväll (gul varning). Nu fungerar de igen.']
+  ]},
   { datum: '2026-11-24', id: '2026-11-24zpk2', tid: '19:58', rader: [
     ['Fixat', 'Spelreglerna i Polkagrisjakt är lättare att läsa i mörkt tema.'],
     ['Nytt', 'På Polkagrisjakt ser du högst upp hur många polkagrisar som just nu går att hitta i din app.']
