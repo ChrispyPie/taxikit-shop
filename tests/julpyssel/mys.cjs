@@ -45,8 +45,8 @@ assert.match(css, /html\[data-theme="dark"\] #jul-mys \.jul-vignette/);
 assert.match(css, /#jul-ljusstake/);
 assert.match(css, /#jul-slingor/);
 assert.match(html, /julpyssel\.css\?v=20261124adv18/);
-assert.match(html, /julpyssel\.js\?v=20261124adv18/);
-assert.match(sw, /CACHE_VER = '20261124log1'/);
+assert.match(html, /julpyssel\.js\?v=20261124tap1/);
+assert.match(sw, /CACHE_VER = '20261124tap1'/);
 
 function boot(opts) {
   opts = opts || {};

@@ -39,8 +39,8 @@ assert.match(js, /jul-ljus-rad/);
 assert.match(js, /querySelector\('#app > header'\)/);
 assert.doesNotMatch(js, /document\.body \|\| document\.documentElement\)\.appendChild\(btn\)/);
 assert.match(html, /julpyssel\.css\?v=20261124adv18/);
-assert.match(html, /julpyssel\.js\?v=20261124adv18/);
-assert.match(sw, /CACHE_VER = '20261124log1'/);
+assert.match(html, /julpyssel\.js\?v=20261124tap1/);
+assert.match(sw, /CACHE_VER = '20261124tap1'/);
 assert.match(css, /#jul-ljus-rad/);
 assert.doesNotMatch(css, /grid-area:\s*jul/);
 assert.match(css, /border-bottom:\s*none/);
@@ -49,8 +49,8 @@ assert.doesNotMatch(css.split('Julgransbelysning')[0], /position:\s*fixed/);
 assert.doesNotMatch(css, /z-index:\s*28/);
 assert.doesNotMatch(css, /bottom:\s*calc\(8px/);
 assert.match(core, /LAZY\.ensure\('berra'\)/);
-assert.match(lazy, /"berra": \["berra\.js\?v=20261123adv14"\]/);
-assert.match(lazy, /berra\.js\?v=20261123adv14/);
+assert.match(lazy, /"berra": \["berra\.js\?v=20261124tap1"\]/);
+assert.match(lazy, /berra\.js\?v=20261124tap1/);
 assert.match(sid, /headerTop: headerTop/);
 
 function boot(opts) {
