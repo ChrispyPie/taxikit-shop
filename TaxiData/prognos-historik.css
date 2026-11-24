@@ -2,6 +2,11 @@
 .ph { display: flex; flex-direction: column; gap: 10px; }
 .ph-zname { font-size: 0.9rem; color: var(--text-soft); margin-top: -4px; }
 .ph-zname b { color: var(--text); }
+.ph-catsel { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; margin: 6px 0 2px; padding: 7px 10px;
+  border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text-soft); font: inherit; font-size: 0.85rem; text-align: left; cursor: pointer; }
+.ph-catsel b { color: var(--text); font-weight: 600; }
+.ph-catsel.ph-catsel-on { border-color: var(--primary); background: var(--surface-soft, var(--surface)); }
+.ph-catsel-go { color: var(--primary); font-weight: 600; white-space: nowrap; flex: none; }
 .ph-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .ph-kpi { background: var(--surface); border: 1px solid var(--border-soft); border-radius: 10px; padding: 8px 6px; text-align: center; }
 .ph-kpi b { display: block; font-size: 1.2rem; color: var(--text); font-variant-numeric: tabular-nums; }
