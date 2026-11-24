@@ -424,8 +424,16 @@
 
   function renderDevices(box) {
     if (!box) return;
-    if (isHidePrivate() || !token() || isDemo() || typeof window.rpc !== 'function') {
+    function devicesFallback() {
+      box.innerHTML = '<div class="home-devices-h">Inloggade enheter</div><div class="home-devices-row" role="list">' +
+        '<div class="home-dev home-dev-this" role="listitem"><div class="home-dev-name">' + esc(cachedLabel || 'Denna enhet') + '</div></div></div>';
+    }
+    if (isHidePrivate() || !token() || isDemo()) {
       box.innerHTML = '';
+      return;
+    }
+    if (typeof window.rpc !== 'function') {
+      devicesFallback();
       return;
     }
     box.innerHTML = '<div class="home-devices-h">Inloggade enheter</div><div class="home-devices-row" role="list">Hämtar…</div>';
@@ -466,7 +474,7 @@
           askDevice(box, dev);
         };
       })
-      .catch(function () { box.innerHTML = ''; });
+      .catch(function () { devicesFallback(); });
   }
 
   function askDevice(box, dev) {

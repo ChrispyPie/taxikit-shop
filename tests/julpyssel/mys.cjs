@@ -31,6 +31,7 @@ assert.doesNotMatch(js, /jul-flinga/);
 assert.match(js, /peppar|tomte/);
 assert.match(css, /#jul-mys/);
 assert.match(css, /#jul-girlang/);
+assert.match(css, /#app\.is-home #jul-girlang\.jul-on[^{]*\{[^}]*position:\s*sticky/s);
 assert.match(css, /pointer-events:\s*none/);
 assert.match(css, /prefers-reduced-motion:\s*reduce/);
 assert.match(css, /jul-twinkle/);
@@ -43,9 +44,9 @@ assert.match(css, /html:not\(\[data-theme="dark"\]\) #jul-mys \.jul-vignette/);
 assert.match(css, /html\[data-theme="dark"\] #jul-mys \.jul-vignette/);
 assert.match(css, /#jul-ljusstake/);
 assert.match(css, /#jul-slingor/);
-assert.match(html, /julpyssel\.css\?v=20261123adv17/);
-assert.match(html, /julpyssel\.js\?v=20261123adv17/);
-assert.match(sw, /CACHE_VER = '20261123adv17'/);
+assert.match(html, /julpyssel\.css\?v=20261124adv18/);
+assert.match(html, /julpyssel\.js\?v=20261124adv18/);
+assert.match(sw, /CACHE_VER = '20261124adv18'/);
 
 function boot(opts) {
   opts = opts || {};

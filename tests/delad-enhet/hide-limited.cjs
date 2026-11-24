@@ -20,7 +20,7 @@ assert.match(cl.split("id: '2026-11-22zprof1'")[1].split(']},')[0].split('rader:
 assert.match(cl.split("id: '2026-11-22zprof1'")[1].split(']},')[0], /begränsad profil/);
 assert.match(cl.split("id: '2026-11-22zprof1'")[1].split(']},')[0], /notiser/i);
 
-assert.match(html, /delad-enhet\.js\?v=20261122zprof1/);
+assert.match(html, /delad-enhet\.js\?v=20261124adv18/);
 assert.match(html, /lazy-views\.js\?v=20261123adv6/);
 assert.match(lv, /changelog\.js\?v=20261123adv6/);
 assert.match(lv, /notis\.js\?v=20261122zprof1/);
