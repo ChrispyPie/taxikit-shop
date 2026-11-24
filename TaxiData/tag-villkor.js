@@ -301,13 +301,14 @@
   };
 
   // Mina bevakningar: standard för alla tåg
-  V.renderPanel = function (box) {
+  V.renderPanel = function (box, opts) {
     if (!box) return;
+    opts = opts || box._tvOpts || {}; box._tvOpts = opts;   // Mina bevakningar bäddar in den i Ljud och notiser (t1839u)
     style();
     var focus = false; try { focus = sessionStorage.getItem('tv_focus') === '1'; sessionStorage.removeItem('tv_focus'); } catch (e) {}
     if (focus) st.open = true;
     var s = st.draft ? normalize(st.draft, get().tag.default) : get().tag.default;
-    var h = '<section class="tv-card" id="tv-card"><button type="button" class="tv-head" data-tv-toggle aria-expanded="' + st.open + '"><span>🔔 <b>Ljud och notiser för tåg</b><small>' + esc(summary(s)) + '</small></span><span aria-hidden="true">' + (st.open ? '▴' : '▾') + '</span></button>';
+    var h = '<section class="tv-card' + (opts.embedded ? ' tv-embedded' : '') + '" id="tv-card"><button type="button" class="tv-head" data-tv-toggle aria-expanded="' + st.open + '"><span>' + (opts.embedded ? '🚆 ' : '🔔 ') + '<b>' + esc(opts.title || 'Ljud och notiser för tåg') + '</b><small>' + esc(summary(s)) + '</small></span><span aria-hidden="true">' + (st.open ? '▴' : '▾') + '</span></button>';
     if (st.open) {
       h += '<form class="tv-body" data-tv-default novalidate><p class="tv-dim">Standard för alla tåg du bevakar, tillfälliga och fasta. Vill du ha andra villkor för en viss avgång: tryck 🔔 på avgången i Schema.</p>' +
         fieldsHtml(s) + '<div class="tv-err" aria-live="polite"></div><div class="tv-actions"><button type="submit" class="tv-save">Spara</button><button type="button" class="tv-sec" data-tv-reset>Återställ standard</button></div></form>';

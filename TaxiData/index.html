@@ -224,7 +224,7 @@
   <script src="julpyssel.js?v=20261124tap1"></script>
   <script src="polkagris.js?v=20261124zpk2"></script>
   <script src="hb-stage.js?v=20261124adv18"></script>
-  <script src="lazy-views.js?v=20261124zpk2"></script>
+  <script src="lazy-views.js?v=20261124mbv1"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -947,6 +947,7 @@
       if (current === FORUM.id && FORUM.back && FORUM.back()) return true;            // forumet: inlägg -> lista
       if (current === 'inkorg' && window.INKORG && INKORG.back()) return true;        // inkorgen: tråd -> lista
       if (current === VERKSTAD.id && VERKSTAD.closeEdit && VERKSTAD.closeEdit()) return true; // stäng öppen anmälan
+      if (current === 'mina-bevakningar' && window.MINA_BEVAKNINGAR && MINA_BEVAKNINGAR.back && MINA_BEVAKNINGAR.back()) return true; // stäng infoboxen
       if (current === 'profil' && window.PROFIL_SIDA && PROFIL_SIDA.back && PROFIL_SIDA.back()) return true; // profilens under-vy
       return false;
     }

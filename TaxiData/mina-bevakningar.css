@@ -84,3 +84,73 @@ html[data-theme="dark"] .mb-st-arrived{color:#93c5fd}
 /* Villkor för tåg (tag-villkor.js): 🔔 per avgång i Schema */
 .mb-villkor-btn{flex:none;width:28px;height:28px;padding:0;margin:0 0 0 4px;border:0;border-radius:7px;background:var(--surface-soft,#222e3b);color:inherit;font-size:14px;line-height:1;cursor:pointer}
 .mb-own-villkor{display:block;color:var(--muted);font-size:.78rem}
+
+/* Infobox (t1838u): tryck på en bevakning. Färger från temat (mörkt/ljust), aldrig vitt på vitt. */
+.mb-info{max-height:min(82vh,640px);overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--surface,#1a2430);color:var(--text,#e2e8f0)}
+.mb-info-head{display:flex;align-items:flex-start;gap:8px;margin:-6px -6px 10px 0}
+.mb-info-head h3{flex:1;margin:4px 0 0;font-size:1.05rem;font-weight:800;line-height:1.3;color:var(--text,#e2e8f0);overflow-wrap:anywhere}
+.mb-action-sheet .mb-info-x{display:inline-flex;align-items:center;justify-content:center;flex:none;width:44px;min-height:44px;margin:0;padding:0;border:0;background:none;color:var(--text,#e2e8f0);font-size:1.25rem}
+.mb-info-dl{margin:0;display:grid;gap:7px}
+.mb-info-kv{display:grid;grid-template-columns:7.6em 1fr;gap:4px 10px;align-items:baseline}
+.mb-info-kv dt{margin:0;color:var(--muted,#94a3b8);font-size:.82rem;font-weight:600}
+.mb-info-kv dd{margin:0;font-size:.95rem;color:var(--text,#e2e8f0);overflow-wrap:anywhere}
+.mb-info-kv dd.mb-info-warn{color:var(--warn-text,#f6ad55);font-weight:700}
+.mb-info-kv dd.mb-info-bad{color:var(--danger-text,#fc8181);font-weight:700}
+html:not([data-theme="dark"]) .mb-info-kv dd.mb-info-warn{color:#b45309}
+html:not([data-theme="dark"]) .mb-info-kv dd.mb-info-bad{color:#c53030}
+.mb-info-note{margin:6px 0 0;font-size:.85rem;color:var(--text-soft,#a0aec0)}
+.mb-info-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.mb-action-sheet .mb-info-link{display:inline-block;width:auto;min-height:40px;margin:0;padding:8px 14px;background:var(--surface-soft,#222e3b);color:var(--primary,#63b3ed);border:1px solid var(--border,#3a4a5c);border-radius:999px;font-weight:600;font-size:.9rem}
+
+/* En vy Dag/Vecka/Månad (t1840u), som Google Kalender/Outlook. Vybytet uppe till höger. */
+.mb-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 8px}
+.mb-top .mb-refresh{margin:0;min-width:44px;min-height:40px;font-size:18px;padding:4px 10px}
+.mb-unit{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:6px 12px;border-radius:999px;border:1px solid var(--border,#3a4a5c);background:var(--surface,#1a2430);color:var(--text,#e2e8f0);font:inherit;font-size:14px;cursor:pointer}
+.mb-unit b{font-weight:700}.mb-unit small{color:var(--muted,#94a3b8);font-size:12px}
+.mb-unit-steps{display:inline-flex;gap:3px}.mb-unit-steps i{width:6px;height:6px;border-radius:50%;background:var(--border,#3a4a5c)}.mb-unit-steps i.on{background:var(--primary,#63b3ed)}
+.mb-backunit{display:inline-flex;align-items:center;min-height:40px;margin:0 0 8px;padding:6px 14px;border-radius:999px;border:1px solid var(--primary,#63b3ed);background:var(--surface,#1a2430);color:var(--primary,#63b3ed);font:inherit;font-weight:700;cursor:pointer}
+/* färg per sort, samma i alla vyer */
+.mb-block-bat{border-color:#2c7a7b;border-left-color:#4fd1c5}
+.mb-wk{margin:8px 0;border:1px solid var(--border,#3a4a5c);border-radius:12px;overflow:hidden;background:var(--surface,#1a2430)}
+.mb-wk-head{display:grid;grid-template-columns:30px repeat(7,1fr);border-bottom:1px solid var(--border,#3a4a5c)}
+.mb-wk-dh{display:flex;flex-direction:column;align-items:center;gap:1px;min-height:46px;padding:4px 0;border:0;background:none;color:var(--text,#e2e8f0);font:inherit;cursor:pointer}
+.mb-wk-dh small{font-size:10px;color:var(--muted,#94a3b8);text-transform:uppercase}.mb-wk-dh b{font-size:15px;width:28px;height:28px;line-height:28px;border-radius:50%;text-align:center}
+.mb-wk-dh.today small{color:var(--primary,#63b3ed);font-weight:700}.mb-wk-dh.today b{background:var(--primary,#63b3ed);color:var(--on-primary,#0b1520)}
+.mb-wk-scroll{max-height:min(62vh,560px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+.mb-wk-grid{position:relative}
+.mb-wk-hr{position:absolute;left:30px;right:0;border-top:1px solid var(--border-soft,#2a3644);pointer-events:none}.mb-wk-hr span{position:absolute;left:-28px;top:-7px;width:24px;text-align:right;font-size:9px;color:var(--muted,#94a3b8)}
+.mb-wk-col{position:absolute;top:0;bottom:0;border-left:1px solid var(--border-soft,#2a3644)}.mb-wk-col.today{background:rgba(99,179,237,.07)}
+.mb-wk-b{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:0;padding:1px 0;margin-left:1px;border-radius:4px;border:1px solid #476c89;border-left:3px solid #63b3ed;background:#1e3a52;color:#e2e8f0;font:inherit;font-size:11px;line-height:1.1;overflow:hidden;cursor:pointer;z-index:2;box-sizing:border-box}
+.mb-wk-b small{font-size:9px;opacity:.9}
+.mb-wk-flyg{background:#4a3b1c;border-color:#987b48;border-left-color:#f6c879}.mb-wk-event{background:#3b2f52;border-color:#776295;border-left-color:#b794f4}.mb-wk-bat{background:#1d4044;border-color:#2c7a7b;border-left-color:#4fd1c5}
+.mb-wk-booking{background:#22543d;border-color:#38a169;border-left-color:#68d391}.mb-wk-b.pending{background:#2d3748;border-style:dashed}.mb-wk-b.bad{opacity:.6;text-decoration:line-through}
+.mb-wk-now{position:absolute;left:-1px;right:0;border-top:2px solid #f56565;z-index:4;pointer-events:none}.mb-wk-now:before{content:'';position:absolute;left:-4px;top:-5px;width:8px;height:8px;border-radius:50%;background:#f56565}
+.mb-month{margin:8px 0;border:1px solid var(--border,#3a4a5c);border-radius:12px;overflow:hidden;background:var(--surface,#1a2430)}
+.mb-mrow{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}.mb-mrow+.mb-mrow{border-top:1px solid var(--border-soft,#2a3644)}
+.mb-mhead span{text-align:center;font-size:11px;font-weight:700;color:var(--muted,#94a3b8);padding:6px 0}
+.mb-mday{display:flex;flex-direction:column;align-items:stretch;gap:2px;min-height:74px;min-width:0;padding:3px 2px;border:0;border-left:1px solid var(--border-soft,#2a3644);background:none;color:var(--text,#e2e8f0);font:inherit;text-align:left;cursor:pointer;overflow:hidden}
+.mb-mday:first-child{border-left:0}.mb-mday b{align-self:center;font-size:12px;font-weight:600;width:22px;height:22px;line-height:22px;border-radius:50%;text-align:center}
+.mb-mday.out{opacity:.45}.mb-mday.today b{background:#f56565;color:#fff;font-weight:800}
+.mb-ml{display:block;font-size:9.5px;line-height:1.25;padding:1px 3px;border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#1e3a52;color:#e2e8f0;border-left:2px solid #63b3ed}
+.mb-ml-flyg{background:#4a3b1c;border-left-color:#f6c879}.mb-ml-event{background:#3b2f52;border-left-color:#b794f4}.mb-ml-bat{background:#1d4044;border-left-color:#4fd1c5}.mb-ml-booking{background:#22543d;border-left-color:#68d391}
+.mb-mmore{font-size:9.5px;color:var(--muted,#94a3b8);padding:0 3px;white-space:nowrap}
+html:not([data-theme="dark"]) .mb-wk-b,html:not([data-theme="dark"]) .mb-ml{background:#dbeafe;color:#1a365d}
+html:not([data-theme="dark"]) .mb-wk-flyg,html:not([data-theme="dark"]) .mb-ml-flyg{background:#fef3c7;color:#5c3d00}
+html:not([data-theme="dark"]) .mb-wk-event,html:not([data-theme="dark"]) .mb-ml-event{background:#ede9fe;color:#3b2a63}
+html:not([data-theme="dark"]) .mb-wk-bat,html:not([data-theme="dark"]) .mb-ml-bat{background:#ccfbf1;color:#134e4a}
+html:not([data-theme="dark"]) .mb-wk-booking,html:not([data-theme="dark"]) .mb-ml-booking{background:#dcfce7;color:#14532d}
+/* Ljud och notiser (t1839u) */
+.mb-lj{background:var(--surface,#1a2430);border:1px solid var(--border,#3a4a5c);border-radius:12px;margin:0 0 8px;overflow:hidden}
+.mb-lj-head{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:48px;padding:10px 12px;border:0;background:none;color:var(--text,#e2e8f0);font:inherit;text-align:left;cursor:pointer}
+.mb-lj-t small{display:block;margin-top:2px;font-size:12px;color:var(--muted,#94a3b8);font-weight:400}
+.mb-lj-body{padding:0 12px 12px;border-top:1px solid var(--border-soft,#2a3644)}
+.mb-lj-dim{margin:8px 0;font-size:12.5px;line-height:1.4;color:var(--text-soft,#a0aec0)}
+.mb-lj-rows{display:grid;gap:6px}
+.mb-lj-row{display:grid;grid-template-columns:minmax(0,1fr) 66px 58px 80px;align-items:center;gap:6px}.mb-lj-row .mb-lj-pill,.mb-lj-row .mb-lj-try{width:100%;padding-left:4px;padding-right:4px}.mb-lj-na{grid-column:span 2;text-align:left}
+.mb-lj-n{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mb-lj-pill,.mb-lj-try{min-height:36px;padding:4px 10px;border-radius:999px;border:1px solid var(--border,#3a4a5c);background:var(--surface-soft,#222e3b);color:var(--text-soft,#a0aec0);font:inherit;font-size:13px;white-space:nowrap;cursor:pointer}
+.mb-lj-pill[aria-pressed=true]{background:var(--primary,#63b3ed);border-color:var(--primary,#63b3ed);color:var(--on-primary,#0b1520);font-weight:700}
+html:not([data-theme="dark"]) .mb-lj-pill[aria-pressed=true]{color:#fff}
+.mb-lj-na{font-size:12px;color:var(--muted,#94a3b8);white-space:nowrap;text-align:center}
+.mb-lj-sub{margin-top:10px}.mb-lj-sub .tv-card{margin:0;background:var(--surface-soft,#222e3b)}
+@media (max-width:370px){.mb-lj-row{grid-template-columns:minmax(0,1fr) 60px 52px 72px;gap:4px}.mb-lj-pill,.mb-lj-try{font-size:12.5px}}
