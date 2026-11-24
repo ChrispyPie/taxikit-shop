@@ -19,6 +19,9 @@ window.CHANGELOG = [
     ['Nytt', 'Adventskalender: 24 luckor med taxifakta, en för varje dag i december. Kalendern sitter litet uppe till vänster på startsidan. Tryck så växer den fram i mitten. Öppna dagens lucka – och alla du missat hittills.'],
     ['Nytt', 'Polkagrisjakt: du får två egna polkagrisar per arbetspass, som bara du kan ta. Samtidigt kan upp till tre delade polkagrisar vara ute i appen; en ny kan dyka upp även om de gamla inte är tagna, och den som trycker först tar den. De försvinner efter 45 minuter om ingen tar dem, och kommer oftare på natten. Ibland syns en gyllene polkagris värd tre poäng. Dina poäng syns som en polkagris med siffra högst upp på startsidan, till höger om ljusstaken. Tryck där för att se din placering (inga andras namn visas). På nyårsafton presenteras vinnaren för alla.']
   ]},
+  { datum: '2026-11-24', id: '2026-11-24zfilt1', tid: '15:11', rader: [
+    ['Förbättrat', 'Prognos: Filter och Notiser har fått en egen rad under flikarna, så att de syns direkt. Knapparna visar också om något är dolt i filtret och hur många bevakningar du har.']
+  ]},
   { datum: '2026-11-24', id: '2026-11-24zhist1', tid: '14:56', rader: [
     ['Nytt', 'Prognos har en ny flik: Historik. Välj zon eller Morgon och en veckodag, till exempel måndagar, så ser du en stapel för varje tidigare måndag med snittlinje. Helgdagar och aftnar är röda med 🎉, skollov har ett gult band med 🎒 och lönedagen har 💰.'],
     ['Nytt', 'Tryck på en stapel för att se dagens bokningar timme för timme jämfört med snittet, som antal eller andel. Nattpasset 18–06 är markerat, och dygnet räknas 06–06 så att natten hör ihop med kvällen. En värmekarta visar vilka veckodagar och timmar som brukar ha flest bokningar.'],

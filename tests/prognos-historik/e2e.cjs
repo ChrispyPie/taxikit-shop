@@ -2,7 +2,7 @@
 // Webbläsartest: Prognos › Historik (t1809u/t1811u/t1812u/t1813u/t1814u).
 // - Historik-filerna (helgdagar.js, prognos-historik.js/.css) och RPC:erna laddas INTE vid appstart eller när Prognos öppnas,
 //   bara när fliken Historik öppnas.
-// - Flikraden är en rad (svepbar om den inte får plats), aktiv flik syns.
+// - Flikraden är en rad (svepbar om den inte får plats), aktiv flik syns. Filter och Notiser på egen rad (t1820u).
 // - Övriga flikar fungerar som förut.
 // Kör: node tests/prognos-historik/e2e.cjs [utmapp]
 const fs = require('node:fs');
@@ -78,7 +78,7 @@ const HIST_RE = /helgdagar\.js|prognos-historik\.(js|css)|rpc\/prognos_historik/
   const loaded = async p => (await p.evaluate(() => performance.getEntriesByType('resource').map(e => e.name))).concat(p._reqs);
   const histLoaded = async p => (await loaded(p)).filter(u => HIST_RE.test(u));
 
-  for (const [w, h, theme, tag] of [[412, 915, 'dark', 'p412d'], [412, 915, 'light', 'p412l'], [345, 740, 'dark', 'p345d'], [915, 412, 'dark', 'l915d'], [740, 345, 'light', 'l740l']]) {
+  for (const [w, h, theme, tag] of [[412, 915, 'dark', 'p412d'], [412, 915, 'light', 'p412l'], [345, 740, 'dark', 'p345d'], [915, 412, 'dark', 'l915d'], [740, 345, 'light', 'l740l'], [1024, 600, 'dark', 't1024d'], [800, 1280, 'light', 't800l']]) {
     const p = await open(w, h, theme);
     await sleep(600);
     if (tag === 'p412d') fs.writeFileSync(path.join(outDir, 'start-resources.txt'), (await p.evaluate(() => performance.getEntriesByType('resource').map(e => e.name.replace(location.origin, '') + ' ' + (e.transferSize || e.encodedBodySize || 0)))).join('\n'));
@@ -88,15 +88,17 @@ const HIST_RE = /helgdagar\.js|prognos-historik\.(js|css)|rpc\/prognos_historik/
     await sleep(800);
     ok(tag + ': Prognos öppen laddar ingen Historik', (await histLoaded(p)).length === 0 && (await rpcHist(p)).length === 0, (await histLoaded(p)).join(','));
     const row = await p.evaluate(() => { const r = document.querySelector('.pg-tabs'); const t = [...r.querySelectorAll('.pg-tab')]; return { one: t.every(x => x.offsetTop === t[0].offsetTop), n: t.length, labels: t.map(x => x.textContent), sw: r.scrollWidth, cw: r.clientWidth, fade: r.className }; });
-    ok(tag + ': flikar på en rad (' + row.labels.join('/') + ')', row.one && row.labels.includes('Historik'), JSON.stringify(row));
+    ok(tag + ': flikar på en rad (' + row.labels.join('/') + ')', row.one && row.labels.includes('Historik') && !row.labels.some(l => /Filter|Notiser/.test(l)), JSON.stringify(row));
+    { const tr = await p.evaluate(() => { const r = document.querySelector('.pg-tabs').getBoundingClientRect(); const b = [...document.querySelectorAll('.pg-tools .pg-tool')].map(x => x.getBoundingClientRect()); return { n: b.length, below: b.every(x => x.top >= r.bottom - 1), same: b.length === 2 && Math.abs(b[0].top - b[1].top) < 2, inside: b.every(x => x.left >= 0 && x.right <= innerWidth + 1) }; });
+      ok(tag + ': Filter + Notiser på egen rad', tr.n === 2 && tr.below && tr.same && tr.inside, JSON.stringify(tr)); }
     // Schema/Morgon/Original/Filter/Notiser fungerar fortfarande
     for (const pn of ['morgon', 'original', 'filter', 'notis', 'schema']) {
       await p.click('[data-panel="' + pn + '"]'); await sleep(250);
-      const on = await p.evaluate(() => document.querySelector('.pg-tab.on') && document.querySelector('.pg-tab.on').getAttribute('data-panel'));
+      const on = await p.evaluate(() => { const e = document.querySelector('.pg-tab.on, .pg-tool.on'); return e && e.getAttribute('data-panel'); });
       ok(tag + ': flik ' + pn, on === pn);
     }
     ok(tag + ': fortfarande ingen Historik efter övriga flikar', (await histLoaded(p)).length === 0 && (await rpcHist(p)).length === 0);
-    if (tag === 'p412d') await p.screenshot({ path: path.join(outDir, tag + '-schema-tabs.png') });
+    if (tag === 'p412d' || tag === 'p412l' || tag === 'l915d' || tag === 't800l') await p.screenshot({ path: path.join(outDir, tag + '-schema-tabs.png') });
     await p.click('[data-panel="historik"]');
     await p.waitForSelector('.ph-kpis', { timeout: 20000 });
     await sleep(500);
