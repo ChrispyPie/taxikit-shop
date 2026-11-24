@@ -100,3 +100,12 @@ assert.match(src, /td-berra-skate/);
 assert.doesNotMatch(src, /\bhen\b/);
 assert.ok(!src.includes('if (berra) r.appendChild(berra);'));
 console.log('berra skate unit extra ok');
+
+assert.match(src, /function treeTap/);
+assert.match(src, /function nearBerra/);
+assert.match(src, /nearTap: nearBerra/);
+assert.match(src, /treeTap: treeTap/);
+assert.ok(B.treeTap && B.nearTap && B.skateBump);
+assert.match(src, /if \(skate\.on\) \{ stopSkate\(false\); return 'stop'; \}/);
+assert.doesNotMatch(src, /BERRA\.skateBump\('scen'\)/);
+console.log('berra tree-tap unit extra ok');

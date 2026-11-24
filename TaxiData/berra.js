@@ -704,6 +704,7 @@
 
   function startSkate(opts) {
     opts = opts || {};
+    if (skate.timer) { clearTimeout(skate.timer); skate.timer = 0; }
     if (skate.on || !canSkate() || !onHome() || !el.btn) return false;
     var g = rinkGeom();
     if (!g) { scheduleSkate(); return false; }
@@ -850,6 +851,22 @@
     return true;
   }
 
+  /* Tryck nära Berra (själva figuren plus en liten marginal runt). */
+  function nearBerra(clientX, clientY) {
+    var r = berraBox();
+    if (!r || clientX == null || clientY == null) return false;
+    var pad = 44;
+    return clientX >= r.left - pad && clientX <= r.right + pad &&
+      clientY >= r.top - pad && clientY <= r.bottom + pad;
+  }
+
+  /* Tryck på granen: starta åkning, eller avbryt och gå tillbaka om han redan åker. */
+  function treeTap() {
+    if (!onHome()) return false;
+    if (skate.on) { stopSkate(false); return 'stop'; }
+    return startSkate({ forced: true }) ? 'start' : false;
+  }
+
   function tick() { if (!skate.on) place(); }
 
   function start() {
@@ -893,6 +910,8 @@
     },
     isSkating: function () { return !!skate.on; },
     skateBump: skateBump,
+    treeTap: treeTap,
+    nearTap: nearBerra,
     skateLines: function () { return SKATE_LINES.slice(); },
     preview: function (text) {
       place();

@@ -643,6 +643,54 @@
     scen.setAttribute('data-rink-vb-w', String(SCEN_VB_W));
     scen.setAttribute('data-rink-vb-h', String(SCEN_VB_H));
   }
+  function origFromVb(x, y) {
+    return { x: (x - SCEN_CX) / SCEN_SCALE + 120, y: (y - SCEN_CY) / SCEN_SCALE + 136 };
+  }
+  function inTriangle(px, py, ax, ay, bx, by, cx, cy) {
+    var v0x = cx - ax, v0y = cy - ay, v1x = bx - ax, v1y = by - ay, v2x = px - ax, v2y = py - ay;
+    var den = v0x * v1y - v1x * v0y;
+    if (!den) return false;
+    var u = (v2x * v1y - v1x * v2y) / den;
+    var v = (v0x * v2y - v2x * v0y) / den;
+    return u >= 0 && v >= 0 && u + v <= 1;
+  }
+  function inTree(p) {
+    if (!p) return false;
+    var o = origFromVb(p.x, p.y);
+    if (o.x >= 110 && o.x <= 130 && o.y >= 114 && o.y <= 140) return true;
+    return inTriangle(o.x, o.y, 120, 20, 80, 128, 160, 128);
+  }
+  /* Kronan, ovanför isen: alltid gran-tryck även om Berra råkar vara nära. */
+  function inTreeCrown(p) {
+    if (!p) return false;
+    var o = origFromVb(p.x, p.y);
+    return o.y < 118 && inTree(p);
+  }
+  function scenVbPt(scen, ev) {
+    if (!scen || !scen.getBoundingClientRect || !ev) return null;
+    var r = scen.getBoundingClientRect();
+    if (!r.width || !r.height) return null;
+    return { x: (ev.clientX - r.left) / r.width * SCEN_VB_W, y: (ev.clientY - r.top) / r.height * SCEN_VB_H };
+  }
+  function onScenTap(scen, ev) {
+    var p = scenVbPt(scen, ev);
+    var B = window.BERRA;
+    var skating = !!(B && B.isSkating && B.isSkating());
+    var near = !!(B && B.nearTap && ev && B.nearTap(ev.clientX, ev.clientY));
+    if (inTreeCrown(p)) {
+      if (B && B.treeTap) B.treeTap();
+      return 'tree';
+    }
+    if (skating && near) {
+      if (B.skateBump) B.skateBump('near');
+      return 'stunt';
+    }
+    if (inTree(p)) {
+      if (B && B.treeTap) B.treeTap();
+      return 'tree';
+    }
+    return 'none';
+  }
   function ensureScen() {
     var scen = document.getElementById('jul-scen');
     if (!allowed()) {
@@ -660,15 +708,8 @@
       var hit = scen.querySelector && scen.querySelector('.jul-scen-hit');
       if (hit) {
         hit.addEventListener('click', function (e) {
-          if (window.BERRA && BERRA.isSkating && BERRA.isSkating()) {
-            e.preventDefault();
-            if (BERRA.skateBump) BERRA.skateBump('scen');
-            return;
-          }
-          scen.classList.remove('jul-scen-pling');
-          void scen.offsetWidth;
-          scen.classList.add('jul-scen-pling');
-          setTimeout(function () { if (scen) scen.classList.remove('jul-scen-pling'); }, 700);
+          e.preventDefault();
+          onScenTap(scen, e);
         });
       }
     }
@@ -825,6 +866,9 @@
     cyclePreview: cyclePreview,
     previewKey: PREVIEW_KEY,
     rink: SCEN_RINK,
+    inTree: inTree,
+    inTreeCrown: inTreeCrown,
+    onScenTap: onScenTap,
     hemOrder: hemOrder,
     placeHomeDevices: placeHomeDevices
   };

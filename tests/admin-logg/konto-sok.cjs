@@ -23,7 +23,7 @@ assert.match(html, /Långtryck för att dölja/);
 assert.match(html, /Filter: \$\{esc\(logSokLabel\(logSok\)\)\}/);
 assert.match(html, /logExLabel\(v\)/);
 assert.match(html, /setTimeout\(function \(\) \{[\s\S]{0,80}addLogExkludera\(v\);[\s\S]{0,20}\}, 500\)/);
-assert.match(sw, /CACHE_VER = '20261124log1'/);
+assert.match(sw, /CACHE_VER = '20261124tap1'/);
 assert.match(sql, /p_exkludera text\[\]/);
 assert.match(sql, /d\.first_name/);
 assert.match(sql, /x\.actor_id ilike v_like/);
