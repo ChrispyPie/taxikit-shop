@@ -102,7 +102,7 @@
     places: Object.keys(PLACES)
   };
 
-  var st = { cane: null, canes: [], standings: [], board: [], mine: 0, myRank: 1, collectors: 0, totalRanked: 1, winner: null, hunt: false, showWin: false, season: null, me: '', flash: '', busy: false, timer: 0 };
+  var st = { cane: null, canes: [], standings: [], board: [], mine: 0, myRank: 1, collectors: 0, totalRanked: 1, findable: 0, winner: null, hunt: false, showWin: false, season: null, me: '', flash: '', busy: false, timer: 0 };
   var elCanes = {};
   var seenCaneIds = {};
   var toastReady = false;
@@ -112,7 +112,7 @@
     var l = document.createElement('link');
     l.id = 'td-polkagris-css-link';
     l.rel = 'stylesheet';
-    l.href = 'polkagris.css?v=20261124zpk1';
+    l.href = 'polkagris.css?v=20261124zpk2';
     document.head.appendChild(l);
   }
 
@@ -378,6 +378,7 @@
     if (r.total_ranked != null) st.totalRanked = r.total_ranked;
     if (r.board) st.board = r.board;
     if (r.standings) st.standings = r.standings;
+    if (r.findable != null) st.findable = r.findable;
   }
 
   function dropCane(id) {
@@ -457,10 +458,12 @@
       st.myRank = r.my_rank != null ? r.my_rank : 1;
       st.collectors = r.collectors != null ? r.collectors : 0;
       st.totalRanked = r.total_ranked != null ? r.total_ranked : Math.max(st.myRank, 1);
+      st.findable = r.findable != null ? r.findable : 0;
       st.winner = r.winner || null;
       st.me = r.me || driverId();
       mountCane();
       mountCount();
+      syncFindable();
       maybeShowWinnerModal();
       return r;
     }).catch(function () { return null; });
@@ -470,6 +473,7 @@
     refresh();
     mountCane();
     mountCount();
+    syncFindable();
   }
 
   function start() {
@@ -506,6 +510,32 @@
       line += ' Tävlingen är slut.';
     }
     return line;
+  }
+
+  function findableText() {
+    if (!st.hunt) return '';
+    var n = st.findable == null ? 0 : st.findable;
+    var word = n === 1 ? 'polkagris' : 'polkagrisar';
+    return 'Just nu: ' + n + ' ' + word + ' att hitta 🍬';
+  }
+
+  function syncFindable() {
+    var el = document.querySelector('.td-pk-now');
+    var text = findableText();
+    if (!text) {
+      if (el && el.parentNode) el.parentNode.removeChild(el);
+      return;
+    }
+    if (el) {
+      el.textContent = text;
+      return;
+    }
+    var jakt = document.querySelector('.td-adv-jakt h2');
+    if (!jakt || !jakt.parentNode) return;
+    el = document.createElement('p');
+    el.className = 'td-pk-now';
+    el.textContent = text;
+    jakt.insertAdjacentElement('afterend', el);
   }
 
   function boardHtml() {
@@ -717,6 +747,8 @@
     caneIconHtml: caneIconHtml,
     boardHtml: boardHtml,
     leadText: leadText,
+    findableText: findableText,
+    syncFindable: syncFindable,
     rulesHtml: rulesHtml,
     openRules: openRules,
     closeRules: closeRules,

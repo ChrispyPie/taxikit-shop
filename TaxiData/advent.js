@@ -804,8 +804,10 @@
     var body = window.POLKAGRIS && POLKAGRIS.boardHtml ? POLKAGRIS.boardHtml() : '<p class="td-adv-muted">Topplistan laddas…</p>';
     var lead = window.POLKAGRIS && POLKAGRIS.leadText ? POLKAGRIS.leadText() :
       'Hitta polkagrisar i appen. Tävlingen pågår 1–31 december.';
+    var nowLine = window.POLKAGRIS && POLKAGRIS.findableText ? POLKAGRIS.findableText() : '';
     return '<section class="td-adv-jakt">' +
       '<h2>Polkagrisjakten</h2>' +
+      (nowLine ? '<p class="td-pk-now">' + esc(nowLine) + '</p>' : '') +
       '<p class="td-pk-lead">' + esc(lead) + '</p>' +
       '<p class="td-pk-rules-wrap"><button type="button" class="td-pk-rules-link" data-pk-rules>Spelregler</button></p>' +
       body +
