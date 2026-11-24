@@ -560,6 +560,14 @@
     putInApp(g, rad || content);
     g.hidden = false;
     g.classList.add('jul-on');
+    var hdr = headerEl();
+    if (hdr && hdr.getBoundingClientRect) {
+      var hh = Math.round(hdr.getBoundingClientRect().height);
+      if (hh > 0) {
+        try { document.documentElement.style.setProperty('--jul-hdr-h', hh + 'px'); } catch (eH) {}
+      }
+    }
+    syncSidaTop();
     var w = 390;
     var src = headerEl() || g || appEl();
     if (src && src.getBoundingClientRect) {
