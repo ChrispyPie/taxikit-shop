@@ -480,8 +480,11 @@
     var zones = loadZones();
     var html = '<div class="pg-card"><h3>Kategorier att visa</h3>' +
       '<p class="pg-muted">Barnstol och babyskydd är tillval på en bilbokning. Spalterna visar bilarna som har tillvalet, och bilens ruta får en liten markering. Antalet per zon räknar bara bilar.</p><div class="pg-chips">';
+    // Alla först, som för zoner (t1833u): Alla tänd = alla kategorier visas; tryck på en kategori = bara den, flera går att lägga till.
+    var allCats = cats.length >= ALL_CATS.length;
+    html += '<button type="button" class="pg-chip' + (allCats ? ' on' : '') + '" data-cat="*">Alla</button>';
     ALL_CATS.forEach(function (c) {
-      var on = cats.indexOf(c.k) >= 0;
+      var on = !allCats && cats.indexOf(c.k) >= 0;
       html += '<button type="button" class="pg-chip' + (on ? ' on' : '') + '" data-cat="' + c.k + '">' +
         esc(c.label) + '</button>';
     });
@@ -2683,11 +2686,13 @@
     root.querySelectorAll('[data-cat]').forEach(function (btn) {
       btn.onclick = function () {
         var k = btn.getAttribute('data-cat');
+        if (k === '*') { saveCats(ALL_CAT_KEYS.slice()); paint(); return; }
         var cats = loadCats();
+        if (cats.length >= ALL_CATS.length) cats = [];   // från Alla: tryck = bara den kategorin
         var i = cats.indexOf(k);
-        if (i >= 0) { if (cats.length > 1) cats.splice(i, 1); }
+        if (i >= 0) cats.splice(i, 1);
         else cats.push(k);
-        saveCats(cats);
+        saveCats(cats.length ? cats : ALL_CAT_KEYS.slice());   // sista bort = Alla igen
         paint();
       };
     });
