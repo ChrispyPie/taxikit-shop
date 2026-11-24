@@ -19,6 +19,9 @@ window.CHANGELOG = [
     ['Nytt', 'Adventskalender: 24 luckor med taxifakta, en för varje dag i december. Kalendern sitter litet uppe till vänster på startsidan. Tryck så växer den fram i mitten. Öppna dagens lucka – och alla du missat hittills.'],
     ['Nytt', 'Polkagrisjakt: du får två egna polkagrisar per arbetspass, som bara du kan ta. Samtidigt kan upp till tre delade polkagrisar vara ute i appen; en ny kan dyka upp även om de gamla inte är tagna, och den som trycker först tar den. De försvinner efter 45 minuter om ingen tar dem, och kommer oftare på natten. Ibland syns en gyllene polkagris värd tre poäng. Dina poäng syns som en polkagris med siffra högst upp på startsidan, till höger om ljusstaken. Tryck där för att se din placering (inga andras namn visas). På nyårsafton presenteras vinnaren för alla.']
   ]},
+  { datum: '2026-11-24', id: '2026-11-24zmod1', tid: '15:31', rader: [
+    ['Förbättrat', 'Inloggade enheter visar nu modellnamnet på telefonen, till exempel Samsung Galaxy eller Pixel, i stället för bara Telefon. På datorn syns webbläsare och operativsystem.']
+  ]},
   { datum: '2026-11-24', id: '2026-11-24znotf1', tid: '15:17', rader: [
     ['Fixat', 'Notiser: filterknapparna fungerar nu. Tryck på t.ex. Flyg & tåg så visas bara de notiserna. Du kan välja flera samtidigt, och Allt visar allt igen. Ny knapp: Uppdateringar, för nyheter i appen.']
   ]},

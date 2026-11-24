@@ -141,15 +141,122 @@
   }
 
   var cachedLabel = '';
+  var HINT_KEY = 'taxi_device_hint';
   function cleanModel(m) {
     m = String(m == null ? '' : m).replace(/[\x00-\x1f\x7f<>]+/g, '').replace(/\s+/g, ' ').trim();
     if (!m || m.toUpperCase() === 'K' || /^(android|mobile|linux|unknown|generic)$/i.test(m)) return '';
-    return m.slice(0, 32);
+    return m.slice(0, 40);
   }
   function parseUaModel(ua) {
     var m = /;\s*Android\s+[^;)]+;\s*([^;)]+?)(?:\s+Build\/|\))/i.exec(String(ua || ''));
     return m ? cleanModel(m[1]) : '';
   }
+  /* Kort tabell: modellkod (prefix) -> vänligt namn. Okänd kod visas som den är, ev. med märkesnamn. */
+  var MODEL_NAMES = {
+    'SM-S938': 'Samsung Galaxy S25 Ultra', 'SM-S937': 'Samsung Galaxy S25 Edge',
+    'SM-S936': 'Samsung Galaxy S25+', 'SM-S931': 'Samsung Galaxy S25',
+    'SM-S928': 'Samsung Galaxy S24 Ultra', 'SM-S926': 'Samsung Galaxy S24+', 'SM-S921': 'Samsung Galaxy S24',
+    'SM-S918': 'Samsung Galaxy S23 Ultra', 'SM-S916': 'Samsung Galaxy S23+', 'SM-S911': 'Samsung Galaxy S23',
+    'SM-S908': 'Samsung Galaxy S22 Ultra', 'SM-S906': 'Samsung Galaxy S22+', 'SM-S901': 'Samsung Galaxy S22',
+    'SM-G998': 'Samsung Galaxy S21 Ultra', 'SM-G996': 'Samsung Galaxy S21+', 'SM-G991': 'Samsung Galaxy S21',
+    'SM-F966': 'Samsung Galaxy Z Fold 7', 'SM-F956': 'Samsung Galaxy Z Fold 6', 'SM-F946': 'Samsung Galaxy Z Fold 5',
+    'SM-F761': 'Samsung Galaxy Z Flip 7', 'SM-F741': 'Samsung Galaxy Z Flip 6', 'SM-F731': 'Samsung Galaxy Z Flip 5',
+    'SM-A566': 'Samsung Galaxy A56', 'SM-A556': 'Samsung Galaxy A55', 'SM-A546': 'Samsung Galaxy A54',
+    'SM-A536': 'Samsung Galaxy A53', 'SM-A366': 'Samsung Galaxy A36', 'SM-A356': 'Samsung Galaxy A35',
+    'SM-A266': 'Samsung Galaxy A26', 'SM-A256': 'Samsung Galaxy A25', 'SM-A166': 'Samsung Galaxy A16', 'SM-A155': 'Samsung Galaxy A15',
+    'SM-X216': 'Samsung Galaxy Tab A9', 'SM-X210': 'Samsung Galaxy Tab A9',
+    'SM-X205': 'Samsung Galaxy Tab A8', 'SM-X200': 'Samsung Galaxy Tab A8',
+    'SM-X516': 'Samsung Galaxy Tab S9 FE', 'SM-X510': 'Samsung Galaxy Tab S9 FE',
+    'SM-X616': 'Samsung Galaxy Tab S9 FE+', 'SM-X610': 'Samsung Galaxy Tab S9 FE+',
+    'SM-X710': 'Samsung Galaxy Tab S9', 'SM-X810': 'Samsung Galaxy Tab S9+', 'SM-X910': 'Samsung Galaxy Tab S9 Ultra',
+    'SM-X726': 'Samsung Galaxy Tab S10+', 'SM-X820': 'Samsung Galaxy Tab S10+', 'SM-X926': 'Samsung Galaxy Tab S10 Ultra',
+    'CPH2653': 'OnePlus 13', 'CPH2645': 'OnePlus 13', 'CPH2649': 'OnePlus 13R',
+    'CPH2581': 'OnePlus 12', 'CPH2573': 'OnePlus 12R', 'CPH2449': 'OnePlus 11', 'CPH2451': 'OnePlus 11R',
+    'A142': 'Nothing Phone (3)', 'A065': 'Nothing Phone (2a)', 'A063': 'Nothing Phone (2)'
+  };
+  function mapModelCode(raw) {
+    var m = cleanModel(raw);
+    if (!m) return '';
+    if (/^pixel\b/i.test(m) || /^nexus\b/i.test(m) || /^iphone\b/i.test(m) || /^ipad\b/i.test(m)) return m;
+    var key = m.toUpperCase().replace(/\s+/g, '');
+    var best = '', bestLen = 0, k;
+    for (k in MODEL_NAMES) {
+      if (!Object.prototype.hasOwnProperty.call(MODEL_NAMES, k)) continue;
+      if (key === k || key.indexOf(k) === 0) {
+        if (k.length > bestLen) { best = MODEL_NAMES[k]; bestLen = k.length; }
+      }
+    }
+    if (best) return best;
+    if (/^SM-|^GT-|^SCH-|^SGH-/.test(key)) return 'Samsung ' + m;
+    if (/^ONEPLUS|^OP5|^KB200|^LE21|^IN20/.test(key)) return /^oneplus/i.test(m) ? m : 'OnePlus ' + m;
+    if (/^CPH\d/.test(key)) return 'Oppo ' + m;
+    if (/^(REDMI|POCO|MI |M2\d{3}|2[0-9]{6,}|2208|2211|2304|2307|2311|2312|2406|2407|2410|2411)/.test(key)) return 'Xiaomi ' + m;
+    if (/^XT\d|^MOTOROLA|^MOTO/.test(key)) return /^moto/i.test(m) ? m : 'Motorola ' + m;
+    if (/^XQ-|^SO-\d|^XQX|^XPERIA/.test(key)) return /xperia/i.test(m) ? m : 'Sony Xperia';
+    if (/^A0[0-9]{2}$|^A1[0-9]{2}$|^NOTHING/.test(key)) return 'Nothing ' + m;
+    if (/^RMX|^REALME/.test(key)) return /realme/i.test(m) ? m : 'Realme ' + m;
+    if (/^HONOR|^ALI-|^ANN-|^REP-/.test(key)) return /honor/i.test(m) ? m : 'Honor ' + m;
+    if (/^ANY-|^CLS-|^HUAWEI|^LYA-|^VOG-/.test(key)) return /huawei/i.test(m) ? m : 'Huawei ' + m;
+    return m;
+  }
+  function iosName(ua, kind) {
+    var u = String(ua || '');
+    if (/ipad/i.test(u) || (kind === 'platta' && /macintosh/i.test(u) && /mobile|safari/i.test(u))) return 'iPad';
+    if (/macintosh/i.test(u) && kind === 'platta') return 'iPad';
+    if (/iphone|ipod/i.test(u)) return 'iPhone';
+    return '';
+  }
+  function browserName(ua) {
+    var u = String(ua || '');
+    if (/Edg\//.test(u)) return 'Edge';
+    if (/OPR\/|Opera\//.test(u)) return 'Opera';
+    if (/Firefox\/|FxiOS\//.test(u)) return 'Firefox';
+    if (/CriOS\/|Chrome\//.test(u) && !/Edg\//.test(u)) return 'Chrome';
+    if (/Safari\//.test(u) && !/Chrome|CriOS|Chromium|Edg|OPR|FxiOS/.test(u)) return 'Safari';
+    return '';
+  }
+  function osName(ua, platform, platformVersion) {
+    var p = String(platform || ''), u = String(ua || ''), ver = String(platformVersion || '');
+    var major = parseInt(ver, 10);
+    if (/windows/i.test(p) || /windows nt/i.test(u)) {
+      if (major >= 13) return 'Windows 11';
+      if (major >= 10 || /windows nt 10/i.test(u)) return 'Windows 10';
+      return 'Windows';
+    }
+    if (/mac/i.test(p) || /macintosh|mac os/i.test(u)) return 'macOS';
+    if (/cros|chrome os/i.test(p + ' ' + u)) return 'ChromeOS';
+    if (/android/i.test(p) || /android/i.test(u)) return major ? ('Android ' + major) : 'Android';
+    if (/linux/i.test(p) || /linux/i.test(u)) return 'Linux';
+    return p;
+  }
+  function friendlyDeviceName(raw, ua, kind, platform, platformVersion) {
+    var ios = iosName(ua, kind);
+    if (ios) return ios;
+    var mapped = mapModelCode(raw);
+    if (mapped) return mapped;
+    if (kind === 'dator') {
+      var br = browserName(ua), os = osName(ua, platform, platformVersion);
+      if (br && os) return br + ' på ' + os;
+      return br || os || '';
+    }
+    return '';
+  }
+  function readHintCache(ua) {
+    try {
+      var o = JSON.parse(localStorage.getItem(HINT_KEY) || '');
+      if (o && typeof o === 'object' && o.ua === ua) return o;
+    } catch (e) {}
+    return null;
+  }
+  function writeHintCache(ua, o) {
+    try {
+      o = o || {};
+      o.ua = ua;
+      o.at = Date.now();
+      localStorage.setItem(HINT_KEY, JSON.stringify(o));
+    } catch (e2) {}
+  }
+
   function detectDeviceKind(ua, w, h, touchPoints, uadMobile, deladOn) {
     if (deladOn) return 'platta';
     var u = String(ua || '').toLowerCase();
@@ -174,18 +281,32 @@
     var name = cleanModel(model) || (kind === 'platta' ? 'Platta' : (kind === 'dator' ? 'Dator' : 'Telefon'));
     return ico + ' ' + name;
   }
-  function getDeviceModel(ua) {
-    var fallback = parseUaModel(ua);
+  function fetchUaData(ua) {
+    var fallbackModel = parseUaModel(ua);
+    var fallback = { model: fallbackModel, platform: '', platformVersion: '' };
     try {
       var uad = navigator.userAgentData;
       if (uad && typeof uad.getHighEntropyValues === 'function') {
         return Promise.race([
-          uad.getHighEntropyValues(['model']).then(function (v) { return cleanModel(v && v.model) || fallback; }).catch(function () { return fallback; }),
-          new Promise(function (res) { setTimeout(function () { res(fallback); }, 400); })
+          uad.getHighEntropyValues(['model', 'platform', 'platformVersion']).then(function (v) {
+            v = v || {};
+            var plat = '';
+            try { plat = String((v.platform || uad.platform || '') || ''); } catch (e0) { plat = String(v.platform || ''); }
+            return {
+              model: cleanModel(v.model) || fallbackModel,
+              platform: plat,
+              platformVersion: String(v.platformVersion || '')
+            };
+          }).catch(function () { return fallback; }),
+          new Promise(function (res) { setTimeout(function () { res(fallback); }, 500); })
         ]);
       }
     } catch (e) {}
     return Promise.resolve(fallback);
+  }
+  function refreshHomeDevices() {
+    var box = document.getElementById('home-devices');
+    if (box && box.innerHTML) renderDevices(box);
   }
   function reportDevice() {
     var t = token();
@@ -197,13 +318,18 @@
     var ua = '';
     try { ua = (navigator.userAgent || '').slice(0, 200); } catch (e3) {}
     var kind = detectDeviceKind(ua, w, h, tp, uadMob, isOn());
-    return getDeviceModel(ua).then(function (model) {
-      cachedLabel = defaultLabelFor(kind, model);
-      var args = { p_token: t, p_ua: ua, p_width: w, p_height: h, p_model: model || null, p_kind: kind };
+    var cached = readHintCache(ua);
+    if (cached && cached.label) cachedLabel = cached.label;
+    return fetchUaData(ua).then(function (info) {
+      var name = friendlyDeviceName(info.model, ua, kind, info.platform, info.platformVersion);
+      cachedLabel = defaultLabelFor(kind, name);
+      writeHintCache(ua, { model: info.model, name: name, label: cachedLabel, kind: kind });
+      var args = { p_token: t, p_ua: ua, p_width: w, p_height: h, p_model: name || info.model || null, p_kind: kind };
       return Promise.resolve(window.rpc('session_set_device', args)).then(function (r) {
         if (r && r.label) cachedLabel = r.label;
+        refreshHomeDevices();
       }).catch(function () {
-        return Promise.resolve(window.rpc('session_set_device', { p_token: t, p_ua: ua, p_width: w, p_height: h })).catch(function () {});
+        return Promise.resolve(window.rpc('session_set_device', { p_token: t, p_ua: ua, p_width: w, p_height: h })).catch(function () {}).then(function () { refreshHomeDevices(); });
       });
     });
   }
@@ -404,6 +530,7 @@
 
   function onLoginSuccess() {
     /* Meddelandet sparas per förar-ID och visas efter inloggning, inte här. */
+    reportDevice();
   }
 
   function seenLabel(iso) {
@@ -590,6 +717,8 @@
     reportDevice: reportDevice,
     detectDeviceKind: detectDeviceKind,
     parseUaModel: parseUaModel,
+    mapModelCode: mapModelCode,
+    friendlyDeviceName: friendlyDeviceName,
     currentLabel: function () { return cachedLabel || (isOn() ? '🚕 Platta' : 'Enhet'); },
     check: check
   };

@@ -18,7 +18,7 @@ function boot(opts) {
     rpc(fn, args) {
       rpcs.push({ fn, args });
       if (opts.rpcHandler) return opts.rpcHandler(fn, args);
-      return Promise.resolve({ ok: true, label: '🚕 SM-X200' });
+      return Promise.resolve({ ok: true, label: '🚕 Samsung Galaxy Tab A8' });
     }
   };
   const doc = {
@@ -64,8 +64,48 @@ async function main() {
   const call = b.rpcs.find((x) => x.fn === 'session_set_device');
   assert.ok(call, 'session_set_device called');
   assert.equal(call.args.p_kind, 'platta');
-  assert.equal(call.args.p_model, 'SM-X200');
-  assert.equal(b.D.currentLabel(), '🚕 SM-X200');
+  assert.equal(call.args.p_model, 'Samsung Galaxy Tab A8');
+  assert.equal(b.D.currentLabel(), '🚕 Samsung Galaxy Tab A8');
+
+  assert.equal(D.mapModelCode('SM-S918B'), 'Samsung Galaxy S23 Ultra');
+  assert.equal(D.mapModelCode('SM-S928U'), 'Samsung Galaxy S24 Ultra');
+  assert.equal(D.mapModelCode('Pixel 8 Pro'), 'Pixel 8 Pro');
+  assert.equal(D.mapModelCode('SM-XYZ999'), 'Samsung SM-XYZ999', 'unknown Samsung code keeps raw with brand');
+  assert.equal(D.friendlyDeviceName('', 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1', 'telefon', '', ''), 'iPhone');
+  assert.equal(D.friendlyDeviceName('', 'Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1', 'platta', '', ''), 'iPad');
+  assert.equal(D.friendlyDeviceName('', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36', 'dator', 'Windows', '15.0.0'), 'Chrome på Windows 11');
+  assert.equal(D.friendlyDeviceName('', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15', 'dator', 'macOS', '15.0.0'), 'Safari på macOS');
+
+  const phone = boot({
+    local: { taxi_session: 'tok2', taxi_driver: '710022' },
+    ua: 'Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+    uad: { mobile: true, getHighEntropyValues: () => Promise.resolve({ model: 'SM-S918B', platform: 'Android', platformVersion: '14.0.0' }) },
+    screen: { width: 412, height: 915 },
+    touchPoints: 5,
+    rpcHandler(fn, args) { return Promise.resolve({ ok: true, label: '📱 Samsung Galaxy S23 Ultra' }); }
+  });
+  await phone.D.reportDevice();
+  const pcall = phone.rpcs.find((x) => x.fn === 'session_set_device');
+  assert.ok(pcall);
+  assert.equal(pcall.args.p_kind, 'telefon');
+  assert.equal(pcall.args.p_model, 'Samsung Galaxy S23 Ultra');
+  assert.equal(phone.D.currentLabel(), '📱 Samsung Galaxy S23 Ultra');
+  assert.ok(phone.ls.getItem('taxi_device_hint'), 'hint cached');
+
+  const desk = boot({
+    local: { taxi_session: 'tok3', taxi_driver: '710022' },
+    ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    uad: { mobile: false, getHighEntropyValues: () => Promise.resolve({ model: '', platform: 'Windows', platformVersion: '15.0.0' }) },
+    screen: { width: 1440, height: 900 },
+    touchPoints: 0,
+    rpcHandler(fn, args) { return Promise.resolve({ ok: true, label: '💻 Chrome på Windows 11' }); }
+  });
+  await desk.D.reportDevice();
+  const dcall = desk.rpcs.find((x) => x.fn === 'session_set_device');
+  assert.equal(dcall.args.p_kind, 'dator');
+  assert.equal(dcall.args.p_model, 'Chrome på Windows 11');
+  assert.equal(desk.D.currentLabel(), '💻 Chrome på Windows 11');
+
 
   assert.match(js, /session_rename_device/);
   assert.match(js, /data-dev-save/);
