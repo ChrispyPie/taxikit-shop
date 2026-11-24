@@ -58,6 +58,17 @@ const HIST_RE = /helgdagar\.js|prognos-historik\.(js|css)|rpc\/prognos_historik/
       window.fetch = function (url, init) {
         var u = String(url), m = u.match(/rpc\/([a-z_]+)/);
         if (m) window.__rpc.push(m[1]);
+        // Kategori-RPC:er (t1835u): dela fixturen på kategorier: 1/3 storbil, 1 barnstol-tillval (app) vid n>=5, resten app
+        var split = function (r) {
+          var n = +r.n || 0, sb = Math.floor(n / 3), bs = n >= 5 ? 1 : 0, out = [];
+          if (n - sb - bs > 0) out.push(Object.assign({}, r, { c: 'app', a: '', n: n - sb - bs }));
+          if (sb) out.push(Object.assign({}, r, { c: 'storbil', a: '', n: sb }));
+          if (bs) out.push(Object.assign({}, r, { c: 'app', a: 'barnstol', n: bs }));
+          return out;
+        };
+        var splitAll = function (rows) { return [].concat.apply([], rows.map(split)); };
+        if (/rpc\/prognos_historik_flyg_kat/.test(u)) return J({ rows: data.flyg.map(function (r) { return Object.assign({}, r, { c: 'app', a: '' }); }), cov: [] });
+        if (/rpc\/prognos_historik_kat/.test(u)) { var zk = JSON.parse(init.body).p_zone; return J({ zone: zk, rows: splitAll(data.hist[zk] || []) }); }
         if (/rpc\/prognos_historik_flyg/.test(u)) return J({ rows: data.flyg, cov: [] });
         if (/rpc\/prognos_historik/.test(u)) {
           var z = JSON.parse(init.body).p_zone;
@@ -120,7 +131,7 @@ const HIST_RE = /helgdagar\.js|prognos-historik\.(js|css)|rpc\/prognos_historik/
     ok(tag + ': aktiv flik Historik syns', st.vis);
     ok(tag + ': staplar + värmekarta', st.bars > 0 && st.hm === 168, JSON.stringify(st));
     ok(tag + ': ingen sidscroll i sidled', st.wide);
-    { const rh = await rpcHist(p); const js = (await loaded(p)).some(u => /prognos-historik\.js/.test(u)); ok(tag + ': Historik laddad vid flikbyte', js && rh.includes('prognos_historik'), 'js=' + js + ' rpc=' + rh.join(',')); }
+    { const rh = await rpcHist(p); const js = (await loaded(p)).some(u => /prognos-historik\.js/.test(u)); ok(tag + ': Historik laddad vid flikbyte', js && rh.some(n => /^prognos_historik/.test(n)), 'js=' + js + ' rpc=' + rh.join(',')); }
     { const sc = await p.evaluate(async () => { const se = document.scrollingElement; se.scrollTop = 600; await new Promise(r => setTimeout(r, 100)); const y = se.scrollTop || window.scrollY; const ins = [...document.querySelectorAll('main, #content')].map(e => e.scrollTop); return { y, ins, h: se.scrollHeight, ih: innerHeight }; });
       ok(tag + ': sidan går att rulla', sc.y > 0 || sc.ins.some(v => v > 0) || sc.h <= sc.ih + 2, JSON.stringify(sc)); await p.evaluate(() => window.scrollTo(0, 0)); }
     // flygtopplista
@@ -168,6 +179,27 @@ const HIST_RE = /helgdagar\.js|prognos-historik\.(js|css)|rpc\/prognos_historik/
       ok(tag + ': Morgon höstlov-band', await p.evaluate(() => document.querySelectorAll('rect.ph-lov').length > 0));
     }
     // tillbaka till Schema fungerar
+    // Kategorier i Historik (t1835u)
+    { const kpi = () => p.evaluate(() => ({ t: +document.querySelector('.ph-kpis b').textContent.replace(/\D/g, ''), v: document.querySelector('.ph-catsel').textContent }));
+      await p.click('[data-panel="historik"]'); await p.waitForSelector('.ph-kpis'); await p.evaluate(() => document.querySelector('[data-ph-z="293"]').click()); await sleep(300);
+      const k0 = await kpi();
+      ok(tag + ': Historik visar Alla kategorier', /Visar: Alla kategorier/.test(k0.v) && k0.t > 0, JSON.stringify(k0));
+      await p.click('.ph-catsel'); await sleep(250);
+      ok(tag + ': Visar-raden öppnar Filter', await p.evaluate(() => document.querySelector('.pg-tool.on') && document.querySelector('.pg-tool.on').getAttribute('data-panel') === 'filter'));
+      await p.evaluate(() => document.querySelector('[data-cat="storbil"]').click()); await sleep(150);
+      await p.click('[data-panel="historik"]'); await sleep(300);
+      const k1 = await kpi();
+      ok(tag + ': Storbil filtrerar Historik', /Visar: Storbil/.test(k1.v) && k1.t > 0 && k1.t < k0.t / 2, JSON.stringify([k0, k1]));
+      await p.click('[data-panel="filter"]'); await sleep(200);
+      await p.evaluate(() => document.querySelector('[data-cat="barnstol"]').click()); await sleep(150);
+      await p.click('[data-panel="historik"]'); await sleep(300);
+      const k2 = await kpi();
+      ok(tag + ': Storbil + Barnstol (tillval räknas)', /Storbil, Barnstol/.test(k2.v) && k2.t > k1.t && k2.t < k0.t, JSON.stringify([k1, k2]));
+      if (tag === 'p412d' || tag === 'p345d') { await p.evaluate(() => window.scrollTo(0, 0)); await sleep(150); await p.screenshot({ path: path.join(outDir, tag + '-hist-kat.png') }); }
+      await p.click('[data-panel="filter"]'); await sleep(200);
+      await p.evaluate(() => document.querySelector('[data-cat="*"]').click()); await sleep(150);
+      await p.click('[data-panel="historik"]'); await sleep(300);
+      ok(tag + ': Alla igen = samma som förut', (await kpi()).t === k0.t); }
     await p.click('[data-panel="schema"]'); await sleep(300);
     ok(tag + ': tillbaka till Schema', await p.evaluate(() => document.querySelector('.pg-tab.on').getAttribute('data-panel') === 'schema'));
     ok(tag + ': inga JS-fel', p._errs.length === 0, p._errs.join(' | '));

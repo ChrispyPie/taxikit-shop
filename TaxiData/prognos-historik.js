@@ -3,6 +3,9 @@
  * Dygn räknas 06–06: timmarna 00–05 hör till föregående datum (natten hör till kvällen).
  * Morgon = morgonprognosen (lämning Landvetter 292), version strax före 04:00, timmar 04–08.
  * Zon 293: flygtopplista (RPC prognos_historik_flyg, hämtas först när den visas), uppskattad koppling.
+ * Kategorier (t1835u): RPC:erna *_kat ger rader per kategori (c) och tillval (a). Förarens val i Prognos › Filter
+ *   (ctx.cats) räknas här: en bokning räknas om kategorin eller ett tillval (barnstol/babyskydd) är valt.
+ *   Filtreringen sker i telefonen, så byte av kategori kräver ingen ny hämtning. Morgonprognosen saknar kategorier.
  * Markeringar via HELGDAGAR (helgdagar.js): 🎉 helgdag/afton, 🎒 skollov, 💰 lön.
  */
 (function () {
@@ -40,13 +43,25 @@
   function short(s) { var d = pd(s); return d.getUTCDate() + '/' + (d.getUTCMonth() + 1); }
   function sum(a) { var t = 0; for (var i = 0; i < a.length; i++) t += a[i]; return t; }
   function p2(n) { return (n < 10 ? '0' : '') + n; }
+  var CHILD = { barnstol: 1, babyskydd: 1 };
+  function catMatch(cats) {
+    if (!cats) return null;
+    var sel = {}; cats.forEach(function (k) { sel[k] = 1; });
+    return function (r) {
+      if (r.c == null) return true;
+      if (sel[r.c]) return true;
+      var a = r.a ? String(r.a).split('+') : [];
+      for (var i = 0; i < a.length; i++) if (CHILD[a[i]] && sel[a[i]]) return true;
+      return false;
+    };
+  }
   function zoneOf(id) { for (var i = 0; i < ZONES.length; i++) if (ZONES[i].id === id) return ZONES[i]; return ZONES[0]; }
 
   function fetchZone(ctx, z) {
     var c = st.cache[z];
     if (st.loading[z] || (c && Date.now() - c.at < TTL)) return;
     st.loading[z] = true;
-    ctx.rpc('prognos_historik', { p_zone: z }).then(function (r) {
+    ctx.rpc(z === 'morgon' ? 'prognos_historik' : 'prognos_historik_kat', { p_zone: z }).then(function (r) {
       st.cache[z] = { at: Date.now(), rows: (r && r.rows) || [] };
       st.err[z] = null;
     }).catch(function () {
@@ -58,7 +73,7 @@
   function fetchFlights(ctx) {
     if (st.flLoading || (st.fl && Date.now() - st.fl.at < TTL)) return;
     st.flLoading = true;
-    ctx.rpc('prognos_historik_flyg', {}).then(function (r) {
+    ctx.rpc('prognos_historik_flyg_kat', {}).then(function (r) {
       st.fl = { at: Date.now(), rows: (r && r.rows) || [], cov: (r && r.cov) || [] };
       st.flErr = null;
     }).catch(function () { st.flErr = 'Flygdata kunde inte hämtas just nu.'; })
@@ -71,16 +86,18 @@
     if (!st.fl) return head + '<p class="pg-muted ph-sub">' + (st.flErr ? esc(st.flErr) : 'Laddar flyg…') + '</p></div>';
     var scope = st.flScope === 'dag' ? [selDay] : dates, set = {};
     scope.forEach(function (d) { set[d] = 1; });
-    var agg = {}, tot = 0;
+    var agg = {}, tot = 0, ok = ctx.match || function () { return true; };
     st.fl.rows.forEach(function (r) {
       var d = String(r.d).slice(0, 10);
-      if (!set[d]) return;
-      var k = r.f, a = agg[k] || (agg[k] = { f: r.f, o: r.o, n: 0, days: [] });
+      if (!set[d] || !ok(r)) return;
+      var k = r.f, a = agg[k] || (agg[k] = { f: r.f, o: r.o, n: 0, days: [], dk: {} });
       a.n += +r.n || 0; tot += +r.n || 0; if (r.o) a.o = r.o;
-      a.days.push({ d: d, l: r.l, s: r.s, n: +r.n || 0 });
+      var dk = d + ' ' + r.s;   // samma flyg samma dygn: slå ihop kategorierna
+      if (a.dk[dk]) a.dk[dk].n += +r.n || 0;
+      else a.days.push(a.dk[dk] = { d: d, l: r.l, s: r.s, n: +r.n || 0 });
     });
     var cb = 0, cm = 0;
-    st.fl.cov.forEach(function (c) { if (set[String(c.d).slice(0, 10)]) { cb += +c.b || 0; cm += +c.m || 0; } });
+    st.fl.cov.forEach(function (c) { if (set[String(c.d).slice(0, 10)] && ok(c)) { cb += +c.b || 0; cm += +c.m || 0; } });
     var list = Object.keys(agg).map(function (k) { return agg[k]; }).sort(function (a, b) { return b.n - a.n; }).slice(0, 10);
     var nd = scope.length;
     var out = head + '<div class="ph-row ph-flscope"><span class="pg-muted ph-sub">' + (st.flScope === 'dag' ? nice(selDay) : nd + ' dygn i urvalet') + '</span>' +
@@ -112,7 +129,7 @@
   }
 
   // Bygger { dag: [24 timmar] } + första datum + pågående dygn
-  function build(z, rows) {
+  function build(z, rows, match) {
     var now = nowParts(), out = {}, keys;
     if (z === 'morgon') {
       rows.forEach(function (r) {
@@ -127,8 +144,9 @@
     }
     var raw = {};
     rows.forEach(function (r) {
-      var d = String(r.d).slice(0, 10);
-      (raw[d] = raw[d] || new Array(24).fill(0))[+r.h] += +r.n || 0;
+      var d = String(r.d).slice(0, 10), a = raw[d] = raw[d] || new Array(24).fill(0);   // alla dygn finns kvar, även med filter
+      if (match && !match(r)) return;
+      a[+r.h] += +r.n || 0;
     });
     keys = Object.keys(raw).sort();
     if (!keys.length) return { d: {}, first: null, partial: null };
@@ -146,18 +164,25 @@
     var esc = ctx.esc;
     if (!st.z) { st.z = zoneOf(ctx.zone).id === ctx.zone ? ctx.zone : '293'; }
     var Z = zoneOf(st.z), isM = st.z === 'morgon';
+    var allC = ctx.allCats || [], selC = ctx.cats || [], isAll = !allC.length || selC.length >= allC.length;
+    ctx.match = isAll || isM ? null : catMatch(selC);
     fetchZone(ctx, st.z);
     var out = '<div class="ph">';
     out += '<div class="pg-ztabs ph-zones">' + ZONES.map(function (z) {
       return '<button type="button" class="pg-ztab' + (z.id === st.z ? ' on' : '') + '" data-ph-z="' + z.id + '">' + z.s + '</button>';
     }).join('') + '</div>';
     out += '<div class="ph-zname">' + (isM ? '' : 'Zon ' + Z.id + ' · ') + '<b>' + esc(Z.n) + '</b></div>';
+    var visar = isM ? 'Alla kategorier <span class="ph-note">(morgonprognosen har ingen kategoriuppdelning)</span>'
+      : isAll ? 'Alla kategorier'
+      : esc(allC.filter(function (c) { return selC.indexOf(c.k) >= 0; }).map(function (c) { return c.label; }).join(', '));
+    out += '<button type="button" class="ph-catsel' + (isAll || isM ? '' : ' ph-catsel-on') + '" data-panel="filter" aria-label="Visar kategorier, ändra i Filter">' +
+      '<span>Visar: <b>' + visar + '</b></span><span class="ph-catsel-go">Ändra ›</span></button>';
     var c = st.cache[st.z];
     if (!c) {
       out += st.err[st.z] ? '<div class="pg-warn">' + esc(st.err[st.z]) + '</div>' : '<div class="pg-card pg-muted">Laddar historik…</div>';
       return out + note() + '</div>';
     }
-    var R = build(st.z, c.rows);
+    var R = build(st.z, c.rows, ctx.match);
     var all = Object.keys(R.d).sort();
     var done = all.filter(function (s) { return s !== R.partial; });
     if (!done.length) return out + '<div class="pg-card pg-muted">Ingen historik ännu för den här zonen.</div>' + note() + '</div>';

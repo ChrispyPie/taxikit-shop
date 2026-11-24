@@ -2488,10 +2488,10 @@
   }
 
   // ---- Historik (t1809u/t1811u): laddas först när fliken öppnas ----
-  var HIST_VER = '20261124avm1';
+  var HIST_VER = '20261124hkat1';
   var histLoading = null;
   function histCtx() {
-    return { rpc: rpc, repaint: function () { if (st.panel === 'historik') paint(); }, zone: st.zoneTab, esc: esc };
+    return { rpc: rpc, repaint: function () { if (st.panel === 'historik') paint(); }, zone: st.zoneTab, esc: esc, cats: loadCats(), allCats: ALL_CATS };
   }
   function loadHistorik() {
     if (window.PROGNOS_HISTORIK) return Promise.resolve();
