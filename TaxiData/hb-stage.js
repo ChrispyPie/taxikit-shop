@@ -66,7 +66,12 @@
       '.hb-stage-scene{pointer-events:auto;cursor:pointer;position:relative;height:' + SCENE_H + 'px;z-index:2}' +
       '.hb-stage-svg{width:100%;height:' + SCENE_H + 'px;display:block;overflow:visible}' +
       '@media (max-width: 600px){' +
-      '#td-hem-scen:has(#jul-scen.jul-on),.td-hem-scen:has(#jul-scen.jul-on){--hem-fig-above:calc(min(340px, 100% - 12px) * 100 / 280);min-height:calc(min(340px, 100vw - 24px) * 262 / 280 + 16px + env(safe-area-inset-bottom, 0px))}' +
+      '#app.is-home:has(#jul-scen.jul-on) #content,#content:has(#jul-scen.jul-on){display:flex;flex-direction:column;overflow:visible}' +
+      '#app.is-home.td-has-dots:has(#jul-scen.jul-on) #content{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}' +
+      '#app.is-home:has(#jul-scen.jul-on) #content > .grid,#content:has(#jul-scen.jul-on) > .grid{order:0}' +
+      '#app.is-home:has(#jul-scen.jul-on) #content > #td-hem-scen,#app.is-home:has(#jul-scen.jul-on) #content > .td-hem-scen,#content:has(#jul-scen.jul-on) > #td-hem-scen,#content:has(#jul-scen.jul-on) > .td-hem-scen{order:1;flex:0 0 auto}' +
+      '#app.is-home:has(#jul-scen.jul-on) #content > #home-devices,#content:has(#jul-scen.jul-on) > #home-devices{order:2;flex:0 0 auto;position:relative;z-index:6;margin:8px 0 12px}' +
+      '#td-hem-scen:has(#jul-scen.jul-on),.td-hem-scen:has(#jul-scen.jul-on){--hem-fig-above:calc(min(340px, 100% - 12px) * 144 / 280);flex:0 0 auto;min-height:calc(min(340px, 100vw - 24px) * 262 / 280 + 12px);padding:4px 8px 8px;margin-top:0}' +
       '#td-hem-scen:has(#jul-scen.jul-on) > .td-berra:not(.td-berra-skate),.td-hem-scen:has(#jul-scen.jul-on) > .td-berra:not(.td-berra-skate),#td-hem-scen:has(#jul-scen.jul-on) > .td-berra-spacer,.td-hem-scen:has(#jul-scen.jul-on) > .td-berra-spacer{margin-bottom:var(--hem-fig-above)}' +
       '#td-hem-scen:has(#jul-scen.jul-on) > .hb-stage,.td-hem-scen:has(#jul-scen.jul-on) > .hb-stage{margin:0 -8px var(--hem-fig-above) 0}' +
       '}';
@@ -309,6 +314,7 @@
     row.id = 'td-hem-scen';
     row.className = 'td-berra-slot td-hem-scen';
     content.appendChild(row);
+    if (window.JULPYSSEL && JULPYSSEL.placeHomeDevices) JULPYSSEL.placeHomeDevices();
     return row;
   }
   function orderHemScen(row) {

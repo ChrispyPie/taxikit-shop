@@ -671,6 +671,28 @@
     if (window.HB_STAGE && window.HB_STAGE.ensureHemScen) return window.HB_STAGE.ensureHemScen();
     return document.getElementById('td-hem-scen') || document.querySelector('.td-berra-slot');
   }
+  function isPhoneHem() {
+    try { return !!(window.matchMedia && window.matchMedia('(max-width: 600px)').matches); } catch (e) { return false; }
+  }
+  /* Telefon + julpyssel: Inloggade enheter under isbanan. Annars (pekplatta / utan jul)
+     stannar listan under ikonerna, före scenraden. */
+  function placeHomeDevices() {
+    var content = contentEl();
+    var devices = document.getElementById('home-devices');
+    var row = document.getElementById('td-hem-scen') || document.querySelector('.td-hem-scen');
+    var scen = document.getElementById('jul-scen');
+    var julOn = !!(scen && scen.classList.contains('jul-on'));
+    if (!content || !devices || !row) return;
+    if (devices.parentNode !== content || row.parentNode !== content) return;
+    if (julOn && isPhoneHem()) {
+      if (devices.previousElementSibling !== row) {
+        if (row.nextSibling) content.insertBefore(devices, row.nextSibling);
+        else content.appendChild(devices);
+      }
+    } else if (devices.nextElementSibling !== row) {
+      content.insertBefore(devices, row);
+    }
+  }
   function hemOrder(row) {
     if (!row) return;
     var spacer = row.querySelector('.td-berra-spacer');
@@ -685,6 +707,7 @@
     for (i = 0; i < want.length; i++) {
       if (row.children[i] !== want[i]) row.insertBefore(want[i], row.children[i] || null);
     }
+    placeHomeDevices();
   }
   function layoutScen(scen) {
     scen = scen || document.getElementById('jul-scen');
@@ -794,7 +817,8 @@
     cyclePreview: cyclePreview,
     previewKey: PREVIEW_KEY,
     rink: SCEN_RINK,
-    hemOrder: hemOrder
+    hemOrder: hemOrder,
+    placeHomeDevices: placeHomeDevices
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
