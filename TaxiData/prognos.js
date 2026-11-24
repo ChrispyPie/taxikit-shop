@@ -2301,7 +2301,7 @@
   function reportBug() {
     if (st.reporting) return;
     st.reporting = true;
-    var tabName = { schema: 'Schema', morgon: 'Morgon', original: 'Original', filter: 'Filter', notis: 'Notiser', kod: 'Kod' }[st.panel] || st.panel;
+    var tabName = { schema: 'Schema', morgon: 'Morgon', historik: 'Historik', original: 'Original', filter: 'Filter', notis: 'Notiser', kod: 'Kod' }[st.panel] || st.panel;
     var z = ZONE_BY_ID[st.zoneTab] || ZONE_BY_ID['293'];
     var cats = loadCats();
     var hidden = ALL_CATS.filter(function (c) { return cats.indexOf(c.k) < 0; }).map(function (c) { return c.label; });
@@ -2357,9 +2357,10 @@
     markShown();
     // Förklaringsrutan är öppen → rita om när den stängs (annars hoppar den/försvinner under fingret)
     if (popOpen()) { st.pendingPaint = true; return; }
-    var tabs = '<div class="pg-tabs">' +
+    var tabs = '<div class="pg-tabs pg-tabs-scroll">' +
       '<button type="button" class="pg-tab' + (st.panel === 'schema' ? ' on' : '') + '" data-panel="schema">Schema</button>' +
       '<button type="button" class="pg-tab' + (st.panel === 'morgon' ? ' on' : '') + '" data-panel="morgon">Morgon</button>' +
+      '<button type="button" class="pg-tab' + (st.panel === 'historik' ? ' on' : '') + '" data-panel="historik">Historik</button>' +
       '<button type="button" class="pg-tab' + (st.panel === 'original' ? ' on' : '') + '" data-panel="original" title="Samma vy som prognos.taxigoteborg.nu">Original</button>' +
       '<button type="button" class="pg-tab' + (st.panel === 'filter' ? ' on' : '') + '" data-panel="filter">Filter</button>' +
       '<button type="button" class="pg-tab' + (st.panel === 'notis' ? ' on' : '') + '" data-panel="notis">Notiser</button>' +
@@ -2378,6 +2379,8 @@
       body += renderNotis();
     } else if (st.panel === 'morgon') {
       body += renderMorgon();
+    } else if (st.panel === 'historik') {
+      body += renderHistorik();
     } else if (st.panel === 'original') {
       body += renderOriginal();
     } else {
@@ -2407,6 +2410,7 @@
     }
     layoutFlyCallouts(st.el);
     fitTabs(st.el);
+    if (st.panel === 'historik' && window.PROGNOS_HISTORIK) window.PROGNOS_HISTORIK.bind(st.el, histCtx());
     // Notis -> rulla fram den markerade förbokningen en gång
     var fc = st.focus && !st.focus.scrolled && st.el.querySelector('#pg-focus-cell');
     if (fc) {
@@ -2415,17 +2419,86 @@
     }
   }
 
-  // Flikraden: får den inte plats på en rad → dela jämnt (3+2) i stället för en ensam flik på rad två.
+  // Flikraden (t1812u): alltid EN rad. Får flikarna inte plats går raden att svepa i sidled,
+  // aktiv flik rullas fram och en mjuk kant visar att det finns mer. Ingen radbrytning.
+  var TABS_CSS = '.pg .pg-tabs.pg-tabs-scroll{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;gap:6px;scroll-behavior:smooth;' +
+    '-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}' +
+    '.pg .pg-tabs.pg-tabs-scroll::-webkit-scrollbar{display:none}' +
+    '.pg .pg-tabs.pg-tabs-scroll .pg-tab{flex:1 0 auto;min-width:auto;white-space:nowrap;padding:6px 11px}' +
+    '.pg .pg-tabs.pg-tabs-scroll.pg-fade-r{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}' +
+    '.pg .pg-tabs.pg-tabs-scroll.pg-fade-l{-webkit-mask-image:linear-gradient(90deg,transparent,#000 28px);mask-image:linear-gradient(90deg,transparent,#000 28px)}' +
+    '.pg .pg-tabs.pg-tabs-scroll.pg-fade-l.pg-fade-r{-webkit-mask-image:linear-gradient(90deg,transparent,#000 28px,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,transparent,#000 28px,#000 calc(100% - 28px),transparent)}';
+  function tabsCss() {
+    if (document.getElementById('pg-tabs-scroll-css')) return;
+    var el = document.createElement('style');
+    el.id = 'pg-tabs-scroll-css';
+    el.textContent = TABS_CSS;
+    document.head.appendChild(el);
+  }
   function fitTabs(root) {
-    var fit = function () {
-      var row = root.querySelector('.pg-tabs');
-      if (!row) return;
-      row.classList.remove('pg-tabs-wrap');
-      var t = row.querySelectorAll('.pg-tab');
-      if (t.length && t[t.length - 1].offsetTop > t[0].offsetTop) row.classList.add('pg-tabs-wrap');
+    tabsCss();
+    var row = root.querySelector('.pg-tabs');
+    if (!row) return;
+    row.classList.remove('pg-tabs-wrap');
+    var fade = function () {
+      var max = row.scrollWidth - row.clientWidth;
+      row.classList.toggle('pg-fade-l', max > 2 && row.scrollLeft > 2);
+      row.classList.toggle('pg-fade-r', max > 2 && row.scrollLeft < max - 2);
     };
-    fit();
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+    var place = function () {
+      var on = row.querySelector('.pg-tab.on');
+      row.style.scrollBehavior = 'auto';
+      if (st.tabPanel === st.panel && st.tabScroll != null) row.scrollLeft = st.tabScroll;
+      if (on) {
+        var l = on.offsetLeft - row.offsetLeft, r = l + on.offsetWidth;
+        if (l < row.scrollLeft + 8 || r > row.scrollLeft + row.clientWidth - 8) {
+          row.scrollLeft = Math.max(0, l - (row.clientWidth - on.offsetWidth) / 2);
+        }
+      }
+      row.style.scrollBehavior = '';
+      st.tabPanel = st.panel;
+      st.tabScroll = row.scrollLeft;
+      fade();
+    };
+    row.addEventListener('scroll', function () { st.tabScroll = row.scrollLeft; fade(); }, { passive: true });
+    place();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
+  }
+
+  // ---- Historik (t1809u/t1811u): laddas först när fliken öppnas ----
+  var HIST_VER = '20261124hist1';
+  var histLoading = null;
+  function histCtx() {
+    return { rpc: rpc, repaint: function () { if (st.panel === 'historik') paint(); }, zone: st.zoneTab, esc: esc };
+  }
+  function loadHistorik() {
+    if (window.PROGNOS_HISTORIK) return Promise.resolve();
+    if (histLoading) return histLoading;
+    histLoading = new Promise(function (res, rej) {
+      var c = document.createElement('link');
+      c.rel = 'stylesheet'; c.href = 'prognos-historik.css?v=' + HIST_VER;
+      document.head.appendChild(c);
+      var add = function (src, next) {
+        var sc = document.createElement('script');
+        sc.src = src + '?v=' + HIST_VER;
+        sc.onload = next;
+        sc.onerror = function () { histLoading = null; rej(new Error('load')); };
+        document.head.appendChild(sc);
+      };
+      var go = function () { add('prognos-historik.js', function () { res(); }); };
+      if (window.HELGDAGAR) go(); else add('helgdagar.js', go);
+    });
+    return histLoading;
+  }
+  function renderHistorik() {
+    if (window.PROGNOS_HISTORIK) return window.PROGNOS_HISTORIK.html(histCtx());
+    loadHistorik().then(function () { if (st.panel === 'historik') paint(); }, function () {
+      if (st.panel === 'historik' && st.el) {
+        var b = st.el.querySelector('.ph-loading');
+        if (b) b.textContent = 'Historiken kunde inte laddas. Kontrollera nätet och försök igen.';
+      }
+    });
+    return '<div class="pg-card ph-loading pg-muted">Laddar historik…</div>';
   }
 
   // Flattest angle from horizontal at which a label of width labelW fits in colW.

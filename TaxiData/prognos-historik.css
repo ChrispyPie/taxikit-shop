@@ -1,0 +1,84 @@
+/* Prognos › Historik (laddas med fliken) */
+.ph { display: flex; flex-direction: column; gap: 10px; }
+.ph-zname { font-size: 0.9rem; color: var(--text-soft); margin-top: -4px; }
+.ph-zname b { color: var(--text); }
+.ph-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.ph-kpi { background: var(--surface); border: 1px solid var(--border-soft); border-radius: 10px; padding: 8px 6px; text-align: center; }
+.ph-kpi b { display: block; font-size: 1.2rem; color: var(--text); font-variant-numeric: tabular-nums; }
+.ph-kpi span { font-size: 0.72rem; color: var(--muted); }
+.ph-wds { display: flex; gap: 4px; }
+.ph-wd { flex: 1 1 0; min-width: 0; border: 1px solid var(--border); background: var(--surface); color: var(--text-soft); border-radius: 10px; padding: 6px 0; font-size: 0.82rem; cursor: pointer; }
+.ph-wd.on { background: var(--primary); color: var(--on-primary); border-color: var(--primary); font-weight: 700; }
+.ph-grid { display: flex; flex-direction: column; gap: 10px; }
+.ph-card h3 { margin: 0 0 2px; font-size: 1rem; color: var(--text); }
+.ph-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.ph-sub { margin: 2px 0 6px; font-size: 0.8rem; }
+.ph-note { font-size: 0.74rem; color: var(--muted); font-weight: 400; }
+.ph-foot { margin: 0; }
+.ph-svg { display: block; width: 100%; height: auto; overflow: visible; -webkit-user-select: none; user-select: none; }
+.ph-svg text { font-family: inherit; fill: var(--text); }
+.ph-svg .ph-mut { fill: var(--muted); }
+.ph-svg .ph-b { font-weight: 700; }
+.ph-svg .ph-t8 { font-size: 8.5px; } .ph-svg .ph-t9 { font-size: 9.5px; } .ph-svg .ph-t10 { font-size: 10.5px; } .ph-svg .ph-t11 { font-size: 11px; }
+.ph-grid-l { stroke: var(--border-soft); stroke-width: 1; }
+.ph-axis { stroke: var(--border); stroke-width: 1; }
+.ph-bar { fill: var(--accent); fill-opacity: 0.55; cursor: pointer; }
+.ph-bar.on { fill-opacity: 1; stroke: var(--text); stroke-width: 1.5; }
+.ph-bar.ph-red { fill: #e53e3e; }
+.ph-bar.ph-part { fill-opacity: 0.18; stroke: var(--accent); stroke-dasharray: 3 2; stroke-width: 1.2; }
+.ph-lov { fill: rgba(236, 201, 75, 0.2); }
+.ph-svg .ph-lovt { fill: #b7791f; }
+html[data-theme="dark"] .ph-svg .ph-lovt { fill: #ecc94b; }
+.ph-avg { stroke: #dd6b20; stroke-width: 1.5; stroke-dasharray: 4 3; }
+html[data-theme="dark"] .ph-avg { stroke: #f6ad55; }
+.ph-svg .ph-avgt { fill: #dd6b20; }
+html[data-theme="dark"] .ph-svg .ph-avgt { fill: #f6ad55; }
+.ph-avgline { fill: none; stroke: #dd6b20; stroke-width: 2; stroke-linejoin: round; }
+html[data-theme="dark"] .ph-avgline { stroke: #f6ad55; }
+.ph-hbar { fill: var(--accent); }
+.ph-night { fill: rgba(99, 179, 237, 0.1); }
+.ph-nightbox { fill: none; stroke: var(--accent); stroke-width: 1.2; stroke-dasharray: 3 2; }
+.ph-svg .ph-acc { fill: var(--accent); }
+.ph-hm { fill: #dd6b20; cursor: pointer; }
+html[data-theme="dark"] .ph-hm { fill: #f6ad55; }
+.ph-hm.on { stroke: var(--text); stroke-width: 1.4; }
+.ph-g0 { stop-color: #dd6b20; stop-opacity: 0.08; } .ph-g1 { stop-color: #dd6b20; stop-opacity: 1; }
+html[data-theme="dark"] .ph-g0, html[data-theme="dark"] .ph-g1 { stop-color: #f6ad55; }
+.ph-readout { font-size: 0.8rem; color: var(--text-soft); margin-top: 4px; min-height: 1.2em; }
+.ph-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 0.74rem; color: var(--text-soft); margin-top: 6px; }
+.ph-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+.ph-k-bar { background: var(--accent); } .ph-k-red { background: #e53e3e; } .ph-k-lov { background: rgba(236, 201, 75, 0.55); }
+.ph-k-avg { background: #dd6b20; height: 2px !important; vertical-align: 2px !important; }
+html[data-theme="dark"] .ph-k-avg { background: #f6ad55; }
+.ph-k-part { border: 1px dashed var(--accent); box-sizing: border-box; }
+.ph-seg { display: inline-flex; border: 1px solid var(--border); border-radius: 9px; overflow: hidden; flex-shrink: 0; }
+.ph-seg button { border: 0; background: var(--surface); color: var(--text-soft); padding: 4px 9px; font-size: 0.76rem; cursor: pointer; }
+.ph-seg button.on { background: var(--primary); color: var(--on-primary); }
+.ph-tags { margin: 2px 0 0; }
+.ph-tag { display: inline-block; font-size: 0.72rem; border-radius: 8px; padding: 1px 7px; font-weight: 600; }
+.ph-tag-red { background: rgba(229, 62, 62, 0.16); color: var(--danger-text); }
+.ph-tag-lov { background: rgba(236, 201, 75, 0.28); color: #975a16; }
+html[data-theme="dark"] .ph-tag-lov { color: #ecc94b; }
+.ph-tag-dag { background: var(--surface-soft); color: var(--text-soft); }
+.ph-up { background: rgba(72, 187, 120, 0.18); color: var(--ok); }
+.ph-dn { background: rgba(245, 101, 101, 0.16); color: var(--danger-text); }
+.ph-soon { font-size: 0.8rem; color: var(--text-soft); background: var(--surface); border: 1px solid var(--border-soft); border-radius: 10px; padding: 8px 10px; line-height: 1.5; }
+/* Liggande / bred skärm: staplar och timprofil sida vid sida */
+@media (min-width: 700px) {
+  .ph-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: start; }
+  .ph-grid > .pg-card:last-child:nth-child(odd) { grid-column: 1 / -1; max-width: 720px; justify-self: center; width: 100%; box-sizing: border-box; }
+}
+body.pg-land .ph { padding: 0 4px 8px; }
+/* Flygtopplista (uppskattat) */
+.ph-flscope { margin-top: 2px; }
+.ph-fllist { list-style: none; margin: 4px 0 0; padding: 0; }
+.ph-flrow { display: grid; grid-template-columns: 5.6em 1fr auto; grid-template-areas: "no from n" "bar bar bar"; gap: 2px 8px; align-items: baseline; padding: 6px 2px; border-top: 1px solid var(--border-soft); cursor: pointer; font-size: 0.86rem; }
+.ph-flrow:first-child { border-top: 0; }
+.ph-flrow.open { background: var(--surface-soft); border-radius: 8px; }
+.ph-flno { grid-area: no; white-space: nowrap; color: var(--text); }
+.ph-flfrom { grid-area: from; color: var(--text-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ph-fln { grid-area: n; font-variant-numeric: tabular-nums; font-weight: 700; color: var(--text); white-space: nowrap; }
+.ph-flbar { grid-area: bar; height: 5px; background: var(--surface-soft); border-radius: 3px; overflow: hidden; }
+.ph-flbar i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+.ph-fldet { list-style: none; font-size: 0.78rem; color: var(--text-soft); padding: 4px 6px 8px; line-height: 1.45; }
+.ph-flnote { margin: 6px 0 0; }
