@@ -97,6 +97,20 @@ const HIST_RE = /helgdagar\.js|prognos-historik\.(js|css)|rpc\/prognos_historik/
       const on = await p.evaluate(() => { const e = document.querySelector('.pg-tab.on, .pg-tool.on'); return e && e.getAttribute('data-panel'); });
       ok(tag + ': flik ' + pn, on === pn);
     }
+    // Kategorier: Alla-chip först, som för zoner (t1833u)
+    { await p.click('[data-panel="filter"]'); await sleep(250);
+      const cs = () => p.evaluate(() => ({ chips: [...document.querySelectorAll('[data-cat]')].map(b => b.textContent), on: [...document.querySelectorAll('[data-cat].on')].map(b => b.getAttribute('data-cat')), ls: localStorage.getItem('prognos_cats') }));
+      const cc = async k => { await p.evaluate(k => document.querySelector('[data-cat="' + k + '"]').click(), k); await sleep(150); return cs(); };
+      let c = await cs();
+      ok(tag + ': Kategorier har Alla först och tänd', c.chips[0] === 'Alla' && c.on.join() === '*', JSON.stringify(c));
+      const k1 = await p.evaluate(() => document.querySelectorAll('[data-cat]')[1].getAttribute('data-cat'));
+      const k2 = await p.evaluate(() => document.querySelectorAll('[data-cat]')[2].getAttribute('data-cat'));
+      c = await cc(k1); ok(tag + ': kategori från Alla = bara den', c.on.join() === k1, JSON.stringify(c));
+      c = await cc(k2); ok(tag + ': lägg till kategori', c.on.length === 2 && !c.on.includes('*'));
+      c = await cc('*'); ok(tag + ': Alla visar alla igen', c.on.join() === '*');
+      c = await cc(k1); c = await cc(k1); ok(tag + ': sista kategori bort = Alla', c.on.join() === '*');
+      if (tag === 'p412d') { await cc(k1); await p.screenshot({ path: path.join(outDir, tag + '-kat-en.png') }); await cc('*'); await p.screenshot({ path: path.join(outDir, tag + '-kat-alla.png') }); }
+      await p.click('[data-panel="schema"]'); await sleep(250); }
     ok(tag + ': fortfarande ingen Historik efter övriga flikar', (await histLoaded(p)).length === 0 && (await rpcHist(p)).length === 0);
     if (tag === 'p412d' || tag === 'p412l' || tag === 'l915d' || tag === 't800l') await p.screenshot({ path: path.join(outDir, tag + '-schema-tabs.png') });
     await p.click('[data-panel="historik"]');
