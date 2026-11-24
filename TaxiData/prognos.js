@@ -2485,7 +2485,7 @@
   }
 
   // ---- Historik (t1809u/t1811u): laddas först när fliken öppnas ----
-  var HIST_VER = '20261124hist1';
+  var HIST_VER = '20261124avm1';
   var histLoading = null;
   function histCtx() {
     return { rpc: rpc, repaint: function () { if (st.panel === 'historik') paint(); }, zone: st.zoneTab, esc: esc };

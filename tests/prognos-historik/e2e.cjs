@@ -114,6 +114,27 @@ const HIST_RE = /helgdagar\.js|prognos-historik\.(js|css)|rpc\/prognos_historik/
     await p.evaluate(() => document.querySelector('.ph-fl').scrollIntoView());
     await p.click('.ph-flrow'); await sleep(200);
     ok(tag + ': flyg detalj', await p.evaluate(() => !!document.querySelector('.ph-fldet') && /landade/.test(document.querySelector('.ph-fldet').textContent)));
+    // avmarkera (t1832u): flyg stängs vid tryck utanför; värmekartan: tryck igen / utanför nollställer
+    await p.evaluate(() => document.querySelector('.ph-kpis').click()); await sleep(200);
+    ok(tag + ': flyg stängs vid tryck utanför', await p.evaluate(() => !document.querySelector('.ph-fldet')));
+    const rd = () => p.evaluate(() => document.querySelector('.ph-readout').textContent);
+    const hmClick = () => p.evaluate(() => document.querySelector('rect.ph-hm[data-ph-hm="2,15"]').dispatchEvent(new MouseEvent('click', { bubbles: true })));
+    await hmClick(); await sleep(200);
+    ok(tag + ': värmekarta vald', /snitt/.test(await rd()) && await p.evaluate(() => !!document.querySelector('rect.ph-hm.on')));
+    await hmClick(); await sleep(200);
+    ok(tag + ': värmekarta avmarkeras vid nytt tryck', /Tryck på en ruta/.test(await rd()) && await p.evaluate(() => !document.querySelector('rect.ph-hm.on')));
+    await hmClick(); await sleep(200);
+    await p.evaluate(() => document.querySelector('.ph-readout').closest('.pg-card').querySelector('h3').click()); await sleep(200);
+    ok(tag + ': värmekarta avmarkeras vid tryck i kortet', /Tryck på en ruta/.test(await rd()));
+    await hmClick(); await sleep(200);
+    await p.evaluate(() => document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }))); await sleep(200);
+    ok(tag + ': värmekarta avmarkeras vid tryck utanför sidan', /Tryck på en ruta/.test(await rd()));
+    { const sel0 = await p.evaluate(() => document.querySelector('rect.ph-bar.on').getAttribute('data-ph-sel'));
+      await p.evaluate(() => { const b = document.querySelectorAll('rect.ph-bar'); b[0].dispatchEvent(new MouseEvent('click', { bubbles: true })); }); await sleep(200);
+      const sel1 = await p.evaluate(() => document.querySelector('rect.ph-bar.on').getAttribute('data-ph-sel'));
+      await p.evaluate(() => document.querySelector('rect.ph-bar.on').dispatchEvent(new MouseEvent('click', { bubbles: true }))); await sleep(200);
+      const sel2 = await p.evaluate(() => document.querySelector('rect.ph-bar.on').getAttribute('data-ph-sel'));
+      ok(tag + ': stapel tryck igen = tillbaka till förvald dag', sel1 !== sel0 && sel2 === sel0, [sel0, sel1, sel2].join(' ')); }
     await p.evaluate(() => window.scrollTo(0, 0)); await sleep(150);
     // tryck stapel
     await p.evaluate(() => { const b = document.querySelectorAll('rect.ph-bar'); b[0].dispatchEvent(new MouseEvent('click', { bubbles: true })); }); await sleep(200);
