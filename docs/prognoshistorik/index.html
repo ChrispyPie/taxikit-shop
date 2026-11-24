@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="sv" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prognos · Historik (prototyp)</title>
+<link rel="stylesheet" href="../../TaxiData/tema.css">
+<style>
+body{margin:0;font-family:"Noto Sans",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:16px}
+.top{display:flex;align-items:center;justify-content:center;position:relative;height:56px;border-bottom:1px solid var(--border-soft);background:var(--surface)}
+.top h1{margin:0;font-size:1.35rem;color:var(--primary)}
+.top .l{position:absolute;left:12px;font-size:1.5rem}
+.proto{position:absolute;right:8px;top:8px;background:#c53030;color:#fff;font-size:.66rem;font-weight:700;padding:3px 7px;border-radius:4px;letter-spacing:.04em}
+.wrap{padding:12px 14px 40px;display:flex;flex-direction:column;gap:10px}
+.tabs,.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.tab{border:1px solid var(--border);background:var(--surface);color:var(--primary);border-radius:14px;padding:6px 12px;font-size:.88rem;flex-shrink:0;cursor:pointer}
+.tab.on{background:var(--primary);color:var(--on-primary);border-color:var(--primary)}
+.tab .new{font-size:.6rem;vertical-align:top;color:#f6ad55;margin-left:2px}
+.ztab{border:1px solid var(--border);background:var(--surface);color:var(--primary);border-radius:12px;padding:5px 10px;font-size:.8rem;flex-shrink:0;cursor:pointer}
+.ztab.on{background:var(--primary);color:var(--on-primary);border-color:var(--primary)}
+.wd{flex:1;min-width:0;border:1px solid var(--border);background:var(--surface);color:var(--text-soft);border-radius:10px;padding:6px 0;font-size:.82rem;text-align:center;cursor:pointer}
+.wd.on{background:var(--primary);color:var(--on-primary);border-color:var(--primary);font-weight:700}
+.card{background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;padding:12px}
+.card h3{margin:0 0 2px;font-size:1rem}
+.sub{color:var(--muted);font-size:.8rem;margin:0 0 8px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.kpi{background:var(--surface-soft);border-radius:10px;padding:8px 6px;text-align:center}
+.kpi b{display:block;font-size:1.2rem;font-variant-numeric:tabular-nums}
+.kpi span{font-size:.7rem;color:var(--muted)}
+.zname{font-size:.9rem;color:var(--text-soft)} .zname b{color:var(--text)}
+svg text{font-family:inherit}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:.74rem;color:var(--text-soft);margin-top:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:9px;overflow:hidden;font-size:.74rem}
+.seg span{padding:3px 9px;color:var(--text-soft)} .seg span.on{background:var(--primary);color:var(--on-primary)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tag{display:inline-block;font-size:.72rem;border-radius:8px;padding:1px 7px;margin-left:4px}
+.tag.up{background:rgba(72,187,120,.18);color:var(--ok)} .tag.dn{background:rgba(245,101,101,.16);color:var(--danger-text)}
+.soon{font-size:.78rem;color:var(--text-soft);background:var(--surface-soft);border-radius:8px;padding:7px 10px}
+.note{font-size:.72rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="top"><span class="l">🏠</span><h1>Prognos</h1><span class="proto">PROTOTYP</span></div>
+<div class="wrap" id="app"></div>
+<script src="data.js"></script>
+<script>
+(function(){
+var D=window.PH_DATA, Q=new URLSearchParams(location.search);
+var ZONES=[{id:'293',s:'293',n:'Landvetter flygplats'},{id:'161',s:'161',n:'Essity'},{id:'163',s:'163',n:'Astra'},{id:'406',s:'406',n:'Volvo'},{id:'432',s:'432',n:'Volvo Cars Torslanda'},{id:'15',s:'15',n:'Hotell Draken'},{id:'morgon',s:'☀️ Morgon',n:'Morgonprognos · lämning Landvetter (292)'}];
+var WD=['Sö','Må','Ti','On','To','Fr','Lö'], WDL=['söndagar','måndagar','tisdagar','onsdagar','torsdagar','fredagar','lördagar'];
+var WDS=['sön','mån','tis','ons','tor','fre','lör'], MON=['jan','feb','mar','apr','maj','jun','jul','aug','sep','okt','nov','dec'];
+var st={z:Q.get('z')||'293',wd:Q.has('wd')?+Q.get('wd'):1,sel:Q.get('sel'),mode:Q.get('mode')||'antal',scroll:Q.get('scroll')};
+function pd(s){var p=s.split('-');return new Date(Date.UTC(+p[0],p[1]-1,+p[2]));}
+function fd(d){return d.toISOString().slice(0,10);}
+function add(s,n){var d=pd(s);d.setUTCDate(d.getUTCDate()+n);return fd(d);}
+function dow(s){return pd(s).getUTCDay();}
+function nice(s){var d=pd(s);return WDS[d.getUTCDay()]+' '+d.getUTCDate()+' '+MON[d.getUTCMonth()];}
+function short(s){var d=pd(s);return d.getUTCDate()+'/'+(d.getUTCMonth()+1);}
+// --- Helgdagar (beräknas) + Göteborgs skollov (tabell per läsår) ---
+function easter(y){var a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;return y+'-'+String(mo).padStart(2,'0')+'-'+String(da).padStart(2,'0');}
+function satBetween(y,m,d1,d2){for(var d=d1;d<=d2;d++){var s=y+'-'+m+'-'+String(d).padStart(2,'0');if(dow(s)===6)return s;}}
+var HOL={};
+[2026,2027].forEach(function(y){var e=easter(y);
+ HOL[y+'-01-01']='Nyårsdagen';HOL[y+'-01-06']='Trettondedag jul';HOL[add(e,-2)]='Långfredag';HOL[add(e,-1)]='Påskafton';HOL[e]='Påskdagen';HOL[add(e,1)]='Annandag påsk';HOL[y+'-05-01']='Första maj';HOL[add(e,39)]='Kristi himmelsfärd';HOL[y+'-06-06']='Nationaldagen';
+ var ms=satBetween(y,'06',20,26);HOL[add(ms,-1)]='Midsommarafton';HOL[ms]='Midsommardagen';
+ var ah=pd(y+'-10-31');while(ah.getUTCDay()!==6)ah.setUTCDate(ah.getUTCDate()+1);HOL[fd(ah)]='Alla helgons dag';
+ HOL[y+'-12-24']='Julafton';HOL[y+'-12-25']='Juldagen';HOL[y+'-12-26']='Annandag jul';HOL[y+'-12-31']='Nyårsafton';});
+var LOV=[['2026-10-24','2026-11-01','Höstlov'],['2026-12-19','2027-01-10','Jullov'],['2027-02-13','2027-02-21','Sportlov'],['2027-03-26','2027-04-05','Påsklov']];
+function lov(s){for(var i=0;i<LOV.length;i++)if(s>=LOV[i][0]&&s<=LOV[i][1])return LOV[i][2];return null;}
+function lon(s){return s.slice(8)==='25';}
+// --- Data: taxidygn 06–06 (natten hör till kvällens datum). Morgon: datum = morgonens datum. ---
+var HOURS=[];for(var h=6;h<30;h++)HOURS.push(h%24);
+function days(z){var raw=D.zones[z]||{},out={};var ks=Object.keys(raw).sort();
+ if(z==='morgon'){ks.forEach(function(k){out[k]=raw[k].slice();});return {d:out,first:ks[0],last:ks[ks.length-1],partial:null};}
+ var first=ks[0],last=D.today; // första datum: från 06:00; idag pågår
+ for(var s=first;s<=last;s=add(s,1)){var a=new Array(24).fill(0),r0=raw[s]||new Array(24).fill(0),r1=raw[add(s,1)]||new Array(24).fill(0);
+  for(var h=6;h<24;h++)a[h]=r0[h];for(h=0;h<6;h++)a[h]=r1[h];out[s]=a;}
+ return {d:out,first:first,last:last,partial:last};}
+function sum(a){return a.reduce(function(x,y){return x+y;},0);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function render(){
+ var Z=ZONES.filter(function(z){return z.id===st.z;})[0], isM=st.z==='morgon', R=days(st.z);
+ var all=Object.keys(R.d).sort(), done=all.filter(function(s){return s!==R.partial;});
+ var tot=sum(done.map(function(s){return sum(R.d[s]);})), avg=tot/done.length;
+ var best=done.slice().sort(function(a,b){return sum(R.d[b])-sum(R.d[a]);})[0];
+ var list=st.wd<0?done:done.filter(function(s){return dow(s)===st.wd;});
+ var wdAvg=list.length?sum(list.map(function(s){return sum(R.d[s]);}))/list.length:0;
+ if(!st.sel||list.indexOf(st.sel)<0)st.sel=list[list.length-1];
+ var H='';
+ H+='<div class="tabs"><span class="tab">Schema</span><span class="tab">Morgon</span><span class="tab on">Historik<span class="new">NY</span></span><span class="tab">Original</span><span class="tab">Filter</span><span class="tab">Notiser</span></div>';
+ H+='<div class="chips">'+ZONES.map(function(z){return '<span class="ztab'+(z.id===st.z?' on':'')+'" data-z="'+z.id+'">'+z.s+'</span>';}).join('')+'</div>';
+ H+='<div class="zname">'+(isM?'':'Zon '+Z.id+' · ')+'<b>'+esc(Z.n)+'</b></div>';
+ H+='<div class="kpis"><div class="kpi"><b>'+tot.toLocaleString('sv-SE')+'</b><span>bokningar sedan '+short(R.first)+'</span></div><div class="kpi"><b>'+Math.round(avg)+'</b><span>snitt per '+(isM?'morgon':'dygn')+'</span></div><div class="kpi"><b>'+sum(R.d[best])+'</b><span>toppen '+nice(best)+'</span></div></div>';
+ H+='<div class="chips" style="gap:4px">'+[1,2,3,4,5,6,0].map(function(w){return '<span class="wd'+(st.wd===w?' on':'')+'" data-wd="'+w+'">'+WD[w]+'</span>';}).join('')+'<span class="wd'+(st.wd<0?' on':'')+'" data-wd="-1">Alla</span></div>';
+ // ---- Stapeldiagram ----
+ var W=384,Hh=190,pl=28,pr=6,pt=22,pb=34,n=list.length,max=Math.max.apply(null,list.map(function(s){return sum(R.d[s]);}).concat([1]));max=Math.ceil(max*1.12/10)*10;
+ var cw=(W-pl-pr)/n,bw=Math.min(cw*0.66,46),y=function(v){return pt+(Hh-pt-pb)*(1-v/max);};
+ var svg='<svg viewBox="0 0 '+W+' '+Hh+'" width="100%" style="display:block;overflow:visible">';
+ [0,0.5,1].forEach(function(f){var v=Math.round(max*f);svg+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="var(--border-soft)" stroke-width="1"/><text x="'+(pl-4)+'" y="'+(y(v)+3)+'" text-anchor="end" font-size="9" fill="var(--muted)">'+v+'</text>';});
+ list.forEach(function(s,i){var x=pl+cw*i+cw/2,v=sum(R.d[s]),L=lov(s),Hd=HOL[s];
+  if(L)svg+='<rect x="'+(pl+cw*i)+'" y="'+pt+'" width="'+cw+'" height="'+(Hh-pt-pb)+'" fill="rgba(236,201,75,.16)"/>';});
+ list.forEach(function(s,i){var x=pl+cw*i+cw/2,v=sum(R.d[s]),Hd=HOL[s],on=s===st.sel;
+  var col=Hd?'#e53e3e':'var(--accent)';
+  svg+='<rect data-sel="'+s+'" x="'+(x-bw/2)+'" y="'+y(v)+'" width="'+bw+'" height="'+(y(0)-y(v))+'" rx="3" fill="'+col+'" opacity="'+(on?1:0.55)+'"'+(on?' stroke="var(--text)" stroke-width="1.5"':'')+'/>';
+  if(n<=12||on)svg+='<text x="'+x+'" y="'+(y(v)-4)+'" text-anchor="middle" font-size="'+(on?10.5:9.5)+'" font-weight="'+(on?700:400)+'" fill="var(--text)">'+v+'</text>';
+  if(Hd)svg+='<text x="'+x+'" y="'+(y(v)-(n<=12||on?16:5))+'" text-anchor="middle" font-size="11">🎉</text>';
+  if(lov(s)&&(i===0||lov(list[i-1])!==lov(s)))svg+='<text x="'+(pl+cw*i+2)+'" y="'+(pt-8)+'" font-size="10" fill="#d69e2e">🎒 '+lov(s)+'</text>';
+  if(lon(s))svg+='<text x="'+x+'" y="'+(y(v)-15)+'" text-anchor="middle" font-size="10">💰</text>';
+  var lab=n<=12||on||(st.wd<0?dow(s)===1:i%2===0);
+  if(lab)svg+='<text x="'+x+'" y="'+(Hh-pb+13)+'" text-anchor="middle" font-size="9.5" fill="'+(on?'var(--text)':'var(--muted)')+'" font-weight="'+(on?700:400)+'">'+short(s)+'</text>';
+  if(st.wd<0&&lab)svg+='<text x="'+x+'" y="'+(Hh-pb+24)+'" text-anchor="middle" font-size="8.5" fill="var(--muted)">'+WD[dow(s)]+'</text>';});
+ svg+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(wdAvg)+'" y2="'+y(wdAvg)+'" stroke="#f6ad55" stroke-dasharray="4 3" stroke-width="1.5"/><text x="'+(W-pr)+'" y="'+(y(wdAvg)-4)+'" text-anchor="end" font-size="9.5" fill="#f6ad55">snitt '+Math.round(wdAvg)+'</text>';
+ svg+='</svg>';
+ var ttl=st.wd<0?'Alla '+(isM?'morgnar':'dygn'):(WDL[st.wd].charAt(0).toUpperCase()+WDL[st.wd].slice(1));
+ H+='<div class="card"><div class="row"><h3>'+ttl+' · bokningar</h3><span class="note">'+list.length+' st</span></div><p class="sub">'+(isM?'Bokade körningar 04–09 till Landvetter, enligt morgonprognosen kl ~03':'Förbokningar som syntes i prognosen. Dygn räknas 06–06, så natten hör till kvällens datum.')+'</p>'+svg+
+  '<div class="legend"><span><i style="background:var(--accent)"></i>vanlig dag</span><span><i style="background:#e53e3e"></i>🎉 helgdag/afton</span><span><i style="background:rgba(236,201,75,.45)"></i>🎒 skollov</span><span>💰 lönedag</span><span><i style="background:#f6ad55;height:2px"></i>snitt</span></div></div>';
+ // ---- Timprofil för vald dag ----
+ var dayA=R.d[st.sel],dT=sum(dayA),avgA=new Array(24).fill(0);list.forEach(function(s){R.d[s].forEach(function(v,h){avgA[h]+=v/list.length;});});var aT=sum(avgA);
+ var hrs=isM?[4,5,6,7,8]:HOURS, pct=st.mode==='andel';
+ var val=function(a,t,h){return pct?(t?a[h]/t*100:0):a[h];};
+ var mx=Math.max.apply(null,hrs.map(function(h){return Math.max(val(dayA,dT,h),val(avgA,aT,h));}).concat([1]))*1.15;
+ var W2=384,H2=150,pl2=24,pb2=22,pt2=8,cw2=(W2-pl2-4)/hrs.length,y2=function(v){return pt2+(H2-pt2-pb2)*(1-v/mx);};
+ var s2='<svg viewBox="0 0 '+W2+' '+H2+'" width="100%" style="display:block">';
+ if(!isM){var nx0=pl2+cw2*12,nx1=pl2+cw2*24;s2+='<rect x="'+nx0+'" y="'+pt2+'" width="'+(nx1-nx0)+'" height="'+(H2-pt2-pb2)+'" fill="rgba(99,179,237,.08)"/><text x="'+(nx0+4)+'" y="'+(pt2+10)+'" font-size="9" fill="var(--muted)">🌙 nattpass 18–06</text>';}
+ hrs.forEach(function(h,i){var x=pl2+cw2*i,v=val(dayA,dT,h);
+  s2+='<rect x="'+(x+cw2*0.14)+'" y="'+y2(v)+'" width="'+(cw2*0.72)+'" height="'+(y2(0)-y2(v))+'" rx="2" fill="var(--accent)"/>';
+  if(isM||i%3===0)s2+='<text x="'+(x+cw2/2)+'" y="'+(H2-pb2+13)+'" text-anchor="middle" font-size="9" fill="var(--muted)">'+String(h).padStart(2,'0')+'</text>';
+  if(isM)s2+='<text x="'+(x+cw2/2)+'" y="'+(y2(v)-4)+'" text-anchor="middle" font-size="10" fill="var(--text)">'+(pct?Math.round(v)+'%':v)+'</text>';});
+ var pts=hrs.map(function(h,i){return (pl2+cw2*i+cw2/2)+','+y2(val(avgA,aT,h));}).join(' ');
+ s2+='<polyline points="'+pts+'" fill="none" stroke="#f6ad55" stroke-width="2" stroke-linejoin="round"/>';
+ s2+='<line x1="'+pl2+'" x2="'+W2+'" y1="'+y2(0)+'" y2="'+y2(0)+'" stroke="var(--border)"/>';
+ s2+='</svg>';
+ var diff=aT?Math.round((dT/aT-1)*100):0;
+ var peak=hrs.slice().sort(function(a,b){return dayA[b]-dayA[a];})[0];
+ var tags=(HOL[st.sel]?' <span class="tag dn" style="background:rgba(229,62,62,.18)">🎉 '+HOL[st.sel]+'</span>':'')+(lov(st.sel)?' <span class="tag" style="background:rgba(236,201,75,.25);color:#d69e2e">🎒 '+lov(st.sel)+'</span>':'');
+ H+='<div class="card"><div class="row"><h3>'+nice(st.sel)+(isM?' (morgon)':'')+' · '+dT+tags+'</h3><span class="seg"><span'+(pct?'':' class="on"')+' data-m="antal">Antal</span><span'+(pct?' class="on"':'')+' data-m="andel">Andel</span></span></div>'+
+  '<p class="sub"><span class="tag '+(diff>=0?'up':'dn')+'" style="margin:0">'+(diff>=0?'+':'')+diff+' % mot snitt</span> &nbsp;Mest '+String(peak).padStart(2,'0')+'–'+String((peak+1)%24).padStart(2,'0')+' · tryck på en stapel ovan för annan dag</p>'+s2+
+  '<div class="legend"><span><i style="background:var(--accent)"></i>'+nice(st.sel)+'</span><span><i style="background:#f6ad55;height:2px"></i>snitt '+(st.wd<0?'alla dagar':WDL[st.wd])+'</span></div></div>';
+ // ---- Heatmap veckodag × timme ----
+ if(!isM){var cnt={},acc={};[1,2,3,4,5,6,0].forEach(function(w){cnt[w]=0;acc[w]=new Array(24).fill(0);});
+  done.forEach(function(s){var w=dow(s);cnt[w]++;R.d[s].forEach(function(v,h){acc[w][h]+=v;});});
+  var hm=0;Object.keys(acc).forEach(function(w){acc[w]=acc[w].map(function(v){return cnt[w]?v/cnt[w]:0;});hm=Math.max.apply(null,[hm].concat(acc[w]));});
+  var cs=14.2,lx=24,s3='<svg viewBox="0 0 '+(lx+cs*24+2)+' '+(cs*7+34)+'" width="100%" style="display:block">';
+  [1,2,3,4,5,6,0].forEach(function(w,r){s3+='<text x="0" y="'+(r*cs+cs*0.75+2)+'" font-size="9.5" fill="'+(w===st.wd?'var(--text)':'var(--muted)')+'" font-weight="'+(w===st.wd?700:400)+'">'+WD[w]+'</text>';
+   HOURS.forEach(function(h,i){var v=acc[w][h]/hm,a=v<=0?0.05:0.12+0.88*Math.pow(v,0.8);
+    s3+='<rect x="'+(lx+i*cs)+'" y="'+(r*cs+1)+'" width="'+(cs-1.5)+'" height="'+(cs-1.5)+'" rx="2.5" fill="rgba(246,173,85,'+a.toFixed(2)+')"/>';});});
+  HOURS.forEach(function(h,i){if(i%3===0)s3+='<text x="'+(lx+i*cs+cs/2)+'" y="'+(7*cs+12)+'" font-size="9" text-anchor="middle" fill="var(--muted)">'+String(h).padStart(2,'0')+'</text>';});
+  s3+='<rect x="'+(lx+12*cs-1)+'" y="0" width="'+(12*cs+1)+'" height="'+(7*cs+1.5)+'" fill="none" stroke="var(--accent)" stroke-width="1.2" stroke-dasharray="3 2" rx="3"/>';
+  s3+='<text x="'+(lx+12*cs)+'" y="'+(7*cs+27)+'" font-size="9" fill="var(--accent)">🌙 ditt nattpass 18–06</text>';
+  s3+='<text x="'+(lx)+'" y="'+(7*cs+27)+'" font-size="9" fill="var(--muted)">lite</text><rect x="'+(lx+20)+'" y="'+(7*cs+19)+'" width="60" height="9" rx="2" fill="url(#g)"/><text x="'+(lx+84)+'" y="'+(7*cs+27)+'" font-size="9" fill="var(--muted)">mycket</text>';
+  s3+='<defs><linearGradient id="g"><stop offset="0" stop-color="rgba(246,173,85,.08)"/><stop offset="1" stop-color="rgba(246,173,85,1)"/></linearGradient></defs></svg>';
+  H+='<div class="card"><h3>När är det mest? · veckodag × timme</h3><p class="sub">Snitt per timme. Mörkare = fler bokningar. Tryck på en ruta för exakt snitt.</p>'+s3+'</div>';}
+ H+='<div class="soon">📅 <b>Snart:</b> 1 advent 29/11 · 💰 lön 25/11 · 🎒 jullov 19/12–10/1 · 🎉 julafton 24/12</div>';
+ H+='<div class="note">Endast summerade antal från prognosen, inga förare eller körningar. Historik finns sedan '+short(R.first)+(isM?'':' (zonerna) ')+'och växer varje dag.</div>';
+ var app=document.getElementById('app');app.innerHTML=H;
+ app.querySelectorAll('[data-z]').forEach(function(e){e.onclick=function(){st.z=e.dataset.z;st.sel=null;render();};});
+ app.querySelectorAll('[data-wd]').forEach(function(e){e.onclick=function(){st.wd=+e.dataset.wd;st.sel=null;render();};});
+ app.querySelectorAll('[data-sel]').forEach(function(e){e.onclick=function(){st.sel=e.dataset.sel;render();};});
+ app.querySelectorAll('[data-m]').forEach(function(e){e.onclick=function(){st.mode=e.dataset.m;render();};});
+}
+render();
+})();
+</script>
+</body></html>
