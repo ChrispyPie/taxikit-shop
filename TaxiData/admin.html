@@ -2081,6 +2081,18 @@ ${renderBildtypPicker(c)}
     // Loggen hämtas 200 rader i taget (admin_log_page, filtret görs på servern). Finns inte den funktionen
     // än används admin_get_log (300 senaste) och filtret görs här.
     let logMore = false, logBusy = false, logOld = false, logNoV2 = false, logSok = '', logSeesIp = false;
+    const LOG_EX_KEY = 'taxi_admin_log_exkludera';
+    const LOG_HINT_KEY = 'taxi_admin_log_dolj_hint';
+    function loadLogExkludera() {
+      try {
+        const a = JSON.parse(localStorage.getItem(LOG_EX_KEY) || '[]');
+        return Array.isArray(a) ? a.map(x => String(x).trim()).filter(Boolean).slice(0, 50) : [];
+      } catch (err) { return []; }
+    }
+    let logExkludera = loadLogExkludera();
+    function saveLogExkludera() {
+      try { localStorage.setItem(LOG_EX_KEY, JSON.stringify(logExkludera)); } catch (err) {}
+    }
 
     // Webbläsare och system i klartext ur user agent, t.ex. 'Chrome på Android'. Hela texten visas när man håller över.
     function simpleUA(ua) {
@@ -2106,17 +2118,98 @@ ${renderBildtypPicker(c)}
     }
     function setLogSok(v) {
       logSok = (v || '').trim();
+      if (logSok && logExkludera.indexOf(logSok) >= 0) {
+        logExkludera = logExkludera.filter(x => x !== logSok);
+        saveLogExkludera();
+      }
       openLog();
+    }
+    function addLogExkludera(v) {
+      v = (v || '').trim();
+      if (!v) return;
+      if (logSok === v) logSok = '';
+      if (logExkludera.indexOf(v) < 0) {
+        logExkludera = logExkludera.concat([v]).slice(0, 50);
+        saveLogExkludera();
+      }
+      openLog();
+    }
+    function removeLogExkludera(v) {
+      logExkludera = logExkludera.filter(x => x !== v);
+      saveLogExkludera();
+      openLog();
+    }
+    function logExLabel(q) {
+      q = (q || '').trim();
+      if (/^[0-9a-f]{6,}$/i.test(q) && /[a-f]/i.test(q)) return 'Dölj ' + q.slice(0, 8);
+      return 'Dölj ' + q;
+    }
+    let logHoldTimer = null, logHoldFired = false;
+    function onLogFilterPointerDown(ev, v) {
+      if (ev.button != null && ev.button !== 0) return;
+      logHoldFired = false;
+      clearTimeout(logHoldTimer);
+      logHoldTimer = setTimeout(function () {
+        logHoldFired = true;
+        logHoldTimer = null;
+        addLogExkludera(v);
+      }, 500);
+    }
+    function onLogFilterPointerUp() {
+      clearTimeout(logHoldTimer);
+      logHoldTimer = null;
+    }
+    function onLogFilterClick(v) {
+      if (logHoldFired) { logHoldFired = false; return false; }
+      setLogSok(v);
+      return false;
+    }
+    function onLogFilterContext(ev, v) {
+      ev.preventDefault();
+      onLogFilterPointerUp();
+      logHoldFired = true;
+      addLogExkludera(v);
+      return false;
+    }
+    function logFilterLink(value, label, title) {
+      const v = esc(JSON.stringify(value));
+      const tAttr = title ? ' title="' + esc(title) + '"' : '';
+      return '<a href="#" style="color:var(--c-3182ce); -webkit-touch-callout:none; user-select:none;"' + tAttr +
+        ' onclick="return onLogFilterClick(' + v + ')"' +
+        ' onpointerdown="onLogFilterPointerDown(event, ' + v + ')"' +
+        ' onpointerup="onLogFilterPointerUp()"' +
+        ' onpointercancel="onLogFilterPointerUp()"' +
+        ' oncontextmenu="return onLogFilterContext(event, ' + v + ')">' + label + '</a>';
+    }
+    function showLogToast(msg) {
+      var el = document.getElementById('log-toast');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'log-toast';
+        el.setAttribute('role', 'status');
+        el.style.cssText = 'position:fixed;left:16px;right:16px;bottom:24px;z-index:300;background:var(--c-2d3748,#2d3748);color:#fff;padding:12px 14px;border-radius:10px;font-size:calc(14px * var(--font-scale, 1));text-align:center;box-shadow:0 4px 14px rgba(0,0,0,0.25);';
+        document.body.appendChild(el);
+      }
+      el.textContent = msg;
+      el.style.display = 'block';
+      clearTimeout(showLogToast._t);
+      showLogToast._t = setTimeout(function () { el.style.display = 'none'; }, 3500);
+    }
+    function maybeShowLogDoljHint() {
+      try { if (localStorage.getItem(LOG_HINT_KEY)) return; localStorage.setItem(LOG_HINT_KEY, '1'); }
+      catch (err) { return; }
+      showLogToast('Långtryck för att dölja');
     }
     const LOG_PAGE = 200;
     async function fetchLogPage(before) {
       const hidden = logHidden();
       const hide = LOG_GROUPS.filter(g => hidden.includes(g[0])).flatMap(g => g[2]);
-      // admin_log_page_v2: samma som admin_log_page men med IP (ägare/S admin), enhet och webbläsare, och sökning.
+      // admin_log_page_v2: IP (ägare/S admin), enhet, webbläsare, sökning på konto/IP/enhet, och p_exkludera.
       if (!logOld && !logNoV2) {
         try {
           const r = await rpc('admin_log_page_v2', { p_limit: LOG_PAGE, p_hide: hide.length ? hide : null,
-            p_before: before ? before.time : null, p_before_id: before ? before.id : null, p_sok: logSok || null });
+            p_before: before ? before.time : null, p_before_id: before ? before.id : null,
+            p_sok: logSok || null, p_exkludera: logExkludera.length ? logExkludera : null });
           if (r && Array.isArray(r.rows)) { logSeesIp = !!r.ip; return { rows: r.rows, more: !!r.more }; }
         } catch (e) {
           if (!(e.code === 'PGRST202' || /admin_log_page_v2/.test(e.message))) throw e;
@@ -2137,9 +2230,68 @@ ${renderBildtypPicker(c)}
       const rows = await rpc('admin_get_log', { p_limit: 300 });
       return { rows: rows || [], more: false };
     }
+    function logSokLabel(q) {
+      q = (q || '').trim();
+      if (!q) return '';
+      if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(q) || (q.includes(':') && /[0-9a-f:]/i.test(q))) return 'IP ' + q;
+      if (/^[0-9]{4,10}$/.test(q)) {
+        const n = plainName(q);
+        return n && n !== q ? 'Konto ' + n + ' · ' + q : 'Konto ' + q;
+      }
+      if (/^[0-9a-f]{6,}$/i.test(q) && /[a-f]/i.test(q)) return 'Enhet ' + q.slice(0, 8);
+      return 'Sök: ' + q;
+    }
+    function logAccountIds(e) {
+      const ids = [];
+      [e.actor_id, e.target_id].forEach(id => {
+        if (!id) return;
+        const s = String(id);
+        if (ids.indexOf(s) >= 0) return;
+        if (drivers[s] || /^[0-9]{4,10}$/.test(s)) ids.push(s);
+      });
+      return ids;
+    }
+    function linkifyLogAccounts(escapedText, e) {
+      const ids = logAccountIds(e).sort((a, b) => b.length - a.length);
+      ids.forEach(id => {
+        const tok = esc(id);
+        const re = new RegExp('(^|[^0-9])(' + tok.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')(?![0-9])', 'g');
+        escapedText = escapedText.replace(re, (m, pre, num) => pre + logFilterLink(id, num));
+      });
+      return escapedText;
+    }
+    function logRowMatchesSok(e, q) {
+      const s = (q || '').trim().toLowerCase();
+      if (!s) return true;
+      if (e.device && String(e.device).toLowerCase().startsWith(s)) return true;
+      if (logSeesIp && e.ip && String(e.ip).toLowerCase().startsWith(s)) return true;
+      if (e.actor_id && String(e.actor_id).toLowerCase().startsWith(s)) return true;
+      if (e.target_id && String(e.target_id).toLowerCase().startsWith(s)) return true;
+      function hay(id) {
+        if (!id) return '';
+        const d = drivers[id] || {};
+        const n = ((d.first_name || '') + ' ' + (d.last_name || d.last_initial || '')).trim().toLowerCase();
+        const short = String(plainName(id) || '').toLowerCase();
+        return n + ' ' + short;
+      }
+      return hay(e.actor_id).includes(s) || hay(e.target_id).includes(s);
+    }
+    function logRowIsExcluded(e) {
+      if (!logExkludera.length) return false;
+      return logExkludera.some(v => {
+        const s = String(v).toLowerCase();
+        if (!s) return false;
+        if (e.actor_id && String(e.actor_id).toLowerCase() === s) return true;
+        if (e.target_id && String(e.target_id).toLowerCase() === s) return true;
+        if (e.ip && String(e.ip).toLowerCase() === s) return true;
+        if (e.device && (String(e.device).toLowerCase() === s || String(e.device).toLowerCase().startsWith(s))) return true;
+        return false;
+      });
+    }
     function filterLog(rows) {
       const hidden = logHidden();
-      return rows.filter(e => !hidden.includes(logGroupOf(e.action)));
+      const client = logOld || logNoV2;
+      return rows.filter(e => !hidden.includes(logGroupOf(e.action)) && (!client || (logRowMatchesSok(e, logSok) && !logRowIsExcluded(e))));
     }
 
     async function openLog() {
@@ -2156,6 +2308,7 @@ ${renderBildtypPicker(c)}
         alert(errText(e));
       }
       render();
+      maybeShowLogDoljHint();
     }
 
     async function moreLog() {
@@ -2180,18 +2333,35 @@ ${renderBildtypPicker(c)}
       });
       h += '</div></div>';
       if (!logNoV2) {
-        const ph = logSeesIp ? 'Sök IP-adress eller enhets-id' : 'Sök enhets-id';
-        h += `<div class="section log-filter"><form onsubmit="setLogSok(this.q.value);return false;" style="display:flex; gap:8px;">
+        const ph = logSeesIp ? 'Sök konto, IP eller enhet' : 'Sök konto eller enhet';
+        h += `<div class="section log-filter"><form onsubmit="setLogSok(this.q.value);return false;" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
           <input name="q" type="search" value="${esc(logSok)}" placeholder="${ph}" autocomplete="off" autocapitalize="off" spellcheck="false" style="flex:1; min-width:0; margin:0;">
-          <button type="submit" style="width:auto; margin:0;">Sök</button>${logSok ? `<button type="button" onclick="setLogSok('')" style="width:auto; margin:0;">Rensa</button>` : ''}</form></div>`;
+          <button type="submit" style="width:auto; margin:0;">Sök</button></form>`;
+        if (logSok || logExkludera.length) {
+          h += '<div style="margin-top:10px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">';
+          if (logSok) {
+            h += `<span style="display:inline-flex; align-items:center; gap:8px; background:var(--c-ebf8ff, #ebf8ff); color:var(--c-2c5282, #2c5282); border:1px solid var(--c-90cdf4, #90cdf4); border-radius:999px; padding:4px 6px 4px 12px; font-size:calc(13px * var(--font-scale, 1));">
+              <span>Filter: ${esc(logSokLabel(logSok))}</span>
+              <button type="button" onclick="setLogSok('')" style="width:auto; margin:0; padding:2px 10px; border-radius:999px;" aria-label="Rensa filter">Rensa</button>
+            </span>`;
+          }
+          logExkludera.forEach(v => {
+            h += `<span style="display:inline-flex; align-items:center; gap:6px; background:var(--c-fff5f5, #fff5f5); color:var(--c-9b2c2c, #9b2c2c); border:1px solid var(--c-feb2b2, #feb2b2); border-radius:999px; padding:4px 6px 4px 12px; font-size:calc(13px * var(--font-scale, 1));">
+              <span>${esc(logExLabel(v))}</span>
+              <button type="button" onclick="removeLogExkludera(${esc(JSON.stringify(v))})" style="width:auto; margin:0; padding:2px 8px; border-radius:999px; background:transparent; border:0; color:inherit; font-size:1.05em; cursor:pointer;" aria-label="Ta bort ${esc(logExLabel(v))}">✕</button>
+            </span>`;
+          });
+          h += '</div>';
+        }
+        h += '</div>';
       }
       return h;
     }
 
     function logMetaLine(e) {
       const parts = [];
-      if (e.ip) parts.push(`<a href="#" style="color:var(--c-3182ce);" onclick="setLogSok(${esc(JSON.stringify(e.ip))});return false;">IP ${esc(e.ip)}</a>`);
-      if (e.device) parts.push(`<a href="#" style="color:var(--c-3182ce);" onclick="setLogSok(${esc(JSON.stringify(e.device))});return false;" title="${esc(e.device)}">Enhet ${esc(e.device.slice(0, 8))}</a>`);
+      if (e.ip) parts.push(logFilterLink(e.ip, 'IP ' + esc(e.ip)));
+      if (e.device) parts.push(logFilterLink(e.device, 'Enhet ' + esc(e.device.slice(0, 8)), e.device));
       if (e.ua) parts.push(`<span title="${esc(e.ua)}">${esc(simpleUA(e.ua))}</span>`);
       return parts.length ? `<span style="font-size:calc(12px * var(--font-scale, 1)); color:var(--c-718096);">${parts.join(' · ')}</span>` : '';
     }
@@ -2201,11 +2371,11 @@ ${renderBildtypPicker(c)}
       if (logEntries === null) { content.innerHTML = html + '<div class="section"><p style="padding:16px;">Laddar...</p></div>'; return; }
       const rows = filterLog(logEntries);
       html += '<div class="section">';
-      if (!rows.length) html += '<p style="padding:16px;">' + (logEntries.length || logHidden().length || logSok ? 'Inget att visa med de här valen.' : 'Ingen aktivitet ännu.') + '</p>';
+      if (!rows.length) html += '<p style="padding:16px;">' + (logEntries.length || logHidden().length || logSok || logExkludera.length ? 'Inget att visa med de här valen.' : 'Ingen aktivitet ännu.') + '</p>';
       rows.forEach(e => {
         html += `<div class="row" style="flex-direction:column; align-items:flex-start; gap:2px;">
           <span style="font-size:calc(12px * var(--font-scale, 1)); color:var(--c-718096);">${esc(formatLogTime(e.time))}</span>
-          <span class="label">${esc(describeLog(e))}</span>
+          <span class="label">${linkifyLogAccounts(esc(describeLog(e)), e)}</span>
           ${logMetaLine(e)}
         </div>`;
       });
@@ -2275,4 +2445,4 @@ ${renderBildtypPicker(c)}
     loadData();
   </script>
 </body>
-</html><!-- cache-bust 1792454000 -->
+</html><!-- cache-bust 1792455000 -->
