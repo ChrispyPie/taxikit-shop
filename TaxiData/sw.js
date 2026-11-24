@@ -4,7 +4,7 @@
  *    Vid ny version rensas gamla cachar automatiskt och öppna flikar får besked ('sw-updated').
  * 2) Webbnotiser (push) för bevakade flyg/tåg/båtar och prognos (sparas i IndexedDB 'taxidata-notis').
  * Ångra: återställ föregående sw.js via backup-branch eller ta bort fetch-lyssnaren. */
-var CACHE_VER = '20261123adv16';
+var CACHE_VER = '20261123adv17';
 var CACHE_PREFIX = 'taxidata-static-';
 var CACHE_NAME = CACHE_PREFIX + CACHE_VER;
 
