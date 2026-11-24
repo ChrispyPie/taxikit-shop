@@ -13,7 +13,7 @@ const lv = fs.readFileSync(path.join(root, 'TaxiData/lazy-views.js'), 'utf8');
 const cl = fs.readFileSync(path.join(root, 'TaxiData/changelog.js'), 'utf8');
 const hem = fs.readFileSync(path.join(root, 'TaxiData/hem-ordning-core.js'), 'utf8');
 
-assert.match(sw, /CACHE_VER = '20261124adv18'/);
+assert.match(sw, /CACHE_VER = '20261124mod1'/);
 assert.match(html, /hb-stage\.js\?v=20261124adv18/);
 assert.match(lv, /hjalpbot\.js\?v=20261123adv6/);
 assert.match(lv, /"berra":\s*\["berra\.js\?v=20261123adv14"\]/);
