@@ -66,19 +66,10 @@
       '.hb-stage-scene{pointer-events:auto;cursor:pointer;position:relative;height:' + SCENE_H + 'px;z-index:2}' +
       '.hb-stage-svg{width:100%;height:' + SCENE_H + 'px;display:block;overflow:visible}' +
       '@media (max-width: 600px){' +
-      '#td-hem-scen:has(#jul-scen.jul-on),.td-hem-scen:has(#jul-scen.jul-on){min-height:calc(min(340px, 100vw - 24px) * 262 / 280 + 16px + 52px + env(safe-area-inset-bottom, 0px))}' +
-      '#td-hem-scen #jul-scen,.td-hem-scen #jul-scen{bottom:calc(env(safe-area-inset-bottom, 0px) + 8px + 52px)}' +
-      '}' +
-      '@media (max-width: 600px) and (max-height: 899px){' +
-      '#td-hem-scen:has(#jul-scen.jul-on),.td-hem-scen:has(#jul-scen.jul-on){min-height:calc(min(286px, 100vw - 24px) * 262 / 280 + 16px + 52px + env(safe-area-inset-bottom, 0px))}' +
-      '#td-hem-scen #jul-scen,.td-hem-scen #jul-scen{width:min(286px, calc(100% - 12px))}' +
-      '}' +
-      '@media (max-width: 600px) and (min-height: 900px){' +
-      '#app.is-home:has(#jul-scen.jul-on) #content{display:flex;flex-direction:column}' +
-      '#app.is-home:has(#jul-scen.jul-on) #content .grid{order:0}' +
-      '#app.is-home:has(#jul-scen.jul-on) #content #td-hem-scen,#app.is-home:has(#jul-scen.jul-on) #content .td-hem-scen{order:1}' +
-      '#app.is-home:has(#jul-scen.jul-on) #content #home-devices{order:2}' +
-      '}'
+      '#td-hem-scen:has(#jul-scen.jul-on),.td-hem-scen:has(#jul-scen.jul-on){--hem-fig-above:calc(min(340px, 100% - 12px) * 100 / 280);min-height:calc(min(340px, 100vw - 24px) * 262 / 280 + 16px + env(safe-area-inset-bottom, 0px))}' +
+      '#td-hem-scen:has(#jul-scen.jul-on) > .td-berra:not(.td-berra-skate),.td-hem-scen:has(#jul-scen.jul-on) > .td-berra:not(.td-berra-skate),#td-hem-scen:has(#jul-scen.jul-on) > .td-berra-spacer,.td-hem-scen:has(#jul-scen.jul-on) > .td-berra-spacer{margin-bottom:var(--hem-fig-above)}' +
+      '#td-hem-scen:has(#jul-scen.jul-on) > .hb-stage,.td-hem-scen:has(#jul-scen.jul-on) > .hb-stage{margin:0 -8px var(--hem-fig-above) 0}' +
+      '}';
     if (!s.parentNode) (document.head || document.documentElement).appendChild(s);
   }
 
