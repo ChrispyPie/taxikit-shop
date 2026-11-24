@@ -286,19 +286,37 @@
     return '<p class="ph-note ph-foot">Historiken börjar 3 nov (morgonprognosen 27 okt) och växer för varje dag. Bara summerade antal visas, inga förare eller enskilda bokningar.</p>';
   }
 
+  // Avmarkera (t1832u): tryck på vald ruta/flyg igen, eller var som helst utanför, så nollställs valet.
+  // Stapeln: tryck på vald dag igen = tillbaka till förvalet (senaste hela dygnet); dagkortet behöver alltid en dag.
+  var cur = null, docBound = false;
+  function clearOutside(t) {
+    var ch = false;
+    if (st.hm && !(t && t.closest && t.closest('[data-ph-hm]'))) { st.hm = null; ch = true; }
+    if (st.flOpen && !(t && t.closest && t.closest('[data-ph-fl],.ph-fldet'))) { st.flOpen = null; ch = true; }
+    return ch;
+  }
   function bind(root, ctx) {
     var box = root.querySelector('.ph');
     if (!box) return;
+    cur = { box: box, ctx: ctx };
+    if (!docBound) {
+      docBound = true;
+      document.addEventListener('click', function (e) {
+        if (!cur || !cur.box.isConnected || cur.box.contains(e.target)) return;
+        if (clearOutside(e.target)) cur.ctx.repaint();
+      });
+    }
     box.addEventListener('click', function (e) {
       var t = e.target.closest('[data-ph-z],[data-ph-wd],[data-ph-sel],[data-ph-m],[data-ph-hm],[data-ph-fs],[data-ph-fl]');
-      if (!t) return;
+      var ch = clearOutside(e.target);
+      if (!t) { if (ch) ctx.repaint(); return; }
       if (t.hasAttribute('data-ph-z')) { st.z = t.getAttribute('data-ph-z'); st.sel = null; st.hm = null; save(); }
       else if (t.hasAttribute('data-ph-wd')) { st.wd = +t.getAttribute('data-ph-wd'); st.sel = null; }
-      else if (t.hasAttribute('data-ph-sel')) { st.sel = t.getAttribute('data-ph-sel'); }
+      else if (t.hasAttribute('data-ph-sel')) { var d = t.getAttribute('data-ph-sel'); st.sel = st.sel === d ? null : d; }
       else if (t.hasAttribute('data-ph-m')) { st.mode = t.getAttribute('data-ph-m'); save(); }
       else if (t.hasAttribute('data-ph-fs')) { st.flScope = t.getAttribute('data-ph-fs'); st.flOpen = null; }
       else if (t.hasAttribute('data-ph-fl')) { var f = t.getAttribute('data-ph-fl'); st.flOpen = st.flOpen === f ? null : f; }
-      else if (t.hasAttribute('data-ph-hm')) { var p = t.getAttribute('data-ph-hm').split(','); st.hm = { w: +p[0], h: +p[1] }; }
+      else if (t.hasAttribute('data-ph-hm')) { var p = t.getAttribute('data-ph-hm').split(','), w = +p[0], h = +p[1]; st.hm = st.hm && st.hm.w === w && st.hm.h === h ? null : { w: w, h: h }; }
       ctx.repaint();
     });
     var zt = box.querySelector('.ph-zones .on');

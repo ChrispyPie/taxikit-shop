@@ -19,6 +19,9 @@ window.CHANGELOG = [
     ['Nytt', 'Adventskalender: 24 luckor med taxifakta, en för varje dag i december. Kalendern sitter litet uppe till vänster på startsidan. Tryck så växer den fram i mitten. Öppna dagens lucka – och alla du missat hittills.'],
     ['Nytt', 'Polkagrisjakt: du får två egna polkagrisar per arbetspass, som bara du kan ta. Samtidigt kan upp till tre delade polkagrisar vara ute i appen; en ny kan dyka upp även om de gamla inte är tagna, och den som trycker först tar den. De försvinner efter 45 minuter om ingen tar dem, och kommer oftare på natten. Ibland syns en gyllene polkagris värd tre poäng. Dina poäng syns som en polkagris med siffra högst upp på startsidan, till höger om ljusstaken. Tryck där för att se din placering (inga andras namn visas). På nyårsafton presenteras vinnaren för alla.']
   ]},
+  { datum: '2026-11-24', id: '2026-11-24zavm1', tid: '15:52', rader: [
+    ['Fixat', 'Prognos › Historik: en vald ruta i värmekartan avmarkeras nu om du trycker på den igen eller någon annanstans. Samma sak för en öppnad rad i flyglistan, och trycker du på vald dag i stapeldiagrammet igen går den tillbaka till senaste dygnet.']
+  ]},
   { datum: '2026-11-24', id: '2026-11-24ztap1', tid: '15:46', rader: [
     ['Förbättrat', 'På startsidan: tryck på granen så börjar Berra åka skridsko, tryck igen så åker han tillbaka. Konster gör han bara om du trycker på honom eller nära honom när han är på isen.']
   ]},
