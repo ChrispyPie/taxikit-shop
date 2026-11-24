@@ -19,6 +19,9 @@ window.CHANGELOG = [
     ['Nytt', 'Adventskalender: 24 luckor med taxifakta, en för varje dag i december. Kalendern sitter litet uppe till vänster på startsidan. Tryck så växer den fram i mitten. Öppna dagens lucka – och alla du missat hittills.'],
     ['Nytt', 'Polkagrisjakt: du får två egna polkagrisar per arbetspass, som bara du kan ta. Samtidigt kan upp till tre delade polkagrisar vara ute i appen; en ny kan dyka upp även om de gamla inte är tagna, och den som trycker först tar den. De försvinner efter 45 minuter om ingen tar dem, och kommer oftare på natten. Ibland syns en gyllene polkagris värd tre poäng. Dina poäng syns som en polkagris med siffra högst upp på startsidan, till höger om ljusstaken. Tryck där för att se din placering (inga andras namn visas). På nyårsafton presenteras vinnaren för alla.']
   ]},
+  { datum: '2026-11-24', id: '2026-11-24zpk1', tid: '16:46', rader: [
+    ['Ändrat', 'Polkagrisjakt: en enkel topplista över förare som kört de senaste 30 dagarna. Du ser bara ditt eget namn; övriga visas som plats och poäng. Spelreglerna ligger under Spelregler.']
+  ]},
   { datum: '2026-11-24', id: '2026-11-24zhkat1', tid: '16:02', rader: [
     ['Förbättrat', 'Prognos › Historik följer nu dina kategorier i Filter (t.ex. bara Storbil). Överst står vilka kategorier som räknas – tryck där för att ändra. Gäller staplar, timprofil, värmekarta och flyglistan, hela vägen bak till 3 nov.']
   ]},

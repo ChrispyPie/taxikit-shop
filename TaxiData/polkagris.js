@@ -102,7 +102,7 @@
     places: Object.keys(PLACES)
   };
 
-  var st = { cane: null, canes: [], board: [], mine: 0, myRank: 1, collectors: 0, totalRanked: 1, winner: null, hunt: false, showWin: false, season: null, me: '', flash: '', busy: false, timer: 0 };
+  var st = { cane: null, canes: [], standings: [], board: [], mine: 0, myRank: 1, collectors: 0, totalRanked: 1, winner: null, hunt: false, showWin: false, season: null, me: '', flash: '', busy: false, timer: 0 };
   var elCanes = {};
   var seenCaneIds = {};
   var toastReady = false;
@@ -112,7 +112,7 @@
     var l = document.createElement('link');
     l.id = 'td-polkagris-css-link';
     l.rel = 'stylesheet';
-    l.href = 'polkagris.css?v=20261123adv13';
+    l.href = 'polkagris.css?v=20261124zpk1';
     document.head.appendChild(l);
   }
 
@@ -377,6 +377,7 @@
     if (r.collectors != null) st.collectors = r.collectors;
     if (r.total_ranked != null) st.totalRanked = r.total_ranked;
     if (r.board) st.board = r.board;
+    if (r.standings) st.standings = r.standings;
   }
 
   function dropCane(id) {
@@ -449,6 +450,7 @@
       st.showWin = !!r.show_winner;
       st.canes = r.canes || (r.cane ? [r.cane] : []);
       st.cane = st.canes[0] || null;
+      st.standings = r.standings || [];
       st.board = r.board || [];
       noteNewCanes(st.canes);
       st.mine = r.mine || 0;
@@ -491,25 +493,76 @@
     mountCount();
   }
 
-  function boardHtml() {
-    var rank = st.myRank || 1;
-    var count = st.mine || 0;
-    var total = st.totalRanked || Math.max(rank, 1);
-    var collectors = st.collectors || 0;
-    var badge = (count > 0 && rank <= 3) ? ['🥇', '🥈', '🥉'][rank - 1] : (rank + '.');
-    var html = '<ol class="td-pk-board td-pk-own">' +
-      '<li class="td-pk-row mine">' +
-        '<span class="td-pk-rank">' + badge + '</span>' +
-        '<span class="td-pk-name">Du (plats ' + rank + ' av ' + total + ')</span>' +
-        '<span class="td-pk-count">' + esc(String(count)) + ' poäng</span>' +
-      '</li>' +
-    '</ol>';
-    if (!collectors) {
-      html += '<p class="td-adv-muted">Ingen har tagit någon polkagris ännu. Håll ögonen öppna i appen – egna, delade och ibland gyllene klubbor dyker upp på olika sidor.</p>';
-    } else {
-      html += '<p class="td-adv-muted">' + collectors + ' förare har samlat minst en polkagris hittills. Andras namn visas inte.</p>';
+  function leadText() {
+    var t = today();
+    var year = t.m === 1 ? t.y - 1 : t.y;
+    var line = 'Hitta polkagrisar i appen. Tävlingen pågår 1–31 december ' + year + '.';
+    if (t.m === 12 && t.d < 31) {
+      var n = 31 - t.d;
+      line += ' ' + n + (n === 1 ? ' dag kvar.' : ' dagar kvar.');
+    } else if (t.m === 12 && t.d >= 31) {
+      line += ' Sista dagen.';
+    } else if (showWinner(t)) {
+      line += ' Tävlingen är slut.';
     }
+    return line;
+  }
+
+  function boardHtml() {
+    var rows = st.standings || [];
+    if (!rows.length) {
+      rows = [{ rank: st.myRank || 1, points: st.mine || 0, mine: true, namn: 'Du' }];
+    }
+    var html = '<ol class="td-pk-board">';
+    rows.forEach(function (r) {
+      var rank = r.rank || 0;
+      var pts = r.points || 0;
+      if (r.mine) {
+        html += '<li class="td-pk-row mine">' +
+          '<span class="td-pk-rank">' + esc(String(rank)) + '.</span>' +
+          '<span class="td-pk-name">' + esc(r.namn || 'Du') + '</span>' +
+          '<span class="td-pk-count">' + esc(String(pts)) + ' p</span>' +
+          '</li>';
+      } else {
+        html += '<li class="td-pk-row">' +
+          '<span class="td-pk-anon">#' + esc(String(rank)) + ' · ' + esc(String(pts)) + ' p</span>' +
+          '</li>';
+      }
+    });
+    html += '</ol>';
     return html;
+  }
+
+  function rulesHtml() {
+    return '<div class="td-pk-rules-sheet" id="td-pk-rules" role="dialog" aria-modal="true" aria-labelledby="td-pk-rules-title">' +
+      '<div class="td-pk-rules-card">' +
+      '<h2 id="td-pk-rules-title">Spelregler</h2>' +
+      '<p>Du får två egna polkagrisar per arbetspass (natt 17–06 och dag 06–17). De syns bara för dig.</p>' +
+      '<p>Upp till tre delade polkagrisar kan vara ute samtidigt. En ny kan dyka upp även om de gamla inte är tagna. Den som trycker först tar den. De försvinner efter 45 minuter om ingen tar dem, och dyker upp oftare på natten än på dagen. Du kan ta högst tre delade per pass.</p>' +
+      '<p>Ibland dyker en gyllene polkagris upp. Den är värd tre poäng, och du kan ta högst en guld per dygn. Extra guld finns bland annat på Lucia, julafton och nyårsafton.</p>' +
+      '<p>Flest poäng vinner (vid lika poäng vinner den som nådde dit först). På nyårsafton presenteras vinnaren för alla med förnamn och första bokstaven i efternamnet, till exempel Christian P.</p>' +
+      '<p>Topplistan visar förare som kört minst ett pass de senaste 30 dagarna, även de med noll poäng. Du ser bara ditt eget namn. Övriga visas som plats och poäng, utan namn och utan förarnummer.</p>' +
+      '<button type="button" class="td-pk-rules-close" data-pk-rules-close>Stäng</button>' +
+      '</div></div>';
+  }
+
+  function closeRules() {
+    var m = document.getElementById('td-pk-rules');
+    if (m && m.parentNode) m.parentNode.removeChild(m);
+  }
+
+  function openRules() {
+    closeRules();
+    var wrap = document.createElement('div');
+    wrap.innerHTML = rulesHtml();
+    var el = wrap.firstChild;
+    el.addEventListener('click', function (e) {
+      if (e.target === el || (e.target.closest && e.target.closest('[data-pk-rules-close]'))) {
+        e.preventDefault();
+        closeRules();
+      }
+    });
+    document.body.appendChild(el);
   }
 
   function winSeenKey() {
@@ -663,6 +716,10 @@
     ensureJulTop: ensureJulTop,
     caneIconHtml: caneIconHtml,
     boardHtml: boardHtml,
+    leadText: leadText,
+    rulesHtml: rulesHtml,
+    openRules: openRules,
+    closeRules: closeRules,
     winnerHtml: winnerHtml,
     fireworks: fireworks,
     state: function () { return st; },
