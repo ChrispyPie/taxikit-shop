@@ -40,7 +40,7 @@ assert.match(js, /querySelector\('#app > header'\)/);
 assert.doesNotMatch(js, /document\.body \|\| document\.documentElement\)\.appendChild\(btn\)/);
 assert.match(html, /julpyssel\.css\?v=20261124adv18/);
 assert.match(html, /julpyssel\.js\?v=20261124adv18/);
-assert.match(sw, /CACHE_VER = '20261124mod1'/);
+assert.match(sw, /CACHE_VER = '20261124log1'/);
 assert.match(css, /#jul-ljus-rad/);
 assert.doesNotMatch(css, /grid-area:\s*jul/);
 assert.match(css, /border-bottom:\s*none/);
