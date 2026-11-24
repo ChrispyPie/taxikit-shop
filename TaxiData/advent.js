@@ -802,13 +802,12 @@
   }
   function jaktHtml() {
     var body = window.POLKAGRIS && POLKAGRIS.boardHtml ? POLKAGRIS.boardHtml() : '<p class="td-adv-muted">Topplistan laddas…</p>';
+    var lead = window.POLKAGRIS && POLKAGRIS.leadText ? POLKAGRIS.leadText() :
+      'Hitta polkagrisar i appen. Tävlingen pågår 1–31 december.';
     return '<section class="td-adv-jakt">' +
       '<h2>Polkagrisjakten</h2>' +
-      '<p>Du får två egna polkagrisar per arbetspass (natt 17–06 och dag 06–17). De syns bara för dig.</p>' +
-      '<p>Upp till tre delade polkagrisar kan vara ute samtidigt. En ny kan dyka upp även om de gamla inte är tagna. Den som trycker först tar den. De försvinner efter 45 minuter om ingen tar dem, och dyker upp oftare på natten än på dagen. Du kan ta högst tre delade per pass.</p>' +
-      '<p>Ibland dyker en gyllene polkagris upp. Den är värd tre poäng, och du kan ta högst en guld per dygn. Extra guld finns bland annat på Lucia, julafton och nyårsafton.</p>' +
-      '<p>Här ser du bara din egen placering och dina poäng – inga andras namn.</p>' +
-      '<p class="td-adv-muted">Flest poäng vinner (vid lika poäng vinner den som nådde dit först). På nyårsafton presenteras vinnaren för alla med förnamn och första bokstaven i efternamnet, till exempel Christian P.</p>' +
+      '<p class="td-pk-lead">' + esc(lead) + '</p>' +
+      '<p class="td-pk-rules-wrap"><button type="button" class="td-pk-rules-link" data-pk-rules>Spelregler</button></p>' +
       body +
       '</section>';
   }
@@ -831,9 +830,21 @@
       var cv = st.el.querySelector('.td-pk-fw');
       if (cv) stopFw = POLKAGRIS.fireworks(cv);
     }
+    if (st.tab === 'jakt') {
+      var mine = st.el.querySelector('.td-pk-row.mine');
+      if (mine && mine.scrollIntoView) {
+        try { mine.scrollIntoView({ block: 'nearest' }); } catch (err) {}
+      }
+    }
   }
 
   function onPageClick(e) {
+    var rules = e.target && e.target.closest && e.target.closest('[data-pk-rules]');
+    if (rules) {
+      e.preventDefault();
+      if (window.POLKAGRIS && typeof POLKAGRIS.openRules === 'function') POLKAGRIS.openRules();
+      return;
+    }
     var t = e.target && e.target.closest && e.target.closest('[data-tab]');
     if (!t) return;
     st.tab = t.getAttribute('data-tab') || 'jakt';
