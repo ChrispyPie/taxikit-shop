@@ -2362,12 +2362,10 @@
       '<button type="button" class="pg-tab' + (st.panel === 'morgon' ? ' on' : '') + '" data-panel="morgon">Morgon</button>' +
       '<button type="button" class="pg-tab' + (st.panel === 'historik' ? ' on' : '') + '" data-panel="historik">Historik</button>' +
       '<button type="button" class="pg-tab' + (st.panel === 'original' ? ' on' : '') + '" data-panel="original" title="Samma vy som prognos.taxigoteborg.nu">Original</button>' +
-      '<button type="button" class="pg-tab' + (st.panel === 'filter' ? ' on' : '') + '" data-panel="filter">Filter</button>' +
-      '<button type="button" class="pg-tab' + (st.panel === 'notis' ? ' on' : '') + '" data-panel="notis">Notiser</button>' +
       (st.status && st.status.code_needed
         ? '<button type="button" class="pg-tab' + (st.panel === 'kod' ? ' on' : '') + '" data-panel="kod">Kod</button>'
         : '') +
-      '</div>';
+      '</div>' + toolsRow();
 
     var body = '';
     if (st.err) body += '<div class="pg-warn">' + esc(st.err) + '</div>';
@@ -2419,11 +2417,32 @@
     }
   }
 
+  // Filter och Notiser på egen rad under flikarna (t1820u), så att ingen missar dem.
+  // Visar kort status: antal dolda kategorier/valda zoner och antal bevakningar.
+  function toolsRow() {
+    var cats = loadCats(), hidden = ALL_CATS.length - cats.length, zones = loadZones();
+    var fInfo = hidden ? hidden + ' dold' + (hidden > 1 ? 'a' : '') : (zones && zones.length ? zones.length + ' zon' + (zones.length > 1 ? 'er' : '') : 'alla');
+    var n = (st.watches || []).length;
+    return '<div class="pg-tools">' +
+      '<button type="button" class="pg-tool' + (st.panel === 'filter' ? ' on' : '') + '" data-panel="filter">' +
+        '<span class="pg-tool-ico" aria-hidden="true">⚙️</span>Filter<span class="pg-tool-sub">' + esc(fInfo) + '</span></button>' +
+      '<button type="button" class="pg-tool' + (st.panel === 'notis' ? ' on' : '') + '" data-panel="notis">' +
+        '<span class="pg-tool-ico" aria-hidden="true">🔔</span>Notiser<span class="pg-tool-sub">' + (n ? n + ' bevakning' + (n > 1 ? 'ar' : '') : 'av') + '</span></button>' +
+      '</div>';
+  }
+
   // Flikraden (t1812u): alltid EN rad. Får flikarna inte plats går raden att svepa i sidled,
   // aktiv flik rullas fram och en mjuk kant visar att det finns mer. Ingen radbrytning.
   var TABS_CSS = '.pg .pg-tabs.pg-tabs-scroll{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;gap:6px;scroll-behavior:smooth;' +
     '-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}' +
     '.pg .pg-tabs.pg-tabs-scroll::-webkit-scrollbar{display:none}' +
+    '.pg .pg-tools{display:flex;gap:8px;margin-top:-2px}' +
+    '.pg .pg-tool{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:6px;border:1px dashed var(--primary);background:var(--surface);color:var(--primary);border-radius:10px;padding:7px 8px;font-size:.9rem;font-weight:600;cursor:pointer;white-space:nowrap}' +
+    '.pg .pg-tool.on{background:var(--primary);color:var(--on-primary);border-style:solid}' +
+    '.pg .pg-tool-ico{font-size:1rem;line-height:1}' +
+    '.pg .pg-tool-sub{font-weight:400;font-size:.76rem;opacity:.8;overflow:hidden;text-overflow:ellipsis}' +
+    '.pg .pg-tool-sub:before{content:"· ";}' +
+    'body.pg-land .pg .pg-tools{margin-top:0}' +
     '.pg .pg-tabs.pg-tabs-scroll .pg-tab{flex:1 0 auto;min-width:auto;white-space:nowrap;padding:6px 11px}' +
     '.pg .pg-tabs.pg-tabs-scroll.pg-fade-r{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}' +
     '.pg .pg-tabs.pg-tabs-scroll.pg-fade-l{-webkit-mask-image:linear-gradient(90deg,transparent,#000 28px);mask-image:linear-gradient(90deg,transparent,#000 28px)}' +
