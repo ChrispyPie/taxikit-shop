@@ -1,4 +1,4 @@
-// Mina bevakningar (t1838u–t1840u): infobox vid tryck, Ljud och notiser i en ruta, en vy Dag → Vecka → Månad.
+// Mina bevakningar: infobox, Ljud och notiser, Dag/Vecka/Månad, verktygsrad med datumväljare.
 // Syntetiska data (fixtures.js, klockan låst 2026-11-06 18:00 svensk tid). Alla externa anrop fångas.
 // Kör: node tests/bevakningar/vyer-infobox.cjs [utmapp] [bas-url]
 const fs = require('node:fs'), path = require('node:path'), http = require('node:http'), assert = require('node:assert/strict');
@@ -32,8 +32,14 @@ let checks = 0; const fails = []; const check = (x, msg) => { if (x) { checks++;
       await p.evaluate(() => openItem('mina-bevakningar'));
       await p.waitForSelector('.mb-block');
       const noX = () => p.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1);
-      check(await p.evaluate(() => !document.querySelector('[data-mb-view]') && document.querySelector('.mb-unit b').textContent === 'Dag'), tag + ': en vy, Dag som förval (inga Tidslinje/Schema-flikar)');
-      check(await p.evaluate(() => { const u = document.querySelector('.mb-unit').getBoundingClientRect(); return u.right > innerWidth - 60; }), tag + ': vybytet uppe till höger');
+      check(await p.evaluate(() => !document.querySelector('[data-mb-view]') && !document.querySelector('.mb-day-shortcuts') && document.querySelector('.mb-unit').getAttribute('data-mb-mode') === 'dag' && !document.querySelector('.mb-unit b')), tag + ': en vy, Dag som förval, ingen textetikett på vyknappen');
+      const bar = await p.evaluate(() => {
+        const t = document.querySelector('.mb-toolbar'), u = document.querySelector('.mb-unit'), d = document.querySelector('[data-mb-pick]'), i = document.querySelector('[data-mb-today]');
+        const tb = t.getBoundingClientRect(), ub = u.getBoundingClientRect(), db = d.getBoundingClientRect(), ib = i.getBoundingClientRect();
+        return { oneRow: Math.abs(ub.top - ib.top) < 8 && Math.abs(ub.bottom - ib.bottom) < 8, leftIcon: ub.left <= tb.left + 2, dateBetween: db.left >= ub.right - 1 && ib.left >= db.right - 1, fits: ib.right <= innerWidth - 4 && tb.right <= innerWidth + 1, h: Math.round(tb.height), label: d.textContent.trim(), idag: i.textContent.trim(), mode: u.getAttribute('data-mb-mode') };
+      });
+      check(bar.oneRow && bar.leftIcon && bar.dateBetween && bar.fits && bar.h <= 52 && bar.idag === 'Idag', tag + ': verktygsrad en rad, ikon vänster, datum, Idag höger ' + JSON.stringify(bar));
+      check(bar.label === 'I dag', tag + ': datumvisaren visar I dag i dagvyn');
       // Infobox
       const openInfo = async sel => { await p.$eval(sel, e => e.scrollIntoView({ block: 'center' })); await sleep(80); await p.click(sel); await p.waitForSelector('.mb-info'); };
       const tgt = await p.evaluate(() => { const b = [...document.querySelectorAll('.mb-block-open')].find(e => /Tåg 443/.test(e.getAttribute('aria-label'))); return b ? b.getAttribute('data-mb-open') : null; });
@@ -76,26 +82,47 @@ let checks = 0; const fails = []; const check = (x, msg) => { if (x) { checks++;
       check(await noX(), tag + ': ingen sidscroll (Ljud)');
       if (tag !== 'l800d') await p.screenshot({ path: path.join(out, 'mb-ljud-' + tag + '.png') });
       await p.click('[data-mb-lj-toggle]'); await sleep(100);
+      if (tag !== 'l800d') { await p.evaluate(() => window.scrollTo(0, document.querySelector('.mb-toolbar').getBoundingClientRect().top + window.scrollY - 8)); await p.screenshot({ path: path.join(out, 'mb-verktygsrad-' + tag + '.png') }); }
+      // Datumväljare (en dag, även framtida)
+      await p.click('[data-mb-pick]'); await p.waitForSelector('#mb-cal-modal.open .pm-day');
+      const cal = await p.evaluate(() => {
+        const days = [...document.querySelectorAll('#mb-cal-modal .pm-day')];
+        const futura = days.find(b => b.getAttribute('data-mb-pm-day') === '2026-11-20');
+        const box = document.querySelector('#mb-cal-modal .pm-box');
+        const cs = getComputedStyle(box), ts = getComputedStyle(document.getElementById('mb-pm-title'));
+        return { title: document.getElementById('mb-pm-title').textContent, wds: [...document.querySelectorAll('#mb-cal-modal .pm-wd')].map(x => x.textContent).join(''), today: !!document.querySelector('#mb-cal-modal .pm-day.today.sel'), futureOn: !!(futura && !futura.disabled && !futura.classList.contains('future')), contrast: cs.backgroundColor !== ts.color, futureDay: !!futura };
+      });
+      check(cal.title === 'Nov 2026' && cal.wds === 'MåTiOnToFrLöSö' && cal.today && cal.futureOn && cal.contrast, tag + ': väljaren är en månad, idag vald, framtida dagar går att välja ' + JSON.stringify(cal));
+      if (tag !== 'l800d') await p.screenshot({ path: path.join(out, 'mb-valjare-' + tag + '.png') });
+      await p.click('#mb-cal-modal [data-mb-pm-day="2026-11-20"]'); await sleep(200);
+      check(await p.evaluate(() => !document.getElementById('mb-cal-modal').classList.contains('open') && document.querySelector('[data-mb-pick]').textContent.trim() === 'fre 20 nov'), tag + ': ett tryck väljer dagen och stänger väljaren');
+      await p.click('[data-mb-today]'); await sleep(150);
+      check(await p.evaluate(() => document.querySelector('[data-mb-pick]').textContent.trim() === 'I dag' && document.querySelector('[data-mb-today]').classList.contains('active')), tag + ': Idag går tillbaka till idag');
+      await p.click('[data-mb-pick]'); await p.waitForSelector('#mb-cal-modal.open');
+      await p.evaluate(() => document.getElementById('mb-cal-modal').click()); await sleep(120);
+      check(await p.evaluate(() => !document.getElementById('mb-cal-modal').classList.contains('open')), tag + ': tryck utanför stänger väljaren');
       // Vecka
       await p.click('[data-mb-unit]'); await sleep(200);
-      check(await p.evaluate(() => document.querySelector('.mb-unit b').textContent === 'Vecka' && document.querySelectorAll('.mb-wk-col').length === 7 && !!document.querySelector('.mb-wk-dh.today') && !!document.querySelector('.mb-wk-now')), tag + ': Vecka med 7 kolumner, i dag markerad, nu-linje');
+      check(await p.evaluate(() => document.querySelector('.mb-unit').getAttribute('data-mb-mode') === 'vecka' && document.querySelectorAll('.mb-wk-col').length === 7 && !!document.querySelector('.mb-wk-dh.today') && !!document.querySelector('.mb-wk-now') && !!document.querySelector('.mb-wk-gutter') && document.querySelectorAll('.mb-wk-hl').length === 24), tag + ': Vecka med 7 kolumner, fast timkolumn, i dag markerad, nu-linje');
+      check(await p.evaluate(() => { const h = document.querySelector('.mb-wk-head'); const d = [...h.querySelectorAll('.mb-wk-dh')]; return d.length === 7 && /mån/.test(d[0].textContent) && /sön/.test(d[6].textContent) && d.some(x => x.classList.contains('today')); }), tag + ': Vecka har veckodag+datum i huvudet, idag markerad');
       check(await noX(), tag + ': ingen sidscroll (Vecka)');
       if (tag !== 'l800d') { await p.evaluate(() => window.scrollTo(0, 0)); await p.screenshot({ path: path.join(out, 'mb-vecka-' + tag + '.png') }); }
       await p.evaluate(() => document.querySelector('.mb-wk-b').click()); await sleep(150);
       check(await p.evaluate(() => !!document.querySelector('.mb-info')), tag + ': block i Vecka öppnar infobox');
       await p.click('[data-mb-info-close]'); await sleep(100);
-      const wkLabel = await p.$eval('.mb-days b', e => e.textContent);
+      const wkLabel = await p.$eval('[data-mb-pick]', e => e.textContent.trim());
       await p.click('.mb-wk-dh.today'); await sleep(200);
-      check(await p.evaluate(() => document.querySelector('.mb-unit b').textContent === 'Dag' && /Tillbaka till vecka/.test(document.querySelector('[data-mb-backunit]').textContent)), tag + ': dag från Vecka visar Tillbaka till vecka');
+      check(await p.evaluate(() => document.querySelector('.mb-unit').getAttribute('data-mb-mode') === 'dag' && /Tillbaka till vecka/.test(document.querySelector('[data-mb-backunit]').textContent)), tag + ': dag från Vecka visar Tillbaka till vecka');
       await p.click('[data-mb-backunit]'); await sleep(150);
-      check(await p.evaluate(() => document.querySelector('.mb-unit b').textContent) === 'Vecka' && (await p.$eval('.mb-days b', e => e.textContent)) === wkLabel, tag + ': tillbaka till samma vecka');
+      check(await p.evaluate(l => document.querySelector('.mb-unit').getAttribute('data-mb-mode') === 'vecka' && document.querySelector('[data-mb-pick]').textContent.trim() === l, wkLabel), tag + ': tillbaka till samma vecka');
       await p.click('[data-mb-step="1"]'); await sleep(100); await p.click('.mb-wk-dh'); await sleep(150);
       await p.evaluate(() => history.back()); await sleep(400);
-      check(await p.evaluate(() => document.querySelector('.mb-unit b').textContent === 'Vecka' && document.getElementById('title').textContent === 'Mina bevakningar'), tag + ': bakåt-svep tillbaka till vecka');
+      check(await p.evaluate(() => document.querySelector('.mb-unit').getAttribute('data-mb-mode') === 'vecka' && document.getElementById('title').textContent === 'Mina bevakningar'), tag + ': bakåt-svep tillbaka till vecka');
       await p.click('[data-mb-step="-1"]'); await sleep(100);
       // Månad
       await p.click('[data-mb-unit]'); await sleep(200);
-      check(await p.evaluate(() => document.querySelector('.mb-unit b').textContent === 'Månad' && document.querySelectorAll('.mb-mday').length >= 28 && !!document.querySelector('.mb-mday.today') && !!document.querySelector('.mb-mmore')), tag + ': Månad med rutnät, i dag inringat, +N till');
+      check(await p.evaluate(() => document.querySelector('.mb-unit').getAttribute('data-mb-mode') === 'manad' && document.querySelectorAll('.mb-mday').length >= 28 && !!document.querySelector('.mb-mday.today') && !!document.querySelector('.mb-mmore') && document.querySelectorAll('.mb-mwk').length >= 5 && /45/.test([...document.querySelectorAll('.mb-mwk')].map(x => x.textContent).join(','))), tag + ': Månad med rutnät, veckonummer, i dag inringat, +N till');
+      check(await p.evaluate(() => { const h = document.querySelector('.mb-mhead'); const t = [...h.querySelectorAll('span')].filter(x => !x.classList.contains('mb-mwk-h')); return t.map(x => x.textContent).join(' ') === 'mån tis ons tor fre lör sön' && t[4].classList.contains('today'); }), tag + ': Månad har huvudet mån–sön med idag (fre) markerad');
       check(await noX(), tag + ': ingen sidscroll (Månad)');
       if (tag !== 'l800d') { await p.evaluate(() => window.scrollTo(0, 0)); await p.screenshot({ path: path.join(out, 'mb-manad-' + tag + '.png') }); }
       await p.click('.mb-mday.today'); await sleep(200);
@@ -105,7 +132,7 @@ let checks = 0; const fails = []; const check = (x, msg) => { if (x) { checks++;
       await p.reload({ waitUntil: 'networkidle0' }); await p.evaluate(() => openItem('mina-bevakningar')); await p.waitForSelector('.mb-month');
       check(true, tag + ': Månad kvar efter omladdning');
       await p.click('[data-mb-unit]'); await sleep(150);
-      check(await p.evaluate(() => document.querySelector('.mb-unit b').textContent === 'Dag'), tag + ': Månad → Dag');
+      check(await p.evaluate(() => document.querySelector('.mb-unit').getAttribute('data-mb-mode') === 'dag'), tag + ': Månad → Dag');
       check(errors.length === 0, tag + ': inga JS-fel ' + errors.join(';'));
       await p.close();
     }
