@@ -1,7 +1,7 @@
-/* Mina bevakningar (t609u): fasta bevakningar för vissa tåg, t.ex. snabbtågen från Stockholm,
+/* Bevakningar (t609u): fasta bevakningar för vissa tåg, t.ex. snabbtågen från Stockholm,
  * bara under de tider föraren väljer (t.ex. 17:00–05:00 mån–fre, så inga notiser när man är ledig).
  *
- * - Visas som ett kort "🔔 Mina bevakningar" på fliken Tåg i Ankomster (under notisknappen).
+ * - Visas som ett kort "🔔 Bevakningar" på fliken Tåg i Ankomster (under notisknappen).
  * - Snabbval "Snabbtåg från Stockholm" eller egen: varifrån, bara snabbtåg, tågnummer.
  * - Notis X min före ankomst, vid försening och om tåget ställs in.
  * - Sparas hos servern (train_watch_*), notiserna skickas av edge-funktionen "bevakning" som push,
@@ -107,7 +107,7 @@
     var l = st.list || [];
     var on = l.filter(function (w) { return w.enabled; }).length;
     var h = '<div class="tn-card" id="tn-card"><button class="tn-head" data-tn-toggle aria-expanded="' + st.open + '">' +
-      '<span>🔔 <b>Mina bevakningar</b></span><span class="tn-count">' + (st.list ? (l.length ? on + ' på' : 'Ingen än') : '…') +
+      '<span>🔔 <b>Bevakningar</b></span><span class="tn-count">' + (st.list ? (l.length ? on + ' på' : 'Ingen än') : '…') +
       ' ' + (st.open ? '▴' : '▾') + '</span></button>';
     if (!st.open) return h + '</div>';
     h += '<div class="tn-body">';
@@ -132,7 +132,7 @@
   }
 
   // Anropas i slutet av ANKOMSTER paint() (efter BEVAKNING.decorate)
-  // Korten på Ankomster är borttagna; inställning sker i Mina bevakningar.
+  // Korten på Ankomster är borttagna; inställning sker i Bevakningar.
   T.decorate = function () {
     if (!token()) return;
     if (st.tok !== token()) { st.tok = token(); st.list = null; st.err = false; }

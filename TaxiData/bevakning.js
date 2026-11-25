@@ -3,11 +3,11 @@
  *
  * - Tryck på ☆ vid en ankomst för en tillfällig bevakning (silverstjärna). Den försvinner
  *   av sig själv ca 30 min efter ankomst. Fasta bevakningar (guldstjärna, samma tur och tid)
- *   skapas i Mina bevakningar med ett långt tryck. En guldstjärna kan inte ändras här.
+ *   skapas i Bevakningar med ett långt tryck. En guldstjärna kan inte ändras här.
  * - Notiserna skickas från servern (Supabase edge-funktionen "bevakning") som webbnotiser (push),
  *   så de kommer även när telefonen ligger i fickan med skärmen släckt.
  * - När appen är öppen spelas ett typiskt ljud (tåg, flyg eller båt) och telefonen vibrerar.
- *   Ljudet slås på eller av på den här sidan och i Mina bevakningar (BEV_LJUD).
+ *   Ljudet slås på eller av på den här sidan och i Bevakningar (BEV_LJUD).
  * - Tillfällig bevakning tas bort automatiskt 30 min efter sista händelsen (AFTER_MIN i edge-funktionen).
  * - Utloggning: B.logout() stänger av notiserna på telefonen och tar bort den hos servern.
  */
@@ -299,8 +299,8 @@
   }
   function toggle(key, item) {
     if(item&&item.station&&item.station!=='G'){toast('Tågbevakningar gäller Göteborg C. Stationsvalet visar tider utan bevakning.');return;}
-    // Stjärnan på Ankomster skapar eller tar bara bort en tillfällig bevakning. Fast/guld görs i Mina bevakningar.
-    if (item && findRoute(item)) { toast('Det här är en fast bevakning. Ändra den i Mina bevakningar.'); return; }
+    // Stjärnan på Ankomster skapar eller tar bara bort en tillfällig bevakning. Fast/guld görs i Bevakningar.
+    if (item && findRoute(item)) { toast('Det här är en fast bevakning. Ändra den i Bevakningar.'); return; }
     var k = parseKey(key); if (!k || !token()) return;
     var existing = watchOf(key);
     var on = !existing;
@@ -321,7 +321,7 @@
           TAGNOTIS._state.list.some(function (rule) { return rule && rule.enabled && TAGNOTIS.matches(rule, item); });
         var pushHint = (st.push === 'denied') ? ' Tillåt notiser i webbläsaren för den här sidan.' : (st.push === 'unsupported' ? ' Den här webbläsaren kan inte ta emot notiser.' : '');
         toast(on ? 'Tillfällig bevakning – du får en notis när ' + what + '.' + pushHint
-                 : (older ? 'Tillfällig bevakning borttagen. Tåget kan fortfarande synas i Mina bevakningar om det ingår i en äldre bevakning.' : 'Bevakningen är borttagen.'));
+                 : (older ? 'Tillfällig bevakning borttagen. Tåget kan fortfarande synas i Bevakningar om det ingår i en äldre bevakning.' : 'Bevakningen är borttagen.'));
         repaint();
       }).catch(function (e) {
         toast(e && e.message === 'too_many' ? 'Du kan bevaka högst 20 ankomster.' : 'Det gick inte att ändra bevakningen.');
@@ -391,15 +391,15 @@
         ? '🔔 På iPhone: lägg först appen på hemskärmen (Dela ⬆️ → Lägg till på hemskärmen) och öppna den därifrån. Kräver iOS 16.4 eller senare.'
         : '🔕 Den här webbläsaren kan inte ta emot notiser.') + '</div>';
     }
-    h += '<div class="bev-hint">Tryck ☆ för en tillfällig bevakning. Fasta (guld) ställs in i Mina bevakningar. <button class="bev-link" data-bev-help>' + (st.help ? 'Dölj hjälp' : 'Hjälp') + '</button></div>';
+    h += '<div class="bev-hint">Tryck ☆ för en tillfällig bevakning. Fasta (guld) ställs in i Bevakningar. <button class="bev-link" data-bev-help>' + (st.help ? 'Dölj hjälp' : 'Hjälp') + '</button></div>';
     if (st.help) {
       h += '<div class="bev-help">' +
         '<p><b>Så fungerar det:</b> stjärnan gör en tillfällig bevakning (silver). Du får en notis när ett bevakat flyg landar, när bagaget börjar rulla, när sista väskan är ute, ' +
         'när tiden ändras eller om det ställs in. För tåg: när tåget ankommer. Det fungerar även när telefonen ligger i fickan. ' +
         'En tillfällig bevakning tas bort av sig själv en halvtimme efter sista händelsen (för flyg: sista väskan). ' +
-        'Vill du ha samma tur varje dag håller du fingret på den i Mina bevakningar, så blir den fast (guld). ' +
+        'Vill du ha samma tur varje dag håller du fingret på den i Bevakningar, så blir den fast (guld). ' +
         'När du bevakar något slås notiserna på automatiskt. Ljudet (tåg, flyg, båt) slås på eller av ovanför listan. När du loggar ut stängs notiserna av på telefonen.</p>' +
-        '<p><b>Tåg:</b> små förseningar (under 15 min) ger varken notis eller ljud. En stor försening (30 min) eller en plötslig ändring (15 min på en gång) ger notis även när tåget är långt bort. Ändra siffrorna, och när ljudet ska gå, under Specificera villkor i Mina bevakningar.</p>' +
+        '<p><b>Tåg:</b> små förseningar (under 15 min) ger varken notis eller ljud. En stor försening (30 min) eller en plötslig ändring (15 min på en gång) ger notis även när tåget är långt bort. Ändra siffrorna, och när ljudet ska gå, under Specificera villkor i Bevakningar.</p>' +
         '<p><b>Android:</b> när du bevakar något första gången frågar telefonen om notiser. Välj Tillåt. Kolla att notiser för Chrome inte är avstängda och att telefonen inte står på ljudlöst.</p>' +
         '<p><b>iPhone:</b> öppna taxikit.shop/TaxiData i Safari, tryck Dela ⬆️ → "Lägg till på hemskärmen". Öppna appen från hemskärmen och logga in. När du bevakar något frågar telefonen om notiser. Kräver iOS 16.4 eller senare.</p>' +
         '<p>Flygtider uppdateras ungefär var 5:e minut, tåg varje minut.</p></div>';
@@ -423,7 +423,7 @@
         fired = true; row.classList.remove('bev-press');
         try { if (navigator.vibrate) navigator.vibrate(30); } catch (x) {}
         var itHold = window.ANKOMSTER && ANKOMSTER.item ? ANKOMSTER.item(key) : null;
-        if (itHold && findRoute(itHold)) toast('Det här är en fast bevakning. Ändra den i Mina bevakningar.');
+        if (itHold && findRoute(itHold)) toast('Det här är en fast bevakning. Ändra den i Bevakningar.');
         else toggle(key, itHold);
       }, HOLD_MS);
     });
@@ -450,7 +450,7 @@
     var wrap = document.createElement('div'); wrap.innerHTML = barHtml();
     if (head) head.parentNode.insertBefore(wrap.firstChild, head.nextSibling);
     var ljud = el.querySelector('#bev-ljud-box');
-    // Tåg: bara kryssrutan Ljud för tåg och länken till villkoren i Mina bevakningar (tag-villkor.js).
+    // Tåg: bara kryssrutan Ljud för tåg och länken till villkoren i Bevakningar (tag-villkor.js).
     if (ljud && (tabKind() || 'tag') === 'tag' && window.TAG_VILLKOR && TAG_VILLKOR.renderAnkomster) TAG_VILLKOR.renderAnkomster(ljud);
     else if (ljud && window.BEV_LJUD && BEV_LJUD.renderCompact) BEV_LJUD.renderCompact(ljud, tabKind() || 'tag');
     if (!st.loadedAt) refresh();
@@ -501,7 +501,7 @@
     var perm = !!(B.isPermanent && B.isPermanent(it));
     var watched = !!(B.isWatched(it.key) || perm);
     var cls = 'ank-star' + (perm ? ' gold' : (watched ? ' on' : ''));
-    var lbl = perm ? 'Fast bevakning – ändra i Mina bevakningar' : (watched ? 'Sluta bevaka' : 'Bevaka');
+    var lbl = perm ? 'Fast bevakning – ändra i Bevakningar' : (watched ? 'Sluta bevaka' : 'Bevaka');
     return '<button type="button" class="' + cls + '" data-bev-star' + (perm ? ' data-bev-perm="1"' : '') +
       ' aria-label="' + lbl + '" title="' + lbl + '">' + (perm || watched ? '★' : '☆') + '</button>';
   };

@@ -12,7 +12,7 @@ try{
  await p.goto(base+'/TaxiData/index.html',{waitUntil:'networkidle0'});
  async function shot(name){check(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'ingen sidscroll');await p.screenshot({path:path.join(out,name+'.png')});}
  await p.waitForSelector('#app',{visible:true});
- check(await p.evaluate(()=>Array.from(document.querySelectorAll('#content .label')).some(e=>e.textContent==='Mina bevakningar')),'rutan syns för förare');await shot('01-hemskarm');
+ check(await p.evaluate(()=>Array.from(document.querySelectorAll('#content .label')).some(e=>e.textContent==='Bevakningar')),'rutan syns för förare');await shot('01-hemskarm');
  await p.evaluate(()=>{localStorage.setItem('taxi_mb_view','list');openItem('mina-bevakningar');});await p.waitForFunction(()=>document.querySelectorAll('.mb-row').length===4);await shot('02-blandat-flode');
  check(await p.evaluate(()=>Array.from(document.querySelectorAll('.mb-time')).map(e=>e.textContent).join('|').startsWith('18:30🚆|18:40✈️|19:00🚆|19:20📅')),'sortering, försening, matchad tågnotis');
  check(await p.$eval('.mb',e=>e.textContent.includes('10 min sen')&&e.textContent.includes('Första bagage')&&e.textContent.includes('Äldre bevakning: Exempelflyg')&&e.textContent.includes('Äldre bevakning: Exempelnotis')),'status och bevakningsetiketter');

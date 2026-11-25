@@ -676,7 +676,7 @@
         '<label class="delad-chk' + (hideOn ? ' on' : '') + '">' +
           '<input type="checkbox" name="delad-hide-private"' + (hideOn ? ' checked' : '') + '>' +
           '<span><span class="delad-chk-t">Dölj privata moduler</span>' +
-          '<span class="delad-chk-d">Döljer och laddar inte kördata, lön, rapporter, ärenden, meddelanden, den fullständiga profilen och admin. Notiser och en begränsad profil (namn, förarnummer och logga ut) finns kvar, liksom Ankomster, Prognos, Väder, Nyheter, Kalender och Mina bevakningar.</span></span>' +
+          '<span class="delad-chk-d">Döljer och laddar inte kördata, lön, rapporter, ärenden, meddelanden, den fullständiga profilen och admin. Notiser och en begränsad profil (namn, förarnummer och logga ut) finns kvar, liksom Ankomster, Prognos, Väder, Nyheter, Kalender och Bevakningar.</span></span>' +
         '</label>' +
       '</div>' : '') +
       '</div>';

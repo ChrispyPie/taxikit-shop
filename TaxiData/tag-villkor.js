@@ -1,8 +1,8 @@
 /* Villkor för tågbevakningar (12 nov 2026): NÄR en bevakning får ge notis och ljud.
  * Problemet: bevakar man alla snabbtåg från Stockholm piper varje liten försening hela resan.
  *
- * - Ankomster (Tåg): bara en kryssruta Ljud för tåg och länken Specificera villkor i Mina bevakningar.
- * - Mina bevakningar: standard för alla tåg (tillfälliga och fasta) och egna villkor per avgång (🔔 i Schema).
+ * - Ankomster (Tåg): bara en kryssruta Ljud för tåg och länken Specificera villkor i Bevakningar.
+ * - Bevakningar: standard för alla tåg (tillfälliga och fasta) och egna villkor per avgång (🔔 i Schema).
  * - Små förseningar (under 15 min): ingen notis, inget ljud. Stor (30 min) eller plötslig (15 min på en gång):
  *   notis även långt bort. Inom X min från ankomst: notis från 15 min. Ankommit/inställt: alltid notis.
  * - Själva beslutet för push och notisflödet tas på servern (supabase/functions/bevakning/villkor.ts, samma
@@ -281,7 +281,7 @@
     style();
     var s = get().tag.default;
     box.innerHTML = '<div class="tv-ank"><label><input type="checkbox" data-tv-sound' + (s.sound ? ' checked' : '') + '> Ljud för tåg</label>' +
-      '<button type="button" class="tv-link" data-tv-open>Specificera villkor i Mina bevakningar</button></div>';
+      '<button type="button" class="tv-link" data-tv-open>Specificera villkor i Bevakningar</button></div>';
     box.onchange = function (e) {
       if (!e.target || !e.target.hasAttribute('data-tv-sound')) return;
       if (root.BEV_LJUD && BEV_LJUD.unlock) BEV_LJUD.unlock();
@@ -300,10 +300,10 @@
     if (typeof root.openItem === 'function') root.openItem('mina-bevakningar');
   };
 
-  // Mina bevakningar: standard för alla tåg
+  // Bevakningar: standard för alla tåg
   V.renderPanel = function (box, opts) {
     if (!box) return;
-    opts = opts || box._tvOpts || {}; box._tvOpts = opts;   // Mina bevakningar bäddar in den i Ljud och notiser (t1839u)
+    opts = opts || box._tvOpts || {}; box._tvOpts = opts;   // Bevakningar bäddar in den i Ljud och notiser (t1839u)
     style();
     var focus = false; try { focus = sessionStorage.getItem('tv_focus') === '1'; sessionStorage.removeItem('tv_focus'); } catch (e) {}
     if (focus) st.open = true;
