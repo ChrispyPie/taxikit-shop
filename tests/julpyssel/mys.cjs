@@ -1,5 +1,5 @@
 'use strict';
-// Julpyssel mys: girlang, stjärnhimmel, vignett. Bara 710022, hemskärm, ingen Nyheter-rad, reduced-motion.
+// Julpyssel mys: girlang, stjärnhimmel, vignett. För alla från 29 nov, hemskärm, reduced-motion.
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
@@ -15,8 +15,11 @@ assert.doesNotMatch(js + css + cl, /\bStig\b/);
 assert.doesNotMatch(js + css, /\bhen\b/);
 assert.doesNotMatch(cl, /id: '2026-11-23zmys1'/);
 assert.doesNotMatch(cl, /id: '2026-11-23zscn1'/);
-assert.doesNotMatch(cl, /girlang|julgransbelysning|snöfall|juldekoration/i);
+assert.match(cl, /id: '2026-11-29zjul1'/);
+assert.match(cl, /girlanger och en julscen/);
+assert.doesNotMatch(cl, /julgransbelysning|snöfall|juldekoration/i);
 assert.match(js, /ALLOW = \{ '710022': 1, '693340': 1 \}/);
+assert.match(js, /JUL_FROM = '2026-11-29'/);
 assert.match(js, /JUL_ALLA = false/);
 assert.match(js, /function ensureMys/);
 assert.match(js, /function paintMys/);
@@ -45,7 +48,7 @@ assert.match(css, /html\[data-theme="dark"\] #jul-mys \.jul-vignette/);
 assert.match(css, /#jul-ljusstake/);
 assert.match(css, /#jul-slingor/);
 assert.match(html, /julpyssel\.css\?v=20261124adv18/);
-assert.match(html, /julpyssel\.js\?v=20261125zber1/);
+assert.match(html, /julpyssel\.js\?v=20261125zjul1/);
 assert.match(sw, /CACHE_VER = '20261124tap1'/);
 
 function boot(opts) {

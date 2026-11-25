@@ -38,6 +38,8 @@ function loadGate(nowIso, driver, search) {
 }
 
 const nov = '2026-11-23T18:00:00+01:00';
+const nov28 = '2026-11-28T23:59:00+01:00';
+const nov29 = '2026-11-29T00:00:00+01:00';
 const dec1 = '2026-12-01T00:00:00+01:00';
 const novLate = '2026-11-30T23:59:00+01:00';
 
@@ -52,13 +54,30 @@ assert.equal(g.allowed(), true, '693340 numeric id before Dec 1');
 
 g = loadGate(nov, '123456', '');
 assert.equal(g.allowed(), false, 'other driver before Dec 1');
+assert.equal(g.huntAllowed(), false, 'hunt closed for other driver in late Nov before first advent');
+
+g = loadGate(nov, '123456', '?adventdatum=2026-12-01');
+assert.equal(g.today().iso, '2026-11-23', 'testdatum only for preview drivers');
+assert.equal(g.asOfArg(), null);
+
+g = loadGate(nov28, '123456', '');
+assert.equal(g.huntAllowed(), false, 'hunt closed 28 Nov 23:59');
+assert.equal(g.allowed(), false, 'calendar closed 28 Nov');
+
+g = loadGate(nov29, '123456', '');
+assert.equal(g.isHuntLive(), true);
+assert.equal(g.huntAllowed(), true, 'hunt open for all from 29 Nov 00:00');
+assert.equal(g.isLive(), false, 'calendar not live 29 Nov');
+assert.equal(g.allowed(), false, 'calendar closed for regular driver 29 Nov');
 
 g = loadGate(novLate, '123456', '');
 assert.equal(g.allowed(), false, 'other driver 23:59 Nov 30');
+assert.equal(g.huntAllowed(), true, 'hunt still open 30 Nov');
 
 g = loadGate(dec1, '123456', '');
 assert.equal(g.isLive(), true);
 assert.equal(g.allowed(), true, 'all drivers from Dec 1 00:00');
+assert.equal(g.huntAllowed(), true, 'hunt still open 1 Dec');
 
 g = loadGate(nov, '710022', '?adventdatum=2026-12-01');
 assert.equal(g.today().iso, '2026-12-01');
@@ -93,6 +112,10 @@ function listaAt(nowIso) {
 }
 const before = listaAt('2026-11-23T22:00:00+01:00');
 assert.ok(!before.includes('2026-12-01zadv1'), 'Nyheter hidden before Dec 1, got ' + before.slice(0, 3));
+assert.ok(!before.includes('2026-11-29zjul1'), 'Jultema-nyhet hidden before 29 Nov');
+const onAdvent = listaAt('2026-11-29T00:00:00+01:00');
+assert.ok(onAdvent.includes('2026-11-29zjul1'), 'Jultema-nyhet syns 29 Nov 00:00');
+assert.ok(!onAdvent.includes('2026-12-01zadv1'), 'Adventskalender-nyhet still hidden 29 Nov');
 assert.ok(before.includes('2026-11-23zhb2'), 'older news still visible');
 const after = listaAt(dec1);
 assert.ok(after.includes('2026-12-01zadv1'), 'Nyheter visible on Dec 1');

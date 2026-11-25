@@ -1,11 +1,13 @@
 /* Polkagrisjakt i december: egna klubbor per pass, upp till tre delade samtidigt
  * och sällsynta gyllene (3 poäng). Först som trycker tar en delad/guld.
- * Öppnas automatiskt för alla från 2026-12-01 00:00 Europe/Stockholm.
- * Före det syns den bara för 710022 och 693340 (testdatum: ?adventdatum= eller ?juldatum=). */
+ * Jakten öppnas för alla från 2026-11-29 00:00 Europe/Stockholm.
+ * Adventskalendern öppnas för alla från 2026-12-01 00:00.
+ * Före respektive datum syns den bara för 710022 och 693340 (testdatum: ?adventdatum= eller ?juldatum=). */
 (function () {
   'use strict';
 
-  var LIVE_FROM = '2026-12-01'; // 00:00 Europe/Stockholm, ingen manuell omkoppling
+  var LIVE_FROM = '2026-11-29'; // jakt + jultema, 00:00 Europe/Stockholm
+  var CAL_FROM = '2026-12-01'; // adventskalender, 00:00 Europe/Stockholm
   var ALLOW = { '710022': 1, '693340': 1 };
 
   var PLACES = {
@@ -45,16 +47,26 @@
     var parts = stockholmParts();
     return { y: +parts.year, m: +parts.month, d: +parts.day, iso: parts.year + '-' + parts.month + '-' + parts.day };
   }
-  function isLive() { return realToday().iso >= LIVE_FROM; }
+  function isHuntLive() { return realToday().iso >= LIVE_FROM; }
+  function isLive() { return realToday().iso >= CAL_FROM; }
   function inSeasonReal(t) {
     t = t || realToday();
     return t.m === 12 || (t.m === 1 && t.d <= 6);
   }
+  function inHuntPeriod(t) {
+    t = t || today();
+    return t.iso >= LIVE_FROM && t.iso <= '2026-12-31';
+  }
   function allowed() {
+    if (ALLOW[driverId()]) return true;
+    return isHuntLive() && (inHuntPeriod(realToday()) || inSeasonReal(realToday()));
+  }
+  function calendarAllowed() {
     if (ALLOW[driverId()]) return true;
     return isLive() && inSeasonReal();
   }
   function queryDate() {
+    if (!ALLOW[driverId()]) return '';
     try {
       var q = new URLSearchParams(location.search);
       return q.get('adventdatum') || q.get('juldatum') || '';
@@ -88,10 +100,13 @@
   }
 
   window.ADVENT_GATE = {
-    LIVE_FROM: LIVE_FROM,
+    LIVE_FROM: CAL_FROM,
+    HUNT_FROM: LIVE_FROM,
     ALLOW: ALLOW,
-    allowed: allowed,
+    allowed: calendarAllowed,
+    huntAllowed: allowed,
     isLive: isLive,
+    isHuntLive: isHuntLive,
     realToday: realToday,
     today: today,
     queryDate: queryDate,
@@ -215,7 +230,7 @@
       '</svg>';
   }
   function huntVisible() {
-    return allowed() && (inDecember(today()) || showWinner(today()));
+    return allowed() && (inHuntPeriod(today()) || showWinner(today()));
   }
   function openBoard() {
     window._adventTab = 'jakt';
