@@ -284,8 +284,8 @@
       return { index: i, row: r, from: from, to: duration ? Math.max(from + 24, Math.min(1440, to)) : to, actualEnd: duration ? to : from, continues: start < key || end > key };
     }).filter(Boolean).sort(function (a, b) { return a.from - b.from || b.to - a.to; });
   }
-  function timelineLayout(list, key) {
-    var segments = daySegments(list, key), group = [], groupEnd = -1;
+  function layoutSegments(segments) {
+    var group = [], groupEnd = -1;
     function finish() {
       var ends = [], columns = 0;
       group.forEach(function (x) {
@@ -299,7 +299,43 @@
       group.push(x); groupEnd = Math.max(groupEnd, x.to);
     }); finish(); return segments;
   }
-  function hasDay(key) { return daySegments(rows, key).length > 0; }
+  function timelineLayout(list, key) {
+    return layoutSegments(daySegments(list, key));
+  }
+  // Filterchips (t1851u/t1852u): samma mönster som Notiser. Allt = inget valt (förval, alla syns).
+  // Tryck på en kategori = bara den; fler går att lägga till. Allt nollställer. Bara visning, inte notiser.
+  // Kategorier = de som har egen färg i schemat (ingen Prognos-rad – den sorten ritas inte här).
+  var FILTER_CATS = [
+    { k: 'tag', n: 'Tåg' },
+    { k: 'flyg', n: 'Flyg' },
+    { k: 'bat', n: 'Båt' },
+    { k: 'event', n: 'Evenemang' },
+    { k: 'booking', n: 'Bokade tider' }
+  ];
+  var LS_FILTER = 'taxi_mb_filter';
+  function filterSel() {
+    try {
+      var v = JSON.parse(localStorage.getItem(LS_FILTER) || 'null');
+      if (Array.isArray(v)) return v.map(String).filter(function (id) {
+        return FILTER_CATS.some(function (c) { return c.k === id; });
+      });
+    } catch (e) {}
+    return [];
+  }
+  function setFilterSel(sel) {
+    try { if (sel.length) localStorage.setItem(LS_FILTER, JSON.stringify(sel)); else localStorage.removeItem(LS_FILTER); } catch (e) {}
+  }
+  function kindShown(kind) {
+    var sel = filterSel();
+    return !sel.length || sel.indexOf(kind) >= 0;
+  }
+  function viewSegments(key) {
+    return daySegments(rows, key).filter(function (x) { return kindShown(x.row.kind); });
+  }
+  function viewLayout(key) {
+    return layoutSegments(viewSegments(key));
+  }
+  function hasDay(key) { return viewSegments(key).length > 0; }
   function dot(key) { return hasDay(key) ? '<i class="mb-daydot" aria-label="Har bevakningar"></i>' : ''; }
   // En vy (t1840u): Dag (tidslinjen med nu-linjen) → Vecka → Månad. Stegar med vald enhet.
   var UNITS = ['dag', 'vecka', 'manad'], UNIT_N = { dag: 'Dag', vecka: 'Vecka', manad: 'Månad' }, MON = ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
@@ -357,6 +393,16 @@
   }
   function gearIcon() {
     return '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.49.49 0 0 0 .12-.62l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.04-.7-1.63-.94l-.36-2.54A.5.5 0 0 0 13.91 2h-3.82a.5.5 0 0 0-.49.35l-.36 2.54c-.59.24-1.13.56-1.63.94l-2.39-.96a.49.49 0 0 0-.59.22L2.71 8.86a.49.49 0 0 0 .12.62l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.49.49 0 0 0-.12.62l1.92 3.32c.13.22.4.31.59.22l2.39-.96c.5.38 1.04.7 1.63.94l.36 2.54c.05.2.25.35.49.35h3.82a.5.5 0 0 0 .49-.35l.36-2.54c.59-.24 1.13-.56 1.63-.94l2.39.96c.22.09.46 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.62l-2.03-1.58zM12 15.6A3.6 3.6 0 1 1 15.6 12 3.6 3.6 0 0 1 12 15.6z"/></svg>';
+  }
+  function filterBar() {
+    var sel = filterSel();
+    var h = '<div class="mb-filter" role="toolbar" aria-label="Filtrera schemat">';
+    h += '<button type="button" class="mb-fchip mb-fchip-all' + (sel.length ? '' : ' on') + '" data-mb-filter="" aria-pressed="' + (sel.length ? 'false' : 'true') + '">Allt</button>';
+    FILTER_CATS.forEach(function (c) {
+      var on = sel.indexOf(c.k) >= 0, off = !!(sel.length && !on);
+      h += '<button type="button" class="mb-fchip mb-fchip-' + c.k + (on ? ' on' : '') + (off ? ' is-off' : '') + '" data-mb-filter="' + c.k + '" aria-pressed="' + (on ? 'true' : 'false') + '"><i class="mb-fdot" aria-hidden="true"></i>' + esc(c.n) + '</button>';
+    });
+    return h + '</div>';
   }
   // Verktygsrad: vyikon eller tillbaka, datumvisare, dubbelpil (idag), kugghjul för ljud och notiser.
   function toolNav() {
@@ -418,12 +464,12 @@
     drawPick();
     m.classList.add('open');
   }
-  function dayItems(k) { return daySegments(rows, k); }
+  function dayItems(k) { return viewSegments(k); }
   // Vecka som i Google Kalender/Outlook: 7 dagkolumner med timrutnät, kompakta block, dagens rubrik markerad.
   var PXW = 0.75;
   function weekHtml() {
     var a = weekStart(selectedDay), today = parts(Date.now()).key, H = 1440 * PXW;
-    var h = toolNav() + '<div class="mb-wk"><div class="mb-wk-head"><span></span>';
+    var h = toolNav() + filterBar() + '<div class="mb-wk"><div class="mb-wk-head"><span></span>';
     for (var i = 0; i < 7; i++) {
       var k = addDay(a, i);
       h += '<button type="button" class="mb-wk-dh' + (k === today ? ' today' : '') + '" data-mb-goday="' + k + '" aria-label="Öppna ' + esc(WDS[i] + ' ' + dm(k)) + ' i dagvyn"><small>' + WDS[i] + '</small><b>' + (+k.slice(8, 10)) + '</b></button>';
@@ -436,7 +482,7 @@
     for (i = 0; i < 7; i++) {
       k = addDay(a, i);
       h += '<div class="mb-wk-col' + (k === today ? ' today' : '') + '" data-mb-goday="' + k + '" role="button" tabindex="0" aria-label="Öppna ' + esc(WDS[i] + ' ' + dm(k)) + ' i dagvyn" style="left:calc(30px + (100% - 30px) * ' + i + ' / 7);width:calc((100% - 30px) / 7)">';
-      timelineLayout(rows, k).forEach(function (x) {
+      viewLayout(k).forEach(function (x) {
         var r = x.row, ht = Math.max(8, (x.to - x.from) * PXW - 2);
         h += '<div class="mb-wk-b mb-wk-' + r.kind + (r.pending ? ' pending' : '') + (r.flag === 'canceled' || r.flag === 'removed' ? ' bad' : '') + '" style="top:' + (x.from * PXW) + 'px;height:' + ht + 'px;left:' + (100 * x.column / x.columns) + '%;width:calc(' + (100 / x.columns) + '% - 2px)" aria-hidden="true"></div>';
       });
@@ -449,7 +495,7 @@
   function monthHtml() {
     var first = selectedDay.slice(0, 8) + '01', start = weekStart(first), today = parts(Date.now()).key, mon = first.slice(0, 7);
     var todayDow = dowOf(today);
-    var h = toolNav() + '<div class="mb-month" role="grid" aria-label="Månad"><div class="mb-mrow mb-mhead"><span class="mb-mwk-h" aria-hidden="true"></span>' + WDS.map(function (d, i) { return '<span' + (i + 1 === todayDow ? ' class="today"' : '') + '>' + d + '</span>'; }).join('') + '</div>';
+    var h = toolNav() + filterBar() + '<div class="mb-month" role="grid" aria-label="Månad"><div class="mb-mrow mb-mhead"><span class="mb-mwk-h" aria-hidden="true"></span>' + WDS.map(function (d, i) { return '<span' + (i + 1 === todayDow ? ' class="today"' : '') + '>' + d + '</span>'; }).join('') + '</div>';
     for (var w = 0; w < 6; w++) {
       var ws = addDay(start, w * 7); if (w && ws.slice(0, 7) > mon) break;
       h += '<div class="mb-mrow"><span class="mb-mwk" aria-label="Vecka ' + isoWeek(ws) + '">' + isoWeek(ws) + '</span>';
@@ -467,8 +513,11 @@
   function goBackUnit() { if (!returnTo) return false; mode = returnTo.mode; selectedDay = returnTo.day; returnTo = null; infoIndex = null; draw(lastErrors); return true; }
   function gapText(mins) { return (mins >= 60 ? Math.floor(mins / 60) + ' h ' : '') + (mins % 60 ? mins % 60 + ' min ' : '') + 'ledigt'; }
   function timelineHtml() {
-    var layout = timelineLayout(rows, selectedDay), h = toolNav();
-    if (!layout.length) h += '<p class="mb-day-empty" role="status">Inga aktuella bevakningar den här dagen.</p>';
+    var layout = viewLayout(selectedDay), h = toolNav() + filterBar();
+    if (!layout.length) {
+      var hidden = daySegments(rows, selectedDay).length;
+      h += '<p class="mb-day-empty" role="status">' + (hidden ? 'Inga bevakningar av den typen den här dagen. Tryck på Allt för att se alla.' : 'Inga aktuella bevakningar den här dagen.') + '</p>';
+    }
     h += '<div class="mb-timeline-scroll" tabindex="0" aria-label="Dagens tidslinje, skrolla för fler timmar"><div class="mb-timeline" style="height:' + (1440 * PX + 52) + 'px">';
     for (var m = 0; m <= 1440; m += 30) {
       h += '<div class="mb-hour' + (m % 60 ? ' half' : '') + '" style="top:' + m * PX + 'px">' + (m % 60 ? '' : '<span>' + String(m / 60).padStart(2, '0') + ':00</span>') + '</div>';
@@ -707,6 +756,15 @@
     var todayBtn = host.querySelector('[data-mb-today]'); if (todayBtn) todayBtn.onclick = function () {
       selectedDay = parts(Date.now()).key; autoPosition = true; actionIndex = null; infoIndex = null; draw(errors);
     };
+    var fbox = host.querySelector('.mb-filter');
+    if (fbox) fbox.onclick = function (e) {
+      var b = e.target.closest('[data-mb-filter]'); if (!b) return;
+      var id = b.getAttribute('data-mb-filter'), sel = filterSel(), i = sel.indexOf(id);
+      if (!id) sel = [];
+      else if (i < 0) sel.push(id); else sel.splice(i, 1);
+      setFilterSel(sel);
+      draw(errors);
+    };
     host.querySelectorAll('[data-mb-menu]').forEach(function (b) { b.onclick = function () { actionIndex = +b.dataset.mbMenu; draw(errors); host.querySelector('[data-mb-cancel]').focus(); }; });
     var cancel = host.querySelector('[data-mb-cancel]'); if (cancel) cancel.onclick = function () { var i = actionIndex; actionIndex = null; gearIndex = null; draw(errors); var b = host.querySelector('[data-mb-menu="' + i + '"]'); if (b) b.focus({ preventScroll: true }); };
     var sheet = host.querySelector('.mb-action-sheet'); if (sheet) sheet.onkeydown = function (e) {
@@ -715,7 +773,7 @@
     var scroll = host.querySelector('.mb-timeline-scroll');
     if (scroll) {
       if (autoPosition || scrollTop === null) {
-        var items = daySegments(rows, selectedDay), pos = selectedDay === parts(Date.now()).key ? minute(Date.now()) : (items.length ? items[0].from : 8 * 60);
+        var items = viewSegments(selectedDay), pos = selectedDay === parts(Date.now()).key ? minute(Date.now()) : (items.length ? items[0].from : 8 * 60);
         scroll.scrollTop = Math.max(0, (pos - 60) * PX); autoPosition = false;
       } else scroll.scrollTop = scrollTop;
     }
