@@ -6,7 +6,7 @@
   if (window.JULPYSSEL) return;
 
   var JUL_ALLA = false;
-  var ALLOW = { '710022': 1 };
+  var ALLOW = { '710022': 1, '693340': 1 };
   var ADVENT = ['2026-11-29', '2026-12-06', '2026-12-13', '2026-12-20'];
   var PREVIEW_KEY = 'taxi_jul_ljus_preview';
   var BURN_END = '2026-12-25';
@@ -23,7 +23,7 @@
   ];
 
   function driverId() {
-    try { return localStorage.getItem('taxi_driver') || ''; } catch (e) { return ''; }
+    try { return String(localStorage.getItem('taxi_driver') || '').trim(); } catch (e) { return ''; }
   }
   function allowed() {
     if (JUL_ALLA) return true;

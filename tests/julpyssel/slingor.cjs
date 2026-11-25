@@ -16,7 +16,7 @@ assert.doesNotMatch(js, /\bhen\b/);
 assert.doesNotMatch(cl, /id: '2026-11-22zjul3'/);
 assert.doesNotMatch(cl, /id: '2026-11-22zjul4'/);
 assert.doesNotMatch(cl, /id: '2026-11-22zjul5'/);
-assert.match(js, /ALLOW = \{ '710022': 1 \}/);
+assert.match(js, /ALLOW = \{ '710022': 1, '693340': 1 \}/);
 assert.match(js, /JUL_ALLA = false/);
 assert.match(js, /jul-slingor/);
 assert.match(js, /jul-slinga-' \+ side/);

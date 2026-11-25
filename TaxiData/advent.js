@@ -1,7 +1,7 @@
 /* Adventskalender i december: 24 luckor med verifierade taxifakta.
  * Permanent modul som inte kan avinstalleras medan den är i säsong.
  * Bara luckor upp till dagens datum kan öppnas.
- * Öppnas automatiskt för alla från 2026-12-01 00:00 Europe/Stockholm; före det bara 710022.
+ * Öppnas automatiskt för alla från 2026-12-01 00:00 Europe/Stockholm; före det bara 710022 och 693340.
  * Testdatum: ?adventdatum=YYYY-MM-DD eller ?juldatum=YYYY-MM-DD.
  * Mini-kalender till vänster om ljusstaken på startskärmen; tryck för att förstora. */
 (function () {
