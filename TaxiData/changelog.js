@@ -19,9 +19,10 @@ window.CHANGELOG = [
     ['Nytt', 'Adventskalender: 24 luckor med taxifakta, en för varje dag i december. Kalendern sitter litet uppe till vänster på startsidan. Tryck så växer den fram i mitten. Öppna dagens lucka – och alla du missat hittills.'],
     ['Nytt', 'Polkagrisjakt: du får två egna polkagrisar per arbetspass, som bara du kan ta. Samtidigt kan upp till tre delade polkagrisar vara ute i appen; en ny kan dyka upp även om de gamla inte är tagna, och den som trycker först tar den. De försvinner efter 45 minuter om ingen tar dem, och kommer oftare på natten. Ibland syns en gyllene polkagris värd tre poäng. Dina poäng syns som en polkagris med siffra högst upp på startsidan, till höger om ljusstaken. Tryck där för att se din placering (inga andras namn visas). På nyårsafton presenteras vinnaren för alla.']
   ]},
-  { datum: '2026-11-25', id: '2026-11-25zmbvr1', tid: '12:11', rader: [
+  { datum: '2026-11-25', id: '2026-11-25zmbvr1', tid: '12:16', rader: [
     ['Förbättrat', 'Mina bevakningar har en ny verktygsrad ovanför kalendern: en ikon som växlar Dag, Vecka och Månad, samma datumvisare som i Körpassdata (bakåt, framåt och en minikalender där du väljer en dag) och en Idag-knapp till höger.'],
-    ['Förbättrat', 'I månadsvyn visas veckonummer till vänster. Både vecka och månad har veckodagarna mån–sön överst, med dagens veckodag markerad. Timmarna i veckovyn sitter kvar till vänster när du skrollar.']
+    ['Förbättrat', 'I månadsvyn visas veckonummer till vänster. Både vecka och månad har veckodagarna mån–sön överst, med dagens veckodag markerad. Timmarna i veckovyn sitter kvar till vänster när du skrollar.'],
+    ['Fixat', 'I vecka- och månadsvyn öppnas ingen inforuta. Tryck på en dag så kommer du till dagvyn, där du kan öppna detaljerna.']
   ]},
   { datum: '2026-11-24', id: '2026-11-24zmbv1', tid: '20:09', rader: [
     ['Förbättrat', 'Mina bevakningar: tryck på en bevakning så får du all info i en ruta direkt på sidan – tåg, spår, försening, flyg, evenemang och bokningar. Länken i rutan tar dig till Ankomster eller Kalender om du vill.'],

@@ -422,15 +422,15 @@
     for (m = 0; m < 1440; m += 60) h += '<div class="mb-wk-hr" style="top:' + m * PXW + 'px"></div>';
     for (i = 0; i < 7; i++) {
       k = addDay(a, i);
-      h += '<div class="mb-wk-col' + (k === today ? ' today' : '') + '" style="left:calc(30px + (100% - 30px) * ' + i + ' / 7);width:calc((100% - 30px) / 7)">';
+      h += '<div class="mb-wk-col' + (k === today ? ' today' : '') + '" data-mb-goday="' + k + '" role="button" tabindex="0" aria-label="Öppna ' + esc(WDS[i] + ' ' + dm(k)) + ' i dagvyn" style="left:calc(30px + (100% - 30px) * ' + i + ' / 7);width:calc((100% - 30px) / 7)">';
       timelineLayout(rows, k).forEach(function (x) {
-        var r = x.row, ht = Math.max(16, (x.to - x.from) * PXW - 2);
-        h += '<button type="button" class="mb-wk-b mb-wk-' + r.kind + (r.pending ? ' pending' : '') + (r.flag === 'canceled' || r.flag === 'removed' ? ' bad' : '') + '" data-mb-open="' + x.index + '" style="top:' + (x.from * PXW) + 'px;height:' + ht + 'px;left:' + (100 * x.column / x.columns) + '%;width:calc(' + (100 / x.columns) + '% - 2px)" aria-label="' + esc(parts(r.at).hm + ' ' + r.title) + '"><span>' + icon(r) + '</span>' + (ht >= 30 ? '<small>' + parts(r.at).hm + '</small>' : '') + '</button>';
+        var r = x.row, ht = Math.max(8, (x.to - x.from) * PXW - 2);
+        h += '<div class="mb-wk-b mb-wk-' + r.kind + (r.pending ? ' pending' : '') + (r.flag === 'canceled' || r.flag === 'removed' ? ' bad' : '') + '" style="top:' + (x.from * PXW) + 'px;height:' + ht + 'px;left:' + (100 * x.column / x.columns) + '%;width:calc(' + (100 / x.columns) + '% - 2px)" aria-hidden="true"></div>';
       });
       if (k === today) h += '<div class="mb-wk-now" style="top:' + minute(Date.now()) * PXW + 'px"></div>';
       h += '</div>';
     }
-    return h + '</div></div></div><p class="mb-timeline-note">Tryck på en dag för dagvyn, eller på ett block för info.</p>';
+    return h + '</div></div></div><p class="mb-timeline-note">Tryck på en dag för dagvyn.</p>';
   }
   // Månad: klassiskt rutnät, korta etiketter (färg per sort), "+N till", dagens datum inringat.
   function monthHtml() {
