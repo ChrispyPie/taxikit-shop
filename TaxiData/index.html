@@ -219,12 +219,12 @@
   <script src="nav-historik.js?v=20261112swipe1"></script>
   <script src="swipe-back.js?v=20261114sidor1"></script>
   <script src="view-state.js?v=20261107lazy1"></script>
-  <script src="hem-ordning-core.js?v=20261123adv10"></script>
-  <script src="hem-sidor.js?v=20261123adv6"></script>
+  <script src="hem-ordning-core.js?v=20261125zmod1"></script>
+  <script src="hem-sidor.js?v=20261125zmod1"></script>
   <script src="julpyssel.js?v=20261125zber1"></script>
   <script src="polkagris.js?v=20261125zber1"></script>
   <script src="hb-stage.js?v=20261124adv18"></script>
-  <script src="lazy-views.js?v=20261125zber1"></script>
+  <script src="lazy-views.js?v=20261125zmod1"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -241,7 +241,6 @@
       { id: VADER.id, icon: VADER.icon, label: VADER.title, roles: ALLA },
       { id: NYHETER.id, icon: NYHETER.icon, label: NYHETER.title, roles: ALLA },
       { id: KALENDER.id, icon: KALENDER.icon, label: KALENDER.title, roles: ALLA },
-      { id: ADVENT.id, icon: ADVENT.icon, label: ADVENT.title, roles: ALLA },
       // Statistik borttagen 2026-10-25 (tom platshållare): { id: 'statistik', icon: '📈', label: 'Statistik', roles: ALLA },
       { id: TOPPLISTOR.id, icon: TOPPLISTOR.icon, label: TOPPLISTOR.title, roles: ALLA },
       // Kommunikation borttagen 2026-10-25 (tom platshållare): { id: 'kommunikation', icon: '💬', label: 'Kommunikation', roles: ALLA },
@@ -493,7 +492,7 @@
       try { afterLogin = sessionStorage.getItem('taxi_go_home') === '1'; sessionStorage.removeItem('taxi_go_home'); } catch (e) {}
       if (isReload() && !afterLogin) {
         var rv = LAZY.restoreView() || localStorage.getItem('taxi_view');
-        if (isHiddenPrivateView(rv)) {
+        if (isHiddenPrivateView(rv) || rv === 'advent') {
           try { localStorage.removeItem('taxi_view'); LAZY.save('view', null); } catch (e0) {}
           if (location.hash) { try { history.replaceState(history.state, '', location.pathname + location.search); } catch (e3) {} }
           return null;
@@ -505,6 +504,7 @@
       if (location.hash) { try { history.replaceState(history.state, '', location.pathname + location.search); } catch (e) {} }
       var sida = null;
       try { sida = new URLSearchParams(location.search).get('sida'); } catch (e) {}
+      if (sida === 'advent') return null;
       return sida ? LAZY.restoreView() : null;
     }
 

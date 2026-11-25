@@ -340,7 +340,7 @@
   }
   function items() {
     var h = HO(), cat = h && h.catalog ? h.catalog() : [], out = [], seen = {};
-    cat.forEach(function (it) { if (it && it.id && !seen[it.id]) { seen[it.id] = 1; out.push({ id: it.id, icon: it.icon, label: String(it.label || it.id), tool: true }); } });
+    cat.forEach(function (it) { if (it && it.id && it.id !== 'advent' && !seen[it.id]) { seen[it.id] = 1; out.push({ id: it.id, icon: it.icon, label: String(it.label || it.id), tool: true }); } });
     if (!seen.moduler && h) out.push({ id: 'moduler', icon: '🧩', label: 'Moduler', tool: true });
     if (isAdmin()) adminItems().forEach(function (it) { if (it.id !== 'a-panel') out.push({ id: it.id, icon: it.icon, label: it.label, href: it.href, tag: 'Admin' }); });
     if (isS()) SADMIN_ITEMS.forEach(function (it) { if (it.id !== 's-panel') out.push({ id: it.id, icon: it.icon, label: it.label, href: it.href, tag: 'S admin' }); });

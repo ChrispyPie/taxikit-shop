@@ -20,7 +20,7 @@ var manifest={
   "vader": ["vader.js?v=20261111karta1"],
   "nyheter": ["nyheter.js?v=20261111nyheter1"],
   "advent": ["advent-fakta.js?v=20261123adv11", "advent.js?v=20261125zber1"],
-  "moduler": ["moduler.js?v=20261122zdelad1"],
+  "moduler": ["moduler.js?v=20261125zmod1"],
   "hjalp": ["hjalp.js?v=20261125mbui1"],
   "hem-ordning": ["hem-ordning.js?v=20261122zdelad1"],
   "berra": ["berra.js?v=20261125bub1"],

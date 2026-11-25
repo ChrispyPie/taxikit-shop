@@ -11,7 +11,6 @@
     vader: 'Väderkarta över Västsverige, med nederbörd, vind och temperatur.',
     nyheter: 'Korta nyheter från Göteborg, med fler flöden om du vill.',
     kalender: 'Det som är inbokat, samlat på ett ställe.',
-    advent: '24 luckor i december, med taxifakta bakom varje lucka. Modulen ligger kvar på startskärmen i december.',
     topplistor: 'Jämför resultat mellan förare för en vald period.',
     forum: 'Frågor och tips mellan förare.',
     'mina-bevakningar': 'Ankomster och händelser du bevakar.',
@@ -68,8 +67,9 @@
   }
 
   function catalog() {
-    if (window.HEM_ORDNING && typeof HEM_ORDNING.catalog === 'function') return HEM_ORDNING.catalog() || [];
-    return [];
+    var items = [];
+    if (window.HEM_ORDNING && typeof HEM_ORDNING.catalog === 'function') items = HEM_ORDNING.catalog() || [];
+    return items.filter(function (it) { return !it || it.id !== 'advent'; });
   }
   function installed(id) {
     if (window.HEM_ORDNING && HEM_ORDNING.isCore && HEM_ORDNING.isCore(id)) return true;

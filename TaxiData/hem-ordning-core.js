@@ -29,12 +29,6 @@
   function isCore(id) { return !!CORE[id]; }
   function isPinned(id) {
     if (PINNED[id]) return true;
-    if (id === 'advent') {
-      var g = window.ADVENT_GATE;
-      if (!g || !g.allowed || !g.allowed()) return false;
-      var t = g.today ? g.today() : null;
-      return !!(t && (t.m === 12 || (t.m === 1 && t.d <= 6)));
-    }
     return false;
   }
   function isDefaultOff(id) { return !!DEFAULT_OFF[id]; }
@@ -212,7 +206,7 @@
     list.forEach(function (x) { if (x && x.id) byId[x.id] = x; });
     var active = list.filter(function (x) {
       if (!x || !x.id) return false;
-      /* Mini-kalendern ersätter trädikonen på startskärmen; advent finns kvar i applådan. */
+      /* Mini-kalendern ersätter trädikonen på startskärmen; Adventskalender är ingen modul i applådan. */
       if (x.id === 'advent') return false;
       if (isOff(x.id)) return false;
       if (isCore(x.id) || isPinned(x.id)) return true;
