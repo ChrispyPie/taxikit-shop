@@ -12,7 +12,7 @@ window.OM_DATA = {
     ['✉️', 'Meddelanden och Ärenden', 'privata meddelanden, felanmälan, verkstadstid och sjukanmälan'],
     ['📅', 'Kalender', 'konserter, matcher, mässor och andra evenemang'],
     ['💬', 'Forum', 'Hjälp & guider, Frågor & svar, Allmänt, Önskemål, Buggar, Mitt åkeri'],
-    ['📌', 'Mina bevakningar', 'bevakade tåg, flyg och båtar, kalenderhändelser och bokade tider i en tidslinje eller lista', 'mina-bevakningar'],
+    ['📌', 'Bevakningar', 'bevakade tåg, flyg och båtar, kalenderhändelser och bokade tider i en tidslinje eller lista', 'mina-bevakningar'],
     ['🔮', 'Prognos', 'kommande bokningar per zon och morgonprognos'],
     ['🤖', 'Hjälpbot', 'liten hjälpare på startskärmen']
   ],

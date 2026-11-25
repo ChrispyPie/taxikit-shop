@@ -199,7 +199,7 @@
     var canStar = !!(bev && home && it.key && (it.key[0] === 'f' || it.key[0] === 't' || it.key[0] === 'b'));
     var cls = 'ank-row' + (it.canceled || it.removed ? ' canceled' : '') + (it.act ? ' arrived' : '') + (watched ? ' watched' : '') + (perm ? ' perm' : '');
     var starCls = 'ank-star' + (perm ? ' gold' : (watched ? ' on' : ''));
-    var starLbl = perm ? 'Fast bevakning – ändra i Mina bevakningar' : (watched ? 'Sluta bevaka' : 'Bevaka');
+    var starLbl = perm ? 'Fast bevakning – ändra i Bevakningar' : (watched ? 'Sluta bevaka' : 'Bevaka');
     var star = canStar
       ? '<button class="' + starCls + '" data-bev-star' + (perm ? ' data-bev-perm="1"' : '') + ' aria-label="' + starLbl + '">' + (perm || watched ? '★' : '☆') + '</button>' : '';
     var tap = !!(it.tid || it.canceled || it.removed || it.special || it.terminal);
@@ -445,7 +445,7 @@
   };
   A.stop = stop;
 
-  // Mina bevakningar delar samma normalisering och offentliga tidtabell som Ankomster.
+  // Bevakningar delar samma normalisering och offentliga tidtabell som Ankomster.
   A.watchItems = function (kind) {
     var source = A.sources.filter(function (s) { return s.id === kind; })[0];
     return source.load().then(function (r) {

@@ -1,7 +1,7 @@
 /* Flyg-Bevakningar: fasta bevakningar för ankomster till Landvetter,
  * bara under de tider föraren väljer.
  *
- * - Kort "🔔 Mina bevakningar" på fliken Flyg i Ankomster (under notisknappen).
+ * - Kort "🔔 Bevakningar" på fliken Flyg i Ankomster (under notisknappen).
  * - Välj avreseort (IATA) och/eller flygnummer. Samma notiser som för tåg: före ankomst, försening, inställt.
  * - Sparas hos servern (flight_watch_*), skickas av edge-funktionen "bevakning" som push.
  * - Flyg som matchar en påslagen bevakning får en liten 🔔 i listan.
@@ -184,7 +184,7 @@
     var l = st.list || [];
     var on = l.filter(function (w) { return w.enabled; }).length;
     var h = '<div class="tn-card" id="fn-card"><button class="tn-head" data-fn-toggle aria-expanded="' + st.open + '">' +
-      '<span>🔔 <b>Mina bevakningar</b></span><span class="tn-count">' + (st.list ? (l.length ? on + ' på' : 'Ingen än') : '…') +
+      '<span>🔔 <b>Bevakningar</b></span><span class="tn-count">' + (st.list ? (l.length ? on + ' på' : 'Ingen än') : '…') +
       ' ' + (st.open ? '▴' : '▾') + '</span></button>';
     if (!st.open) return h + '</div>';
     h += '<div class="tn-body">';
@@ -208,7 +208,7 @@
     return h + '</div></div>';
   }
 
-  // Korten på Ankomster är borttagna; inställning sker i Mina bevakningar.
+  // Korten på Ankomster är borttagna; inställning sker i Bevakningar.
   T.decorate = function () {
     if (!token()) return;
     if (st.tok !== token()) { st.tok = token(); st.list = null; st.err = false; }

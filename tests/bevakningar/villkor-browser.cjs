@@ -1,4 +1,4 @@
-// Villkor för tågbevakningar (12 nov): Ankomster har bara kryssruta + länk, Mina bevakningar har standard
+// Villkor för tågbevakningar (12 nov): Ankomster har bara kryssruta + länk, Bevakningar har standard
 // och egna villkor per avgång. Isolerad profil, påhittade exempel, inga riktiga API-anrop.
 // Kör: node tests/bevakningar/villkor-browser.cjs   (SCREENSHOT_DIR=… för bilder)
 const puppeteer=require('../meddelanden/node_modules/puppeteer-core'),fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
@@ -38,7 +38,7 @@ try{
    nums:c.querySelectorAll('input[type=number]').length, card:!!c.querySelector('.tv-card,.tv-form,.tv-sheet'), text:b.textContent.trim(), checked:b.querySelector('[data-tv-sound]').checked};});
  check(ank.boxes===1&&ank.links===1&&ank.buttons===1,'Ankomster: en kryssruta och en länk, inget mer ('+JSON.stringify(ank)+')');
  check(ank.nums===0&&!ank.card,'Ankomster: inga minutfält eller paneler');
- check(/Ljud för tåg/.test(ank.text)&&/Specificera villkor i Mina bevakningar/.test(ank.text),'texten');
+ check(/Ljud för tåg/.test(ank.text)&&/Specificera villkor i Bevakningar/.test(ank.text),'texten');
  check(ank.checked,'ljud på som standard');
  await p.evaluate(()=>scrollTo(0,0));await shot('01-ankomster-tag');
  // Av/på sparas i standarden, i Tågljud och hos servern
@@ -64,9 +64,9 @@ try{
  check(plays.oldSmall===0&&plays.oldBig>0,'äldre server: 12 min tyst, 60 min ljud');
  check(plays.flyg>0,'flyg som förut');
 
- // ---------- Länken öppnar Mina bevakningar med standarden ----------
+ // ---------- Länken öppnar Bevakningar med standarden ----------
  await p.click('[data-tv-open]');
- await p.waitForFunction(()=>document.getElementById('title').textContent==='Mina bevakningar');
+ await p.waitForFunction(()=>document.getElementById('title').textContent==='Bevakningar');
  await p.waitForSelector('#tv-card form[data-tv-default]');
  check(await p.evaluate(()=>document.querySelector('#tv-card [data-tv-toggle]').getAttribute('aria-expanded')==='true'),'villkoren öppna efter länken');
  const vals=await p.evaluate(()=>Object.fromEntries(['lead_min','small_min','big_min','jump_min'].map(k=>[k,document.querySelector('#tv-card [name='+k+']').value])));

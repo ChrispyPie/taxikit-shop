@@ -3,7 +3,7 @@
  * (Web Audio). Sparas bara i telefonen (localStorage 'taxi_bev_ljud').
  * Av = tyst, typ-toggle stänger av en sort. Ljudet låses upp vid första
  * trycket (webbläsare kräver en användargest). Inställningarna sitter på
- * Ankomster och i Mina bevakningar, inte under Inställningar.
+ * Ankomster och i Bevakningar, inte under Inställningar.
  * Tåg (12 nov): om ljudet spelas avgörs av villkoren i tag-villkor.js (push med v: 1 och silent).
  * Ångra: ta bort filerna i ljud/, återställ den här filen och beep() i bevakning.js.
  */

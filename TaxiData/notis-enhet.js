@@ -309,7 +309,7 @@
     };
   }
 
-  // Skapa en knapp för att öppna/kopiera direkt från Mina bevakningar / Ankomster
+  // Skapa en knapp för att öppna/kopiera direkt från Bevakningar / Ankomster
   function renderCopyButton(host) {
     if (!host) return;
     css();

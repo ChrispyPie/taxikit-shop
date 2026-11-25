@@ -19,14 +19,18 @@ window.CHANGELOG = [
     ['Nytt', 'Adventskalender: 24 luckor med taxifakta, en för varje dag i december. Kalendern sitter litet uppe till vänster på startsidan. Tryck så växer den fram i mitten. Öppna dagens lucka – och alla du missat hittills.'],
     ['Nytt', 'Polkagrisjakt: du får två egna polkagrisar per arbetspass, som bara du kan ta. Samtidigt kan upp till tre delade polkagrisar vara ute i appen; en ny kan dyka upp även om de gamla inte är tagna, och den som trycker först tar den. De försvinner efter 45 minuter om ingen tar dem, och kommer oftare på natten. Ibland syns en gyllene polkagris värd tre poäng. Dina poäng syns som en polkagris med siffra högst upp på startsidan, till höger om ljusstaken. Tryck där för att se din placering (inga andras namn visas). På nyårsafton presenteras vinnaren för alla.']
   ]},
+  { datum: '2026-11-25', id: '2026-11-25zmbui1', tid: '14:23', rader: [
+    ['Förbättrat', 'Sidan heter nu Bevakningar, så att hela rubriken får plats högst upp.'],
+    ['Förbättrat', 'På Bevakningar är ↻-knappen och rutan Ljud och notiser borta från sidan. Ljud och notiser ligger i kugghjulet till höger på verktygsraden. Idag-knappen är en dubbelpil som hoppar till den här dagen, veckan eller månaden. Har du öppnat en dag från vecka eller månad blir vyknappen en tillbaka-pil. Dagsschemat har samma bakgrund som de andra vyerna.']
+  ]},
   { datum: '2026-11-25', id: '2026-11-25zmbvr1', tid: '12:16', rader: [
-    ['Förbättrat', 'Mina bevakningar har en ny verktygsrad ovanför kalendern: en ikon som växlar Dag, Vecka och Månad, samma datumvisare som i Körpassdata (bakåt, framåt och en minikalender där du väljer en dag) och en Idag-knapp till höger.'],
+    ['Förbättrat', 'Bevakningar har en ny verktygsrad ovanför kalendern: en ikon som växlar Dag, Vecka och Månad, samma datumvisare som i Körpassdata (bakåt, framåt och en minikalender där du väljer en dag) och en Idag-knapp till höger.'],
     ['Förbättrat', 'I månadsvyn visas veckonummer till vänster. Både vecka och månad har veckodagarna mån–sön överst, med dagens veckodag markerad. Timmarna i veckovyn sitter kvar till vänster när du skrollar.'],
     ['Fixat', 'I vecka- och månadsvyn öppnas ingen inforuta. Tryck på en dag så kommer du till dagvyn, där du kan öppna detaljerna.']
   ]},
   { datum: '2026-11-24', id: '2026-11-24zmbv1', tid: '20:09', rader: [
-    ['Förbättrat', 'Mina bevakningar: tryck på en bevakning så får du all info i en ruta direkt på sidan – tåg, spår, försening, flyg, evenemang och bokningar. Länken i rutan tar dig till Ankomster eller Kalender om du vill.'],
-    ['Förbättrat', 'Mina bevakningar har nu en enda vy som du byter med knappen uppe till höger: Dag, Vecka eller Månad, som i en vanlig kalender. Tryck på en dag i vecka eller månad för att se dagen, och Tillbaka för att komma tillbaka.'],
+    ['Förbättrat', 'Bevakningar: tryck på en bevakning så får du all info i en ruta direkt på sidan – tåg, spår, försening, flyg, evenemang och bokningar. Länken i rutan tar dig till Ankomster eller Kalender om du vill.'],
+    ['Förbättrat', 'Bevakningar har nu en enda vy som du byter med knappen uppe till höger: Dag, Vecka eller Månad, som i en vanlig kalender. Tryck på en dag i vecka eller månad för att se dagen, och Tillbaka för att komma tillbaka.'],
     ['Förbättrat', 'Ljud och notiser för tåg, flyg, båt och prognos ligger nu samlat i en ruta, med Notis, Ljud och Testa på en rad per sort. Dina inställningar är kvar.'],
     ['Fixat', 'Flygbevakningarna gick inte att hämta sedan i kväll (gul varning). Nu fungerar de igen.']
   ]},
@@ -69,7 +73,7 @@ window.CHANGELOG = [
     ['Nytt', 'Historiken börjar 3 november (morgonprognosen 27 oktober) och växer för varje dag. Bara summerade antal visas, inga förare eller enskilda bokningar.']
   ]},
   { datum: '2026-11-23', id: '2026-11-23zflyg9', tid: '21:34', rader: [
-    ['Fixat', 'Ankomster: flyg som Swedavia strukit ur tidtabellen i förväg och som aldrig skulle flyga visas inte längre som Borttagen. Byter ett flyg bolag men har samma nummer och avgångsort (till exempel Lanzarote JTD284 som blev BLX284) syns bara det riktiga flyget, med texten "Ersätter JTD284". Borttagen visas bara om ett flyg som faktiskt var planerat plockas bort. Samma sak gäller i Mina bevakningar.']
+    ['Fixat', 'Ankomster: flyg som Swedavia strukit ur tidtabellen i förväg och som aldrig skulle flyga visas inte längre som Borttagen. Byter ett flyg bolag men har samma nummer och avgångsort (till exempel Lanzarote JTD284 som blev BLX284) syns bara det riktiga flyget, med texten "Ersätter JTD284". Borttagen visas bara om ett flyg som faktiskt var planerat plockas bort. Samma sak gäller i Bevakningar.']
   ]},
   { datum: '2026-11-23', id: '2026-11-23zhem2', tid: '19:15', rader: [
     ['Ändrat', 'Du kan ta bort genvägen från startsidan för alla ikoner, även Inställningar, Om, Admin, S admin, Adventskalender och Moduler. Modulerna finns kvar i applådan och när du sveper upp. Avinstallera fungerar som tidigare.']
@@ -141,7 +145,7 @@ window.CHANGELOG = [
     ['Fixat', 'Inloggade enheter: plattor känns nu igen som Platta i stället för Telefon även när automatisk utloggning är avstängd, och du kan ge varje enhet ett eget namn som syns på alla dina enheter.']
   ]},
   { datum: '2026-11-21', id: '2026-11-21val2', tid: '16:12', rader: [
-    ['Nytt', 'Delad enhet: nu kan du välja om automatisk utloggning ska vara på, och du kan kryssa i Dölj privata moduler för att dölja kördata, lön, rapporter, ärenden, meddelanden, profil och admin på bilplattan. Mina bevakningar, Ankomster, Prognos, Väder, Nyheter och Kalender finns kvar. Inloggningen på en delad enhet ber heller inte om att spara lösenord.']
+    ['Nytt', 'Delad enhet: nu kan du välja om automatisk utloggning ska vara på, och du kan kryssa i Dölj privata moduler för att dölja kördata, lön, rapporter, ärenden, meddelanden, profil och admin på bilplattan. Bevakningar, Ankomster, Prognos, Väder, Nyheter och Kalender finns kvar. Inloggningen på en delad enhet ber heller inte om att spara lösenord.']
   ]},
   { datum: '2026-11-21', id: '2026-11-21login1', tid: '15:45', rader: [
     ['Fixat', 'Appen fastnar inte längre på "Kontrollerar inloggning" efter utloggning. Du kan logga in igen direkt.']
@@ -225,9 +229,9 @@ window.CHANGELOG = [
   ]},
   { datum: '2026-11-12', id: '2026-11-12ljud1', tid: '16:10', rader: [
     ['Förbättrat', 'Tåg piper mycket mindre. Små förseningar, under 15 minuter, ger ingen notis och inget ljud. Du får notis när tåget börjar närma sig, när förseningen blir stor (30 minuter eller mer), när tiden plötsligt ändras mycket, när tåget ställs in och när det har kommit fram.'],
-    ['Nytt', 'I Mina bevakningar finns Ljud och notiser för tåg. Där väljer du själv hur många minuter före ankomst du vill ha notis, och vad som räknas som liten och stor försening. Det sparas på ditt konto.'],
-    ['Nytt', 'Tryck på 🔔 vid ett tåg i Mina bevakningar för att ge just den avgången egna villkor, bara den här gången eller varje gång för en fast bevakning.'],
-    ['Ändrat', 'Under tåg på Ankomster finns nu bara Ljud för tåg, av eller på, och en länk till villkoren i Mina bevakningar.']
+    ['Nytt', 'I Bevakningar finns Ljud och notiser för tåg. Där väljer du själv hur många minuter före ankomst du vill ha notis, och vad som räknas som liten och stor försening. Det sparas på ditt konto.'],
+    ['Nytt', 'Tryck på 🔔 vid ett tåg i Bevakningar för att ge just den avgången egna villkor, bara den här gången eller varje gång för en fast bevakning.'],
+    ['Ändrat', 'Under tåg på Ankomster finns nu bara Ljud för tåg, av eller på, och en länk till villkoren i Bevakningar.']
   ]},
   { datum: '2026-11-12', id: '2026-11-12svar1', tid: '16:00', rader: [
     ['Fixat', 'Admin › Ägare › Ärenden: en felanmälan, Bilen står eller Behövs till bilen går nu att svara på direkt i ärendet. Meddelandet syns i tråden och föraren får en notis. Ärendet visas inte längre som Arkiv eller bara läsning.'],
@@ -353,19 +357,19 @@ window.CHANGELOG = [
     ['Rättat', 'Etiketterna under Bevakar på Ankomster är silver för tillfälliga bevakningar. Guld används bara för fasta.']
   ]},
   { datum: '2026-11-11', id: '2026-11-11bev2', tid: '08:00', rader: [
-    ['Rättat', 'En tillfällig bevakning på Ankomster visas med en silverstjärna, inte guld. Guldstjärnan används bara för fasta bevakningar, som du gör i Mina bevakningar med ett långt tryck.'],
+    ['Rättat', 'En tillfällig bevakning på Ankomster visas med en silverstjärna, inte guld. Guldstjärnan används bara för fasta bevakningar, som du gör i Bevakningar med ett långt tryck.'],
     ['Rättat', 'Ett tåg som inte har gått visar inte längre en slutstation från gårdagens tåg med samma nummer. Senast sedd gäller bara den här turen och bara stationer på vägen. Har tåget inte avgått står det Ej avgått.'],
-    ['Rättat', 'Stjärnan på Ankomster gör bara en tillfällig bevakning. Tar du bort den där försvinner den också från Mina bevakningar. En fast bevakning (guld) gör du bara med ett långt tryck i Mina bevakningar.']
+    ['Rättat', 'Stjärnan på Ankomster gör bara en tillfällig bevakning. Tar du bort den där försvinner den också från Bevakningar. En fast bevakning (guld) gör du bara med ett långt tryck i Bevakningar.']
   ]},
   { datum: '2026-11-11', id: '2026-11-11bev1', tid: '07:30', rader: [
-    ['Nytt', 'Stjärnan på en ankomst i Tåg, Flyg eller Båt gör en tillfällig bevakning (silverstjärna). Den syns i Mina bevakningar och som en liten etikett högst upp på sidan, och försvinner cirka en halvtimme efter ankomst.'],
-    ['Nytt', 'I Mina bevakningar kan du hålla fingret på en tillfällig tåg-, flyg- eller båtbevakning för att göra den fast (guldstjärna). Den gäller samma tur och ungefär samma klockslag, så den följer med även om tågnumret ändras. Kugghjulet ställer in tid och dagar, till exempel mån–fre 05:40. En fast bevakning görs tillfällig bara här, inte på Ankomster. Konserter och andra evenemang kan bara vara tillfälliga.'],
-    ['Förbättrat', 'Ljudet för tåg, flyg och båt är inspelningar. Du slår på eller av varje ljud och kan testa det på Ankomster och i Mina bevakningar. Valet sparas i telefonen. Om en fil saknas används en reservton. Rutan Ljud för bevakningar är borttagen från Inställningar.'],
+    ['Nytt', 'Stjärnan på en ankomst i Tåg, Flyg eller Båt gör en tillfällig bevakning (silverstjärna). Den syns i Bevakningar och som en liten etikett högst upp på sidan, och försvinner cirka en halvtimme efter ankomst.'],
+    ['Nytt', 'I Bevakningar kan du hålla fingret på en tillfällig tåg-, flyg- eller båtbevakning för att göra den fast (guldstjärna). Den gäller samma tur och ungefär samma klockslag, så den följer med även om tågnumret ändras. Kugghjulet ställer in tid och dagar, till exempel mån–fre 05:40. En fast bevakning görs tillfällig bara här, inte på Ankomster. Konserter och andra evenemang kan bara vara tillfälliga.'],
+    ['Förbättrat', 'Ljudet för tåg, flyg och båt är inspelningar. Du slår på eller av varje ljud och kan testa det på Ankomster och i Bevakningar. Valet sparas i telefonen. Om en fil saknas används en reservton. Rutan Ljud för bevakningar är borttagen från Inställningar.'],
     ['Förbättrat', 'De extra korten Bevakningar under Tåg och Flyg är borttagna. Notislistan, Schema och Tidslinjen är kvar. Knappar och etiketter är mindre så listan får plats bättre på telefonen.']
   ]},
   { datum: '2026-11-11', id: '2026-11-11ljud1', rader: [
     ['Nytt', 'När en bevakning slår till medan appen är öppen spelas ett kort ljud: ett tåghorn för tåg, ett flygljud för flyg och en båtsignal för båt. Under Inställningar finns Ljud för bevakningar, där du kan slå av allt eller en typ i taget, och prova hur det låter. Valet sparas i telefonen.'],
-    ['Förbättrat', 'Mina bevakningar visar tydligare status på varje ankomst: I tid, försenad, ankommen eller inställd. Listan heter Schema och är tätare, så dagens och kommande ankomster är lätta att läsa på telefonen.']
+    ['Förbättrat', 'Bevakningar visar tydligare status på varje ankomst: I tid, försenad, ankommen eller inställd. Listan heter Schema och är tätare, så dagens och kommande ankomster är lätta att läsa på telefonen.']
   ]},
   { datum: '2026-11-11', id: '2026-11-11pr2', rader: [
     ['Rättat', 'Passrapporten öppnas när du trycker på den lilla rems-ikonen. Plusknappen och resten av raden fäller ut passet som förut. Samma sak för resor och kvittokopian.'],
@@ -409,7 +413,7 @@ window.CHANGELOG = [
     ['Nytt', 'Prognos på Landvetter visar en linje vid 10 min (då bokningarna går ut) och en flygspalt med ankomster till Landvetter i varje tid. Tryck på ett flyg för mer uppgifter. Kolumnrubrikerna står lodrätt så spalterna får plats även på en smal skärm.']
   ]},
   { datum: '2026-11-10', id: '2026-11-10fly', rader: [
-    ['Nytt', 'Du kan nu lägga fasta Bevakningar även för flyg till Landvetter, under Ankomster › Flyg. De syns på sidan Mina bevakningar som Bevakning (flyg).']
+    ['Nytt', 'Du kan nu lägga fasta Bevakningar även för flyg till Landvetter, under Ankomster › Flyg. De syns på sidan Bevakningar som Bevakning (flyg).']
   ]},
   { datum: '2026-11-10', id: '2026-11-10ref', rader: [
     ['Förbättrat', 'Ankomster: uppdatera-knappen är borttagen, listan uppdateras av sig själv. Stationsväljaren och klockan ryms oftare på samma rad; om klockan hamnar på raden under står den till vänster.']
@@ -418,7 +422,7 @@ window.CHANGELOG = [
     ['Förbättrat', 'Ankomster: stationsväljaren och klockan för senast uppdaterad står på samma rad när det får plats, annars hamnar klockan på raden under.']
   ]},
   { datum: '2026-11-10', id: '2026-11-10bev', rader: [
-    ['Förbättrat', 'De fasta tågbevakningarna heter nu Bevakningar. Du hittar dem under Mina bevakningar på Ankomster › Tåg, och tåg som passar en bevakning syns också på sidan Mina bevakningar.']
+    ['Förbättrat', 'De fasta tågbevakningarna heter nu Bevakningar. Du hittar dem under Bevakningar på Ankomster › Tåg, och tåg som passar en bevakning syns också på sidan Bevakningar.']
   ]},
   { datum: '2026-11-10', id: '2026-11-10upd', rader: [
     ['Förbättrat', 'Ankomster visar klockslaget för senast uppdaterad med sekunder, så du ser när listan senast hämtades (ungefär var 15:e sekund).']
@@ -458,7 +462,7 @@ window.CHANGELOG = [
   // Christian godkände kör 2026-11-07; svensk go-live-tid.
   { datum: '2026-11-07', id: '2026-11-07g', tid: '16:23', rader: [
     ['Nytt', 'Inkorg samlar Meddelande till admin, Sjuk och Verkstadstimmar. Kategoriikoner på en rad och rubrik för vald kategori. Äldre samtal och bilärenden finns kvar att läsa.'],
-    ['Nytt', 'Bokad tid: ett Typ-fält blir rubriken, datum väljs i kalendern och visas ÅÅÅÅ-MM-DD, med tid i 24-timmarsformat. Ett frivilligt meddelande kan följa med. Välj åkeriets bil eller Nej. Avböj använder texten i den vanliga svarsrutan; tom ruta ger en röd varning. Väntande tider visas grå i Mina bevakningar.'],
+    ['Nytt', 'Bokad tid: ett Typ-fält blir rubriken, datum väljs i kalendern och visas ÅÅÅÅ-MM-DD, med tid i 24-timmarsformat. Ett frivilligt meddelande kan följa med. Välj åkeriets bil eller Nej. Avböj använder texten i den vanliga svarsrutan; tom ruta ger en röd varning. Väntande tider visas grå i Bevakningar.'],
     ['Nytt', 'Lägg till bilar i profilen. Biltelefonerna visas för åkeriet. Vid din vanliga kontakttelefon väljer du Ägare, Åkeriet eller Alla (inom Taxi Göteborg).'],
     ['Förbättrat', 'Admin › Ärenden: Meddelande och Bokad tid till åkeriets chaufförer. Önskemål finns bara under Önskemål och idéer. Sjukanmälan och intyg är fortsatt skyddade.', 'admin']
   ]},
@@ -487,7 +491,7 @@ window.CHANGELOG = [
     ['Nytt', 'Ankomster: tryck på ett inställt eller borttaget tåg eller flyg för att se orsaken, till exempel banarbete. Finns ingen orsak står det så.']
   ] },
   { datum: '2026-11-06', id: '2026-11-06m', tid: '23:09', rader: [
-    ['Nytt', 'Mina bevakningar på hemskärmen visar tåg, flyg och kalenderhändelser som en tidslinje med klockslag, nu-linje och lediga luckor. Välj dag eller växla till Lista. Tryck på ett block för att öppna det, eller på ⋯ för att sluta bevaka.'],
+    ['Nytt', 'Bevakningar på hemskärmen visar tåg, flyg och kalenderhändelser som en tidslinje med klockslag, nu-linje och lediga luckor. Välj dag eller växla till Lista. Tryck på ett block för att öppna det, eller på ⋯ för att sluta bevaka.'],
     ['Nytt', 'I Kalender kan du slå på Visa mina bevakningar för att se dina tåg och flyg som rader och prickar. Valet sparas på telefonen.']
   ] },
   { datum: '2026-11-06', id: '2026-11-06l', tid: '22:58', rader: [

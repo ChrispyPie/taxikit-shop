@@ -2,7 +2,7 @@
  * RPC:er som Ankomster och Kalender. Tidtabellerna är offentliga och delas med Ankomster. */
 (function () {
   'use strict';
-  var M = window.MINA_BEVAKNINGAR = { id: 'mina-bevakningar', title: 'Mina bevakningar', icon: '📌' };
+  var M = window.MINA_BEVAKNINGAR = { id: 'mina-bevakningar', title: 'Bevakningar', icon: '📌' };
   var host = null, timer = null, generation = 0, rows = [], busy = false;
   function token() { return localStorage.getItem('taxi_session') || ''; }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -349,17 +349,30 @@
     if (mode === 'manad') return selectedDay.slice(0, 7) === today.slice(0, 7);
     return selectedDay === today;
   }
-  // Verktygsrad som i Google Kalender: ikon för vyn, datumvisare som i Körpassdata, Idag till höger.
+  function backIcon() {
+    return '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M15 5.5l-7 6.5 7 6.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  }
+  function todayIcon() {
+    return '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l6 6-6 6M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  }
+  function gearIcon() {
+    return '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.49.49 0 0 0 .12-.62l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.04-.7-1.63-.94l-.36-2.54A.5.5 0 0 0 13.91 2h-3.82a.5.5 0 0 0-.49.35l-.36 2.54c-.59.24-1.13.56-1.63.94l-2.39-.96a.49.49 0 0 0-.59.22L2.71 8.86a.49.49 0 0 0 .12.62l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.49.49 0 0 0-.12.62l1.92 3.32c.13.22.4.31.59.22l2.39-.96c.5.38 1.04.7 1.63.94l.36 2.54c.05.2.25.35.49.35h3.82a.5.5 0 0 0 .49-.35l.36-2.54c.59-.24 1.13-.56 1.63-.94l2.39.96c.22.09.46 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.62l-2.03-1.58zM12 15.6A3.6 3.6 0 1 1 15.6 12 3.6 3.6 0 0 1 12 15.6z"/></svg>';
+  }
+  // Verktygsrad: vyikon eller tillbaka, datumvisare, dubbelpil (idag), kugghjul för ljud och notiser.
   function toolNav() {
     var u = UNIT_N[mode], next = UNIT_N[UNITS[(UNITS.indexOf(mode) + 1) % 3]], todayOn = onToday();
-    return '<div class="mb-toolbar">' +
-      '<button type="button" class="mb-unit" data-mb-unit data-mb-mode="' + mode + '" aria-label="Vy: ' + u + '. Tryck för ' + next + '">' + unitIcon(mode) + '</button>' +
+    var todayLbl = mode === 'vecka' ? 'Den här veckan' : mode === 'manad' ? 'Den här månaden' : 'Idag';
+    var left = returnTo
+      ? '<button type="button" class="mb-unit" data-mb-backunit aria-label="Tillbaka till ' + (returnTo.mode === 'vecka' ? 'vecka' : 'månad') + '">' + backIcon() + '</button>'
+      : '<button type="button" class="mb-unit" data-mb-unit data-mb-mode="' + mode + '" aria-label="Vy: ' + u + '. Tryck för ' + next + '">' + unitIcon(mode) + '</button>';
+    return '<div class="mb-toolbar">' + left +
       '<div class="date-nav mb-date-nav">' +
         '<button type="button" data-mb-step="-1" aria-label="Föregående ' + u.toLowerCase() + '">‹</button>' +
         '<button type="button" class="tl-date" data-mb-pick aria-haspopup="dialog" aria-label="Välj datum">' + esc(navDateLabel(selectedDay)) + '</button>' +
         '<button type="button" data-mb-step="1" aria-label="Nästa ' + u.toLowerCase() + '">›</button>' +
       '</div>' +
-      '<button type="button" class="mb-today' + (todayOn ? ' active' : '') + '" data-mb-today aria-pressed="' + todayOn + '">Idag</button>' +
+      '<button type="button" class="mb-today' + (todayOn ? ' active' : '') + '" data-mb-today aria-label="' + todayLbl + '" aria-pressed="' + todayOn + '">' + todayIcon() + '</button>' +
+      '<button type="button" class="mb-lj-btn" data-mb-lj-open aria-label="Ljud och notiser" aria-haspopup="dialog">' + gearIcon() + '</button>' +
     '</div>';
   }
   function closePick() {
@@ -454,7 +467,7 @@
   function goBackUnit() { if (!returnTo) return false; mode = returnTo.mode; selectedDay = returnTo.day; returnTo = null; infoIndex = null; draw(lastErrors); return true; }
   function gapText(mins) { return (mins >= 60 ? Math.floor(mins / 60) + ' h ' : '') + (mins % 60 ? mins % 60 + ' min ' : '') + 'ledigt'; }
   function timelineHtml() {
-    var layout = timelineLayout(rows, selectedDay), h = (returnTo ? '<button type="button" class="mb-backunit" data-mb-backunit>‹ Tillbaka till ' + (returnTo.mode === 'vecka' ? 'vecka' : 'månad') + '</button>' : '') + toolNav();
+    var layout = timelineLayout(rows, selectedDay), h = toolNav();
     if (!layout.length) h += '<p class="mb-day-empty" role="status">Inga aktuella bevakningar den här dagen.</p>';
     h += '<div class="mb-timeline-scroll" tabindex="0" aria-label="Dagens tidslinje, skrolla för fler timmar"><div class="mb-timeline" style="height:' + (1440 * PX + 52) + 'px">';
     for (var m = 0; m <= 1440; m += 30) {
@@ -582,24 +595,19 @@
     var focus = false; try { focus = sessionStorage.getItem('tv_focus') === '1'; } catch (e) {}
     if (focus) ljOpen = true;   // länken "Specificera villkor" på Ankomster öppnar rutan
     var s = ljState();
-    var h = '<section class="mb-lj"><button type="button" class="mb-lj-head" data-mb-lj-toggle aria-expanded="' + ljOpen + '"><span class="mb-lj-t">🔔 <b>Ljud och notiser</b><small>' + esc(ljSummary(s)) + '</small></span><span aria-hidden="true" class="mb-lj-car">' + (ljOpen ? '▴' : '▾') + '</span></button>';
-    if (ljOpen) {
-      h += '<div class="mb-lj-body"><p class="mb-lj-dim">Gäller den här enheten. Notis = push till telefonen. Ljud = när appen är öppen.</p><div class="mb-lj-rows" role="group" aria-label="Per sort">';
-      LJ_KINDS.forEach(function (x) {
-        var v = s[x.k];
-        h += '<div class="mb-lj-row"><span class="mb-lj-n">' + x.ic + ' ' + x.n + '</span>' +
-          '<button type="button" class="mb-lj-pill" data-mb-lj-notis="' + x.k + '" aria-pressed="' + v.notis + '" aria-label="Notis för ' + x.n.toLowerCase() + '">Notis</button>' +
-          (x.snd ? '<button type="button" class="mb-lj-pill" data-mb-lj-ljud="' + x.k + '" aria-pressed="' + v.ljud + '" aria-label="Ljud för ' + x.n.toLowerCase() + '">Ljud</button>' +
-            '<button type="button" class="mb-lj-try" data-mb-lj-try="' + x.k + '" aria-label="Testa ljud för ' + x.n.toLowerCase() + '">▶ Testa</button>'
-            : '<span class="mb-lj-na">utan ljud</span>') + '</div>';
-      });
-      h += '</div><div class="mb-lj-sub" id="mb-lj-tag"></div>' +
-        '<p class="mb-lj-dim">✈️ Flyg: förvarning och försening ställs per flygbevakning under Ankomster › Flyg. 📅 Evenemang: påminnelsen du valt på evenemanget i Kalender. ◷ Bokade tider: notis när ärendet ändras.</p>' +
-        '<div id="mb-notis-copy"></div></div>';
-    }
-    box.innerHTML = h + '</section>';
-    box.querySelector('[data-mb-lj-toggle]').onclick = function () { ljOpen = !ljOpen; try { sessionStorage.removeItem('tv_focus'); } catch (e) {} renderLjud(box); };
-    if (!ljOpen) return;
+    var h = '<div class="mb-lj-body"><p class="mb-lj-dim">' + esc(ljSummary(s)) + '. Gäller den här enheten. Notis = push till telefonen. Ljud = när appen är öppen.</p><div class="mb-lj-rows" role="group" aria-label="Per sort">';
+    LJ_KINDS.forEach(function (x) {
+      var v = s[x.k];
+      h += '<div class="mb-lj-row"><span class="mb-lj-n">' + x.ic + ' ' + x.n + '</span>' +
+        '<button type="button" class="mb-lj-pill" data-mb-lj-notis="' + x.k + '" aria-pressed="' + v.notis + '" aria-label="Notis för ' + x.n.toLowerCase() + '">Notis</button>' +
+        (x.snd ? '<button type="button" class="mb-lj-pill" data-mb-lj-ljud="' + x.k + '" aria-pressed="' + v.ljud + '" aria-label="Ljud för ' + x.n.toLowerCase() + '">Ljud</button>' +
+          '<button type="button" class="mb-lj-try" data-mb-lj-try="' + x.k + '" aria-label="Testa ljud för ' + x.n.toLowerCase() + '">▶ Testa</button>'
+          : '<span class="mb-lj-na">utan ljud</span>') + '</div>';
+    });
+    h += '</div><div class="mb-lj-sub" id="mb-lj-tag"></div>' +
+      '<p class="mb-lj-dim">✈️ Flyg: förvarning och försening ställs per flygbevakning under Ankomster › Flyg. 📅 Evenemang: påminnelsen du valt på evenemanget i Kalender. ◷ Bokade tider: notis när ärendet ändras.</p>' +
+      '<div id="mb-notis-copy"></div></div>';
+    box.innerHTML = h;
     var tbox = box.querySelector('#mb-lj-tag');
     if (tbox && window.TAG_VILLKOR && TAG_VILLKOR.renderPanel) TAG_VILLKOR.renderPanel(tbox, { title: 'Villkor för tåg', embedded: true });
     var cp = box.querySelector('#mb-notis-copy');
@@ -627,16 +635,24 @@
     }; });
   }
 
-  M.back = function () { return !!(host && host.isConnected && (closePick() || closeInfo() || goBackUnit())); };
+  function closeLjud() {
+    if (!ljOpen) return false;
+    ljOpen = false;
+    try { sessionStorage.removeItem('tv_focus'); } catch (e) {}
+    if (host && host.isConnected) draw(lastErrors);
+    return true;
+  }
+  M.back = function () { return !!(host && host.isConnected && (closePick() || closeLjud() || closeInfo() || goBackUnit())); };
 
   function draw(errors, message) {
     if (!host || !host.isConnected) return;
     closePick();
     var oldScroll = host.querySelector('.mb-timeline-scroll'), scrollTop = oldScroll ? oldScroll.scrollTop : null, oldWk = host.querySelector('.mb-wk-scroll'), wkTop = oldWk ? oldWk.scrollTop : null;
     lastErrors = errors || [];
-    var h = '<div class="mb"><div class="mb-top"><button type="button" class="mb-refresh" data-mb-refresh aria-label="Uppdatera">↻</button></div><div id="mb-ljud-box"></div><p class="mb-intro">Tryck på en bevakning för all info. Håll fingret på en tåg-, flyg- eller båtbevakning för att göra den fast (guldstjärna).</p>';
+    try { if (sessionStorage.getItem('tv_focus') === '1') ljOpen = true; } catch (e) {}
+    var h = '<div class="mb"><p class="mb-intro">Tryck på en bevakning i dagvyn för mer info. Håll fingret för att göra en tåg-, flyg- eller båtbevakning fast (guldstjärna).</p>';
     if (message) h += '<p role="status" class="mb-warning">' + esc(message) + '</p>';
-    if (errors && errors.length) h += '<p role="status" class="mb-warning">Kunde inte hämta ' + esc(errors.join(', ')) + '. Listan kan vara ofullständig. Försök igen med Uppdatera.</p>';
+    if (errors && errors.length) h += '<p role="status" class="mb-warning">Kunde inte hämta ' + esc(errors.join(', ')) + '. Listan kan vara ofullständig. Den uppdateras automatiskt.</p>';
     if (!rows.length) h += '<div class="mb-empty"><div>📌</div><h3>' + (errors && errors.length ? 'Inget att visa just nu' : 'Inga bevakningar än') + '</h3><p>Tryck ☆ på en ankomst under Ankomster för en tillfällig bevakning. I Kalender: öppna ett evenemang och välj en påminnelse.</p><button data-mb-source="ankomster">Öppna Ankomster</button><button data-mb-source="kalender">Öppna Kalender</button></div>';
     if (mode === 'dag') h += timelineHtml(); else if (mode === 'vecka') h += weekHtml(); else h += monthHtml();
     var day = '';
@@ -671,6 +687,9 @@
       h += '</div><button data-mb-gear-save>Spara</button><button data-mb-cancel>Avbryt</button></section></div>';
     }
     if (infoIndex !== null && rows[infoIndex] && actionIndex === null && gearIndex === null) h += infoHtml(rows[infoIndex], infoIndex);
+    if (ljOpen && actionIndex === null && gearIndex === null && infoIndex === null) {
+      h += '<div class="mb-action-shade mb-lj-shade" data-mb-lj-shade><section class="mb-action-sheet mb-lj-sheet" role="dialog" aria-modal="true" aria-labelledby="mb-lj-h"><div class="mb-lj-bar"><h3 id="mb-lj-h">Ljud och notiser</h3><button type="button" data-mb-lj-close aria-label="Stäng">✕</button></div><div id="mb-ljud-box"></div></section></div>';
+    }
     host.innerHTML = h + '<p class="mb-foot">Tillfälliga ankomster tas bort på Ankomster eller försvinner efter ankomst. Fasta görs tillfälliga med ett långt tryck här. Avslutade visas i högst 2 timmar. Kalender: kommande året i dina städer.</p></div>';
     var unitBtn = host.querySelector('[data-mb-unit]');
     if (unitBtn) unitBtn.onclick = function () {
@@ -702,7 +721,6 @@
     var wk = host.querySelector('.mb-wk-scroll');
     if (wk) wk.scrollTop = wkTop !== null && !autoPosition ? wkTop : Math.max(0, (minute(Date.now()) - 120) * PXW);
     if (mode !== 'dag') autoPosition = false;
-    host.querySelector('[data-mb-refresh]').onclick = refresh;
     host.querySelectorAll('[data-mb-source]').forEach(function (b) { b.onclick = function () { window.openItem(b.dataset.mbSource); }; });
     host.querySelectorAll('[data-mb-open]').forEach(function (b) { b.onclick = function () { infoIndex = +b.dataset.mbOpen; actionIndex = null; gearIndex = null; draw(errors); var x = host.querySelector('[data-mb-info-close]'); if (x) x.focus({ preventScroll: true }); }; });
     var infoShade = host.querySelector('[data-mb-info-shade]');
@@ -769,7 +787,14 @@
       b.classList.toggle('on');
       b.setAttribute('aria-pressed', b.classList.contains('on') ? 'true' : 'false');
     }; });
-    renderLjud(host.querySelector('#mb-ljud-box'));
+    var ljBtn = host.querySelector('[data-mb-lj-open]');
+    if (ljBtn) ljBtn.onclick = function () { ljOpen = true; infoIndex = null; actionIndex = null; closePick(); draw(errors); };
+    var ljShade = host.querySelector('[data-mb-lj-shade]');
+    if (ljShade) {
+      ljShade.onclick = function (e) { if (e.target === ljShade) closeLjud(); };
+      ljShade.querySelector('[data-mb-lj-close]').onclick = closeLjud;
+    }
+    if (ljOpen) renderLjud(host.querySelector('#mb-ljud-box'));
     bindHold(host, errors);
   }
   function bindHold(el, errors) {
@@ -817,9 +842,9 @@
       draw(d.errors);
     }).catch(function () { if (g === generation) { rows = []; draw(['bevakningar']); } });
   }
-  if (typeof document !== 'undefined' && document.addEventListener) document.addEventListener('keydown', function (e) { if (e.key !== 'Escape' || !host || !host.isConnected) return; if (closePick()) return; if (infoIndex !== null) closeInfo(); });
+  if (typeof document !== 'undefined' && document.addEventListener) document.addEventListener('keydown', function (e) { if (e.key !== 'Escape' || !host || !host.isConnected) return; if (closePick()) return; if (closeLjud()) return; if (infoIndex !== null) closeInfo(); });
   if (typeof document !== 'undefined' && document.addEventListener) document.addEventListener('tag-villkor-change', function () { if (host && host.isConnected && actionIndex === null && gearIndex === null && infoIndex === null) draw(lastErrors); });
-  M.stop = function () { generation++; clearInterval(timer); timer = null; host = null; rows = []; busy = false; actionIndex = null; gearIndex = null; infoIndex = null; closePick(); };
+  M.stop = function () { generation++; clearInterval(timer); timer = null; host = null; rows = []; busy = false; actionIndex = null; gearIndex = null; infoIndex = null; ljOpen = false; closePick(); };
   M.render = function (el) {
     M.stop(); selectedDay = (window.VIEW_STATE&&VIEW_STATE.get('mina-bevakningar',{}).day)||parts(Date.now()).key; mode = (function (v) { return UNITS.indexOf(v) >= 0 ? v : 'dag'; })(localStorage.getItem('taxi_mb_view')); returnTo = null; autoPosition = true; actionIndex = null; host = el; el.innerHTML = '<div class="mb"><p role="status">Laddar dina bevakningar…</p></div>'; refresh();
     timer = setInterval(function () { if (!host || !host.isConnected) M.stop(); else if (!document.hidden && !busy && actionIndex === null) refresh(); }, 60000);

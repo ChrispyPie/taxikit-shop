@@ -1,4 +1,4 @@
-// Mina bevakningar: infobox, Ljud och notiser, Dag/Vecka/Månad, verktygsrad med datumväljare.
+// Bevakningar: infobox, Ljud och notiser, Dag/Vecka/Månad, verktygsrad med datumväljare.
 // Syntetiska data (fixtures.js, klockan låst 2026-11-06 18:00 svensk tid). Alla externa anrop fångas.
 // Kör: node tests/bevakningar/vyer-infobox.cjs [utmapp] [bas-url]
 const fs = require('node:fs'), path = require('node:path'), http = require('node:http'), assert = require('node:assert/strict');
@@ -33,12 +33,13 @@ let checks = 0; const fails = []; const check = (x, msg) => { if (x) { checks++;
       await p.waitForSelector('.mb-block');
       const noX = () => p.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1);
       check(await p.evaluate(() => !document.querySelector('[data-mb-view]') && !document.querySelector('.mb-day-shortcuts') && document.querySelector('.mb-unit').getAttribute('data-mb-mode') === 'dag' && !document.querySelector('.mb-unit b')), tag + ': en vy, Dag som förval, ingen textetikett på vyknappen');
+      check(await p.evaluate(() => !document.querySelector('[data-mb-refresh]') && !document.querySelector('.mb-lj-head') && !document.querySelector('#mb-ljud-box')), tag + ': ingen ↻-knapp och inget Ljud-kort på sidan');
       const bar = await p.evaluate(() => {
-        const t = document.querySelector('.mb-toolbar'), u = document.querySelector('.mb-unit'), d = document.querySelector('[data-mb-pick]'), i = document.querySelector('[data-mb-today]');
-        const tb = t.getBoundingClientRect(), ub = u.getBoundingClientRect(), db = d.getBoundingClientRect(), ib = i.getBoundingClientRect();
-        return { oneRow: Math.abs(ub.top - ib.top) < 8 && Math.abs(ub.bottom - ib.bottom) < 8, leftIcon: ub.left <= tb.left + 2, dateBetween: db.left >= ub.right - 1 && ib.left >= db.right - 1, fits: ib.right <= innerWidth - 4 && tb.right <= innerWidth + 1, h: Math.round(tb.height), label: d.textContent.trim(), idag: i.textContent.trim(), mode: u.getAttribute('data-mb-mode') };
+        const t = document.querySelector('.mb-toolbar'), u = document.querySelector('.mb-unit'), d = document.querySelector('[data-mb-pick]'), i = document.querySelector('[data-mb-today]'), g = document.querySelector('[data-mb-lj-open]');
+        const tb = t.getBoundingClientRect(), ub = u.getBoundingClientRect(), db = d.getBoundingClientRect(), ib = i.getBoundingClientRect(), gb = g.getBoundingClientRect();
+        return { oneRow: Math.abs(ub.top - gb.top) < 8 && Math.abs(ub.bottom - gb.bottom) < 8, leftIcon: ub.left <= tb.left + 2, dateBetween: db.left >= ub.right - 1 && ib.left >= db.right - 1 && gb.left >= ib.right - 1, fits: gb.right <= innerWidth - 4 && tb.right <= innerWidth + 1, h: Math.round(tb.height), label: d.textContent.trim(), idag: (i.textContent||'').trim(), idagLbl: i.getAttribute('aria-label'), gear: !!g, mode: u.getAttribute('data-mb-mode'), title: document.getElementById('title').textContent };
       });
-      check(bar.oneRow && bar.leftIcon && bar.dateBetween && bar.fits && bar.h <= 52 && bar.idag === 'Idag', tag + ': verktygsrad en rad, ikon vänster, datum, Idag höger ' + JSON.stringify(bar));
+      check(bar.oneRow && bar.leftIcon && bar.dateBetween && bar.fits && bar.h <= 52 && bar.idag === '' && bar.idagLbl === 'Idag' && bar.gear && bar.title === 'Bevakningar', tag + ': verktygsrad en rad, ikon, datum, dubbelpil, kugghjul ' + JSON.stringify(bar));
       check(bar.label === 'I dag', tag + ': datumvisaren visar I dag i dagvyn');
       // Infobox
       const openInfo = async sel => { await p.$eval(sel, e => e.scrollIntoView({ block: 'center' })); await sleep(80); await p.click(sel); await p.waitForSelector('.mb-info'); };
@@ -46,14 +47,14 @@ let checks = 0; const fails = []; const check = (x, msg) => { if (x) { checks++;
       await openInfo('[data-mb-open="' + tgt + '"]');
       const info = await p.$eval('.mb-info', e => e.textContent);
       check(/Tåg 443/.test(info) && /Planerad20:47/.test(info) && /Beräknad20:55/.test(info) && /Spår3/.test(info) && /8 min sen/.test(info) && /Göteborg C/.test(info) && /SJ Regional/.test(info), tag + ': infobox tåg med alla fält ' + info.slice(0, 160));
-      check(await p.evaluate(() => document.getElementById('title').textContent === 'Mina bevakningar'), tag + ': stannar i Mina bevakningar');
+      check(await p.evaluate(() => document.getElementById('title').textContent === 'Bevakningar'), tag + ': stannar i Bevakningar');
       check(await p.evaluate(() => { const s = getComputedStyle(document.querySelector('.mb-info')), d = getComputedStyle(document.querySelector('.mb-info-kv dd')); return s.backgroundColor !== d.color; }), tag + ': kontrast i infoboxen (text ≠ bakgrund)');
       if (tag !== 'l800d') await p.screenshot({ path: path.join(out, 'mb-infobox-' + tag + '.png') });
       await p.click('[data-mb-info-close]'); await sleep(120); check(await p.evaluate(() => !document.querySelector('.mb-info')), tag + ': ✕ stänger');
       await openInfo('[data-mb-open="' + tgt + '"]'); await p.evaluate(() => { const s = document.querySelector('[data-mb-info-shade]'); s.dispatchEvent(new MouseEvent('click', { bubbles: true })); }); await sleep(120);
       check(await p.evaluate(() => !document.querySelector('.mb-info')), tag + ': tryck utanför stänger');
       await openInfo('[data-mb-open="' + tgt + '"]'); await p.evaluate(() => history.back()); await sleep(400);
-      check(await p.evaluate(() => !document.querySelector('.mb-info') && document.getElementById('title').textContent === 'Mina bevakningar'), tag + ': bakåt stänger rutan och stannar på sidan');
+      check(await p.evaluate(() => !document.querySelector('.mb-info') && document.getElementById('title').textContent === 'Bevakningar'), tag + ': bakåt stänger rutan och stannar på sidan');
       const t2 = await p.evaluate(() => { const b = [...document.querySelectorAll('.mb-block-open')].find(e => /Tåg 2011/.test(e.getAttribute('aria-label'))); return b.getAttribute('data-mb-open'); });
       await openInfo('[data-mb-open="' + t2 + '"]');
       check(/Inställt/.test(await p.$eval('.mb-info', e => e.textContent)), tag + ': inställt tåg visas');
@@ -67,9 +68,9 @@ let checks = 0; const fails = []; const check = (x, msg) => { if (x) { checks++;
       await p.$eval('[data-mb-menu]', e => e.scrollIntoView({ block: 'center' })); await p.click('[data-mb-menu]'); await sleep(120);
       check(await p.evaluate(() => !!document.querySelector('[data-mb-cancel]') && !document.querySelector('.mb-info')), tag + ': ⋯-menyn fungerar som förut');
       await p.click('[data-mb-cancel]'); await sleep(100);
-      // Ljud och notiser
-      check(await p.evaluate(() => { const b = document.querySelector('[data-mb-lj-toggle]'); return b.getAttribute('aria-expanded') === 'false' && /Notis:.*Ljud:/.test(b.textContent); }), tag + ': Ljud och notiser hopfälld med sammanfattning');
-      await p.evaluate(() => window.scrollTo(0, 0)); await p.click('[data-mb-lj-toggle]'); await sleep(150);
+      // Ljud och notiser i kugghjulspanelen
+      await p.evaluate(() => window.scrollTo(0, 0)); await p.click('[data-mb-lj-open]'); await p.waitForSelector('#mb-ljud-box .mb-lj-row');
+      check(await p.evaluate(() => !!document.querySelector('.mb-lj-sheet') && /Ljud och notiser/.test(document.querySelector('#mb-lj-h').textContent)), tag + ': kugghjulet öppnar Ljud och notiser');
       const lj = await p.evaluate(() => [...document.querySelectorAll('.mb-lj-row')].map(r => { const b = r.getBoundingClientRect(); return { h: Math.round(b.height), ok: b.right <= innerWidth }; }));
       check(lj.length === 4 && lj.every(x => x.h <= 46 && x.ok), tag + ': 4 rader utan radbrytning ' + JSON.stringify(lj));
       await p.click('[data-mb-lj-ljud="flyg"]'); await sleep(100);
@@ -81,7 +82,8 @@ let checks = 0; const fails = []; const check = (x, msg) => { if (x) { checks++;
       check(await p.evaluate(() => !!document.querySelector('#mb-lj-tag .tv-card') && !!document.querySelector('#mb-notis-copy button')), tag + ': tågvillkor och Kopiera finns i rutan');
       check(await noX(), tag + ': ingen sidscroll (Ljud)');
       if (tag !== 'l800d') await p.screenshot({ path: path.join(out, 'mb-ljud-' + tag + '.png') });
-      await p.click('[data-mb-lj-toggle]'); await sleep(100);
+      await p.click('[data-mb-lj-close]'); await sleep(150);
+      check(await p.evaluate(() => !document.querySelector('.mb-lj-sheet')), tag + ': ✕ stänger ljudpanelen');
       if (tag !== 'l800d') { await p.evaluate(() => window.scrollTo(0, document.querySelector('.mb-toolbar').getBoundingClientRect().top + window.scrollY - 8)); await p.screenshot({ path: path.join(out, 'mb-verktygsrad-' + tag + '.png') }); }
       // Datumväljare (en dag, även framtida)
       await p.click('[data-mb-pick]'); await p.waitForSelector('#mb-cal-modal.open .pm-day');
@@ -110,16 +112,17 @@ let checks = 0; const fails = []; const check = (x, msg) => { if (x) { checks++;
       check(await p.evaluate(() => !document.querySelector('.mb-wk [data-mb-open]') && /Tryck på en dag för dagvyn/.test(document.querySelector('.mb-timeline-note').textContent) && !/block för info/.test(document.body.innerText)), tag + ': Vecka har ingen infobox-länk, rätt hjälptext');
       const wkLabel = await p.$eval('[data-mb-pick]', e => e.textContent.trim());
       await p.click('.mb-wk-b'); await sleep(200);
-      check(await p.evaluate(() => !document.querySelector('.mb-info') && document.querySelector('.mb-unit').getAttribute('data-mb-mode') === 'dag' && /Tillbaka till vecka/.test(document.querySelector('[data-mb-backunit]').textContent)), tag + ': tryck på block i Vecka öppnar dagvyn, inte infobox');
+      check(await p.evaluate(() => !document.querySelector('.mb-info') && document.querySelector('.mb-unit').getAttribute('data-mb-mode') === null && /Tillbaka till vecka/.test(document.querySelector('[data-mb-backunit]').getAttribute('aria-label')) && !document.querySelector('[data-mb-unit]')), tag + ': tryck på block i Vecka öppnar dagvyn med tillbaka-pil, inte infobox');
+      if (tag !== 'l800d') { await p.evaluate(() => window.scrollTo(0, 0)); await p.screenshot({ path: path.join(out, 'mb-tillbaka-' + tag + '.png') }); }
       await p.click('[data-mb-backunit]'); await sleep(150);
       check(await p.evaluate(l => document.querySelector('.mb-unit').getAttribute('data-mb-mode') === 'vecka' && document.querySelector('[data-mb-pick]').textContent.trim() === l, wkLabel), tag + ': tillbaka till samma vecka efter blocktryck');
       await p.click('.mb-wk-dh.today'); await sleep(200);
-      check(await p.evaluate(() => document.querySelector('.mb-unit').getAttribute('data-mb-mode') === 'dag' && /Tillbaka till vecka/.test(document.querySelector('[data-mb-backunit]').textContent)), tag + ': dag från Vecka visar Tillbaka till vecka');
+      check(await p.evaluate(() => !document.querySelector('[data-mb-unit]') && /Tillbaka till vecka/.test(document.querySelector('[data-mb-backunit]').getAttribute('aria-label'))), tag + ': dag från Vecka visar tillbaka-pil i stället för vyknappen');
       await p.click('[data-mb-backunit]'); await sleep(150);
       check(await p.evaluate(l => document.querySelector('.mb-unit').getAttribute('data-mb-mode') === 'vecka' && document.querySelector('[data-mb-pick]').textContent.trim() === l, wkLabel), tag + ': tillbaka till samma vecka');
       await p.click('[data-mb-step="1"]'); await sleep(100); await p.click('.mb-wk-dh'); await sleep(150);
       await p.evaluate(() => history.back()); await sleep(400);
-      check(await p.evaluate(() => document.querySelector('.mb-unit').getAttribute('data-mb-mode') === 'vecka' && document.getElementById('title').textContent === 'Mina bevakningar'), tag + ': bakåt-svep tillbaka till vecka');
+      check(await p.evaluate(() => document.querySelector('.mb-unit').getAttribute('data-mb-mode') === 'vecka' && document.getElementById('title').textContent === 'Bevakningar'), tag + ': bakåt-svep tillbaka till vecka');
       await p.click('[data-mb-step="-1"]'); await sleep(100);
       // Månad
       await p.click('[data-mb-unit]'); await sleep(200);
@@ -131,7 +134,7 @@ let checks = 0; const fails = []; const check = (x, msg) => { if (x) { checks++;
       const ml = await p.$('.mb-mday.today .mb-ml');
       if (ml) { await ml.click(); await sleep(200); }
       else { await p.click('.mb-mday.today'); await sleep(200); }
-      check(await p.evaluate(() => !document.querySelector('.mb-info') && document.querySelector('.mb-unit').getAttribute('data-mb-mode') === 'dag' && /Tillbaka till månad/.test(document.querySelector('[data-mb-backunit]').textContent)), tag + ': tryck i Månad öppnar dagvyn, inte infobox');
+      check(await p.evaluate(() => !document.querySelector('.mb-info') && !document.querySelector('[data-mb-unit]') && /Tillbaka till månad/.test(document.querySelector('[data-mb-backunit]').getAttribute('aria-label'))), tag + ': tryck i Månad öppnar dagvyn med tillbaka-pil, inte infobox');
       await p.click('[data-mb-backunit]'); await sleep(150);
       check(await p.evaluate(() => localStorage.getItem('taxi_mb_view') === 'manad'), tag + ': vyn sparas');
       await p.reload({ waitUntil: 'networkidle0' }); await p.evaluate(() => openItem('mina-bevakningar')); await p.waitForSelector('.mb-month');
