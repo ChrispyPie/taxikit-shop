@@ -37,7 +37,7 @@ assert.match(advent, /data-tab="jakt"/);
 assert.match(advent, /data-tab="vinnare"/);
 assert.match(index, /polkagris\.js\?v=20261125zber1/);
 assert.match(js, /polkagris\.css\?v=20261124zpk2/);
-assert.match(sw, /CACHE_VER = '20261125zber1'/);
+assert.match(sw, /CACHE_VER = '20261125zmod1'/);
 assert.match(lazy, /advent\.js\?v=20261125zber1/);
 assert.match(lazy, /changelog\.js\?v=20261125bub1/);
 

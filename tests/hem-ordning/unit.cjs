@@ -82,20 +82,14 @@ ctx.window.ADVENT_GATE = {
   allowed() { return true; },
   today() { return { y: 2026, m: 12, d: 5, iso: '2026-12-05' }; }
 };
-assert.ok(H.isPinned('advent'));
-H.uninstall('advent');
-assert.ok(H.isInstalled('advent'), 'advent kan inte avinstalleras i december');
+assert.ok(!H.isPinned('advent'), 'Adventskalender är ingen modul att fästa');
 const menuAdv = menu.concat([{ id: 'advent', label: 'Adventskalender', icon: 'x' }]);
 H.setCatalog(menuAdv);
 H.preview(['kordata', 'advent', 'moduler'], []);
-H.removeShortcut('advent');
-H.removeShortcut('moduler');
-assert.ok(!H.arrange(menuAdv).map(x => x.id).includes('advent'), 'advent-genväg kan tas bort');
-assert.ok(!H.arrange(menuAdv).map(x => x.id).includes('moduler'), 'moduler-genväg kan tas bort');
-assert.ok(H.isInstalled('advent') && H.isPinned('advent'));
 H.addToHome('advent', { force: true });
 assert.ok(!H.arrange(menuAdv).map(x => x.id).includes('advent'), 'advent-ikonen hör inte hemma på startytan (mini-kalendern ersätter den)');
-assert.ok(H.isInstalled('advent'), 'advent finns kvar i applådan');
+H.removeShortcut('moduler');
+assert.ok(!H.arrange(menuAdv).map(x => x.id).includes('moduler'), 'moduler-genväg kan tas bort');
 
 const ordna = fs.readFileSync(path.resolve(__dirname, '../../TaxiData/hem-ordning.js'), 'utf8');
 assert.match(ordna, /data-lp="off"/);
