@@ -16,7 +16,7 @@ assert.doesNotMatch(js + css, /\bhen\b/);
 assert.doesNotMatch(cl, /id: '2026-11-23zmys1'/);
 assert.doesNotMatch(cl, /id: '2026-11-23zscn1'/);
 assert.doesNotMatch(cl, /girlang|julgransbelysning|snöfall|juldekoration/i);
-assert.match(js, /ALLOW = \{ '710022': 1 \}/);
+assert.match(js, /ALLOW = \{ '710022': 1, '693340': 1 \}/);
 assert.match(js, /JUL_ALLA = false/);
 assert.match(js, /function ensureMys/);
 assert.match(js, /function paintMys/);
@@ -45,7 +45,7 @@ assert.match(css, /html\[data-theme="dark"\] #jul-mys \.jul-vignette/);
 assert.match(css, /#jul-ljusstake/);
 assert.match(css, /#jul-slingor/);
 assert.match(html, /julpyssel\.css\?v=20261124adv18/);
-assert.match(html, /julpyssel\.js\?v=20261124tap1/);
+assert.match(html, /julpyssel\.js\?v=20261125zber1/);
 assert.match(sw, /CACHE_VER = '20261124tap1'/);
 
 function boot(opts) {

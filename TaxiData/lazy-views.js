@@ -19,7 +19,7 @@ var manifest={
   "bevakning": ["notis-enhet.js?v=20261125mbov1", "bevakning-ljud.js?v=20261125mbov1", "tag-villkor.js?v=20261125mbui1", "bevakning.js?v=20261125mbov1"],
   "vader": ["vader.js?v=20261111karta1"],
   "nyheter": ["nyheter.js?v=20261111nyheter1"],
-  "advent": ["advent-fakta.js?v=20261123adv11", "advent.js?v=20261124zpk2"],
+  "advent": ["advent-fakta.js?v=20261123adv11", "advent.js?v=20261125zber1"],
   "moduler": ["moduler.js?v=20261122zdelad1"],
   "hjalp": ["hjalp.js?v=20261125mbui1"],
   "hem-ordning": ["hem-ordning.js?v=20261122zdelad1"],

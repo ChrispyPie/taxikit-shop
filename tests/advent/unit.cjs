@@ -22,6 +22,7 @@ assert.match(fakta, /Sleipner/);
 assert.match(fakta, /Halda/);
 
 assert.match(advent, /710022/);
+assert.match(advent, /693340/);
 assert.match(advent, /adventdatum|juldatum/);
 assert.match(advent, /24 luckor/);
 assert.match(advent, /function canOpen/);

@@ -1,12 +1,12 @@
 /* Polkagrisjakt i december: egna klubbor per pass, upp till tre delade samtidigt
  * och sällsynta gyllene (3 poäng). Först som trycker tar en delad/guld.
  * Öppnas automatiskt för alla från 2026-12-01 00:00 Europe/Stockholm.
- * Före det syns den bara för 710022 (testdatum: ?adventdatum= eller ?juldatum=). */
+ * Före det syns den bara för 710022 och 693340 (testdatum: ?adventdatum= eller ?juldatum=). */
 (function () {
   'use strict';
 
   var LIVE_FROM = '2026-12-01'; // 00:00 Europe/Stockholm, ingen manuell omkoppling
-  var ALLOW = { '710022': 1 };
+  var ALLOW = { '710022': 1, '693340': 1 };
 
   var PLACES = {
     hem: { view: '', sel: '#app.is-home .grid', pos: 'after' },
@@ -27,7 +27,7 @@
   };
 
   function driverId() {
-    try { return localStorage.getItem('taxi_driver') || ''; } catch (e) { return ''; }
+    try { return String(localStorage.getItem('taxi_driver') || '').trim(); } catch (e) { return ''; }
   }
   function token() {
     try { return localStorage.getItem('taxi_session') || ''; } catch (e) { return ''; }

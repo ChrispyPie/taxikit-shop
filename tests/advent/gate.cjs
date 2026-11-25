@@ -45,6 +45,11 @@ let g = loadGate(nov, '710022', '');
 assert.equal(g.allowed(), true, '710022 before Dec 1');
 assert.equal(g.isLive(), false);
 
+g = loadGate(nov, '693340', '');
+assert.equal(g.allowed(), true, '693340 before Dec 1');
+g = loadGate(nov, 693340, '');
+assert.equal(g.allowed(), true, '693340 numeric id before Dec 1');
+
 g = loadGate(nov, '123456', '');
 assert.equal(g.allowed(), false, 'other driver before Dec 1');
 
