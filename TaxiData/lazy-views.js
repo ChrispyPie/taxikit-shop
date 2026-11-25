@@ -4,19 +4,19 @@ var L=window.LAZY={}, files={}, groups={}, complete={};
 var manifest={
   "kordata": ["serverstatus.js?v=20261026tm1", "receipt-versions.js?v=20261110repl1", "kvittokopia.js?v=20261111kv1", "passrapport.js?v=20261111pr2", "script.js?v=20261123adv6"],
   "lonekoll": ["pay-data.js?v=20261107lazy1", "skattetabell-2026.js?v=20261114skatt1", "lonekoll.js?v=20261123adv6"],
-  "ankomster": ["notis-enhet.js?v=20261122zdelad1", "bevakning-ljud.js?v=20261122zdelad1", "tag-villkor.js?v=20261124mbv1", "train-stations.js?v=20261108stations1", "arrival-data.js?v=20261123del1", "bevakning.js?v=20261122zdelad1", "tagnotis.js?v=20261122zprof1", "flygnotis.js?v=20261122zprof1", "ankomster.js?v=20261123del1"],
-  "prognos": ["notis-enhet.js?v=20261122zdelad1", "bevakning-ljud.js?v=20261122zdelad1", "tag-villkor.js?v=20261124mbv1", "train-stations.js?v=20261108stations1", "arrival-data.js?v=20261123del1", "bevakning.js?v=20261122zdelad1", "prognos.js?v=20261124hkat1", "prognos-notis.js?v=20261122zdelad1"],
+  "ankomster": ["notis-enhet.js?v=20261122zdelad1", "bevakning-ljud.js?v=20261122zdelad1", "tag-villkor.js?v=20261125mbvr1", "train-stations.js?v=20261108stations1", "arrival-data.js?v=20261123del1", "bevakning.js?v=20261122zdelad1", "tagnotis.js?v=20261122zprof1", "flygnotis.js?v=20261122zprof1", "ankomster.js?v=20261123del1"],
+  "prognos": ["notis-enhet.js?v=20261122zdelad1", "bevakning-ljud.js?v=20261122zdelad1", "tag-villkor.js?v=20261125mbvr1", "train-stations.js?v=20261108stations1", "arrival-data.js?v=20261123del1", "bevakning.js?v=20261122zdelad1", "prognos.js?v=20261124hkat1", "prognos-notis.js?v=20261122zdelad1"],
   "kalender": ["kalender.js?v=20261111maps1"],
   "topplistor": ["topplistor.js?v=20261123adv6"],
   "forum": ["forum.js?v=20261107lazy1"],
-  "mina-bevakningar": ["notis-enhet.js?v=20261122zdelad1", "bevakning-ljud.js?v=20261122zdelad1", "tag-villkor.js?v=20261124mbv1", "train-stations.js?v=20261108stations1", "arrival-data.js?v=20261123del1", "bevakning.js?v=20261122zdelad1", "tagnotis.js?v=20261122zprof1", "flygnotis.js?v=20261122zprof1", "mina-bevakningar.js?v=20261124mbv1"],
+  "mina-bevakningar": ["notis-enhet.js?v=20261122zdelad1", "bevakning-ljud.js?v=20261122zdelad1", "tag-villkor.js?v=20261125mbvr1", "train-stations.js?v=20261108stations1", "arrival-data.js?v=20261123del1", "bevakning.js?v=20261122zdelad1", "tagnotis.js?v=20261122zprof1", "flygnotis.js?v=20261122zprof1", "mina-bevakningar.js?v=20261125mbvr1"],
   "verkstad": ["sjuk.js?v=20261107inkorg1", "verkstad.js?v=20261111whmsg1"],
-  "installningar": ["notis-enhet.js?v=20261122zdelad1", "bevakning-ljud.js?v=20261122zdelad1", "tag-villkor.js?v=20261124mbv1", "bevakning.js?v=20261122zdelad1", "animationer.js?v=20261122zdelad1", "animationer-vader.js?v=20261123adv6", "berra.js?v=20261124tap1", "hjalpbot-scenarier.js?v=20261122zdelad1", "hjalpbot-tips.js?v=20261122zdelad1", "hjalpbot-hogtid.js?v=20261122zdelad1", "hjalpbot.js?v=20261123adv6"],
-  "om": ["om-data.js?v=20261111pgbot1", "changelog.js?v=20261124mbv1", "om.js?v=20261107omwatch1"],
+  "installningar": ["notis-enhet.js?v=20261122zdelad1", "bevakning-ljud.js?v=20261122zdelad1", "tag-villkor.js?v=20261125mbvr1", "bevakning.js?v=20261122zdelad1", "animationer.js?v=20261122zdelad1", "animationer-vader.js?v=20261123adv6", "berra.js?v=20261124tap1", "hjalpbot-scenarier.js?v=20261122zdelad1", "hjalpbot-tips.js?v=20261122zdelad1", "hjalpbot-hogtid.js?v=20261122zdelad1", "hjalpbot.js?v=20261123adv6"],
+  "om": ["om-data.js?v=20261111pgbot1", "changelog.js?v=20261125mbvr1", "om.js?v=20261107omwatch1"],
   "profil": ["mailbox-api.js?v=20261107lazy1", "profilbild.js?v=20261105kh1", "profil-sprak.js?v=20261107p1", "profil-sida.js?v=20261107inkorg2b"],
   "inkorg": ["arende-status.js?v=20261114arfel1", "mailbox-ui.js?v=20261114arfel1", "inkorg.js?v=20261107arenden1"],
-  "notiser": ["om-data.js?v=20261111pgbot1", "changelog.js?v=20261124mbv1", "om.js?v=20261107omwatch1", "notis.js?v=20261124notf1"],
-  "bevakning": ["notis-enhet.js?v=20261122zdelad1", "bevakning-ljud.js?v=20261122zdelad1", "tag-villkor.js?v=20261124mbv1", "bevakning.js?v=20261122zdelad1"],
+  "notiser": ["om-data.js?v=20261111pgbot1", "changelog.js?v=20261125mbvr1", "om.js?v=20261107omwatch1", "notis.js?v=20261124notf1"],
+  "bevakning": ["notis-enhet.js?v=20261122zdelad1", "bevakning-ljud.js?v=20261122zdelad1", "tag-villkor.js?v=20261125mbvr1", "bevakning.js?v=20261122zdelad1"],
   "vader": ["vader.js?v=20261111karta1"],
   "nyheter": ["nyheter.js?v=20261111nyheter1"],
   "advent": ["advent-fakta.js?v=20261123adv11", "advent.js?v=20261124zpk2"],
@@ -26,14 +26,14 @@ var manifest={
   "berra": ["berra.js?v=20261124tap1"],
   "hjalpbot": ["animationer.js?v=20261122zdelad1", "animationer-vader.js?v=20261123adv6", "berra.js?v=20261124tap1", "hjalpbot-scenarier.js?v=20261122zdelad1", "hjalpbot-tips.js?v=20261122zdelad1", "hjalpbot-hogtid.js?v=20261122zdelad1", "hjalpbot.js?v=20261123adv6"],
   "animationer": ["animationer.js?v=20261122zdelad1", "animationer-vader.js?v=20261123adv6"],
-  "notis-enhet": ["notis-enhet.js?v=20261122zdelad1", "bevakning-ljud.js?v=20261122zdelad1", "tag-villkor.js?v=20261124mbv1"]
+  "notis-enhet": ["notis-enhet.js?v=20261122zdelad1", "bevakning-ljud.js?v=20261122zdelad1", "tag-villkor.js?v=20261125mbvr1"]
 };
 var identity='';L.navigation=0;
 L.get=VIEW_STATE.get;L.save=VIEW_STATE.save;
 L.has=function(id){return Object.prototype.hasOwnProperty.call(manifest,id);};
 L.ready=function(id){return !!complete[id];};
 L.file=function(src){if(files[src])return files[src];files[src]=new Promise(function(resolve,reject){var s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=function(){delete files[src];s.remove();reject(new Error('load_failed'));};document.head.appendChild(s);});return files[src];};
-L.ensure=function(id){if(window.DELAD&&DELAD.isHidePrivate&&DELAD.isHidePrivate()&&DELAD.isPrivateView&&DELAD.isPrivateView(id))return Promise.reject(new Error('hidden_private'));if(!L.has(id))return Promise.reject(new Error('unknown_view'));if(groups[id])return groups[id];groups[id]=(async function(){if(id==='mina-bevakningar'){var c=document.createElement('link');c.rel='stylesheet';c.href='mina-bevakningar.css?v=20261124mbv1';document.head.appendChild(c);}if(id==='vader'){var c=document.createElement('link');c.rel='stylesheet';c.href='vader.css?v=20261111karta1';document.head.appendChild(c);}if(id==='advent'){var c=document.createElement('link');c.rel='stylesheet';c.href='advent.css?v=20261123adv11';document.head.appendChild(c);}for(var src of manifest[id])await L.file(src);if(id==='prognos'){var q=new URLSearchParams(location.search);if(q.get('zon'))PROGNOS.focus({zone:q.get('zon'),cat:q.get('kat'),at:q.get('tid'),id:q.get('bok')});}complete[id]=true;if(id==='profil'&&window.setFullName)setFullName();if(id==='notiser')NOTIS.start();})().catch(function(e){delete groups[id];throw e;});return groups[id];};
+L.ensure=function(id){if(window.DELAD&&DELAD.isHidePrivate&&DELAD.isHidePrivate()&&DELAD.isPrivateView&&DELAD.isPrivateView(id))return Promise.reject(new Error('hidden_private'));if(!L.has(id))return Promise.reject(new Error('unknown_view'));if(groups[id])return groups[id];groups[id]=(async function(){if(id==='mina-bevakningar'){var c=document.createElement('link');c.rel='stylesheet';c.href='mina-bevakningar.css?v=20261125mbvr1';document.head.appendChild(c);}if(id==='vader'){var c=document.createElement('link');c.rel='stylesheet';c.href='vader.css?v=20261111karta1';document.head.appendChild(c);}if(id==='advent'){var c=document.createElement('link');c.rel='stylesheet';c.href='advent.css?v=20261123adv11';document.head.appendChild(c);}for(var src of manifest[id])await L.file(src);if(id==='prognos'){var q=new URLSearchParams(location.search);if(q.get('zon'))PROGNOS.focus({zone:q.get('zon'),cat:q.get('kat'),at:q.get('tid'),id:q.get('bok')});}complete[id]=true;if(id==='profil'&&window.setFullName)setFullName();if(id==='notiser')NOTIS.start();})().catch(function(e){delete groups[id];throw e;});return groups[id];};
 L.error=function(el,retry){el.innerHTML='<p role="alert">Verktyget kunde inte laddas.</p><button type="button">Försök igen</button>';el.querySelector('button').onclick=retry;};
 L.loading=function(el,id,after){el.innerHTML='<p role="status">Laddar verktyget…</p>';L.ensure(id).then(after).catch(function(){L.error(el,function(){L.loading(el,id,after);});});};
 L.setView=function(id){L.save('view',id);var h=id?'#view='+encodeURIComponent(id):'';if(location.hash!==h)history.replaceState(history.state,'',location.pathname+location.search+h);};

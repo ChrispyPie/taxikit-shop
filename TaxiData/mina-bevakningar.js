@@ -322,25 +322,104 @@
     return false;
   }
   function udot(k) { return hasUnit(k) ? '<i class="mb-daydot" aria-label="Har bevakningar"></i>' : ''; }
-  function dayNav() {
-    var today = parts(Date.now()).key, tomorrow = addDay(today, 1), L = unitLabel(selectedDay), u = UNIT_N[mode].toLowerCase();
-    var sc = mode === 'dag'
-      ? '<button data-mb-day="' + today + '" aria-pressed="' + (today === selectedDay) + '">I dag' + dot(today) + '</button><button data-mb-day="' + tomorrow + '" aria-pressed="' + (tomorrow === selectedDay) + '">I morgon' + dot(tomorrow) + '</button>'
-      : '<button data-mb-day="' + today + '" aria-pressed="' + (unitLabel(today).big === L.big && unitLabel(today).small === L.small) + '">' + (mode === 'vecka' ? 'Den här veckan' : 'Den här månaden') + '</button>';
-    return '<div class="mb-days"><button data-mb-step="-1" aria-label="Föregående ' + u + '">‹' + udot(stepKey(selectedDay, -1)) + '</button><div><b>' + esc(L.big) + udot(selectedDay) + '</b><small>' + esc(L.small) + '</small></div><button data-mb-step="1" aria-label="Nästa ' + u + '">›' + udot(stepKey(selectedDay, 1)) + '</button></div><div class="mb-day-shortcuts">' + sc + '</div>';
+  function unitIcon(u) {
+    var box = '<rect x="3.5" y="3.5" width="17" height="17" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/>';
+    function svg(inner) { return '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">' + inner + '</svg>'; }
+    if (u === 'dag') return svg(box + '<path d="M7 8.5h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><rect x="7" y="10.5" width="10" height="3.8" rx="1" fill="currentColor"/><path d="M7 16.5h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>');
+    if (u === 'vecka') return svg(box + '<path d="M8.2 5.2v13.6M11.4 5.2v13.6M14.6 5.2v13.6M17.8 5.2v13.6" fill="none" stroke="currentColor" stroke-width="1.5"/>');
+    var cells = '', r, c;
+    for (r = 0; r < 3; r++) for (c = 0; c < 3; c++) cells += '<rect x="' + (5 + c * 5) + '" y="' + (5 + r * 5) + '" width="3.6" height="3.6" rx="0.7" fill="currentColor"/>';
+    return svg(cells);
+  }
+  function navDateLabel(k) {
+    if (mode === 'vecka') {
+      var a = weekStart(k), b = addDay(a, 6);
+      return a.slice(0, 7) === b.slice(0, 7) ? (+a.slice(8, 10) + '–' + dm(b)) : (dm(a) + '–' + dm(b));
+    }
+    if (mode === 'manad') return MON[+k.slice(5, 7) - 1].replace(/^./, function (c) { return c.toUpperCase(); }) + ' ' + k.slice(0, 4);
+    var today = parts(Date.now()).key;
+    if (k === today) return 'I dag';
+    if (k === addDay(today, 1)) return 'I morgon';
+    if (k === addDay(today, -1)) return 'I går';
+    return WDS[dowOf(k) - 1] + ' ' + dm(k);
+  }
+  function onToday() {
+    var today = parts(Date.now()).key;
+    if (mode === 'vecka') return weekStart(selectedDay) === weekStart(today);
+    if (mode === 'manad') return selectedDay.slice(0, 7) === today.slice(0, 7);
+    return selectedDay === today;
+  }
+  // Verktygsrad som i Google Kalender: ikon för vyn, datumvisare som i Körpassdata, Idag till höger.
+  function toolNav() {
+    var u = UNIT_N[mode], next = UNIT_N[UNITS[(UNITS.indexOf(mode) + 1) % 3]], todayOn = onToday();
+    return '<div class="mb-toolbar">' +
+      '<button type="button" class="mb-unit" data-mb-unit data-mb-mode="' + mode + '" aria-label="Vy: ' + u + '. Tryck för ' + next + '">' + unitIcon(mode) + '</button>' +
+      '<div class="date-nav mb-date-nav">' +
+        '<button type="button" data-mb-step="-1" aria-label="Föregående ' + u.toLowerCase() + '">‹</button>' +
+        '<button type="button" class="tl-date" data-mb-pick aria-haspopup="dialog" aria-label="Välj datum">' + esc(navDateLabel(selectedDay)) + '</button>' +
+        '<button type="button" data-mb-step="1" aria-label="Nästa ' + u.toLowerCase() + '">›</button>' +
+      '</div>' +
+      '<button type="button" class="mb-today' + (todayOn ? ' active' : '') + '" data-mb-today aria-pressed="' + todayOn + '">Idag</button>' +
+    '</div>';
+  }
+  function closePick() {
+    var m = document.getElementById('mb-cal-modal');
+    if (!m || !m.classList.contains('open')) return false;
+    m.classList.remove('open');
+    return true;
+  }
+  function drawPick() {
+    var m = document.getElementById('mb-cal-modal'); if (!m || !pick) return;
+    var first = pick.m, y = +first.slice(0, 4), mo = +first.slice(5, 7) - 1, today = parts(Date.now()).key;
+    var title = MON[mo].replace(/^./, function (c) { return c.toUpperCase(); }) + ' ' + y;
+    var h = '<div class="pm-head"><button type="button" data-mb-pm-prev aria-label="Föregående månad">‹</button><span id="mb-pm-title">' + esc(title) + '</span><button type="button" data-mb-pm-next aria-label="Nästa månad">›</button></div>';
+    h += '<div class="pm-cal" id="mb-pm-cal">' + ['Må', 'Ti', 'On', 'To', 'Fr', 'Lö', 'Sö'].map(function (d) { return '<div class="pm-wd">' + d + '</div>'; }).join('');
+    var i, dim = new Date(Date.UTC(y, mo + 1, 0)).getUTCDate();
+    for (i = 0; i < dowOf(first) - 1; i++) h += '<div></div>';
+    for (i = 1; i <= dim; i++) {
+      var k = first.slice(0, 8) + String(i).padStart(2, '0'), c = 'pm-day';
+      if (k === pick.sel) c += ' sel';
+      if (k === today) c += ' today';
+      h += '<button type="button" class="' + c + '" data-mb-pm-day="' + k + '">' + i + '</button>';
+    }
+    m.querySelector('.pm-box').innerHTML = h;
+    m.querySelector('[data-mb-pm-prev]').onclick = function (e) { e.stopPropagation(); pick.m = addMonth(first, -1).slice(0, 8) + '01'; drawPick(); };
+    m.querySelector('[data-mb-pm-next]').onclick = function (e) { e.stopPropagation(); pick.m = addMonth(first, 1).slice(0, 8) + '01'; drawPick(); };
+    m.querySelectorAll('[data-mb-pm-day]').forEach(function (b) { b.onclick = function (e) {
+      e.stopPropagation(); selectedDay = b.getAttribute('data-mb-pm-day'); autoPosition = true; actionIndex = null; infoIndex = null;
+      closePick(); draw(lastErrors);
+    }; });
+  }
+  var pick = null;
+  function openPick() {
+    var m = document.getElementById('mb-cal-modal');
+    if (!m) {
+      m = document.createElement('div');
+      m.id = 'mb-cal-modal';
+      m.className = 'pm-overlay';
+      m.innerHTML = '<div class="pm-box" role="dialog" aria-modal="true" aria-label="Välj dag"></div>';
+      document.body.appendChild(m);
+      m.addEventListener('click', function (ev) { if (ev.target === m) closePick(); });
+    }
+    pick = { m: selectedDay.slice(0, 8) + '01', sel: selectedDay };
+    drawPick();
+    m.classList.add('open');
   }
   function dayItems(k) { return daySegments(rows, k); }
   // Vecka som i Google Kalender/Outlook: 7 dagkolumner med timrutnät, kompakta block, dagens rubrik markerad.
   var PXW = 0.75;
   function weekHtml() {
     var a = weekStart(selectedDay), today = parts(Date.now()).key, H = 1440 * PXW;
-    var h = dayNav() + '<div class="mb-wk"><div class="mb-wk-head"><span></span>';
+    var h = toolNav() + '<div class="mb-wk"><div class="mb-wk-head"><span></span>';
     for (var i = 0; i < 7; i++) {
       var k = addDay(a, i);
       h += '<button type="button" class="mb-wk-dh' + (k === today ? ' today' : '') + '" data-mb-goday="' + k + '" aria-label="Öppna ' + esc(WDS[i] + ' ' + dm(k)) + ' i dagvyn"><small>' + WDS[i] + '</small><b>' + (+k.slice(8, 10)) + '</b></button>';
     }
     h += '</div><div class="mb-wk-scroll" tabindex="0" aria-label="Veckans timmar, skrolla för fler"><div class="mb-wk-grid" style="height:' + H + 'px">';
-    for (var m = 0; m < 1440; m += 60) h += '<div class="mb-wk-hr" style="top:' + m * PXW + 'px"><span>' + (m ? String(m / 60).padStart(2, '0') : '') + '</span></div>';
+    h += '<div class="mb-wk-gutter" aria-hidden="true">';
+    for (var m = 0; m < 1440; m += 60) h += '<div class="mb-wk-hl" style="top:' + m * PXW + 'px">' + (m ? String(m / 60).padStart(2, '0') : '') + '</div>';
+    h += '</div>';
+    for (m = 0; m < 1440; m += 60) h += '<div class="mb-wk-hr" style="top:' + m * PXW + 'px"></div>';
     for (i = 0; i < 7; i++) {
       k = addDay(a, i);
       h += '<div class="mb-wk-col' + (k === today ? ' today' : '') + '" style="left:calc(30px + (100% - 30px) * ' + i + ' / 7);width:calc((100% - 30px) / 7)">';
@@ -356,10 +435,11 @@
   // Månad: klassiskt rutnät, korta etiketter (färg per sort), "+N till", dagens datum inringat.
   function monthHtml() {
     var first = selectedDay.slice(0, 8) + '01', start = weekStart(first), today = parts(Date.now()).key, mon = first.slice(0, 7);
-    var h = dayNav() + '<div class="mb-month" role="grid" aria-label="Månad"><div class="mb-mrow mb-mhead">' + ['Må', 'Ti', 'On', 'To', 'Fr', 'Lö', 'Sö'].map(function (d) { return '<span>' + d + '</span>'; }).join('') + '</div>';
+    var todayDow = dowOf(today);
+    var h = toolNav() + '<div class="mb-month" role="grid" aria-label="Månad"><div class="mb-mrow mb-mhead"><span class="mb-mwk-h" aria-hidden="true"></span>' + WDS.map(function (d, i) { return '<span' + (i + 1 === todayDow ? ' class="today"' : '') + '>' + d + '</span>'; }).join('') + '</div>';
     for (var w = 0; w < 6; w++) {
-      var ws = addDay(start, w * 7); if (w > 3 && ws.slice(0, 7) !== mon) break;
-      h += '<div class="mb-mrow">';
+      var ws = addDay(start, w * 7); if (w && ws.slice(0, 7) > mon) break;
+      h += '<div class="mb-mrow"><span class="mb-mwk" aria-label="Vecka ' + isoWeek(ws) + '">' + isoWeek(ws) + '</span>';
       for (var i = 0; i < 7; i++) {
         var k = addDay(ws, i), list = dayItems(k), show = list.length > 3 ? 2 : list.length;
         h += '<button type="button" class="mb-mday' + (k.slice(0, 7) !== mon ? ' out' : '') + (k === today ? ' today' : '') + '" data-mb-goday="' + k + '" aria-label="' + esc(dm(k)) + ', ' + (list.length ? list.length + ' bevakningar' : 'inget') + '"><b>' + (+k.slice(8, 10)) + '</b>' +
@@ -374,7 +454,7 @@
   function goBackUnit() { if (!returnTo) return false; mode = returnTo.mode; selectedDay = returnTo.day; returnTo = null; infoIndex = null; draw(lastErrors); return true; }
   function gapText(mins) { return (mins >= 60 ? Math.floor(mins / 60) + ' h ' : '') + (mins % 60 ? mins % 60 + ' min ' : '') + 'ledigt'; }
   function timelineHtml() {
-    var layout = timelineLayout(rows, selectedDay), h = (returnTo ? '<button type="button" class="mb-backunit" data-mb-backunit>‹ Tillbaka till ' + (returnTo.mode === 'vecka' ? 'vecka' : 'månad') + '</button>' : '') + dayNav();
+    var layout = timelineLayout(rows, selectedDay), h = (returnTo ? '<button type="button" class="mb-backunit" data-mb-backunit>‹ Tillbaka till ' + (returnTo.mode === 'vecka' ? 'vecka' : 'månad') + '</button>' : '') + toolNav();
     if (!layout.length) h += '<p class="mb-day-empty" role="status">Inga aktuella bevakningar den här dagen.</p>';
     h += '<div class="mb-timeline-scroll" tabindex="0" aria-label="Dagens tidslinje, skrolla för fler timmar"><div class="mb-timeline" style="height:' + (1440 * PX + 52) + 'px">';
     for (var m = 0; m <= 1440; m += 30) {
@@ -547,13 +627,14 @@
     }; });
   }
 
-  M.back = function () { return !!(host && host.isConnected && (closeInfo() || goBackUnit())); };   // bakåt: infoboxen först, sedan tillbaka till vecka/månad   // bakåt-svep/bakåtknapp stänger rutan först
+  M.back = function () { return !!(host && host.isConnected && (closePick() || closeInfo() || goBackUnit())); };
 
   function draw(errors, message) {
     if (!host || !host.isConnected) return;
+    closePick();
     var oldScroll = host.querySelector('.mb-timeline-scroll'), scrollTop = oldScroll ? oldScroll.scrollTop : null, oldWk = host.querySelector('.mb-wk-scroll'), wkTop = oldWk ? oldWk.scrollTop : null;
     lastErrors = errors || [];
-    var h = '<div class="mb"><div class="mb-top"><button type="button" class="mb-refresh" data-mb-refresh aria-label="Uppdatera">↻</button><button type="button" class="mb-unit" data-mb-unit aria-label="Visa ' + UNIT_N[mode] + ', tryck för ' + UNIT_N[UNITS[(UNITS.indexOf(mode) + 1) % 3]] + '"><span class="mb-unit-ic" aria-hidden="true">📅</span><b>' + UNIT_N[mode] + '</b><span class="mb-unit-steps" aria-hidden="true">' + UNITS.map(function (u) { return '<i' + (u === mode ? ' class="on"' : '') + '></i>'; }).join('') + '</span><small>→ ' + UNIT_N[UNITS[(UNITS.indexOf(mode) + 1) % 3]] + '</small></button></div><div id="mb-ljud-box"></div><p class="mb-intro">Tryck på en bevakning för all info. Håll fingret på en tåg-, flyg- eller båtbevakning för att göra den fast (guldstjärna).</p>';
+    var h = '<div class="mb"><div class="mb-top"><button type="button" class="mb-refresh" data-mb-refresh aria-label="Uppdatera">↻</button></div><div id="mb-ljud-box"></div><p class="mb-intro">Tryck på en bevakning för all info. Håll fingret på en tåg-, flyg- eller båtbevakning för att göra den fast (guldstjärna).</p>';
     if (message) h += '<p role="status" class="mb-warning">' + esc(message) + '</p>';
     if (errors && errors.length) h += '<p role="status" class="mb-warning">Kunde inte hämta ' + esc(errors.join(', ')) + '. Listan kan vara ofullständig. Försök igen med Uppdatera.</p>';
     if (!rows.length) h += '<div class="mb-empty"><div>📌</div><h3>' + (errors && errors.length ? 'Inget att visa just nu' : 'Inga bevakningar än') + '</h3><p>Tryck ☆ på en ankomst under Ankomster för en tillfällig bevakning. I Kalender: öppna ett evenemang och välj en påminnelse.</p><button data-mb-source="ankomster">Öppna Ankomster</button><button data-mb-source="kalender">Öppna Kalender</button></div>';
@@ -602,6 +683,10 @@
     host.querySelectorAll('[data-mb-day], [data-mb-step]').forEach(function (b) { b.onclick = function () {
       selectedDay = b.dataset.mbDay || stepKey(selectedDay, +b.dataset.mbStep); autoPosition = true; actionIndex = null; draw(errors);
     }; });
+    var pickBtn = host.querySelector('[data-mb-pick]'); if (pickBtn) pickBtn.onclick = openPick;
+    var todayBtn = host.querySelector('[data-mb-today]'); if (todayBtn) todayBtn.onclick = function () {
+      selectedDay = parts(Date.now()).key; autoPosition = true; actionIndex = null; infoIndex = null; draw(errors);
+    };
     host.querySelectorAll('[data-mb-menu]').forEach(function (b) { b.onclick = function () { actionIndex = +b.dataset.mbMenu; draw(errors); host.querySelector('[data-mb-cancel]').focus(); }; });
     var cancel = host.querySelector('[data-mb-cancel]'); if (cancel) cancel.onclick = function () { var i = actionIndex; actionIndex = null; gearIndex = null; draw(errors); var b = host.querySelector('[data-mb-menu="' + i + '"]'); if (b) b.focus({ preventScroll: true }); };
     var sheet = host.querySelector('.mb-action-sheet'); if (sheet) sheet.onkeydown = function (e) {
@@ -732,9 +817,9 @@
       draw(d.errors);
     }).catch(function () { if (g === generation) { rows = []; draw(['bevakningar']); } });
   }
-  if (typeof document !== 'undefined' && document.addEventListener) document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && infoIndex !== null && host && host.isConnected) closeInfo(); });
+  if (typeof document !== 'undefined' && document.addEventListener) document.addEventListener('keydown', function (e) { if (e.key !== 'Escape' || !host || !host.isConnected) return; if (closePick()) return; if (infoIndex !== null) closeInfo(); });
   if (typeof document !== 'undefined' && document.addEventListener) document.addEventListener('tag-villkor-change', function () { if (host && host.isConnected && actionIndex === null && gearIndex === null && infoIndex === null) draw(lastErrors); });
-  M.stop = function () { generation++; clearInterval(timer); timer = null; host = null; rows = []; busy = false; actionIndex = null; gearIndex = null; infoIndex = null; };
+  M.stop = function () { generation++; clearInterval(timer); timer = null; host = null; rows = []; busy = false; actionIndex = null; gearIndex = null; infoIndex = null; closePick(); };
   M.render = function (el) {
     M.stop(); selectedDay = (window.VIEW_STATE&&VIEW_STATE.get('mina-bevakningar',{}).day)||parts(Date.now()).key; mode = (function (v) { return UNITS.indexOf(v) >= 0 ? v : 'dag'; })(localStorage.getItem('taxi_mb_view')); returnTo = null; autoPosition = true; actionIndex = null; host = el; el.innerHTML = '<div class="mb"><p role="status">Laddar dina bevakningar…</p></div>'; refresh();
     timer = setInterval(function () { if (!host || !host.isConnected) M.stop(); else if (!document.hidden && !busy && actionIndex === null) refresh(); }, 60000);

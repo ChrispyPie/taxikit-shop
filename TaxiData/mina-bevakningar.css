@@ -102,12 +102,9 @@ html:not([data-theme="dark"]) .mb-info-kv dd.mb-info-bad{color:#c53030}
 .mb-info-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
 .mb-action-sheet .mb-info-link{display:inline-block;width:auto;min-height:40px;margin:0;padding:8px 14px;background:var(--surface-soft,#222e3b);color:var(--primary,#63b3ed);border:1px solid var(--border,#3a4a5c);border-radius:999px;font-weight:600;font-size:.9rem}
 
-/* En vy Dag/Vecka/Månad (t1840u), som Google Kalender/Outlook. Vybytet uppe till höger. */
-.mb-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 8px}
+/* En vy Dag/Vecka/Månad. Verktygsrad direkt ovanför kalendern (vyikon, datumvisare, Idag). */
+.mb-top{display:flex;align-items:center;gap:8px;margin:0 0 8px}
 .mb-top .mb-refresh{margin:0;min-width:44px;min-height:40px;font-size:18px;padding:4px 10px}
-.mb-unit{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:6px 12px;border-radius:999px;border:1px solid var(--border,#3a4a5c);background:var(--surface,#1a2430);color:var(--text,#e2e8f0);font:inherit;font-size:14px;cursor:pointer}
-.mb-unit b{font-weight:700}.mb-unit small{color:var(--muted,#94a3b8);font-size:12px}
-.mb-unit-steps{display:inline-flex;gap:3px}.mb-unit-steps i{width:6px;height:6px;border-radius:50%;background:var(--border,#3a4a5c)}.mb-unit-steps i.on{background:var(--primary,#63b3ed)}
 .mb-backunit{display:inline-flex;align-items:center;min-height:40px;margin:0 0 8px;padding:6px 14px;border-radius:999px;border:1px solid var(--primary,#63b3ed);background:var(--surface,#1a2430);color:var(--primary,#63b3ed);font:inherit;font-weight:700;cursor:pointer}
 /* färg per sort, samma i alla vyer */
 .mb-block-bat{border-color:#2c7a7b;border-left-color:#4fd1c5}
@@ -154,3 +151,34 @@ html:not([data-theme="dark"]) .mb-lj-pill[aria-pressed=true]{color:#fff}
 .mb-lj-na{font-size:12px;color:var(--muted,#94a3b8);white-space:nowrap;text-align:center}
 .mb-lj-sub{margin-top:10px}.mb-lj-sub .tv-card{margin:0;background:var(--surface-soft,#222e3b)}
 @media (max-width:370px){.mb-lj-row{grid-template-columns:minmax(0,1fr) 60px 52px 72px;gap:4px}.mb-lj-pill,.mb-lj-try{font-size:12.5px}}
+
+.mb-toolbar{display:flex;align-items:center;gap:6px;margin:0 0 8px;flex-wrap:nowrap;min-width:0}
+.mb-toolbar .mb-unit{flex:0 0 40px;width:40px;height:40px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;border:2px solid var(--primary,#63b3ed);background:var(--surface,#1a2430);color:var(--primary,#63b3ed);cursor:pointer;box-sizing:border-box}
+.mb-toolbar .mb-unit svg{display:block}
+.mb-toolbar .date-nav{flex:1;min-width:0;gap:4px;justify-content:stretch}
+.mb-toolbar .date-nav button{flex:0 0 36px;width:36px;height:40px;box-sizing:border-box}
+.mb-toolbar .date-nav button.tl-date{flex:1 1 auto;width:auto;min-width:0;padding:0 6px;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.mb-toolbar .mb-today{flex:0 0 auto;height:40px;padding:0 10px;border-radius:10px;border:2px solid var(--primary,#63b3ed);background:var(--surface,#1a2430);color:var(--primary,#63b3ed);font:inherit;font-weight:600;font-size:14px;white-space:nowrap;cursor:pointer;box-sizing:border-box}
+.mb-toolbar .mb-today.active{background:var(--primary,#63b3ed);color:var(--on-primary,#fff)}
+#mb-cal-modal{z-index:16000}
+#mb-cal-modal .pm-day{cursor:pointer}
+#mb-cal-modal .pm-day.today{border:2px solid var(--primary,#63b3ed)}
+/* Vecka: fast rubrikrad och fast timkolumn till vänster, som Google Kalender. */
+.mb-wk-head{position:sticky;top:0;z-index:6;background:var(--surface,#1a2430)}
+.mb-wk-scroll{border-radius:0 0 12px 12px;overflow-x:hidden}
+.mb-wk-gutter{position:absolute;left:0;top:0;bottom:0;width:30px;background:var(--surface,#1a2430);z-index:3;pointer-events:none}
+.mb-wk-hl{position:absolute;left:0;width:28px;text-align:right;font-size:9px;line-height:1;color:var(--muted,#94a3b8);transform:translateY(-6px)}
+.mb-wk-hr span{display:none}
+/* Månad: veckonummer i smal kolumn, veckodagshuvud med idag markerad. */
+.mb-mrow{grid-template-columns:24px repeat(7,minmax(0,1fr))}
+.mb-mwk-h{display:block}
+.mb-mwk{display:flex;align-items:center;justify-content:center;align-self:start;justify-self:center;width:22px;min-height:16px;margin:4px 1px 0;padding:3px 0;border-radius:999px;background:var(--surface-soft,#2a3644);color:var(--muted,#94a3b8);font-size:10px;font-weight:700;line-height:1;pointer-events:none}
+.mb-mhead .today{color:var(--primary,#63b3ed);font-weight:800}
+html:not([data-theme="dark"]) .mb-mwk{background:#e2e8f0;color:#4a5568}
+@media (max-width:370px){
+  .mb-toolbar{gap:4px}
+  .mb-toolbar .mb-unit{flex-basis:36px;width:36px;height:38px}
+  .mb-toolbar .date-nav button{flex-basis:32px;width:32px;height:38px}
+  .mb-toolbar .date-nav button.tl-date{font-size:12.5px;padding:0 4px}
+  .mb-toolbar .mb-today{height:38px;padding:0 8px;font-size:13px}
+}
