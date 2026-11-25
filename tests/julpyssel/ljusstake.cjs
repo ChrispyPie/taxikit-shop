@@ -22,6 +22,7 @@ assert.doesNotMatch(cl, /id: '2026-11-22zjul3'/);
 assert.doesNotMatch(cl, /id: '2026-11-22zjul4'/);
 assert.doesNotMatch(cl, /id: '2026-11-22zjul5'/);
 assert.match(js, /ALLOW = \{ '710022': 1, '693340': 1 \}/);
+assert.match(js, /JUL_FROM = '2026-11-29'/);
 assert.match(js, /JUL_ALLA = false/);
 assert.match(js, /ADVENT = \['2026-11-29', '2026-12-06', '2026-12-13', '2026-12-20'\]/);
 assert.match(js, /taxi_jul_ljus_preview/);

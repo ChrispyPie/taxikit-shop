@@ -19,6 +19,10 @@ window.CHANGELOG = [
     ['Nytt', 'Adventskalender: 24 luckor med taxifakta, en för varje dag i december. Kalendern sitter litet uppe till vänster på startsidan. Tryck så växer den fram i mitten. Öppna dagens lucka – och alla du missat hittills.'],
     ['Nytt', 'Polkagrisjakt: du får två egna polkagrisar per arbetspass, som bara du kan ta. Samtidigt kan upp till tre delade polkagrisar vara ute i appen; en ny kan dyka upp även om de gamla inte är tagna, och den som trycker först tar den. De försvinner efter 45 minuter om ingen tar dem, och kommer oftare på natten. Ibland syns en gyllene polkagris värd tre poäng. Dina poäng syns som en polkagris med siffra högst upp på startsidan, till höger om ljusstaken. Tryck där för att se din placering (inga andras namn visas). På nyårsafton presenteras vinnaren för alla.']
   ]},
+  { datum: '2026-11-29', id: '2026-11-29zjul1', tid: '00:00', rader: [
+    ['Nytt', 'Jultema på startsidan från första advent: girlanger och en julscen hemma hos oss.'],
+    ['Nytt', 'Polkagrisjakt: hitta polkagrisar i appen. Du får egna, det finns delade, och ibland en gyllene. Poängen syns som en polkagris uppe till höger, intill ljusstaken. Tryck där för att se din placering. Adventskalendern öppnas 1 december.']
+  ]},
   { datum: '2026-11-25', id: '2026-11-25zbub1', tid: '15:03', rader: [
     ['Förbättrat', 'Pratbubblorna på startsidan följer nu textens längd, så en kort replik inte blir lika bred som skärmen. Gäller både Berra och hjälpboten, även på andra sidor.']
   ]},

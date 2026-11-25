@@ -41,7 +41,8 @@ assert.doesNotMatch(index, /id: ADVENT\.id, icon: ADVENT\.icon/);
 assert.match(index, /rv === 'advent'/);
 assert.match(index, /sida === 'advent'/);
 assert.match(index, /item\.id === 'advent'/);
-assert.match(fs.readFileSync(path.join(root, 'TaxiData/polkagris.js'), 'utf8'), /LIVE_FROM = '2026-12-01'/);
+assert.match(fs.readFileSync(path.join(root, 'TaxiData/polkagris.js'), 'utf8'), /CAL_FROM = '2026-12-01'/);
+assert.match(fs.readFileSync(path.join(root, 'TaxiData/polkagris.js'), 'utf8'), /LIVE_FROM = '2026-11-29'/);
 assert.match(sql, /not_open_yet/);
 assert.match(sql, /advent_is_test/);
 assert.match(sql, /return 0;/); // test season/year

@@ -1,11 +1,12 @@
-/* Julpyssel i TaxiData. Syns bara för utvalda förar-id (ALLOW).
- * För att visa för alla: sätt JUL_ALLA = true, eller lägg fler id i ALLOW.
- * Ångra: ta bort script- och css-taggarna i index.html. */
+/* Julpyssel i TaxiData. Jultema (girlanger och julscen) syns för alla
+ * från 2026-11-29 00:00 Europe/Stockholm. Före det bara ALLOW.
+ * Testdatum ?juldatum= gäller bara ALLOW. */
 (function () {
   'use strict';
   if (window.JULPYSSEL) return;
 
   var JUL_ALLA = false;
+  var JUL_FROM = '2026-11-29'; // 00:00 Europe/Stockholm
   var ALLOW = { '710022': 1, '693340': 1 };
   var ADVENT = ['2026-11-29', '2026-12-06', '2026-12-13', '2026-12-20'];
   var PREVIEW_KEY = 'taxi_jul_ljus_preview';
@@ -27,7 +28,8 @@
   }
   function allowed() {
     if (JUL_ALLA) return true;
-    return !!ALLOW[driverId()];
+    if (ALLOW[driverId()]) return true;
+    return ymd(new Date()) >= JUL_FROM;
   }
   function ymd(d) {
     try {
@@ -40,6 +42,7 @@
     }
   }
   function dateOverride() {
+    if (!ALLOW[driverId()]) return '';
     try {
       var q = new URLSearchParams(location.search).get('juldatum');
       if (q && /^\d{4}-\d{2}-\d{2}$/.test(q)) return q;
