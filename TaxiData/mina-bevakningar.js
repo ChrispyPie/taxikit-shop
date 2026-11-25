@@ -563,19 +563,20 @@
     var b = host && host.querySelector('[data-mb-open="' + i + '"]'); if (b) b.focus({ preventScroll: true });
     return true;
   }
-  // Ljud och notiser (t1839u): EN hopfälld ruta för alla sorters bevakningar. Per sort: notis på den här
+  // Ljud och notiser (t1839u/t1850u): EN hopfälld ruta för alla sorters bevakningar. Per sort: notis på den här
   // enheten (NOTIS_ENHET), ljud i appen (BEV_LJUD; för tåg även standardens Ljud på i TAG_VILLKOR) och Testa.
+  // Övrigt (nyckel prognos) täcker prognos och andra notiser som inte är tåg, flyg eller båt.
   // Samma lagring som förut (taxi_notis_enhet, taxi_bev_ljud, taxi_bev_villkor), så inga inställningar försvinner.
   var ljOpen = false;
   var LJ_KINDS = [
     { k: 'tag', ic: '🚆', n: 'Tåg', snd: true },
     { k: 'flyg', ic: '✈️', n: 'Flyg', snd: true },
     { k: 'bat', ic: '⛴️', n: 'Båt', snd: true },
-    { k: 'prognos', ic: '🔮', n: 'Prognos', snd: false }
+    { k: 'prognos', ic: '🔔', n: 'Övrigt', snd: true }
   ];
   function ljState() {
     var ne = window.NOTIS_ENHET && NOTIS_ENHET.read ? NOTIS_ENHET.read() : { tag: true, flyg: true, bat: true, prognos: true };
-    var lj = window.BEV_LJUD && BEV_LJUD.read ? BEV_LJUD.read() : { on: true, tag: true, flyg: true, bat: true };
+    var lj = window.BEV_LJUD && BEV_LJUD.read ? BEV_LJUD.read() : { on: true, tag: true, flyg: true, bat: true, prognos: true };
     var out = {};
     LJ_KINDS.forEach(function (x) {
       var snd = x.snd && lj.on && lj[x.k];
@@ -588,7 +589,7 @@
   function ljSummary(s) {
     var n = [], l = [];
     LJ_KINDS.forEach(function (x) { if (s[x.k].notis) n.push(x.n); if (x.snd && s[x.k].ljud) l.push(x.n); });
-    return 'Notis: ' + ljList(n) + ' · Ljud: ' + (l.length === 3 ? 'tåg, flyg, båt' : l.length ? l.join(', ').toLowerCase() : 'av');
+    return 'Notis: ' + ljList(n) + ' · Ljud: ' + (l.length ? ljList(l) : 'av');
   }
   function renderLjud(box) {
     if (!box) return;
@@ -605,7 +606,7 @@
           : '<span class="mb-lj-na">utan ljud</span>') + '</div>';
     });
     h += '</div><div class="mb-lj-sub" id="mb-lj-tag"></div>' +
-      '<p class="mb-lj-dim">✈️ Flyg: förvarning och försening ställs per flygbevakning under Ankomster › Flyg. 📅 Evenemang: påminnelsen du valt på evenemanget i Kalender. ◷ Bokade tider: notis när ärendet ändras.</p>' +
+      '<p class="mb-lj-dim">🔔 Övrigt gäller prognos (förbokningar) och andra notiser som inte är tåg, flyg eller båt. ✈️ Flyg: förvarning och försening ställs per flygbevakning under Ankomster › Flyg. 📅 Evenemang: påminnelsen du valt på evenemanget i Kalender. ◷ Bokade tider: notis när ärendet ändras.</p>' +
       '<div id="mb-notis-copy"></div></div>';
     box.innerHTML = h;
     var tbox = box.querySelector('#mb-lj-tag');
@@ -620,8 +621,8 @@
     box.querySelectorAll('[data-mb-lj-ljud]').forEach(function (b) { b.onclick = function () {
       var k = b.getAttribute('data-mb-lj-ljud'), on = b.getAttribute('aria-pressed') !== 'true';
       if (window.BEV_LJUD && BEV_LJUD.write) {
-        var cur = BEV_LJUD.read(); if (!cur.on) { cur.tag = cur.flyg = cur.bat = false; }
-        cur[k] = on; cur.on = !!(cur.tag || cur.flyg || cur.bat); BEV_LJUD.write(cur);
+        var cur = BEV_LJUD.read(); if (!cur.on) { cur.tag = cur.flyg = cur.bat = cur.prognos = false; }
+        cur[k] = on; cur.on = !!(cur.tag || cur.flyg || cur.bat || cur.prognos); BEV_LJUD.write(cur);
         if (on && BEV_LJUD.unlock) BEV_LJUD.unlock();
       }
       // Tågljudet är samma som standardens Ljud på i tågvillkoren (sparas även hos servern), som förut.

@@ -76,6 +76,16 @@ let checks = 0; const fails = []; const check = (x, msg) => { if (x) { checks++;
       await p.click('[data-mb-lj-ljud="flyg"]'); await sleep(100);
       check(await p.evaluate(() => JSON.parse(localStorage.getItem('taxi_bev_ljud')).flyg === false && document.querySelector('[data-mb-lj-ljud="flyg"]').getAttribute('aria-pressed') === 'false'), tag + ': flygljud av sparas i samma nyckel');
       await p.click('[data-mb-lj-ljud="flyg"]'); await sleep(100);
+      check(await p.evaluate(() => {
+        const row = [...document.querySelectorAll('.mb-lj-row')].find(r => /Övrigt/.test(r.textContent));
+        const names = [...document.querySelectorAll('.mb-lj-n')].map(e => e.textContent.trim());
+        return !!(row && row.querySelector('[data-mb-lj-notis="prognos"]') && row.querySelector('[data-mb-lj-ljud="prognos"]') && row.querySelector('[data-mb-lj-try="prognos"]') && !/utan ljud/.test(row.textContent) && names.includes('🔔 Övrigt') && !names.some(n => /Prognos/.test(n)));
+      }), tag + ': Övrigt har Notis, Ljud och Testa, inget utan ljud');
+      check(await p.evaluate(() => JSON.parse(localStorage.getItem('taxi_bev_ljud')).prognos !== false && document.querySelector('[data-mb-lj-ljud="prognos"]').getAttribute('aria-pressed') === 'true'), tag + ': övrigt ljud på som standard');
+      check(await p.evaluate(() => /Notis: allt · Ljud: allt/.test(document.querySelector('.mb-lj-dim').textContent)), tag + ': sammanfattning räknar med Övrigt');
+      await p.click('[data-mb-lj-ljud="prognos"]'); await sleep(100);
+      check(await p.evaluate(() => JSON.parse(localStorage.getItem('taxi_bev_ljud')).prognos === false && document.querySelector('[data-mb-lj-ljud="prognos"]').getAttribute('aria-pressed') === 'false' && /Ljud: tåg, flyg, båt/.test(document.querySelector('.mb-lj-dim').textContent)), tag + ': övrigt ljud av sparas i ny nyckel');
+      await p.click('[data-mb-lj-ljud="prognos"]'); await sleep(100);
       await p.click('[data-mb-lj-notis="bat"]'); await sleep(100);
       check(await p.evaluate(() => JSON.parse(localStorage.getItem('taxi_notis_enhet')).bat === false), tag + ': båtnotis av sparas per enhet');
       await p.click('[data-mb-lj-notis="bat"]'); await sleep(100);

@@ -273,7 +273,8 @@
   // Samma ljud/vibration/toast används av Prognos-notiser (prognos-notis.js)
   // item (valfritt): { key, tag, target } -> rutan leder dit, t.ex. Prognos på rätt zon
   B.ring = function (text, item) {
-    beep();
+    if (window.BEV_LJUD && BEV_LJUD.play) BEV_LJUD.play('prognos', false);
+    else beep();
     try { if (navigator.vibrate) navigator.vibrate([300, 120, 300, 120, 300]); } catch (e) {}
     toast(text, 8000, item);
   };

@@ -129,7 +129,10 @@ async function testNotisEnhet() {
   assert.equal(N.allows('flyg'), true);
   assert.equal(N.allows('bat'), false);
   assert.equal(N.allows('prognos'), false);
-  assert.equal(N.allows('admin-meddelande'), true, 'non-category notices unaffected');
+  assert.equal(N.allows('admin-meddelande'), false, 'övriga notiser följer prognos/övrigt');
+  N.write({ tag: false, flyg: true, bat: false, prognos: true });
+  assert.equal(N.allows('admin-meddelande'), true, 'övrigt på släpper igenom andra notiser');
+  N.write({ tag: false, flyg: true, bat: false, prognos: false });
   const list = await N.listOtherDevices();
   assert.equal(list[0].device_name, '🚕 Platta');
   N.applyCopied(list[0].data);
