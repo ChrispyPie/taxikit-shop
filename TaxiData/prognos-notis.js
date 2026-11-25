@@ -84,7 +84,8 @@
     var zone = zoneOf(item);
     if (zone === LANDVETTER && window.BEV_LJUD && BEV_LJUD.play && window.BEVAKNING && BEVAKNING.toast) {
       // Landvetter: säkerhetsbältesljudet (ljud/flyg.mp3) i stället för pipet. Samma vibration och ruta.
-      BEV_LJUD.play('flyg', true);
+      // force=true så flyg-växeln inte tystar prognosen; ljudet styrs av Övrigt (nyckel prognos).
+      if (!BEV_LJUD.enabled || BEV_LJUD.enabled('prognos')) BEV_LJUD.play('flyg', true);
       try { if (navigator.vibrate) navigator.vibrate([300, 120, 300, 120, 300]); } catch (e) {}
       BEVAKNING.toast(text, 8000, item);
     }

@@ -7,7 +7,7 @@
 
   var KEY = 'taxi_notis_enhet';
   var CATS = ['tag', 'flyg', 'bat', 'prognos'];
-  var LABELS = { tag: '🚆 Tåg', flyg: '✈️ Flyg', bat: '⛴️ Båt', prognos: '🔮 Prognos (förbokningar)' };
+  var LABELS = { tag: '🚆 Tåg', flyg: '✈️ Flyg', bat: '⛴️ Båt', prognos: '🔔 Övrigt' };
 
   function api() { return (typeof SB_URL !== 'undefined' && SB_URL) || window.TRIP_API_URL || 'https://lpfdryvukqmjlgenuzpb.supabase.co'; }
   function apiKey() { return (typeof SB_KEY !== 'undefined' && SB_KEY) || window.TRIP_API_KEY || ''; }
@@ -74,7 +74,8 @@
     else if (k.indexOf('flyg') === 0) k = 'flyg';
     else if (k.indexOf('tag') === 0) k = 'tag';
     else if (k.indexOf('bat') === 0 || k.indexOf('båt') === 0) k = 'bat';
-    if (CATS.indexOf(k) < 0) return true;
+    if (k === 'test') return true;
+    if (CATS.indexOf(k) < 0) return read().prognos !== false;
     return read()[k] !== false;
   }
 
@@ -93,8 +94,8 @@
     if (window.BEV_LJUD && BEV_LJUD.read) return BEV_LJUD.read();
     try {
       var o = JSON.parse(localStorage.getItem('taxi_bev_ljud') || 'null') || {};
-      return { on: o.on !== false, tag: o.tag !== false, flyg: o.flyg !== false, bat: o.bat !== false };
-    } catch (e) { return { on: true, tag: true, flyg: true, bat: true }; }
+      return { on: o.on !== false, tag: o.tag !== false, flyg: o.flyg !== false, bat: o.bat !== false, prognos: o.prognos !== false };
+    } catch (e) { return { on: true, tag: true, flyg: true, bat: true, prognos: true }; }
   }
   function readVillkor() {
     if (window.TAG_VILLKOR && TAG_VILLKOR.get) return TAG_VILLKOR.get();
@@ -241,6 +242,7 @@
         '<label class="ne-chk"><input type="checkbox" data-ne-ljud="tag"' + (lj.tag ? ' checked' : '') + '><span>🚆 Tågljud</span></label>' +
         '<label class="ne-chk"><input type="checkbox" data-ne-ljud="flyg"' + (lj.flyg ? ' checked' : '') + '><span>✈️ Flygljud</span></label>' +
         '<label class="ne-chk"><input type="checkbox" data-ne-ljud="bat"' + (lj.bat ? ' checked' : '') + '><span>⛴️ Båtljud</span></label>' +
+        '<label class="ne-chk"><input type="checkbox" data-ne-ljud="prognos"' + (lj.prognos !== false ? ' checked' : '') + '><span>🔔 Övrigt ljud</span></label>' +
       '</div>' +
       '<div class="ne-row" style="margin-top:10px">' +
         '<button type="button" class="ne-btn" data-ne-copy>Kopiera inställningar från annan enhet</button>' +

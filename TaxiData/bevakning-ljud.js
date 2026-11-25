@@ -1,6 +1,9 @@
-/* Ljud för bevakningar (tåg, flyg, båt) när appen är öppen.
+/* Ljud för bevakningar (tåg, flyg, båt) och övrigt när appen är öppen.
  * Spelar ljud/tag.mp3, flyg.mp3, bat.mp3 om filen finns, annars en reservton
- * (Web Audio). Sparas bara i telefonen (localStorage 'taxi_bev_ljud').
+ * (Web Audio). Övrigt (prognos och andra notiser som inte är tåg/flyg/båt)
+ * använder samma pip som BEVAKNING.ring(); Landvetter-prognosen spelar
+ * fortfarande ljud/flyg.mp3 men styrs av nyckeln prognos, inte flyg.
+ * Sparas bara i telefonen (localStorage 'taxi_bev_ljud').
  * Av = tyst, typ-toggle stänger av en sort. Ljudet låses upp vid första
  * trycket (webbläsare kräver en användargest). Inställningarna sitter på
  * Ankomster och i Bevakningar, inte under Inställningar.
@@ -10,7 +13,7 @@
 (function () {
   'use strict';
   var KEY = 'taxi_bev_ljud';
-  var DEFAULTS = { on: true, tag: true, flyg: true, bat: true };
+  var DEFAULTS = { on: true, tag: true, flyg: true, bat: true, prognos: true };
   var actx = null;
   var unlocked = false;
   var queue = [];
@@ -30,19 +33,20 @@
       on: o.on !== false,
       tag: o.tag !== false,
       flyg: o.flyg !== false,
-      bat: o.bat !== false
+      bat: o.bat !== false,
+      prognos: o.prognos !== false
     };
   }
   function write(s) {
-    try { localStorage.setItem(KEY, JSON.stringify({ on: !!s.on, tag: !!s.tag, flyg: !!s.flyg, bat: !!s.bat })); } catch (e) {}
+    try { localStorage.setItem(KEY, JSON.stringify({ on: !!s.on, tag: !!s.tag, flyg: !!s.flyg, bat: !!s.bat, prognos: s.prognos !== false })); } catch (e) {}
   }
 
   function enabled(kind) {
     if (window.NOTIS_ENHET && NOTIS_ENHET.allows && kind !== 'test' && !NOTIS_ENHET.allows(kind)) return false;
     var s = read();
     if (!s.on) return false;
-    if (kind === 'test') return s.tag || s.flyg || s.bat;
-    if (kind === 'tag' || kind === 'flyg' || kind === 'bat') return !!s[kind];
+    if (kind === 'test') return s.tag || s.flyg || s.bat || s.prognos;
+    if (kind === 'tag' || kind === 'flyg' || kind === 'bat' || kind === 'prognos') return !!s[kind];
     return false;
   }
 
@@ -60,6 +64,9 @@
     if (/✈️|landat|flyg/i.test(title)) return 'flyg';
     if (/🚆|tåg/i.test(title)) return 'tag';
     if (/⛴️|båt|fartyg/i.test(title)) return 'bat';
+    if (tag.indexOf('prognos') === 0) return 'prognos';
+    // Övrigt: allt som inte är tåg, flyg eller båt (nyheter, påminnelser, m.m.)
+    if (tag || title || k) return 'prognos';
     return '';
   }
 
@@ -127,6 +134,13 @@
     tone(c, 'sine', 185, t + 0.58, 0.38, 0.09);
     return 1.05;
   }
+  // Samma tre pip som BEVAKNING.ring() / beep() för prognos och övriga notiser.
+  function playOvrigt(c, t) {
+    tone(c, 'sine', 880, t, 0.22, 0.4);
+    tone(c, 'sine', 880, t + 0.25, 0.22, 0.4);
+    tone(c, 'sine', 1320, t + 0.5, 0.22, 0.4);
+    return 0.74;
+  }
 
   function playSynth(kind, force) {
     if (!force && !enabled(kind === 'test' ? 'test' : kind)) return 0;
@@ -137,11 +151,13 @@
       if (kind === 'tag') dur = playTag(c, t);
       else if (kind === 'flyg') dur = playFlyg(c, t);
       else if (kind === 'bat') dur = playBat(c, t);
+      else if (kind === 'prognos') dur = playOvrigt(c, t);
       else if (kind === 'test') {
         var s = read();
         if (s.tag || force) { dur = Math.max(dur, playTag(c, t)); t += 0.85; }
         if (s.flyg || force) { dur = (t - c.currentTime) + playFlyg(c, t); t += 0.95; }
-        if (s.bat || force) { dur = (t - c.currentTime) + playBat(c, t); }
+        if (s.bat || force) { dur = (t - c.currentTime) + playBat(c, t); t += 1.15; }
+        if (s.prognos || force) { dur = (t - c.currentTime) + playOvrigt(c, t); }
       }
     } catch (e) { return 0; }
     return dur;
@@ -181,7 +197,7 @@
   function playKind(kind, force, cb) {
     if (!force && !enabled(kind === 'test' ? 'test' : kind)) { if (cb) cb(0); return; }
     unlock();
-    var types = kind === 'test' ? ['tag', 'flyg', 'bat'].filter(function (k) { var s = read(); return force || s[k]; }) : [kind];
+    var types = kind === 'test' ? ['tag', 'flyg', 'bat', 'prognos'].filter(function (k) { var s = read(); return force || s[k]; }) : [kind];
     var i = 0, total = 0;
     function next() {
       if (i >= types.length) { if (cb) cb(total); return; }
