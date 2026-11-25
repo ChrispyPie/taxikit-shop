@@ -107,10 +107,12 @@ let checks = 0; const fails = []; const check = (x, msg) => { if (x) { checks++;
       check(await p.evaluate(() => { const h = document.querySelector('.mb-wk-head'); const d = [...h.querySelectorAll('.mb-wk-dh')]; return d.length === 7 && /mån/.test(d[0].textContent) && /sön/.test(d[6].textContent) && d.some(x => x.classList.contains('today')); }), tag + ': Vecka har veckodag+datum i huvudet, idag markerad');
       check(await noX(), tag + ': ingen sidscroll (Vecka)');
       if (tag !== 'l800d') { await p.evaluate(() => window.scrollTo(0, 0)); await p.screenshot({ path: path.join(out, 'mb-vecka-' + tag + '.png') }); }
-      await p.evaluate(() => document.querySelector('.mb-wk-b').click()); await sleep(150);
-      check(await p.evaluate(() => !!document.querySelector('.mb-info')), tag + ': block i Vecka öppnar infobox');
-      await p.click('[data-mb-info-close]'); await sleep(100);
+      check(await p.evaluate(() => !document.querySelector('.mb-wk [data-mb-open]') && /Tryck på en dag för dagvyn/.test(document.querySelector('.mb-timeline-note').textContent) && !/block för info/.test(document.body.innerText)), tag + ': Vecka har ingen infobox-länk, rätt hjälptext');
       const wkLabel = await p.$eval('[data-mb-pick]', e => e.textContent.trim());
+      await p.click('.mb-wk-b'); await sleep(200);
+      check(await p.evaluate(() => !document.querySelector('.mb-info') && document.querySelector('.mb-unit').getAttribute('data-mb-mode') === 'dag' && /Tillbaka till vecka/.test(document.querySelector('[data-mb-backunit]').textContent)), tag + ': tryck på block i Vecka öppnar dagvyn, inte infobox');
+      await p.click('[data-mb-backunit]'); await sleep(150);
+      check(await p.evaluate(l => document.querySelector('.mb-unit').getAttribute('data-mb-mode') === 'vecka' && document.querySelector('[data-mb-pick]').textContent.trim() === l, wkLabel), tag + ': tillbaka till samma vecka efter blocktryck');
       await p.click('.mb-wk-dh.today'); await sleep(200);
       check(await p.evaluate(() => document.querySelector('.mb-unit').getAttribute('data-mb-mode') === 'dag' && /Tillbaka till vecka/.test(document.querySelector('[data-mb-backunit]').textContent)), tag + ': dag från Vecka visar Tillbaka till vecka');
       await p.click('[data-mb-backunit]'); await sleep(150);
@@ -125,8 +127,11 @@ let checks = 0; const fails = []; const check = (x, msg) => { if (x) { checks++;
       check(await p.evaluate(() => { const h = document.querySelector('.mb-mhead'); const t = [...h.querySelectorAll('span')].filter(x => !x.classList.contains('mb-mwk-h')); return t.map(x => x.textContent).join(' ') === 'mån tis ons tor fre lör sön' && t[4].classList.contains('today'); }), tag + ': Månad har huvudet mån–sön med idag (fre) markerad');
       check(await noX(), tag + ': ingen sidscroll (Månad)');
       if (tag !== 'l800d') { await p.evaluate(() => window.scrollTo(0, 0)); await p.screenshot({ path: path.join(out, 'mb-manad-' + tag + '.png') }); }
-      await p.click('.mb-mday.today'); await sleep(200);
-      check(await p.evaluate(() => /Tillbaka till månad/.test(document.querySelector('[data-mb-backunit]').textContent)), tag + ': dag från Månad visar Tillbaka till månad');
+      check(await p.evaluate(() => !document.querySelector('.mb-month [data-mb-open]') && !document.querySelector('.mb-ml[data-mb-open]')), tag + ': Månad har inga infobox-länkar');
+      const ml = await p.$('.mb-mday.today .mb-ml');
+      if (ml) { await ml.click(); await sleep(200); }
+      else { await p.click('.mb-mday.today'); await sleep(200); }
+      check(await p.evaluate(() => !document.querySelector('.mb-info') && document.querySelector('.mb-unit').getAttribute('data-mb-mode') === 'dag' && /Tillbaka till månad/.test(document.querySelector('[data-mb-backunit]').textContent)), tag + ': tryck i Månad öppnar dagvyn, inte infobox');
       await p.click('[data-mb-backunit]'); await sleep(150);
       check(await p.evaluate(() => localStorage.getItem('taxi_mb_view') === 'manad'), tag + ': vyn sparas');
       await p.reload({ waitUntil: 'networkidle0' }); await p.evaluate(() => openItem('mina-bevakningar')); await p.waitForSelector('.mb-month');

@@ -116,9 +116,8 @@ html:not([data-theme="dark"]) .mb-info-kv dd.mb-info-bad{color:#c53030}
 .mb-wk-scroll{max-height:min(62vh,560px);overflow-y:auto;-webkit-overflow-scrolling:touch}
 .mb-wk-grid{position:relative}
 .mb-wk-hr{position:absolute;left:30px;right:0;border-top:1px solid var(--border-soft,#2a3644);pointer-events:none}.mb-wk-hr span{position:absolute;left:-28px;top:-7px;width:24px;text-align:right;font-size:9px;color:var(--muted,#94a3b8)}
-.mb-wk-col{position:absolute;top:0;bottom:0;border-left:1px solid var(--border-soft,#2a3644)}.mb-wk-col.today{background:rgba(99,179,237,.07)}
-.mb-wk-b{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:0;padding:1px 0;margin-left:1px;border-radius:4px;border:1px solid #476c89;border-left:3px solid #63b3ed;background:#1e3a52;color:#e2e8f0;font:inherit;font-size:11px;line-height:1.1;overflow:hidden;cursor:pointer;z-index:2;box-sizing:border-box}
-.mb-wk-b small{font-size:9px;opacity:.9}
+.mb-wk-col{position:absolute;top:0;bottom:0;border-left:1px solid var(--border-soft,#2a3644);cursor:pointer}.mb-wk-col.today{background:rgba(99,179,237,.07)}
+.mb-wk-b{position:absolute;margin-left:1px;border-radius:2px;border:1px solid #476c89;border-left:2px solid #63b3ed;background:#1e3a52;overflow:hidden;pointer-events:none;z-index:2;box-sizing:border-box}
 .mb-wk-flyg{background:#4a3b1c;border-color:#987b48;border-left-color:#f6c879}.mb-wk-event{background:#3b2f52;border-color:#776295;border-left-color:#b794f4}.mb-wk-bat{background:#1d4044;border-color:#2c7a7b;border-left-color:#4fd1c5}
 .mb-wk-booking{background:#22543d;border-color:#38a169;border-left-color:#68d391}.mb-wk-b.pending{background:#2d3748;border-style:dashed}.mb-wk-b.bad{opacity:.6;text-decoration:line-through}
 .mb-wk-now{position:absolute;left:-1px;right:0;border-top:2px solid #f56565;z-index:4;pointer-events:none}.mb-wk-now:before{content:'';position:absolute;left:-4px;top:-5px;width:8px;height:8px;border-radius:50%;background:#f56565}
@@ -128,7 +127,7 @@ html:not([data-theme="dark"]) .mb-info-kv dd.mb-info-bad{color:#c53030}
 .mb-mday{display:flex;flex-direction:column;align-items:stretch;gap:2px;min-height:74px;min-width:0;padding:3px 2px;border:0;border-left:1px solid var(--border-soft,#2a3644);background:none;color:var(--text,#e2e8f0);font:inherit;text-align:left;cursor:pointer;overflow:hidden}
 .mb-mday:first-child{border-left:0}.mb-mday b{align-self:center;font-size:12px;font-weight:600;width:22px;height:22px;line-height:22px;border-radius:50%;text-align:center}
 .mb-mday.out{opacity:.45}.mb-mday.today b{background:#f56565;color:#fff;font-weight:800}
-.mb-ml{display:block;font-size:9.5px;line-height:1.25;padding:1px 3px;border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#1e3a52;color:#e2e8f0;border-left:2px solid #63b3ed}
+.mb-ml{display:block;font-size:8px;line-height:1.2;padding:0 2px;border-radius:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#1e3a52;color:#e2e8f0;border-left:2px solid #63b3ed}
 .mb-ml-flyg{background:#4a3b1c;border-left-color:#f6c879}.mb-ml-event{background:#3b2f52;border-left-color:#b794f4}.mb-ml-bat{background:#1d4044;border-left-color:#4fd1c5}.mb-ml-booking{background:#22543d;border-left-color:#68d391}
 .mb-mmore{font-size:9.5px;color:var(--muted,#94a3b8);padding:0 3px;white-space:nowrap}
 html:not([data-theme="dark"]) .mb-wk-b,html:not([data-theme="dark"]) .mb-ml{background:#dbeafe;color:#1a365d}
