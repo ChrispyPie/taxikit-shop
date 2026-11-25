@@ -447,9 +447,13 @@
     var r = berraBox();
     if (!el.bubble || !r) return;
     var vw = window.innerWidth, vh = window.innerHeight, pad = 8, tail = 8;
-    var bw = Math.min(260, vw - pad * 2);
+    var maxW = Math.min(260, vw - pad * 2);
+    el.bubble.style.left = '0px';
+    el.bubble.style.width = 'max-content';
+    el.bubble.style.maxWidth = maxW + 'px';
+    var bw = Math.ceil(el.bubble.getBoundingClientRect().width) || 80;
+    if (bw > maxW) bw = maxW;
     el.bubble.style.width = bw + 'px';
-    el.bubble.style.maxWidth = bw + 'px';
     var bh = el.bubble.offsetHeight || 48;
     var cx = r.left + r.width / 2;
     var aboveTop = r.top - bh - tail - 4;

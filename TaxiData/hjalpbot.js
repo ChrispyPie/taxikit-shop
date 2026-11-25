@@ -762,17 +762,26 @@
   function placeChrome() {
     if (!el.bubble || !el.walker) return;
     var vw = window.innerWidth, vh = window.innerHeight, pad = 8;
-    var bw = Math.min(280, vw - pad * 2), bot = botRect();
+    var maxW = Math.min(280, vw - pad * 2), bot = botRect();
     function measure(w) {
+      if (w == null) {
+        el.bubble.style.left = '0px';
+        el.bubble.style.width = 'max-content';
+        el.bubble.style.maxWidth = maxW + 'px';
+        var nat = Math.ceil(el.bubble.getBoundingClientRect().width) || 80;
+        if (nat > maxW) nat = maxW;
+        el.bubble.style.width = nat + 'px';
+        return { w: nat, h: el.bubble.offsetHeight || 48 };
+      }
       el.bubble.style.width = w + 'px';
       el.bubble.style.maxWidth = w + 'px';
-      return el.bubble.offsetHeight || 48;
+      return { w: w, h: el.bubble.offsetHeight || 48 };
     }
-    var bh = measure(bw), spot = bubbleSpot(bot, bw, bh, vw, vh);
-    if (spot.cost > 0 && bw > 220) {
+    var m = measure(null), bw = m.w, bh = m.h, spot = bubbleSpot(bot, bw, bh, vw, vh);
+    if (spot.cost > 0 && bw > 160) {
       // smalare bubbla om den då slipper täcka ikoner eller enheter
-      var bw2 = Math.max(200, bw - 64), bh2 = measure(bw2), spot2 = bubbleSpot(bot, bw2, bh2, vw, vh);
-      if (spot2.cost < spot.cost) { bw = bw2; bh = bh2; spot = spot2; }
+      var bw2 = Math.max(160, bw - 64), m2 = measure(bw2), spot2 = bubbleSpot(bot, m2.w, m2.h, vw, vh);
+      if (spot2.cost < spot.cost) { bw = m2.w; bh = m2.h; spot = spot2; }
       else measure(bw);
     }
     el.bubble.style.top = Math.round(spot.t) + 'px';
