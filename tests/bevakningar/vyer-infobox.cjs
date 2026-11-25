@@ -41,6 +41,27 @@ let checks = 0; const fails = []; const check = (x, msg) => { if (x) { checks++;
       });
       check(bar.oneRow && bar.leftIcon && bar.dateBetween && bar.fits && bar.h <= 52 && bar.idag === '' && bar.idagLbl === 'Idag' && bar.gear && bar.title === 'Bevakningar', tag + ': verktygsrad en rad, ikon, datum, dubbelpil, kugghjul ' + JSON.stringify(bar));
       check(bar.label === 'Fr 6/11 -26', tag + ': datumvisaren i dagvyn ' + bar.label);
+      // Filterchips under verktygsraden (Allt först, samma mönster som Notiser)
+      const filt = await p.evaluate(() => {
+        const bar = document.querySelector('.mb-toolbar'), row = document.querySelector('.mb-filter'), cal = document.querySelector('.mb-timeline-scroll, .mb-wk, .mb-month');
+        const chips = [...document.querySelectorAll('.mb-filter [data-mb-filter]')].map(b => ({ id: b.getAttribute('data-mb-filter'), t: b.textContent.trim(), on: b.getAttribute('aria-pressed') === 'true', off: b.classList.contains('is-off'), right: Math.round(b.getBoundingClientRect().right) }));
+        return { under: !!(bar && row && cal && bar.getBoundingClientRect().bottom <= row.getBoundingClientRect().top + 2 && row.getBoundingClientRect().bottom <= cal.getBoundingClientRect().top + 2), labels: chips.map(c => c.t), first: chips[0] && chips[0].id === '' && chips[0].t === 'Allt' && chips[0].on && !chips[0].off, othersOn: chips.slice(1).some(c => c.on), othersOff: chips.slice(1).some(c => c.off), n: chips.length, overflow: chips.some(c => c.right > innerWidth + 1), stored: localStorage.getItem('taxi_mb_filter') };
+      });
+      check(filt.under && filt.first && !filt.othersOn && !filt.othersOff && filt.n === 6 && !filt.overflow && !filt.stored, tag + ': Allt valt som förval, 6 knappar under verktygsraden ' + JSON.stringify(filt));
+      if (tag !== 'l800d') await p.screenshot({ path: path.join(out, 'mb-filter-allt-' + tag + '.png') });
+      await p.click('[data-mb-filter="tag"]'); await sleep(80);
+      await p.click('[data-mb-filter="bat"]'); await sleep(80);
+      await p.click('[data-mb-filter="event"]'); await sleep(80);
+      await p.click('[data-mb-filter="booking"]'); await sleep(80);
+      const oneOff = await p.evaluate(() => {
+        const chips = Object.fromEntries([...document.querySelectorAll('.mb-filter [data-mb-filter]')].map(b => [b.getAttribute('data-mb-filter') || 'allt', { on: b.getAttribute('aria-pressed') === 'true', off: b.classList.contains('is-off') }]));
+        const strike = getComputedStyle(document.querySelector('[data-mb-filter="flyg"]')).textDecorationLine;
+        return { chips, strike, stored: localStorage.getItem('taxi_mb_filter'), hasTag: !!document.querySelector('.mb-block-tag'), hasFlyg: !!document.querySelector('.mb-block-flyg') };
+      });
+      check(!oneOff.chips.allt.on && oneOff.chips.tag.on && oneOff.chips.flyg.off && /line-through/.test(oneOff.strike) && oneOff.hasTag && !oneOff.hasFlyg && /flyg/.test(oneOff.stored) === false && /tag/.test(oneOff.stored), tag + ': en kategori avstängd döljs i schemat ' + JSON.stringify(oneOff));
+      if (tag !== 'l800d') await p.screenshot({ path: path.join(out, 'mb-filter-flyg-av-' + tag + '.png') });
+      await p.click('[data-mb-filter=""]'); await sleep(80);
+      check(await p.evaluate(() => document.querySelector('[data-mb-filter=""]').getAttribute('aria-pressed') === 'true' && !localStorage.getItem('taxi_mb_filter') && !!document.querySelector('.mb-block-tag') && !!document.querySelector('.mb-block-flyg') && ![...document.querySelectorAll('.mb-filter [data-mb-filter]')].slice(1).some(b => b.classList.contains('is-off'))), tag + ': Allt nollställer filtret');
       // Infobox
       const openInfo = async sel => { await p.$eval(sel, e => e.scrollIntoView({ block: 'center' })); await sleep(80); await p.click(sel); await p.waitForSelector('.mb-info'); };
       const tgt = await p.evaluate(() => { const b = [...document.querySelectorAll('.mb-block-open')].find(e => /Tåg 443/.test(e.getAttribute('aria-label'))); return b ? b.getAttribute('data-mb-open') : null; });
@@ -96,6 +117,8 @@ let checks = 0; const fails = []; const check = (x, msg) => { if (x) { checks++;
       check(await p.evaluate(() => !document.querySelector('.mb-lj-sheet')), tag + ': ✕ stänger ljudpanelen');
       if (tag !== 'l800d') { await p.evaluate(() => window.scrollTo(0, document.querySelector('.mb-toolbar').getBoundingClientRect().top + window.scrollY - 8)); await p.screenshot({ path: path.join(out, 'mb-verktygsrad-' + tag + '.png') }); }
       // Datumväljare (en dag, även framtida)
+      await p.evaluate(() => { window.scrollTo(0, 0); document.querySelector('[data-mb-pick]').scrollIntoView({ block: 'center' }); });
+      await sleep(80);
       await p.click('[data-mb-pick]'); await p.waitForSelector('#mb-cal-modal.open .pm-day');
       const cal = await p.evaluate(() => {
         const days = [...document.querySelectorAll('#mb-cal-modal .pm-day')];

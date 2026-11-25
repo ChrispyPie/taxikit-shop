@@ -160,6 +160,23 @@ html:not([data-theme="dark"]) .mb-lj-pill[aria-pressed=true]{color:#fff}
 .mb-toolbar .mb-today,.mb-toolbar .mb-lj-btn{flex:0 0 40px;width:40px;height:40px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;border:2px solid var(--primary,#63b3ed);background:var(--surface,#1a2430);color:var(--primary,#63b3ed);cursor:pointer;box-sizing:border-box}
 .mb-toolbar .mb-today svg,.mb-toolbar .mb-lj-btn svg{display:block}
 .mb-toolbar .mb-today.active{background:var(--primary,#63b3ed);color:var(--on-primary,#fff)}
+
+/* Filterchips under verktygsraden: färgad kant + prick i samma accent som schemat. */
+.mb-filter{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px;padding:0 1px;min-width:0}
+.mb-fchip{display:inline-flex;align-items:center;gap:5px;border:1.5px solid var(--mb-fc,#94a3b8);background:transparent;color:var(--text,#e2e8f0);border-radius:999px;padding:3px 9px;font:inherit;font-size:12px;line-height:1.2;min-height:28px;cursor:pointer;white-space:nowrap;box-sizing:border-box}
+.mb-fchip .mb-fdot{width:7px;height:7px;border-radius:50%;background:var(--mb-fc);flex:none}
+.mb-fchip-all{--mb-fc:var(--primary,#63b3ed)}
+.mb-fchip-all .mb-fdot{display:none}
+.mb-fchip-tag{--mb-fc:#63b3ed}
+.mb-fchip-flyg{--mb-fc:#f6c879}
+.mb-fchip-bat{--mb-fc:#4fd1c5}
+.mb-fchip-event{--mb-fc:#b794f4}
+.mb-fchip-booking{--mb-fc:#68d391}
+.mb-fchip.on{background:color-mix(in srgb,var(--mb-fc) 28%,transparent);font-weight:700}
+.mb-fchip-all.on{background:var(--primary,#63b3ed);color:var(--on-primary,#0b1520);border-color:var(--primary,#63b3ed)}
+.mb-fchip.is-off{opacity:.45;text-decoration:line-through;text-decoration-thickness:1px}
+.mb-fchip:focus-visible{outline:2px solid var(--primary,#63b3ed);outline-offset:2px}
+html:not([data-theme="dark"]) .mb-fchip-all.on{color:#fff}
 #mb-cal-modal{z-index:16000}
 #mb-cal-modal .pm-day{cursor:pointer}
 #mb-cal-modal .pm-day.today{border:2px solid var(--primary,#63b3ed)}
