@@ -19,6 +19,9 @@ window.CHANGELOG = [
     ['Nytt', 'Adventskalender: 24 luckor med taxifakta, en för varje dag i december. Kalendern sitter litet uppe till vänster på startsidan. Tryck så växer den fram i mitten. Öppna dagens lucka – och alla du missat hittills.'],
     ['Nytt', 'Polkagrisjakt: du får två egna polkagrisar per arbetspass, som bara du kan ta. Samtidigt kan upp till tre delade polkagrisar vara ute i appen; en ny kan dyka upp även om de gamla inte är tagna, och den som trycker först tar den. De försvinner efter 45 minuter om ingen tar dem, och kommer oftare på natten. Ibland syns en gyllene polkagris värd tre poäng. Dina poäng syns som en polkagris med siffra högst upp på startsidan, till höger om ljusstaken. Tryck där för att se din placering (inga andras namn visas). På nyårsafton presenteras vinnaren för alla.']
   ]},
+  { datum: '2026-11-25', id: '2026-11-25zbub1', tid: '15:03', rader: [
+    ['Förbättrat', 'Pratbubblorna på startsidan följer nu textens längd, så en kort replik inte blir lika bred som skärmen. Gäller både Berra och hjälpboten, även på andra sidor.']
+  ]},
   { datum: '2026-11-25', id: '2026-11-25zmbfl1', tid: '14:47', rader: [
     ['Nytt', 'På Bevakningar finns filterknappar under verktygsraden, med samma färger som i schemat. Allt visar allt igen. Valet sparas i telefonen och påverkar bara visningen, inte notiserna.']
   ]},
