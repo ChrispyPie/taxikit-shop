@@ -306,7 +306,13 @@
   var MONL = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'], WDS = ['mån', 'tis', 'ons', 'tor', 'fre', 'lör', 'sön'];
   function dowOf(k) { return new Date(k + 'T12:00:00Z').getUTCDay() || 7; }
   function weekStart(k) { return addDay(k, 1 - dowOf(k)); }
-  function isoWeek(k) { var d = new Date(addDay(k, 4 - dowOf(k)) + 'T12:00:00Z'), y = Date.UTC(d.getUTCFullYear(), 0, 1); return Math.ceil(((d - y) / 864e5 + 1) / 7); }
+  function isoThu(k) { return addDay(k, 4 - dowOf(k)); }
+  function isoWeekYear(k) { return +isoThu(k).slice(0, 4); }
+  function isoWeek(k) {
+    var thu = isoThu(k), y = isoWeekYear(k), w1 = addDay(y + '-01-04', 1 - dowOf(y + '-01-04'));
+    return Math.round((new Date(weekStart(thu) + 'T12:00:00Z') - new Date(w1 + 'T12:00:00Z')) / 6048e5) + 1;
+  }
+  function yyOf(y) { return String(y).slice(-2); }
   function dm(k) { return +k.slice(8, 10) + ' ' + MON[+k.slice(5, 7) - 1]; }
   function addMonth(k, n) { var y = +k.slice(0, 4), m = +k.slice(5, 7) - 1 + n; y += Math.floor(m / 12); m = ((m % 12) + 12) % 12; var dim = new Date(Date.UTC(y, m + 1, 0)).getUTCDate(); return y + '-' + String(m + 1).padStart(2, '0') + '-' + String(Math.min(+k.slice(8, 10), dim)).padStart(2, '0'); }
   function stepKey(k, n) { return mode === 'vecka' ? addDay(k, 7 * n) : mode === 'manad' ? addMonth(k, n) : addDay(k, n); }
@@ -331,17 +337,11 @@
     for (r = 0; r < 3; r++) for (c = 0; c < 3; c++) cells += '<rect x="' + (5 + c * 5) + '" y="' + (5 + r * 5) + '" width="3.6" height="3.6" rx="0.7" fill="currentColor"/>';
     return svg(cells);
   }
+  var WD2 = ['Må', 'Ti', 'On', 'To', 'Fr', 'Lö', 'Sö'];
   function navDateLabel(k) {
-    if (mode === 'vecka') {
-      var a = weekStart(k), b = addDay(a, 6);
-      return a.slice(0, 7) === b.slice(0, 7) ? (+a.slice(8, 10) + '–' + dm(b)) : (dm(a) + '–' + dm(b));
-    }
-    if (mode === 'manad') return MON[+k.slice(5, 7) - 1].replace(/^./, function (c) { return c.toUpperCase(); }) + ' ' + k.slice(0, 4);
-    var today = parts(Date.now()).key;
-    if (k === today) return 'I dag';
-    if (k === addDay(today, 1)) return 'I morgon';
-    if (k === addDay(today, -1)) return 'I går';
-    return WDS[dowOf(k) - 1] + ' ' + dm(k);
+    if (mode === 'vecka') return 'V' + isoWeek(k) + ' -' + yyOf(isoWeekYear(k));
+    if (mode === 'manad') return MON[+k.slice(5, 7) - 1].replace(/^./, function (c) { return c.toUpperCase(); }) + ' -' + yyOf(+k.slice(0, 4));
+    return WD2[dowOf(k) - 1] + ' ' + (+k.slice(8, 10)) + '/' + (+k.slice(5, 7)) + ' -' + yyOf(+k.slice(0, 4));
   }
   function onToday() {
     var today = parts(Date.now()).key;
@@ -740,7 +740,7 @@
         : (r.rules.length ? verb + ' ingår i en äldre bevakning. Stänga av hela bevakningen (' + r.rules.map(function (w) { return w.name; }).join(', ') + ')?' : 'Sluta bevaka ' + r.title + '?');
       if (!window.confirm(text)) return;
       busy = true; actionIndex = null; gearIndex = null; draw(errors);
-      remove(r).then(function () { if (g === generation) refresh(); }).catch(function () { busy = false; if (g === generation) draw(errors, 'Kunde inte ta bort allt. Uppdatera och försök igen.'); }).finally(function () { busy = false; });
+      remove(r).then(function () { if (g === generation) refresh(); }).catch(function () { busy = false; if (g === generation) draw(errors, 'Kunde inte ta bort allt. Försök igen om en stund.'); }).finally(function () { busy = false; });
     }; });
     host.querySelectorAll('[data-mb-gear]').forEach(function (b) { b.onclick = function (e) {
       e.preventDefault(); e.stopPropagation();
@@ -852,6 +852,7 @@
   // Ren logik för tester med syntetiska data.
   M.villkorTarget = villkorTarget;
   M.normalize = normalize; M.inWindow = inWindow; M.timelineLayout = timelineLayout; M.daySegments = daySegments;
+  M.isoWeek = isoWeek; M.isoWeekYear = isoWeekYear;
 
  if(window.VIEW_STATE)VIEW_STATE.bind('mina-bevakningar',function(){return {day:selectedDay};});
 

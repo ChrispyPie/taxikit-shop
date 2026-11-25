@@ -40,7 +40,7 @@ let checks = 0; const fails = []; const check = (x, msg) => { if (x) { checks++;
         return { oneRow: Math.abs(ub.top - gb.top) < 8 && Math.abs(ub.bottom - gb.bottom) < 8, leftIcon: ub.left <= tb.left + 2, dateBetween: db.left >= ub.right - 1 && ib.left >= db.right - 1 && gb.left >= ib.right - 1, fits: gb.right <= innerWidth - 4 && tb.right <= innerWidth + 1, h: Math.round(tb.height), label: d.textContent.trim(), idag: (i.textContent||'').trim(), idagLbl: i.getAttribute('aria-label'), gear: !!g, mode: u.getAttribute('data-mb-mode'), title: document.getElementById('title').textContent };
       });
       check(bar.oneRow && bar.leftIcon && bar.dateBetween && bar.fits && bar.h <= 52 && bar.idag === '' && bar.idagLbl === 'Idag' && bar.gear && bar.title === 'Bevakningar', tag + ': verktygsrad en rad, ikon, datum, dubbelpil, kugghjul ' + JSON.stringify(bar));
-      check(bar.label === 'I dag', tag + ': datumvisaren visar I dag i dagvyn');
+      check(bar.label === 'Fr 6/11 -26', tag + ': datumvisaren i dagvyn ' + bar.label);
       // Infobox
       const openInfo = async sel => { await p.$eval(sel, e => e.scrollIntoView({ block: 'center' })); await sleep(80); await p.click(sel); await p.waitForSelector('.mb-info'); };
       const tgt = await p.evaluate(() => { const b = [...document.querySelectorAll('.mb-block-open')].find(e => /Tåg 443/.test(e.getAttribute('aria-label'))); return b ? b.getAttribute('data-mb-open') : null; });
@@ -97,15 +97,18 @@ let checks = 0; const fails = []; const check = (x, msg) => { if (x) { checks++;
       check(cal.title === 'Nov 2026' && cal.wds === 'MåTiOnToFrLöSö' && cal.today && cal.futureOn && cal.contrast, tag + ': väljaren är en månad, idag vald, framtida dagar går att välja ' + JSON.stringify(cal));
       if (tag !== 'l800d') await p.screenshot({ path: path.join(out, 'mb-valjare-' + tag + '.png') });
       await p.click('#mb-cal-modal [data-mb-pm-day="2026-11-20"]'); await sleep(200);
-      check(await p.evaluate(() => !document.getElementById('mb-cal-modal').classList.contains('open') && document.querySelector('[data-mb-pick]').textContent.trim() === 'fre 20 nov'), tag + ': ett tryck väljer dagen och stänger väljaren');
+      check(await p.evaluate(() => !document.getElementById('mb-cal-modal').classList.contains('open') && document.querySelector('[data-mb-pick]').textContent.trim() === 'Fr 20/11 -26'), tag + ': ett tryck väljer dagen och stänger väljaren');
       await p.click('[data-mb-today]'); await sleep(150);
-      check(await p.evaluate(() => document.querySelector('[data-mb-pick]').textContent.trim() === 'I dag' && document.querySelector('[data-mb-today]').classList.contains('active')), tag + ': Idag går tillbaka till idag');
+      check(await p.evaluate(() => document.querySelector('[data-mb-pick]').textContent.trim() === 'Fr 6/11 -26' && document.querySelector('[data-mb-today]').classList.contains('active')), tag + ': Idag går tillbaka till idag');
       await p.click('[data-mb-pick]'); await p.waitForSelector('#mb-cal-modal.open');
       await p.evaluate(() => document.getElementById('mb-cal-modal').click()); await sleep(120);
       check(await p.evaluate(() => !document.getElementById('mb-cal-modal').classList.contains('open')), tag + ': tryck utanför stänger väljaren');
       // Vecka
       await p.click('[data-mb-unit]'); await sleep(200);
       check(await p.evaluate(() => document.querySelector('.mb-unit').getAttribute('data-mb-mode') === 'vecka' && document.querySelectorAll('.mb-wk-col').length === 7 && !!document.querySelector('.mb-wk-dh.today') && !!document.querySelector('.mb-wk-now') && !!document.querySelector('.mb-wk-gutter') && document.querySelectorAll('.mb-wk-hl').length === 24), tag + ': Vecka med 7 kolumner, fast timkolumn, i dag markerad, nu-linje');
+      check(await p.evaluate(() => document.querySelector('[data-mb-pick]').textContent.trim() === 'V45 -26'), tag + ': veckoetikett V45 -26');
+      const iso = await p.evaluate(() => ({ a: [MINA_BEVAKNINGAR.isoWeek('2027-01-01'), MINA_BEVAKNINGAR.isoWeekYear('2027-01-01')], b: [MINA_BEVAKNINGAR.isoWeek('2027-01-04'), MINA_BEVAKNINGAR.isoWeekYear('2027-01-04')] }));
+      check(iso.a[0] === 53 && iso.a[1] === 2026 && iso.b[0] === 1 && iso.b[1] === 2027, tag + ': ISO-vecka/år runt nyår ' + JSON.stringify(iso));
       check(await p.evaluate(() => { const h = document.querySelector('.mb-wk-head'); const d = [...h.querySelectorAll('.mb-wk-dh')]; return d.length === 7 && /mån/.test(d[0].textContent) && /sön/.test(d[6].textContent) && d.some(x => x.classList.contains('today')); }), tag + ': Vecka har veckodag+datum i huvudet, idag markerad');
       check(await noX(), tag + ': ingen sidscroll (Vecka)');
       if (tag !== 'l800d') { await p.evaluate(() => window.scrollTo(0, 0)); await p.screenshot({ path: path.join(out, 'mb-vecka-' + tag + '.png') }); }
@@ -127,6 +130,7 @@ let checks = 0; const fails = []; const check = (x, msg) => { if (x) { checks++;
       // Månad
       await p.click('[data-mb-unit]'); await sleep(200);
       check(await p.evaluate(() => document.querySelector('.mb-unit').getAttribute('data-mb-mode') === 'manad' && document.querySelectorAll('.mb-mday').length >= 28 && !!document.querySelector('.mb-mday.today') && !!document.querySelector('.mb-mmore') && document.querySelectorAll('.mb-mwk').length >= 5 && /45/.test([...document.querySelectorAll('.mb-mwk')].map(x => x.textContent).join(','))), tag + ': Månad med rutnät, veckonummer, i dag inringat, +N till');
+      check(await p.evaluate(() => document.querySelector('[data-mb-pick]').textContent.trim() === 'Nov -26'), tag + ': månadsetikett Nov -26');
       check(await p.evaluate(() => { const h = document.querySelector('.mb-mhead'); const t = [...h.querySelectorAll('span')].filter(x => !x.classList.contains('mb-mwk-h')); return t.map(x => x.textContent).join(' ') === 'mån tis ons tor fre lör sön' && t[4].classList.contains('today'); }), tag + ': Månad har huvudet mån–sön med idag (fre) markerad');
       check(await noX(), tag + ': ingen sidscroll (Månad)');
       if (tag !== 'l800d') { await p.evaluate(() => window.scrollTo(0, 0)); await p.screenshot({ path: path.join(out, 'mb-manad-' + tag + '.png') }); }
