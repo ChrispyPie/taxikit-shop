@@ -23,7 +23,7 @@ window.CHANGELOG = [
     ['Nytt', 'Jultema på startsidan från första advent: girlanger och en julscen hemma hos oss.'],
     ['Nytt', 'Polkagrisjakt: hitta polkagrisar i appen. Du får egna, det finns delade, och ibland en gyllene. Poängen syns som en polkagris uppe till höger, intill ljusstaken. Tryck där för att se din placering. Adventskalendern öppnas 1 december.']
   ]},
-  { datum: '2026-11-27', id: '2026-11-27omboka1', tid: '16:10', rader: [
+  { datum: '2026-11-27', id: '2026-11-27omboka1', tid: '14:01', rader: [
     ['Nytt', 'Bokad tid: du kan nu avboka eller boka om en tid, även en som redan är godkänd. Både förare och admin kan det. Avboka: skriv orsaken i svarsrutan och tryck Avboka (utan orsak får du röd varning, som vid Avböj). Föreslå ny tid: välj nytt datum och klockslag, den andra sidan får förslaget att godkänna och tiden visas grå tills den är godkänd. Den andra sidan får en aktivitetsprick som vid andra svar.']
   ]},
   { datum: '2026-11-27', id: '2026-11-27eko1', tid: '14:06', rader: [
