@@ -23,6 +23,9 @@ window.CHANGELOG = [
     ['Nytt', 'Jultema på startsidan från första advent: girlanger och en julscen hemma hos oss.'],
     ['Nytt', 'Polkagrisjakt: hitta polkagrisar i appen. Du får egna, det finns delade, och ibland en gyllene. Poängen syns som en polkagris uppe till höger, intill ljusstaken. Tryck där för att se din placering. Adventskalendern öppnas 1 december.']
   ]},
+  { datum: '2026-11-27', id: '2026-11-27person1', tid: '20:29', rader: [
+    ['Nytt', 'Admin › Ärenden: i ett öppet ärende är chaufförens namn nu klickbart. Du kommer tillbaka till listan, som visar alla ärenden med den personen. Överst står en ring med Ärenden: Namn och ett kryss som tar bort filtret. Kategoriknapparna fungerar tillsammans med filtret.', 'admin']
+  ]},
   { datum: '2026-11-27', id: '2026-11-27lista1', tid: '20:20', rader: [
     ['Förbättrat', 'Ärenden och Meddelanden: när du går in öppnas alltid listan, inte det ärende du senast läste. Vald kategori är kvar. Varje rad har en färgad kant efter kategori (blå Meddelande, gul Verkstad, rosa Sjuk, grön Bokad tid) och kategoriknapparna har samma färger. Uppe till höger på raden visas ✓ godkänd, ✕ nekad eller avbokad, och ? när det väntar på beslut.']
   ]},
