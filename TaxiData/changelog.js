@@ -23,6 +23,9 @@ window.CHANGELOG = [
     ['Nytt', 'Jultema på startsidan från första advent: girlanger och en julscen hemma hos oss.'],
     ['Nytt', 'Polkagrisjakt: hitta polkagrisar i appen. Du får egna, det finns delade, och ibland en gyllene. Poängen syns som en polkagris uppe till höger, intill ljusstaken. Tryck där för att se din placering. Adventskalendern öppnas 1 december.']
   ]},
+  { datum: '2026-11-27', id: '2026-11-27bil1', tid: '15:05', rader: [
+    ['Förbättrat', 'Meddelande och Bokad tid: Bil nr är nu förvalt till Nej, och du kan välja bland åkeriets bilar. Väljer du en bil du inte har kört de senaste sju dagarna frågar appen Du har inte kört bil … senaste veckan. Är det rätt bil? Svara Ja eller Byt bil.']
+  ]},
   { datum: '2026-11-27', id: '2026-11-27sjuklas1', tid: '14:20', rader: [
     ['Ändrat', 'Sjukanmälan och läkarintyg låses nu med tråden. Raderar admin eller ägare en sjuktråd får föraren fortfarande läsa den, men kan inte längre friskanmäla, ladda upp eller ta bort intyg eller ta bort sjukperioden. Ägaren kan återställa tråden från Papperskorgen, då går allt att ändra igen. Inga sjukuppgifter raderas på riktigt.', 'admin']
   ]},
