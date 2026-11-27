@@ -37,7 +37,8 @@
     not_found: 'Sjukperioden finns inte längre.',
     too_big: 'Filen är för stor (högst 3 MB).',
     bad_file: 'Filen går inte att läsa. Ta ett foto eller välj en PDF.',
-    too_many: 'Det finns redan 10 intyg på den här perioden.'
+    too_many: 'Det finns redan 10 intyg på den här perioden.',
+    thread_closed: 'Tråden är stängd. Du kan läsa den men inte ändra eller ladda upp något.'
   };
   var st = { data: null, err: null, body: null, onChange: null, form: null, busy: false, flash: null, certs: {}, lon: {}, decide: null, filter: 'att' };
 
@@ -127,7 +128,7 @@
   };
   // Återanvänd formuläret från Inkorg, efter att sjuk_get har kontrollerat behörighet.
   S.newReport = function () {
-    if (!st.data || st.err || (st.data.mine || []).some(function(r){return !r.end;})) return;
+    if (!st.data || st.err || (st.data.mine || []).some(function(r){return !r.end && !r.locked;})) return;
     st.form = { kind: 'ny', start: today(), comment: '' }; draw();
   };
   function act(p, okMsg) {
@@ -144,16 +145,19 @@
     return '<span class="bv-st sj-' + s[1] + '">' + esc(s[0]) + '</span>';
   }
   function card(r, boss) {
+    // Stängd tråd (2026-11-27sjuklas1): när admin/ägare raderat tråden får föraren läsa men inte ändra. Servern nekar också (thread_closed).
+    var lock = !!r.locked && !boss && !(st.data && st.data.boss);
     var h = '<div class="vk-card sj-card' + (r.open ? ' sj-open' : '') + '" data-id="' + r.id + '">';
     h += '<div class="vk-ihead"><span class="vk-when">' + (boss ? esc(sn(r.name) || r.driver_id) + ' <small>· ' + esc(r.driver_id) + '</small><br>' : '') +
       '🤒 ' + esc(dsv(r.start)) + ' – ' + (r.open ? 'pågår' : esc(dsv(r.end))) + '</span>' + badge(r) + '</div>';
     h += '<div class="vk-imeta">' + dagar(r.days) + (r.open ? ' hittills' : '') + (r.certs ? ' · 📄 ' + r.certs + ' intyg' : '') +
       ' · <span class="sj-lon ' + r.sjuklon + '">' + esc(LON[r.sjuklon] || '') + '</span></div>';
-    if (r.open) h += '<div class="vk-warn' + (r.days >= 8 && !r.certs ? ' bad' : '') + '">' + esc(regel(r.days)) + '</div>';
+    if (lock) h += '<div class="vk-warn" role="status">🔒 Tråden är stängd. Du kan läsa den men inte ändra, friskanmäla eller ladda upp intyg.</div>';
+    else if (r.open) h += '<div class="vk-warn' + (r.days >= 8 && !r.certs ? ' bad' : '') + '">' + esc(regel(r.days)) + '</div>';
     if (r.comment) h += '<div class="bv-text sj-c">' + (boss ? '💬 ' : 'Din kommentar: ') + esc(r.comment) + '</div>';
     if (r.status_at && r.status !== 'ny') h += '<div class="vk-boss">' + esc((STATUS[r.status] || [''])[0]) + ' av ' + esc(sn(r.status_by) || 'ägaren') + ' · ' + esc(when(r.status_at)) +
       (r.status_comment ? '<br>"' + esc(r.status_comment) + '"' : '') + '</div>';
-    if (r.status === 'intyg_begart' && !boss && !r.certs) h += '<div class="vk-warn bad">📄 Ägaren vill ha ett läkarintyg. Ta ett foto av det och ladda upp det här nedanför.</div>';
+    if (r.status === 'intyg_begart' && !boss && !r.certs && !lock) h += '<div class="vk-warn bad">📄 Ägaren vill ha ett läkarintyg. Ta ett foto av det och ladda upp det här nedanför.</div>';
     // Intyg
     var c = st.certs[r.id];
     if (c === 'loading') h += '<div class="vk-imeta">Hämtar intyg…</div>';
@@ -161,7 +165,7 @@
       h += '<div class="bv-thumbs big">' + c.map(function (x) {
         var inner = x.mime === 'application/pdf' ? '<span class="sj-pdf">📄 PDF</span>' : '<img src="' + esc(x.url) + '" alt="Läkarintyg">';
         return '<div class="bv-thumb"><a href="' + esc(x.url) + '" target="_blank" rel="noopener">' + inner + '</a>' +
-          ((x.mine || boss) ? '<button type="button" class="sj-cdel" data-c="' + x.id + '" data-r="' + r.id + '" aria-label="Ta bort intyget">×</button>' : '') + '</div>';
+          ((!lock && (x.mine || boss)) ? '<button type="button" class="sj-cdel" data-c="' + x.id + '" data-r="' + r.id + '" aria-label="Ta bort intyget">×</button>' : '') + '</div>';
       }).join('') + '</div>';
     } else if (c && !c.length) h += '<div class="vk-imeta">Inga intyg.</div>';
     h += lonBox(r);
@@ -173,10 +177,11 @@
         '<div class="pm-btns"><button type="button" id="sj-dcancel">Avbryt</button><button type="button" class="primary" id="sj-dok"' + (st.busy ? ' disabled' : '') + '>' + esc(lbl) + '</button></div>';
     }
     var a = [];
-    if (!boss || r.driver_id === st.data.me) {
+    if (lock) { /* ingen friskanmälan */ }
+    else if (!boss || r.driver_id === st.data.me) {
       if (r.open) a.push('<button type="button" class="kal-ok" data-a="frisk">💪 Friskanmäl</button>');
     } else if (r.open) a.push('<button type="button" data-a="frisk">💪 Friskanmäl</button>');
-    a.push('<label class="sj-up">📷 Läkarintyg<input type="file" accept="image/*,application/pdf" data-up="' + r.id + '" hidden></label>');
+    if (!lock) a.push('<label class="sj-up">📷 Läkarintyg<input type="file" accept="image/*,application/pdf" data-up="' + r.id + '" hidden></label>');
     if (r.certs && !(c && c.length)) a.push('<button type="button" data-a="certs">📄 Visa intyg</button>');
     a.push('<button type="button" data-a="lon">' + (st.lon[r.id] ? 'Dölj sjuklön' : '💰 Beräknad sjuklön') + '</button>');
     if (boss && !(st.decide && st.decide.id === r.id)) {
@@ -184,7 +189,7 @@
       if (r.status !== 'intyg_begart') a.push('<button type="button" class="bv-pagar" data-a="intyg_begart">📄 Begär läkarintyg</button>');
       if (r.status !== 'avslagen') a.push('<button type="button" class="vk-del" data-a="avslagen">Avslå</button>');
     }
-    if (boss || r.status === 'ny') a.push('<button type="button" class="vk-del" data-a="del">Ta bort</button>');
+    if (!lock && (boss || r.status === 'ny')) a.push('<button type="button" class="vk-del" data-a="del">Ta bort</button>');
     h += '<div class="vk-iact bv-act sj-act" data-id="' + r.id + '">' + a.join('') + '</div>';
     if (boss) {
       h += '<div class="sj-lonrow"><span>Sjuklön:</span>' + ['ej', 'beviljad', 'utbetald'].map(function (v) {
@@ -225,14 +230,14 @@
     var d = st.data; if (!d) { body.innerHTML = '<div class="tl-msg">Laddar…</div>'; return; }
     var h = '';
     if (st.flash) h += '<div class="vk-flash">' + esc(st.flash) + '</div>';
-    var mine = d.mine || [], open = mine.filter(function (r) { return r.open; })[0];
+    var mine = d.mine || [], open = mine.filter(function (r) { return r.open && !r.locked; })[0];
     h += '<div class="vk-ltitle">Min sjukanmälan</div>';
     if (st.form && st.form.kind === 'frisk') h += friskForm(findR(st.form.id));
     else if (st.form && st.form.kind === 'ny') h += reportForm();
     else if (!open) h += '<button type="button" id="sj-new" class="vk-new">🤒 Anmäl sjuk</button>';
     if (open) h += card(open, false);
     h += reglerBox();
-    var old = mine.filter(function (r) { return !r.open; });
+    var old = mine.filter(function (r) { return r !== open; });
     if (old.length) h += '<details class="sj-hist"><summary class="vk-ltitle">Mina tidigare sjukperioder (' + old.length + ')</summary>' + old.map(function (r) { return card(r, false); }).join('') + '</details>';
     if (d.boss) {
       var all = others();
