@@ -65,7 +65,7 @@ try:
     p.wait_for_function("document.querySelectorAll('.ar-row').length>5")
     check('Önskemål' not in p.locator('#content').inner_text());check(p.locator('.mx-category-heading').inner_text()=='Alla');check(p.locator('.mx-filters button').evaluate_all('es=>new Set(es.map(e=>e.getBoundingClientRect().top)).size===1'));p.get_by_role('button',name='Sjuk',exact=True).click();check(p.locator('.mx-category-heading').inner_text()=='Sjuk');p.get_by_role('button',name='Alla',exact=True).click();shot(p,'01-inkorg')
     p.get_by_role('button',name='＋ Nytt ärende',exact=True).click();p.wait_for_selector('dialog[open]')
-    check(p.locator('dialog button').all_text_contents()==['Meddelande','Sjuk','Verkstadstimmar','Avbryt'])
+    check(p.locator('dialog button').all_text_contents()==['Meddelande','Bokad tid','Sjuk','Verkstadstimmar','Avbryt'])
     p.get_by_role('button',name='Meddelande',exact=True).last.click();p.wait_for_selector('#mx-form')
     check(p.locator('#mx-driver_id').count()==0);p.wait_for_selector('#mx-car_choice option[value="1"]',state='attached');check(p.input_value('#mx-car_choice')=='none');check(p.locator('#mx-car_choice option').all_text_contents()==['Välj','Nej','25','7'])
     p.fill('#mx-subject','Ett bilfel (test)');p.fill('#mx-body','Syntetiskt meddelande till admin.');p.select_option('#mx-car_choice','1');shot(p,'02-meddelande-formular')
