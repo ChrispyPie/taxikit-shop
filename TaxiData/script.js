@@ -1347,6 +1347,27 @@ function editGoal() {
     .catch(() => { /* sparat i telefonen; servern tar emot när funktionen finns */ });
 }
 
+// Enhetsknapp i menyraden (2026-11-27menyrad2): växlar Dag → Vecka → Månad → År och visar ikon som i Mina bevakningar.
+(function () {
+  var UN = ['dag', 'vecka', 'manad', 'ar'], NM = { dag: 'Dag', vecka: 'Vecka', manad: 'Månad', ar: 'År' };
+  var BOX = '<rect x="3.5" y="3.5" width="17" height="17" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/>';
+  function sv(i) { return '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">' + i + '</svg>'; }
+  function cells(c, r, step, size, dx) { var h = '', i, j; for (j = 0; j < r; j++) for (i = 0; i < c; i++) h += '<rect x="' + (5 + dx + i * step) + '" y="' + (5.2 + j * step) + '" width="' + size + '" height="' + size + '" rx="0.7" fill="currentColor"/>'; return h; }
+  var IC = {
+    dag: sv(BOX + '<path d="M7 8.5h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><rect x="7" y="10.5" width="10" height="3.8" rx="1" fill="currentColor"/><path d="M7 16.5h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'),
+    vecka: sv(BOX + '<path d="M8.2 5.2v13.6M11.4 5.2v13.6M14.6 5.2v13.6M17.8 5.2v13.6" fill="none" stroke="currentColor" stroke-width="1.5"/>'),
+    manad: sv(cells(3, 3, 5, 3.6, 0)),
+    ar: sv(BOX + cells(4, 3, 3.4, 2.2, 0.9))
+  };
+  var btn = document.getElementById('kp-unit'); if (!btn) return;
+  function cur() { var a = document.querySelector('#kp-tabs .tab.active'); return a ? a.dataset.tab : (typeof currentTab !== 'undefined' ? currentTab : 'dag'); }
+  function paintUnit() { var c = cur(), n = UN[(UN.indexOf(c) + 1) % UN.length]; btn.innerHTML = IC[c] || IC.dag; btn.setAttribute('aria-label', 'Vy: ' + NM[c] + '. Tryck för ' + NM[n]); }
+  btn.addEventListener('click', function () { var n = UN[(UN.indexOf(cur()) + 1) % UN.length], t = document.querySelector('#kp-tabs .tab[data-tab="' + n + '"]'); if (t) t.click(); });
+  var tabs = document.getElementById('kp-tabs');
+  if (tabs && window.MutationObserver) new MutationObserver(paintUnit).observe(tabs, { attributes: true, subtree: true, attributeFilter: ['class'] });
+  paintUnit();
+})();
+
 function syncTabs() {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === currentTab));
 }
