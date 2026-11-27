@@ -180,6 +180,22 @@
             { id: 1, driver_id: '900105', namn: 'David D', start: mm(pm).slice(0, 8) + '27', end: mm(M).slice(0, 8) + '03', open: false, dagar: 7, agare_dagar: 7, status: 'godkand', sjuklon: 'beviljad', counted: true, kr: 3720, sparat: true, karens: 480, ingen_data: false, certs: 1 },
             { id: 2, driver_id: '900104', namn: 'Cecilia T', start: mm(M).slice(0, 8) + '05', end: null, open: true, dagar: 2, agare_dagar: 2, status: 'ny', sjuklon: 'ej', counted: false, kr: null, sparat: false, karens: null, ingen_data: false, certs: 0 }] };
       }
+      case 'ekonomi_loneunderlag': {   // Admin › Ekonomi › Löneunderlag (påhittade siffror, ca 56 000 kr inkört per förare och månad)
+        var fy = +String(args.p_from).slice(0, 4), fm = +String(args.p_from).slice(5, 7) - 1, tm = +String(args.p_to).slice(5, 7) - 1;
+        var nowM = new Date().getFullYear() === fy ? new Date().getMonth() : 11, last = Math.min(tm, nowM), mons = [];
+        for (var q = fm; q <= last; q++) mons.push(q);
+        var mk = function (id, namn, base) {
+          var one = function (list) {
+            var ik = 0, dg = 0; list.forEach(function (i) { ik += base * (0.9 + 0.04 * (i % 4)); dg += 20; });
+            var lg = ik / 1.06 * 0.987 - 2500 * list.length;
+            return { from: args.p_from, to: args.p_to, kalenderdagar: list.length * 30, inkort: Math.round(ik), uber: 0, pass: dg, timmar: dg * 8, kordagar: dg,
+              inpass_man: list.length, lonegrund: Math.round(lg), lon: Math.round(lg * 0.37 * 100) / 100, sem: Math.round(lg * 0.37 * 13) / 100, provision: 37 };
+          };
+          return { driver_id: id, namn: namn, l: one(mons), manader: mons.map(function (i) {
+            var m = one([i]); m.mon = fy + '-' + ('0' + (i + 1)).slice(-2) + '-01'; return { mon: m.mon, l: m }; }) };
+        };
+        return { from: args.p_from, to: args.p_to, provision: 37, forare: mons.length ? [mk('900103', 'Bengt P', 56000), mk('900104', 'Cecilia T', 48000), mk('900105', 'David D', 52000)] : [] };
+      }
       case 'admin_workshop_list':
         return { rate: 250, entries: [
           { id: 1, driver_id: '900103', namn: 'Bengt P', start: iso(1, 9), end: iso(1, 11), car: '9001', minutes: 120, kr: 500, status: 'pending', comment: 'Byte av torkarblad (exempel)', msgs: [] },

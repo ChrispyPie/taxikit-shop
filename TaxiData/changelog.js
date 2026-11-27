@@ -23,6 +23,9 @@ window.CHANGELOG = [
     ['Nytt', 'Jultema på startsidan från första advent: girlanger och en julscen hemma hos oss.'],
     ['Nytt', 'Polkagrisjakt: hitta polkagrisar i appen. Du får egna, det finns delade, och ibland en gyllene. Poängen syns som en polkagris uppe till höger, intill ljusstaken. Tryck där för att se din placering. Adventskalendern öppnas 1 december.']
   ]},
+  { datum: '2026-11-27', id: '2026-11-27eko2', tid: '23:50', rader: [
+    ['Nytt', 'Ekonomi: ny del Löneunderlag. Se varje förares inkört, lönegrund, lön och semesterersättning för en månad eller ett helt år, med en rad per månad i årsvyn. Ladda ner (CSV) och Kopiera tar med löneunderlaget.', 'agare']
+  ]},
   { datum: '2026-11-27', id: '2026-11-27bilaga1', tid: '21:02', rader: [
     ['Nytt', 'Du kan nu ta bort en bild eller ett läkarintyg du skickat in av misstag. Tryck på krysset på bilden och bekräfta. Filen raderas helt och går inte att få tillbaka, och i tråden står i stället "Bilaga borttagen av …" med tid, så ägaren kan be om ett nytt intyg. Du kan ta bort dina egna bilagor även när tråden är stängd. Ägare och admin kan ta bort alla bilagor.'],
     ['Fixat', 'Sjuk: Tidigare sjukperioder stänger sig inte längre när du trycker Visa intyg.']

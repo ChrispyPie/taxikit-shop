@@ -18,7 +18,7 @@
     bad_period: 'Ogiltig period.',
     demo_read_only: 'Det här är ett demokonto. Du kan titta runt men inte ändra något.'
   };
-  var E = window.EKONOMI = { data: null, cache: {}, year: null, month: null, mode: 'manad', err: null, loading: false, open: {}, el: null };
+  var E = window.EKONOMI = { data: null, cache: {}, year: null, month: null, mode: 'manad', err: null, loading: false, open: {}, el: null, lu: {}, luErr: null, luBusy: null };
 
   function sn(s) { return window.shortName ? window.shortName(s) : (s == null ? '' : String(s)); }
   function p2(n) { return String(n).padStart(2, '0'); }
@@ -138,7 +138,7 @@
   function title() { return E.mode === 'ar' ? String(E.year) : cap(MON[E.month]) + ' ' + E.year; }
   function openAttr(k) { return E.open[k] ? ' open' : ''; }
   function det(k, inner) { return '<details data-k="' + k + '"' + openAttr(k) + ' ontoggle="EKONOMI.tg(this)">' + inner + '</details>'; }
-  E.tg = function (el) { E.open[el.getAttribute('data-k')] = el.open; };
+  E.tg = function (el) { var k = el.getAttribute('data-k'); E.open[k] = el.open; if (k === 'lu' && el.open) { E.luFail = null; luLoad(); } };
   function bar(v, s, max) {
     if (!max) return '<div class="ek-hb"><div></div></div>';
     return '<div class="ek-hb"><div><i class="ek-v" style="width:' + (v / max * 100).toFixed(1) + '%"></i><i class="ek-s" style="width:' + (s / max * 100).toFixed(1) + '%"></i></div></div>';
@@ -216,6 +216,56 @@
     return h + '</div>';
   }
 
+
+  // ---------- Fas 2: löneunderlag per förare (laddas först när sektionen öppnas) ----------
+  function luRange() {
+    if (E.mode === 'ar') return [E.year + '-01-01', E.year + '-12-31'];
+    var last = new Date(E.year, E.month + 1, 0).getDate();
+    return [E.year + '-' + p2(E.month + 1) + '-01', E.year + '-' + p2(E.month + 1) + '-' + p2(last)];
+  }
+  function luKey() { return luRange().join('_'); }
+  function luLoad() {
+    var k = luKey(), r = luRange();
+    if (E.lu[k]) return Promise.resolve(E.lu[k]);
+    if (E.luBusy === k && E.luP) return E.luP;
+    if (E.luFail === k) return Promise.resolve(null);
+    E.luBusy = k; E.luErr = null;
+    E.luP = rpc('ekonomi_loneunderlag', { p_from: r[0], p_to: r[1] })
+      .then(function (d) { E.lu[k] = d; return d; })
+      .catch(function (e) { E.luErr = err(e); E.luFail = k; return null; })
+      .then(function (d) { E.luBusy = null; E.luP = null; E.draw(); return d; });
+    return E.luP;
+  }
+  function luSection(o) {
+    var d = E.lu[luKey()], tot = 0, h;
+    if (d) d.forare.forEach(function (f) { tot += +f.l.lon + +f.l.sem; });
+    h = '<summary><b>🧾 Löneunderlag</b><span class="r">' + (d ? kr(tot) : '') + '<small>' + (d ? d.forare.length + ' förare' : 'öppna för att räkna') + '</small></span></summary><div class="ek-body">';
+    if (E.luErr) h += '<div class="ek-row"><span>' + esc(E.luErr) + '</span></div>';
+    else if (!d) h += '<div class="ek-row"><span>Räknar…</span></div>';
+    else {
+      if (!d.forare.length) h += '<div class="ek-row"><span>Inga körda pass i perioden.</span></div>';
+      var by = {}; o.list.forEach(function (r) { by[r.id] = r; });
+      d.forare.forEach(function (f) {
+        var l = f.l, x = by[f.driver_id] || { vKr: 0, sKr: 0, vMin: 0, sDays: 0 };
+        h += '<details class="ek-sub" data-k="l' + f.driver_id + '"' + openAttr('l' + f.driver_id) + ' ontoggle="EKONOMI.tg(this)"><summary><span>' + esc(nameOf(f)) +
+          '<small>' + l.kordagar + ' körda dagar · ' + l.pass + ' pass</small></span><span class="r">' + kr(+l.lon + +l.sem) + '</span></summary><div class="in">' +
+          '<div class="ek-row"><span>Inkört<small>brutto</small></span><span class="r">' + kr(l.inkort) + '</span></div>' +
+          (+l.uber ? '<div class="ek-row"><span>Uber brutto</span><span class="r">' + kr(l.uber) + '</span></div>' : '') +
+          '<div class="ek-row"><span>Lönegrund<small>netto ex moms − Uberavgift − adm. − inpassering</small></span><span class="r">' + kr(l.lonegrund) + '</span></div>' +
+          '<div class="ek-row"><span>Lön<small>' + (+l.provision).toLocaleString('sv-SE') + ' % av lönegrund</small></span><span class="r">' + kr(l.lon) + '</span></div>' +
+          '<div class="ek-row"><span>Semesterersättning<small>13 %</small></span><span class="r">' + kr(l.sem) + '</span></div>' +
+          (x.sKr ? '<div class="ek-row"><span>Sjuklön<small>' + dagar(x.sDays) + '</small></span><span class="r">' + kr(x.sKr) + '</span></div>' : '') +
+          (x.vKr ? '<div class="ek-row"><span>Verkstadstimmar<small>' + dur(x.vMin) + '</small></span><span class="r">' + kr(x.vKr) + '</span></div>' : '') +
+          (E.mode === 'ar' ? (f.manader || []).map(function (m) {
+            return '<div class="ek-row"><span>' + cap(MON[mIdx(m.mon)]) + '<small>lönegrund ' + kr(m.l.lonegrund) + '</small></span><span class="r">' + kr(+m.l.lon + +m.l.sem) + '</span></div>';
+          }).join('') : '') +
+          '</div></details>';
+      });
+      h += '<div class="ek-note" style="text-align:left">Utkast: samma uträkning som förarnas Lönekoll (lön = provision × lönegrund). Skatt och arbetsgivaravgift ingår inte.</div>';
+    }
+    return h + '</div>';
+  }
+
   E.render = function (content) {
     E.el = content; init();
     var h = '<p class="ar-note" style="text-align:center;margin-bottom:10px">Bara ägaren och superadmin ser ekonomin.</p>';
@@ -232,6 +282,8 @@
     h += '<div class="ek-card">' + det('verkstad', verkstadSection(o, d)) + '</div>';
     h += '<div class="ek-card">' + det('sjuk', sjukSection(o, d)) + '</div>';
     h += '<div class="ek-card">' + det('total', totalSection(o)) + '</div>';
+    h += '<div class="ek-card">' + det('lu', luSection(o)) + '</div>';
+    if (E.open.lu) luLoad();
     h += '<div class="ek-btns"><button onclick="EKONOMI.csv()">⬇️ Ladda ner (CSV)</button><button onclick="EKONOMI.copy()">📋 Kopiera</button></div>';
     h += '<div class="ek-note">Verkstadstid betalas med timpriset som gällde när den godkändes och räknas till den månad då besöket började. ' +
       'Fler delar (intäkter, utgifter och resultat) kommer här senare.</div>';
@@ -278,16 +330,31 @@
       });
     }
     lines.push([ym, 'Totalt', '', hrs(tot.m), Math.round(tot.v), tot.d, Math.round(tot.s), Math.round(tot.v + tot.s)].map(q).join(sep));
+    var d = E.lu[luKey()];
+    if (d && d.forare && d.forare.length) {
+      lines.push('');
+      lines.push(['Löneunderlag', 'Förare', 'Förar-ID', 'Inkört (kr)', 'Uber (kr)', 'Lönegrund (kr)', 'Provision (%)', 'Lön (kr)', 'Semesterersättning (kr)', 'Lön + semester (kr)'].join(sep));
+      var lt = { ik: 0, ub: 0, lg: 0, lo: 0, se: 0 };
+      var row = function (lab, f, l) { return [lab, f.namn || '', f.driver_id, Math.round(l.inkort), Math.round(l.uber), Math.round(l.lonegrund), +l.provision, Math.round(l.lon), Math.round(l.sem), Math.round(+l.lon + +l.sem)].map(q).join(sep); };
+      d.forare.forEach(function (f) {
+        if (E.mode === 'ar') (f.manader || []).forEach(function (m) { lines.push(row(cap(MON[mIdx(m.mon)]) + ' ' + E.year, f, m.l)); });
+        lines.push(row(ym + (E.mode === 'ar' ? ' (summa)' : ''), f, f.l));
+        lt.ik += +f.l.inkort; lt.ub += +f.l.uber; lt.lg += +f.l.lonegrund; lt.lo += +f.l.lon; lt.se += +f.l.sem;
+      });
+      lines.push([ym, 'Totalt', '', Math.round(lt.ik), Math.round(lt.ub), Math.round(lt.lg), '', Math.round(lt.lo), Math.round(lt.se), Math.round(lt.lo + lt.se)].map(q).join(sep));
+    }
     return lines.join('\r\n');
   }
   E.csv = function () {
     if (!E.data) return;
+    if (!E.lu[luKey()] && E.luFail !== luKey()) { return luLoad().then(function () { return E.csv(); }); }
     var b = new Blob(['\ufeff' + csvText(';')], { type: 'text/csv;charset=utf-8' }), a = document.createElement('a');
     a.href = URL.createObjectURL(b); a.download = 'ekonomi-' + (E.mode === 'ar' ? E.year : E.year + '-' + p2(E.month + 1)) + '.csv';
     document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
   };
   E.copy = function () {
     if (!E.data) return;
+    if (!E.lu[luKey()] && E.luFail !== luKey()) { return luLoad().then(function () { return E.copy(); }); }
     var t = csvText('\t'), done = function () { alert('Kopierat. Klistra in i Excel eller ett mejl.'); };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, function () { prompt('Kopiera texten:', t); });
     else prompt('Kopiera texten:', t);
