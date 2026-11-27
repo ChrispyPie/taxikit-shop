@@ -224,7 +224,7 @@
   <script src="julpyssel.js?v=20261125zjul1"></script>
   <script src="polkagris.js?v=20261125zjul1"></script>
   <script src="hb-stage.js?v=20261124adv18"></script>
-  <script src="lazy-views.js?v=20261127nyhettid1"></script>
+  <script src="lazy-views.js?v=20261127lista1"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
@@ -565,6 +565,7 @@
       try { if (window.HJALPBOT_TIPS && HJALPBOT_TIPS.markUsed) HJALPBOT_TIPS.markUsed('inkorg'); } catch (e) {}
       document.getElementById('profile-menu').classList.remove('show');
       if (current === 'inkorg') { renderMenu(); return; }
+      if (window.INKORG && INKORG.enter) INKORG.enter();   // in till Meddelanden = alltid listan (2026-11-27lista1)
       localStorage.removeItem('taxi_view');
       document.getElementById('dashboard-view').classList.add('hidden');
       document.getElementById('app').style.display = 'block';
