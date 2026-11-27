@@ -18,7 +18,5 @@ Uppdaterad 2026-11-27 ca 23:55 (Stockholm). Gren `feat/ekonomi-fas2-20261127` (f
 1. Applicera migrationen (`apply_migration`) när Christian sagt ok. Före dess visar sektionen (utom i demon) "Det här finns inte på servern ännu".
 2. (skärmbild av sektionen i demon saknas ännu, lägg i docs/ekonomi/bilder/)
 3. Jämför mot en riktig lönespec (t.ex. avi 1777) och bestäm vad som ska ingå i totalen (idag lön + semester; sjuklön och verkstad visas som egna rader). Hantera manuella överstyrningar (maj/juni/aug 2025 hade handjusterad lön) – kräver att Berra kan skriva över lön per förare och månad (ny tabell + RLS + undo).
-4. Årsvyn: visa per månad per förare (idag en summa för hela året).
-5. CSV/Kopiera ska även ta med löneunderlaget.
-6. Före merge: bumpa `CACHE_VER` i sw.js och `?v` för lazy-views/index om de ändrats, ny Nyheter-post (agare, svenska), rebase på senaste main, undo-notering i docs/ekonomi/UNDO.md och /workspace/backups/.
-7. Senare faser: intäkter, utgifter, resultat (se docs/ekonomi/README.md).
+4. Före merge: bumpa `CACHE_VER` i sw.js och `?v` för lazy-views/index om de ändrats, ny Nyheter-post (agare, svenska), rebase på senaste main, undo-notering i docs/ekonomi/UNDO.md och /workspace/backups/.
+5. Senare faser: intäkter, utgifter, resultat (se docs/ekonomi/README.md).
