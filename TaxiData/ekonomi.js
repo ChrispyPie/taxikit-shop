@@ -226,12 +226,15 @@
   function luKey() { return luRange().join('_'); }
   function luLoad() {
     var k = luKey(), r = luRange();
-    if (E.lu[k] || E.luBusy === k || E.luFail === k) return;
+    if (E.lu[k]) return Promise.resolve(E.lu[k]);
+    if (E.luBusy === k && E.luP) return E.luP;
+    if (E.luFail === k) return Promise.resolve(null);
     E.luBusy = k; E.luErr = null;
-    rpc('ekonomi_loneunderlag', { p_from: r[0], p_to: r[1] })
-      .then(function (d) { E.lu[k] = d; })
-      .catch(function (e) { E.luErr = err(e); E.luFail = k; })
-      .then(function () { E.luBusy = null; E.draw(); });
+    E.luP = rpc('ekonomi_loneunderlag', { p_from: r[0], p_to: r[1] })
+      .then(function (d) { E.lu[k] = d; return d; })
+      .catch(function (e) { E.luErr = err(e); E.luFail = k; return null; })
+      .then(function (d) { E.luBusy = null; E.luP = null; E.draw(); return d; });
+    return E.luP;
   }
   function luSection(o) {
     var d = E.lu[luKey()], tot = 0, h;
@@ -327,16 +330,31 @@
       });
     }
     lines.push([ym, 'Totalt', '', hrs(tot.m), Math.round(tot.v), tot.d, Math.round(tot.s), Math.round(tot.v + tot.s)].map(q).join(sep));
+    var d = E.lu[luKey()];
+    if (d && d.forare && d.forare.length) {
+      lines.push('');
+      lines.push(['Löneunderlag', 'Förare', 'Förar-ID', 'Inkört (kr)', 'Uber (kr)', 'Lönegrund (kr)', 'Provision (%)', 'Lön (kr)', 'Semesterersättning (kr)', 'Lön + semester (kr)'].join(sep));
+      var lt = { ik: 0, ub: 0, lg: 0, lo: 0, se: 0 };
+      var row = function (lab, f, l) { return [lab, f.namn || '', f.driver_id, Math.round(l.inkort), Math.round(l.uber), Math.round(l.lonegrund), +l.provision, Math.round(l.lon), Math.round(l.sem), Math.round(+l.lon + +l.sem)].map(q).join(sep); };
+      d.forare.forEach(function (f) {
+        if (E.mode === 'ar') (f.manader || []).forEach(function (m) { lines.push(row(cap(MON[mIdx(m.mon)]) + ' ' + E.year, f, m.l)); });
+        lines.push(row(ym + (E.mode === 'ar' ? ' (summa)' : ''), f, f.l));
+        lt.ik += +f.l.inkort; lt.ub += +f.l.uber; lt.lg += +f.l.lonegrund; lt.lo += +f.l.lon; lt.se += +f.l.sem;
+      });
+      lines.push([ym, 'Totalt', '', Math.round(lt.ik), Math.round(lt.ub), Math.round(lt.lg), '', Math.round(lt.lo), Math.round(lt.se), Math.round(lt.lo + lt.se)].map(q).join(sep));
+    }
     return lines.join('\r\n');
   }
   E.csv = function () {
     if (!E.data) return;
+    if (!E.lu[luKey()] && E.luFail !== luKey()) { return luLoad().then(function () { return E.csv(); }); }
     var b = new Blob(['\ufeff' + csvText(';')], { type: 'text/csv;charset=utf-8' }), a = document.createElement('a');
     a.href = URL.createObjectURL(b); a.download = 'ekonomi-' + (E.mode === 'ar' ? E.year : E.year + '-' + p2(E.month + 1)) + '.csv';
     document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
   };
   E.copy = function () {
     if (!E.data) return;
+    if (!E.lu[luKey()] && E.luFail !== luKey()) { return luLoad().then(function () { return E.copy(); }); }
     var t = csvText('\t'), done = function () { alert('Kopierat. Klistra in i Excel eller ett mejl.'); };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, function () { prompt('Kopiera texten:', t); });
     else prompt('Kopiera texten:', t);
