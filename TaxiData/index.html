@@ -12,6 +12,7 @@
   <script src="delad-enhet.js?v=20261125mbui1"></script>
   <script src="namn.js?v=20261028nm1"></script>
   <link rel="stylesheet" href="style.css?v=20261123adv6">
+  <link rel="stylesheet" href="menyrad.css?v=20261127menyrad2">
   <link rel="stylesheet" href="tema.css?v=20261122zdelad1">
   <link rel="stylesheet" href="julpyssel.css?v=20261124adv18">
   <link rel="manifest" href="manifest.webmanifest?v=20261111pwa1">
@@ -193,18 +194,22 @@
       </div>
     </header>
     <div class="controls">
-      <div class="tabs">
+      <!-- Menyrad som i Mina bevakningar (2026-11-27menyrad2). De dolda flikarna ligger kvar eftersom script.js styr dem; enhetsknappen växlar dem. -->
+      <div class="tabs" id="kp-tabs" hidden>
         <button class="tab active" data-tab="dag">Dag</button>
         <button class="tab" data-tab="vecka">Vecka</button>
         <button class="tab" data-tab="manad">Månad</button>
         <button class="tab" data-tab="ar">År</button>
       </div>
-      <div class="date-nav">
-        <button id="prev">‹</button>
-        <div id="current-date">Idag</div>
-        <button id="next">›</button>
-        <button id="today">»</button>
-        <button id="period-btn" title="Välj egen period" aria-label="Välj egen period">📅</button>
+      <div class="mb-toolbar">
+        <button type="button" class="mb-unit" id="kp-unit" aria-label="Vy: Dag. Tryck för Vecka"></button>
+        <div class="date-nav mb-date-nav">
+          <button id="prev" aria-label="Föregående">‹</button>
+          <div id="current-date" class="tl-date">Idag</div>
+          <button id="next" aria-label="Nästa">›</button>
+        </div>
+        <button type="button" class="mb-today" id="today" aria-label="Idag"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l6 6-6 6M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button type="button" class="mb-lj-btn" id="period-btn" title="Välj egen period" aria-label="Välj egen period">📅</button>
       </div>
       <!-- Serverstatus-lampan visas bara i vyer vars data kommer från servern (här Körpassdata).
            Topplistor visar den också (tl-server-status i topplistor.js). -->
@@ -224,7 +229,7 @@
   <script src="julpyssel.js?v=20261125zjul1"></script>
   <script src="polkagris.js?v=20261125zjul1"></script>
   <script src="hb-stage.js?v=20261124adv18"></script>
-  <script src="lazy-views.js?v=20261127bilnr2"></script>
+  <script src="lazy-views.js?v=20261127menyrad2"></script>
   <script>
     // Vilka roller som ser varje ikon. Rollen kommer från servern (get_me), inte från något föraren kan ändra.
     // Servern kontrollerar ändå behörigheten på varje sida; det här styr bara vad som visas.
