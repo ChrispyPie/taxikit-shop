@@ -1,6 +1,6 @@
 # Ekonomi fas 2 (löneunderlag) – status
 
-Uppdaterad 2026-11-27 ca 23:55 (Stockholm). Gren `feat/ekonomi-fas2-20261127` (från main efter fas 1). **Utkast-PR, ska INTE mergas före Christians kör.**
+Uppdaterad 2026-11-27 ca 23:55 (Stockholm). Gren `feat/ekonomi-fas2-20261127` (från main efter fas 1). **Christian sa 'Kör live' 2026-11-27 ca 23:48. Fas 2 är live (PR #270), migrationen applicerad.**
 
 ## Klart
 - SQL `supabase/migrations/20261128a_ekonomi_fas2_loneunderlag.sql`: `ekonomi_loneunderlag(p_token, p_from, p_to)` (public → messaging_private → private). Bara ägare + superadmin, ej demo, bara eget åkeri, bara läsning. Per förare med körda dagar i perioden: `private.forar_lon_period` (inkört, Uber, lönegrund, lön = provision × lönegrund, semesterersättning 13 %). **Inte applicerad i prod än.** Provkörd i en transaktion som rullades tillbaka mot prod (oktober: bl.a. Adilio lön 5 811,72 kr, lönegrund 15 707,36, provision 37,000 %).

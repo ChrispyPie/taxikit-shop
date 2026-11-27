@@ -12,3 +12,8 @@ Gamla Löner-sidan (verkstad-admin.js, payroll_month) ligger kvar och fungerar d
 ## Databasen
 Kör `supabase/migrations/undo/20261127e_ekonomi_fas1_undo.sql` (i ordning). Det tar bort de nya funktionerna och triggern, tar bort provision-kolumnen (förvalt 37 gäller som förut) och återställer `lonekost_cfg`, `save_lonekost` och `forar_lon_period` exakt som de låg i databasen före. Sparade sjuklön-belopp (`sjuklon_belopp`, `sjuklon_calc`) ligger kvar tills steg 3 körs (valfritt).
 Gör appen-reverten först, annars visar Ekonomi-sidan "Det här finns inte på servern ännu".
+
+## Fas 2 (löneunderlag), live 2026-11-27/28
+Backup-gren: `backup/main-before-ekonomi-fas2-20261128` (main före merge av PR #270).
+- Appen: `git revert -m 1 <merge-commit för PR #270>` på en ny gren från origin/main, bumpa `CACHE_VER` i sw.js, PR + merge (ingen force-push). Då försvinner sektionen Löneunderlag; resten av Ekonomi (fas 1) ligger kvar.
+- Databasen: kör `supabase/migrations/undo/20261128a_ekonomi_fas2_loneunderlag_undo.sql`. Den tar bara bort tre nya funktioner (`public/messaging_private/private.ekonomi_loneunderlag`). Inga data eller kolumner berörs. Gör appen-reverten först.
