@@ -23,6 +23,9 @@ window.CHANGELOG = [
     ['Nytt', 'Jultema på startsidan från första advent: girlanger och en julscen hemma hos oss.'],
     ['Nytt', 'Polkagrisjakt: hitta polkagrisar i appen. Du får egna, det finns delade, och ibland en gyllene. Poängen syns som en polkagris uppe till höger, intill ljusstaken. Tryck där för att se din placering. Adventskalendern öppnas 1 december.']
   ]},
+  { datum: '2026-11-27', id: '2026-11-27avslut1', tid: '13:55', rader: [
+    ['Fixat', 'Admin › Ärenden: en felanmälan, Bilen står eller Behövs till bilen går nu att avsluta direkt i ärendet. Under svarsrutan finns Status med Pågår, ✓ Avsluta (Klar) och Öppna igen. Skriver du något i rutan följer det med som kommentar. Förut gick det bara att skriva till föraren, så vissa ärenden stod kvar som pågående.', 'admin']
+  ]},
   { datum: '2026-11-25', id: '2026-11-25zbub1', tid: '15:03', rader: [
     ['Förbättrat', 'Pratbubblorna på startsidan följer nu textens längd, så en kort replik inte blir lika bred som skärmen. Gäller både Berra och hjälpboten, även på andra sidor.']
   ]},
