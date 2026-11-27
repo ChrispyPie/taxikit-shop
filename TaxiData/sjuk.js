@@ -28,6 +28,7 @@
   var STATUS = { ny: ['Ny', 'ny'], godkand: ['Klar · godkänd', 'klar'], intyg_begart: ['Väntar på svar · läkarintyg', 'pagar'], avslagen: ['Klar · avslagen', 'nej'] };
   var LON = { ej: 'Sjuklön ej hanterad', beviljad: 'Sjuklön beviljad', utbetald: 'Sjuklön utbetald' };
   var ERR = {
+    delete_failed: 'Intyget kunde inte tas bort just nu. Försök igen.',
     already_sick: 'Du har redan en pågående sjukanmälan. Friskanmäl den först.',
     already_recovered: 'Sjukperioden är redan avslutad.',
     bad_date: 'Datumet går inte. Välj ett annat datum.',
@@ -167,7 +168,7 @@
       '🤒 ' + esc(dsv(r.start)) + ' – ' + (r.open ? 'pågår' : esc(dsv(r.end))) + '</span>' + badge(r) + '</div>';
     h += '<div class="vk-imeta">' + dagar(r.days) + (r.open ? ' hittills' : '') + (r.certs ? ' · 📄 ' + r.certs + ' intyg' : '') +
       ' · <span class="sj-lon ' + r.sjuklon + '">' + esc(LON[r.sjuklon] || '') + '</span></div>';
-    if (lock) h += '<div class="vk-warn" role="status">🔒 Tråden är stängd. Du kan läsa den men inte ändra, friskanmäla eller ladda upp intyg.</div>';
+    if (lock) h += '<div class="vk-warn" role="status">🔒 Tråden är stängd. Du kan läsa den men inte ändra, friskanmäla eller ladda upp intyg. Du kan fortfarande ta bort dina egna bilagor.</div>';
     else if (r.open) h += '<div class="vk-warn' + (r.days >= 8 && !r.certs ? ' bad' : '') + '">' + esc(regel(r.days)) + '</div>';
     if (r.comment) h += '<div class="bv-text sj-c">' + (boss ? '💬 ' : 'Din kommentar: ') + esc(r.comment) + '</div>';
     if (r.status_at && r.status !== 'ny') h += '<div class="vk-boss">' + esc((STATUS[r.status] || [''])[0]) + ' av ' + esc(sn(r.status_by) || 'ägaren') + ' · ' + esc(when(r.status_at)) +
@@ -178,9 +179,12 @@
     if (c === 'loading') h += '<div class="vk-imeta">Hämtar intyg…</div>';
     else if (c && c.length) {
       h += '<div class="bv-thumbs big">' + c.map(function (x) {
+        // Borttaget intyg: filen är raderad, kvar finns bara en rad om vem som tog bort det och när (så ägaren kan be om ett nytt).
+        if (x.deleted) return '<div class="sj-gone" style="font-size:.85rem;opacity:.85;padding:.4rem .6rem;border:1px dashed currentColor;border-radius:8px;align-self:center">🗑 Bilaga borttagen av ' + esc(sn(x.deleted_by) || 'okänd') + (x.deleted_at ? ' · ' + esc(when(x.deleted_at)) : '') + '</div>';
         var inner = x.mime === 'application/pdf' ? '<span class="sj-pdf">📄 PDF</span>' : '<img src="' + esc(x.url) + '" alt="Läkarintyg">';
+        // Den som laddat upp får alltid ta bort sitt intyg (även i stängd tråd/beviljad sjuklön); ägare/admin får ta bort alla.
         return '<div class="bv-thumb"><a href="' + esc(x.url) + '" target="_blank" rel="noopener">' + inner + '</a>' +
-          ((!lock && (x.mine || boss)) ? '<button type="button" class="sj-cdel" data-c="' + x.id + '" data-r="' + r.id + '" aria-label="Ta bort intyget">×</button>' : '') + '</div>';
+          ((x.mine || boss) ? '<button type="button" class="sj-cdel" style="min-height:0;min-width:0;padding:0;width:26px;height:26px;border-radius:50%" data-c="' + x.id + '" data-r="' + r.id + '" aria-label="Ta bort intyget">×</button>' : '') + '</div>';
       }).join('') + '</div>';
     } else if (c && !c.length) h += '<div class="vk-imeta">Inga intyg.</div>';
     h += lonBox(r);
@@ -197,7 +201,7 @@
       if (r.open) a.push('<button type="button" class="kal-ok" data-a="frisk">💪 Friskanmäl</button>');
     } else if (r.open) a.push('<button type="button" data-a="frisk">💪 Friskanmäl</button>');
     if (!lock) a.push('<label class="sj-up">📷 Läkarintyg<input type="file" accept="image/*,application/pdf" data-up="' + r.id + '" hidden></label>');
-    if (r.certs && !(c && c.length)) a.push('<button type="button" data-a="certs">📄 Visa intyg</button>');
+    if ((r.certs || r.certs_deleted) && !(c && c.length)) a.push('<button type="button" data-a="certs">' + (r.certs ? '📄 Visa intyg' : '🗑 Visa borttagen bilaga') + '</button>');
     a.push('<button type="button" data-a="lon">' + (st.lon[r.id] ? 'Dölj sjuklön' : '💰 Beräknad sjuklön') + '</button>');
     if (boss && !(st.decide && st.decide.id === r.id)) {
       if (r.status !== 'godkand') a.push('<button type="button" class="kal-ok" data-a="godkand">✓ Godkänn</button>');
@@ -254,7 +258,7 @@
     if (open) h += card(open, false);
     h += reglerBox();
     var old = mine.filter(function (r) { return r !== open; });
-    if (old.length) h += '<details class="sj-hist"><summary class="vk-ltitle">Mina tidigare sjukperioder (' + old.length + ')</summary>' + old.map(function (r) { return card(r, false); }).join('') + '</details>';
+    if (old.length) h += '<details class="sj-hist"' + (st.histOpen ? ' open' : '') + '><summary class="vk-ltitle">Mina tidigare sjukperioder (' + old.length + ')</summary>' + old.map(function (r) { return card(r, false); }).join('') + '</details>';
     if (d.boss) {
       var all = others();
       var F = { att: ['Att hantera', function (r) { return r.open || r.status === 'ny' || r.status === 'intyg_begart' || (r.status === 'godkand' && r.sjuklon !== 'utbetald'); }],
@@ -323,10 +327,12 @@
     body.querySelectorAll('input[data-up]').forEach(function (inp) {
       inp.onchange = function () { var f = inp.files && inp.files[0]; if (f) upload(+inp.dataset.up, f); inp.value = ''; };
     });
+    // Tidigare perioder (där stängda trådar ligger) ska stanna öppna när man trycker Visa intyg / Ta bort intyg.
+    var hd = body.querySelector('.sj-hist'); if (hd) hd.addEventListener('toggle', function () { st.histOpen = hd.open; });
     body.querySelectorAll('.sj-cdel').forEach(function (b) {
       b.onclick = function (ev) {
         ev.preventDefault();
-        if (!confirm('Ta bort intyget?')) return;
+        if (!confirm('Ta bort intyget? Filen raderas permanent och går inte att få tillbaka. Ägaren ser att en bilaga tagits bort.')) return;
         var rid = +b.dataset.r;
         fn({ action: 'delete_cert', cert_id: +b.dataset.c }).then(function () { delete st.certs[rid]; return load(); })
           .then(function () { showCerts(rid); }).catch(function (e) { if (!fail(e)) alert(errText(e)); });
