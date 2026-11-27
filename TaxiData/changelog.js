@@ -26,6 +26,11 @@ window.CHANGELOG = [
   { datum: '2026-11-27', id: '2026-11-27omboka1', tid: '16:10', rader: [
     ['Nytt', 'Bokad tid: du kan nu avboka eller boka om en tid, även en som redan är godkänd. Både förare och admin kan det. Avboka: skriv orsaken i svarsrutan och tryck Avboka (utan orsak får du röd varning, som vid Avböj). Föreslå ny tid: välj nytt datum och klockslag, den andra sidan får förslaget att godkänna och tiden visas grå tills den är godkänd. Den andra sidan får en aktivitetsprick som vid andra svar.']
   ]},
+  { datum: '2026-11-27', id: '2026-11-27eko1', tid: '14:06', rader: [
+    ['Nytt', 'Admin › Löner heter nu Ekonomi (sidan Åkeriekonomi). Överst står en total för perioden: verkstadstimmar och sjuklön. Öppna Verkstadstimmar, Sjuklön eller Totalt per chaufför för att se varje chaufför. Byt mellan Månad och År med knapparna uppe, och tryck på en stapel i diagrammet för att hoppa till den månaden. Ladda ner (CSV) och Kopiera finns kvar.', 'agare'],
+    ['Nytt', 'Sjuklön räknas in när den är markerad Beviljad eller Utbetald i Ärenden. Perioder som går över månadsskifte delas dag för dag och karensavdraget dras i första månaden. Beloppet sparas när perioden är avslutad.', 'agare'],
+    ['Förbättrat', 'Provisionen (förvalt 37 %) kan nu ändras under Bilar › Ändra lönekostnad och sjuklön. Den används i bilkalkylen och i uträkningen av sjuklön.', 'agare']
+  ]},
   { datum: '2026-11-27', id: '2026-11-27bil1', tid: '15:05', rader: [
     ['Förbättrat', 'Meddelande och Bokad tid: Bil nr är nu förvalt till Nej, och du kan välja bland åkeriets bilar. Väljer du en bil du inte har kört de senaste sju dagarna frågar appen Du har inte kört bil … senaste veckan. Är det rätt bil? Svara Ja eller Byt bil.']
   ]},
