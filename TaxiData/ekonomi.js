@@ -18,7 +18,7 @@
     bad_period: 'Ogiltig period.',
     demo_read_only: 'Det här är ett demokonto. Du kan titta runt men inte ändra något.'
   };
-  var E = window.EKONOMI = { data: null, cache: {}, year: null, month: null, mode: 'manad', err: null, loading: false, open: {}, el: null };
+  var E = window.EKONOMI = { data: null, cache: {}, year: null, month: null, mode: 'manad', err: null, loading: false, open: {}, el: null, lu: {}, luErr: null, luBusy: null };
 
   function sn(s) { return window.shortName ? window.shortName(s) : (s == null ? '' : String(s)); }
   function p2(n) { return String(n).padStart(2, '0'); }
@@ -138,7 +138,7 @@
   function title() { return E.mode === 'ar' ? String(E.year) : cap(MON[E.month]) + ' ' + E.year; }
   function openAttr(k) { return E.open[k] ? ' open' : ''; }
   function det(k, inner) { return '<details data-k="' + k + '"' + openAttr(k) + ' ontoggle="EKONOMI.tg(this)">' + inner + '</details>'; }
-  E.tg = function (el) { E.open[el.getAttribute('data-k')] = el.open; };
+  E.tg = function (el) { var k = el.getAttribute('data-k'); E.open[k] = el.open; if (k === 'lu' && el.open) { E.luFail = null; luLoad(); } };
   function bar(v, s, max) {
     if (!max) return '<div class="ek-hb"><div></div></div>';
     return '<div class="ek-hb"><div><i class="ek-v" style="width:' + (v / max * 100).toFixed(1) + '%"></i><i class="ek-s" style="width:' + (s / max * 100).toFixed(1) + '%"></i></div></div>';
@@ -216,6 +216,50 @@
     return h + '</div>';
   }
 
+
+  // ---------- Fas 2: löneunderlag per förare (laddas först när sektionen öppnas) ----------
+  function luRange() {
+    if (E.mode === 'ar') return [E.year + '-01-01', E.year + '-12-31'];
+    var last = new Date(E.year, E.month + 1, 0).getDate();
+    return [E.year + '-' + p2(E.month + 1) + '-01', E.year + '-' + p2(E.month + 1) + '-' + p2(last)];
+  }
+  function luKey() { return luRange().join('_'); }
+  function luLoad() {
+    var k = luKey(), r = luRange();
+    if (E.lu[k] || E.luBusy === k || E.luFail === k) return;
+    E.luBusy = k; E.luErr = null;
+    rpc('ekonomi_loneunderlag', { p_from: r[0], p_to: r[1] })
+      .then(function (d) { E.lu[k] = d; })
+      .catch(function (e) { E.luErr = err(e); E.luFail = k; })
+      .then(function () { E.luBusy = null; E.draw(); });
+  }
+  function luSection(o) {
+    var d = E.lu[luKey()], tot = 0, h;
+    if (d) d.forare.forEach(function (f) { tot += +f.l.lon + +f.l.sem; });
+    h = '<summary><b>🧾 Löneunderlag</b><span class="r">' + (d ? kr(tot) : '') + '<small>' + (d ? d.forare.length + ' förare' : 'öppna för att räkna') + '</small></span></summary><div class="ek-body">';
+    if (E.luErr) h += '<div class="ek-row"><span>' + esc(E.luErr) + '</span></div>';
+    else if (!d) h += '<div class="ek-row"><span>Räknar…</span></div>';
+    else {
+      if (!d.forare.length) h += '<div class="ek-row"><span>Inga körda pass i perioden.</span></div>';
+      var by = {}; o.list.forEach(function (r) { by[r.id] = r; });
+      d.forare.forEach(function (f) {
+        var l = f.l, x = by[f.driver_id] || { vKr: 0, sKr: 0, vMin: 0, sDays: 0 };
+        h += '<details class="ek-sub" data-k="l' + f.driver_id + '"' + openAttr('l' + f.driver_id) + ' ontoggle="EKONOMI.tg(this)"><summary><span>' + esc(nameOf(f)) +
+          '<small>' + l.kordagar + ' körda dagar · ' + l.pass + ' pass</small></span><span class="r">' + kr(+l.lon + +l.sem) + '</span></summary><div class="in">' +
+          '<div class="ek-row"><span>Inkört<small>brutto</small></span><span class="r">' + kr(l.inkort) + '</span></div>' +
+          (+l.uber ? '<div class="ek-row"><span>Uber brutto</span><span class="r">' + kr(l.uber) + '</span></div>' : '') +
+          '<div class="ek-row"><span>Lönegrund<small>netto ex moms − Uberavgift − adm. − inpassering</small></span><span class="r">' + kr(l.lonegrund) + '</span></div>' +
+          '<div class="ek-row"><span>Lön<small>' + (+l.provision).toLocaleString('sv-SE') + ' % av lönegrund</small></span><span class="r">' + kr(l.lon) + '</span></div>' +
+          '<div class="ek-row"><span>Semesterersättning<small>13 %</small></span><span class="r">' + kr(l.sem) + '</span></div>' +
+          (x.sKr ? '<div class="ek-row"><span>Sjuklön<small>' + dagar(x.sDays) + '</small></span><span class="r">' + kr(x.sKr) + '</span></div>' : '') +
+          (x.vKr ? '<div class="ek-row"><span>Verkstadstimmar<small>' + dur(x.vMin) + '</small></span><span class="r">' + kr(x.vKr) + '</span></div>' : '') +
+          '</div></details>';
+      });
+      h += '<div class="ek-note" style="text-align:left">Utkast: samma uträkning som förarnas Lönekoll (lön = provision × lönegrund). Skatt och arbetsgivaravgift ingår inte.</div>';
+    }
+    return h + '</div>';
+  }
+
   E.render = function (content) {
     E.el = content; init();
     var h = '<p class="ar-note" style="text-align:center;margin-bottom:10px">Bara ägaren och superadmin ser ekonomin.</p>';
@@ -232,6 +276,8 @@
     h += '<div class="ek-card">' + det('verkstad', verkstadSection(o, d)) + '</div>';
     h += '<div class="ek-card">' + det('sjuk', sjukSection(o, d)) + '</div>';
     h += '<div class="ek-card">' + det('total', totalSection(o)) + '</div>';
+    h += '<div class="ek-card">' + det('lu', luSection(o)) + '</div>';
+    if (E.open.lu) luLoad();
     h += '<div class="ek-btns"><button onclick="EKONOMI.csv()">⬇️ Ladda ner (CSV)</button><button onclick="EKONOMI.copy()">📋 Kopiera</button></div>';
     h += '<div class="ek-note">Verkstadstid betalas med timpriset som gällde när den godkändes och räknas till den månad då besöket började. ' +
       'Fler delar (intäkter, utgifter och resultat) kommer här senare.</div>';
