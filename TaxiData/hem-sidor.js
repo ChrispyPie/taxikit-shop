@@ -19,7 +19,7 @@
     { id: 'a-onskemal', icon: '💡', label: 'Önskemål och idéer', href: 'admin.html#onskemal', roles: ADMIN },
     { id: 'a-akeridata', icon: '📊', label: 'Åkeridata', href: 'akeridata.html', roles: AKERI },
     { id: 'a-bilar', icon: '🚕', label: 'Bilar', href: 'admin.html#bilar', roles: AKERI },
-    { id: 'a-loner', icon: '💰', label: 'Löner', href: 'admin.html#loner', roles: AKERI },
+    { id: 'a-loner', icon: '💰', label: 'Ekonomi', href: 'admin.html#loner', roles: AKERI },
     { id: 'a-panel', icon: '🔐', label: 'Adminpanelen', href: 'admin.html', roles: ADMIN }
   ];
   var SADMIN_ITEMS = [

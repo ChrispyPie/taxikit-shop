@@ -164,6 +164,22 @@
           ex(905, 'supply', '9001', 'rengoring', 'Spillt kaffe i baksätet (exempel)', 'klar', 4, 18, '900105', 'David D',
             { closed_at: iso(3, 9), history: [{ status: 'klar', comment: 'Tvättad (exempel)', at: iso(3, 9) }] })] };
       }
+      case 'ekonomi_period': {   // Admin › Ekonomi (påhittade siffror)
+        var Y = new Date().getFullYear(), M = new Date().getMonth(), mm = function (i) { return Y + '-' + ('0' + (i + 1)).slice(-2) + '-01'; };
+        var pm = M > 0 ? M - 1 : M;
+        return { from: Y + '-01-01', to: Y + '-12-31', rate: 250, named: true,
+          cfg: { sjuklon_pct: 80, karens_pct: 20, sjuklon_dagar: 14, snitt_man: 6, provision: 37 },
+          verkstad: [
+            { driver_id: '900103', namn: 'Bengt P', mon: mm(pm), approved_min: 180, approved_kr: 750, pending_min: 0, rejected_min: 0 },
+            { driver_id: '900104', namn: 'Cecilia T', mon: mm(pm), approved_min: 60, approved_kr: 250, pending_min: 0, rejected_min: 30 },
+            { driver_id: '900103', namn: 'Bengt P', mon: mm(M), approved_min: 90, approved_kr: 375, pending_min: 120, rejected_min: 0 }],
+          sjuk: [
+            { driver_id: '900105', namn: 'David D', mon: mm(pm), period_id: 1, dagar: 4, brutto: 2400, karens: 480, kr: 1920 },
+            { driver_id: '900105', namn: 'David D', mon: mm(M), period_id: 1, dagar: 3, brutto: 1800, karens: 0, kr: 1800 }],
+          perioder: [
+            { id: 1, driver_id: '900105', namn: 'David D', start: mm(pm).slice(0, 8) + '27', end: mm(M).slice(0, 8) + '03', open: false, dagar: 7, agare_dagar: 7, status: 'godkand', sjuklon: 'beviljad', counted: true, kr: 3720, sparat: true, karens: 480, ingen_data: false, certs: 1 },
+            { id: 2, driver_id: '900104', namn: 'Cecilia T', start: mm(M).slice(0, 8) + '05', end: null, open: true, dagar: 2, agare_dagar: 2, status: 'ny', sjuklon: 'ej', counted: false, kr: null, sparat: false, karens: null, ingen_data: false, certs: 0 }] };
+      }
       case 'admin_workshop_list':
         return { rate: 250, entries: [
           { id: 1, driver_id: '900103', namn: 'Bengt P', start: iso(1, 9), end: iso(1, 11), car: '9001', minutes: 120, kr: 500, status: 'pending', comment: 'Byte av torkarblad (exempel)', msgs: [] },
