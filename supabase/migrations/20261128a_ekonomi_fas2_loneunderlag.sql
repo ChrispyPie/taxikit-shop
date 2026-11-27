@@ -7,7 +7,11 @@ declare v jsonb;
 begin
   if p_from is null or p_to is null or p_to < p_from or p_to - p_from > 800 then raise exception 'bad_period' using errcode = '22023'; end if;
   select coalesce(jsonb_agg(jsonb_build_object('driver_id', f.forar, 'namn', private.forum_name(f.forar),
-           'l', private.forar_lon_period(p_company, f.forar, p_from, p_to)) order by private.forum_name(f.forar), f.forar), '[]'::jsonb)
+           'l', private.forar_lon_period(p_company, f.forar, p_from, p_to),
+           'manader', (select coalesce(jsonb_agg(jsonb_build_object('mon', g.m, 'l', private.forar_lon_period(p_company, f.forar,
+                         greatest(p_from, g.m), least(p_to, (g.m + interval '1 month')::date - 1))) order by g.m), '[]'::jsonb)
+                       from (select distinct date_trunc('month', d2.day)::date m from private.day_summary d2
+                              where d2.company_id = p_company and d2.forar = f.forar and d2.day between p_from and p_to) g)) order by private.forum_name(f.forar), f.forar), '[]'::jsonb)
     into v
     from (select distinct d.forar from private.day_summary d
            where d.company_id = p_company and d.day between p_from and p_to) f;

@@ -253,6 +253,9 @@
           '<div class="ek-row"><span>Semesterersättning<small>13 %</small></span><span class="r">' + kr(l.sem) + '</span></div>' +
           (x.sKr ? '<div class="ek-row"><span>Sjuklön<small>' + dagar(x.sDays) + '</small></span><span class="r">' + kr(x.sKr) + '</span></div>' : '') +
           (x.vKr ? '<div class="ek-row"><span>Verkstadstimmar<small>' + dur(x.vMin) + '</small></span><span class="r">' + kr(x.vKr) + '</span></div>' : '') +
+          (E.mode === 'ar' ? (f.manader || []).map(function (m) {
+            return '<div class="ek-row"><span>' + cap(MON[mIdx(m.mon)]) + '<small>lönegrund ' + kr(m.l.lonegrund) + '</small></span><span class="r">' + kr(+m.l.lon + +m.l.sem) + '</span></div>';
+          }).join('') : '') +
           '</div></details>';
       });
       h += '<div class="ek-note" style="text-align:left">Utkast: samma uträkning som förarnas Lönekoll (lön = provision × lönegrund). Skatt och arbetsgivaravgift ingår inte.</div>';
