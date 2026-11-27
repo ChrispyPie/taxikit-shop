@@ -23,6 +23,12 @@ window.CHANGELOG = [
     ['Nytt', 'Jultema på startsidan från första advent: girlanger och en julscen hemma hos oss.'],
     ['Nytt', 'Polkagrisjakt: hitta polkagrisar i appen. Du får egna, det finns delade, och ibland en gyllene. Poängen syns som en polkagris uppe till höger, intill ljusstaken. Tryck där för att se din placering. Adventskalendern öppnas 1 december.']
   ]},
+  { datum: '2026-11-27', id: '2026-11-27utkast1', tid: '20:41', rader: [
+    ['Nytt', 'Utkast: det du skriver i ett nytt meddelande, en Bokad tid eller ett svar sparas automatiskt på din enhet medan du skriver. Går du till en annan sida kan du komma tillbaka och fortsätta. Utkasten visas överst i listan under Utkast. Under texten står Utkast sparat och Släng utkast. Utkastet försvinner när du skickar, och alla utkast rensas när du loggar ut.']
+  ]},
+  { datum: '2026-11-27', id: '2026-11-27forarbokad1', tid: '20:41', rader: [
+    ['Nytt', 'Meddelanden: du kan nu föreslå en Bokad tid själv. Tryck på Nytt ärende och välj Bokad tid. Välj datum i kalendern och klockslag, skriv ett meddelande och välj bil. Admin får förslaget att godkänna, avböja eller boka om, och i listan visas ? tills det är avgjort.']
+  ]},
   { datum: '2026-11-27', id: '2026-11-27person1', tid: '20:29', rader: [
     ['Nytt', 'Admin › Ärenden: i ett öppet ärende är chaufförens namn nu klickbart. Du kommer tillbaka till listan, som visar alla ärenden med den personen. Överst står en ring med Ärenden: Namn och ett kryss som tar bort filtret. Kategoriknapparna fungerar tillsammans med filtret.', 'admin']
   ]},
