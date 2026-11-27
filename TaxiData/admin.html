@@ -172,7 +172,7 @@
   <script src="onskemal-admin.js?v=20261106ik1"></script>
   <script src="view-state.js?v=20261107lazy1"></script>
   <script src="arende-status.js?v=20261114arfel1"></script>
-  <script src="mailbox-ui.js?v=20261127omboka1"></script>
+  <script src="mailbox-ui.js?v=20261127lista1"></script>
   <script src="arenden-admin.js?v=20261107inkorg2b"></script>
   <script src="swipe-back.js?v=20261114sidor1"></script>
   <script>
@@ -468,7 +468,7 @@
       if (location.hash === '#verkstad' && canSeeAkeridata()) { history.replaceState(null, '', location.pathname); openMenu('arenden'); return; }
       // admin.html#arende=issue:12 öppnar ett ärende i Ärenden (länk från klockan i förarappen)
       const arm = /^#arende=(issue|maint|wh|task|sjuk|wish)(?::|%3A)(\d+)$/.exec(location.hash);
-      if (arm && canSeeCases()) { history.replaceState(null, '', location.pathname); ARENDEN_ADMIN.openCase(arm[1], arm[2]); openMenu('arenden'); return; }
+      if (arm && canSeeCases()) { history.replaceState(null, '', location.pathname); openMenu('arenden'); ARENDEN_ADMIN.openCase(arm[1], arm[2]); return; }
       render();
       // Antal verkstadstider som väntar på beslut visas på rutan
       if (canSeeAkeridata()) VERKSTAD_ADMIN.count().then(() => { if (!path.length) render(); });
@@ -2398,7 +2398,7 @@ ${renderBildtypPicker(c)}
       selectedDay = null;
       selectedCar = null;
       if (id === 'loner') { if (canSeeAkeridata()) EKONOMI.load(); else render(); return; }
-      if (id === 'arenden') { render(); if (canSeeCases()) ARENDEN_ADMIN.load(); return; }
+      if (id === 'arenden') { if (window.ARENDEN_ADMIN && ARENDEN_ADMIN.enter) ARENDEN_ADMIN.enter(); render(); if (canSeeCases()) ARENDEN_ADMIN.load(); return; }
       if (id === 'onskemal') { if (canSeeCases()) { ONSKEMAL_ADMIN.load(); return; } }
       render();
     }
