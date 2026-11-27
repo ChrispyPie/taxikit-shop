@@ -99,7 +99,7 @@ const HIST_RE = /helgdagar\.js|prognos-historik\.(js|css)|rpc\/prognos_historik/
     await sleep(800);
     ok(tag + ': Prognos öppen laddar ingen Historik', (await histLoaded(p)).length === 0 && (await rpcHist(p)).length === 0, (await histLoaded(p)).join(','));
     const row = await p.evaluate(() => { const r = document.querySelector('.pg-tabs'); const t = [...r.querySelectorAll('.pg-tab')]; return { one: t.every(x => x.offsetTop === t[0].offsetTop), n: t.length, labels: t.map(x => x.textContent), sw: r.scrollWidth, cw: r.clientWidth, fade: r.className }; });
-    ok(tag + ': flikar på en rad (' + row.labels.join('/') + ')', row.one && row.labels.includes('Historik') && !row.labels.some(l => /Filter|Notiser/.test(l)), JSON.stringify(row));
+    ok(tag + ': flikar på en rad (' + row.labels.join('/') + ')', row.one && row.labels.includes('Historik') && !row.labels.some(l => /Filter|Bevakningar|Notiser/.test(l)), JSON.stringify(row));
     { const tr = await p.evaluate(() => { const r = document.querySelector('.pg-tabs').getBoundingClientRect(); const b = [...document.querySelectorAll('.pg-tools .pg-tool')].map(x => x.getBoundingClientRect()); return { n: b.length, below: b.every(x => x.top >= r.bottom - 1), same: b.length === 2 && Math.abs(b[0].top - b[1].top) < 2, inside: b.every(x => x.left >= 0 && x.right <= innerWidth + 1) }; });
       ok(tag + ': Filter + Notiser på egen rad', tr.n === 2 && tr.below && tr.same && tr.inside, JSON.stringify(tr)); }
     // Schema/Morgon/Original/Filter/Notiser fungerar fortfarande

@@ -6,3 +6,6 @@
 **Backup:** `backup/main-before-forare-bokad-tid-20261127`. **Cache:** `20261127utkast1`. Nyheter `2026-11-27utkast1`, `2026-11-27forarbokad1`.
 ## Ångra
 `git revert -m 1 <merge-commit>`, höj cache, PR + merge. Ingen force-push. Ingen SQL. Sparade utkast ligger kvar i enhetens localStorage men visas inte efter revert; de kan rensas med `Object.keys(localStorage).filter(k=>k.startsWith('taxi_mx_draft:')).forEach(k=>localStorage.removeItem(k))`.
+
+## Ändring 20:56 (samma release som bilaga1): Bokad tid flyttad
+"Bokad tid" är borttaget som eget val i förarens "Nytt ärende" (kvar: Meddelande, Sjuk, Verkstadstimmar). I stället: (1) knappen "📅 Bokad tid" längst ner i en tråd under svarsrutan (förare och admin, ej i stängd tråd för förare), (2) i förarens nya Meddelande en valfri "📅 Lägg till bokad tid" (datum/tid; skickas som Bokad tid med rubriken som typ och texten som meddelande, utkast `compose` med fältet `addbook`). Admins flöde i listan är oförändrat. Bara UI i `mailbox-ui.js`. Ångra: revert PR.

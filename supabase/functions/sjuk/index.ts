@@ -4,7 +4,7 @@
 //  - action "flush":       skickar köade pushnotiser (sjukanmälan, beslut, friskanmälan, intyg). Kräver giltig token.
 //  - action "upload":      laddar upp ett intyg (JPEG eller PDF, base64) till en sjukperiod
 //  - action "list":        intygen för en sjukperiod som signerade länkar (15 min)
-//  - action "delete_cert": raderar ett intyg
+//  - action "delete_cert": tar bort ett intyg på riktigt (filen raderas, en markering visar vem som tog bort det)
 //  - action "delete":      raderar en sjukperiod (och dess intyg)
 // Inga hälsouppgifter skrivs till loggarna här.
 import webpush from "npm:web-push@3.6.7";
@@ -118,16 +118,32 @@ Deno.serve(async (req) => {
     if (b.action === "list") {
       const { data, error } = await sb.rpc("sjuk_svc_cert_list", { p_token: token, p_report: b.report_id ?? null });
       if (error) return fail(error);
-      const list = (data || []) as { id: number; path: string; mime: string; created_at: string; mine: boolean }[];
+      type Cert = { id: number; path: string | null; mime: string; created_at: string; mine: boolean; deleted?: boolean; deleted_by?: string | null; deleted_at?: string | null };
+      const list = (data || []) as Cert[];
       if (!list.length) return out({ certs: [] });
-      const s = await sb.storage.from(BUCKET).createSignedUrls(list.map((p) => p.path), 900);
+      // Borttagna intyg (filen är raderad) får ingen länk – bara en notis om vem som tog bort dem.
+      const live = list.filter((p) => !p.deleted && p.path);
+      const s = live.length ? await sb.storage.from(BUCKET).createSignedUrls(live.map((p) => p.path as string), 900) : { data: [], error: null };
       if (s.error) return out({ error: "sign_failed" }, 500);
-      return out({ certs: list.map((p, i) => ({ id: p.id, mime: p.mime, created_at: p.created_at, mine: p.mine, url: s.data?.[i]?.signedUrl || null })) });
+      const url = new Map(live.map((p, i) => [p.id, s.data?.[i]?.signedUrl || null]));
+      return out({ certs: list.map((p) => p.deleted
+        ? { id: p.id, mime: p.mime, created_at: p.created_at, mine: p.mine, deleted: true, deleted_by: p.deleted_by || null, deleted_at: p.deleted_at || null, url: null }
+        : { id: p.id, mime: p.mime, created_at: p.created_at, mine: p.mine, url: url.get(p.id) || null }) });
     }
     if (b.action === "delete_cert") {
+      // Riktig radering (2026-11-27bilaga1): databasen markerar intyget som borttaget, sedan raderas filen ur den privata hinken.
+      // Misslyckas raderingen backas markeringen så att inget "borttaget" intyg ligger kvar i lagringen.
       const { data, error } = await sb.rpc("sjuk_svc_cert_delete", { p_token: token, p_cert: b.cert_id ?? null });
       if (error) return fail(error);
-      await sb.storage.from(BUCKET).remove([data.path]);
+      const path = data && data.path;
+      if (path) {
+        let rm = await sb.storage.from(BUCKET).remove([path]);
+        if (rm.error) rm = await sb.storage.from(BUCKET).remove([path]);
+        if (rm.error) {
+          await sb.rpc("sjuk_svc_cert_unmark", { p_cert: b.cert_id });
+          return out({ error: "delete_failed" }, 500);
+        }
+      }
       return out({ ok: true });
     }
     if (b.action === "delete") {

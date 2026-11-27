@@ -2430,7 +2430,7 @@
       '<button type="button" class="pg-tool' + (st.panel === 'filter' ? ' on' : '') + '" data-panel="filter">' +
         '<span class="pg-tool-ico" aria-hidden="true">⚙️</span>Filter<span class="pg-tool-sub">' + esc(fInfo) + '</span></button>' +
       '<button type="button" class="pg-tool' + (st.panel === 'notis' ? ' on' : '') + '" data-panel="notis">' +
-        '<span class="pg-tool-ico" aria-hidden="true">🔔</span>Notiser<span class="pg-tool-sub">' + (n ? n + ' bevakning' + (n > 1 ? 'ar' : '') : 'av') + '</span></button>' +
+        '<span class="pg-tool-ico" aria-hidden="true">🔔</span>Bevakningar<span class="pg-tool-sub">' + n + ' st</span></button>' +
       '</div>';
   }
 

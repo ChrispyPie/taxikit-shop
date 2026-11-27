@@ -37,6 +37,7 @@
   var NTYPES = [['bil_stop', '🛑 Bilen står'], ['bil_fault', '⚠️ Nytt fel'], ['bil_supply', '🧴 Något behövs'], ['bil_suggest', '💡 Förslag på underhåll'],
     ['bil_maint', '🔧 Underhåll snart/försenat'], ['bil_task_reply', '📅 Förare har bokat tid/svarat'], ['bil_task_done', '✅ Uppgift klar']];
   var ERR = {
+    delete_failed: 'Bilden kunde inte tas bort just nu. Försök igen.',
     bad_time: 'Stopptiden måste vara efter starttiden.',
     too_long: 'Högst 24 timmar per registrering. Dela upp längre tider.',
     future: 'Du kan inte registrera tid som inte har hänt än.',
@@ -407,7 +408,7 @@
       if (f.files.length >= 3) { f.msg = ERR.too_many_photos; draw(); return; }
       shrink(file).then(function (u) { f.files.push(u); f.msg = ''; draw(); }).catch(function () { f.msg = ERR.bad_image; draw(); });
     };
-    body.querySelectorAll('.bv-thumb button').forEach(function (b) { b.onclick = function () { if (before) before(); f.files.splice(+b.dataset.n, 1); draw(); }; });
+    body.querySelectorAll('.bv-thumb button:not(.vk-pdel)').forEach(function (b) { b.onclick = function () { if (before) before(); f.files.splice(+b.dataset.n, 1); draw(); }; });
   }
   function uploadAll(files, key, id) {
     var chain = Promise.resolve(), bad = 0;
@@ -489,6 +490,16 @@
     };
     inp.click();
   }
+  // Ta bort en egen bild efter att den skickats (2026-11-27bilaga1). Filen raderas på riktigt; kvar blir en rad "Bilaga borttagen av …".
+  document.addEventListener('click', function (ev) {
+    var b = ev.target && ev.target.closest ? ev.target.closest('.vk-pdel') : null; if (!b || !document.getElementById('vk-body')) return;
+    ev.preventDefault();
+    if (!confirm('Ta bort bilden? Den raderas permanent och går inte att få tillbaka.')) return;
+    var id = +b.dataset.id, key = b.dataset.k;
+    photoApi({ action: 'delete_photo', photo_id: +b.dataset.p }).then(function () { flash('Bilden är borttagen.'); return load(); })
+      .then(function () { showPhotos({ id: id }, key); })
+      .catch(function (e) { if (!fail(e)) alert(errText(e)); });
+  });
   function pk(key, id) { return (key === 'maint_id' ? 'm' : '') + id; }
   function showPhotos(i, key) {
     key = key || 'issue_id'; var k = pk(key, i.id), b = { action: 'list' }; b[key] = i.id;
@@ -499,7 +510,11 @@
   function photoBlock(key, id) {
     var ph = st.photos[pk(key, id)];
     if (ph === 'loading') return '<div class="vk-imeta">Hämtar foton…</div>';
-    if (ph && ph.length) return '<div class="bv-thumbs big">' + ph.map(function (p) { return p.url ? '<a href="' + esc(p.url) + '" target="_blank" rel="noopener"><img src="' + esc(p.url) + '" alt="Foto"></a>' : ''; }).join('') + '</div>';
+    if (ph && ph.length) return '<div class="bv-thumbs big">' + ph.map(function (p) {
+      if (p.deleted) return '<div class="vk-gone" style="font-size:.85rem;opacity:.85;padding:.4rem .6rem;border:1px dashed currentColor;border-radius:8px;align-self:center">🗑 Bilaga borttagen av ' + esc(sn(p.deleted_by) || 'okänd') + (p.deleted_at ? ' · ' + esc(when(p.deleted_at)) : '') + '</div>';
+      return p.url ? '<div class="bv-thumb"><a href="' + esc(p.url) + '" target="_blank" rel="noopener"><img src="' + esc(p.url) + '" alt="Foto"></a>' +
+        (p.can_delete ? '<button type="button" class="vk-pdel" style="min-height:0;min-width:0;padding:0;width:26px;height:26px;border-radius:50%" data-p="' + p.id + '" data-id="' + id + '" data-k="' + key + '" aria-label="Ta bort bilden">×</button>' : '') + '</div>' : '';
+    }).join('') + '</div>';
     return '';
   }
   function startHours(i) {
@@ -551,7 +566,7 @@
     var ph = st.photos[i.id];
     h += photoBlock('issue_id', i.id) + taskLinks(i.tasks);
     var act = [];
-    if (i.photos && !ph) act.push('<button type="button" data-a="photos">📷 Visa foto</button>');
+    if ((i.photos || i.photos_deleted) && !ph) act.push('<button type="button" data-a="photos">' + (i.photos ? '📷 Visa foto' : '🗑 Visa borttagen bilaga') + '</button>');
     if (canMsg(i) && !st.iopen[i.id] && !isNew) act.push('<button type="button" class="bv-send" data-a="msg">💬 ' + (admin() ? 'Skriv till föraren' : 'Skriv till ägaren') + '</button>');
     if (i.kind === 'fault' && i.status !== 'klar') act.push('<button type="button" data-a="hours">⏱️ Verkstadstid</button>');
     if (act.length) h += '<div class="vk-iact bv-act" data-id="' + i.id + '">' + act.join('') + '</div>';
@@ -727,7 +742,7 @@
     h += photoBlock('maint_id', m.id) + taskLinks(m.tasks);
     if (st.mDone && st.mDone.id === m.id) return h + doneForm(m) + '</div>';
     var act = [], ph = st.photos['m' + m.id];
-    if (m.photos && !ph) act.push('<button type="button" data-a="photos">📷 Visa foto (' + m.photos + ')</button>');
+    if ((m.photos || m.photos_deleted) && !ph) act.push('<button type="button" data-a="photos">' + (m.photos ? '📷 Visa foto (' + m.photos + ')' : '🗑 Visa borttagen bilaga') + '</button>');
     if (act.length) h += '<div class="vk-iact bm-act" data-id="' + m.id + '">' + act.join('') + '</div>';
     return h + '</div>';
   }
@@ -912,7 +927,7 @@
     if (st.tr && st.tr.id === t.id) h += replyForm(t);
     else {
       var act = [], lo2 = t.issue || t.maint;
-      if (lo2 && lo2.photos && !st.photos[pk(t.issue ? 'issue_id' : 'maint_id', lo2.id)]) act.push('<button type="button" data-a="photos">📷 Visa foto</button>');
+      if (lo2 && (lo2.photos || lo2.photos_deleted) && !st.photos[pk(t.issue ? 'issue_id' : 'maint_id', lo2.id)]) act.push('<button type="button" data-a="photos">📷 Visa foto</button>');
       if (open && me) act.push('<button type="button" class="bv-pagar" data-a="reply">📅 ' + (t.booked_at ? 'Ändra tid' : 'Svara / boka tid') + '</button>');
       if (open && (me || own)) act.push('<button type="button" class="kal-ok" data-a="done">✓ Klar</button>');
       if (open && own) act.push('<button type="button" data-a="edit">Ändra</button>');

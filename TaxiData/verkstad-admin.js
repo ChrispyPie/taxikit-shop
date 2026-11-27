@@ -73,7 +73,7 @@
       '.vka-what{font-weight:600}.vka-txt{margin-top:6px;font-size:calc(14px * var(--font-scale, 1));overflow-wrap:anywhere;white-space:pre-wrap}' +
       '.vka-btns .vka-del{flex:0 0 auto;border-color:var(--c-c53030)!important;color:var(--c-c53030)!important}' +
       '.vka-more{width:100%;padding:9px;margin:0 0 10px;font-size:calc(14px * var(--font-scale, 1))}' +
-      '.vka-ph{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.vka-ph img{width:84px;height:84px;object-fit:cover;border-radius:6px}';
+      '.vka-ph{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.vka-ph img{width:84px;height:84px;object-fit:cover;border-radius:6px}.vka-pw{position:relative;display:inline-block}.vka-pdel{position:absolute;top:-6px;right:-6px;width:26px;height:26px;border-radius:50%;border:none;background:#c53030;color:#fff;font-size:.95rem;line-height:1}';
     document.head.appendChild(s);
   })();
 
@@ -225,6 +225,15 @@
     photoApi({ action: 'list', issue_id: id }).then(function (r) { A.photos[id] = r.photos || []; render(); })
       .catch(function (e) { A.photos[id] = null; alert(err(e)); render(); });
   };
+  // Ta bort bild (2026-11-27bilaga1): filen raderas på riktigt, kvar blir en rad "Bilaga borttagen av …".
+  document.addEventListener('click', function (ev) {
+    var b = ev.target && ev.target.closest ? ev.target.closest('.vka-pdel') : null; if (!b) return;
+    ev.preventDefault();
+    if (!confirm('Ta bort bilden? Den raderas permanent och går inte att få tillbaka.')) return;
+    var id = +b.dataset.i;
+    photoApi({ action: 'delete_photo', photo_id: +b.dataset.p }).then(function () { return A.loadBil(); }).then(function () { A.iphotos(id); })
+      .catch(function (e) { alert(err(e)); });
+  });
   A.toggleDone = function (k) { A.showDone[k] = !A.showDone[k]; render(); };
   // Meddelande till föraren utan att ändra status
   A.imsg = function (id) {
@@ -283,8 +292,12 @@
     h += ihist(i);
     var ph = A.photos[i.id];
     if (ph === 'loading') h += '<div class="vka-meta">Hämtar foton…</div>';
-    else if (ph && ph.length) h += '<div class="vka-ph">' + ph.map(function (p) { return p.url ? '<a href="' + esc(p.url) + '" target="_blank" rel="noopener"><img src="' + esc(p.url) + '" alt="Foto"></a>' : ''; }).join('') + '</div>';
-    else if (i.photos) h += '<button class="vka-ask" onclick="VERKSTAD_ADMIN.iphotos(' + i.id + ')">📷 Visa foto</button>';
+    else if (ph && ph.length) h += '<div class="vka-ph">' + ph.map(function (p) {
+      if (p.deleted) return '<div class="vka-meta">🗑 Bilaga borttagen av ' + esc(p.deleted_by || 'okänd') + (p.deleted_at ? ' · ' + esc(when(p.deleted_at)) : '') + '</div>';
+      return p.url ? '<span class="vka-pw"><a href="' + esc(p.url) + '" target="_blank" rel="noopener"><img src="' + esc(p.url) + '" alt="Foto"></a>' +
+        (p.can_delete ? '<button type="button" class="vka-pdel" data-p="' + p.id + '" data-i="' + i.id + '" aria-label="Ta bort bilden">×</button>' : '') + '</span>' : '';
+    }).join('') + '</div>';
+    else if (i.photos || i.photos_deleted) h += '<button class="vka-ask" onclick="VERKSTAD_ADMIN.iphotos(' + i.id + ')">' + (i.photos ? '📷 Visa foto' : '🗑 Visa borttagen bilaga') + '</button>';
     if (open) {
       h += '<textarea id="vka-ic-' + i.id + '" maxlength="500" placeholder="Skriv till föraren (status ändras inte)"></textarea>' +
         (i.mine ? '' : '<button class="vka-ask" onclick="VERKSTAD_ADMIN.imsg(' + i.id + ')">💬 Skicka meddelande</button>') +

@@ -26,7 +26,9 @@ begin
  -- föraren nekas alla skrivande flöden med thread_closed (42501)
  begin perform public.sjuk_recover(drv,rid,current_date); raise exception 'recover allowed'; exception when insufficient_privilege then if sqlerrm<>'thread_closed' then raise; end if; n:=n+1; end;
  begin execute 'set local role service_role'; perform public.sjuk_svc_cert_begin(drv,rid,'application/pdf'); raise exception 'cert_begin allowed'; exception when insufficient_privilege then if sqlerrm<>'thread_closed' then raise; end if; execute 'set local role anon'; n:=n+1; end;
- begin execute 'set local role service_role'; perform public.sjuk_svc_cert_delete(drv,cert); raise exception 'cert_delete allowed'; exception when insufficient_privilege then if sqlerrm<>'thread_closed' then raise; end if; execute 'set local role anon'; n:=n+1; end;
+ -- (ändrat 2026-11-27bilaga1) uploadaren får ta bort sitt intyg även i låst tråd + utbetald sjuklön; filen raderas av edge-funktionen, DB markerar bara
+ begin execute 'set local role service_role'; perform public.sjuk_svc_cert_delete(drv,cert); execute 'set local role anon'; n:=n+1; end;
+ execute 'reset role'; if (select deleted_at from private.sick_certs where id=cert) is null then raise exception 'cert not marked'; end if; update private.sick_certs set deleted_at=null,deleted_by=null where id=cert;
  begin execute 'set local role service_role'; perform public.sjuk_svc_delete(drv,rid); raise exception 'delete allowed'; exception when insufficient_privilege then if sqlerrm<>'thread_closed' then raise; end if; execute 'set local role anon'; n:=n+1; end;
  -- ett påbörjat intyg (uppladdning före låset) kan inte slutföras efter låset
  execute 'reset role';
