@@ -129,8 +129,23 @@
   // Återanvänd formuläret från Inkorg, efter att sjuk_get har kontrollerat behörighet.
   S.newReport = function () {
     if (!st.data || st.err || (st.data.mine || []).some(function(r){return !r.end && !r.locked;})) return;
-    st.form = { kind: 'ny', start: today(), comment: '' }; draw();
+    st.form = dNew(); draw();
   };
+  // Utkast för ny sjukanmälan (2026-11-27utkast2): samma nyckelschema som Meddelanden (MAILBOX.draft).
+  function dOK() { return window.MAILBOX && MAILBOX.draft; }
+  function dSave() {
+    var f = st.form; if (!dOK() || !f || f.kind !== 'ny') return;
+    if (!(f.comment || '').trim() && (!f.start || f.start === today())) { MAILBOX.draft.drop('sjuk'); st.dhint = ''; var h0 = document.getElementById('sj-draft-hint'); if (h0) h0.textContent = ''; return; }
+    MAILBOX.draft.put('sjuk', { k: 'sjuk', t: 'Sjukanmälan', v: { start: f.start, comment: f.comment || '' } });
+    st.dhint = 'Utkast sparat'; var h = document.getElementById('sj-draft-hint'); if (h) h.textContent = st.dhint;
+  }
+  function dNew() {
+    var f = { kind: 'ny', start: today(), comment: '' }; st.dhint = '';
+    var r = dOK() && MAILBOX.draft.get('sjuk');
+    if (r) { var s = r.v.start; if (s && s >= addDays(today(), -14) && s <= addDays(today(), 1)) f.start = s; f.comment = r.v.comment || ''; st.dhint = 'Utkast återställt'; }
+    return f;
+  }
+  function dDrop() { if (dOK()) MAILBOX.draft.drop('sjuk'); st.dhint = ''; }
   function act(p, okMsg) {
     if (st.busy) return Promise.resolve();
     st.busy = true; draw();
@@ -208,6 +223,7 @@
       '<div class="vk-field"><label class="vk-lbl" for="sj-com">Kommentar till ägaren (valfri)</label>' +
       '<textarea id="sj-com" maxlength="500" rows="2" placeholder="Till exempel: Jag hör av mig i morgon.">' + esc(f.comment || '') + '</textarea>' +
       '<div class="vk-imeta">Skriv inte diagnos eller orsak – det behövs inte.</div></div>' +
+      '<div class="mx-draft-line"><span id="sj-draft-hint" class="mx-draft-hint" role="status" aria-live="polite">' + esc(st.dhint || '') + '</span><button type="button" class="mx-draft-drop" id="sj-draft-drop">Släng utkast</button></div>' +
       '<div class="pm-btns"><button type="button" id="sj-cancel">Avbryt</button><button type="button" class="primary" id="sj-send"' + (st.busy ? ' disabled' : '') + '>Skicka sjukanmälan</button></div></div>';
   }
   function friskForm(r) {
@@ -257,13 +273,14 @@
 
   function bind(body) {
     var q = function (s) { return body.querySelector(s); };
-    if (q('#sj-new')) q('#sj-new').onclick = function () { st.form = { kind: 'ny', start: today(), comment: '' }; draw(); };
+    if (q('#sj-new')) q('#sj-new').onclick = function () { st.form = dNew(); draw(); };
     if (q('#sj-cancel')) q('#sj-cancel').onclick = function () { st.form = null; draw(); };
-    if (q('#sj-com')) q('#sj-com').oninput = function () { st.form.comment = this.value; };
-    if (q('#sj-start')) q('#sj-start').onchange = function () { st.form.start = this.value; };
+    if (q('#sj-com')) q('#sj-com').oninput = function () { st.form.comment = this.value; dSave(); };
+    if (q('#sj-draft-drop')) q('#sj-draft-drop').onclick = function () { dDrop(); st.form = { kind: 'ny', start: today(), comment: '' }; st.dhint = 'Utkast slängt'; draw(); };
+    if (q('#sj-start')) q('#sj-start').onchange = function () { st.form.start = this.value; dSave(); };
     if (q('#sj-send')) q('#sj-send').onclick = function () {
       var s = (q('#sj-start') || {}).value || today();
-      act(rpc('sjuk_report', { p_start: s, p_comment: (q('#sj-com') || {}).value || null }), '🤒 Sjukanmälan skickad till ägaren. Krya på dig!');
+      act(rpc('sjuk_report', { p_start: s, p_comment: (q('#sj-com') || {}).value || null }).then(function (r) { dDrop(); return r; }), '🤒 Sjukanmälan skickad till ägaren. Krya på dig!');
     };
     var back = q('#sj-back');
     if (back) {

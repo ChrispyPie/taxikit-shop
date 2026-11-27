@@ -23,6 +23,9 @@ window.CHANGELOG = [
     ['Nytt', 'Jultema på startsidan från första advent: girlanger och en julscen hemma hos oss.'],
     ['Nytt', 'Polkagrisjakt: hitta polkagrisar i appen. Du får egna, det finns delade, och ibland en gyllene. Poängen syns som en polkagris uppe till höger, intill ljusstaken. Tryck där för att se din placering. Adventskalendern öppnas 1 december.']
   ]},
+  { datum: '2026-11-27', id: '2026-11-27utkast2', tid: '20:48', rader: [
+    ['Nytt', 'Utkast finns nu också för Verkstadstimmar, Sjukanmälan och Föreslå ny tid. Det du skrivit sparas medan du skriver, kommer tillbaka när du öppnar formuläret igen och syns under Utkast i listan. Släng utkast tar bort det, och det försvinner när du skickar eller loggar ut.']
+  ]},
   { datum: '2026-11-27', id: '2026-11-27utkast1', tid: '20:41', rader: [
     ['Nytt', 'Utkast: det du skriver i ett nytt meddelande, en Bokad tid eller ett svar sparas automatiskt på din enhet medan du skriver. Går du till en annan sida kan du komma tillbaka och fortsätta. Utkasten visas överst i listan under Utkast. Under texten står Utkast sparat och Släng utkast. Utkastet försvinner när du skickar, och alla utkast rensas när du loggar ut.']
   ]},

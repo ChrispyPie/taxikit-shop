@@ -251,7 +251,7 @@
   V.newReport = function (tab) {
     if (tab !== 'timmar' && tab !== 'sjuk') { if(window.INKORG) INKORG.compose(); return; }
     V.openTab(tab); st.embedded = true;
-    if (tab === 'timmar') st.form = newForm(null);
+    if (tab === 'timmar') st.form = dApply(newForm(null));
     draw();
   };
 
@@ -1063,9 +1063,24 @@
     }
     var cars = (st.data && st.data.cars) || [];
     var cc = curCar() && cars.some(function (c) { return c.id === curCar(); }) ? curCar() : null;
-    return { id: entry ? entry.id : null, s: s, e: e, car: entry ? entry.car_id : (cc || (cars.length === 1 ? cars[0].id : null)),
+    return { id: entry ? entry.id : null, dirty: false, s: s, e: e, car: entry ? entry.car_id : (cc || (cars.length === 1 ? cars[0].id : null)),
       comment: entry ? (entry.comment || '') : '', issue: entry ? (entry.issue_id || null) : null, msg: '' };
   }
+  // Utkast för ny verkstadstid (2026-11-27utkast2): samma nyckelschema som Meddelanden (MAILBOX.draft).
+  function dOK() { return window.MAILBOX && MAILBOX.draft; }
+  function dSave() {
+    var f = st.form; if (!dOK() || !f || f.id || !f.dirty) return;
+    MAILBOX.draft.put('timmar', { k: 'timmar', t: 'Verkstadstimmar', v: { s: f.s.toISOString(), e: f.e.toISOString(), car: f.car, comment: f.comment || '', issue: f.issue || null } });
+    st.dhint = 'Utkast sparat'; var h = document.getElementById('vk-draft-hint'); if (h) h.textContent = st.dhint;
+  }
+  function dApply(f) {
+    var r = dOK() && MAILBOX.draft.get('timmar'); st.dhint = ''; if (!r) return f;
+    var v = r.v, s = new Date(v.s), e = new Date(v.e); if (isNaN(s) || isNaN(e)) return f;
+    var cars = (st.data && st.data.cars) || [];
+    f.s = s; f.e = e; f.comment = v.comment || ''; if (v.car && cars.some(function (c) { return c.id === v.car; })) f.car = v.car; f.issue = v.issue || null;
+    f.dirty = true; st.dhint = 'Utkast återställt'; return f;
+  }
+  function dDrop() { if (dOK()) MAILBOX.draft.drop('timmar'); st.dhint = ''; }
   function minutes(f) { return Math.round((f.e - f.s) / 60000); }
   // Klientkontroll (servern kontrollerar samma sak igen)
   function problem(f) {
@@ -1107,6 +1122,7 @@
     h += '<div id="vk-live" class="vk-live' + (p ? ' bad' : '') + '">' + (p ? esc(ERR[p]) : dur(m) + ' × ' + kr(rate) + '/h = <b>' + kr(m / 60 * rate) + '</b>') + '</div>';
     if (!p && m > WARN_MIN) h += '<div class="vk-warn">Över 10 timmar – kontrollera att tiden stämmer.</div>';
     if (f.msg) h += '<div class="vk-warn bad">' + esc(f.msg) + '</div>';
+    if (!f.id) h += '<div class="mx-draft-line"><span id="vk-draft-hint" class="mx-draft-hint" role="status" aria-live="polite">' + esc(st.dhint || '') + '</span><button type="button" class="mx-draft-drop" id="vk-draft-drop">Släng utkast</button></div>';
     h += '<div class="pm-btns"><button type="button" id="vk-cancel">Avbryt</button><button type="button" id="vk-save" class="primary"' + (st.busy ? ' disabled' : '') + '>' + (f.id ? 'Spara ändring' : 'Skicka till ägaren') + '</button></div></div>';
     return h;
   }
@@ -1116,13 +1132,14 @@
       sel.onchange = function () {
         var d = f[sel.dataset.k];
         if (sel.classList.contains('vk-h')) d.setHours(+sel.value); else d.setMinutes(+sel.value);
-        draw();
+        f.dirty = true; dSave(); draw();
       };
     });
     b.querySelectorAll('.vk-date').forEach(function (btn) { btn.onclick = function () { openCal(btn.dataset.k); }; });
-    document.getElementById('vk-car').onchange = function (ev) { f.car = ev.target.value ? +ev.target.value : null; f.issue = null; draw(); };
-    var is = document.getElementById('vk-issue'); if (is) is.onchange = function (ev) { f.issue = ev.target.value ? +ev.target.value : null; };
-    document.getElementById('vk-comment').oninput = function (ev) { f.comment = ev.target.value; };
+    document.getElementById('vk-car').onchange = function (ev) { f.car = ev.target.value ? +ev.target.value : null; f.issue = null; f.dirty = true; dSave(); draw(); };
+    var is = document.getElementById('vk-issue'); if (is) is.onchange = function (ev) { f.issue = ev.target.value ? +ev.target.value : null; f.dirty = true; dSave(); };
+    document.getElementById('vk-comment').oninput = function (ev) { f.comment = ev.target.value; f.dirty = true; dSave(); };
+    var dd = document.getElementById('vk-draft-drop'); if (dd) dd.onclick = function () { dDrop(); st.form = newForm(null); st.dhint = 'Utkast slängt'; draw(); };
     document.getElementById('vk-cancel').onclick = function () { st.form = null; draw(); };
     document.getElementById('vk-save').onclick = save;
   }
@@ -1133,7 +1150,7 @@
     if (m > WARN_MIN && !confirm('Du registrerar ' + dur(m) + ' på verkstaden. Stämmer det?')) return;
     st.busy = true; f.msg = ''; draw();
     rpc('save_my_workshop', { p_id: f.id, p_start: f.s.toISOString(), p_end: f.e.toISOString(), p_car_id: f.car, p_comment: f.comment || null, p_issue_id: f.issue || null })
-      .then(function () { st.busy = false; st.form = null; try { if (window.HJALPBOT_TIPS && HJALPBOT_TIPS.markUsed) HJALPBOT_TIPS.markUsed('submitted'); } catch (e) {} flash(f.id ? 'Ändringen är sparad.' : 'Skickat! Ägaren godkänner eller nekar.'); return load(); })
+      .then(function () { st.busy = false; if (!f.id) dDrop(); st.form = null; try { if (window.HJALPBOT_TIPS && HJALPBOT_TIPS.markUsed) HJALPBOT_TIPS.markUsed('submitted'); } catch (e) {} flash(f.id ? 'Ändringen är sparad.' : 'Skickat! Ägaren godkänner eller nekar.'); return load(); })
       .catch(function (e) { st.busy = false; if (e.code === '28000') { location.reload(); return; } f.msg = errText(e); draw(); });
   }
   function remove(id) {
@@ -1198,7 +1215,7 @@
     });
     h += '<div class="tl-foot">Du kan ändra eller ta bort en registrering så länge den väntar – även när ägaren har frågat något. Ersättningen räknas med timpriset när ägaren godkänner.</div>';
     body.innerHTML = h;
-    var nb = document.getElementById('vk-new'); if (nb) nb.onclick = function () { st.form = newForm(null); draw(); };
+    var nb = document.getElementById('vk-new'); if (nb) nb.onclick = function () { st.form = dApply(newForm(null)); draw(); };
     body.querySelectorAll('.vk-edit').forEach(function (b) {
       b.onclick = function () { var x = list.filter(function (y) { return y.id === +b.dataset.id; })[0]; if (x) { st.form = newForm(x); draw(); window.scrollTo(0, 0); } };
     });
@@ -1230,7 +1247,7 @@
         d.setFullYear(cal.pick.getFullYear(), cal.pick.getMonth(), cal.pick.getDate());
         // Flyttas startdagen och stopp låg samma dag, följer stoppdagen med
         if (cal.key === 's' && wasSame) f.e.setFullYear(cal.pick.getFullYear(), cal.pick.getMonth(), cal.pick.getDate());
-        m.classList.remove('open'); draw();
+        f.dirty = true; dSave(); m.classList.remove('open'); draw();
       };
     }
     cal.key = key; cal.pick = sod(st.form[key]); cal.m = new Date(cal.pick.getFullYear(), cal.pick.getMonth(), 1);
