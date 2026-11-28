@@ -248,7 +248,7 @@
       d.forare.forEach(function (f) {
         var l = f.l, x = by[f.driver_id] || { vKr: 0, sKr: 0, vMin: 0, sDays: 0 };
         h += '<details class="ek-sub" data-k="l' + f.driver_id + '"' + openAttr('l' + f.driver_id) + ' ontoggle="EKONOMI.tg(this)"><summary><span>' + esc(nameOf(f)) +
-          '<small>' + l.kordagar + ' körda dagar · ' + l.pass + ' pass</small></span><span class="r">' + kr(+l.lon + +l.sem) + '</span></summary><div class="in">' +
+          '<small>' + l.kordagar + ' körda dagar · ' + l.pass + ' pass' + (!+l.inkort && +l.pass ? ' · inga resor registrerade i Taxi Göteborgs data' : '') + '</small></span><span class="r">' + kr(+l.lon + +l.sem) + '</span></summary><div class="in">' +
           '<div class="ek-row"><span>Inkört<small>brutto</small></span><span class="r">' + kr(l.inkort) + '</span></div>' +
           (+l.uber ? '<div class="ek-row"><span>Uber brutto</span><span class="r">' + kr(l.uber) + '</span></div>' : '') +
           '<div class="ek-row"><span>Lönegrund<small>netto ex moms − Uberavgift − adm. − inpassering</small></span><span class="r">' + kr(l.lonegrund) + '</span></div>' +
