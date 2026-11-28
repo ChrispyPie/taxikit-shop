@@ -7,7 +7,7 @@
 create table if not exists private.ekonomi_kostnad (
   id bigint generated always as identity primary key,
   company_id text not null,
-  kategori text not null check (kategori in ('bil', 'bransle', 'lokal', 'forsakring', 'administration', 'skador', 'avgift', 'ovrigt')),
+  kategori text not null check (kategori in ('bil', 'bransle', 'lokal', 'forsakring', 'administration', 'skador', 'avgift', 'dack', 'ovrigt')),
   namn text not null check (length(btrim(namn)) between 1 and 80),
   belopp numeric(12, 2) not null check (belopp >= 0 and belopp <= 100000000),   -- exkl. moms
   moms_pct numeric(4, 1) not null default 25 check (moms_pct in (0, 6, 12, 25)),
@@ -24,14 +24,15 @@ create index if not exists ekonomi_kostnad_co on private.ekonomi_kostnad (compan
 alter table private.ekonomi_kostnad enable row level security;
 revoke all on private.ekonomi_kostnad from public, anon, authenticated;
 
--- Allt som Resultat behöver utöver fas 1 och 2: manuella poster + bilarnas årskostnader (public.cars, ifyllda under Bilar).
+-- Allt som Resultat behöver utöver fas 1 och 2: manuella poster + bilkostnader från public.cars (Bilar är källan, Ekonomi läser bara).
 create or replace function private.ekonomi_kostnader(p_company text)
  returns jsonb language sql stable security definer set search_path to 'public', 'pg_temp' as $function$
   select jsonb_build_object(
     'manuella', coalesce((select jsonb_agg(jsonb_build_object('id', k.id, 'kategori', k.kategori, 'namn', k.namn, 'belopp', k.belopp,
         'moms_pct', k.moms_pct, 'typ', k.typ, 'fran', k.fran, 'till', k.till, 'bil', k.bil, 'anteckning', k.anteckning) order by k.fran, k.id)
         from private.ekonomi_kostnad k where k.company_id = p_company and k.borttagen is null), '[]'::jsonb),
-    'bilar', coalesce((select jsonb_agg(jsonb_build_object('bilnummer', c.bilnummer, 'i_trafik', c.i_trafik, 'ur_trafik', c.ur_trafik,
+    'bilar', coalesce((select jsonb_agg(jsonb_build_object('bilnummer', c.bilnummer, 'modell', c.modell, 'bildtyp', c.bildtyp,
+        'i_trafik', c.i_trafik, 'ur_trafik', c.ur_trafik,
         'inkopspris', c.inkopspris, 'livslangd_ar', c.livslangd_ar, 'rantor_ar', c.rantor_ar, 'skatt_ar', c.skatt_ar, 'service_ar', c.service_ar,
         'taxiavg_ar', c.taxiavg_ar, 'forsakring_ar', c.forsakring_ar, 'tvatt_ar', c.tvatt_ar) order by c.bilnummer) from public.cars c), '[]'::jsonb))
 $function$;
