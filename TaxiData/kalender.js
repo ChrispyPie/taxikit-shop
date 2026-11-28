@@ -328,6 +328,29 @@
     }).join('') + '</div>';
   }
 
+  // Menyrad som i Mina bevakningar (2026-11-28menyrad5). Enhetsknapp växlar Dag/Vecka/Månad/År; datumrutan öppnar kalendern.
+  var KAL_UNITS = ['dag', 'vecka', 'manad', 'ar'], KAL_UNIT_N = { dag: 'Dag', vecka: 'Vecka', manad: 'Månad', ar: 'År' };
+  function kalSvg(inner) { return '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">' + inner + '</svg>'; }
+  var KAL_BOX = '<rect x="3.5" y="3.5" width="17" height="17" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/>';
+  function kalCells(cols, rows, step, size, dx) {
+    var h = '', r, c; for (r = 0; r < rows; r++) for (c = 0; c < cols; c++) h += '<rect x="' + (5 + dx + c * step) + '" y="' + (5.2 + r * step) + '" width="' + size + '" height="' + size + '" rx="0.7" fill="currentColor"/>';
+    return h;
+  }
+  var KAL_ICON = {
+    dag: kalSvg(KAL_BOX + '<path d="M7 8.5h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><rect x="7" y="10.5" width="10" height="3.8" rx="1" fill="currentColor"/><path d="M7 16.5h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'),
+    vecka: kalSvg(KAL_BOX + '<path d="M8.2 5.2v13.6M11.4 5.2v13.6M14.6 5.2v13.6M17.8 5.2v13.6" fill="none" stroke="currentColor" stroke-width="1.5"/>'),
+    manad: kalSvg(kalCells(3, 3, 5, 3.6, 0)),
+    ar: kalSvg(KAL_BOX + kalCells(4, 3, 3.4, 2.2, 0.9)),
+    today: kalSvg('<path d="M6 6l6 6-6 6M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>')
+  };
+  function kalOnToday() {
+    var t = st.today, c = st.cur; if (!t || !c) return false;
+    if (st.view === 'vecka') return monday(c) === monday(t);
+    if (st.view === 'manad') return c.slice(0, 7) === t.slice(0, 7);
+    if (st.view === 'ar') return c.slice(0, 4) === t.slice(0, 4);
+    return c === t;
+  }
+
   function draw() {
     var body = st.el && document.getElementById('kal-body'); if (!body) return;
     if (st.err) { body.innerHTML = '<div class="tl-msg err">' + esc(st.err) + '</div>'; return; }
@@ -341,12 +364,14 @@
       : esc(d.city.name)) + '</span>' +
       '<button type="button" class="kal-bell" id="kal-bell" aria-label="Påminnelser">🔔' + (d.unread_notices ? '<b>' + d.unread_notices + '</b>' : '') + '</button></div>';
     h += tonightHtml();
-    h += '<div class="tabs kal-tabs">' + [['dag', 'Dag'], ['vecka', 'Vecka'], ['manad', 'Månad'], ['ar', 'År']].map(function (v) {
-      return '<button type="button" class="tab' + (st.view === v[0] ? ' active' : '') + '" data-v="' + v[0] + '">' + v[1] + '</button>';
-    }).join('') + '</div>';
-    h += '<div class="date-nav kal-nav"><button type="button" id="kal-prev" aria-label="Föregående">‹</button><span class="tl-date kal-date">' + esc(navLabel()) +
-      '</span><button type="button" id="kal-next" aria-label="Nästa">›</button><button type="button" id="kal-pick" class="tl-period" aria-label="Välj datum">📅</button></div>';
-    if (st.cur !== st.today) h += '<div class="kal-back"><button type="button" id="kal-today">Till idag</button></div>';
+    var nu = KAL_UNITS[(KAL_UNITS.indexOf(st.view) + 1) % KAL_UNITS.length];
+    h += '<div class="mb-toolbar kal-toolbar">' +
+      '<button type="button" class="mb-unit" id="kal-unit" aria-label="Vy: ' + KAL_UNIT_N[st.view] + '. Tryck för ' + KAL_UNIT_N[nu] + '">' + (KAL_ICON[st.view] || KAL_ICON.dag) + '</button>' +
+      '<div class="date-nav mb-date-nav kal-nav">' +
+        '<button type="button" id="kal-prev" aria-label="Föregående">‹</button>' +
+        '<button type="button" class="tl-date kal-date" id="kal-date" aria-haspopup="dialog" aria-label="Välj datum">' + esc(navLabel()) + '</button>' +
+        '<button type="button" id="kal-next" aria-label="Nästa">›</button></div>' +
+      '<button type="button" class="mb-today' + (kalOnToday() ? ' active' : '') + '" id="kal-today" aria-label="Idag">' + KAL_ICON.today + '</button></div>';
     h += '<label class="kal-watch-toggle"><input type="checkbox" id="kal-show-watches"' + (localStorage.getItem('taxi_kal_watches') === '1' ? ' checked' : '') + '> Visa mina bevakningar</label>';
     if (st.watchLoading) h += '<div role="status" class="kal-none">Hämtar bevakningar…</div>';
     if (st.watchError) h += '<div role="status" class="mb-warning">' + esc(st.watchError) + '</div>';
@@ -374,12 +399,13 @@
       var r = (st.watchRows || []).find(function (w) { return w.id === b.dataset.watch; });
       if (r) MINA_BEVAKNINGAR.open(r);
     }; });
-    body.querySelectorAll('.kal-tabs .tab').forEach(function (b) {
-      b.onclick = function () { st.view = b.dataset.v; localStorage.setItem('taxi_kal_view', st.view); go(st.cur); };
-    });
+    document.getElementById('kal-unit').onclick = function () {
+      var n = KAL_UNITS[(KAL_UNITS.indexOf(st.view) + 1) % KAL_UNITS.length];
+      st.view = n; localStorage.setItem('taxi_kal_view', st.view); go(st.cur);
+    };
     document.getElementById('kal-prev').onclick = function () { go(st.view === 'ar' ? addMonths(st.cur, -12) : st.view === 'manad' ? addMonths(st.cur, -1) : addDays(st.cur, st.view === 'vecka' ? -7 : -1)); };
     document.getElementById('kal-next').onclick = function () { go(st.view === 'ar' ? addMonths(st.cur, 12) : st.view === 'manad' ? addMonths(st.cur, 1) : addDays(st.cur, st.view === 'vecka' ? 7 : 1)); };
-    document.getElementById('kal-pick').onclick = function () { openCal(st.cur, function (k) { go(k); }, 'Gå till datum'); };
+    document.getElementById('kal-date').onclick = function () { openCal(st.cur, function (k) { go(k); }, 'Gå till datum'); };
     var tb = document.getElementById('kal-today'); if (tb) tb.onclick = function () { go(st.today); };
     var ta = document.getElementById('kal-today-all'); if (ta) ta.onclick = function () { st.view = 'dag'; localStorage.setItem('taxi_kal_view', 'dag'); go(st.today); };
     var cs = document.getElementById('kal-city'); if (cs) cs.onchange = function () { st.city = cs.value; st.data = null; st.loaded = null; load(); };

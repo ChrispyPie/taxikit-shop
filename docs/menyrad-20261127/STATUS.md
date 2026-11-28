@@ -10,6 +10,9 @@ Mål: samma menyrad-stil som Mina bevakningar (`.mb-toolbar`: enhetsknapp som v�
 4. **Datumruta i stället för 📅** (PR TBA, cache `20261128menyrad4`): 📅-knappen är borttagen i Körpassdata, Åkeridata och Topplista. Tryck på datumrutan i mitten öppnar periodväljaren (samma kalender som förut). Mina bevakningar hade redan datumrutan som väljare och kugghjulet till höger är ljud/notiser, inte kalender – den lämnas kvar. Test `tests/arenden-20261127/menyrad4.py` (360+390 px, ljust+mörkt). Skärmbilder: `/workspace/anim-preview/menyrad4/`. Backup: `backup/main-before-menyrad4-20261128`. Ångra: `git revert -m 1 <merge>`.
 
 
+5. **Kalender + Lönekoll + delad CSS** (PR TBA, cache `20261128menyrad5`): Kalender har samma verktygsrad (enhetsknapp, ‹ datumruta ›, idag). 📅 borttagen; datumrutan öppnar "Gå till datum". Lönekoll (bara månad, ingen egen kalender) har samma rad utan enhetsknapp. `mina-bevakningar.css` använder nu delad `menyrad.css` för `.mb-toolbar` (laddas för topplistor, kalender, lonekoll och mina-bevakningar). Test `tests/arenden-20261127/menyrad5.py` (360+390, ljust+mörkt). Skärmbilder: `/workspace/anim-preview/menyrad5/`. Backup: `backup/main-before-menyrad5-20261128`.
+
+
 ## Kvar
 3. Övriga sidor (Kalender återanvänder `.tabs`/`.date-nav` från Körpassdata, gör den först) med flik-/menyrad: Prognos (flikrad + Filter/Bevakningar), Ankomster (chips `.ank-chips`), Lönekoll, Verkstad (flikar), Forum, Kalender – kolla vilka som har datum-/vynav och byt dem som i steg 1.
 4. Städning: låt `mina-bevakningar.css` använda `menyrad.css` i stället för egen kopia av `.mb-toolbar`.
