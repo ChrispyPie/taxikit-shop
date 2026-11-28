@@ -276,6 +276,7 @@
     h += '<div class="ek-seg"><button class="' + (E.mode === 'manad' ? 'on' : '') + '" onclick="EKONOMI.setMode(\'manad\')">Månad</button><button class="' + (E.mode === 'ar' ? 'on' : '') + '" onclick="EKONOMI.setMode(\'ar\')">År</button></div>';
     h += '<div class="ek-bar"><button onclick="EKONOMI.shift(-1)" aria-label="Föregående">‹</button><b>' + esc(title()) + '</b>' +
       '<button onclick="EKONOMI.shift(1)" aria-label="Nästa"' + (atMax ? ' disabled style="opacity:.4"' : '') + '>›</button></div>';
+    if (window.EKRES) h += EKRES.html(E);
     h += '<div class="ek-hero"><small>Att betala · ' + esc(title().toLowerCase()) + '</small><span class="ek-big">' + kr(o.total) + '</span>' +
       '<span class="ek-split"><i class="ek-v"></i>Verkstad ' + kr(o.vKr) + ' &nbsp; <i class="ek-s"></i>Sjuklön ' + kr(o.sKr) + '</span></div>';
     h += '<div class="ek-card"><div class="ek-h">Per månad ' + E.year + '</div>' + monthChart(o) + '</div>';
