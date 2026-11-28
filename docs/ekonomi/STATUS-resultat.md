@@ -1,18 +1,21 @@
 # Ekonomi › Resultat – status (utkast, 2026-11-28)
 
-Gren `feat/ekonomi-resultat-20261128`. **Ingen merge, ingen migration i prod före Christians kör.**
+Gren `feat/ekonomi-resultat-20261128`, PR #272. **Ingen merge, ingen migration i prod före Christians kör.**
 
 ## Klart
-- `docs/ekonomi/PLAN-resultat.md`: vad som finns, vad som måste matas in, skiss, frågor.
-- SQL `supabase/migrations/20261128b_ekonomi_resultat.sql` (+ undo): tabell `private.ekonomi_kostnad` (RLS på, ingen policy), `ekonomi_kostnader`, `ekonomi_kostnad_spara`, `ekonomi_kostnad_ta_bort` (bara ägare + superadmin, ej demo). Provkörd i en rullad transaktion mot prod. **Inte applicerad.**
-- UI `TaxiData/ekonomi-resultat.js`: Resultat överst i Ekonomi (± i grönt/rött, stapeldiagram per månad, fällbara poster Intäkter, Avgifter, Förarlöner, Sjuklön/verkstad, Bilkostnader, Övriga kostnader med formulär, Moms och skatt), månad och år.
-- Demo-data i demo.js, skärmbilder i `docs/ekonomi/bilder-resultat/` (och `/workspace/taxidata-cleanup/screenshots/ekonomi-resultat/`), test `tests/ekonomi/resultat.cjs`.
-- Löneunderlaget visar nu "inga resor registrerade i Taxi Göteborgs data" när en förare har pass men 0 kr (Petrus W).
+- Plan: `docs/ekonomi/PLAN-resultat.md` (Christians svar 28 nov inarbetade).
+- SQL `20261128b` kostnadstabell + `20261128c` bränsleutdrag, båda med undo. **Inte applicerade.** Provkörning av 20261128b skedde tidigare i en rullad transaktion. 20261128c är inte körd mot prod.
+- UI: Resultat överst (efter bolagsskatt 20,6 % på vinst, 0 kr vid förlust, procentsatsen kan ändras). Stapeldiagram före skatt. Fällbara poster.
+- **Bilar är källan:** Ekonomi läser bara bilkostnader (Mirai = leasing, storbil = avbetalning, TG-avgift förvalt 13 000 kr/bil/mån) och har länken **Redigera i Bilar**. Ingen bildata sparas i Ekonomi.
+- Övriga kostnader kan läggas till, ändras och tas bort.
+- **Bränsleutdrag:** ladda upp CSV/PDF/bild (max 8 MB). CSV tolkas generiskt och en summa föreslås; Berra bekräftar innan den sparas som Bränsle och el. PDF/bild sparas, beloppet fylls i för hand. Filen är privat och kan tas bort.
+- Demo-data: två Mirai (exempel 10 000 kr/mån), en storbil (exempel 8 000 kr/mån), TG 13 000 × 3. Skärmbilder i `docs/ekonomi/bilder-resultat/` och `/workspace/taxidata-cleanup/screenshots/ekonomi-resultat/`.
+- Tester: `tests/ekonomi/csv.cjs`, `resultat.cjs`, plus fas 1/2-testerna.
 
 ## Återstår
-1. Christians svar på frågorna i planen (bolagsform/skatt, leasing, fasta avgifter till Taxi Göteborg).
-2. Bränsle/el automatiskt (idag manuell månadspost). Bilkostnader kommer från Bilar.
-3. Redigera en befintlig kostnad (idag bara lägga till och ta bort).
+1. Berra: exakt Mirai-leasing, storbilarnas finansiering, TG-avgift, samt kort/konto och format för bränsleutdrag (gärna ett exempelutdrag).
+2. Bilar-formuläret: fält för finansiering och månadsbelopp, förvald TG-avgift 13 000 kr/mån (Ekonomi ska bara läsa).
+3. Exakt CSV/PDF-tolkning när exempelutdrag finns.
 4. CSV/Kopiera ska ta med Resultat.
-5. Verifiera mot Berras siffror för en månad. Jämför lönekostnad mot riktiga lönespecar (arbetsgivaravgift på lön + semester + sjuklön är ett antagande).
-6. Före merge: applicera migrationen, bumpa `CACHE_VER` i sw.js, Nyheter (ägare), undo-noteringar i docs/ekonomi/UNDO.md och /workspace/backups/, rebase på main.
+5. Verifiera mot Berras siffror (arbetsgivaravgift på lön + semester + sjuklön är ett antagande).
+6. Före merge: applicera 20261128b och 20261128c, bumpa `CACHE_VER` i sw.js, Nyheter (ägare), undo-noteringar, rebase på main.
