@@ -196,6 +196,47 @@
         };
         return { from: args.p_from, to: args.p_to, provision: 37, forare: mons.length ? [mk('900103', 'Bengt P', 56000), mk('900104', 'Cecilia T', 48000), mk('900105', 'David D', 52000)] : [] };
       }
+      case 'ekonomi_kostnader': case 'ekonomi_kostnad_spara': case 'ekonomi_kostnad_ta_bort':
+      case 'ekonomi_utdrag_ladda': case 'ekonomi_utdrag_hamta': case 'ekonomi_utdrag_ta_bort': case 'ekonomi_utdrag_bekrafta': {
+        // Påhittade siffror, sparas bara i minnet. Bilkostnader som om de kom från Bilar (leasing/avbetalning).
+        var Y = new Date().getFullYear();
+        var DK = D._kost = D._kost || { n: 2, u: 0, rows: [
+          { id: 1, kategori: 'lokal', namn: 'Kontor och telefon', belopp: 3200, moms_pct: 25, typ: 'manad', fran: Y + '-01-01', till: null, bil: null, anteckning: null },
+          { id: 2, kategori: 'administration', namn: 'Bokföring', belopp: 6000, moms_pct: 25, typ: 'ar', fran: Y + '-01-01', till: null, bil: null, anteckning: null }],
+          utdrag: [], filer: {} };
+        if (name === 'ekonomi_kostnad_spara') {
+          var np = args.p || {}, row = { id: args.p_id || ++DK.n, kategori: np.kategori, namn: np.namn, belopp: +np.belopp, moms_pct: +np.moms_pct, typ: np.typ, fran: np.fran, till: np.till || null, bil: np.bil || null, anteckning: null };
+          if (args.p_id) DK.rows = DK.rows.map(function (x) { return x.id === args.p_id ? row : x; }); else DK.rows.push(row);
+          return { ok: true, id: row.id };
+        }
+        if (name === 'ekonomi_kostnad_ta_bort') { DK.rows = DK.rows.filter(function (x) { return x.id !== args.p_id; }); return { ok: true }; }
+        if (name === 'ekonomi_utdrag_ladda') {
+          var uid = ++DK.u;
+          DK.utdrag.push({ id: uid, typ: 'bransle', mon: args.p_mon, filnamn: args.p_filnamn, mime: args.p_mime, storlek: Math.round((args.p_base64 || '').length * 0.75),
+            parsad_summa: args.p_forslag, parsad: args.p_parsad, status: 'foreslagen', kostnad_id: null, skapad: new Date().toISOString() });
+          DK.filer[uid] = args.p_base64;
+          return { id: uid, mon: args.p_mon, filnamn: args.p_filnamn, mime: args.p_mime, parsad_summa: args.p_forslag, parsad: args.p_parsad, status: 'foreslagen' };
+        }
+        if (name === 'ekonomi_utdrag_hamta') {
+          var uh = DK.utdrag.filter(function (x) { return x.id === args.p_id; })[0]; if (!uh) { var e1 = new Error('not_found'); throw e1; }
+          return { id: uh.id, filnamn: uh.filnamn, mime: uh.mime, storlek: uh.storlek, base64: DK.filer[uh.id] || '' };
+        }
+        if (name === 'ekonomi_utdrag_ta_bort') {
+          DK.utdrag = DK.utdrag.filter(function (x) { return x.id !== args.p_id; }); delete DK.filer[args.p_id]; return { ok: true };
+        }
+        if (name === 'ekonomi_utdrag_bekrafta') {
+          var ub = DK.utdrag.filter(function (x) { return x.id === args.p_id; })[0]; if (!ub) { var e2 = new Error('not_found'); throw e2; }
+          var kid = ub.kostnad_id, br = { kategori: 'bransle', namn: 'Bränsle och el', belopp: +args.p_belopp, moms_pct: +(args.p_moms_pct || 25), typ: 'engang', fran: ub.mon, till: null, bil: null, anteckning: 'Från utdrag ' + ub.filnamn };
+          if (kid) DK.rows = DK.rows.map(function (x) { return x.id === kid ? Object.assign({}, x, br) : x; });
+          else { br.id = ++DK.n; DK.rows.push(br); kid = br.id; }
+          ub.status = 'bekraftad'; ub.parsad_summa = +args.p_belopp; ub.kostnad_id = kid;
+          return { ok: true, kostnad_id: kid, belopp: +args.p_belopp };
+        }
+        return { manuella: DK.rows, utdrag: DK.utdrag, bilar: [
+          { bilnummer: '9001', modell: 'Toyota Mirai', bildtyp: 'mirai', i_trafik: null, ur_trafik: null, finansiering: 'leasing', belopp_manad: 10000 },
+          { bilnummer: '9002', modell: 'Toyota Mirai', bildtyp: 'mirai', i_trafik: null, ur_trafik: null, finansiering: 'leasing', belopp_manad: 10000 },
+          { bilnummer: '9003', modell: 'Storbil', bildtyp: 'storbil', i_trafik: null, ur_trafik: null, finansiering: 'avbetalning', belopp_manad: 8000 }] };
+      }
       case 'admin_workshop_list':
         return { rate: 250, entries: [
           { id: 1, driver_id: '900103', namn: 'Bengt P', start: iso(1, 9), end: iso(1, 11), car: '9001', minutes: 120, kr: 500, status: 'pending', comment: 'Byte av torkarblad (exempel)', msgs: [] },

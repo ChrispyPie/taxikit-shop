@@ -248,7 +248,7 @@
       d.forare.forEach(function (f) {
         var l = f.l, x = by[f.driver_id] || { vKr: 0, sKr: 0, vMin: 0, sDays: 0 };
         h += '<details class="ek-sub" data-k="l' + f.driver_id + '"' + openAttr('l' + f.driver_id) + ' ontoggle="EKONOMI.tg(this)"><summary><span>' + esc(nameOf(f)) +
-          '<small>' + l.kordagar + ' körda dagar · ' + l.pass + ' pass</small></span><span class="r">' + kr(+l.lon + +l.sem) + '</span></summary><div class="in">' +
+          '<small>' + l.kordagar + ' körda dagar · ' + l.pass + ' pass' + (!+l.inkort && +l.pass ? ' · inga resor registrerade i Taxi Göteborgs data' : '') + '</small></span><span class="r">' + kr(+l.lon + +l.sem) + '</span></summary><div class="in">' +
           '<div class="ek-row"><span>Inkört<small>brutto</small></span><span class="r">' + kr(l.inkort) + '</span></div>' +
           (+l.uber ? '<div class="ek-row"><span>Uber brutto</span><span class="r">' + kr(l.uber) + '</span></div>' : '') +
           '<div class="ek-row"><span>Lönegrund<small>netto ex moms − Uberavgift − adm. − inpassering</small></span><span class="r">' + kr(l.lonegrund) + '</span></div>' +
@@ -276,6 +276,7 @@
     h += '<div class="ek-seg"><button class="' + (E.mode === 'manad' ? 'on' : '') + '" onclick="EKONOMI.setMode(\'manad\')">Månad</button><button class="' + (E.mode === 'ar' ? 'on' : '') + '" onclick="EKONOMI.setMode(\'ar\')">År</button></div>';
     h += '<div class="ek-bar"><button onclick="EKONOMI.shift(-1)" aria-label="Föregående">‹</button><b>' + esc(title()) + '</b>' +
       '<button onclick="EKONOMI.shift(1)" aria-label="Nästa"' + (atMax ? ' disabled style="opacity:.4"' : '') + '>›</button></div>';
+    if (window.EKRES) h += EKRES.html(E);
     h += '<div class="ek-hero"><small>Att betala · ' + esc(title().toLowerCase()) + '</small><span class="ek-big">' + kr(o.total) + '</span>' +
       '<span class="ek-split"><i class="ek-v"></i>Verkstad ' + kr(o.vKr) + ' &nbsp; <i class="ek-s"></i>Sjuklön ' + kr(o.sKr) + '</span></div>';
     h += '<div class="ek-card"><div class="ek-h">Per månad ' + E.year + '</div>' + monthChart(o) + '</div>';
