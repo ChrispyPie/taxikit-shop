@@ -196,6 +196,18 @@
         };
         return { from: args.p_from, to: args.p_to, provision: 37, forare: mons.length ? [mk('900103', 'Bengt P', 56000), mk('900104', 'Cecilia T', 48000), mk('900105', 'David D', 52000)] : [] };
       }
+      case 'ekonomi_kostnader': case 'ekonomi_kostnad_spara': case 'ekonomi_kostnad_ta_bort': {   // Admin › Ekonomi › Resultat (påhittade siffror, sparas bara i minnet)
+        var DK = D._kost = D._kost || { n: 3, rows: [
+          { id: 1, kategori: 'lokal', namn: 'Kontor och telefon', belopp: 3200, moms_pct: 25, typ: 'manad', fran: new Date().getFullYear() + '-01-01', till: null, bil: null, anteckning: null },
+          { id: 2, kategori: 'bransle', namn: 'Bränsle och el (exempel)', belopp: 31000, moms_pct: 25, typ: 'manad', fran: new Date().getFullYear() + '-01-01', till: null, bil: null, anteckning: null },
+          { id: 3, kategori: 'administration', namn: 'Bokföring', belopp: 6000, moms_pct: 25, typ: 'ar', fran: new Date().getFullYear() + '-01-01', till: null, bil: null, anteckning: null }] };
+        if (name === 'ekonomi_kostnad_spara') { var np = args.p || {}; DK.rows.push({ id: ++DK.n, kategori: np.kategori, namn: np.namn, belopp: +np.belopp, moms_pct: +np.moms_pct, typ: np.typ, fran: np.fran, till: np.till || null, bil: np.bil || null, anteckning: null }); return { ok: true }; }
+        if (name === 'ekonomi_kostnad_ta_bort') { DK.rows = DK.rows.filter(function (x) { return x.id !== args.p_id; }); return { ok: true }; }
+        return { manuella: DK.rows, bilar: [
+          { bilnummer: '9001', i_trafik: null, ur_trafik: null, inkopspris: 420000, livslangd_ar: 5, rantor_ar: 12000, skatt_ar: 6000, service_ar: 18000, taxiavg_ar: 14400, forsakring_ar: 21000, tvatt_ar: 3000 },
+          { bilnummer: '9002', i_trafik: null, ur_trafik: null, inkopspris: 380000, livslangd_ar: 5, rantor_ar: 10000, skatt_ar: 5000, service_ar: 16000, taxiavg_ar: 14400, forsakring_ar: 19000, tvatt_ar: 3000 },
+          { bilnummer: '9003', i_trafik: null, ur_trafik: null, inkopspris: 300000, livslangd_ar: 5, rantor_ar: 8000, skatt_ar: 4000, service_ar: 14000, taxiavg_ar: 14400, forsakring_ar: 17000, tvatt_ar: 3000 }] };
+      }
       case 'admin_workshop_list':
         return { rate: 250, entries: [
           { id: 1, driver_id: '900103', namn: 'Bengt P', start: iso(1, 9), end: iso(1, 11), car: '9001', minutes: 120, kr: 500, status: 'pending', comment: 'Byte av torkarblad (exempel)', msgs: [] },
