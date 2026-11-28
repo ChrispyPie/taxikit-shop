@@ -199,7 +199,7 @@
       case 'ekonomi_kostnader': case 'ekonomi_kostnad_spara': case 'ekonomi_kostnad_ta_bort': {   // Admin › Ekonomi › Resultat (påhittade siffror, sparas bara i minnet)
         var DK = D._kost = D._kost || { n: 3, rows: [
           { id: 1, kategori: 'lokal', namn: 'Kontor och telefon', belopp: 3200, moms_pct: 25, typ: 'manad', fran: new Date().getFullYear() + '-01-01', till: null, bil: null, anteckning: null },
-          { id: 2, kategori: 'bransle', namn: 'Bränsle och el (exempel)', belopp: 31000, moms_pct: 25, typ: 'manad', fran: new Date().getFullYear() + '-01-01', till: null, bil: null, anteckning: null },
+          { id: 2, kategori: 'bransle', namn: 'Bränsle och el (exempel)', belopp: 6000, moms_pct: 25, typ: 'manad', fran: new Date().getFullYear() + '-01-01', till: null, bil: null, anteckning: null },
           { id: 3, kategori: 'administration', namn: 'Bokföring', belopp: 6000, moms_pct: 25, typ: 'ar', fran: new Date().getFullYear() + '-01-01', till: null, bil: null, anteckning: null }] };
         if (name === 'ekonomi_kostnad_spara') { var np = args.p || {}; DK.rows.push({ id: ++DK.n, kategori: np.kategori, namn: np.namn, belopp: +np.belopp, moms_pct: +np.moms_pct, typ: np.typ, fran: np.fran, till: np.till || null, bil: np.bil || null, anteckning: null }); return { ok: true }; }
         if (name === 'ekonomi_kostnad_ta_bort') { DK.rows = DK.rows.filter(function (x) { return x.id !== args.p_id; }); return { ok: true }; }
