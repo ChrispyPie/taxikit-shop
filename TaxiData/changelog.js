@@ -23,6 +23,9 @@ window.CHANGELOG = [
     ['Nytt', 'Jultema på startsidan från första advent: girlanger och en julscen hemma hos oss.'],
     ['Nytt', 'Polkagrisjakt: hitta polkagrisar i appen. Du får egna, det finns delade, och ibland en gyllene. Poängen syns som en polkagris uppe till höger, intill ljusstaken. Tryck där för att se din placering. Adventskalendern öppnas 1 december.']
   ]},
+  { datum: '2026-11-28', id: '2026-11-28res2', tid: '07:20', rader: [
+    ['Nytt', 'Ekonomi visar nu åkeriets resultat, plus eller minus, för en månad eller ett år: intäkter, avgifter, förarlöner, sjuklön, verkstad, bilkostnader och övriga kostnader. Bolagsskatt 20,6 % räknas på vinst. Du kan lägga till och ändra kostnader, och ladda upp ett månadsutdrag för bränsle och el (CSV föreslår en summa som du bekräftar). Bilkostnader redigeras under Bilar. Taxi Göteborg-avgiften är förvalt 13 000 kr per bil och månad, kolla med Berra.', 'agare']
+  ]},
   { datum: '2026-11-27', id: '2026-11-27eko2', tid: '23:50', rader: [
     ['Nytt', 'Ekonomi: ny del Löneunderlag. Se varje förares inkört, lönegrund, lön och semesterersättning för en månad eller ett helt år, med en rad per månad i årsvyn. Ladda ner (CSV) och Kopiera tar med löneunderlaget.', 'agare']
   ]},

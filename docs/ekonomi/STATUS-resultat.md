@@ -1,6 +1,6 @@
 # Ekonomi › Resultat – status (utkast, 2026-11-28)
 
-Gren `feat/ekonomi-resultat-20261128`, PR #272. **Ingen merge, ingen migration i prod före Christians kör.**
+Christian sa 'kör live' 2026-11-28 ca 07:14. Resultat går live. Demoexempel (10 000/8 000 kr) är inte förval i prod: leasing och avbetalning börjar utan belopp. TG-avgift förvalt 13 000 kr/bil/mån, märkt kolla med Berra.
 
 ## Klart
 - Plan: `docs/ekonomi/PLAN-resultat.md` (Christians svar 28 nov inarbetade).
