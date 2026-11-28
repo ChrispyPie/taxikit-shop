@@ -10,7 +10,8 @@
 .mb-toolbar .mb-today svg,.mb-toolbar .mb-lj-btn svg{display:block}
 .mb-toolbar .mb-today.active{background:var(--primary,#63b3ed);color:var(--on-primary,#fff)}
 .mb-toolbar .mb-lj-btn.active{background:var(--primary,#63b3ed);color:var(--on-primary,#fff)}
-.mb-toolbar .date-nav .tl-date{flex:1 1 auto;min-width:0;display:flex;align-items:center;justify-content:center;height:40px;padding:0 6px;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-sizing:border-box}
+/* Datumrutan öppnar periodväljaren (2026-11-28menyrad4). */
+.mb-toolbar .date-nav .tl-date{cursor:pointer;flex:1 1 auto;min-width:0;display:flex;align-items:center;justify-content:center;height:40px;padding:0 6px;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-sizing:border-box}
 .mb-toolbar .date-nav .tl-date.period{font-size:12.5px}
 .mb-toolbar .mb-lj-btn{font-size:1.05rem;line-height:1}
 .tl-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px;min-width:0}

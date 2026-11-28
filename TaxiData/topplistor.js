@@ -191,10 +191,9 @@
           '<button type="button" class="mb-unit" id="tl-unit"></button>' +
           '<div class="date-nav mb-date-nav" id="tl-datenav">' +
             '<button type="button" id="tl-prev" aria-label="Föregående">‹</button>' +
-            '<div id="tl-date" class="tl-date"></div>' +
+            '<button type="button" id="tl-date" class="tl-date" aria-haspopup="dialog" aria-label="Välj period"></button>' +
             '<button type="button" id="tl-next" aria-label="Nästa">›</button></div>' +
-          '<button type="button" class="mb-today" id="tl-today" aria-label="Idag">' + ICON.today + '</button>' +
-          '<button type="button" class="mb-lj-btn tl-period" id="tl-period" title="Välj egen period" aria-label="Välj egen period">📅</button></div>' +
+          '<button type="button" class="mb-today" id="tl-today" aria-label="Idag">' + ICON.today + '</button></div>' +
         '<div class="tl-chips" role="toolbar" aria-label="Visa">' +
           '<button type="button" class="mb-fchip tl-view" data-view="topplista">🏆 Topplista</button>' +
           '<button type="button" class="mb-fchip tl-view" data-view="rekord">🏅 Rekord</button>' +
@@ -234,7 +233,7 @@
     document.getElementById('tl-prev').onclick = function () { move(-1); };
     document.getElementById('tl-next').onclick = function () { if (!isCurrent()) move(1); };
     document.getElementById('tl-today').onclick = function () { st.date = new Date(); if (st.tab === 'period') { st.tab = st.lastTab; st.range = null; } load(); };
-    document.getElementById('tl-period').onclick = openCal;
+    var datePick = document.getElementById('tl-date'); if (datePick) datePick.onclick = openCal;
     document.getElementById('tl-sel').onclick = function (e) {
       e.stopPropagation();
       st.menu = !st.menu; drawMenu();
@@ -305,7 +304,7 @@
     st.el.querySelectorAll('.tl-view').forEach(function (b) { var on = b.dataset.view === st.view; b.classList.toggle('active', on); b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
     st.el.querySelectorAll('.tl-tab').forEach(function (b) { b.classList.toggle('active', b.dataset.tab === st.tab); });
     st.el.querySelectorAll('.tl-mode').forEach(function (b) { var on = b.dataset.mode === st.mode; b.classList.toggle('active', on); b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
-    ['tl-datenav', 'tl-today', 'tl-period'].forEach(function (id) { var e = document.getElementById(id); if (e) e.style.display = rek ? 'none' : ''; });
+    ['tl-datenav', 'tl-today'].forEach(function (id) { var e = document.getElementById(id); if (e) e.style.display = rek ? 'none' : ''; });
     var ub = document.getElementById('tl-unit');
     if (ub) {
       var cu = unitTab(), nu = UNITS[(UNITS.indexOf(cu) + 1) % UNITS.length];
@@ -314,8 +313,6 @@
     }
     var de = document.getElementById('tl-date');
     if (de) { de.textContent = label(); de.classList.toggle('period', st.tab === 'period'); }
-    var pb = document.getElementById('tl-period');
-    if (pb) pb.classList.toggle('active', st.tab === 'period');
     var td = document.getElementById('tl-today');
     if (td) td.classList.toggle('active', st.tab === 'dag' && sod(st.date).getTime() === sod(new Date()).getTime());
     var nx = document.getElementById('tl-next');
