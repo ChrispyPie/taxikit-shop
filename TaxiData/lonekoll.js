@@ -221,9 +221,12 @@
     ensureCss();
     st.el = content;
     content.innerHTML =
-      '<div class="tl-controls"><div class="date-nav"><button type="button" id="lk-prev" aria-label="Föregående månad">‹</button>' +
-      '<div id="lk-date" class="tl-date"></div><button type="button" id="lk-next" aria-label="Nästa månad">›</button>' +
-      '<button type="button" id="lk-today" aria-label="Den här månaden">»</button></div></div><div id="lk-body"></div>';
+      '<div class="tl-controls"><div class="mb-toolbar"><div class="date-nav mb-date-nav">' +
+      '<button type="button" id="lk-prev" aria-label="Föregående månad">‹</button>' +
+      '<div id="lk-date" class="tl-date"></div>' +
+      '<button type="button" id="lk-next" aria-label="Nästa månad">›</button></div>' +
+      '<button type="button" class="mb-today" id="lk-today" aria-label="Den här månaden">' +
+      '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l6 6-6 6M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></div><div id="lk-body"></div>';
     document.getElementById('lk-prev').onclick = function () { st.month = new Date(st.month.getFullYear(), st.month.getMonth() - 1, 1); draw(); };
     document.getElementById('lk-next').onclick = function () { if (!period().cur) { st.month = new Date(st.month.getFullYear(), st.month.getMonth() + 1, 1); draw(); } };
     document.getElementById('lk-today').onclick = function () { st.month = null; draw(); };
@@ -265,6 +268,7 @@
     var p = period(), s = loadSettings();
     document.getElementById('lk-date').textContent = MON[p.m].charAt(0).toUpperCase() + MON[p.m].slice(1) + ' ' + p.y;
     var nx = document.getElementById('lk-next'); nx.disabled = p.cur; nx.style.opacity = p.cur ? '0.3' : '1';
+    var td = document.getElementById('lk-today'); if (td) td.classList.toggle('active', !!p.cur);
     if (st.err) { body.innerHTML = '<div class="tl-msg err">' + esc(st.err) + '</div><button type="button" class="lk-btn" id="lk-retry">Försök igen</button>'; document.getElementById('lk-retry').onclick = function () { L.render(st.el); }; return; }
     if (st.loading) { body.innerHTML = '<div class="tl-msg">Laddar…</div>'; return; }
 
