@@ -17,3 +17,11 @@ Gör appen-reverten först, annars visar Ekonomi-sidan "Det här finns inte på 
 Backup-gren: `backup/main-before-ekonomi-fas2-20261128` (main före merge av PR #270).
 - Appen: `git revert -m 1 <merge-commit för PR #270>` på en ny gren från origin/main, bumpa `CACHE_VER` i sw.js, PR + merge (ingen force-push). Då försvinner sektionen Löneunderlag; resten av Ekonomi (fas 1) ligger kvar.
 - Databasen: kör `supabase/migrations/undo/20261128a_ekonomi_fas2_loneunderlag_undo.sql`. Den tar bara bort tre nya funktioner (`public/messaging_private/private.ekonomi_loneunderlag`). Inga data eller kolumner berörs. Gör appen-reverten först.
+
+## Fas Resultat (PR live 2026-11-28)
+Backup-gren: `backup/main-before-ekonomi-resultat-20261128` (main före merge av Ekonomi › Resultat).
+- Appen: `git revert -m 1 <merge-commit>` på en ny gren från origin/main, bumpa `CACHE_VER` i sw.js, PR + merge (ingen force-push). Då försvinner Resultat, kostnadsläggning och bränsleutdrag. Fas 1 och 2 (verkstad, sjuklön, löneunderlag) ligger kvar.
+- Databasen, i denna ordning:
+  1. `supabase/migrations/undo/20261128c_ekonomi_utdrag_undo.sql` (tar bort utdragsfunktioner och tabellen `private.ekonomi_utdrag` – filerna försvinner, exportera först om de behövs; återställer `ekonomi_kostnader` till 20261128b).
+  2. `supabase/migrations/undo/20261128b_ekonomi_resultat_undo.sql` (tar bort kostnadsfunktionerna och tabellen `private.ekonomi_kostnad` – inlagda kostnader försvinner, exportera först).
+- Gör appen-reverten först. Inga kolumner i befintliga tabeller (`cars` m.fl.) har ändrats.

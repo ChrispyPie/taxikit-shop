@@ -107,8 +107,9 @@
         item = { namn: namn, kr: sum, typ: 'agd', sub: 'avskrivning, räntor, skatt, service, försäkring, tvätt' };
       }
       o.bilar.push(item);
-      if (b.taxiavg_manad != null || b.taxiavg_ar != null) o.tg += b.taxiavg_manad != null ? num(b.taxiavg_manad) : num(b.taxiavg_ar) / 12;
-      else { o.tg += TG_DEF; o.tgFlag = true; }
+      // Förvalt 13 000 kr/bil/mån, alltid märkt kolla med Berra. taxiavg_ar i Bilar används inte
+      // förrän Berra bekräftat (värdena där varierar och är inte samma sak).
+      o.tg += TG_DEF; o.tgFlag = true;
     });
     (K.manuella || []).forEach(function (x) {
       var f = new Date(x.fran), t = x.till ? new Date(x.till) : null, kr0 = 0;
