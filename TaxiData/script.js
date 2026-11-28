@@ -601,8 +601,6 @@ function render() {
   syncTabs();
 
   document.getElementById('today').classList.toggle('active', isTodayNow && currentTab === 'dag');
-  const periodBtn = document.getElementById('period-btn');
-  if (periodBtn) periodBtn.classList.toggle('active', isPeriod);
   document.getElementById('next').disabled = isCurrent;
   document.getElementById('next').style.opacity = isCurrent ? '0.3' : '1';
 
@@ -1503,6 +1501,8 @@ function confirmPeriod() {
 
 const periodBtnEl = document.getElementById('period-btn');
 if (periodBtnEl) periodBtnEl.onclick = openPeriodModal;
+var datePick = document.getElementById('current-date');
+if (datePick) datePick.onclick = openPeriodModal;
 
 
 // ---- Åkeriets mål (bara ägaren kan ändra; servern kontrollerar behörigheten) ----
